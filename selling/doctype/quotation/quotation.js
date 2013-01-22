@@ -198,7 +198,7 @@ cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 cur_frm.cscript['Declare Order Lost'] = function(){
 	var qtn_lost_dialog;
 
-	set_qtn_lost_dialog = function(doc,cdt,cdn){
+	set_qtn_lost_dialog = function(){
 		qtn_lost_dialog = new Dialog(400,400,'Add Quotation Lost Reason');
 		qtn_lost_dialog.make_body([
 			['HTML', 'Message', '<div class="comment">Please add quotation lost reason</div>'],
@@ -238,7 +238,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	}
 
 	if(!qtn_lost_dialog){
-		set_qtn_lost_dialog(doc,cdt,cdn);
+		set_qtn_lost_dialog();
 	}
 	qtn_lost_dialog.show();
 }

@@ -21,14 +21,13 @@ from webnotes.utils import cstr, getdate
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
 
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -172,12 +171,10 @@ class DocType(TransactionBase):
 			else:
 				msgprint("Contact Date Cannot be before Last Contact Date")
 				raise Exception
-			#webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-	
 
-	# Validate
-	# --------
 	def validate(self):
+		super(DocType, self).validate()
+		
 		import utilities
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
 			"Order Confirmed", "Order Lost", "Cancelled"])
@@ -189,13 +186,9 @@ class DocType(TransactionBase):
 		self.validate_for_items()
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.validate_max_discount(self,'quotation_details') #verify whether rate is not greater than max_discount
+		sales_com_obj.validate_max_discount(self,'quotation_details')
 		sales_com_obj.check_conversion_rate(self)
 		
-		# Get total in words
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
-		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
 	def on_update(self):
 		# Set Quotation Status

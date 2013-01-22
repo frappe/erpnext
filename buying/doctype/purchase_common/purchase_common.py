@@ -449,16 +449,9 @@ class DocType(BuyingController):
 		arg = eval(arg)
 		rate = sql("select account_type, tax_rate from `tabAccount` where name = '%s'" %(arg['account_head']), as_dict=1)
 		
-		ret = {
-				'rate'	:	rate and (rate[0]['account_type'] == 'Tax' and not arg['charge_type'] == 'Actual') and flt(rate[0]['tax_rate']) or 0
-		}
-		#msgprint(ret)
-		return ret
-	
-	def get_total_in_words(self, currency, amount):
-		from webnotes.utils import money_in_words
-		return money_in_words(amount, currency)	
-	
+		return {'rate':	rate and (rate[0]['account_type'] == 'Tax' \
+			and not arg['charge_type'] == 'Actual') and flt(rate[0]['tax_rate']) or 0 }
+
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:

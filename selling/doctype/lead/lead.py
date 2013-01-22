@@ -23,9 +23,9 @@ from webnotes import session, msgprint
 
 sql = webnotes.conn.sql
 	
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self, doc, doclist):
 		self.doc = doc
 		self.doclist = doclist
