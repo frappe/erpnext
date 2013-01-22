@@ -20,7 +20,7 @@ from webnotes import _, msgprint
 from webnotes.utils import flt
 
 from buying.utils import get_item_details
-from setup.utils import get_company_currency, get_total_in_words
+from setup.utils import get_company_currency
 
 from utilities.transaction_base import TransactionBase
 class BuyingController(TransactionBase):
@@ -33,8 +33,7 @@ class BuyingController(TransactionBase):
 				self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
 				
 			# set total in words
-			if self.meta.get_field("in_words") and self.meta.get_field("in_words_import"):
-				self.set_total_in_words()
+			self.set_total_in_words()
 		
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):
@@ -74,7 +73,10 @@ class BuyingController(TransactionBase):
 				raise_exception=True)
 
 	def set_total_in_words(self):
+		from webnotes.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)
-		self.doc.in_words = get_total_in_words(self.doc.grand_total, company_currency)
-		self.doc.in_words_import = get_total_in_words(self.doc.grand_total_import,
-		 	self.doc.currency)
+		if self.meta.get_field("in_words"):
+			self.doc.in_words = money_in_words(self.doc.grand_total, company_currency)
+		if self.meta.get_field("in_words_import"):
+			self.doc.in_words_import = money_in_words(self.doc.grand_total_import,
+		 		self.doc.currency)

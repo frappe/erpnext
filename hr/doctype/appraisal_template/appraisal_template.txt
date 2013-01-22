@@ -7,10 +7,10 @@
   "modified": "2013-01-07 17:16:25"
  }, 
  {
-  "autoname": "field:kra_title", 
   "name": "__common__", 
-  "doctype": "DocType", 
+  "autoname": "field:kra_title", 
   "module": "HR", 
+  "doctype": "DocType", 
   "document_type": "Master"
  }, 
  {
@@ -24,6 +24,7 @@
  {
   "parent": "Appraisal Template", 
   "read": 1, 
+  "report": 1, 
   "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -67,9 +68,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Points", 
   "fieldname": "total_points", 
-  "fieldtype": "Int"
+  "fieldtype": "Int", 
+  "label": "Total Points"
  }, 
  {
   "doctype": "DocPerm"

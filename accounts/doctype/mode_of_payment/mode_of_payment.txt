@@ -7,10 +7,10 @@
   "modified": "2012-12-04 16:33:37"
  }, 
  {
-  "autoname": "field:mode_of_payment", 
   "name": "__common__", 
-  "doctype": "DocType", 
+  "autoname": "field:mode_of_payment", 
   "module": "Accounts", 
+  "doctype": "DocType", 
   "document_type": "Master"
  }, 
  {
@@ -24,15 +24,16 @@
  {
   "parent": "Mode of Payment", 
   "read": 1, 
+  "doctype": "DocPerm", 
   "cancel": 1, 
   "name": "__common__", 
   "amend": 0, 
   "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
   "parenttype": "DocType", 
   "role": "Accounts Manager", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

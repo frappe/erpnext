@@ -9,13 +9,13 @@
  {
   "section_style": "Simple", 
   "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "doctype": "DocType", 
-  "autoname": "field:order_lost_reason", 
+  "allow_trash": 1, 
   "document_type": "Master", 
+  "autoname": "field:order_lost_reason", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "server_code_error": " ", 
   "show_in_menu": 0, 
   "version": 4
  }, 
@@ -35,6 +35,7 @@
   "write": 1, 
   "cancel": 1, 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

@@ -10,12 +10,12 @@
   "section_style": "Tray", 
   "search_fields": "select_form,rule_status", 
   "module": "Setup", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
-  "autoname": "field:rule_name", 
   "document_type": "Master", 
+  "autoname": "field:rule_name", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "server_code_error": " ", 
   "show_in_menu": 0, 
   "version": 31
  }, 
@@ -30,6 +30,7 @@
  {
   "parent": "Workflow Rule", 
   "read": 1, 
+  "report": 1, 
   "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 

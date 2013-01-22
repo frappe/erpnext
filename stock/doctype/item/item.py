@@ -77,7 +77,12 @@ class DocType:
 
 	def update_website(self):
 		from website.utils import update_page_name
-		update_page_name(self.doc, self.doc.name + " " + self.doc.item_name)
+		if self.doc.name==self.doc.item_name:
+			page_name_from = self.doc.name
+		else:
+			page_name_from = self.doc.name + " " + self.doc.item_name
+
+		update_page_name(self.doc, page_name_from)
 		
 		from website.helpers.product import invalidate_cache_for
 		invalidate_cache_for(self.doc.item_group)

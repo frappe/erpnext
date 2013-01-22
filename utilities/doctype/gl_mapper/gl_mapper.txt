@@ -10,12 +10,12 @@
   "section_style": "Simple", 
   "module": "Utilities", 
   "doctype": "DocType", 
+  "server_code_error": " ", 
   "autoname": "field:doc_type", 
-  "show_in_menu": 0, 
   "name": "__common__", 
   "colour": "White:FFF", 
   "_last_update": "1305006361", 
-  "server_code_error": " ", 
+  "show_in_menu": 0, 
   "version": 1
  }, 
  {
@@ -33,6 +33,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

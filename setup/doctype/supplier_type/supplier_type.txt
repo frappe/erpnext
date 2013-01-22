@@ -7,11 +7,11 @@
   "modified": "2012-12-06 10:29:04"
  }, 
  {
-  "autoname": "field:supplier_type", 
   "name": "__common__", 
+  "autoname": "field:supplier_type", 
   "allow_rename": 1, 
-  "doctype": "DocType", 
   "module": "Setup", 
+  "doctype": "DocType", 
   "document_type": "Master"
  }, 
  {
@@ -25,8 +25,8 @@
   "name": "__common__", 
   "parent": "Supplier Type", 
   "amend": 0, 
-  "doctype": "DocPerm", 
   "submit": 0, 
+  "doctype": "DocPerm", 
   "read": 1, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
@@ -66,6 +66,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Purchase Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -82,6 +83,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Purchase User", 
   "cancel": 0, 
   "permlevel": 0
@@ -90,6 +92,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Purchase Master Manager", 
   "cancel": 1, 
   "permlevel": 0

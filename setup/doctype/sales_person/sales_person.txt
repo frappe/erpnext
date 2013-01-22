@@ -7,14 +7,14 @@
   "modified": "2012-12-06 10:30:15"
  }, 
  {
-  "autoname": "field:sales_person_name", 
+  "document_type": "Master", 
   "in_create": 1, 
-  "name": "__common__", 
+  "autoname": "field:sales_person_name", 
   "allow_rename": 1, 
-  "search_fields": "name,parent_sales_person", 
+  "name": "__common__", 
   "module": "Setup", 
   "doctype": "DocType", 
-  "document_type": "Master", 
+  "search_fields": "name,parent_sales_person", 
   "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets."
  }, 
  {
@@ -66,23 +66,23 @@
   "doctype": "DocField", 
   "label": "Parent Sales Person", 
   "oldfieldname": "parent_sales_person", 
-  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "parent_sales_person", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Sales Person"
+  "options": "Sales Person", 
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Has Child Node", 
   "oldfieldname": "is_group", 
-  "options": "\nYes\nNo", 
+  "permlevel": 0, 
   "fieldname": "is_group", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "\nYes\nNo"
  }, 
  {
   "doctype": "DocField", 
@@ -92,10 +92,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Employee", 
   "options": "Employee", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
+  "label": "Employee", 
   "permlevel": 0
  }, 
  {
@@ -153,10 +153,10 @@
   "doctype": "DocField", 
   "label": "Target Details1", 
   "oldfieldname": "target_details", 
-  "options": "Target Detail", 
+  "permlevel": 0, 
   "fieldname": "target_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Target Detail"
  }, 
  {
   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
@@ -165,11 +165,11 @@
   "doctype": "DocField", 
   "label": "Target Distribution", 
   "oldfieldname": "distribution_id", 
-  "options": "Budget Distribution", 
+  "permlevel": 0, 
   "fieldname": "distribution_id", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "Budget Distribution"
  }, 
  {
   "create": 0, 
@@ -183,6 +183,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -199,6 +200,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 0, 
   "permlevel": 0
@@ -207,6 +209,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Master Manager", 
   "cancel": 1, 
   "permlevel": 0

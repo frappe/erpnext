@@ -11,12 +11,12 @@
   "is_submittable": 1, 
   "search_fields": "status, employee, employee_name", 
   "module": "HR", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
   "autoname": "APRSL.#####", 
+  "_last_update": "1316075905", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1316075905", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -54,11 +54,11 @@
   "doctype": "DocField", 
   "label": "Appraisal Template", 
   "oldfieldname": "kra_template", 
-  "options": "Appraisal Template", 
+  "permlevel": 0, 
   "fieldname": "kra_template", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Appraisal Template"
  }, 
  {
   "doctype": "DocField", 
@@ -99,17 +99,17 @@
  }, 
  {
   "permlevel": 1, 
-  "depends_on": "kra_template", 
+  "doctype": "DocField", 
   "no_copy": 1, 
   "search_index": 1, 
   "colour": "White:FFF", 
-  "doctype": "DocField", 
+  "oldfieldtype": "Select", 
   "label": "Status", 
   "oldfieldname": "status", 
   "default": "Draft", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
+  "depends_on": "kra_template", 
   "reqd": 1, 
   "options": "\nDraft\nSubmitted\nCompleted\nCancelled", 
   "in_filter": 1
@@ -142,11 +142,11 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Goals", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "depends_on": "kra_template", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Table", 
@@ -155,20 +155,20 @@
   "doctype": "DocField", 
   "label": "Appraisal Goals", 
   "oldfieldname": "appraisal_details", 
-  "permlevel": 0, 
+  "options": "Appraisal Goal", 
   "fieldname": "appraisal_details", 
   "fieldtype": "Table", 
-  "options": "Appraisal Goal"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Button", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Calculate Total Score", 
-  "permlevel": 0, 
+  "options": "calculate_total", 
   "fieldname": "calculate_total_score", 
   "fieldtype": "Button", 
-  "options": "calculate_total"
+  "permlevel": 0
  }, 
  {
   "no_copy": 1, 
@@ -209,11 +209,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -221,11 +221,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -262,6 +262,7 @@
   "submit": 0, 
   "write": 1, 
   "role": "Employee", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "owner"
  }, 
@@ -271,6 +272,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -281,6 +283,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "HR User", 
   "cancel": 1, 
   "permlevel": 0

@@ -9,23 +9,23 @@
  {
   "section_style": "Simple", 
   "module": "Projects", 
+  "server_code_error": " ", 
   "in_dialog": 1, 
-  "autoname": "field:activity_type", 
   "document_type": "Master", 
+  "autoname": "field:activity_type", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
   "version": 1
  }, 
  {
   "parent": "Activity Type", 
   "name": "__common__", 
   "doctype": "DocField", 
+  "reqd": 1, 
   "parenttype": "DocType", 
   "fieldname": "activity_type", 
   "fieldtype": "Data", 
-  "reqd": 1, 
   "label": "Activity Type", 
   "permlevel": 0, 
   "parentfield": "fields"
@@ -38,6 +38,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

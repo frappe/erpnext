@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["21st January, 2013", [
+		"Number Formatting: Added Number Format to Global Defaults & Currency",
+	]],
 	["18th January, 2013", [
 		"Buying: Added Price List to purchase cycle",
 	]],

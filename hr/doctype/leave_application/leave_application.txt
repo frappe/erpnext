@@ -7,13 +7,13 @@
   "modified": "2013-01-01 15:13:51"
  }, 
  {
+  "document_type": "Transaction", 
   "is_submittable": 1, 
-  "autoname": "LAP/.#####", 
   "description": "Apply / Approve Leaves", 
-  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
+  "autoname": "LAP/.#####", 
   "module": "HR", 
   "doctype": "DocType", 
-  "document_type": "Transaction", 
+  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
   "name": "__common__"
  }, 
  {
@@ -37,33 +37,33 @@
   "doctype": "DocType"
  }, 
  {
+  "permlevel": 2, 
   "default": "Open", 
   "doctype": "DocField", 
   "label": "Status", 
   "no_copy": 1, 
-  "options": "Open\nApproved\nRejected", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "permlevel": 2
+  "options": "Open\nApproved\nRejected"
  }, 
  {
   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
   "doctype": "DocField", 
   "label": "Leave Approver", 
-  "options": "link:Profile", 
+  "permlevel": 0, 
   "fieldname": "leave_approver", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Profile"
  }, 
  {
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Leave Type", 
-  "options": "link:Leave Type", 
+  "permlevel": 0, 
   "fieldname": "leave_type", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Leave Type", 
   "in_filter": 1
  }, 
  {
@@ -110,11 +110,11 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Employee", 
-  "options": "Employee", 
+  "permlevel": 0, 
   "fieldname": "employee", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Employee", 
   "in_filter": 1
  }, 
  {
@@ -167,11 +167,11 @@
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Fiscal Year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 2, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 2, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -179,25 +179,26 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Letter Head", 
-  "options": "Letter Head", 
+  "permlevel": 2, 
   "fieldname": "letter_head", 
   "fieldtype": "Link", 
-  "permlevel": 2
+  "options": "Letter Head"
  }, 
  {
   "print_hide": 1, 
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Amended From", 
-  "options": "Sales Invoice", 
+  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "Sales Invoice"
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Employee", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "employee"
  }, 
@@ -206,6 +207,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
+  "report": 1, 
   "role": "HR User", 
   "cancel": 1, 
   "permlevel": 0
@@ -215,15 +217,16 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
-  "role": "Leave Approver", 
   "cancel": 1, 
+  "role": "Leave Approver", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "leave_approver:user"
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "HR User", 
-  "permlevel": 2
+  "permlevel": 2, 
+  "doctype": "DocPerm"
  }, 
  {
   "amend": 0, 

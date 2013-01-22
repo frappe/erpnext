@@ -8,10 +8,10 @@
  }, 
  {
   "is_submittable": 1, 
-  "autoname": "naming_series:", 
   "in_create": 0, 
-  "doctype": "DocType", 
+  "autoname": "naming_series:", 
   "module": "Manufacturing", 
+  "doctype": "DocType", 
   "name": "__common__"
  }, 
  {
@@ -25,15 +25,16 @@
  {
   "parent": "Production Order", 
   "read": 1, 
+  "doctype": "DocPerm", 
   "cancel": 1, 
   "name": "__common__", 
   "amend": 1, 
   "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
   "parenttype": "DocType", 
   "role": "Manufacturing User", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 
@@ -52,15 +53,15 @@
  }, 
  {
   "read_only": 1, 
-  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
   "no_copy": 1, 
   "search_index": 1, 
-  "doctype": "DocField", 
+  "oldfieldtype": "Select", 
   "label": "Status", 
   "oldfieldname": "status", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:!doc.__islocal", 
   "reqd": 1, 
   "options": "\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled", 
   "in_filter": 1

@@ -36,7 +36,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 	name = webnotes.conn.get_value("Lead", {"email_id": sender}, "name")
 	if name:
 		lead = webnotes.model_wrapper("Lead", name)
-		lead.doc.status = "Open"
+		lead.doc.status = status
 		lead.ignore_permissions = True
 		lead.save()
 	else:
@@ -44,13 +44,13 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 			"doctype":"Lead",
 			"lead_name": sender,
 			"email_id": sender,
-			"status": "Open",
+			"status": status,
 			"source": "Website"
 		})
 		lead.ignore_permissions = True
 		lead.insert()
 	
-	make(content=message, sender=sender, 
+	make(content=message, sender=sender, subject=subject,
 		doctype="Lead", name=lead.doc.name, lead=lead.doc.name)
 
 	

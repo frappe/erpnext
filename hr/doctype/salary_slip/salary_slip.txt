@@ -9,8 +9,8 @@
  {
   "is_submittable": 1, 
   "name": "__common__", 
-  "doctype": "DocType", 
-  "module": "HR"
+  "module": "HR", 
+  "doctype": "DocType"
  }, 
  {
   "name": "__common__", 
@@ -45,12 +45,12 @@
   "doctype": "DocField", 
   "label": "Employee", 
   "oldfieldname": "employee", 
-  "permlevel": 0, 
+  "options": "Employee", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "Employee", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -69,12 +69,12 @@
   "doctype": "DocField", 
   "label": "Department", 
   "oldfieldname": "department", 
-  "options": "Department", 
+  "permlevel": 1, 
   "fieldname": "department", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 0, 
-  "permlevel": 1, 
+  "options": "Department", 
   "in_filter": 1
  }, 
  {
@@ -82,11 +82,11 @@
   "doctype": "DocField", 
   "label": "Designation", 
   "oldfieldname": "designation", 
-  "options": "Designation", 
+  "permlevel": 1, 
   "fieldname": "designation", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 1, 
+  "options": "Designation", 
   "in_filter": 1
  }, 
  {
@@ -94,11 +94,11 @@
   "doctype": "DocField", 
   "label": "Branch", 
   "oldfieldname": "branch", 
-  "options": "Branch", 
+  "permlevel": 1, 
   "fieldname": "branch", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 1, 
+  "options": "Branch", 
   "in_filter": 1
  }, 
  {
@@ -106,11 +106,11 @@
   "doctype": "DocField", 
   "label": "Grade", 
   "oldfieldname": "grade", 
-  "options": "Grade", 
+  "permlevel": 1, 
   "fieldname": "grade", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 1, 
+  "options": "Grade", 
   "in_filter": 1
  }, 
  {
@@ -133,10 +133,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Letter Head", 
   "options": "Letter Head", 
   "fieldname": "letter_head", 
   "fieldtype": "Link", 
+  "label": "Letter Head", 
   "permlevel": 0
  }, 
  {
@@ -153,22 +153,22 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 1, 
-  "options": "Fiscal Year", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
   "doctype": "DocField", 
   "label": "Company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
@@ -300,10 +300,10 @@
   "doctype": "DocField", 
   "label": "Salary Structure Earnings", 
   "oldfieldname": "earning_details", 
-  "options": "Salary Slip Earning", 
+  "permlevel": 0, 
   "fieldname": "earning_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Salary Slip Earning"
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -320,10 +320,10 @@
   "doctype": "DocField", 
   "label": "Deductions", 
   "oldfieldname": "deduction_details", 
-  "options": "Salary Slip Deduction", 
+  "permlevel": 0, 
   "fieldname": "deduction_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Salary Slip Deduction"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -421,6 +421,7 @@
   "submit": 1, 
   "write": 1, 
   "role": "HR User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -429,18 +430,19 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "HR Manager", 
   "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "HR User", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "HR Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

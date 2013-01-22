@@ -11,12 +11,12 @@
   "is_submittable": 1, 
   "search_fields": "employee,employee_name,leave_type,total_leaves_allocated,fiscal_year", 
   "module": "HR", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
   "autoname": "LAL/.#####", 
+  "_last_update": "1317365120", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1317365120", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -198,8 +198,9 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "HR User", 
   "cancel": 1, 
+  "role": "HR User", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "owner"
  }, 
@@ -209,6 +210,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "HR Manager", 
   "cancel": 1, 
   "permlevel": 0

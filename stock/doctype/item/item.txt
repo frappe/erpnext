@@ -32,9 +32,10 @@
   "read": 1, 
   "submit": 0, 
   "doctype": "DocPerm", 
-  "amend": 0, 
   "parenttype": "DocType", 
   "report": 1, 
+  "permlevel": 0, 
+  "amend": 0, 
   "parentfield": "permissions"
  }, 
  {
@@ -423,6 +424,7 @@
   "permlevel": 1
  }, 
  {
+  "read_only": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -431,7 +433,7 @@
   "fieldname": "last_purchase_rate", 
   "fieldtype": "Currency", 
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Currency", 
@@ -776,11 +778,12 @@
  }, 
  {
   "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
-  "search_index": 1, 
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Weightage", 
   "fieldname": "weightage", 
   "fieldtype": "Int", 
+  "search_index": 1, 
   "permlevel": 0
  }, 
  {
@@ -864,35 +867,26 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 1, 
   "role": "Material Master Manager", 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Master Manager", 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 1
+  "cancel": 1
  }
 ]

@@ -9,21 +9,21 @@
  {
   "section_style": "Simple", 
   "name": "__common__", 
+  "autoname": "field:industry", 
   "colour": "White:FFF", 
   "module": "Selling", 
   "server_code_error": " ", 
   "version": 4, 
   "doctype": "DocType", 
-  "autoname": "field:industry", 
   "document_type": "Master"
  }, 
  {
   "parent": "Industry Type", 
   "oldfieldtype": "Data", 
+  "doctype": "DocField", 
   "oldfieldname": "industry", 
   "reqd": 1, 
   "name": "__common__", 
-  "doctype": "DocField", 
   "label": "Industry", 
   "parenttype": "DocType", 
   "fieldname": "industry", 
@@ -36,6 +36,7 @@
   "parent": "Industry Type", 
   "read": 1, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"

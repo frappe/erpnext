@@ -8,11 +8,11 @@
  }, 
  {
   "read_only": 1, 
-  "autoname": "QUES.#######", 
   "in_create": 1, 
+  "autoname": "QUES.#######", 
   "name": "__common__", 
-  "doctype": "DocType", 
   "module": "Utilities", 
+  "doctype": "DocType", 
   "allow_attach": 0
  }, 
  {
@@ -26,6 +26,7 @@
  {
   "parent": "Question", 
   "read": 1, 
+  "report": 1, 
   "cancel": 1, 
   "name": "__common__", 
   "create": 1, 
@@ -72,9 +73,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Users Voted", 
   "fieldname": "_users_voted", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Users Voted"
  }, 
  {
   "oldfieldtype": "Text", 

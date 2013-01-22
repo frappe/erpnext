@@ -12,9 +12,9 @@
   "search_fields": "item_code,warehouse", 
   "module": "Stock", 
   "server_code_error": " ", 
+  "autoname": "BIN/.#######", 
   "read_only": 0, 
   "_last_update": "1322549701", 
-  "autoname": "BIN/.#######", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "doctype": "DocType", 
@@ -36,6 +36,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

@@ -8,11 +8,11 @@
  }, 
  {
   "is_submittable": 1, 
-  "autoname": "EXP.######", 
   "name": "__common__", 
-  "search_fields": "approval_status,employee,employee_name", 
+  "autoname": "EXP.######", 
   "module": "HR", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "search_fields": "approval_status,employee,employee_name"
  }, 
  {
   "name": "__common__", 
@@ -67,7 +67,6 @@
   "permlevel": 0
  }, 
  {
-  "reqd": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "colour": "White:FFF", 
@@ -77,6 +76,7 @@
   "width": "160px", 
   "fieldname": "total_claimed_amount", 
   "fieldtype": "Currency", 
+  "reqd": 0, 
   "permlevel": 1, 
   "in_filter": 0
  }, 
@@ -107,30 +107,30 @@
   "doctype": "DocField", 
   "label": "Expense Claim Details", 
   "oldfieldname": "expense_voucher_details", 
-  "options": "Expense Claim Detail", 
+  "permlevel": 0, 
   "fieldname": "expense_voucher_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Expense Claim Detail"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
-  "permlevel": 0, 
   "oldfieldtype": "Link", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "From Employee", 
   "oldfieldname": "employee", 
-  "reqd": 1, 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
   "search_index": 1, 
+  "reqd": 1, 
   "options": "Employee", 
   "in_filter": 1
  }, 
@@ -151,11 +151,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -163,11 +163,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
@@ -188,10 +188,10 @@
   "in_filter": 1
  }, 
  {
-  "allow_on_submit": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Small Text", 
   "colour": "White:FFF", 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Remark", 
   "oldfieldname": "remark", 
@@ -243,6 +243,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Employee", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "owner"
  }, 
@@ -252,8 +253,9 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Expense Approver", 
   "cancel": 1, 
+  "role": "Expense Approver", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "exp_approver:user"
  }, 
@@ -263,13 +265,14 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "HR User", 
   "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

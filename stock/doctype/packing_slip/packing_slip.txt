@@ -8,19 +8,19 @@
  }, 
  {
   "section_style": "Simple", 
-  "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
   "is_submittable": 1, 
+  "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
   "search_fields": "delivery_note", 
   "module": "Stock", 
-  "doctype": "DocType", 
   "read_only_onload": 1, 
+  "autoname": "PS.#######", 
   "document_type": "Transaction", 
   "subject": "[%(delivery_note)s] Case Nos: %(from_case_no)s - %(to_case_no)s  |  Net Weight: %(net_weight_pkg)s %(net_weight_uom)s  |  Gross Weight: %(gross_weight_pkg)s %(gross_weight_uom)s", 
-  "autoname": "PS.#######", 
+  "_last_update": "1328091392", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "is_transaction_doc": 1, 
-  "_last_update": "1328091392", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -49,6 +49,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Material User", 
   "cancel": 1, 
   "permlevel": 0
@@ -59,6 +60,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 1, 
   "permlevel": 0
@@ -69,6 +71,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Material Master Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -79,6 +82,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Material Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -89,6 +93,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -116,11 +121,11 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Delivery Note", 
-  "permlevel": 0, 
+  "options": "Delivery Note", 
   "fieldname": "delivery_note", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Delivery Note"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -133,11 +138,11 @@
   "no_copy": 0, 
   "doctype": "DocField", 
   "label": "Series", 
-  "permlevel": 0, 
+  "options": "PS", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "PS"
+  "permlevel": 0
  }, 
  {
   "colour": "White:FFF", 
@@ -243,10 +248,10 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Gross Weight UOM", 
-  "permlevel": 0, 
+  "options": "UOM", 
   "fieldname": "gross_weight_uom", 
   "fieldtype": "Link", 
-  "options": "UOM"
+  "permlevel": 0
  }, 
  {
   "colour": "White:FFF", 
@@ -261,10 +266,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Amended From", 
-  "permlevel": 1, 
+  "options": "Packing Slip", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "Packing Slip"
+  "permlevel": 1
  }, 
  {
   "print_hide": 1, 

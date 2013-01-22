@@ -9,13 +9,13 @@
  {
   "in_create": 1, 
   "allow_rename": 1, 
-  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
-  "search_fields": "debit_or_credit, group_or_ledger", 
+  "name": "__common__", 
   "module": "Accounts", 
   "doctype": "DocType", 
   "allow_copy": 1, 
+  "search_fields": "debit_or_credit, group_or_ledger", 
   "document_type": "Master", 
-  "name": "__common__"
+  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained."
  }, 
  {
   "name": "__common__", 
@@ -27,10 +27,10 @@
  {
   "name": "__common__", 
   "parent": "Account", 
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
   "read": 1, 
+  "submit": 0, 
+  "doctype": "DocPerm", 
+  "amend": 0, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
  }, 
@@ -83,12 +83,12 @@
   "doctype": "DocField", 
   "label": "Group or Ledger", 
   "oldfieldname": "group_or_ledger", 
-  "permlevel": 1, 
+  "options": "\nLedger\nGroup", 
   "fieldname": "group_or_ledger", 
   "fieldtype": "Select", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "\nLedger\nGroup", 
+  "permlevel": 1, 
   "in_filter": 1
  }, 
  {
@@ -107,11 +107,11 @@
   "doctype": "DocField", 
   "label": "Is PL Account", 
   "oldfieldname": "is_pl_account", 
-  "options": "Yes\nNo", 
+  "permlevel": 1, 
   "fieldname": "is_pl_account", 
   "fieldtype": "Select", 
   "search_index": 1, 
-  "permlevel": 1, 
+  "options": "Yes\nNo", 
   "in_filter": 1
  }, 
  {
@@ -119,12 +119,12 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "Company", 
+  "permlevel": 1, 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "permlevel": 1, 
+  "options": "Company", 
   "in_filter": 1
  }, 
  {
@@ -139,11 +139,11 @@
   "doctype": "DocField", 
   "label": "Parent Account", 
   "oldfieldname": "parent_account", 
-  "options": "Account", 
+  "permlevel": 0, 
   "fieldname": "parent_account", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "description": "Setting Account Type helps in selecting this Account in transactions.", 
@@ -151,11 +151,11 @@
   "doctype": "DocField", 
   "label": "Account Type", 
   "oldfieldname": "account_type", 
-  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
+  "permlevel": 0, 
   "fieldname": "account_type", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0, 
+  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
   "in_filter": 1
  }, 
  {
@@ -176,10 +176,10 @@
   "doctype": "DocField", 
   "label": "Frozen", 
   "oldfieldname": "freeze_account", 
-  "options": "No\nYes", 
+  "permlevel": 2, 
   "fieldname": "freeze_account", 
   "fieldtype": "Select", 
-  "permlevel": 2
+  "options": "No\nYes"
  }, 
  {
   "print_hide": 1, 
@@ -209,20 +209,20 @@
   "doctype": "DocField", 
   "label": "Master Type", 
   "oldfieldname": "master_type", 
-  "options": "\nSupplier\nCustomer\nEmployee", 
+  "permlevel": 0, 
   "fieldname": "master_type", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nSupplier\nCustomer\nEmployee"
  }, 
  {
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Master Name", 
   "oldfieldname": "master_name", 
-  "options": "[Select]", 
+  "permlevel": 0, 
   "fieldname": "master_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "[Select]"
  }, 
  {
   "read_only": 1, 
@@ -258,6 +258,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Auditor", 
   "cancel": 0, 
   "permlevel": 0
@@ -282,6 +283,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 0, 
   "permlevel": 0
@@ -290,6 +292,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Purchase User", 
   "cancel": 0, 
   "permlevel": 0
@@ -298,6 +301,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts User", 
   "cancel": 0, 
   "permlevel": 0
@@ -306,6 +310,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts Manager", 
   "cancel": 1, 
   "permlevel": 0

@@ -7,12 +7,12 @@
   "modified": "2013-01-09 14:46:42"
  }, 
  {
-  "autoname": "naming_series:", 
+  "document_type": "Master", 
   "allow_attach": 1, 
-  "search_fields": "employee_name", 
+  "autoname": "naming_series:", 
   "module": "HR", 
   "doctype": "DocType", 
-  "document_type": "Master", 
+  "search_fields": "employee_name", 
   "name": "__common__"
  }, 
  {
@@ -53,10 +53,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Image View", 
   "options": "image", 
   "fieldname": "image_view", 
   "fieldtype": "Image", 
+  "label": "Image View", 
   "permlevel": 0
  }, 
  {
@@ -77,22 +77,22 @@
   "doctype": "DocField", 
   "label": "Naming Series", 
   "oldfieldname": "naming_series", 
-  "options": "EMP/", 
+  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 0, 
-  "permlevel": 0
+  "options": "EMP/"
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Salutation", 
   "oldfieldname": "salutation", 
-  "options": "\nMr\nMs", 
+  "permlevel": 0, 
   "fieldname": "salutation", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "\nMr\nMs"
  }, 
  {
   "oldfieldtype": "Data", 
@@ -106,10 +106,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Image", 
   "options": "attach_files:", 
   "fieldname": "image", 
   "fieldtype": "Select", 
+  "label": "Image", 
   "permlevel": 0
  }, 
  {
@@ -123,10 +123,10 @@
   "description": "System User (login) ID. If set, it will become default for all HR forms.", 
   "doctype": "DocField", 
   "label": "User ID", 
-  "options": "Profile", 
+  "permlevel": 0, 
   "fieldname": "user_id", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Profile"
  }, 
  {
   "oldfieldtype": "Data", 
@@ -167,23 +167,23 @@
   "doctype": "DocField", 
   "label": "Gender", 
   "oldfieldname": "gender", 
-  "options": "\nMale\nFemale", 
+  "permlevel": 0, 
   "fieldname": "gender", 
   "fieldtype": "Select", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "\nMale\nFemale", 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
@@ -205,12 +205,12 @@
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
-  "permlevel": 0, 
+  "options": "\nActive\nLeft", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "\nActive\nLeft", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -218,11 +218,11 @@
   "doctype": "DocField", 
   "label": "Employment Type", 
   "oldfieldname": "employment_type", 
-  "options": "Employment Type", 
+  "permlevel": 0, 
   "fieldname": "employment_type", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 0, 
+  "options": "Employment Type", 
   "in_filter": 1
  }, 
  {
@@ -231,10 +231,10 @@
   "doctype": "DocField", 
   "label": "Holiday List", 
   "oldfieldname": "holiday_list", 
-  "options": "Holiday List", 
+  "permlevel": 0, 
   "fieldname": "holiday_list", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Holiday List"
  }, 
  {
   "doctype": "DocField", 
@@ -302,11 +302,11 @@
   "doctype": "DocField", 
   "label": "Branch", 
   "oldfieldname": "branch", 
-  "options": "Branch", 
+  "permlevel": 0, 
   "fieldname": "branch", 
   "fieldtype": "Link", 
   "reqd": 0, 
-  "permlevel": 0, 
+  "options": "Branch", 
   "in_filter": 1
  }, 
  {
@@ -314,11 +314,11 @@
   "doctype": "DocField", 
   "label": "Department", 
   "oldfieldname": "department", 
-  "options": "Department", 
+  "permlevel": 0, 
   "fieldname": "department", 
   "fieldtype": "Link", 
   "reqd": 0, 
-  "permlevel": 0, 
+  "options": "Department", 
   "in_filter": 1
  }, 
  {
@@ -326,12 +326,12 @@
   "doctype": "DocField", 
   "label": "Designation", 
   "oldfieldname": "designation", 
-  "options": "Designation", 
+  "permlevel": 0, 
   "fieldname": "designation", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 0, 
-  "permlevel": 0, 
+  "options": "Designation", 
   "in_filter": 1
  }, 
  {
@@ -339,11 +339,11 @@
   "doctype": "DocField", 
   "label": "Grade", 
   "oldfieldname": "grade", 
-  "options": "Grade", 
+  "permlevel": 0, 
   "fieldname": "grade", 
   "fieldtype": "Link", 
   "reqd": 0, 
-  "permlevel": 0, 
+  "options": "Grade", 
   "in_filter": 1
  }, 
  {
@@ -351,10 +351,10 @@
   "doctype": "DocField", 
   "label": "Reports to", 
   "oldfieldname": "reports_to", 
-  "options": "Employee", 
+  "permlevel": 0, 
   "fieldname": "reports_to", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Employee"
  }, 
  {
   "description": "Provide email id registered in company", 
@@ -382,22 +382,22 @@
   "doctype": "DocField", 
   "label": "Salary Mode", 
   "oldfieldname": "salary_mode", 
-  "options": "\nBank\nCash\nCheque", 
+  "permlevel": 0, 
   "fieldname": "salary_mode", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nBank\nCash\nCheque"
  }, 
  {
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Bank Name", 
   "oldfieldname": "bank_name", 
-  "options": "Suggest", 
+  "permlevel": 0, 
   "fieldname": "bank_name", 
   "fieldtype": "Data", 
   "depends_on": "eval:doc.salary_mode == 'Bank'", 
   "hidden": 0, 
-  "permlevel": 0, 
+  "options": "Suggest", 
   "in_filter": 1
  }, 
  {
@@ -477,10 +477,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Emergency Contact Details", 
   "options": "<b>Emergency Contact Details</b>", 
   "fieldname": "emergency_contact_details", 
   "fieldtype": "HTML", 
+  "label": "Emergency Contact Details", 
   "permlevel": 0
  }, 
  {
@@ -513,10 +513,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Permanent Accommodation Type", 
   "options": "\nRented\nOwned", 
   "fieldname": "permanent_accommodation_type", 
   "fieldtype": "Select", 
+  "label": "Permanent Accommodation Type", 
   "permlevel": 0
  }, 
  {
@@ -528,10 +528,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Current Accommodation Type", 
   "options": "\nRented\nOwned", 
   "fieldname": "current_accommodation_type", 
   "fieldtype": "Select", 
+  "label": "Current Accommodation Type", 
   "permlevel": 0
  }, 
  {
@@ -616,18 +616,18 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Marital Status", 
   "options": "\nSingle\nMarried\nDivorced\nWidowed", 
   "fieldname": "marital_status", 
   "fieldtype": "Select", 
+  "label": "Marital Status", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Blood Group", 
   "options": "\nA+\nA-\nB+\nB-\nAB+\nAB-\nO+\nO-", 
   "fieldname": "blood_group", 
   "fieldtype": "Select", 
+  "label": "Blood Group", 
   "permlevel": 0
  }, 
  {
@@ -662,10 +662,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Educational Qualification Details", 
   "options": "Employee Education", 
   "fieldname": "educational_qualification_details", 
   "fieldtype": "Table", 
+  "label": "Educational Qualification Details", 
   "permlevel": 0
  }, 
  {
@@ -677,34 +677,34 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Previous Work Experience", 
   "options": "Simple", 
   "fieldname": "previous_work_experience", 
   "fieldtype": "Section Break", 
+  "label": "Previous Work Experience", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Employee External Work History", 
   "options": "Employee External Work History", 
   "fieldname": "previous_experience_details", 
   "fieldtype": "Table", 
+  "label": "Employee External Work History", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "History In Company", 
   "options": "Simple", 
   "fieldname": "history_in_company", 
   "fieldtype": "Section Break", 
+  "label": "History In Company", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Employee Internal Work Historys", 
   "options": "Employee Internal Work History", 
   "fieldname": "experience_in_company_details", 
   "fieldtype": "Table", 
+  "label": "Employee Internal Work Historys", 
   "permlevel": 0
  }, 
  {
@@ -755,10 +755,10 @@
   "doctype": "DocField", 
   "label": "Leave Encashed?", 
   "oldfieldname": "leave_encashed", 
-  "options": "\nYes\nNo", 
+  "permlevel": 0, 
   "fieldname": "leave_encashed", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nYes\nNo"
  }, 
  {
   "oldfieldtype": "Date", 
@@ -793,10 +793,10 @@
   "doctype": "DocField", 
   "label": "Reason for Resignation", 
   "oldfieldname": "reason_for_resignation", 
-  "options": "\nBetter Prospects\nHealth Concerns", 
+  "permlevel": 0, 
   "fieldname": "reason_for_resignation", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nBetter Prospects\nHealth Concerns"
  }, 
  {
   "oldfieldtype": "Data", 
@@ -838,8 +838,9 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "role": "Employee", 
   "cancel": 0, 
+  "role": "Employee", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "employee"
  }, 
@@ -855,8 +856,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "HR User", 
   "cancel": 1, 
+  "role": "HR User", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "company"
  }, 
@@ -864,6 +866,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "HR Manager", 
   "cancel": 1, 
   "permlevel": 0

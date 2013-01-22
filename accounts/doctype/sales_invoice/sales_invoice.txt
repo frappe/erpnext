@@ -8,12 +8,12 @@
  }, 
  {
   "is_submittable": 1, 
-  "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "search_fields": "posting_date, due_date, debit_to, fiscal_year, grand_total, outstanding_amount", 
+  "autoname": "naming_series:", 
   "module": "Accounts", 
   "doctype": "DocType", 
   "read_only_onload": 1, 
+  "search_fields": "posting_date, due_date, debit_to, fiscal_year, grand_total, outstanding_amount", 
   "name": "__common__"
  }, 
  {
@@ -104,8 +104,8 @@
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Account"
+  "options": "Account", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -176,45 +176,45 @@
  {
   "print_hide": 0, 
   "description": "The date at which current entry will get or has actually executed.", 
-  "default": "Today", 
+  "no_copy": 1, 
   "oldfieldtype": "Date", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
-  "no_copy": 1, 
+  "default": "Today", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "description": "Enter the date by which payments from customer is expected against this invoice.", 
-  "default": "Today", 
+  "no_copy": 1, 
   "oldfieldtype": "Date", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Due Date", 
   "oldfieldname": "due_date", 
-  "no_copy": 1, 
+  "default": "Today", 
   "fieldname": "due_date", 
   "fieldtype": "Date", 
   "search_index": 0, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Mode of Payment", 
   "oldfieldname": "mode_of_payment", 
-  "options": "link:Mode of Payment", 
+  "permlevel": 0, 
   "fieldname": "mode_of_payment", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Mode of Payment"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -232,10 +232,10 @@
   "doctype": "DocField", 
   "label": "Entries", 
   "oldfieldname": "entries", 
-  "options": "Sales Invoice Item", 
+  "permlevel": 0, 
   "fieldname": "entries", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Invoice Item"
  }, 
  {
   "print_hide": 1, 
@@ -247,10 +247,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
   "doctype": "DocField", 
@@ -297,10 +297,10 @@
   "doctype": "DocField", 
   "label": "Sales Order", 
   "oldfieldname": "sales_order_main", 
-  "options": "Sales Order", 
+  "permlevel": 0, 
   "fieldname": "sales_order_main", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Sales Order"
  }, 
  {
   "print_hide": 1, 
@@ -310,10 +310,10 @@
   "doctype": "DocField", 
   "label": "Delivery Note", 
   "oldfieldname": "delivery_note_main", 
-  "options": "Delivery Note", 
+  "permlevel": 0, 
   "fieldname": "delivery_note_main", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Delivery Note"
  }, 
  {
   "print_hide": 1, 
@@ -345,11 +345,11 @@
   "doctype": "DocField", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 
-  "options": "link:Price List", 
+  "permlevel": 0, 
   "fieldname": "price_list_name", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Price List"
  }, 
  {
   "print_hide": 1, 
@@ -357,11 +357,11 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "price_list_currency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "print_hide": 1, 
@@ -387,11 +387,11 @@
   "doctype": "DocField", 
   "label": "Currency", 
   "oldfieldname": "currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "currency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "print_hide": 1, 
@@ -421,10 +421,10 @@
   "doctype": "DocField", 
   "label": "Taxes and Charges", 
   "oldfieldname": "charge", 
-  "options": "Sales Taxes and Charges Master", 
+  "permlevel": 0, 
   "fieldname": "charge", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Sales Taxes and Charges Master"
  }, 
  {
   "print_hide": 1, 
@@ -443,10 +443,10 @@
   "doctype": "DocField", 
   "label": "Taxes and Charges1", 
   "oldfieldname": "other_charges", 
-  "options": "Sales Taxes and Charges", 
+  "permlevel": 0, 
   "fieldname": "other_charges", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Taxes and Charges"
  }, 
  {
   "print_hide": 1, 
@@ -652,10 +652,10 @@
   "doctype": "DocField", 
   "label": "Cash/Bank Account", 
   "oldfieldname": "cash_bank_account", 
-  "options": "Account", 
+  "permlevel": 0, 
   "fieldname": "cash_bank_account", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "colour": "White:FFF", 
@@ -688,20 +688,20 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Write Off Account", 
-  "options": "Account", 
+  "permlevel": 0, 
   "fieldname": "write_off_account", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "print_hide": 1, 
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Write Off Cost Center", 
-  "options": "Cost Center", 
+  "permlevel": 0, 
   "fieldname": "write_off_cost_center", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Cost Center"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -718,10 +718,10 @@
   "doctype": "DocField", 
   "label": "Select Terms and Conditions", 
   "oldfieldname": "tc_name", 
-  "options": "Terms and Conditions", 
+  "permlevel": 0, 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Terms and Conditions"
  }, 
  {
   "print_hide": 1, 
@@ -729,11 +729,11 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Get Terms and Conditions", 
+  "permlevel": 0, 
   "trigger": "Server", 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
-  "options": "get_tc_details", 
-  "permlevel": 0
+  "options": "get_tc_details"
  }, 
  {
   "print_hide": 1, 
@@ -741,10 +741,10 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Terms and Conditions HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
+  "permlevel": 0, 
   "fieldname": "terms_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "options": "You can add Terms and Notes that will be printed in the Transaction"
  }, 
  {
   "oldfieldtype": "Text Editor", 
@@ -773,19 +773,19 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "doctype": "DocField", 
@@ -799,11 +799,11 @@
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Territory", 
   "in_filter": 1
  }, 
  {
@@ -811,10 +811,10 @@
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Customer Group", 
-  "options": "Customer Group", 
+  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
+  "options": "Customer Group", 
   "in_filter": 1
  }, 
  {
@@ -882,20 +882,20 @@
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
-  "options": "link:Letter Head", 
+  "permlevel": 0, 
   "fieldname": "letter_head", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Letter Head"
  }, 
  {
   "print_hide": 1, 
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "C-Form Applicable", 
-  "options": "No\nYes", 
+  "permlevel": 0, 
   "fieldname": "c_form_applicable", 
   "fieldtype": "Select", 
-  "permlevel": 0, 
+  "options": "No\nYes", 
   "report_hide": 0
  }, 
  {
@@ -903,10 +903,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "C-Form No", 
-  "options": "C-Form", 
+  "permlevel": 1, 
   "fieldname": "c_form_no", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "C-Form"
  }, 
  {
   "print_hide": 1, 
@@ -915,11 +915,11 @@
   "doctype": "DocField", 
   "label": "Campaign", 
   "oldfieldname": "campaign", 
-  "options": "Campaign", 
+  "permlevel": 0, 
   "fieldname": "campaign", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.source == 'Campaign'", 
-  "permlevel": 0
+  "options": "Campaign"
  }, 
  {
   "description": "Track this Sales Invoice against any Project", 
@@ -933,8 +933,8 @@
   "fieldname": "project_name", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "in_filter": 1, 
-  "options": "Project"
+  "options": "Project", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -967,10 +967,10 @@
   "doctype": "DocField", 
   "label": "Source", 
   "oldfieldname": "source", 
-  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
+  "permlevel": 0, 
   "fieldname": "source", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign"
  }, 
  {
   "print_hide": 1, 
@@ -978,12 +978,12 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "permlevel": 0, 
+  "options": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 1, 
-  "options": "Company", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -1008,10 +1008,10 @@
   "doctype": "DocField", 
   "label": "Amended From", 
   "oldfieldname": "amended_from", 
-  "options": "Sales Invoice", 
+  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "Sales Invoice"
  }, 
  {
   "print_hide": 1, 
@@ -1064,10 +1064,10 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Advances Received", 
-  "options": "get_advances", 
+  "permlevel": 0, 
   "fieldname": "get_advances_received", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_advances"
  }, 
  {
   "print_hide": 1, 
@@ -1075,10 +1075,10 @@
   "doctype": "DocField", 
   "label": "Sales Invoice Advance", 
   "oldfieldname": "advance_adjustment_details", 
-  "options": "Sales Invoice Advance", 
+  "permlevel": 0, 
   "fieldname": "advance_adjustment_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Invoice Advance"
  }, 
  {
   "print_hide": 1, 
@@ -1092,10 +1092,10 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Packing Details", 
-  "options": "Delivery Note Packing Item", 
+  "permlevel": 0, 
   "fieldname": "packing_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Delivery Note Packing Item"
  }, 
  {
   "print_hide": 1, 
@@ -1122,11 +1122,11 @@
   "doctype": "DocField", 
   "label": "Sales Partner", 
   "oldfieldname": "sales_partner", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "sales_partner", 
   "fieldtype": "Link", 
   "options": "Sales Partner", 
-  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -1176,10 +1176,10 @@
   "doctype": "DocField", 
   "label": "Sales Team1", 
   "oldfieldname": "sales_team", 
-  "options": "Sales Team", 
+  "permlevel": 0, 
   "fieldname": "sales_team", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Team"
  }, 
  {
   "print_hide": 1, 
@@ -1222,10 +1222,10 @@
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Recurring Type", 
-  "permlevel": 0, 
+  "options": "Monthly\nQuarterly\nHalf-yearly\nYearly", 
   "fieldname": "recurring_type", 
   "fieldtype": "Select", 
-  "options": "Monthly\nQuarterly\nHalf-yearly\nYearly"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -1346,9 +1346,9 @@
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Material Manager", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "amend": 1, 
@@ -1358,6 +1358,7 @@
   "write": 1, 
   "read": 1, 
   "role": "Accounts User", 
+  "report": 1, 
   "permlevel": 0, 
   "cancel": 1
  }, 
@@ -1369,13 +1370,14 @@
   "write": 0, 
   "read": 1, 
   "role": "Accounts User", 
-  "permlevel": 1, 
-  "cancel": 0
+  "cancel": 0, 
+  "permlevel": 1
  }, 
  {
   "read": 1, 
   "doctype": "DocPerm", 
   "role": "Customer", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "customer"
  }, 
@@ -1387,8 +1389,8 @@
   "write": 0, 
   "read": 1, 
   "role": "Accounts Manager", 
-  "permlevel": 1, 
-  "cancel": 0
+  "cancel": 0, 
+  "permlevel": 1
  }, 
  {
   "amend": 1, 
@@ -1398,6 +1400,7 @@
   "write": 1, 
   "read": 1, 
   "role": "Accounts Manager", 
+  "report": 1, 
   "permlevel": 0, 
   "cancel": 1
  }

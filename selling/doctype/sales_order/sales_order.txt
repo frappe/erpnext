@@ -12,9 +12,9 @@
   "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company", 
   "module": "Selling", 
   "read_only_onload": 1, 
-  "autoname": "naming_series:", 
   "document_type": "Transaction", 
   "issingle": 0, 
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "doctype": "DocType"
  }, 
@@ -76,8 +76,8 @@
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Customer"
+  "options": "Customer", 
+  "in_filter": 1
  }, 
  {
   "doctype": "DocField", 
@@ -128,11 +128,11 @@
   "doctype": "DocField", 
   "label": "Order Type", 
   "oldfieldname": "order_type", 
-  "permlevel": 0, 
+  "options": "\nSales\nMaintenance", 
   "fieldname": "order_type", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nSales\nMaintenance"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -156,21 +156,21 @@
   "fieldtype": "Date", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
-  "depends_on": "eval:doc.order_type == 'Sales'", 
+  "doctype": "DocField", 
   "search_index": 1, 
   "colour": "White:FFF", 
-  "doctype": "DocField", 
+  "oldfieldtype": "Date", 
   "label": "Expected Delivery Date", 
   "oldfieldname": "delivery_date", 
   "width": "160px", 
   "fieldname": "delivery_date", 
   "fieldtype": "Date", 
-  "oldfieldtype": "Date", 
+  "depends_on": "eval:doc.order_type == 'Sales'", 
   "reqd": 0, 
   "hidden": 0, 
   "permlevel": 0, 
@@ -211,11 +211,11 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Shipping Address Name", 
-  "options": "Address", 
+  "permlevel": 1, 
   "fieldname": "shipping_address_name", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "permlevel": 1, 
+  "options": "Address", 
   "in_filter": 1
  }, 
  {
@@ -246,10 +246,10 @@
   "doctype": "DocField", 
   "label": "Sales Order Items", 
   "oldfieldname": "sales_order_details", 
-  "options": "Sales Order Item", 
+  "permlevel": 0, 
   "fieldname": "sales_order_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Order Item"
  }, 
  {
   "doctype": "DocField", 
@@ -309,8 +309,8 @@
   "fieldname": "quotation_no", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "in_filter": 1, 
-  "options": "Quotation"
+  "options": "Quotation", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -333,10 +333,10 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Pull Quotation Items", 
-  "options": "pull_quotation_details", 
+  "permlevel": 0, 
   "fieldname": "pull_quotation_details", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "pull_quotation_details"
  }, 
  {
   "doctype": "DocField", 
@@ -366,11 +366,11 @@
   "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "price_list_currency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "print_hide": 1, 
@@ -437,10 +437,10 @@
   "doctype": "DocField", 
   "label": "Sales Taxes and Charges", 
   "oldfieldname": "charge", 
-  "options": "Sales Taxes and Charges Master", 
+  "permlevel": 0, 
   "fieldname": "charge", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Sales Taxes and Charges Master"
  }, 
  {
   "oldfieldtype": "Button", 
@@ -456,10 +456,10 @@
   "doctype": "DocField", 
   "label": "Sales Taxes and Charges", 
   "oldfieldname": "other_charges", 
-  "options": "Sales Taxes and Charges", 
+  "permlevel": 0, 
   "fieldname": "other_charges", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Taxes and Charges"
  }, 
  {
   "print_hide": 0, 
@@ -597,31 +597,31 @@
   "doctype": "DocField", 
   "label": "Select Terms and Conditions", 
   "oldfieldname": "tc_name", 
-  "options": "Terms and Conditions", 
+  "permlevel": 0, 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "Terms and Conditions"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Terms and Conditions", 
-  "options": "get_tc_details", 
+  "permlevel": 0, 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_tc_details"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "HTML", 
   "doctype": "DocField", 
   "label": "Terms and Conditions HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
+  "permlevel": 0, 
   "fieldname": "terms_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "options": "You can add Terms and Notes that will be printed in the Transaction"
  }, 
  {
   "print_hide": 0, 
@@ -651,21 +651,21 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "permlevel": 0, 
+  "options": "Address", 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
+  "options": "Contact", 
   "in_filter": 1
  }, 
  {
@@ -673,11 +673,11 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Territory", 
   "in_filter": 1
  }, 
  {
@@ -694,12 +694,12 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Customer Group", 
-  "permlevel": 0, 
+  "options": "Customer Group", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Customer Group"
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -723,15 +723,15 @@
  }, 
  {
   "print_hide": 1, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Select", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
-  "options": "link:Letter Head", 
+  "permlevel": 0, 
   "fieldname": "letter_head", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Letter Head"
  }, 
  {
   "print_hide": 1, 
@@ -755,11 +755,11 @@
   "doctype": "DocField", 
   "label": "Campaign", 
   "oldfieldname": "campaign", 
-  "options": "Campaign", 
+  "permlevel": 0, 
   "fieldname": "campaign", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.source == 'Campaign'", 
-  "permlevel": 0
+  "options": "Campaign"
  }, 
  {
   "print_hide": 1, 
@@ -804,8 +804,8 @@
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Company"
+  "options": "Company", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -827,14 +827,14 @@
   "no_copy": 1, 
   "depends_on": "eval:!doc.__islocal", 
   "colour": "White:FFF", 
+  "no_column": 0, 
   "doctype": "DocField", 
   "label": "Cancel Reason", 
   "oldfieldname": "cancel_reason", 
-  "permlevel": 1, 
   "fieldname": "cancel_reason", 
   "fieldtype": "Data", 
-  "no_column": 0, 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "permlevel": 1
  }, 
  {
   "print_hide": 1, 
@@ -852,10 +852,10 @@
   "doctype": "DocField", 
   "label": "Source", 
   "oldfieldname": "source", 
-  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
+  "permlevel": 0, 
   "fieldname": "source", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign"
  }, 
  {
   "description": "Track this Sales Order against any Project", 
@@ -869,8 +869,8 @@
   "fieldname": "project_name", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "in_filter": 1, 
-  "options": "Project"
+  "options": "Project", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -902,8 +902,8 @@
   "fieldname": "per_delivered", 
   "fieldtype": "Currency", 
   "depends_on": "eval:!doc.__islocal", 
-  "in_filter": 1, 
-  "permlevel": 1
+  "permlevel": 1, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -918,32 +918,32 @@
   "fieldname": "per_billed", 
   "fieldtype": "Currency", 
   "depends_on": "eval:!doc.__islocal", 
-  "in_filter": 1, 
-  "permlevel": 1
+  "permlevel": 1, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Delivery Status", 
-  "options": "Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable", 
+  "permlevel": 0, 
   "fieldname": "delivery_status", 
   "fieldtype": "Select", 
   "no_column": 0, 
   "hidden": 1, 
-  "permlevel": 0
+  "options": "Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable"
  }, 
  {
   "print_hide": 1, 
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Billing Status", 
-  "options": "Billed\nNot Billed\nPartly Billed\nClosed", 
+  "permlevel": 0, 
   "fieldname": "billing_status", 
   "fieldtype": "Select", 
   "no_column": 0, 
   "hidden": 1, 
-  "permlevel": 0
+  "options": "Billed\nNot Billed\nPartly Billed\nClosed"
  }, 
  {
   "print_hide": 1, 
@@ -964,10 +964,10 @@
   "doctype": "DocField", 
   "label": "Packing Details", 
   "oldfieldname": "packing_details", 
-  "options": "Delivery Note Packing Item", 
+  "permlevel": 1, 
   "fieldname": "packing_details", 
   "fieldtype": "Table", 
-  "permlevel": 1
+  "options": "Delivery Note Packing Item"
  }, 
  {
   "print_hide": 1, 
@@ -1000,8 +1000,8 @@
   "fieldname": "sales_partner", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "in_filter": 1, 
-  "options": "Sales Partner"
+  "options": "Sales Partner", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -1048,10 +1048,10 @@
   "doctype": "DocField", 
   "label": "Sales Team1", 
   "oldfieldname": "sales_team", 
-  "options": "Sales Team", 
+  "permlevel": 0, 
   "fieldname": "sales_team", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Sales Team"
  }, 
  {
   "print_hide": 1, 
@@ -1069,6 +1069,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 1, 
   "permlevel": 0
@@ -1079,6 +1080,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Maintenance User", 
   "cancel": 1, 
   "permlevel": 0
@@ -1099,6 +1101,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Maintenance Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -1109,6 +1112,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -1139,8 +1143,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Customer", 
   "cancel": 0, 
+  "role": "Customer", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "customer"
  }, 

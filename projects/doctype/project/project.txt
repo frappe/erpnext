@@ -7,13 +7,13 @@
   "modified": "2012-12-03 17:10:41"
  }, 
  {
-  "autoname": "field:project_name", 
+  "document_type": "Master", 
   "allow_attach": 1, 
-  "search_fields": "customer, status, priority, is_active", 
+  "autoname": "field:project_name", 
   "module": "Projects", 
   "doctype": "DocType", 
   "max_attachments": 4, 
-  "document_type": "Master", 
+  "search_fields": "customer, status, priority, is_active", 
   "name": "__common__"
  }, 
  {
@@ -76,11 +76,11 @@
   "doctype": "DocField", 
   "label": "Is Active", 
   "oldfieldname": "is_active", 
-  "options": "Yes\nNo", 
+  "permlevel": 0, 
   "fieldname": "is_active", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "Yes\nNo"
  }, 
  {
   "no_copy": 0, 
@@ -88,11 +88,11 @@
   "doctype": "DocField", 
   "label": "Priority", 
   "oldfieldname": "priority", 
-  "options": "Medium\nLow\nHigh", 
+  "permlevel": 0, 
   "fieldname": "priority", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "Medium\nLow\nHigh"
  }, 
  {
   "doctype": "DocField", 
@@ -141,11 +141,11 @@
   "doctype": "DocField", 
   "label": "Project Type", 
   "oldfieldname": "project_type", 
-  "options": "Internal\nExternal\nOther", 
+  "permlevel": 0, 
   "fieldname": "project_type", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0
+  "options": "Internal\nExternal\nOther"
  }, 
  {
   "description": "Important dates and commitments in your project life cycle", 
@@ -165,11 +165,11 @@
   "doctype": "DocField", 
   "label": "Project Milestones", 
   "oldfieldname": "project_milestones", 
-  "permlevel": 0, 
+  "options": "Project Milestone", 
   "fieldname": "project_milestones", 
   "fieldtype": "Table", 
   "search_index": 0, 
-  "options": "Project Milestone"
+  "permlevel": 0
  }, 
  {
   "description": "Tasks belonging to this Project.", 
@@ -191,10 +191,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Project Details", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
   "no_copy": 0, 
@@ -211,10 +211,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Project Costing", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "project_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
   "no_copy": 0, 
@@ -297,8 +297,8 @@
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 0, 
-  "in_filter": 1, 
-  "options": "Customer"
+  "options": "Customer", 
+  "in_filter": 1
  }, 
  {
   "no_copy": 0, 
@@ -382,11 +382,11 @@
   "doctype": "DocField", 
   "label": "Customer Group", 
   "oldfieldname": "customer_group", 
-  "options": "Customer Group", 
+  "permlevel": 1, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
-  "permlevel": 1
+  "options": "Customer Group"
  }, 
  {
   "print_hide": 1, 
@@ -419,13 +419,14 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Projects User", 
   "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

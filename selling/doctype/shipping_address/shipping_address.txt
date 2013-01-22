@@ -10,12 +10,12 @@
   "section_style": "Simple", 
   "search_fields": "customer, ship_to, shipping_address", 
   "module": "Selling", 
-  "doctype": "DocType", 
   "allow_trash": 1, 
-  "autoname": "SA.#####", 
   "document_type": "Master", 
+  "autoname": "SA.#####", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 8
  }, 
@@ -42,8 +42,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Sales Master Manager", 
   "cancel": 1, 
+  "role": "Sales Master Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -55,8 +56,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Sales Manager", 
   "cancel": 1, 
+  "role": "Sales Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -74,11 +76,11 @@
  {
   "doctype": "DocField", 
   "label": "Customer", 
-  "options": "Customer", 
+  "permlevel": 0, 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Customer"
  }, 
  {
   "doctype": "DocField", 

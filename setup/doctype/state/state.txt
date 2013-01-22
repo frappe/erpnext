@@ -7,25 +7,25 @@
   "modified": "2012-03-27 14:36:25"
  }, 
  {
+  "show_in_menu": 0, 
   "section_style": "Simple", 
   "in_create": 0, 
   "module": "Setup", 
-  "server_code_error": " ", 
+  "autoname": "field:state_name", 
   "document_type": "Master", 
   "read_only": 0, 
-  "autoname": "field:state_name", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
+  "server_code_error": " ", 
   "version": 14
  }, 
  {
   "name": "__common__", 
   "parent": "State", 
   "doctype": "DocField", 
-  "reqd": 1, 
   "parenttype": "DocType", 
+  "reqd": 1, 
   "permlevel": 0, 
   "parentfield": "fields"
  }, 
@@ -36,6 +36,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
