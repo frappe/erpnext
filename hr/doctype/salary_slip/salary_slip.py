@@ -136,9 +136,10 @@ class DocType(TransactionBase):
 
 
 	def validate(self):
+		from webnotes.utils import money_in_words
 		self.check_existing()
-		dcc = get_company_currency(self.doc.company)
-		self.doc.total_in_words	= get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
+		company_currency = get_company_currency(self.doc.company)
+		self.doc.total_in_words = money_in_words(self.doc.rounded_total, company_currency)
 
 
 	def calculate_earning_total(self):
