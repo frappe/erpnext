@@ -237,11 +237,12 @@ class DocType:
 					self.doc.pay_to_recd_from = webnotes.conn.get_value(master_type, ' - '.join(d.account.split(' - ')[:-1]), master_type == 'Customer' and 'customer_name' or 'supplier_name')
 			
 			if acc_type == 'Bank or Cash':
-				dcc = get_company_currency(self.doc.company)
-				amt = cint(d.debit) and d.debit or d.credit	
-				self.doc.total_amount = dcc +' '+ cstr(amt)
-				self.doc.total_amount_in_words = get_obj('Sales Common').get_total_in_words(dcc, cstr(amt))
-
+				company_currency = get_company_currency(self.doc.company)
+				amt = flt(d.debit) and d.debit or d.credit	
+				self.doc.total_amount = company_currency +' '+ cstr(amt)
+				from webnotes.utils import money_in_words
+				self.doc.total_amount_in_words = money_in_words(amt, company_currency)
+				
 	def get_values(self):
 		cond = (flt(self.doc.write_off_amount) > 0) and ' and outstanding_amount <= '+self.doc.write_off_amount or ''
 		if self.doc.write_off_based_on == 'Accounts Receivable':

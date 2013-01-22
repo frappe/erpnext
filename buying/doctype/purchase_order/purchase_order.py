@@ -67,10 +67,6 @@ class DocType(BuyingController):
 		# Check for stopped status
 		self.check_for_stopped_status(pc_obj)
 		
-		 # get total in words
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
-		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 
 	def get_default_schedule_date(self):
 		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)

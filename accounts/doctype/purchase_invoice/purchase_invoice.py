@@ -366,15 +366,6 @@ class DocType(BuyingController):
 		 	self.doc.posting_date,'Posting Date')
 		
 		self.validate_write_off_account()
-		
-		#get Purchase Common Obj
-		pc_obj = get_obj(dt='Purchase Common')
-		
-		 # get total in words
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
-		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency,
-		 	self.doc.grand_total_import)
 
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
