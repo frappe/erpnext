@@ -246,10 +246,6 @@ class DocType(TransactionBase):
 	# =========================================================================
 	def on_submit(self):
 		self.check_item_table()
-		if not self.doc.amended_from:
-			webnotes.conn.set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been sent')
-		else:
-			webnotes.conn.set(self.doc, 'message', 'Quotation has been amended. New Quotation no:'+self.doc.name)
 		
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
@@ -264,24 +260,11 @@ class DocType(TransactionBase):
 # ON CANCEL
 # ==========================================================================
 	def on_cancel(self):
-		webnotes.conn.set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been cancelled')
-		
 		#update enquiry status
 		self.update_enquiry('cancel')
 		
 		webnotes.conn.set(self.doc,'status','Cancelled')
-		
-	
-# SEND SMS
-# =============================================================================
-	def send_sms(self):
-		if not self.doc.customer_mobile_no:
-			msgprint("Please enter customer mobile no")
-		elif not self.doc.message:
-			msgprint("Please enter the message you want to send")
-		else:
-			msgprint(get_obj("SMS Control", "SMS Control").send_sms([self.doc.contact_mobile,], self.doc.message))
-	
+			
 # Print other charges
 # ===========================================================================
 	def print_other_charges(self,docname):
