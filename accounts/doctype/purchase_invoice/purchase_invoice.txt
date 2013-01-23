@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-21 18:19:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:42", 
+  "modified": "2013-01-22 16:55:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -238,11 +238,11 @@
  {
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1
  }, 
  {

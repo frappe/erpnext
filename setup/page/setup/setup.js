@@ -19,7 +19,7 @@ wn.module_page["Setup"] = [
 			{
 				"doctype":"Currency",
 				"label": wn._("Currency"),
-				"description": wn._("Currency Master")
+				"description": wn._("Enable / disable currencies.")
 			},
 		]
 	},

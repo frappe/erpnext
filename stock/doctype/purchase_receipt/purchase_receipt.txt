@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-21 18:19:24", 
+  "creation": "2013-01-22 15:24:18", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:43", 
+  "modified": "2013-01-22 16:55:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -267,11 +267,11 @@
   "description": "Supplier's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1
  }, 

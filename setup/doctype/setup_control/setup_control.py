@@ -53,6 +53,7 @@ class DocType:
 		}}
 		self.create_records(master_dict)
 		
+		
 		# Company
 		master_dict = {'Company': {
 			'company_name':args.get('company_name'),
@@ -60,6 +61,10 @@ class DocType:
 			'default_currency':args.get('currency')
 		}}
 		self.create_records(master_dict)
+
+		# enable default currency
+		webnotes.conn.set_value("Currency", args.get("currency"), "enabled", 1)
+
 		
 		def_args = {
 			'current_fiscal_year':curr_fiscal_year,

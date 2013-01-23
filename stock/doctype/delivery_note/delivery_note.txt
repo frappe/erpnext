@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:25", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:00", 
+  "modified": "2013-01-22 16:54:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -328,9 +328,9 @@
   "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Price List Currency", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1
@@ -357,11 +357,11 @@
   "description": "Customer's Currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1
