@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:29", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:59", 
+  "modified": "2013-01-23 16:56:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,7 +55,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency"

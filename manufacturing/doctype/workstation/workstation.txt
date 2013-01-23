@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:50:39", 
+  "modified": "2013-01-23 16:43:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -102,7 +102,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate_labour", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate Labour", 
   "oldfieldname": "hour_rate_labour", 
   "oldfieldtype": "Currency", 
@@ -118,7 +118,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate_electricity", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate Electricity", 
   "oldfieldname": "hour_rate_electricity", 
   "oldfieldtype": "Currency"
@@ -126,7 +126,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate_consumable", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate Consumable", 
   "oldfieldname": "hour_rate_consumable", 
   "oldfieldtype": "Currency"
@@ -134,7 +134,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate_rent", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate Rent", 
   "oldfieldname": "hour_rate_rent", 
   "oldfieldtype": "Currency"
@@ -142,7 +142,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "overhead", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Overhead", 
   "oldfieldname": "overhead", 
   "oldfieldtype": "Currency", 
@@ -158,7 +158,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate", 
   "oldfieldname": "hour_rate", 
   "oldfieldtype": "Currency", 

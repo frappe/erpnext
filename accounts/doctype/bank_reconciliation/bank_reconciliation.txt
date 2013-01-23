@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:57", 
+  "modified": "2013-01-23 17:11:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,7 +37,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "Accounts User", 
   "submit": 0, 
   "write": 1
@@ -54,6 +54,16 @@
   "label": "Bank Account", 
   "options": "Account", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -95,6 +105,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {

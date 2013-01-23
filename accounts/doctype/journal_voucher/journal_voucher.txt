@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:34", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:03", 
+  "modified": "2013-01-23 17:11:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -123,6 +123,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_debit", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -134,6 +135,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_credit", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -149,6 +151,7 @@
   "no_copy": 1, 
   "oldfieldname": "difference", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -308,6 +311,7 @@
   "fieldname": "write_off_amount", 
   "fieldtype": "Currency", 
   "label": "Write Off Amount <=", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "report_hide": 1
  }, 

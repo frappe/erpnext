@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:55:23", 
+  "modified": "2013-01-23 17:11:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -242,6 +242,7 @@
   "no_copy": 0, 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 
@@ -413,6 +414,7 @@
   "label": "Taxes and Charges Total*", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -440,6 +442,7 @@
   "no_copy": 0, 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0, 
@@ -453,6 +456,7 @@
   "no_copy": 0, 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "200px"
@@ -486,6 +490,7 @@
   "no_copy": 0, 
   "oldfieldname": "grand_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 
@@ -499,6 +504,7 @@
   "no_copy": 0, 
   "oldfieldname": "rounded_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 

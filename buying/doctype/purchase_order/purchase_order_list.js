@@ -23,7 +23,7 @@ wn.doclistviews['Purchase Order'] = wn.views.ListView.extend({
 		{
 			width: '18%', 
 			content: function(parent, data) { 
-				$(parent).html(data.currency + ' ' + fmt_money(data.grand_total_import)) 
+				$(parent).html(format_currency(data.grand_total_import, data.currency)) 
 			},
 			css: {'text-align':'right'}
 		},

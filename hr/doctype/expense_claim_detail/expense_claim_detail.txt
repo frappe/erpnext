@@ -1,80 +1,80 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:39", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-05 14:22:03"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "istable": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "HR"
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Expense Claim Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Expense Claim Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Expense Claim Detail"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Expense Date", 
-  "oldfieldname": "expense_date", 
-  "width": "150px", 
   "fieldname": "expense_date", 
   "fieldtype": "Date", 
-  "reqd": 0
+  "label": "Expense Date", 
+  "oldfieldname": "expense_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 0, 
+  "width": "150px"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Expense Claim Type", 
-  "oldfieldname": "expense_type", 
-  "width": "150px", 
   "fieldname": "expense_type", 
   "fieldtype": "Select", 
+  "label": "Expense Claim Type", 
+  "oldfieldname": "expense_type", 
+  "oldfieldtype": "Link", 
+  "options": "link:Expense Claim Type", 
   "reqd": 1, 
-  "options": "link:Expense Claim Type"
+  "width": "150px"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Claim Amount", 
-  "oldfieldname": "claim_amount", 
-  "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "claim_amount", 
   "fieldtype": "Currency", 
-  "reqd": 1
+  "label": "Claim Amount", 
+  "oldfieldname": "claim_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
+  "reqd": 1, 
+  "width": "150px"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
-  "label": "Sanctioned Amount", 
-  "oldfieldname": "sanctioned_amount", 
-  "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "sanctioned_amount", 
-  "fieldtype": "Currency"
+  "fieldtype": "Currency", 
+  "label": "Sanctioned Amount", 
+  "no_copy": 1, 
+  "oldfieldname": "sanctioned_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
+  "width": "150px"
  }
 ]

@@ -242,8 +242,7 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	},
 	
 	get_company_currency: function() {
-		return (wn.boot.company[this.frm.doc.company].default_currency ||
-			sys_defaults['currency']);
+		return erpnext.get_currency(this.frm.doc.company);
 	}
 });
 
@@ -648,9 +647,9 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
 
 				if(tax[t].charge_type == 'Actual')
-					$td(otc,i+1,t+1).innerHTML = fmt_money(tax[t].total_amount);
+					$td(otc,i+1,t+1).innerHTML = format_currency(tax[t].total_amount, erpnext.get_currency(doc.company));
 				else
-					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
+					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +format_currency(tax[t].total_amount, erpnext.get_currency(doc.company));
 
 				if (tax[t].category != "Total"){
 					item_tax += tax[t].total_amount;
@@ -676,9 +675,9 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
 
 				if(tax[t].charge_type == 'Actual')
-					$td(otc,i+1,t+1).innerHTML = fmt_money(tax[t].total_amount);
+					$td(otc,i+1,t+1).innerHTML = format_currency(tax[t].total_amount, erpnext.get_currency(doc.company));
 				else
-					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
+					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +format_currency(tax[t].total_amount, erpnext.get_currency(doc.company));
 
 				if (tax[t].category != "Total"){
 					item_tax -= tax[t].total_amount;

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:58", 
+  "modified": "2013-01-23 16:43:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -99,7 +99,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "amount", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Amount", 
   "oldfieldname": "amount_as_per_mar", 
   "oldfieldtype": "Currency", 

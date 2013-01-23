@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cur_frm.add_fetch("delivery_note_no", "company", "company");
+cur_frm.add_fetch("sales_invoice_no", "company", "company");
+cur_frm.add_fetch("purchase_receipt_no", "company", "company");
+
 // Onload
 //-------------------------------
 cur_frm.cscript.onload = function(doc,dt,dn){
@@ -217,7 +221,7 @@ cur_frm.cscript.make_jv = function(doc, dr_or_cr, children) {
 		for(var i=0; i<children.length; i++) {
 			var ch = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 			$.extend(ch, children[i]);
-			ch.balance = fmt_money(ch.balance);
+			ch.balance = flt(ch.balance);
 		}
 	}
 

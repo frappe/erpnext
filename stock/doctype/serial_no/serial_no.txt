@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:29", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:50:06", 
+  "modified": "2013-01-23 17:11:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -196,6 +196,7 @@
   "no_copy": 1, 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "reqd": 1, 
   "search_index": 0
  }, 

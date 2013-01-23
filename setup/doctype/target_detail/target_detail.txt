@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:48:39", 
+  "modified": "2013-01-23 16:52:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -59,7 +59,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "target_amount", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "in_filter": 1, 
   "label": "Target  Amount", 
   "oldfieldname": "target_amount", 

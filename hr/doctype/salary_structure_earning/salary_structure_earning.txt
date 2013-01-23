@@ -1,62 +1,57 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:54", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:54"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 0, 
   "istable": 1, 
   "module": "HR", 
-  "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "hide_heading": 0, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "version": 26, 
-  "hide_toolbar": 0
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Salary Structure Earning", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Salary Structure Earning", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Salary Structure Earning"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Type", 
-  "oldfieldname": "e_type", 
-  "width": "200px", 
   "fieldname": "e_type", 
   "fieldtype": "Link", 
+  "label": "Type", 
+  "oldfieldname": "e_type", 
+  "oldfieldtype": "Data", 
+  "options": "Earning Type", 
   "reqd": 1, 
-  "options": "Earning Type"
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "modified_value", 
+  "fieldtype": "Currency", 
   "label": "Amount", 
   "oldfieldname": "modified_value", 
-  "trigger": "Client", 
-  "fieldname": "modified_value", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
+  "fieldname": "depend_on_lwp", 
+  "fieldtype": "Check", 
   "label": "Depend on LWP", 
   "oldfieldname": "depend_on_lwp", 
-  "fieldname": "depend_on_lwp", 
-  "fieldtype": "Check"
+  "oldfieldtype": "Check"
  }
 ]

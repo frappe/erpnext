@@ -1,250 +1,244 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:06", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:42", 
+  "modified": "2013-01-23 17:11:17", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:42"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "search_fields": "voucher_no,account,posting_date,against_voucher", 
-  "module": "Accounts", 
-  "server_code_error": " ", 
   "autoname": "GL.#######", 
-  "_last_update": "1319016431", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 103
+  "in_create": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "voucher_no,account,posting_date,against_voucher"
  }, 
  {
-  "name": "__common__", 
-  "parent": "GL Entry", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "GL Entry", 
-  "read": 1, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "GL Entry", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "role": "Accounts User", 
-  "doctype": "DocPerm", 
-  "submit": 0
- }, 
- {
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "role": "Accounts Manager", 
-  "cancel": 0, 
   "permlevel": 0
  }, 
  {
-  "role": "System Manager", 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "GL Entry", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "GL Entry"
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Posting Date", 
-  "oldfieldname": "posting_date", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
   "description": "The date at which current entry is made in system.", 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
   "label": "Transaction Date", 
   "oldfieldname": "transaction_date", 
-  "fieldname": "transaction_date", 
-  "fieldtype": "Date"
+  "oldfieldtype": "Date"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Aging Date", 
-  "oldfieldname": "aging_date", 
   "fieldname": "aging_date", 
   "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Aging Date", 
+  "oldfieldname": "aging_date", 
   "oldfieldtype": "Date", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Account", 
-  "oldfieldname": "account", 
   "fieldname": "account", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Account", 
+  "oldfieldname": "account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Cost Center", 
-  "oldfieldname": "cost_center", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
   "label": "Debit Amt", 
   "oldfieldname": "debit", 
-  "fieldname": "debit", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
   "label": "Credit Amt", 
   "oldfieldname": "credit", 
-  "fieldname": "credit", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Against", 
-  "oldfieldname": "against", 
   "fieldname": "against", 
   "fieldtype": "Text", 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Against", 
+  "oldfieldname": "against", 
+  "oldfieldtype": "Text"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Against Voucher", 
-  "oldfieldname": "against_voucher", 
   "fieldname": "against_voucher", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Against Voucher", 
+  "oldfieldname": "against_voucher", 
   "oldfieldtype": "Data", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Against Voucher Type", 
-  "oldfieldname": "against_voucher_type", 
   "fieldname": "against_voucher_type", 
   "fieldtype": "Data", 
+  "in_filter": 0, 
+  "label": "Against Voucher Type", 
+  "oldfieldname": "against_voucher_type", 
   "oldfieldtype": "Data", 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Voucher Type", 
-  "oldfieldname": "voucher_type", 
   "fieldname": "voucher_type", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
   "oldfieldtype": "Select", 
   "options": "Journal Voucher\nSales Invoice\nPurchase Invoice", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Voucher No", 
-  "oldfieldname": "voucher_no", 
   "fieldname": "voucher_no", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Voucher No", 
+  "oldfieldname": "voucher_no", 
   "oldfieldtype": "Data", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "no_copy": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "oldfieldname": "remarks", 
   "fieldname": "remarks", 
   "fieldtype": "Text", 
+  "in_filter": 1, 
+  "label": "Remarks", 
+  "no_copy": 1, 
+  "oldfieldname": "remarks", 
   "oldfieldtype": "Text", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Is Cancelled", 
-  "oldfieldname": "is_cancelled", 
   "fieldname": "is_cancelled", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Is Cancelled", 
+  "oldfieldname": "is_cancelled", 
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Is Opening", 
-  "oldfieldname": "is_opening", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Is Opening", 
+  "oldfieldname": "is_opening", 
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Is Advance", 
-  "oldfieldname": "is_advance", 
   "fieldname": "is_advance", 
   "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Is Advance", 
+  "oldfieldname": "is_advance", 
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
   "oldfieldtype": "Link", 
   "options": "Company", 
-  "in_filter": 1
+  "search_index": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }
 ]

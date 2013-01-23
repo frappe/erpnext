@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:58", 
+  "modified": "2013-01-23 16:43:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -68,7 +68,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "hour_rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Hour Rate", 
   "oldfieldname": "hour_rate", 
   "oldfieldtype": "Currency", 
@@ -87,7 +87,7 @@
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "operating_cost", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Operating Cost", 
   "oldfieldname": "operating_cost", 
   "oldfieldtype": "Currency", 

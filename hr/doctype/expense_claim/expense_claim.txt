@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:02", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -76,6 +76,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_claimed_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "160px"
@@ -89,6 +90,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_sanctioned_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1, 
   "width": "160px"
  }, 

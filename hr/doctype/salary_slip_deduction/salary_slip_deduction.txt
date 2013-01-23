@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:58", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,13 +55,15 @@
   "label": "Amount", 
   "oldfieldname": "d_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "d_modified_amount", 
   "fieldtype": "Currency", 
-  "label": "Modified Amount"
+  "label": "Modified Amount", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
   "doctype": "DocField", 

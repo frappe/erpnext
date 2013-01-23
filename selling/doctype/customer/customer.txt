@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:54:47", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -277,6 +277,7 @@
   "label": "Credit Limit", 
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "permlevel": 2
  }, 
  {

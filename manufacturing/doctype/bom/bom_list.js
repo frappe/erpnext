@@ -36,8 +36,7 @@ wn.doclistviews['BOM'] = wn.views.ListView.extend({
 		{
 			width: '20%', 
 			content: function(parent, data) {
-				$(parent).html(sys_defaults.currency + " " 
-					+ fmt_money(data.total_cost));
+				$(parent).html(format_currency(data.total_cost));
 			},
 			css: {'text-align': 'right'},
 		},

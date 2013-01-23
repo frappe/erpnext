@@ -28,7 +28,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		{
 			width: '18%', 
 			content: function(parent, data) { 
-				$(parent).html(wn.boot.company[data.company].default_currency + ' ' + fmt_money(data.total_debit)) 
+				$(parent).html(format_currency(data.total_debit, erpnext.get_currency(data.company))); 
 			},
 			css: {'text-align':'right'}
 		},
