@@ -79,11 +79,6 @@ wn.module_page["Stock"] = [
 				description: wn._("Incoming quality inspection.")
 			},
 			{
-				"doctype":"Landed Cost Master",
-				"label":"Landed Cost Master",
-				description: wn._("Transportatoin cost distribution template.")
-			},
-			{
 				"route":"Form/Landed Cost Wizard/Landed Cost Wizard",
 				"label": wn._("Landed Cost Wizard"),
 				description: wn._("Distribute transport overhead across items."),

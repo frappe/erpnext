@@ -64,7 +64,6 @@ def delete_masters():
 		'Letter Head':'',
 		'Leave Type':['Leave Without Pay', 'Privilege Leave', 'Casual Leave', 'PL', 'CL', 'LWP', 
 			'Compensatory Off', 'Sick Leave'],
-		'Landed Cost Master':'',
 		'Appraisal Template':'',
 		'Item Group':['All Item Groups', 'Default'], 
 		'Item':'',
