@@ -35,16 +35,23 @@ cur_frm.cscript.refresh = function(doc) {
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	if (!doc.account) msgprint("Please select Account first");
 	else {
-		return repl("select gle.voucher_no, gle.posting_date \
-			from `tabGL Entry` gle where gle.account = '%(acc)s' \
-			and gle.voucher_type = '%(dt)s' \
-			and gle.voucher_no LIKE '%s' \
-			and ifnull(gle.is_cancelled, 'No') = 'No'\
-			and (select sum(debit) - sum(credit) from `tabGL Entry` \
-				where against_voucher_type = '%(dt)s' and against_voucher = gle.voucher_no \
-				and ifnull(is_cancelled, 'No') = 'No') != 0 \
-			ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50 \
-		", {dt:doc.voucher_type, acc:doc.account});
+		return repl("select gle.voucher_no, gle.posting_date, gle.%(account_type)s \
+		    from `tabGL Entry` gle \
+		    where gle.account = '%(acc)s' \
+		    and gle.voucher_type = '%(dt)s' \
+			and gle.voucher_no like '%s' \
+		    and ifnull(gle.is_cancelled, 'No') = 'No' \
+		    and (ifnull(gle.against_voucher, '') = '' \
+		        or ifnull(gle.against_voucher, '') = gle.voucher_no ) \
+			and ifnull(gle.%(account_type)s, 0) > 0 \
+		    and (select ifnull(abs(sum(debit) - sum(credit)), 0) from `tabGL Entry` \
+		        where against_voucher_type = '%(dt)s' \
+		        and against_voucher = gle.voucher_no \
+		        and voucher_no != gle.voucher_no \
+		        and ifnull(is_cancelled, 'No') = 'No') != \
+		        abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)) \
+		    ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50", 
+			{dt:doc.voucher_type, acc:doc.account, account_type: doc.account_type});
 	}
 }
 
@@ -52,3 +59,12 @@ cur_frm.cscript.voucher_no  =function(doc, cdt, cdn) {
 	get_server_fields('get_voucher_details', '', '', doc, cdt, cdn, 1)
 }
 
+cur_frm.cscript.account = function(doc, cdt, cdn) {
+	wn.call({
+		doc: this.frm.doc,
+		method: "set_account_type",
+		callback: function(r) {
+			if(!r.exc) refresh_field("account_type");
+		}
+	});
+}

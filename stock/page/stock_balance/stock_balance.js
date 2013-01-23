@@ -60,7 +60,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				formatter: this.currency_formatter},
 			{id: "closing_value", name: "Closing Value", field: "closing_value", width: 100, 
 				formatter: this.currency_formatter},
-				
+			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "item_name", name: "Item Name", field: "item_name", width: 100},
 			{id: "description", name: "Description", field: "description", width: 200, 

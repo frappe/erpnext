@@ -16,7 +16,7 @@ def project_perms():
 
 def stock_perms():
 	webnotes.conn.sql("""delete from `tabDocPerm`
-		where parent in ('Landed Cost Master', 'Landed Cost Wizard', 
+		where parent in ('Landed Cost Wizard', 
 		'Sales and Purchase Return Tool') and role='All' and permlevel=0""")
 		
 def account_perms():

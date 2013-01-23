@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-10 16:34:28", 
+  "creation": "2013-01-22 16:50:39", 
   "docstatus": 0, 
   "modified": "2013-01-22 16:54:49", 
   "modified_by": "Administrator", 
@@ -29,7 +29,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "submit": 0, 
   "write": 1
  }, 
@@ -91,20 +91,6 @@
   "fieldname": "section_break1", 
   "fieldtype": "Section Break", 
   "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "landed_cost", 
-  "fieldtype": "Link", 
-  "label": "Select Landed Cost Items Master", 
-  "options": "Landed Cost Master"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_details", 
-  "fieldtype": "Button", 
-  "label": "Get Details", 
-  "options": "get_landed_cost_master_details"
  }, 
  {
   "doctype": "DocField", 

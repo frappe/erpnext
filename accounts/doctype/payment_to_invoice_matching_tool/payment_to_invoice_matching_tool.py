@@ -27,32 +27,32 @@ class DocType:
 	def __init__(self, doc, doclist):
 		self.doc = doc
 		self.doclist = doclist
-		self.acc_type = self.doc.account and webnotes.conn.sql("""select debit_or_credit 
-			from `tabAccount` where name = %s""", self.doc.account)[0][0].lower() or ''
-		self.dt = {
-			'Sales Invoice': 'Sales Invoice',
-			'Purchase Invoice': 'Purchase Invoice',
-			'Journal Voucher': 'Journal Voucher'
-		}
+	
+	def set_account_type(self):
+		self.doc.account_type = self.doc.account and \
+			webnotes.conn.get_value("Account", self.doc.account, "debit_or_credit").lower() or ""
 		
 	def get_voucher_details(self):
-		tot_amt = webnotes.conn.sql("""
-			select sum(%s) from `tabGL Entry` where 
-			voucher_type = %s and voucher_no = %s 
+		total_amount = webnotes.conn.sql("""select %s from `tabGL Entry` 
+			where voucher_type = %s and voucher_no = %s 
 			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
-			(self.acc_type, '%s', '%s', '%s'), 
-			(self.dt[self.doc.voucher_type], self.doc.voucher_no, self.doc.account))
+			(self.doc.account_type, '%s', '%s', '%s'), 
+			(self.doc.voucher_type, self.doc.voucher_no, self.doc.account))
+			
+		total_amount = total_amount and flt(total_amount[0][0]) or 0
 		
-		outstanding = webnotes.conn.sql("""
+		reconciled_payment = webnotes.conn.sql("""
 			select sum(%s) - sum(%s) from `tabGL Entry` where 
 			against_voucher = %s and voucher_no != %s
 			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
-			((self.acc_type == 'debit' and 'credit' or 'debit'), self.acc_type, '%s', '%s', '%s'),
-			(self.doc.voucher_no, self.doc.voucher_no, self.doc.account))
+			((self.doc.account_type == 'debit' and 'credit' or 'debit'), self.doc.account_type, 
+			 	'%s', '%s', '%s'), (self.doc.voucher_no, self.doc.voucher_no, self.doc.account))
+			
+		reconciled_payment = reconciled_payment and flt(reconciled_payment[0][0]) or 0
 		
 		ret = {
-			'total_amount': flt(tot_amt[0][0]) or 0,	
-			'pending_amt_to_reconcile': flt(tot_amt[0][0]) - flt(outstanding[0][0]) or 0
+			'total_amount': total_amount,	
+			'pending_amt_to_reconcile': total_amount - reconciled_payment
 		}
 		
 		return ret
@@ -69,7 +69,7 @@ class DocType:
 
 	def get_gl_entries(self):
 		self.validate_mandatory()
-		dc = self.acc_type == 'debit' and 'credit' or 'debit'
+		dc = self.doc.account_type == 'debit' and 'credit' or 'debit'
 		
 		cond = self.doc.from_date and " and t1.posting_date >= '" + self.doc.from_date + "'" or ""
 		cond += self.doc.to_date and " and t1.posting_date <= '" + self.doc.to_date + "'"or ""
@@ -97,7 +97,7 @@ class DocType:
 				'Payment to Invoice Matching Tool Detail', self.doclist)
 			ch.voucher_no = d.get('voucher_no')
 			ch.posting_date = d.get('posting_date')
-			ch.amt_due =  self.acc_type == 'debit' and flt(d.get('amt_due')) \
+			ch.amt_due =  self.doc.account_type == 'debit' and flt(d.get('amt_due')) \
 				or -1*flt(d.get('amt_due'))
 			ch.total_amt = flt(d.get('total_amt'))
 			ch.against_account = d.get('against_account')
@@ -116,7 +116,7 @@ class DocType:
 			3. submit payment voucher
 		"""
 		if not self.doc.voucher_no or not webnotes.conn.sql("""select name from `tab%s` 
-				where name = %s""" % (self.dt[self.doc.voucher_type], '%s'), self.doc.voucher_no):
+				where name = %s""" % (self.doc.voucher_type, '%s'), self.doc.voucher_no):
 			msgprint("Please select valid Voucher No to proceed", raise_exception=1)
 		
 		lst = []
@@ -125,11 +125,11 @@ class DocType:
 				args = {
 					'voucher_no' : d.voucher_no,
 					'voucher_detail_no' : d.voucher_detail_no, 
-					'against_voucher_type' : self.dt[self.doc.voucher_type], 
+					'against_voucher_type' : self.doc.voucher_type, 
 					'against_voucher'  : self.doc.voucher_no,
 					'account' : self.doc.account, 
 					'is_advance' : 'No', 
-					'dr_or_cr' :  self.acc_type=='debit' and 'credit' or 'debit', 
+					'dr_or_cr' :  self.doc.account_type=='debit' and 'credit' or 'debit', 
 					'unadjusted_amt' : flt(d.amt_due),
 					'allocated_amt' : flt(d.amt_to_be_reconciled)
 				}

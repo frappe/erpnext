@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-21 18:19:17", 
+  "creation": "2013-01-23 15:27:14", 
   "docstatus": 0, 
   "modified": "2013-01-23 17:11:27", 
   "modified_by": "Administrator", 
@@ -56,6 +56,13 @@
   "label": "Company", 
   "options": "Company", 
   "print_hide": 1
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_type", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Account Type", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
