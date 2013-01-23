@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-21 18:19:17", 
+  "creation": "2013-01-23 12:23:46", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:41", 
+  "modified": "2013-01-23 12:26:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "submit": 0, 
   "write": 1
  }, 
@@ -46,6 +46,14 @@
   "label": "Account", 
   "options": "Account", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_type", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Account Type", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
