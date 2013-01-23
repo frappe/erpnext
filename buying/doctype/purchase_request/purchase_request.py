@@ -126,8 +126,6 @@ class DocType(BuyingController):
 		# Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
 
-		# Validate Mandatory
-		pc_obj.validate_mandatory(self)
 
 		# Validate for items
 		pc_obj.validate_for_items(self)

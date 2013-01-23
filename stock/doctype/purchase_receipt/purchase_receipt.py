@@ -130,7 +130,6 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-		pc_obj.validate_mandatory(self)
 		pc_obj.get_prevdoc_date(self)
 		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)

@@ -165,15 +165,6 @@ class DocType(BuyingController):
 						d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate \
 							= d.import_rate = item_last_purchase_rate
 			
-	# validation
-	# -------------------------------------------------------------------------------------------------------
-	
-	# validate fields
-	def validate_mandatory(self, obj):
-		# check amendment date
-		if obj.doc.amended_from and not obj.doc.amendment_date:
-			msgprint("Please enter amendment date")
-			raise Exception
 
 	# validate for same items and	validate is_stock_item , is_purchase_item also validate uom and conversion factor
 	def validate_for_items(self, obj):
