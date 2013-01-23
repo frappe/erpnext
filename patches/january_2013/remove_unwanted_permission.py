@@ -11,4 +11,3 @@ def execute():
 				if doctype.doclist.get({"doctype":"DocPerm", "permlevel":pl}):
 					webnotes.conn.sql("""delete from `tabDocPerm` 
 						where parent = %s and permlevel = %s""", (dt[0], pl))
-					print doctype.doc.name
