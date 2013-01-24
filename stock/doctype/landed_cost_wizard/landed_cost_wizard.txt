@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:39", 
   "docstatus": 0, 
-  "modified": "2013-01-23 15:25:00", 
+  "modified": "2013-01-22 16:54:49", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -67,9 +67,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "reqd": 1
  }, 
  {

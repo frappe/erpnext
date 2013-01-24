@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:41", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -72,6 +72,7 @@
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
   "label": "Grand Total", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1, 
   "width": "120px"
  }, 

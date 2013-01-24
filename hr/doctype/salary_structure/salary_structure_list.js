@@ -33,13 +33,8 @@ wn.doclistviews['Salary Structure'] = wn.views.ListView.extend({
 		{
 			width: '15%',
 			content: function(parent, data) {
-				$(parent).html(
-					(
-						data.company
-						? wn.boot.company[data.company].default_currency
-						: sys_defaults.currency
-					)
-					+ ' ' + fmt_money(data.net_pay));
+				$(parent).html(format_currency(data.net_pay, 
+					erpnext.get_currency(data.company)));
 			},
 			css: {'text-align': 'right'},
 		},

@@ -17,6 +17,8 @@
 // Booking Entry Id
 // --------------------
 
+cur_frm.add_fetch("account", "company", "company")
+
 cur_frm.cscript.onload_post_render = function(doc) {
 	$(cur_frm.get_field("reconcile").input).addClass("btn-info");
 }

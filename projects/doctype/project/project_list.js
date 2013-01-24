@@ -34,15 +34,14 @@ wn.doclistviews['Project'] = wn.views.ListView.extend({
 		{
 			width: '15%', 
 			content: function(parent, data) {
-				$(parent).html(sys_defaults.currency + " " 
-					+ fmt_money(data.project_value));
+				$(parent).html(format_currency(data.project_value));
 			},
 			css: {'text-align': 'right'},
 		},
 		{
 			width: '10%', 
 			content: function(parent, data) {
-				$(parent).html(fmt_money(data.per_gross_margin) + " %");
+				$(parent).html(format_number(data.per_gross_margin) + " %");
 			},
 			css: {'text-align': 'right'},
 		},

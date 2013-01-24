@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:28", 
   "docstatus": 0, 
-  "modified": "2013-01-22 15:02:34", 
+  "modified": "2013-01-23 17:11:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -118,6 +118,7 @@
   "fieldname": "import_ref_rate", 
   "fieldtype": "Currency", 
   "label": "Ref Rate ", 
+  "options": "currency", 
   "print_hide": 1
  }, 
  {
@@ -135,6 +136,7 @@
   "label": "Rate", 
   "oldfieldname": "import_rate", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "print_width": "100px", 
   "width": "100px"
@@ -146,6 +148,7 @@
   "label": "Amount", 
   "oldfieldname": "import_amount", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "read_only": 1
  }, 
  {
@@ -153,6 +156,7 @@
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
   "label": "Ref Rate *", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1
  }, 
  {
@@ -163,6 +167,7 @@
   "label": "Rate *(Default Curr.)", 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "print_width": "100px", 
   "reqd": 1, 
@@ -176,6 +181,7 @@
   "label": "Amount (Default Curr.)", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "print_width": "100px", 
   "reqd": 0, 
@@ -381,6 +387,7 @@
   "label": "Raw Materials Supplied Cost", 
   "oldfieldname": "rm_supp_cost", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -395,6 +402,7 @@
   "no_copy": 1, 
   "oldfieldname": "item_tax_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -442,6 +450,7 @@
   "no_copy": 1, 
   "oldfieldname": "valuation_rate", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "print_width": "80px", 
   "read_only": 1, 

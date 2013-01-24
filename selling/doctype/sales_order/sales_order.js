@@ -27,8 +27,6 @@ wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
 
-// ONLOAD
-// ================================================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
@@ -148,7 +146,6 @@ cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 }
 
 
-//================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
 	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;
@@ -156,11 +153,6 @@ cur_frm.cscript.new_contact = function(){
 	loaddoc('Contact', tn);
 }
 
-// DOCTYPE TRIGGERS
-// ================================================================================================
-
-
-// ***************** Get project name *****************
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	var cond = '';
 	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
@@ -171,20 +163,22 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 }
 
 
-// *************** Customized link query for QUOTATION ***************************** 
 cur_frm.fields_dict['quotation_no'].get_query = function(doc) {
 	var cond='';
-	if(doc.order_type) cond = ' ifnull(`tabQuotation`.order_type, "") = "'+doc.order_type+'" and';
-	if(doc.customer) cond += ' ifnull(`tabQuotation`.customer, "") = "'+doc.customer+'" and';
+	if(doc.order_type) cond = ' ifnull(`tabQuotation`.order_type, "") = "'
+		+doc.order_type+'" and';
+	if(doc.customer) cond += ' ifnull(`tabQuotation`.customer, "") = "'
+		+doc.customer+'" and';
 	
-	return repl('SELECT DISTINCT name, customer, transaction_date FROM `tabQuotation` WHERE `tabQuotation`.company = "' + doc.company + '" and `tabQuotation`.`docstatus` = 1 and `tabQuotation`.status != "Order Lost" and %(cond)s `tabQuotation`.%(key)s LIKE "%s" ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
+	return repl('SELECT DISTINCT name, customer, transaction_date FROM `tabQuotation` \
+		WHERE `tabQuotation`.company = "' 
+		+ doc.company + '" and `tabQuotation`.`docstatus` = 1 \
+			and `tabQuotation`.status != "Order Lost" \
+			and %(cond)s `tabQuotation`.%(key)s LIKE "%s" \
+			ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
 }
 
 
-// SALES ORDER DETAILS TRIGGERS
-// ================================================================================================
-
-// ***************** Get available qty in warehouse of item selected **************** 
 cur_frm.cscript.reserved_warehouse = function(doc, cdt , cdn) {
 	var d = locals[cdt][cdn];
 	if (d.reserved_warehouse) {
@@ -222,7 +216,6 @@ cur_frm.cscript['Make Maintenance Schedule'] = function() {
 	}
 }
 
-//------------ make maintenance visit ------------
 cur_frm.cscript.make_maintenance_visit = function() {
 	var doc = cur_frm.doc;
 
@@ -251,8 +244,6 @@ cur_frm.cscript.make_maintenance_visit = function() {
 	}
 }
 
-// make indent
-// ================================================================================================
 cur_frm.cscript['Make Purchase Request'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
@@ -272,8 +263,6 @@ cur_frm.cscript['Make Purchase Request'] = function() {
 }
 
 
-// MAKE DELIVERY NOTE
-// ================================================================================================
 cur_frm.cscript['Make Delivery Note'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
@@ -293,8 +282,6 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 }
 
 
-// MAKE SALES INVOICE
-// ================================================================================================
 cur_frm.cscript['Make Sales Invoice'] = function() {
 	var doc = cur_frm.doc;
 
@@ -312,36 +299,36 @@ cur_frm.cscript['Make Sales Invoice'] = function() {
 }
 
 
-// STOP SALES ORDER
-// ==================================================================================================
 cur_frm.cscript['Stop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
 	var check = confirm("Are you sure you want to STOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'stop_sales_order', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', {
+			'method':'stop_sales_order', 
+			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
+			}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
 }
 
-// UNSTOP SALES ORDER
-// ==================================================================================================
 cur_frm.cscript['Unstop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
 	var check = confirm("Are you sure you want to UNSTOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'unstop_sales_order', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', {
+			'method':'unstop_sales_order', 
+			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
+		}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
 }
 
-//get query select Territory
-//=======================================================================================================================
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
@@ -350,4 +337,4 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_order)) {
 		cur_frm.email_doc(wn.boot.notification_settings.sales_order_message);
 	}
-}
+};

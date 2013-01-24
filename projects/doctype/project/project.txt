@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:41", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -198,6 +198,13 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "project_details", 
   "fieldtype": "Section Break", 
   "label": "Project Costing", 
@@ -212,6 +219,7 @@
   "no_copy": 0, 
   "oldfieldname": "project_value", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "reqd": 0, 
   "search_index": 0
  }, 
@@ -223,6 +231,7 @@
   "no_copy": 0, 
   "oldfieldname": "est_material_cost", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "search_index": 0
  }, 
  {
@@ -241,6 +250,7 @@
   "no_copy": 0, 
   "oldfieldname": "gross_margin_value", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "reqd": 0, 
   "search_index": 0
  }, 
@@ -252,6 +262,7 @@
   "no_copy": 0, 
   "oldfieldname": "per_gross_margin", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "reqd": 0, 
   "search_index": 0
  }, 

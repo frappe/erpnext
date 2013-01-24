@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:46:41", 
+  "modified": "2013-01-23 16:32:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -81,7 +81,7 @@
   "depends_on": "eval:doc.taxable=='No'", 
   "doctype": "DocField", 
   "fieldname": "exemption_limit", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "hidden": 1, 
   "label": "Exemption Limit", 
   "oldfieldname": "exemption_limit", 

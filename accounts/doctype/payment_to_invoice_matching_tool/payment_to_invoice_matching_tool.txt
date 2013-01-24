@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-23 15:27:14", 
   "docstatus": 0, 
-  "modified": "2013-01-23 15:56:55", 
+  "modified": "2013-01-23 17:11:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 0, 
+  "role": "Accounts User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -47,6 +48,15 @@
   "options": "Account", 
   "reqd": 1
  }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "print_hide": 1
+ },
  {
   "doctype": "DocField", 
   "fieldname": "account_type", 
@@ -90,6 +100,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -97,6 +108,7 @@
   "fieldname": "pending_amt_to_reconcile", 
   "fieldtype": "Currency", 
   "label": "Outstanding Amount", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -174,15 +186,6 @@
   "label": "Amount <="
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts User"
+  "doctype": "DocPerm"
  }
 ]

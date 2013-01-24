@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:29", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:23", 
+  "modified": "2013-01-23 16:48:38", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -30,7 +30,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "submit": 0, 
   "write": 1
  }, 
@@ -89,6 +89,15 @@
   "oldfieldname": "purchase_receipt_no", 
   "oldfieldtype": "Link", 
   "options": "Purchase Receipt"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -174,22 +183,6 @@
   "cancel": 0, 
   "doctype": "DocPerm", 
   "role": "Material User"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "doctype": "DocPerm", 
-  "role": "Material Manager"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts Manager"
  }, 
  {
   "doctype": "DocPerm", 

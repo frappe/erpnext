@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:06", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:01", 
+  "modified": "2013-01-23 17:11:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,7 +44,8 @@
   "fieldtype": "Currency", 
   "label": "Debit", 
   "oldfieldname": "debit", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
   "doctype": "DocField", 
@@ -52,7 +53,8 @@
   "fieldtype": "Currency", 
   "label": "Credit", 
   "oldfieldname": "credit", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
   "doctype": "DocField", 

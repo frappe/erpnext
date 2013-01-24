@@ -1,59 +1,55 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:54", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:54"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "HR", 
-  "show_in_menu": 0, 
-  "version": 14, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Salary Structure Deduction", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Salary Structure Deduction", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Salary Structure Deduction"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Type", 
-  "oldfieldname": "d_type", 
-  "width": "200px", 
   "fieldname": "d_type", 
   "fieldtype": "Link", 
+  "label": "Type", 
+  "oldfieldname": "d_type", 
+  "oldfieldtype": "Select", 
+  "options": "Deduction Type", 
   "reqd": 1, 
-  "options": "Deduction Type"
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "d_modified_amt", 
+  "fieldtype": "Currency", 
   "label": "Amount", 
   "oldfieldname": "d_modified_amt", 
-  "fieldname": "d_modified_amt", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
+  "fieldname": "depend_on_lwp", 
+  "fieldtype": "Check", 
   "label": "Depend on LWP", 
   "oldfieldname": "depend_on_lwp", 
-  "fieldname": "depend_on_lwp", 
-  "fieldtype": "Check"
+  "oldfieldtype": "Check"
  }
 ]

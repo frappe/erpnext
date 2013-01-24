@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:26", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:26:18", 
+  "modified": "2013-01-23 17:11:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -107,6 +107,7 @@
   "no_copy": 0, 
   "oldfieldname": "ref_rate", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "reqd": 0, 
   "width": "100px"
@@ -129,6 +130,7 @@
   "label": "Rate", 
   "oldfieldname": "export_rate", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "reqd": 0, 
   "width": "150px"
@@ -140,6 +142,7 @@
   "label": "Amount", 
   "oldfieldname": "export_amount", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 
@@ -152,6 +155,7 @@
   "label": "Price List Rate*", 
   "oldfieldname": "base_ref_rate", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "100px"
@@ -164,6 +168,7 @@
   "label": "Rate*", 
   "oldfieldname": "basic_rate", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "reqd": 0, 
   "width": "150px"
@@ -175,6 +180,7 @@
   "label": "Amount*", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0, 
@@ -255,6 +261,7 @@
   "fieldtype": "Currency", 
   "label": "Billed Amt", 
   "no_copy": 1, 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "100px"

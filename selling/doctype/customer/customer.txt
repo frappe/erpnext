@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "modified": "2013-01-22 15:06:09", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -238,10 +238,10 @@
   "description": "This currency will get fetched in Sales transactions of this customer", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Default Currency", 
   "no_copy": 1, 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "permlevel": 0
  }, 
  {
@@ -277,6 +277,7 @@
   "label": "Credit Limit", 
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "permlevel": 2
  }, 
  {

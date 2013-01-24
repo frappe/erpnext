@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "modified": "2013-01-22 15:03:42", 
+  "modified": "2013-01-23 17:11:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -244,6 +244,7 @@
   "label": "Net Total*", 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 1
@@ -319,9 +320,9 @@
   "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Price List Currency", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1
  }, 
@@ -343,11 +344,11 @@
  {
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1
  }, 
@@ -413,6 +414,7 @@
   "label": "Total Taxes and Charges", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -448,6 +450,7 @@
   "label": "Grand Total", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 
@@ -460,6 +463,7 @@
   "label": "Rounded Total", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -481,6 +485,7 @@
   "label": "Total Advance", 
   "oldfieldname": "total_advance", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -492,6 +497,7 @@
   "no_copy": 1, 
   "oldfieldname": "outstanding_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -510,6 +516,7 @@
   "label": "Grand Total (Export)", 
   "oldfieldname": "grand_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 1
@@ -521,6 +528,7 @@
   "label": "Rounded Total (Export)", 
   "oldfieldname": "rounded_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1
  }, 
@@ -541,13 +549,14 @@
   "label": "Gross Profit", 
   "oldfieldname": "gross_profit", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "gross_profit_percent", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Gross Profit (%)", 
   "oldfieldname": "gross_profit_percent", 
   "oldfieldtype": "Currency", 
@@ -573,6 +582,7 @@
   "label": "Paid Amount", 
   "oldfieldname": "paid_amount", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1
  }, 
  {
@@ -603,6 +613,7 @@
   "fieldname": "write_off_amount", 
   "fieldtype": "Currency", 
   "label": "Write Off Amount", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1
  }, 
  {
@@ -1016,6 +1027,7 @@
   "label": "Total Commission", 
   "oldfieldname": "total_commission", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1
  }, 
  {

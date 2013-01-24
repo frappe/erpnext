@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:18:30", 
+  "modified": "2013-01-23 17:02:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,6 +44,7 @@
   "label": "Budget Allocated", 
   "oldfieldname": "budget_allocated", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency(cur_frm.doc.company_name)", 
   "reqd": 1
  }, 
  {
@@ -53,6 +54,7 @@
   "label": "Actual", 
   "oldfieldname": "actual", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency(cur_frm.doc.company_name)", 
   "read_only": 1
  }, 
  {

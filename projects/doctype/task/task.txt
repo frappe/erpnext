@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:26", 
+  "modified": "2013-01-23 17:11:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -170,7 +170,8 @@
   "fieldtype": "Currency", 
   "label": "Allocated Budget", 
   "oldfieldname": "allocated_budget", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
   "doctype": "DocField", 
@@ -203,7 +204,8 @@
   "fieldtype": "Currency", 
   "label": "Actual Budget", 
   "oldfieldname": "actual_budget", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
   "doctype": "DocField", 
@@ -230,6 +232,18 @@
   "label": "Closing Date", 
   "oldfieldname": "closing_date", 
   "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_22", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company"
  }, 
  {
   "doctype": "DocField", 

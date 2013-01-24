@@ -65,7 +65,11 @@ class DocType:
 			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
 			webnotes.conn.set_default('year_end_date', \
 				get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
-				
+		
+		# enable default currency
+		if self.doc.default_currency:
+			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+		
 		# clear cache
 		webnotes.clear_cache()
 	

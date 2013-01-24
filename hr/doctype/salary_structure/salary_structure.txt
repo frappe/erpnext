@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:22", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -155,6 +155,7 @@
   "label": "CTC", 
   "oldfieldname": "ctc", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "reqd": 1
  }, 
  {
@@ -234,6 +235,7 @@
   "label": "Total Earning", 
   "oldfieldname": "total_earning", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -243,6 +245,7 @@
   "label": "Total Deduction", 
   "oldfieldname": "total_deduction", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {
@@ -256,6 +259,7 @@
   "fieldname": "net_pay", 
   "fieldtype": "Currency", 
   "label": "Net Pay", 
+  "options": "eval:erpnext.get_currency()", 
   "read_only": 1
  }, 
  {

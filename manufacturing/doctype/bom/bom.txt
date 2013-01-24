@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:57", 
+  "modified": "2013-01-23 17:00:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -150,7 +150,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "total_cost", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Total Cost", 
   "read_only": 1
  }, 
@@ -162,14 +162,14 @@
  {
   "doctype": "DocField", 
   "fieldname": "raw_material_cost", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Total Raw Material Cost", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "operating_cost", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Total Operating Cost", 
   "read_only": 1
  }, 

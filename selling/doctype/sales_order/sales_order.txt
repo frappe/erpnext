@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:20", 
+  "creation": "2013-01-22 15:24:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:52:58", 
+  "modified": "2013-01-23 17:11:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -249,6 +249,7 @@
   "label": "Net Total*", 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 
@@ -331,9 +332,9 @@
   "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Price List Currency", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1
  }, 
@@ -356,11 +357,11 @@
   "description": "Customer's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1, 
   "width": "100px"
@@ -427,6 +428,7 @@
   "label": "Taxes and Charges Total*", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "150px"
@@ -454,6 +456,7 @@
   "label": "Grand Total*", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0, 
@@ -466,6 +469,7 @@
   "label": "Rounded Total", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "150px"
@@ -497,6 +501,7 @@
   "label": "Grand Total (Export)", 
   "oldfieldname": "grand_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "reqd": 0, 
@@ -509,6 +514,7 @@
   "label": "Rounded Total (Export)", 
   "oldfieldname": "rounded_total_export", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 0, 
   "read_only": 1, 
   "width": "150px"
@@ -920,6 +926,7 @@
   "label": "Total Commission", 
   "oldfieldname": "total_commission", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1
  }, 
  {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-21 18:19:20", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:44", 
+  "modified": "2013-01-23 16:59:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -242,7 +242,7 @@
   "description": "% of materials ordered against this Purchase Requisition", 
   "doctype": "DocField", 
   "fieldname": "per_ordered", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "% Ordered", 
   "no_copy": 1, 
   "oldfieldname": "per_ordered", 

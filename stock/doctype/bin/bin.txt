@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:25", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:50:19", 
+  "modified": "2013-01-23 16:53:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -136,7 +136,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "ma_rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "hidden": 1, 
   "in_filter": 0, 
   "label": "Moving Average Rate", 
@@ -159,7 +159,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "fcfs_rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "hidden": 1, 
   "label": "FCFS Rate", 
   "oldfieldname": "fcfs_rate", 
@@ -170,7 +170,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "valuation_rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Valuation Rate", 
   "oldfieldname": "valuation_rate", 
   "oldfieldtype": "Currency"
@@ -178,7 +178,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "stock_value", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Stock Value", 
   "oldfieldname": "stock_value", 
   "oldfieldtype": "Currency"

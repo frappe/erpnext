@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-21 18:19:20", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:25", 
+  "modified": "2013-01-23 17:11:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -196,12 +196,12 @@
   "description": "Supplier's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Currency", 
   "no_copy": 0, 
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "print_hide": 1, 
   "reqd": 1
  }, 
@@ -322,6 +322,7 @@
   "no_copy": 0, 
   "oldfieldname": "net_total_import", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -333,6 +334,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_added_import", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 0
@@ -345,6 +347,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_deducted_import", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 0
@@ -357,6 +360,7 @@
   "no_copy": 0, 
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 0
@@ -386,6 +390,7 @@
   "no_copy": 1, 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0
@@ -398,6 +403,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -409,6 +415,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -420,6 +427,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -431,6 +439,7 @@
   "no_copy": 1, 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -441,6 +450,7 @@
   "label": "Rounded Total", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
   "print_hide": 1, 
   "read_only": 1
  }, 

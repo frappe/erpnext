@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:25", 
+  "modified": "2013-01-22 16:55:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -162,10 +162,10 @@
   "description": "This currency will get fetched in Purchase transactions of this supplier", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Default Currency", 
   "no_copy": 1, 
-  "options": "link:Currency"
+  "options": "Currency"
  }, 
  {
   "description": "Statutory info and other general information about your Supplier", 

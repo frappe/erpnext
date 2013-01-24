@@ -213,7 +213,9 @@ class DocType:
 		cc = sql("select name from `tabCost Center` where cost_center_name = 'Root' and company_name = '%s'"%(self.doc.name))
 		if not cc:
 			self.create_default_cost_center()
-
+			
+		if self.doc.default_currency:
+			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
 
 	def on_trash(self):
 		"""

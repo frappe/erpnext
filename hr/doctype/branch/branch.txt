@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:18:28", 
+  "modified": "2013-01-22 17:36:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_rename": 1, 
   "autoname": "field:branch", 
   "doctype": "DocType", 
   "document_type": "Master", 
