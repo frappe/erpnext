@@ -24,10 +24,13 @@ class DocType(DocTypeNestedSet):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.nsm_parent_field = 'parent_item_group';
-	
+		self.nsm_parent_field = 'parent_item_group'
+		
 	def on_update(self):
 		super(DocType, self).on_update()
+		
+		self.validate_name_with_item()
+		
 		if self.doc.show_in_website:
 			# webpage updates
 			from website.utils import update_page_name
@@ -42,7 +45,12 @@ class DocType(DocTypeNestedSet):
 			
 			from website.helpers.product import invalidate_cache_for
 			invalidate_cache_for(self.doc.name)
-			
+		
+	def validate_name_with_item(self):
+		if webnotes.conn.exists("Item", self.doc.name):
+			webnotes.msgprint("An item exists with same name (%s), please change the \
+				item group name or rename the item" % self.doc.name, raise_exception=1)
+	
 	def prepare_template_args(self):
 		from website.helpers.product import get_product_list_for_group, \
 			get_parent_item_groups, get_group_item_count

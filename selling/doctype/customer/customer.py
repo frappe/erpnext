@@ -172,6 +172,8 @@ class DocType(TransactionBase):
 				pass
 
 	def on_update(self):
+		self.validate_name_with_customer_group()
+		
 		self.update_lead_status()
 		# create account head
 		self.create_account_head()
@@ -179,6 +181,12 @@ class DocType(TransactionBase):
 		self.update_credit_days_limit()
 		#create address and contact from lead
 		self.create_lead_address_contact()
+		
+	def validate_name_with_customer_group(self):
+		if webnotes.conn.exists("Customer Group", self.doc.name):
+			webnotes.msgprint("An Customer Group exists with same name (%s), \
+				please change the Customer name or rename the Customer Group" % 
+				self.doc.name, raise_exception=1)
 
 	def delete_customer_address(self):
 		for rec in sql("select * from `tabAddress` where customer='%s'" %(self.doc.name), as_dict=1):

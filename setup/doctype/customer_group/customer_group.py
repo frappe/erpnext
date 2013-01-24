@@ -37,6 +37,15 @@ class DocType(DocTypeNestedSet):
 				To untrash please go to Setup -> Recycle Bin.""" % 
 				(self.doc.customer_group_name), raise_exception = 1)		
 
+	def on_update(self):
+		self.validate_name_with_customer()
+		
+	def validate_name_with_customer(self):
+		if webnotes.conn.exists("Customer", self.doc.name):
+			webnotes.msgprint("An Customer exists with same name (%s), \
+				please change the Customer Group name or rename the Customer" % 
+				self.doc.name, raise_exception=1)
+
 	def on_trash(self):
 		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", 
 		 	self.doc.name)
