@@ -1,0 +1,23 @@
+{
+ "Accounts": "Comptes", 
+ "Add rows to set annual budgets on Accounts.": "Ajoutez des lignes d&#39;\u00e9tablir des budgets annuels des comptes.", 
+ "Budget": "Budget", 
+ "Budget Details": "D\u00e9tails du budget", 
+ "Company": "Entreprise", 
+ "Company Abbr": "Soci\u00e9t\u00e9 Abr", 
+ "Cost Center": "Centre de co\u00fbts", 
+ "Cost Center Details": "Co\u00fbt Center D\u00e9tails", 
+ "Cost Center Name": "Co\u00fbt Nom du centre", 
+ "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>": "D\u00e9finir le budget pour ce centre de co\u00fbts. Pour d\u00e9finir l&#39;action budg\u00e9taire, voir <a href=\"#!List/Company\">Ma\u00eetre Soci\u00e9t\u00e9</a>", 
+ "Distribution Id": "Id distribution", 
+ "Group": "Groupe", 
+ "Group or Ledger": "Groupe ou Ledger", 
+ "Ledger": "Grand livre", 
+ "Parent Cost Center": "Centre de co\u00fbts Parent", 
+ "Select Budget Distribution, if you want to track based on seasonality.": "S\u00e9lectionnez R\u00e9partition du budget, si vous voulez suivre en fonction de la saisonnalit\u00e9.", 
+ "Track separate Income and Expense for product verticals or divisions.": "Suivre distincte sur le revenu et d\u00e9penses pour des produits ou des divisions verticales.", 
+ "Trash Reason": "Raison Corbeille", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}

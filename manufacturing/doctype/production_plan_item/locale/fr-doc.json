@@ -1,0 +1,11 @@
+{
+ "BOM No": "Aucune nomenclature", 
+ "Description": "Description", 
+ "Item Code": "Code de l&#39;article", 
+ "Manufacturing": "Fabrication", 
+ "Planned Qty": "Quantit\u00e9 planifi\u00e9e", 
+ "Production Plan Item": "\u00c9l\u00e9ment du plan de production", 
+ "SO Pending Qty": "SO attente Qt\u00e9", 
+ "Sales Order": "Commande", 
+ "UOM": "Emballage"
+}

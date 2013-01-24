@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Quantit\u00e9 r\u00e9elle", 
+ "Bin": "Bo\u00eete", 
+ "FCFS Rate": "Taux PAPS", 
+ "Item Code": "Code de l&#39;article", 
+ "Moving Average Rate": "Moving Prix moyen", 
+ "Ordered Quantity": "Quantit\u00e9 command\u00e9e", 
+ "Planned Qty": "Quantit\u00e9 planifi\u00e9e", 
+ "Projected Qty": "Qt\u00e9 projet\u00e9", 
+ "Quantity Requested for Purchase": "Quantit\u00e9 demand\u00e9e pour l&#39;achat", 
+ "Reserved Quantity": "Quantit\u00e9 r\u00e9serv\u00e9s", 
+ "Stock": "Stock", 
+ "Stock Value": "Valeur de l&#39;action", 
+ "UOM": "Emballage", 
+ "Valuation Rate": "Taux d&#39;\u00e9valuation", 
+ "Warehouse": "Entrep\u00f4t", 
+ "Warehouse Type": "Type d&#39;entrep\u00f4t"
+}

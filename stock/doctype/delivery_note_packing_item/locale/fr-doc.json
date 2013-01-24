@@ -1,0 +1,18 @@
+{
+ "Actual Qty": "Quantit\u00e9 r\u00e9elle", 
+ "Batch No": "Aucun lot", 
+ "Delivery Note Packing Item": "Article d&#39;emballage de livraison Note", 
+ "Description": "Description", 
+ "Item Code": "Code de l&#39;article", 
+ "Item Name": "Nom d&#39;article", 
+ "Page Break": "Saut de page", 
+ "Parent Detail docname": "DocName D\u00e9tail Parent", 
+ "Parent Item": "Article Parent", 
+ "Prevdoc DocType": "Prevdoc DocType", 
+ "Projected Qty": "Qt\u00e9 projet\u00e9", 
+ "Qty": "Qt\u00e9", 
+ "Serial No": "N \u00b0 de s\u00e9rie", 
+ "Stock": "Stock", 
+ "UOM": "Emballage", 
+ "Warehouse": "Entrep\u00f4t"
+}

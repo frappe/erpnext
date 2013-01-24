@@ -1,0 +1,14 @@
+{
+ "Amount": "Montant", 
+ "BOM Item": "Article BOM", 
+ "BOM No": "Aucune nomenclature", 
+ "Item Code": "Code de l&#39;article", 
+ "Item Description": "Description de l&#39;objet", 
+ "Manufacturing": "Fabrication", 
+ "Operation No": "Op\u00e9ration No", 
+ "Qty": "Qt\u00e9", 
+ "Qty Consumed Per Unit": "Quantit\u00e9 consomm\u00e9e par unit\u00e9", 
+ "Rate": "Taux", 
+ "Scrap %": "Scrap%", 
+ "Stock UOM": "Stock UDM"
+}

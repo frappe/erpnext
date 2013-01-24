@@ -1,0 +1,10 @@
+{
+ " is less than equals to zero in the system, \\\t\t\t\t\t\tvaluation rate is mandatory for this item": "est inf\u00e9rieure \u00e0 \u00e9gale \u00e0 z\u00e9ro dans le syst\u00e8me, le taux de valorisation \\ est obligatoire pour cet ouvrage", 
+ "' can not be managed using Stock Reconciliation.\\\t\t\t\t\tYou can add/delete Serial No directly, \\\t\t\t\t\tto modify stock of this item.": "\u00bbNe peut pas \u00eatre g\u00e9r\u00e9 \u00e0 l&#39;aide de r\u00e9conciliation Droits. \\ Vous pouvez ajouter / supprimer des N \u00b0 de s\u00e9rie directement, \\ \u00e0 modifier le bilan de cet article.", 
+ "As existing qty for item: ": "Comme qt\u00e9 existantes pour l&#39;article:", 
+ "Hey! You seem to be using the wrong template. \\\t\t\t\tClick on 'Download Template' button to get the correct template.": "Hey! Vous semblez \u00eatre en utilisant le mod\u00e8le tort. \\ Cliquez sur le bouton &quot;T\u00e9l\u00e9charger le mod\u00e8le &#39;pour obtenir le bon mod\u00e8le.", 
+ "Row # ": "Row #", 
+ "Serialized Item: '": "Article s\u00e9rialis\u00e9: &#39;", 
+ "Sorry! We can only allow upto 100 rows for Stock Reconciliation.": "D\u00e9sol\u00e9! Nous ne pouvons permettre jusqu&#39;\u00e0 100 lignes pour la r\u00e9conciliation Droits.", 
+ "Stock Reconciliation file not uploaded": "Fichier de rapprochement Stock pas transf\u00e9r\u00e9"
+}

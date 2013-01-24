@@ -1,0 +1,16 @@
+{
+ "Amount": "Montant", 
+ "BOM Detail No": "D\u00e9tail BOM Non", 
+ "Buying": "Achat", 
+ "Consumed Qty": "Quantit\u00e9 consomm\u00e9e", 
+ "Conversion Factor": "Facteur de conversion", 
+ "Current Stock": "Stock actuel", 
+ "Description": "Description", 
+ "Item Code": "Code de l&#39;article", 
+ "Purchase Receipt Item Supplied": "Article re\u00e7u d&#39;achat fournis", 
+ "Rate": "Taux", 
+ "Raw Material Item Code": "Raw Code article Mati\u00e8re", 
+ "Reference Name": "Nom de r\u00e9f\u00e9rence", 
+ "Required Qty": "Quantit\u00e9 requise", 
+ "Stock Uom": "Stock UDM"
+}

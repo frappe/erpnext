@@ -1,0 +1,11 @@
+{
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials": "Groupe global de ** ** Articles dans un autre article **. ** Ceci est utile si vous mettez en place un certains articles ** ** dans un paquet et vous maintenir le stock des articles emball\u00e9s ** ** et non pas le total ** Article **. Le paquet ** ** Point aura \u00abEst Produit en stock&quot; comme &quot;No&quot; et &quot;Est Point de vente&quot; que &quot;Oui&quot; Par exemple:. Si vous vendez des ordinateurs portables et sacs \u00e0 dos s\u00e9par\u00e9ment et un prix sp\u00e9cial si le client ach\u00e8te \u00e0 la fois , puis l&#39;ordinateur portable Sac \u00e0 dos + sera une nouvelle nomenclature des ventes Item.Note: BOM = Bill of Materials", 
+ "List items that form the package.": "Liste des articles qui composent le paquet.", 
+ "Package Items": "Articles paquet", 
+ "Parent Item": "Article Parent", 
+ "Sales BOM": "BOM ventes", 
+ "Sales BOM Item": "Article nomenclature des ventes", 
+ "Sales BOM Items": "Articles ventes de nomenclature", 
+ "Stock": "Stock", 
+ "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"": "L&#39;article qui repr\u00e9sente le package. Cet article doit avoir \u00abEst Produit en stock&quot; comme &quot;No&quot; et &quot;Est Point de vente&quot; que &quot;Oui&quot;"
+}
