@@ -415,8 +415,8 @@ class DocType(TransactionBase):
 							'qty': flt(p.qty),
 							'reserved_qty': (flt(p.qty)/qty)*(reserved_qty),
 							'uom': p.uom,
-							'batch_no': p.batch_no,
-							'serial_no': p.serial_no,
+							'batch_no': cstr(p.batch_no).strip(),
+							'serial_no': cstr(p.serial_no).strip(),
 							'name': d.name
 						})
 			else:
@@ -427,8 +427,8 @@ class DocType(TransactionBase):
 					'qty': qty,
 					'reserved_qty': reserved_qty,
 					'uom': d.stock_uom,
-					'batch_no': d.batch_no,
-					'serial_no': d.serial_no,
+					'batch_no': cstr(d.batch_no).strip(),
+					'serial_no': cstr(d.serial_no).strip(),
 					'name': d.name
 				})
 		return il

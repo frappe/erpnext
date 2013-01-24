@@ -166,7 +166,7 @@ class DocType(TransactionBase):
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
-				"serial_no": d.serial_no,
+				"serial_no": cstr(d.serial_no).strip(),
 				"bom_no": d.bom_no,
 			})
 			# get actual stock at source warehouse
@@ -257,7 +257,7 @@ class DocType(TransactionBase):
 			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
 		
 		for d in getlist(self.doclist, 'mtn_details'):
-			if d.serial_no:
+			if cstr(d.serial_no).strip():
 				for x in get_valid_serial_nos(d.serial_no):
 					serial_no = x.strip()
 					if d.s_warehouse:
@@ -536,8 +536,8 @@ class DocType(TransactionBase):
 			'stock_uom': d.stock_uom,
 			'company': self.doc.company,
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
-			'batch_no': d.batch_no,
-			'serial_no': d.serial_no
+			'batch_no': cstr(d.batch_no).strip(),
+			'serial_no': cstr(d.serial_no).strip()
 		})
 	
 	def get_cust_values(self):
