@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-01-24 11:48:48", 
+  "modified": "2013-01-24 13:55:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -94,12 +94,12 @@
   "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n######"
  }, 
  {
-  "description": "Precision for Float fields (quantities, discounts, percentages etc)", 
+  "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
   "doctype": "DocField", 
   "fieldname": "float_precision", 
   "fieldtype": "Select", 
   "label": "Float Precision", 
-  "options": "2\n3\n4\n5\n6"
+  "options": "\n2\n3\n4\n5\n6"
  }, 
  {
   "doctype": "DocField", 
