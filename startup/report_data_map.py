@@ -254,7 +254,42 @@ data_map = {
 			"item_code": ["Item", "name"]
 		}
 	},
-	
+	"Purchase Order": {
+		"columns": ["name", "supplier", "transaction_date as posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"supplier": ["Supplier", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Purchase Order Item[Purchase Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Purchase Order", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
+	"Purchase Receipt": {
+		"columns": ["name", "supplier", "posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"supplier": ["Supplier", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Purchase Receipt Item[Purchase Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Purchase Receipt", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
 	# Support
 	"Support Ticket": {
 		"columns": ["name","status","creation","resolution_date","first_responded_on"],
