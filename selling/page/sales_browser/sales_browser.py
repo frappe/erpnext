@@ -18,12 +18,16 @@ def get_children():
 		
 @webnotes.whitelist()
 def add_node():
-	from webnotes.model.doc import Document
+	# from webnotes.model.doc import Document
 	ctype = webnotes.form_dict.get('ctype')
 	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
-
-	d = Document(ctype)
-	d.fields[ctype.lower().replace(' ', '_') + '_name'] = webnotes.form_dict['name_field']
-	d.fields[parent_field] = webnotes.form_dict['parent']
-	d.is_group = webnotes.form_dict['is_group']
-	d.save()
+	name_field = ctype.lower().replace(' ', '_') + '_name'
+	
+	doclist = [{
+		"doctype": ctype,
+		"__islocal": 1,
+		name_field: webnotes.form_dict['name_field'],
+		parent_field: webnotes.form_dict['parent'],
+		"is_group": webnotes.form_dict['is_group']
+	}]
+	webnotes.model_wrapper(doclist).save()
