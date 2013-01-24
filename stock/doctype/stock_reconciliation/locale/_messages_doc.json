@@ -1,14 +1,12 @@
 [
- "Reconciliation Time", 
- "Remark", 
- "Amendment Date", 
- "The date at which current entry is corrected in the system.", 
- "Diff Info", 
- "Reconciliation Date", 
- "File List", 
- "Steps", 
+ "Reconciliation JSON", 
+ "Reconciliation HTML", 
  "Amended From", 
- "Download Template", 
  "Stock Reconciliation", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
+ "Upload HTML", 
+ "Reconciliation Data", 
+ "Posting Time", 
+ "Posting Date", 
  "Stock"
 ]

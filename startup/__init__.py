@@ -21,10 +21,13 @@ from __future__ import unicode_literals
 
 lang_names = {
 	"हिंदी": "hi",
-	"English": "en"
+	"English": "en",
+	"español": "es",
+	"français": "fr",
+	"português": "pt"
 }
 
-lang_list = ["en", "hi"]
+lang_list = ["en", "hi", "es", "fr", "pt"]
 
 product_name = "ERPNext"
 profile_defaults = {
