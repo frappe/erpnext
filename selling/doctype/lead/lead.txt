@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:18", 
+  "creation": "2013-01-22 16:50:33", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:03", 
+  "modified": "2013-01-24 16:06:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -227,7 +227,7 @@
   "oldfieldtype": "Data"
  }, 
  {
-  "description": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>", 
+  "description": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -470,6 +470,6 @@
  {
   "cancel": 0, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "role": "Guest"
  }
 ]
