@@ -1,0 +1,16 @@
+{
+ "Amount": "Quantidade", 
+ "BOM Detail No": "BOM nenhum detalhe", 
+ "Buying": "Comprar", 
+ "Consumed Qty": "Qtde consumida", 
+ "Conversion Factor": "Fator de Convers\u00e3o", 
+ "Current Stock": "Estoque atual", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Item Code": "C\u00f3digo do artigo", 
+ "Purchase Receipt Item Supplied": "Recibo de compra do item em actualiza\u00e7\u00e3o", 
+ "Rate": "Taxa", 
+ "Raw Material Item Code": "Item C\u00f3digo de mat\u00e9rias-primas", 
+ "Reference Name": "Nome de refer\u00eancia", 
+ "Required Qty": "Quantidade requerida", 
+ "Stock Uom": "Estoque Uom"
+}

@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Quantidade real", 
+ "Bin": "Caixa", 
+ "FCFS Rate": "Taxa FCFS", 
+ "Item Code": "C\u00f3digo do artigo", 
+ "Moving Average Rate": "Movendo Taxa M\u00e9dia", 
+ "Ordered Quantity": "Quantidade pedida", 
+ "Planned Qty": "Qtde planejada", 
+ "Projected Qty": "Qtde Projetada", 
+ "Quantity Requested for Purchase": "Quantidade Solicitada para Compra", 
+ "Reserved Quantity": "Quantidade reservados", 
+ "Stock": "Estoque", 
+ "Stock Value": "Valor da", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Taxa de valoriza\u00e7\u00e3o", 
+ "Warehouse": "Armaz\u00e9m", 
+ "Warehouse Type": "Tipo de armaz\u00e9m"
+}
