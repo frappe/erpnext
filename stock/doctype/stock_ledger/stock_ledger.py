@@ -38,14 +38,14 @@ class DocType:
 		
 		for d in getlist(obj.doclist, table_name):
 			if d.serial_no:
-				d.serial_no = d.serial_no.replace(',', '\n')
+				d.serial_no = cstr(d.serial_no).strip().replace(',', '\n')
 				d.save()
 
 
 	def validate_serial_no_warehouse(self, obj, fname):
 		for d in getlist(obj.doclist, fname):
 			wh = d.warehouse or d.s_warehouse
-			if d.serial_no and wh:
+			if cstr(d.serial_no).strip() and wh:
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				for s in serial_nos:
 					s = s.strip()
@@ -172,7 +172,6 @@ class DocType:
 
 
 	def update_serial_record(self, obj, fname, is_submit = 1, is_incoming = 0):
-		import datetime
 		for d in getlist(obj.doclist, fname):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
@@ -191,10 +190,12 @@ class DocType:
 				
 	def update_stock(self, values, is_amended = 'No'):
 		for v in values:
-			sle_id, serial_nos = '', ''
+			sle_id, valid_serial_nos = '', ''
 			# get serial nos
-			if v.get("serial_no"):
-				serial_nos = get_valid_serial_nos(v["serial_no"], v['actual_qty'], v['item_code'])
+			if v.get("serial_no", "").strip():
+				valid_serial_nos = get_valid_serial_nos(v["serial_no"], 
+					v['actual_qty'], v['item_code'])
+				v["serial_no"] = valid_serial_nos and "\n".join(valid_serial_nos) or ""
 			
 			# reverse quantities for cancel
 			if v.get('is_cancelled') == 'Yes':

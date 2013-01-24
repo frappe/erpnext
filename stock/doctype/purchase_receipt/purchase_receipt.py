@@ -154,15 +154,9 @@ class DocType(BuyingController):
 	def scrub_rejected_serial_nos(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
 			if d.rejected_serial_no:
-				d.rejected_serial_no = d.rejected_serial_no.replace(',', '\n')
+				d.rejected_serial_no = cstr(d.rejected_serial_no).strip().replace(',', '\n')
 				d.save()
 
-
-
-	# On Submit
-	# -----------------------------------------------------------------------------------------------------
-
- # Update Stock
 	def update_stock(self, is_submit):
 		pc_obj = get_obj('Purchase Common')
 		self.values = []
@@ -211,9 +205,9 @@ class DocType(BuyingController):
 	# make Stock Entry
 	def make_sl_entry(self, d, wh, qty, in_value, is_submit, rejected = 0):
 		if rejected:
-			serial_no = d.rejected_serial_no
+			serial_no = cstr(d.rejected_serial_no).strip()
 		else:
-			serial_no = d.serial_no
+			serial_no = cstr(d.serial_no).strip()
 
 		self.values.append({
 			'item_code'					: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
@@ -229,7 +223,7 @@ class DocType(BuyingController):
 			'company'					: self.doc.company,
 			'fiscal_year'				: self.doc.fiscal_year,
 			'is_cancelled'				: (is_submit==1) and 'No' or 'Yes',
-			'batch_no'					: d.batch_no,
+			'batch_no'					: cstr(d.batch_no).strip(),
 			'serial_no'					: serial_no
 			})
 

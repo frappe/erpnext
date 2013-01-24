@@ -186,10 +186,30 @@ class DocType:
 		if not self.doc.from_case_no:
 			self.doc.from_case_no = self.get_recommended_case_no()
 
-		from webnotes.model.code import get_obj
-		for d in self.doclist:
-			psd_obj = get_obj(doc=d)
-			psd_obj.get_item_details(self.doc.delivery_note)
+		for d in self.doclist.get({"parentfield": "item_details"}):
+			self.set_item_details(d)
+
+
+	def set_item_details(self, row):
+		res = webnotes.conn.sql("""\
+			SELECT item_name, SUM(IFNULL(qty, 0)) as total_qty,
+			IFNULL(packed_qty,	0) as packed_qty, stock_uom
+			FROM `tabDelivery Note Item`
+			WHERE parent=%s AND item_code=%s GROUP BY item_code""",
+			(self.doc.delivery_note, row.item_code), as_dict=1)
+
+		if res and len(res)>0:
+			qty = res[0]['total_qty'] - res[0]['packed_qty']
+			if not row.qty:
+				row.qty = qty >= 0 and qty or 0
+
+		res = webnotes.conn.sql("""\
+			SELECT net_weight, weight_uom FROM `tabItem`
+			WHERE name=%s""", self.doc.item_code, as_dict=1)
+
+		if res and len(res)>0:
+			row.net_weight = res[0]["net_weight"]
+			row.weight_uom = res[0]["weight_uom"]
 
 
 	def get_recommended_case_no(self):
@@ -202,5 +222,3 @@ class DocType:
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
 
 		return cint(recommended_case_no[0][0]) + 1
-		
-
