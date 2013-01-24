@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:54:48", 
+  "modified": "2013-01-24 11:48:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,11 +27,13 @@
   "permlevel": 0
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Global Defaults", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 0, 
   "role": "System Manager", 
@@ -90,6 +92,14 @@
   "fieldtype": "Select", 
   "label": "Number Format", 
   "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n######"
+ }, 
+ {
+  "description": "Precision for Float fields (quantities, discounts, percentages etc)", 
+  "doctype": "DocField", 
+  "fieldname": "float_precision", 
+  "fieldtype": "Select", 
+  "label": "Float Precision", 
+  "options": "2\n3\n4\n5\n6"
  }, 
  {
   "doctype": "DocField", 
@@ -403,12 +413,6 @@
   "label": "SMS Sender Name"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2
+  "doctype": "DocPerm"
  }
 ]
