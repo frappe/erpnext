@@ -18,9 +18,8 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt
-from webnotes.model import db_exists
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
@@ -38,6 +37,8 @@ class DocType:
 		return ret
 
 	def on_update(self):
+		self.validate_name_with_item_group()
+		
 		if self.doc.show_in_website:
 			# webpage updates
 			self.update_website()
@@ -62,8 +63,6 @@ class DocType:
 				if flt(d.conversion_factor) != 1:
 					msgprint("Conversion Factor of UOM : %s should be equal to 1. As UOM : %s is Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
 					raise Exception
-				# else set uom_exist as true
-				uom_exist='true'
 			elif cstr(d.uom) != cstr(self.doc.stock_uom) and flt(d.conversion_factor) == 1:
 				msgprint("Conversion Factor of UOM : %s should not be equal to 1. As UOM : %s is not Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
 				raise Exception
@@ -74,6 +73,12 @@ class DocType:
 			child.uom = self.doc.stock_uom
 			child.conversion_factor = 1
 			child.save()
+
+	def validate_name_with_item_group(self):
+		if webnotes.conn.exists("Item Group", self.doc.name):
+			webnotes.msgprint("An item group exists with same name (%s), \
+				please change the item name or rename the item group" % 
+				self.doc.name, raise_exception=1)
 
 	def update_website(self):
 		from website.utils import update_page_name
@@ -179,7 +184,7 @@ class DocType:
 
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
-		
+					
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
 			existing_qty = sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
