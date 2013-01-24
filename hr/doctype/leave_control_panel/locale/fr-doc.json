@@ -1,0 +1,20 @@
+{
+ "Allocate": "Allouer", 
+ "Branch": "Branche", 
+ "Carry Forward": "Reporter", 
+ "Department": "D\u00e9partement", 
+ "Designation": "D\u00e9signation", 
+ "Employee Type": "Type de contrat", 
+ "Fiscal Year": "Exercice", 
+ "Grade": "Grade", 
+ "HR": "RH", 
+ "Leave Control Panel": "Laisser le Panneau de configuration", 
+ "Leave Type": "Laisser Type d&#39;", 
+ "Leave blank if considered for all branches": "Laisser vide si cela est jug\u00e9 pour toutes les branches", 
+ "Leave blank if considered for all departments": "Laisser vide si cela est jug\u00e9 pour tous les minist\u00e8res", 
+ "Leave blank if considered for all designations": "Laisser vide si cela est jug\u00e9 pour toutes les d\u00e9signations", 
+ "Leave blank if considered for all employee types": "Laisser vide si cela est jug\u00e9 pour tous les types d&#39;employ\u00e9s", 
+ "Leave blank if considered for all grades": "Laisser vide si cela est jug\u00e9 pour tous les grades", 
+ "New Leaves Allocated (In Days)": "Feuilles de nouveaux allou\u00e9s (en jours)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "S&#39;il vous pla\u00eet s\u00e9lectionnez Report si vous souhaitez \u00e9galement inclure le solde de l&#39;exercice pr\u00e9c\u00e9dent ne laisse \u00e0 cet exercice"
+}

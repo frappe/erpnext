@@ -1,0 +1,14 @@
+{
+ "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.": "A\u00f1o Fiscal ** ** representa un ejercicio. Los asientos contables y otras transacciones importantes se siguen contra ** Ejercicio **.", 
+ "Accounts": "Cuentas", 
+ "Entries are not allowed against this Fiscal Year if the year is closed.": "No se permiten comentarios en contra de este a\u00f1o fiscal si el a\u00f1o est\u00e1 cerrado.", 
+ "Fiscal Year": "A\u00f1o Fiscal", 
+ "Fiscal Year Details": "Datos del ejercicio fiscal", 
+ "For e.g. 2012, 2012-13": "Por ejemplo, 2012, 2012-13", 
+ "No": "No", 
+ "Trash Reason": "Trash Raz\u00f3n", 
+ "Year Closed": "A\u00f1o Cerrado", 
+ "Year Name": "Nombre A\u00f1o", 
+ "Year Start Date": "A\u00f1o Fecha de inicio", 
+ "Yes": "S\u00ed"
+}

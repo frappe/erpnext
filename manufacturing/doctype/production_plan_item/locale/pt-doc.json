@@ -1,0 +1,11 @@
+{
+ "BOM No": "BOM N\u00e3o", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Item Code": "C\u00f3digo do artigo", 
+ "Manufacturing": "Fabrico", 
+ "Planned Qty": "Qtde planejada", 
+ "Production Plan Item": "Item do plano de produ\u00e7\u00e3o", 
+ "SO Pending Qty": "Est\u00e1 pendente de Qtde", 
+ "Sales Order": "Ordem de Vendas", 
+ "UOM": "UOM"
+}

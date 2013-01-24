@@ -1,0 +1,23 @@
+{
+ "Against Docname": "Contra DocNombre", 
+ "Against Doctype": "Contra Doctype", 
+ "Amount": "Cantidad", 
+ "Amount*": "Importe *", 
+ "Basic Rate*": "* Tasa B\u00e1sica", 
+ "Brand": "Marca", 
+ "Customer's Item Code": "Cliente C\u00f3digo del art\u00edculo", 
+ "Description": "Descripci\u00f3n", 
+ "Discount (%)": "Descuento (%)", 
+ "Item Code": "C\u00f3digo del art\u00edculo", 
+ "Item Group": "Grupo de art\u00edculos", 
+ "Item Name": "Nombre del elemento", 
+ "Item Tax Rate": "Art\u00edculo Tasa Impositiva", 
+ "Page Break": "Salto de p\u00e1gina", 
+ "Price List Rate": "Precio Califica", 
+ "Price List Rate*": "Lista de precios * Evaluar", 
+ "Quantity": "Cantidad", 
+ "Quotation Item": "Cotizaci\u00f3n del art\u00edculo", 
+ "Rate": "Velocidad", 
+ "Selling": "De venta", 
+ "UOM": "UOM"
+}

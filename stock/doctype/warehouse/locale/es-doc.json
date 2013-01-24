@@ -1,0 +1,23 @@
+{
+ "A logical Warehouse against which stock entries are made.": "Un almacen de dep\u00f3sito l\u00f3gico en el que las entradas en existencias est\u00e1n hechos.", 
+ "Address Line 1": "Direcci\u00f3n L\u00ednea 1", 
+ "Address Line 2": "Direcci\u00f3n L\u00ednea 2", 
+ "City": "Ciudad", 
+ "Company": "Empresa", 
+ "Email Id": "Email Id", 
+ "For Reference Only.": "S\u00f3lo de referencia.", 
+ "Merge": "Unir", 
+ "Merge Warehouses": "Combinar Almacenes", 
+ "Merge With": "Combinar con", 
+ "Mobile No": "Mobile No", 
+ "PIN": "PIN", 
+ "Phone No": "No de tel\u00e9fono", 
+ "State": "Estado", 
+ "Stock": "Valores", 
+ "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.": "Esta caracter\u00edstica es para la fusi\u00f3n de almacenes duplicados. Sustituir\u00e1 a todos los eslabones de esta bodega por &quot;Combinar Con&quot; almac\u00e9n. Despu\u00e9s de la fusi\u00f3n puede eliminar este almac\u00e9n, como el nivel de stock para este almac\u00e9n ser\u00e1 cero.", 
+ "Warehouse": "Almac\u00e9n", 
+ "Warehouse Contact Info": "Almac\u00e9n de informaci\u00f3n de contacto", 
+ "Warehouse Detail": "Almac\u00e9n Detalle", 
+ "Warehouse Name": "Almac\u00e9n Nombre", 
+ "Warehouse Type": "Dep\u00f3sito de tipo"
+}

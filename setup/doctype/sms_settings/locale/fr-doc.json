@@ -1,0 +1,13 @@
+{
+ "Eg. smsgateway.com/api/send_sms.cgi": "Par exemple. smsgateway.com / api / send_sms.cgi", 
+ "Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)": "Entrez les param\u00e8tres url statiques (par exemple ici sender = ERPNext, username = ERPNext, mot de passe = 1234 etc)", 
+ "Enter url parameter for message": "Entrez le param\u00e8tre url pour le message", 
+ "Enter url parameter for receiver nos": "Entrez le param\u00e8tre url pour nos r\u00e9cepteurs", 
+ "Message Parameter": "Param\u00e8tre message", 
+ "Receiver Parameter": "Param\u00e8tre r\u00e9cepteur", 
+ "SMS Gateway URL": "URL SMS Gateway", 
+ "SMS Parameters": "Param\u00e8tres SMS", 
+ "SMS Settings": "Param\u00e8tres SMS", 
+ "Setup": "Installation", 
+ "Static Parameters": "Param\u00e8tres statiques"
+}

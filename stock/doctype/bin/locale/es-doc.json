@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Cantidad real", 
+ "Bin": "Papelera", 
+ "FCFS Rate": "Tasa FCFS", 
+ "Item Code": "C\u00f3digo del art\u00edculo", 
+ "Moving Average Rate": "Tarifa media m\u00f3vil", 
+ "Ordered Quantity": "Cantidad ordenada", 
+ "Planned Qty": "Cantidad de Planificaci\u00f3n", 
+ "Projected Qty": "Cantidad proyectada", 
+ "Quantity Requested for Purchase": "Cantidad de la petici\u00f3n de compra", 
+ "Reserved Quantity": "Cantidad reservada", 
+ "Stock": "Valores", 
+ "Stock Value": "Valor de la", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Valoraci\u00f3n de tipo", 
+ "Warehouse": "Almac\u00e9n", 
+ "Warehouse Type": "Dep\u00f3sito de tipo"
+}

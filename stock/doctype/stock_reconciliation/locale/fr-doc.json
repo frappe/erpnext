@@ -1,0 +1,12 @@
+{
+ "Amended From": "De modifi\u00e9e", 
+ "Posting Date": "Date de publication", 
+ "Posting Time": "Affichage Temps", 
+ "Reconciliation Data": "Donn\u00e9es de r\u00e9conciliation", 
+ "Reconciliation HTML": "R\u00e9conciliation HTML", 
+ "Reconciliation JSON": "R\u00e9conciliation JSON", 
+ "Stock": "Stock", 
+ "Stock Reconciliation": "Stock r\u00e9conciliation", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Cet outil vous permet de mettre \u00e0 jour ou corriger la quantit\u00e9 et la valorisation de stock dans le syst\u00e8me. Il est g\u00e9n\u00e9ralement utilis\u00e9 pour synchroniser les valeurs du syst\u00e8me et ce qui existe r\u00e9ellement dans vos entrep\u00f4ts.", 
+ "Upload HTML": "T\u00e9l\u00e9chargez HTML"
+}

@@ -1,0 +1,18 @@
+{
+ "Change the starting / current sequence number of an existing series.": "Changer le num\u00e9ro de s\u00e9quence de d\u00e9marrage / courant d&#39;une s\u00e9rie existante.", 
+ "Check this if you want to force the user to select a series before saving. There will be no default if you check this.": "Cochez cette case si vous voulez forcer l&#39;utilisateur \u00e0 s\u00e9lectionner une s\u00e9rie avant de l&#39;enregistrer. Il n&#39;y aura pas d\u00e9faut si vous cochez cette.", 
+ "Current Value": "Valeur actuelle", 
+ "Help HTML": "Aide HTML", 
+ "Naming Series": "Nommer S\u00e9rie", 
+ "Prefix": "Pr\u00e9fixe", 
+ "Select Transaction": "S\u00e9lectionnez Transaction", 
+ "Series List for this Transaction": "Liste s\u00e9rie pour cette transaction", 
+ "Set prefix for numbering series on your transactions": "D\u00e9finir le pr\u00e9fixe de num\u00e9rotation des s\u00e9ries sur vos transactions", 
+ "Setup": "Installation", 
+ "Setup Series": "S\u00e9rie de configuration", 
+ "This is the number of the last created transaction with this prefix": "Il s&#39;agit du num\u00e9ro de la derni\u00e8re transaction cr\u00e9\u00e9e par ce pr\u00e9fixe", 
+ "Update": "Mettre \u00e0 jour", 
+ "Update Series": "Update Series", 
+ "Update Series Number": "Num\u00e9ro de s\u00e9rie mise \u00e0 jour", 
+ "User must always select": "L&#39;utilisateur doit toujours s\u00e9lectionner"
+}

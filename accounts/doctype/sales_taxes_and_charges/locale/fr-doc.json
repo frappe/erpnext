@@ -1,0 +1,23 @@
+{
+ "Account Head": "Chef du compte", 
+ "Accounts": "Comptes", 
+ "Actual": "R\u00e9el", 
+ "Amount": "Montant", 
+ "Cheating FieldPlease do not delete ": "Tricher FieldPlease ne supprimez pas", 
+ "Cost Center": "Centre de co\u00fbts", 
+ "Description": "Description", 
+ "Enter Row": "Entrez Row", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Si elle est coch\u00e9e, le montant de la taxe sera consid\u00e9r\u00e9 comme d\u00e9j\u00e0 inclus dans le tarif Imprimer / Print Montant", 
+ "Is this Tax included in Basic Rate?": "Est-ce Taxes incluses dans le taux de base?", 
+ "Item Wise Tax Detail ": "D\u00e9tail d&#39;item imp\u00f4t Wise", 
+ "On Net Total": "Le total net", 
+ "On Previous Row Amount": "Le montant rang\u00e9e pr\u00e9c\u00e9dente", 
+ "On Previous Row Total": "Le total de la rang\u00e9e pr\u00e9c\u00e9dente", 
+ "Parenttype": "ParentType", 
+ "Rate": "Taux", 
+ "Sales Taxes and Charges": "Taxes de vente et frais", 
+ "Total": "Total", 
+ "Total Amount": "Montant total", 
+ "Total Tax Amount": "Montant Total de la taxe", 
+ "Type": "Type"
+}

@@ -1,0 +1,16 @@
+{
+ "Customer Group": "Groupe de clients", 
+ "Customer Group Name": "Nom du groupe client", 
+ "Default Price List": "Liste des prix d\u00e9faut", 
+ "Has Child Node": "A Node enfant", 
+ "No": "Aucun", 
+ "Only leaf nodes are allowed in transaction": "Seuls les noeuds feuilles sont autoris\u00e9es dans une transaction", 
+ "Parent Customer Group": "Groupe Client parent", 
+ "Setup": "Installation", 
+ "This Price List will be selected as default for all Customers under this Group.": "Cette liste de prix sera s\u00e9lectionn\u00e9 par d\u00e9faut pour tous les clients dans ce groupe.", 
+ "Trash Reason": "Raison Corbeille", 
+ "Yes": "Oui", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}

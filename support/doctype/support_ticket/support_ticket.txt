@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:25", 
+  "modified": "2013-01-24 14:29:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,14 +24,17 @@
  }, 
  {
   "amend": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Support Ticket", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "submit": 0
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -60,7 +63,7 @@
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
   "options": "\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed", 
-  "read_only": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -244,34 +247,17 @@
  }, 
  {
   "cancel": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Guest", 
-  "write": 1
+  "role": "Guest"
  }, 
  {
   "cancel": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Customer", 
-  "write": 1
+  "role": "Customer"
  }, 
  {
   "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Support Team", 
-  "write": 1
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "Support Team", 
-  "write": 0
+  "role": "Support Team"
  }
 ]

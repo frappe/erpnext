@@ -1,0 +1,13 @@
+{
+ "Accounts": "Contas", 
+ "Against Account": "Contra Conta", 
+ "Bank Reconciliation Detail": "Banco Detalhe Reconcilia\u00e7\u00e3o", 
+ "Cheque Date": "Data Cheque", 
+ "Cheque Number": "N\u00famero de cheques", 
+ "Clearance Date": "Data de Liquida\u00e7\u00e3o", 
+ "Credit": "Cr\u00e9dito", 
+ "Debit": "D\u00e9bito", 
+ "Posting Date": "Data da Publica\u00e7\u00e3o", 
+ "The date at which current entry will get or has actually executed.": "A data em que a entrada de corrente vai ter ou tem realmente executado.", 
+ "Voucher ID": "ID comprovante"
+}

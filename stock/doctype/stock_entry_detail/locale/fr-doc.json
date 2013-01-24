@@ -1,0 +1,20 @@
+{
+ "Actual Qty (at source/target)": "Quantit\u00e9 r\u00e9elle (\u00e0 la source / cible)", 
+ "Amount": "Montant", 
+ "BOM No": "Aucune nomenclature", 
+ "BOM No. for a Finished Good Item": "N \u00b0 nomenclature pour un produit fini Bonne", 
+ "Batch No": "Aucun lot", 
+ "Conversion Factor": "Facteur de conversion", 
+ "Description": "Description", 
+ "Item Code": "Code de l&#39;article", 
+ "Qty": "Qt\u00e9", 
+ "Qty as per Stock UOM": "Qt\u00e9 en stock pour Emballage", 
+ "Serial No": "N \u00b0 de s\u00e9rie", 
+ "Source Warehouse": "Source d&#39;entrep\u00f4t", 
+ "Stock": "Stock", 
+ "Stock Entry Detail": "D\u00e9tail d&#39;entr\u00e9e Stock", 
+ "Stock UOM": "Stock UDM", 
+ "Target Warehouse": "Cible d&#39;entrep\u00f4t", 
+ "UOM": "Emballage", 
+ "Valuation Rate": "Taux d&#39;\u00e9valuation"
+}

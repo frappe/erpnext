@@ -1,0 +1,20 @@
+{
+ "ATT": "ATT", 
+ "Absent": "Ausente", 
+ "Amended From": "De modificada", 
+ "Amendment Date": "Enmienda Fecha", 
+ "Attendance": "Asistencia", 
+ "Attendance Date": "Asistencia Fecha", 
+ "Attendance Details": "Datos de asistencia", 
+ "Company": "Empresa", 
+ "Employee": "Empleado", 
+ "Employee Name": "Nombre del empleado", 
+ "Fiscal Year": "A\u00f1o Fiscal", 
+ "HR": "HR", 
+ "Half Day": "Medio D\u00eda", 
+ "Leave Type": "Deja Tipo", 
+ "Naming Series": "Nombrar Series", 
+ "Present": "Presente", 
+ "Status": "Estado", 
+ "The date at which current entry is corrected in the system.": "La fecha en la que la entrada actual se corrige en el sistema."
+}

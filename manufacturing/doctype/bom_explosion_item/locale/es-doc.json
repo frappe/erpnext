@@ -1,0 +1,13 @@
+{
+ "Amount": "Cantidad", 
+ "BOM Explosion Item": "Art\u00edculo BOM Explosion", 
+ "Description": "Descripci\u00f3n", 
+ "Item Code": "C\u00f3digo del art\u00edculo", 
+ "Manufacturing": "Fabricaci\u00f3n", 
+ "Mat Detail No": "Mat Detalle Desierto", 
+ "Parent BOM": "Padres BOM", 
+ "Qty": "Cantidad", 
+ "Qty Consumed Per Unit": "Cantidad consumida por unidad", 
+ "Rate": "Velocidad", 
+ "Stock UOM": "De la UOM"
+}

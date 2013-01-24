@@ -24,13 +24,18 @@ erpnext.desktop.render = function() {
 		module.label = wn._(module.label);
 		module.gradient_css = wn.get_gradient_css(module.color, 45);
 		
-		$('#icon-grid').append(repl('\
-			<div id="module-icon-%(link)s" class="case-wrapper" data-name="%(name)s"><a href="#%(link)s">\
+		$module_icon = $(repl('\
+			<div id="module-icon-%(link)s" class="case-wrapper" \
+				data-name="%(name)s" data-link="%(link)s">\
 				<div class="case-border" style="%(gradient_css)s">\
 					<i class="%(icon)s"></i>\
-				</div></a>\
+				</div>\
 				<div class="case-label">%(label)s</div>\
-			</div>', module));
+			</div>', module)).click(function() {
+				wn.set_route($(this).attr("data-link"));
+			}).css({
+				cursor:"pointer"
+			}).appendTo("#icon-grid");
 	}
 	
 	// modules
@@ -52,7 +57,7 @@ erpnext.desktop.render = function() {
 erpnext.desktop.show_pending_notifications = function() {
 	var add_circle = function(str_module, id, title) {
 		var module = $('#'+str_module);
-		module.find('a:first').append(
+		module.prepend(
 			repl('<div id="%(id)s" class="circle" title="%(title)s" style="display: None">\
 					<span class="circle-text"></span>\
 				 </div>', {id: id, title: wn._(title)}));
