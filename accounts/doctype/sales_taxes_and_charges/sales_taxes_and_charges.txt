@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:09", 
+  "creation": "2013-01-24 11:03:30", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:18", 
+  "modified": "2013-01-24 14:15:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -161,7 +161,7 @@
   "fieldname": "included_in_print_rate", 
   "fieldtype": "Check", 
   "label": "Is this Tax included in Basic Rate?", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "print_hide": 1, 
   "report_hide": 1, 
   "width": "150px"
