@@ -8,27 +8,26 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  if(!doc.status) set_multiple(cdt, cdn, {status:'In Store'});
-  if(doc.__islocal) hide_field(['supplier_name','address_display'])
+	if(!doc.status) set_multiple(cdt, cdn, {status:'In Store'});
+	if(doc.__islocal) hide_field(['supplier_name','address_display'])
 }
 
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  if(!doc.__islocal) {
-    flds = ['item_code', 'warehouse', 'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate', 'supplier']
-    for(i=0;i<flds.length;i++) 
-      cur_frm.set_df_property(flds[i], 'read_only', 1);
-  }
+	flds = ['status', 'item_code', 'warehouse', 'purchase_document_type', 
+	'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate', 
+	'supplier']
+	for(i=0;i<flds.length;i++) {
+		cur_frm.set_df_property(flds[i], 'read_only', doc.__islocal ? 0 : 1);
+	}
 }
-
-
 
 // item details
 // -------------
@@ -47,14 +46,14 @@ cur_frm.add_fetch('customer', 'territory', 'territory')
 // territory
 // ----------
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
+	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
 // Supplier
 //-------------
 cur_frm.cscript.supplier = function(doc,dt,dn) {
-  if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-  if(doc.supplier) unhide_field(['supplier_name','address_display']);
+	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
+	if(doc.supplier) unhide_field(['supplier_name','address_display']);
 }
 
 //item code
