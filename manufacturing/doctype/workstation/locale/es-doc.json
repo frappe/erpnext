@@ -1,0 +1,19 @@
+{
+ "Capacity": "Capacidad", 
+ "Capacity Units": "Unidades de capacidad", 
+ "Description": "Descripci\u00f3n", 
+ "Hour Rate": "Hora Tarifa", 
+ "Hour Rate Consumable": "Consumible Tipo horas", 
+ "Hour Rate Electricity": "Tarifario horas", 
+ "Hour Rate Labour": "Trabajo tarifa por hora", 
+ "Hour Rate Rent": "Alquiler Tarifa horas", 
+ "Manufacturing": "Fabricaci\u00f3n", 
+ "Over Heads": "Sobre las cabezas de", 
+ "Overhead": "Gastos generales", 
+ "Trash Reason": "Trash Raz\u00f3n", 
+ "Units/Hour": "Unidades / hora", 
+ "Units/Shifts": "Unidades / Turnos", 
+ "Warehouse": "Almac\u00e9n", 
+ "Workstation": "Puesto de trabajo", 
+ "Workstation Name": "Nombre de estaci\u00f3n de trabajo"
+}

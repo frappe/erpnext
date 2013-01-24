@@ -1,0 +1,15 @@
+[
+ "Username", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"", 
+ "Password", 
+ "POP3 Mail Settings", 
+ "Use SSL", 
+ "Setup", 
+ "Sales Email Settings", 
+ "Host", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
+ "POP3 server e.g. (pop.gmail.com)", 
+ "Check to activate", 
+ "Extract Emails", 
+ "Email Id"
+]

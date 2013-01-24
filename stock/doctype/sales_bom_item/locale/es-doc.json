@@ -1,0 +1,9 @@
+{
+ "Description": "Descripci\u00f3n", 
+ "Item": "Art\u00edculo", 
+ "Qty": "Cantidad", 
+ "Rate": "Velocidad", 
+ "Sales BOM Item": "Ventas de art\u00edculo de lista de materiales", 
+ "Stock": "Valores", 
+ "UOM": "UOM"
+}

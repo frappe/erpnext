@@ -1,0 +1,23 @@
+{
+ "Accounts": "Cuentas", 
+ "Add rows to set annual budgets on Accounts.": "A\u00f1ada filas para fijar presupuestos anuales de Cuentas.", 
+ "Budget": "Presupuesto", 
+ "Budget Details": "Datos del Presupuesto", 
+ "Company": "Empresa", 
+ "Company Abbr": "Compa\u00f1\u00eda Abbr", 
+ "Cost Center": "De centros de coste", 
+ "Cost Center Details": "Costo Detalles Center", 
+ "Cost Center Name": "Costo Nombre del centro", 
+ "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>": "Definir Presupuesto para este Centro de Costo. Para configurar la acci\u00f3n presupuesto, consulte <a href=\"#!List/Company\">empresa Master</a>", 
+ "Distribution Id": "ID Distribution", 
+ "Group": "Grupo", 
+ "Group or Ledger": "Grupo o Ledger", 
+ "Ledger": "Libro mayor", 
+ "Parent Cost Center": "Padres de centros de coste", 
+ "Select Budget Distribution, if you want to track based on seasonality.": "Seleccione Distribuci\u00f3n del Presupuesto, si desea realizar un seguimiento sobre la base de la estacionalidad.", 
+ "Track separate Income and Expense for product verticals or divisions.": "Seguimiento de Ingresos y Gastos por separado para los productos o divisiones verticales.", 
+ "Trash Reason": "Trash Raz\u00f3n", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}
