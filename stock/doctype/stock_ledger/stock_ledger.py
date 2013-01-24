@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, flt, nowdate
+from webnotes.utils import add_days, cstr, flt, nowdate, cint
 from webnotes.model.doc import Document
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
@@ -149,17 +149,18 @@ class DocType:
 		s = Document('Serial No', serial_no)
 		s.delivery_document_type =	 obj.doc.doctype
 		s.delivery_document_no	 =	 obj.doc.name
-		s.delivery_date					=	 obj.doc.posting_date
-		s.delivery_time					=	 obj.doc.posting_time
-		s.customer						=	 obj.doc.customer
-		s.customer_name					=	 obj.doc.customer_name
-		s.delivery_address			 	=	 obj.doc.address_display
-		s.territory						=	 obj.doc.territory
-		s.warranty_expiry_date	 		=	 s.warranty_period and add_days(cstr(obj.doc.posting_date), s.warranty_period) or ''
-		s.docstatus						=	 1
-		s.status						=	 'Delivered'
-		s.modified						=	 nowdate()
-		s.modified_by					=	 session['user']
+		s.delivery_date			=	 obj.doc.posting_date
+		s.delivery_time			=	 obj.doc.posting_time
+		s.customer				=	 obj.doc.customer
+		s.customer_name			=	 obj.doc.customer_name
+		s.delivery_address	 	=	 obj.doc.address_display
+		s.territory				=	 obj.doc.territory
+		s.warranty_expiry_date	=	 cint(s.warranty_period) and \
+		 	add_days(cstr(obj.doc.posting_date), cint(s.warranty_period)) or s.warranty_expiry_date
+		s.docstatus				=	 1
+		s.status				=	 'Delivered'
+		s.modified				=	 nowdate()
+		s.modified_by			=	 session['user']
 		s.save()
 
 
