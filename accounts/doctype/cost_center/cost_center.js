@@ -47,12 +47,6 @@ cur_frm.cscript.parent_cost_center = function(doc,cdt,cdn){
 	}
 }
 
-//company abbr
-cur_frm.cscript.company_name = function(doc,cdt,cdn){
-	get_server_fields('get_abbr','','',doc,cdt,cdn,1);
-}
-
-
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {

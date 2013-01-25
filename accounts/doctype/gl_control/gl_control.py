@@ -47,37 +47,23 @@ class DocType:
 		return flt(bal)
 
 	def add_ac(self,arg):
-		arg = eval(arg)
-		ac = Document('Account')
-		for d in arg.keys():
-			ac.fields[d] = arg[d]
-		ac.old_parent = ''
-		ac_obj = get_obj(doc=ac)
-		ac_obj.doc.freeze_account='No'
-		ac_obj.validate()
-		ac_obj.doc.save(1)
-		ac_obj.on_update()
+		ac = webnotes.model_wrapper(eval(arg))
+		ac.doc.doctype = "Account"
+		ac.doc.old_parent = ""
+		ac.doc.freeze_account = "No"
+		ac.insert()
 
-		return ac_obj.doc.name
+		return ac.doc.name
 
 	# Add a new cost center
 	#----------------------
 	def add_cc(self,arg):
-		arg = eval(arg)
-		cc = Document('Cost Center')
-		# map fields
-		for d in arg.keys():
-			cc.fields[d] = arg[d]
-		# map company abbr
-		other_info = webnotes.conn.sql("select company_abbr from `tabCost Center` where name='%s'"%arg['parent_cost_center'])
-		cc.company_abbr = other_info and other_info[0][0] or arg['company_abbr']
+		cc = webnotes.model_wrapper(eval(arg))
+		cc.doc.doctype = "Cost Center"
+		cc.doc.old_parent = ""
+		cc.insert()
 
-		cc_obj = get_obj(doc=cc)
-		cc_obj.validate()
-		cc_obj.doc.save(1)
-		cc_obj.on_update()
-
-		return cc_obj.doc.name
+		return cc.doc.name
 
 
 	# Get field values from the voucher
