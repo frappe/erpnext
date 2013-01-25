@@ -1,0 +1,22 @@
+{
+ "Classification of Customers by region": "Indeling van klanten per regio", 
+ "For reference": "Ter referentie", 
+ "Has Child Node": "Heeft het kind Node", 
+ "No": "Geen", 
+ "Only leaf nodes are allowed in transaction": "Alleen leaf nodes zijn toegestaan \u200b\u200bin transactie", 
+ "Parent Territory": "Parent Territory", 
+ "Select Budget Distribution to unevenly distribute targets across months.": "Selecteer Budget Uitkering aan ongelijk verdelen doelen uit maanden.", 
+ "Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.": "Set Item Group-wise budgetten op dit gebied. U kunt ook seizoensinvloeden door de Distribution.", 
+ "Setup": "Setup", 
+ "Target Details": "Target Details", 
+ "Target Distribution": "Target Distributie", 
+ "Territory": "Grondgebied", 
+ "Territory Manager": "Territory Manager", 
+ "Territory Name": "Grondgebied Naam", 
+ "Territory Targets": "Grondgebied Doelen", 
+ "Trash Reason": "Trash Reden", 
+ "Yes": "Ja", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "RGT"
+}

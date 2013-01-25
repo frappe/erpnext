@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Werkelijke hoeveelheid", 
+ "Bin": "Bak", 
+ "FCFS Rate": "FCFS Rate", 
+ "Item Code": "Artikelcode", 
+ "Moving Average Rate": "Moving Average Rate", 
+ "Ordered Quantity": "Bestelde hoeveelheid", 
+ "Planned Qty": "Geplande Aantal", 
+ "Projected Qty": "Verwachte Aantal", 
+ "Quantity Requested for Purchase": "Aantal op aankoop", 
+ "Reserved Quantity": "Gereserveerde Aantal", 
+ "Stock": "Voorraad", 
+ "Stock Value": "Stock Waarde", 
+ "UOM": "Verpakking", 
+ "Valuation Rate": "Waardering Prijs", 
+ "Warehouse": "Magazijn", 
+ "Warehouse Type": "Warehouse Type"
+}

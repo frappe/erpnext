@@ -1,0 +1,11 @@
+{
+ "Item Code": "Artikelcode", 
+ "Item Name": "Naam van het punt", 
+ "Net Weight": "Netto Gewicht", 
+ "Packing Slip Item": "Pakbon Item", 
+ "Page Break": "Pagina-einde", 
+ "Quantity": "Hoeveelheid", 
+ "Stock": "Voorraad", 
+ "UOM": "Verpakking", 
+ "Weight UOM": "Gewicht Verpakking"
+}

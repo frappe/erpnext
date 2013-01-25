@@ -1,0 +1,19 @@
+{
+ "Capacity": "Hoedanigheid", 
+ "Capacity Units": "Capaciteit Units", 
+ "Description": "Beschrijving", 
+ "Hour Rate": "Uurtarief", 
+ "Hour Rate Consumable": "Uurtarief verbruiksartikelen", 
+ "Hour Rate Electricity": "Uur Prijs Elektriciteit", 
+ "Hour Rate Labour": "Uurtarief Arbeid", 
+ "Hour Rate Rent": "Uur Prijs Huur", 
+ "Manufacturing": "Productie", 
+ "Over Heads": "Meer dan Heads", 
+ "Overhead": "Boven het hoofd", 
+ "Trash Reason": "Trash Reden", 
+ "Units/Hour": "Eenheden / uur", 
+ "Units/Shifts": "Eenheden / Verschuivingen", 
+ "Warehouse": "Magazijn", 
+ "Workstation": "Workstation", 
+ "Workstation Name": "Naam van werkstation"
+}

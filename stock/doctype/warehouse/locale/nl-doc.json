@@ -1,0 +1,23 @@
+{
+ "A logical Warehouse against which stock entries are made.": "Een logische Warehouse waartegen de voorraad worden gemaakt.", 
+ "Address Line 1": "Adres Lijn 1", 
+ "Address Line 2": "Adres Lijn 2", 
+ "City": "City", 
+ "Company": "Vennootschap", 
+ "Email Id": "E-mail Identiteitskaart", 
+ "For Reference Only.": "Alleen ter referentie.", 
+ "Merge": "Samensmelten", 
+ "Merge Warehouses": "Samenvoegen Magazijnen", 
+ "Merge With": "Fuseren met", 
+ "Mobile No": "Mobiel Nog geen", 
+ "PIN": "PIN", 
+ "Phone No": "Telefoon nr.", 
+ "State": "Staat", 
+ "Stock": "Voorraad", 
+ "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.": "Deze functie is voor het samenvoegen van dubbele magazijnen. Deze vervangt alle schakels van dit magazijn door &quot;Samenvoegen met&quot; magazijn. Na het samenvoegen kunt u wissen dit magazijn, de voorraad niveau voor dit magazijn zal nul zijn.", 
+ "Warehouse": "Magazijn", 
+ "Warehouse Contact Info": "Warehouse Contact Info", 
+ "Warehouse Detail": "Magazijn Detail", 
+ "Warehouse Name": "Warehouse Naam", 
+ "Warehouse Type": "Warehouse Type"
+}

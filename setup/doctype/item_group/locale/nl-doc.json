@@ -1,0 +1,23 @@
+{
+ "Check this if you want to show in website": "Selecteer dit als u wilt weergeven in de website", 
+ "Description": "Beschrijving", 
+ "File List": "File List", 
+ "HTML / Banner that will show on the top of product list.": "HTML / Banner dat zal laten zien op de bovenkant van het product lijst.", 
+ "Has Child Node": "Heeft het kind Node", 
+ "Item Classification": "Item Classificatie", 
+ "Item Group": "Item Group", 
+ "Item Group Name": "Item Groepsnaam", 
+ "No": "Geen", 
+ "Only leaf nodes are allowed in transaction": "Alleen leaf nodes zijn toegestaan \u200b\u200bin transactie", 
+ "Page Name": "Page Name", 
+ "Parent Item Group": "Parent Item Group", 
+ "Setup": "Setup", 
+ "Show in Website": "Toon in Website", 
+ "Show this slideshow at the top of the page": "Laat deze slideshow aan de bovenkant van de pagina", 
+ "Slideshow": "Diashow", 
+ "Website Settings": "Website-instellingen", 
+ "Yes": "Ja", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "RGT"
+}

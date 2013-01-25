@@ -1,0 +1,18 @@
+{
+ "Change the starting / current sequence number of an existing series.": "Wijzig de start-/ huidige volgnummer van een bestaande serie.", 
+ "Check this if you want to force the user to select a series before saving. There will be no default if you check this.": "Controleer dit als u wilt dwingen de gebruiker om een \u200b\u200breeks voor het opslaan te selecteren. Er zal geen standaard zijn als je dit controleren.", 
+ "Current Value": "Huidige waarde", 
+ "Help HTML": "Help HTML", 
+ "Naming Series": "Benoemen Series", 
+ "Prefix": "Voorvoegsel", 
+ "Select Transaction": "Selecteer Transactie", 
+ "Series List for this Transaction": "Series Lijst voor deze transactie", 
+ "Set prefix for numbering series on your transactions": "Stel prefix voor het nummeren van serie over uw transacties", 
+ "Setup": "Setup", 
+ "Setup Series": "Setup-serie", 
+ "This is the number of the last created transaction with this prefix": "Dit is het nummer van de laatst gemaakte transactie met dit voorvoegsel", 
+ "Update": "Bijwerken", 
+ "Update Series": "Update Series", 
+ "Update Series Number": "Update Serie Nummer", 
+ "User must always select": "Gebruiker moet altijd kiezen"
+}

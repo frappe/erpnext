@@ -1,0 +1,10 @@
+{
+ " is less than equals to zero in the system, \\\t\t\t\t\t\tvaluation rate is mandatory for this item": "minder dan gelijk aan nul in het systeem \\ waardering prijs is verplicht voor dit artikel", 
+ "' can not be managed using Stock Reconciliation.\\\t\t\t\t\tYou can add/delete Serial No directly, \\\t\t\t\t\tto modify stock of this item.": "&#39;Kan niet worden beheerd met behulp van Stock Verzoening. \\ U kunt toevoegen / verwijderen Serienummer direct, \\ om de balans op van dit artikel te wijzigen.", 
+ "As existing qty for item: ": "Aangezien de bestaande aantal voor artikel:", 
+ "Hey! You seem to be using the wrong template. \\\t\t\t\tClick on 'Download Template' button to get the correct template.": "Hey! Je lijkt met de verkeerde sjabloon. \\ Klik op de knop &#39;Download Template&#39; om de juiste template te krijgen.", 
+ "Row # ": "Rij #", 
+ "Serialized Item: '": "Geserialiseerde Item: &#39;", 
+ "Sorry! We can only allow upto 100 rows for Stock Reconciliation.": "Sorry! We kunnen alleen maar staan \u200b\u200btot 100 rijen voor Stock Verzoening.", 
+ "Stock Reconciliation file not uploaded": "Stock Verzoening bestand niet geupload"
+}

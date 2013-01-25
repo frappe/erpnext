@@ -1,0 +1,11 @@
+{
+ "BOM No": "BOM Geen", 
+ "Description": "Beschrijving", 
+ "Item Code": "Artikelcode", 
+ "Manufacturing": "Productie", 
+ "Planned Qty": "Geplande Aantal", 
+ "Production Plan Item": "Productie Plan Item", 
+ "SO Pending Qty": "SO afwachting Aantal", 
+ "Sales Order": "Verkooporder", 
+ "UOM": "Verpakking"
+}

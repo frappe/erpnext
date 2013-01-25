@@ -1,0 +1,11 @@
+{
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials": "De totale groep van ** Items ** in een andere ** Item **. Dit is handig als u de bundeling van een bepaalde ** Items ** in een pakket en u onderhoudt voorraad van de verpakte ** Items ** en niet de totale ** Item **. Het pakket ** Item ** zal hebben &quot;Is Stock Item&quot; als &quot;No&quot; en &quot;Is Sales Item&quot; als &quot;Ja&quot; Bijvoorbeeld:. Als je verkoopt laptops en Rugzakken apart en hebben een speciale prijs als de klant koopt zowel , dan is de laptop + Rugzak zal een nieuwe Sales BOM Item.Note: BOM = Bill of Materials", 
+ "List items that form the package.": "Lijst items die het pakket vormen.", 
+ "Package Items": "Pakket Artikelen", 
+ "Parent Item": "Parent Item", 
+ "Sales BOM": "Verkoop BOM", 
+ "Sales BOM Item": "Verkoop BOM Item", 
+ "Sales BOM Items": "Verkoop BOM Items", 
+ "Stock": "Voorraad", 
+ "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"": "Het item dat het pakket vertegenwoordigt. Dit artikel moet hebben &quot;Is Stock Item&quot; als &quot;No&quot; en &quot;Is Sales Item&quot; als &quot;Yes&quot;"
+}

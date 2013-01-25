@@ -1,0 +1,13 @@
+{
+ "Accounts": "Accounts", 
+ "Bank Account": "Bankrekening", 
+ "Bank Reconciliation": "Bank Verzoening", 
+ "Company": "Vennootschap", 
+ "Entries": "Inzendingen", 
+ "From Date": "Van Datum", 
+ "Get Non Reconciled Entries": "Get Niet Reconciled reacties", 
+ "Select account head of the bank where cheque was deposited.": "Selecteer met het hoofd van de bank waar cheque werd afgezet.", 
+ "To Date": "To-date houden", 
+ "Total Amount": "Totaal bedrag", 
+ "Update Clearance Date": "Werk Clearance Datum"
+}
