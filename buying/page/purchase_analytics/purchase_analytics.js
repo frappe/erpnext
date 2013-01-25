@@ -35,8 +35,10 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company",
-				"Purchase Invoice", "Purchase Invoice Item", "Fiscal Year"],
+			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company", "Fiscal Year", 
+				"Purchase Invoice", "Purchase Invoice Item", 
+				"Purchase Order", "Purchase Order Item[Purchase Analytics]", 
+				"Purchase Receipt", "Purchase Receipt Item[Purchase Analytics]"],
 			tree_grid: { show: true }
 		});
 		
@@ -102,6 +104,8 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
+		{fieldtype:"Select", label: "Based On", options:["Purchase Invoice", 
+			"Purchase Order", "Purchase Receipt"]},
 		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"]},
 		{fieldtype:"Select", label: "Company", link:"Company", 
 			default_value: "Select Company..."},
@@ -124,7 +128,11 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 		this.filter_inputs.tree_type.change(function() {
 			me.filter_inputs.refresh.click();
 		});
-
+		
+		this.filter_inputs.based_on.change(function() {
+			me.filter_inputs.refresh.click();
+		});
+		
 		this.show_zero_check()		
 		this.setup_plot_check();
 	},
@@ -135,8 +143,6 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 	prepare_data: function() {
 		var me = this;
 		if (!this.tl) {
-			this.make_transaction_list("Purchase Invoice", "Purchase Invoice Item");
-
 			// add 'Not Set' Supplier & Item
 			// Add 'All Supplier Types' Supplier Type
 			// (Supplier / Item are not mandatory!!)
@@ -163,6 +169,11 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 				id: "Not Set",
 			});
 		}
+		
+		if (!this.tl || !this.tl[this.based_on]) {
+			this.make_transaction_list(this.based_on, this.based_on + " Item");
+		}
+		
 		
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Supplier') {
@@ -214,11 +225,12 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 		var to_date = dateutil.str_to_obj(this.to_date);
 		var is_val = this.value_or_qty == 'Value';
 		
-		$.each(this.tl, function(i, tl) {
+		$.each(this.tl[this.based_on], function(i, tl) {
 			if (me.is_default('company') ? true : me.apply_filter(tl, "company")) { 
 				var posting_date = dateutil.str_to_obj(tl.posting_date);
 				if (posting_date >= from_date && posting_date <= to_date) {
-					var item = me.item_by_name[tl[me.tree_grid.item_key]] || me.item_by_name['Not Set'];
+					var item = me.item_by_name[tl[me.tree_grid.item_key]] || 
+						me.item_by_name['Not Set'];
 					item[me.column_map[tl.posting_date].field] += (is_val ? tl.amount : tl.qty);
 				}
 			}

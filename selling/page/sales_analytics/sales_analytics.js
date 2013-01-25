@@ -34,8 +34,10 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company",
-				"Sales Invoice", "Sales Invoice Item", "Territory"],
+			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company", "Territory", 
+				"Fiscal Year", "Sales Invoice", "Sales Invoice Item", 
+				"Sales Order", "Sales Order Item[Sales Analytics]", 
+				"Delivery Note", "Delivery Note Item[Sales Analytics]"],
 			tree_grid: { show: true }
 		});
 		
@@ -45,13 +47,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_customer_group", 
-				formatter: function(item) {
-					// return repl('<a href="#Report2/stock-invoices/customer=%(enc_value)s">%(value)s</a>', {
-					// 		value: item.name,
-					// 		enc_value: encodeURIComponent(item.name)
-					// 	});
-					return item.name;
-				}
+				formatter: function(item) { return item.name; }
 			},
 			"Customer": {
 				label: "Customer",
@@ -110,6 +106,8 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
+		{fieldtype:"Select", label: "Based On", options:["Sales Invoice", 
+			"Sales Order", "Delivery Note"]},
 		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"]},
 		{fieldtype:"Select", label: "Company", link:"Company", 
 			default_value: "Select Company..."},
@@ -132,6 +130,10 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.filter_inputs.tree_type.change(function() {
 			me.filter_inputs.refresh.click();
 		});
+		
+		this.filter_inputs.based_on.change(function() {
+			me.filter_inputs.refresh.click();
+		});
 
 		this.show_zero_check()		
 		this.setup_plot_check();
@@ -143,8 +145,6 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 	prepare_data: function() {
 		var me = this;
 		if (!this.tl) {
-			this.make_transaction_list("Sales Invoice", "Sales Invoice Item");
-
 			// add 'Not Set' Customer & Item
 			// (Customer / Item are not mandatory!!)
 			wn.report_dump.data["Customer"].push({
@@ -159,6 +159,10 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				parent_item_group: "All Item Groups",
 				id: "Not Set",
 			});
+		}
+
+		if (!this.tl || !this.tl[this.based_on]) {
+			this.make_transaction_list(this.based_on, this.based_on + " Item");
 		}
 		
 		if(!this.data || me.item_type != me.tree_type) {
@@ -214,11 +218,12 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		var to_date = dateutil.str_to_obj(this.to_date);
 		var is_val = this.value_or_qty == 'Value';
 		
-		$.each(this.tl, function(i, tl) {
+		$.each(this.tl[this.based_on], function(i, tl) {
 			if (me.is_default('company') ? true : me.apply_filter(tl, "company")) { 
 				var posting_date = dateutil.str_to_obj(tl.posting_date);
 				if (posting_date >= from_date && posting_date <= to_date) {
-					var item = me.item_by_name[tl[me.tree_grid.item_key]] || me.item_by_name['Not Set'];
+					var item = me.item_by_name[tl[me.tree_grid.item_key]] || 
+						me.item_by_name['Not Set'];
 					item[me.column_map[tl.posting_date].field] += (is_val ? tl.amount : tl.qty);
 				}
 			}
