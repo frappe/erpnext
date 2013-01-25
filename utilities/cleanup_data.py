@@ -134,8 +134,6 @@ def reset_global_defaults():
 	flds = {
 		'default_company': '', 
 		'default_currency': '', 
-		'default_currency_format': 'Lacs', 
-		'default_currency_fraction': '', 
 		'current_fiscal_year': '', 
 		'date_format': 'dd-mm-yyyy', 
 		'sms_sender_name': '', 
