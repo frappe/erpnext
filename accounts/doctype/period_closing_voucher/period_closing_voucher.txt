@@ -1,223 +1,160 @@
 [
  {
-  "owner": "jai@webnotestech.com", 
+  "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "creation": "2012-06-11 12:09:52", 
+  "modified": "2013-01-22 14:47:50", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-10 14:21:21"
+  "owner": "jai@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "is_submittable": 1, 
-  "search_fields": "posting_date, fiscal_year", 
-  "module": "Accounts", 
-  "server_code_error": " ", 
   "autoname": "PCE/.###", 
-  "_last_update": "1311621379", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "is_submittable": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "posting_date, fiscal_year"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Period Closing Voucher", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Period Closing Voucher", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Period Closing Voucher", 
-  "doctype": "DocType"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Accounts Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Accounts Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Accounts Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Accounts Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "permlevel": 0
  }, 
  {
   "amend": 1, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Period Closing Voucher", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
   "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 1, 
+  "write": 1
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Accounts Manager", 
-  "report": 1, 
-  "permlevel": 0
+  "doctype": "DocType", 
+  "name": "Period Closing Voucher"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Transaction Date", 
-  "oldfieldname": "transaction_date", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Posting Date", 
-  "oldfieldname": "posting_date", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Closing Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Closing Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Select", 
+  "options": "link:Company", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break"
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Closing Account Head", 
-  "oldfieldname": "closing_account_head", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "closing_account_head", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
+  "label": "Closing Account Head", 
+  "oldfieldname": "closing_account_head", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "HTML", 
   "doctype": "DocField", 
-  "label": "CoA Help", 
-  "options": "<a href=\"#!Accounts Browser/Account\">To manage Account Head, click here</a>", 
   "fieldname": "coa_help", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "label": "CoA Help", 
+  "oldfieldtype": "HTML", 
+  "options": "<a href=\"#!Accounts Browser/Account\">To manage Account Head, click here</a>"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "oldfieldname": "remarks", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Remarks", 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Cancel Reason", 
-  "oldfieldname": "cancel_reason", 
   "fieldname": "cancel_reason", 
   "fieldtype": "Small Text", 
-  "oldfieldtype": "Small Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Cancel Reason", 
+  "oldfieldname": "cancel_reason", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
  }
 ]

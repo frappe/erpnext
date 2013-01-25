@@ -1,89 +1,55 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:54", 
+  "modified": "2013-01-22 14:56:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 15:59:52"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
   "description": "Set prefix for numbering series on your transactions", 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "read_only": 1, 
-  "hide_heading": 0, 
-  "issingle": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1, 
-  "hide_toolbar": 1
+  "hide_heading": 0, 
+  "hide_toolbar": 1, 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Naming Series", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Naming Series", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Naming Series", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
   "permlevel": 0
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "role": "System Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "System Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "role": "Guest", 
+  "name": "__common__", 
+  "parent": "Naming Series", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Naming Series"
  }, 
  {
   "description": "Set prefix for numbering series on your transactions", 
   "doctype": "DocField", 
-  "label": "Setup Series", 
   "fieldname": "setup_series", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Setup Series"
  }, 
  {
   "doctype": "DocField", 
@@ -93,9 +59,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Help HTML", 
   "fieldname": "help_html", 
   "fieldtype": "HTML", 
+  "label": "Help HTML", 
   "options": "<div class=\"help-box\">\nEdit list of Series in the box below. Each Series Prefix on a new line.<br><br>\nAllowed special characters are \"/\" and \"-\"<br>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\n</div>"
  }, 
  {
@@ -106,26 +72,23 @@
  }, 
  {
   "description": "Check this if you want to force the user to select a series before saving. There will be no default if you check this.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "User must always select", 
   "fieldname": "user_must_always_select", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "User must always select"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Update", 
   "fieldname": "update", 
-  "fieldtype": "Button"
+  "fieldtype": "Button", 
+  "label": "Update"
  }, 
  {
   "description": "Change the starting / current sequence number of an existing series.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Update Series", 
   "fieldname": "update_series", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Update Series"
  }, 
  {
   "doctype": "DocField", 
@@ -135,18 +98,19 @@
  }, 
  {
   "description": "This is the number of the last created transaction with this prefix", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Current Value", 
   "fieldname": "current_value", 
-  "fieldtype": "Int"
+  "fieldtype": "Int", 
+  "label": "Current Value"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Update Series Number", 
   "fieldname": "update_series_start", 
   "fieldtype": "Button", 
+  "label": "Update Series Number", 
   "options": "update_series_start"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

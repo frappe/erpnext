@@ -61,7 +61,7 @@ $.extend(wn.modules, {
 	"HR": {
 		link: "hr-home",
 		color: "#018d6c",
-		label: "Human Resources",
+		label: wn._("Human Resources"),
 		icon: "icon-group"
 	},
 	"Setup": {
@@ -72,26 +72,31 @@ $.extend(wn.modules, {
 	"Activity": {
 		link: "activity",
 		color: "#633501",
-		icon: "icon-play"
+		icon: "icon-play",
+		label: wn._("Activity"),
 	},
 	"To Do": {
 		link: "todo",
 		color: "#febf04",
+		label: wn._("To Do"),
 		icon: "icon-check"
 	},
 	"Calendar": {
 		link: "calendar",
 		color: "#026584",
+		label: wn._("Calendar"),
 		icon: "icon-calendar"
 	},
 	"Messages": {
 		link: "messages",
 		color: "#8d016e",
+		label: wn._("Messages"),
 		icon: "icon-comments"
 	},
 	"Knowledge Base": {
 		link: "questions",
 		color: "#01372b",
+		label: wn._("Knowledge Base"),
 		icon: "icon-question-sign"
 	},
 	

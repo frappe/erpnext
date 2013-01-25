@@ -161,7 +161,7 @@ wn.module_page["Selling"] = [
 			},
 			{
 				"label":wn._("Sales Orders Pending to be Delivered"),
-				route: "query-report/Sales Orders Pending to be Delivered"
+				route: "query-report/Sales Orders Pending To Be Delivered"
 			},
 		]
 	}

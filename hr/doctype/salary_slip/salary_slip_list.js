@@ -33,13 +33,8 @@ wn.doclistviews['Salary Slip'] = wn.views.ListView.extend({
 		{
 			width: '16%',
 			content: function(parent, data) {
-				$(parent).html(
-					(
-						data.company
-						? wn.boot.company[data.company].default_currency
-						: sys_defaults.currency
-					)
-					+ ' ' + fmt_money(data.rounded_total));
+				$(parent).html(format_currency(data.rounded_total,
+					erpnext.get_currency(data.company)));
 			},
 			css: {'text-align': 'right'},
 		},

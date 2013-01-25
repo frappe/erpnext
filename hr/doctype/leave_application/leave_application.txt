@@ -1,240 +1,239 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-12-19 12:46:47", 
+  "modified": "2013-01-22 14:47:02", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-01 15:13:51"
+  "owner": "Administrator"
  }, 
  {
+  "autoname": "LAP/.#####", 
+  "description": "Apply / Approve Leaves", 
+  "doctype": "DocType", 
   "document_type": "Transaction", 
   "is_submittable": 1, 
-  "description": "Apply / Approve Leaves", 
-  "autoname": "LAP/.#####", 
   "module": "HR", 
-  "doctype": "DocType", 
-  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
-  "name": "__common__"
+  "name": "__common__", 
+  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Leave Application", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Leave Application", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType"
+ }, 
+ {
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Leave Application", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "write": 1
  }, 
  {
-  "name": "Leave Application", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Leave Application"
  }, 
  {
-  "permlevel": 2, 
   "default": "Open", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "no_copy": 1, 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "options": "Open\nApproved\nRejected"
+  "label": "Status", 
+  "no_copy": 1, 
+  "options": "Open\nApproved\nRejected", 
+  "permlevel": 2
  }, 
  {
   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
   "doctype": "DocField", 
-  "label": "Leave Approver", 
-  "permlevel": 0, 
   "fieldname": "leave_approver", 
   "fieldtype": "Select", 
-  "options": "link:Profile"
+  "label": "Leave Approver", 
+  "options": "link:Profile", 
+  "permlevel": 0
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Leave Type", 
-  "permlevel": 0, 
   "fieldname": "leave_type", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Leave Type", 
   "options": "link:Leave Type", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "From Date", 
   "fieldname": "from_date", 
   "fieldtype": "Date", 
+  "label": "From Date", 
+  "permlevel": 0, 
   "reqd": 1, 
-  "permlevel": 0
+  "search_index": 1
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "To Date", 
   "fieldname": "to_date", 
   "fieldtype": "Date", 
+  "label": "To Date", 
+  "permlevel": 0, 
   "reqd": 1, 
-  "permlevel": 0
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Half Day", 
   "fieldname": "half_day", 
   "fieldtype": "Check", 
+  "label": "Half Day", 
   "permlevel": 0
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Reason", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "label": "Reason", 
   "permlevel": 0
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Employee", 
-  "permlevel": 0, 
   "fieldname": "employee", 
   "fieldtype": "Link", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Employee", 
   "options": "Employee", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "read_only": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Employee Name", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Employee Name", 
   "permlevel": 0, 
-  "in_filter": 1
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "read_only": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Leave Balance Before Application", 
   "fieldname": "leave_balance", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
- }, 
- {
-  "read_only": 1, 
+  "fieldtype": "Float", 
+  "label": "Leave Balance Before Application", 
   "no_copy": 1, 
-  "doctype": "DocField", 
-  "label": "Total Leave Days", 
-  "fieldname": "total_leave_days", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "More Info", 
+  "fieldname": "total_leave_days", 
+  "fieldtype": "Float", 
+  "label": "Total Leave Days", 
+  "no_copy": 1, 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "sb10", 
   "fieldtype": "Section Break", 
+  "label": "More Info", 
   "permlevel": 0
  }, 
  {
   "default": "Today", 
   "doctype": "DocField", 
-  "label": "Posting Date", 
-  "no_copy": 1, 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "reqd": 1, 
-  "permlevel": 2
+  "label": "Posting Date", 
+  "no_copy": 1, 
+  "permlevel": 2, 
+  "reqd": 1
  }, 
  {
-  "read_only": 0, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "permlevel": 2, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "permlevel": 2, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "read_only": 0, 
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Letter Head", 
-  "permlevel": 2, 
   "fieldname": "letter_head", 
   "fieldtype": "Link", 
-  "options": "Letter Head"
+  "label": "Letter Head", 
+  "options": "Letter Head", 
+  "permlevel": 2, 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "Sales Invoice"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Employee", 
-  "report": 1, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Sales Invoice", 
   "permlevel": 0, 
-  "match": "employee"
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "match": "employee", 
+  "permlevel": 0, 
+  "role": "Employee"
  }, 
  {
   "amend": 1, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "HR User", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 1
  }, 
  {
   "amend": 1, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "cancel": 1, 
+  "match": "leave_approver:user", 
+  "permlevel": 0, 
   "role": "Leave Approver", 
-  "report": 1, 
-  "permlevel": 0, 
-  "match": "leave_approver:user"
+  "submit": 1
  }, 
  {
-  "role": "HR User", 
+  "doctype": "DocPerm", 
   "permlevel": 2, 
-  "doctype": "DocPerm"
+  "role": "HR User"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
+  "permlevel": 2, 
   "role": "Leave Approver", 
-  "cancel": 0, 
-  "permlevel": 2
+  "submit": 0
  }
 ]

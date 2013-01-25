@@ -134,6 +134,7 @@ data_map = {
 			"warehouse": ["Warehouse", "name"]
 		},
 	},
+	
 	"Sales Order Item": {
 		"columns": ["item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
 			"reserved_warehouse as warehouse"],
@@ -185,6 +186,42 @@ data_map = {
 			"item_code": ["Item", "name"]
 		}
 	},
+	"Sales Order": {
+		"columns": ["name", "customer", "transaction_date as posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "transaction_date",
+		"links": {
+			"customer": ["Customer", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Sales Order Item[Sales Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Sales Order", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
+	"Delivery Note": {
+		"columns": ["name", "customer", "posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"customer": ["Customer", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Delivery Note Item[Sales Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Delivery Note", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
 	"Supplier": {
 		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name", 
 			"supplier_type as parent_supplier_type"],
@@ -217,7 +254,42 @@ data_map = {
 			"item_code": ["Item", "name"]
 		}
 	},
-	
+	"Purchase Order": {
+		"columns": ["name", "supplier", "transaction_date as posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"supplier": ["Supplier", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Purchase Order Item[Purchase Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Purchase Order", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
+	"Purchase Receipt": {
+		"columns": ["name", "supplier", "posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"supplier": ["Supplier", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Purchase Receipt Item[Purchase Analytics]": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Purchase Receipt", "name"],
+			"item_code": ["Item", "name"]
+		}
+	},
 	# Support
 	"Support Ticket": {
 		"columns": ["name","status","creation","resolution_date","first_responded_on"],

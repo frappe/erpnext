@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-01-21 16:32:30", 
+  "modified": "2013-01-24 13:55:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,14 +27,18 @@
   "permlevel": 0
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Global Defaults", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 0, 
-  "submit": 0
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -90,6 +94,14 @@
   "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n######"
  }, 
  {
+  "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
+  "doctype": "DocField", 
+  "fieldname": "float_precision", 
+  "fieldtype": "Select", 
+  "label": "Float Precision", 
+  "options": "\n2\n3\n4\n5\n6"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
@@ -99,9 +111,9 @@
   "default": "INR", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Default Currency", 
-  "options": "link:Currency", 
+  "options": "Currency", 
   "reqd": 1
  }, 
  {
@@ -188,7 +200,7 @@
   "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>", 
   "doctype": "DocField", 
   "fieldname": "tolerance", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Allowance Percent"
  }, 
  {
@@ -401,27 +413,6 @@
   "label": "SMS Sender Name"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All"
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "System Manager", 
-  "write": 1
+  "doctype": "DocPerm"
  }
 ]

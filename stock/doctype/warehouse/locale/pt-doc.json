@@ -1,0 +1,23 @@
+{
+ "A logical Warehouse against which stock entries are made.": "Um armaz\u00e9m l\u00f3gico contra o qual as entradas de a\u00e7\u00f5es s\u00e3o feitas.", 
+ "Address Line 1": "Endere\u00e7o Linha 1", 
+ "Address Line 2": "Endere\u00e7o Linha 2", 
+ "City": "Cidade", 
+ "Company": "Companhia", 
+ "Email Id": "Id e-mail", 
+ "For Reference Only.": "Apenas para refer\u00eancia.", 
+ "Merge": "Fundir", 
+ "Merge Warehouses": "Mesclar Armaz\u00e9ns", 
+ "Merge With": "Intercalar com", 
+ "Mobile No": "No m\u00f3vel", 
+ "PIN": "PIN", 
+ "Phone No": "N \u00ba de telefone", 
+ "State": "Estado", 
+ "Stock": "Estoque", 
+ "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.": "Este recurso \u00e9 para a fus\u00e3o armaz\u00e9ns duplicados. Ele ir\u00e1 substituir todos os links deste armaz\u00e9m por &quot;Intercalar com&quot; armaz\u00e9m. Ap\u00f3s a fus\u00e3o voc\u00ea pode excluir este armaz\u00e9m, como n\u00edvel de estoque para este armaz\u00e9m vai ser zero.", 
+ "Warehouse": "Armaz\u00e9m", 
+ "Warehouse Contact Info": "Armaz\u00e9m Informa\u00e7\u00f5es de Contato", 
+ "Warehouse Detail": "Detalhe Armaz\u00e9m", 
+ "Warehouse Name": "Nome Armaz\u00e9m", 
+ "Warehouse Type": "Tipo de armaz\u00e9m"
+}

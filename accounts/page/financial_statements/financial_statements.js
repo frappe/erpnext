@@ -83,9 +83,11 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
   $i('stmt_tree').innerHTML = 'Refreshing....';
   $i('stmt_tree').style.display = 'block';
   
+  var company = sel_val($i('stmt_company'))
+
   var arg = {
   	statement:sel_val($i('stmt_type'))
-  	,company:sel_val($i('stmt_company'))
+  	,company:company,
   	,period:sel_val($i('stmt_period'))
   	,year:sel_val($i('stmt_fiscal_year'))
   }
@@ -136,9 +138,12 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
           }
           if(nl[i][0] != 0){
             if(nl[i][j]) {
-              if (i==0) per.innerHTML = (nl[i][j]+'').bold();
-              else if(nl[i][0] == 1 || nl[i][0] == 4) per.innerHTML = (cstr(fmt_money(nl[i][j]))+'').bold();
-              else per.innerHTML = fmt_money(nl[i][j])
+              if (i==0) 
+				per.innerHTML = (nl[i][j]+'').bold();
+              else if(nl[i][0] == 1 || nl[i][0] == 4) 
+				per.innerHTML = format_currency(nl[i][j], erpnext.get_currency(company)).bold();
+              else 
+				per.innerHTML = format_currency(nl[i][j], erpnext.get_currency(company))
             } else
               per.innerHTML = '-';
           }

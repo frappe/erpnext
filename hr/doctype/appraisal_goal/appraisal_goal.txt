@@ -1,81 +1,72 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
+  "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:40", 
+  "modified": "2013-01-22 14:16:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-15 17:50:24"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "HR", 
-  "server_code_error": " ", 
-  "version": 1, 
+  "autoname": "APRSLD.#####", 
   "doctype": "DocType", 
-  "autoname": "APRSLD.#####"
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Appraisal Goal", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Appraisal Goal", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Appraisal Goal"
  }, 
  {
   "description": "Key Responsibility Area", 
-  "oldfieldtype": "Small Text", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Goal", 
-  "oldfieldname": "kra", 
-  "width": "240px", 
   "fieldname": "kra", 
   "fieldtype": "Small Text", 
+  "label": "Goal", 
+  "oldfieldname": "kra", 
+  "oldfieldtype": "Small Text", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "240px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "per_weightage", 
+  "fieldtype": "Float", 
   "label": "Weightage (%)", 
   "oldfieldname": "per_weightage", 
-  "width": "70px", 
-  "fieldname": "per_weightage", 
-  "fieldtype": "Currency", 
+  "oldfieldtype": "Currency", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "70px"
  }, 
  {
-  "permlevel": 0, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Score (0-5)", 
-  "oldfieldname": "score", 
-  "width": "70px", 
-  "trigger": "Client", 
   "fieldname": "score", 
-  "fieldtype": "Currency", 
-  "options": "\n0\n1\n2\n3\n4\n5"
+  "fieldtype": "Float", 
+  "label": "Score (0-5)", 
+  "no_copy": 1, 
+  "oldfieldname": "score", 
+  "oldfieldtype": "Select", 
+  "options": "\n0\n1\n2\n3\n4\n5", 
+  "width": "70px"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Score Earned", 
-  "oldfieldname": "score_earned", 
-  "width": "70px", 
   "fieldname": "score_earned", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "fieldtype": "Float", 
+  "label": "Score Earned", 
+  "no_copy": 1, 
+  "oldfieldname": "score_earned", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1, 
+  "width": "70px"
  }
 ]

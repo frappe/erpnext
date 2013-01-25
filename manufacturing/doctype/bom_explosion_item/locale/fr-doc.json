@@ -1,0 +1,13 @@
+{
+ "Amount": "Montant", 
+ "BOM Explosion Item": "Article \u00e9clatement de la nomenclature", 
+ "Description": "Description", 
+ "Item Code": "Code de l&#39;article", 
+ "Manufacturing": "Fabrication", 
+ "Mat Detail No": "D\u00e9tail Mat Non", 
+ "Parent BOM": "BOM Parent", 
+ "Qty": "Qt\u00e9", 
+ "Qty Consumed Per Unit": "Quantit\u00e9 consomm\u00e9e par unit\u00e9", 
+ "Rate": "Taux", 
+ "Stock UOM": "Stock UDM"
+}

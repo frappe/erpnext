@@ -1,75 +1,69 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:22", 
+  "modified": "2013-01-22 14:47:58", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:22"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Setup", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "field:order_lost_reason", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "show_in_menu": 0, 
-  "version": 4
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Quotation Lost Reason", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Quotation Lost Reason", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
+  "name": "__common__", 
+  "parent": "Quotation Lost Reason", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Quotation Lost Reason", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Quotation Lost Reason"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "order_lost_reason", 
+  "fieldtype": "Data", 
+  "label": "Quotation Lost Reason", 
+  "oldfieldname": "order_lost_reason", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
   "amend": 0, 
-  "role": "Sales Master Manager", 
   "doctype": "DocPerm", 
-  "submit": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "permlevel": 1
- }, 
- {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Quotation Lost Reason", 
-  "oldfieldname": "order_lost_reason", 
-  "fieldname": "order_lost_reason", 
-  "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "role": "Sales Master Manager"
  }
 ]

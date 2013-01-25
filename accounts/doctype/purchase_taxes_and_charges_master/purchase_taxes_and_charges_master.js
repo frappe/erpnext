@@ -31,8 +31,8 @@ cur_frm.pformat.purchase_tax_details= function(doc){
   var make_row = function(title,val,bold){
     var bstart = '<b>'; var bend = '</b>';
     return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-     +'<td style="width:25%;text-align:right;">'+doc.currency+'</td>'
-     +'<td style="width:25%;text-align:right;">'+val+'</td>'
+     +'<td style="width:25%;text-align:right;"></td>'
+     +'<td style="width:25%;text-align:right;">'+format_currency(val, doc.currency)+'</td>'
      +'</tr>'
   }
 
@@ -44,20 +44,22 @@ cur_frm.pformat.purchase_tax_details= function(doc){
   var cl = getchildren('Purchase Taxes and Charges',doc.name,'purchase_tax_details');
 
   // outer table  
-  var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
+  var out='<div><table class="noborder" style="width:100%">\
+		<tr><td style="width: 60%"></td><td>';
   
   // main table
-  out +='<table class="noborder" style="width:100%">'+make_row('Net Total',fmt_money(convert_rate(doc.net_total)),1);
+  out +='<table class="noborder" style="width:100%">'
+		+make_row('Net Total',convert_rate(doc.net_total),1);
 
   // add rows
   if(cl.length){
     for(var i=0;i<cl.length;i++){
-      out += make_row(cl[i].description,fmt_money(convert_rate(cl[i].tax_amount)),0);
+      out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
     }
   }
   
   // grand total
-  out +=make_row('Grand Total',fmt_money(doc.grand_total_import),1)
+  out +=make_row('Grand Total',doc.grand_total_import,1)
   if(doc.in_words_import){
     out +='</table></td></tr>';
     out += '<tr><td colspan = "2">';

@@ -1,0 +1,16 @@
+{
+ "Check to activate": "V\u00e9rifiez pour activer", 
+ "Email Id": "Identification d&#39;email", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "Identification d&#39;email o\u00f9 un demandeur d&#39;emploi enverra par courriel par exemple &quot;jobs@example.com&quot;", 
+ "Email settings for jobs email id \"jobs@example.com\"": "Param\u00e8tres par email pour Emploi email id &quot;jobs@example.com&quot;", 
+ "Extract Emails": "Extrait Emails", 
+ "Host": "H\u00f4te", 
+ "Jobs Email Settings": "Param\u00e8tres de messagerie Emploi", 
+ "POP3 Mail Settings": "Param\u00e8tres de messagerie POP3", 
+ "POP3 server e.g. (pop.gmail.com)": "Serveur POP3 par exemple (pop.gmail.com)", 
+ "Password": "Mot de passe", 
+ "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"": "Param\u00e8tres pour extraire demandeurs d&#39;emploi \u00e0 partir d&#39;une bo\u00eete aux lettres par exemple &quot;jobs@example.com&quot;", 
+ "Setup": "Installation", 
+ "Use SSL": "Utiliser SSL", 
+ "Username": "Nom d&#39;utilisateur"
+}

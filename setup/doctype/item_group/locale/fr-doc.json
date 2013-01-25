@@ -1,0 +1,23 @@
+{
+ "Check this if you want to show in website": "Cochez cette case si vous souhaitez afficher sur le site", 
+ "Description": "Description", 
+ "File List": "Liste des fichiers", 
+ "HTML / Banner that will show on the top of product list.": "HTML / banni\u00e8re qui appara\u00eetra sur le haut de la liste des produits.", 
+ "Has Child Node": "A Node enfant", 
+ "Item Classification": "Classification d&#39;article", 
+ "Item Group": "Groupe d&#39;\u00e9l\u00e9ments", 
+ "Item Group Name": "Nom du groupe d&#39;article", 
+ "No": "Aucun", 
+ "Only leaf nodes are allowed in transaction": "Seuls les noeuds feuilles sont autoris\u00e9es dans une transaction", 
+ "Page Name": "Nom de la page", 
+ "Parent Item Group": "Groupe d&#39;\u00e9l\u00e9ments Parent", 
+ "Setup": "Installation", 
+ "Show in Website": "Afficher dans Site Web", 
+ "Show this slideshow at the top of the page": "Voir ce diaporama en haut de la page", 
+ "Slideshow": "Diaporama", 
+ "Website Settings": "R\u00e9glages Site web", 
+ "Yes": "Oui", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}

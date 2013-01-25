@@ -1,136 +1,125 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
+  "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:43", 
+  "modified": "2013-01-22 14:47:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:43"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Support", 
-  "server_code_error": " ", 
-  "version": 13, 
+  "autoname": "MVD.#####", 
   "doctype": "DocType", 
-  "autoname": "MVD.#####"
+  "istable": 1, 
+  "module": "Support", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Maintenance Visit Purpose", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Maintenance Visit Purpose", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Maintenance Visit Purpose"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Service Person", 
-  "oldfieldname": "service_person", 
-  "permlevel": 0, 
   "fieldname": "service_person", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Sales Person"
+  "label": "Service Person", 
+  "oldfieldname": "service_person", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Work Done", 
-  "oldfieldname": "work_done", 
   "fieldname": "work_done", 
   "fieldtype": "Small Text", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Work Done", 
+  "oldfieldname": "work_done", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Serial No", 
-  "oldfieldname": "serial_no", 
   "fieldname": "serial_no", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Serial No", 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Against Document No", 
-  "oldfieldname": "prevdoc_docname", 
-  "width": "160px", 
   "fieldname": "prevdoc_docname", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 1, 
-  "report_hide": 1
+  "label": "Against Document No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "160px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Against Document Detail No", 
-  "oldfieldname": "prevdoc_detail_docname", 
-  "width": "160px", 
   "fieldname": "prevdoc_detail_docname", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1, 
-  "report_hide": 1
+  "label": "Against Document Detail No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "160px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Document Type", 
-  "oldfieldname": "prevdoc_doctype", 
-  "width": "150px", 
   "fieldname": "prevdoc_doctype", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 1, 
-  "report_hide": 1
+  "label": "Document Type", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "150px"
  }
 ]

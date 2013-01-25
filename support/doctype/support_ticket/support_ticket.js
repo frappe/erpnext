@@ -33,14 +33,13 @@ $.extend(cur_frm.cscript, {
 		      if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);	
 			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);		
 			}else if(doc.allocated_to) {
-			  set_field_permlevel('status',2);
+			  cur_frm.set_df_property('status','read_only', 1);
 			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
 			}
 			
-			// can't change the main message & subject once set  
-			set_field_permlevel('subject',2);
-			set_field_permlevel('description',2);
-			set_field_permlevel('raised_by',2);
+			cur_frm.set_df_property('subject','read_only', 1);
+			cur_frm.set_df_property('description','hidden', 1);
+			cur_frm.set_df_property('raised_by','read_only', 1);
 		}
 		refresh_field('status');
 	},

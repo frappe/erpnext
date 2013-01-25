@@ -1,0 +1,23 @@
+{
+ "A logical Warehouse against which stock entries are made.": "Un Entrep\u00f4t logique contre laquelle les entr\u00e9es en stocks sont faits.", 
+ "Address Line 1": "Adresse ligne 1", 
+ "Address Line 2": "Adresse ligne 2", 
+ "City": "Ville", 
+ "Company": "Entreprise", 
+ "Email Id": "Identification d&#39;email", 
+ "For Reference Only.": "Pour r\u00e9f\u00e9rence seulement.", 
+ "Merge": "Fusionner", 
+ "Merge Warehouses": "Fusionner Entrep\u00f4ts", 
+ "Merge With": "Fusionner avec", 
+ "Mobile No": "Aucun mobile", 
+ "PIN": "PIN", 
+ "Phone No": "N \u00b0 de t\u00e9l\u00e9phone", 
+ "State": "\u00c9tat", 
+ "Stock": "Stock", 
+ "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.": "Cette fonction est pour la fusion des entrep\u00f4ts en double. Elle remplacera tous les liens de cet entrep\u00f4t par \u00abFusionner avec&quot; entrep\u00f4t. Apr\u00e8s la fusion, vous pouvez supprimer cet entrep\u00f4t, que le niveau de stock pour cet entrep\u00f4t sera \u00e9gal \u00e0 z\u00e9ro.", 
+ "Warehouse": "Entrep\u00f4t", 
+ "Warehouse Contact Info": "Entrep\u00f4t Info Contact", 
+ "Warehouse Detail": "D\u00e9tail d&#39;entrep\u00f4t", 
+ "Warehouse Name": "Nom d&#39;entrep\u00f4t", 
+ "Warehouse Type": "Type d&#39;entrep\u00f4t"
+}

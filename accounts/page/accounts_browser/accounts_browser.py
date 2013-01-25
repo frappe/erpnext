@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import get_defaults, fmt_money
+from webnotes.utils import get_defaults
 from accounts.utils import get_balance_on
 
 @webnotes.whitelist()

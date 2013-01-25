@@ -1,440 +1,369 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
+  "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "creation": "2012-06-11 12:10:15", 
+  "modified": "2013-01-22 14:56:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-06-27 12:50:00"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "is_submittable": 1, 
-  "tag_fields": "completion_status,maintenance_type", 
-  "search_fields": "status,maintenance_type,customer,customer_name, address,mntc_date,company,fiscal_year", 
-  "module": "Support", 
-  "server_code_error": " ", 
   "autoname": "MV.#####", 
-  "subject": "To %(customer_name)s on %(mntc_date)s", 
-  "_last_update": "1322549701", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "is_submittable": 1, 
+  "module": "Support", 
+  "name": "__common__", 
+  "search_fields": "status,maintenance_type,customer,customer_name, address,mntc_date,company,fiscal_year"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Maintenance Visit", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Maintenance Visit", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Maintenance Visit", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Maintenance Visit", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
   "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Maintenance Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
-  "role": "Maintenance Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Maintenance Visit"
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Maintenance User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Maintenance User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Customer Details", 
-  "options": "Simple", 
   "fieldname": "customer_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Customer Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Customer", 
-  "oldfieldname": "customer", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
   "options": "Customer", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Customer Name", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Customer Name", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Address", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Address", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Contact", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Mobile No", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Mobile No", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact Email", 
   "fieldname": "contact_email", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Contact Email", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "default": "Today", 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Maintenance Date", 
-  "oldfieldname": "mntc_date", 
-  "no_copy": 1, 
   "fieldname": "mntc_date", 
   "fieldtype": "Date", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Maintenance Date", 
+  "no_copy": 1, 
+  "oldfieldname": "mntc_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Maintenance Time", 
-  "oldfieldname": "mntc_time", 
   "fieldname": "mntc_time", 
   "fieldtype": "Time", 
-  "permlevel": 0
+  "label": "Maintenance Time", 
+  "no_copy": 1, 
+  "oldfieldname": "mntc_time", 
+  "oldfieldtype": "Time"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Maintenance Details", 
-  "options": "Simple", 
   "fieldname": "maintenance_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Maintenance Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Completion Status", 
-  "oldfieldname": "completion_status", 
-  "options": "\nPartially Completed\nFully Completed", 
   "fieldname": "completion_status", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Completion Status", 
+  "oldfieldname": "completion_status", 
+  "oldfieldtype": "Select", 
+  "options": "\nPartially Completed\nFully Completed", 
+  "reqd": 1
  }, 
  {
   "default": "Unscheduled", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Maintenance Type", 
-  "oldfieldname": "maintenance_type", 
-  "permlevel": 0, 
   "fieldname": "maintenance_type", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Maintenance Type", 
+  "oldfieldname": "maintenance_type", 
+  "oldfieldtype": "Select", 
   "options": "\nScheduled\nUnscheduled\nBreakdown", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Sales Order No", 
-  "oldfieldname": "sales_order_no", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Sales Order No", 
+  "oldfieldname": "sales_order_no", 
   "oldfieldtype": "Link", 
   "options": "Sales Order", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Customer Issue No", 
-  "oldfieldname": "customer_issue_no", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer_issue_no", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer Issue No", 
+  "oldfieldname": "customer_issue_no", 
   "oldfieldtype": "Link", 
   "options": "Customer Issue", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
-  "permlevel": 0, 
   "fieldname": "maintenance_schedule", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
   "label": "Maintenance Schedule", 
-  "options": "Maintenance Schedule", 
-  "in_filter": 1
+  "options": "Maintenance Schedule"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Button", 
   "doctype": "DocField", 
-  "label": "Get Items", 
-  "options": "fetch_items", 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
-  "permlevel": 0, 
+  "label": "Get Items", 
+  "oldfieldtype": "Button", 
+  "options": "fetch_items", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Maintenance Visit Purpose", 
-  "oldfieldname": "maintenance_visit_details", 
-  "options": "Maintenance Visit Purpose", 
   "fieldname": "maintenance_visit_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Maintenance Visit Purpose", 
+  "oldfieldname": "maintenance_visit_details", 
+  "oldfieldtype": "Table", 
+  "options": "Maintenance Visit Purpose"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Customer Feedback", 
-  "oldfieldname": "customer_feedback", 
   "fieldname": "customer_feedback", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Customer Feedback", 
+  "oldfieldname": "customer_feedback", 
+  "oldfieldtype": "Small Text"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break3", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "permlevel": 1, 
   "default": "Draft", 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "no_copy": 1, 
   "fieldname": "status", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "options": "\nDraft\nCancelled\nSubmitted"
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Data", 
+  "options": "\nDraft\nCancelled\nSubmitted", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
-  "width": "150px", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
-  "width": "100px", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "width": "100px"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Select", 
   "options": "link:Company", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact Info", 
   "fieldname": "contact_info_section", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Contact Info"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Customer Address", 
-  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "options": "Address"
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Contact Person", 
-  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "options": "Contact"
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break4", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Territory", 
-  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "options": "Territory"
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Customer Group", 
-  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "options": "Customer Group"
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Maintenance Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Maintenance User"
  }
 ]

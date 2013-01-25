@@ -1,131 +1,105 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:50", 
+  "modified": "2013-01-22 14:55:58", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-11 14:37:30"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
-  "module": "Accounts", 
-  "allow_trash": 1, 
   "autoname": "field:distribution_id", 
-  "show_in_menu": 0, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
-  "name_case": "Title Case", 
-  "version": 1
+  "module": "Accounts", 
+  "name": "__common__", 
+  "name_case": "Title Case"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Budget Distribution", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Budget Distribution", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Budget Distribution", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "System Manager", 
-  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 2, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Budget Distribution", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
   "report": 1, 
-  "role": "Accounts Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "role": "Accounts Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "role": "Accounts Manager", 
-  "permlevel": 2, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Budget Distribution"
  }, 
  {
   "description": "Name of the Budget Distribution", 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Distribution Name", 
-  "oldfieldname": "distribution_id", 
   "fieldname": "distribution_id", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Distribution Name", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "options": "link:Fiscal Year", 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Budget Distribution Details", 
-  "oldfieldname": "budget_distribution_details", 
-  "options": "Budget Distribution Detail", 
   "fieldname": "budget_distribution_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Budget Distribution Details", 
+  "oldfieldname": "budget_distribution_details", 
+  "oldfieldtype": "Table", 
+  "options": "Budget Distribution Detail"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "System Manager"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Accounts Manager"
  }
 ]

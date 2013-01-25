@@ -277,24 +277,21 @@ class DocType(TransactionBase):
 	def on_update(self):
 		webnotes.conn.set(self.doc, 'status', 'Draft')
 	
-	#validate that new maintenance start date does not clash with existing mntc end date
-	#-------------------------------------------------------------------------------------------------
 	def validate_serial_no_warranty(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if d.serial_no:
-				dt = sql("select warranty_expiry_date, amc_expiry_date from `tabSerial No` where name = %s", d.serial_no, as_dict=1)
-				
-				if dt[0]['warranty_expiry_date']:
-					if dt[0]['warranty_expiry_date'] >= getdate(d.start_date):
-						msgprint("Serial no "+d.serial_no+" for item "+d.item_code+" is already under warranty till "+(dt[0]['warranty_expiry_date']).strftime('%Y-%m-%d')+". You can schedule AMC start date after "+(dt[0]['warranty_expiry_date']).strftime('%Y-%m-%d'))
-						raise Exception
-				if dt[0]['amc_expiry_date']:
-					if dt[0]['amc_expiry_date'] >= getdate(d.start_date):
-						msgprint("Serial no "+d.serial_no+" for item "+d.item_code+" is already under AMC till "+(dt[0]['amc_expiry_date']).strftime('%Y-%m-%d')+". You can schedule new AMC start date after "+(dt[0]['amc_expiry_date']).strftime('%Y-%m-%d'))
-						raise Exception
-	
-	#validate if schedule generated for all items
-	#-------------------------------------------------
+			if d.serial_no.strip():
+				dt = sql("""select warranty_expiry_date, amc_expiry_date 
+					from `tabSerial No` where name = %s""", d.serial_no, as_dict=1)
+				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
+					webnotes.msgprint("""Serial No: %s is already under warranty upto %s. 
+						Please check AMC Start Date.""" % 
+						(d.serial_no, dt[0]["warranty_expiry_date"]), raise_exception=1)
+						
+				if dt[0]['amc_expiry_date'] and dt[0]['amc_expiry_date'] >= d.start_date:
+					webnotes.msgprint("""Serial No: %s is already under AMC upto %s.
+						Please check AMC Start Date.""" % 
+						(d.serial_no, sr[0]["amc_expiry_date"]), raise_exception=1)
+
 	def validate_schedule(self):
 		item_lst1 =[]
 		item_lst2 =[]

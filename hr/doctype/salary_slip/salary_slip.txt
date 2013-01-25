@@ -1,448 +1,407 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:29:40", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "owner": "Administrator"
  }, 
  {
+  "doctype": "DocType", 
   "is_submittable": 1, 
-  "name": "__common__", 
   "module": "HR", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Salary Slip", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Salary Slip", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Salary Slip", 
-  "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Column Break", 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Salary Slip", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Slip"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Employee", 
-  "oldfieldname": "employee", 
-  "options": "Employee", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Employee Name", 
-  "oldfieldname": "employee_name", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Department", 
-  "oldfieldname": "department", 
-  "permlevel": 1, 
   "fieldname": "department", 
   "fieldtype": "Link", 
-  "search_index": 0, 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Department", 
+  "oldfieldname": "department", 
+  "oldfieldtype": "Link", 
   "options": "Department", 
-  "in_filter": 1
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Designation", 
-  "oldfieldname": "designation", 
-  "permlevel": 1, 
   "fieldname": "designation", 
   "fieldtype": "Link", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "oldfieldtype": "Link", 
   "options": "Designation", 
-  "in_filter": 1
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Branch", 
-  "oldfieldname": "branch", 
-  "permlevel": 1, 
   "fieldname": "branch", 
   "fieldtype": "Link", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Branch", 
+  "oldfieldname": "branch", 
+  "oldfieldtype": "Link", 
   "options": "Branch", 
-  "in_filter": 1
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Grade", 
-  "oldfieldname": "grade", 
-  "permlevel": 1, 
   "fieldname": "grade", 
   "fieldtype": "Link", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Grade", 
+  "oldfieldname": "grade", 
+  "oldfieldtype": "Link", 
   "options": "Grade", 
-  "in_filter": 1
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "PF No.", 
-  "oldfieldname": "pf_no", 
   "fieldname": "pf_no", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "PF No.", 
+  "oldfieldname": "pf_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "ESIC No.", 
-  "oldfieldname": "esic_no", 
   "fieldname": "esic_no", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "ESIC No.", 
+  "oldfieldname": "esic_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "options": "Letter Head", 
   "fieldname": "letter_head", 
   "fieldtype": "Link", 
   "label": "Letter Head", 
-  "permlevel": 0
+  "options": "Letter Head"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Link", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Data", 
+  "options": "Fiscal Year", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company", 
-  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
   "options": "link:Company", 
-  "in_filter": 1
+  "reqd": 1
  }, 
  {
-  "permlevel": 0, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Month", 
-  "oldfieldname": "month", 
-  "width": "37%", 
-  "trigger": "Client", 
   "fieldname": "month", 
   "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Month", 
+  "oldfieldname": "month", 
+  "oldfieldtype": "Select", 
   "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "37%"
  }, 
  {
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "Total days in month", 
-  "oldfieldname": "total_days_in_month", 
   "fieldname": "total_days_in_month", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Total days in month", 
+  "oldfieldname": "total_days_in_month", 
+  "oldfieldtype": "Int", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
+  "fieldname": "leave_without_pay", 
+  "fieldtype": "Float", 
   "label": "Leave Without Pay", 
   "oldfieldname": "leave_without_pay", 
-  "trigger": "Client", 
-  "fieldname": "leave_without_pay", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Float", 
   "doctype": "DocField", 
-  "label": "Payment days", 
-  "oldfieldname": "payment_days", 
   "fieldname": "payment_days", 
   "fieldtype": "Float", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Payment days", 
+  "oldfieldname": "payment_days", 
+  "oldfieldtype": "Float", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Bank Name", 
-  "oldfieldname": "bank_name", 
   "fieldname": "bank_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Bank Name", 
+  "oldfieldname": "bank_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Bank Account No.", 
-  "oldfieldname": "bank_account_no", 
   "fieldname": "bank_account_no", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Bank Account No.", 
+  "oldfieldname": "bank_account_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Check", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Email", 
-  "oldfieldname": "email_check", 
   "fieldname": "email_check", 
   "fieldtype": "Check", 
-  "permlevel": 0, 
+  "label": "Email", 
+  "no_copy": 1, 
+  "oldfieldname": "email_check", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 0, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
   "report_hide": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
   "hidden": 0, 
-  "permlevel": 0, 
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
   "report_hide": 0
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Earning & Deduction", 
   "fieldname": "earning_deduction", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Earning & Deduction", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Column Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Earning", 
-  "width": "50%", 
   "fieldname": "earning", 
   "fieldtype": "Column Break", 
+  "label": "Earning", 
+  "oldfieldtype": "Column Break", 
   "reqd": 0, 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Salary Structure Earnings", 
-  "oldfieldname": "earning_details", 
-  "permlevel": 0, 
   "fieldname": "earning_details", 
   "fieldtype": "Table", 
+  "label": "Salary Structure Earnings", 
+  "oldfieldname": "earning_details", 
+  "oldfieldtype": "Table", 
   "options": "Salary Slip Earning"
  }, 
  {
-  "oldfieldtype": "Column Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Deduction", 
-  "width": "50%", 
   "fieldname": "deduction", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "label": "Deduction", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Deductions", 
-  "oldfieldname": "deduction_details", 
-  "permlevel": 0, 
   "fieldname": "deduction_details", 
   "fieldtype": "Table", 
+  "label": "Deductions", 
+  "oldfieldname": "deduction_details", 
+  "oldfieldtype": "Table", 
   "options": "Salary Slip Deduction"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Totals", 
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Totals", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Arrear Amount", 
-  "oldfieldname": "arrear_amount", 
   "fieldname": "arrear_amount", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Arrear Amount", 
+  "oldfieldname": "arrear_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Leave Encashment Amount", 
-  "oldfieldname": "encashment_amount", 
   "fieldname": "leave_encashment_amount", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Leave Encashment Amount", 
+  "oldfieldname": "encashment_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Gross Pay", 
-  "oldfieldname": "gross_pay", 
   "fieldname": "gross_pay", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Gross Pay", 
+  "oldfieldname": "gross_pay", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Total Deduction", 
-  "oldfieldname": "total_deduction", 
   "fieldname": "total_deduction", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Total Deduction", 
+  "oldfieldname": "total_deduction", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "description": "Gross Pay + Arrear Amount +Encashment Amount - Total Deduction", 
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Net Pay", 
-  "oldfieldname": "net_pay", 
   "fieldname": "net_pay", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Net Pay", 
+  "oldfieldname": "net_pay", 
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Rounded Total", 
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Rounded Total", 
+  "options": "eval:erpnext.get_currency()", 
+  "read_only": 1
  }, 
  {
   "description": "Net Pay (in words) will be visible once you save the Salary Slip.", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Total in words", 
-  "oldfieldname": "net_pay_in_words", 
   "fieldname": "total_in_words", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Total in words", 
+  "oldfieldname": "net_pay_in_words", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "amend": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "HR User", 
-  "report": 1, 
-  "permlevel": 0
+  "role": "HR User"
  }, 
  {
   "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "HR Manager", 
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "HR User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

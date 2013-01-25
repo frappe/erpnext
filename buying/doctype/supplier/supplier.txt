@@ -1,249 +1,213 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "creation": "2012-12-07 15:15:23", 
+  "modified": "2013-01-22 16:55:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 14:02:18"
+  "owner": "Administrator"
  }, 
  {
-  "document_type": "Master", 
-  "description": "Supplier of Goods or Services.", 
-  "autoname": "naming_series:", 
   "allow_rename": 1, 
-  "module": "Buying", 
+  "autoname": "naming_series:", 
+  "description": "Supplier of Goods or Services.", 
   "doctype": "DocType", 
-  "search_fields": "supplier_name,supplier_type", 
-  "name": "__common__"
+  "document_type": "Master", 
+  "module": "Buying", 
+  "name": "__common__", 
+  "search_fields": "supplier_name,supplier_type"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Supplier", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Supplier", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Supplier", 
-  "doctype": "DocType"
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Supplier", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Supplier"
  }, 
  {
   "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Basic Info", 
   "fieldname": "basic_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Basic Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Supplier Name", 
-  "oldfieldname": "supplier_name", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Supplier Name", 
+  "no_copy": 1, 
+  "oldfieldname": "supplier_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Supplier Type", 
-  "oldfieldname": "supplier_type", 
-  "permlevel": 0, 
   "fieldname": "supplier_type", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Supplier Type"
+  "label": "Supplier Type", 
+  "oldfieldname": "supplier_type", 
+  "oldfieldtype": "Link", 
+  "options": "Supplier Type", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Series", 
-  "oldfieldname": "naming_series", 
-  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
   "options": "\nSUPP\nSUPP/10-11/"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "label": "Address & Contacts", 
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Address & Contacts", 
+  "oldfieldtype": "Column Break"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Address Desc", 
-  "permlevel": 0, 
   "fieldname": "address_desc", 
   "fieldtype": "HTML", 
+  "label": "Address Desc", 
   "options": "<em>Addresses will appear only when you save the supplier</em>"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Address HTML", 
   "fieldname": "address_html", 
   "fieldtype": "HTML", 
-  "permlevel": 1
+  "label": "Address HTML", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Contact Desc", 
-  "permlevel": 0, 
   "fieldname": "contact_desc", 
   "fieldtype": "HTML", 
+  "label": "Contact Desc", 
   "options": "<em>Contact Details will appear only when you save the supplier</em>"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact HTML", 
   "fieldname": "contact_html", 
   "fieldtype": "HTML", 
-  "permlevel": 1
+  "label": "Contact HTML", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "communication_history", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Communication HTML", 
   "fieldname": "communication_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "label": "Communication HTML"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "description": "Enter the company name under which Account Head will be created for this Supplier", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "options": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
   "description": "This currency will get fetched in Purchase transactions of this supplier", 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Default Currency", 
-  "permlevel": 0, 
   "fieldname": "default_currency", 
-  "fieldtype": "Select", 
-  "options": "link:Currency"
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "no_copy": 1, 
+  "options": "Currency"
  }, 
  {
   "description": "Statutory info and other general information about your Supplier", 
-  "oldfieldtype": "Code", 
   "doctype": "DocField", 
-  "label": "Supplier Details", 
-  "oldfieldname": "supplier_details", 
   "fieldname": "supplier_details", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Supplier Details", 
+  "oldfieldname": "supplier_details", 
+  "oldfieldtype": "Code"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Credit Days", 
   "fieldname": "credit_days", 
   "fieldtype": "Int", 
-  "permlevel": 0
+  "label": "Credit Days"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Website", 
-  "oldfieldname": "website", 
   "fieldname": "website", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Website", 
+  "oldfieldname": "website", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Purchase Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Purchase Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "role": "Purchase Master Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
   "role": "Purchase Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }
 ]

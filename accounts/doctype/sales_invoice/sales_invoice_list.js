@@ -32,7 +32,7 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 		{
 			width: '18%', 
 			content: function(parent, data) { 
-				$(parent).html(data.currency + ' ' + fmt_money(data.grand_total_export)) 
+				$(parent).html(format_currency(data.grand_total_export, data.currency)) 
 			},
 			css: {'text-align':'right'}
 		},

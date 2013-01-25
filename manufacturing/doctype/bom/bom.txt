@@ -1,311 +1,268 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "creation": "2012-12-19 12:29:06", 
+  "modified": "2013-01-23 17:00:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-19 15:52:47"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 0, 
-  "in_create": 0, 
-  "allow_print": 0, 
-  "search_fields": "item", 
-  "module": "Manufacturing", 
-  "doctype": "DocType", 
-  "issingle": 0, 
-  "document_type": "Master", 
   "allow_attach": 0, 
-  "read_only": 0, 
+  "allow_copy": 0, 
   "allow_email": 0, 
-  "hide_heading": 0, 
-  "name": "__common__", 
+  "allow_print": 0, 
   "allow_rename": 0, 
-  "is_submittable": 1, 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "hide_heading": 0, 
   "hide_toolbar": 0, 
-  "allow_copy": 0
+  "in_create": 0, 
+  "is_submittable": 1, 
+  "issingle": 0, 
+  "istable": 0, 
+  "module": "Manufacturing", 
+  "name": "__common__", 
+  "read_only": 0, 
+  "search_fields": "item"
  }, 
  {
-  "name": "__common__", 
-  "parent": "BOM", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "BOM", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "BOM", 
-  "doctype": "DocType"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "BOM", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "BOM"
  }, 
  {
   "description": "Item to be manufactured or repacked", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item", 
-  "oldfieldname": "item", 
-  "options": "Item", 
   "fieldname": "item", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Item", 
+  "oldfieldname": "item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "label": "Is Active", 
-  "oldfieldname": "is_active", 
   "default": "1", 
+  "doctype": "DocField", 
   "fieldname": "is_active", 
   "fieldtype": "Check", 
-  "reqd": 0, 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Is Active", 
+  "no_copy": 1, 
+  "oldfieldname": "is_active", 
+  "oldfieldtype": "Select", 
+  "reqd": 0
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Check", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Is Default", 
-  "oldfieldname": "is_default", 
   "fieldname": "is_default", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Is Default", 
+  "no_copy": 1, 
+  "oldfieldname": "is_default", 
+  "oldfieldtype": "Check"
  }, 
  {
   "description": "Manage cost of operations", 
   "doctype": "DocField", 
-  "label": "With Operations", 
   "fieldname": "with_operations", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "With Operations"
  }, 
  {
-  "oldfieldtype": "Section Break", 
+  "depends_on": "with_operations", 
   "doctype": "DocField", 
-  "label": "Operations", 
-  "permlevel": 0, 
   "fieldname": "operations", 
   "fieldtype": "Section Break", 
-  "depends_on": "with_operations", 
+  "label": "Operations", 
+  "oldfieldtype": "Section Break", 
   "options": "Specify the operations, operating cost and give a unique Operation no to your operations."
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "BOM Operations", 
-  "oldfieldname": "bom_operations", 
-  "permlevel": 0, 
   "fieldname": "bom_operations", 
   "fieldtype": "Table", 
+  "label": "BOM Operations", 
+  "oldfieldname": "bom_operations", 
+  "oldfieldtype": "Table", 
   "options": "BOM Operation"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Materials", 
   "fieldname": "materials", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Materials", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "BOM Item", 
-  "oldfieldname": "bom_materials", 
-  "permlevel": 0, 
   "fieldname": "bom_materials", 
   "fieldtype": "Table", 
+  "label": "BOM Item", 
+  "oldfieldname": "bom_materials", 
+  "oldfieldtype": "Table", 
   "options": "BOM Item"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Costing", 
   "fieldname": "costing", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Costing", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Valuation Rate\nLast Purchase Rate", 
   "fieldname": "rm_cost_as_per", 
   "fieldtype": "Select", 
   "label": "Rate Of Materials Based On", 
-  "permlevel": 0
+  "options": "Valuation Rate\nLast Purchase Rate"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Cost", 
   "fieldname": "total_cost", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "fieldtype": "Float", 
+  "label": "Total Cost", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb1", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Raw Material Cost", 
   "fieldname": "raw_material_cost", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "fieldtype": "Float", 
+  "label": "Total Raw Material Cost", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Operating Cost", 
   "fieldname": "operating_cost", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "fieldtype": "Float", 
+  "label": "Total Operating Cost", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info_section", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info"
  }, 
  {
-  "description": "Quantity of item obtained after manufacturing / repacking from given quantities of raw materials", 
   "default": "1", 
-  "oldfieldtype": "Currency", 
+  "description": "Quantity of item obtained after manufacturing / repacking from given quantities of raw materials", 
   "doctype": "DocField", 
+  "fieldname": "quantity", 
+  "fieldtype": "Float", 
   "label": "Quantity", 
   "oldfieldname": "quantity", 
-  "fieldname": "quantity", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "options": "link:UOM", 
   "fieldname": "uom", 
   "fieldtype": "Select", 
   "label": "Item UOM", 
-  "permlevel": 1
+  "options": "link:UOM", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break23", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Project Name", 
-  "oldfieldname": "project_name", 
-  "permlevel": 0, 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
-  "options": "Project", 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Link", 
+  "options": "Project"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Item Desription", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Item Desription", 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "BOM"
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "BOM", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 0, 
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Materials Required (Exploded)", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Materials Required (Exploded)", 
+  "print_hide": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Table", 
-  "doctype": "DocField", 
-  "label": "Materials Required (Exploded)", 
-  "oldfieldname": "flat_bom_details", 
   "default": "No Toolbar", 
-  "options": "BOM Explosion Item", 
+  "doctype": "DocField", 
   "fieldname": "flat_bom_details", 
   "fieldtype": "Table", 
   "hidden": 0, 
-  "permlevel": 1
+  "label": "Materials Required (Exploded)", 
+  "no_copy": 1, 
+  "oldfieldname": "flat_bom_details", 
+  "oldfieldtype": "Table", 
+  "options": "BOM Explosion Item", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "System Manager", 
-  "report": 1, 
-  "permlevel": 0
+  "role": "System Manager"
  }, 
  {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Manufacturing Manager", 
-  "report": 1, 
-  "permlevel": 0
+  "role": "Manufacturing Manager"
  }, 
  {
-  "role": "Manufacturing Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Manufacturing User", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Manufacturing User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "role": "Manufacturing User"
  }
 ]

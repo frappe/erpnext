@@ -1,0 +1,11 @@
+{
+ "Batch": "Lot", 
+ "Batch Finished Date": "Date de lot fini", 
+ "Batch ID": "ID du lot", 
+ "Batch Started Date": "Date de d\u00e9marrage du lot", 
+ "Description": "Description", 
+ "Expiry Date": "Date d&#39;expiration", 
+ "Item": "Article", 
+ "Stock": "Stock", 
+ "Trash Reason": "Raison Corbeille"
+}

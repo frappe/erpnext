@@ -1,0 +1,21 @@
+{
+ "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.": "Todas as transa\u00e7\u00f5es de vendas pode ser marcado contra diversas Pessoas ** ** vendas de modo que voc\u00ea pode definir e monitorar metas.", 
+ "Employee": "Empregado", 
+ "Has Child Node": "Tem n\u00f3 filho", 
+ "No": "N\u00e3o", 
+ "Parent Sales Person": "Vendas Pessoa pai", 
+ "Sales Person": "Vendas Pessoa", 
+ "Sales Person Name": "Vendas Nome Pessoa", 
+ "Sales Person Targets": "Metas de vendas Pessoa", 
+ "Select Budget Distribution to unevenly distribute targets across months.": "Selecione distribui\u00e7\u00e3o do or\u00e7amento para distribuir desigualmente alvos em todo m\u00eas.", 
+ "Select company name first.": "Selecione o nome da empresa em primeiro lugar.", 
+ "Set targets Item Group-wise for this Sales Person.": "Estabelecer metas item Group-wise para este Vendas Pessoa.", 
+ "Setup": "Instala\u00e7\u00e3o", 
+ "Target Details1": "Alvo Details1", 
+ "Target Distribution": "Distribui\u00e7\u00e3o alvo", 
+ "Trash Reason": "Raz\u00e3o lixo", 
+ "Yes": "Sim", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}

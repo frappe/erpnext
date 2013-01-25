@@ -1,85 +1,83 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 10:23:35", 
   "docstatus": 0, 
-  "creation": "2013-01-15 12:28:57", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-16 13:59:28"
+  "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
-  "is_submittable": 1, 
+  "allow_copy": 1, 
+  "allow_email": 1, 
   "allow_print": 1, 
-  "search_fields": "posting_date", 
-  "module": "Stock", 
-  "doctype": "DocType", 
-  "read_only_onload": 0, 
   "autoname": "SR/.######", 
   "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
-  "allow_email": 1, 
-  "name": "__common__", 
+  "doctype": "DocType", 
+  "is_submittable": 1, 
   "max_attachments": 1, 
-  "allow_copy": 1
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only_onload": 0, 
+  "search_fields": "posting_date"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Stock Reconciliation", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Stock Reconciliation", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Stock Reconciliation", 
-  "read": 1, 
   "cancel": 1, 
-  "name": "__common__", 
-  "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Stock Reconciliation", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "Material Manager", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
-  "name": "Stock Reconciliation", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Stock Reconciliation"
  }, 
  {
-  "read_only": 0, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Posting Date", 
-  "oldfieldname": "reconciliation_date", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "reqd": 1, 
-  "in_filter": 0
+  "in_filter": 0, 
+  "label": "Posting Date", 
+  "oldfieldname": "reconciliation_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
-  "read_only": 0, 
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Posting Time", 
-  "oldfieldname": "reconciliation_time", 
   "fieldname": "posting_time", 
   "fieldtype": "Time", 
-  "reqd": 1, 
-  "in_filter": 0
+  "in_filter": 0, 
+  "label": "Posting Time", 
+  "oldfieldname": "reconciliation_time", 
+  "oldfieldtype": "Time", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "Stock Reconciliation"
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Stock Reconciliation", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -87,40 +85,46 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Upload HTML", 
   "fieldname": "upload_html", 
-  "fieldtype": "HTML"
+  "fieldtype": "HTML", 
+  "label": "Upload HTML", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "depends_on": "reconciliation_json", 
   "doctype": "DocField", 
-  "label": "Reconciliation Data", 
   "fieldname": "sb2", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Reconciliation Data"
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "Reconciliation HTML", 
   "fieldname": "reconciliation_html", 
   "fieldtype": "HTML", 
-  "hidden": 0
+  "hidden": 0, 
+  "label": "Reconciliation HTML", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Reconciliation JSON", 
   "fieldname": "reconciliation_json", 
   "fieldtype": "Long Text", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Reconciliation JSON", 
+  "no_copy": 1, 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }
 ]

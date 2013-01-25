@@ -1,171 +1,162 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:27", 
   "docstatus": 0, 
-  "creation": "2012-06-11 12:10:10", 
+  "modified": "2013-01-22 14:46:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-10 12:05:31"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Stock", 
-  "show_in_menu": 0, 
-  "version": 1, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Delivery Note Packing Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Delivery Note Packing Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Delivery Note Packing Item"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Parent Item", 
-  "oldfieldname": "parent_item", 
-  "permlevel": 1, 
   "fieldname": "parent_item", 
   "fieldtype": "Link", 
-  "options": "Item"
+  "label": "Parent Item", 
+  "oldfieldname": "parent_item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 1, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item", 
-  "in_filter": 1
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Parent Detail docname", 
-  "oldfieldname": "parent_detail_docname", 
   "fieldname": "parent_detail_docname", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Parent Detail docname", 
+  "no_copy": 1, 
+  "oldfieldname": "parent_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "read_only": 1, 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Warehouse", 
-  "oldfieldname": "warehouse", 
-  "permlevel": 0, 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
   "options": "Warehouse"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Serial No", 
   "fieldname": "serial_no", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Serial No"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Batch No", 
   "fieldname": "batch_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Batch No"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Actual Qty", 
-  "oldfieldname": "actual_qty", 
   "fieldname": "actual_qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
+  "fieldtype": "Float", 
+  "label": "Actual Qty", 
   "no_copy": 1, 
+  "oldfieldname": "actual_qty", 
   "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Projected Qty", 
-  "oldfieldname": "projected_qty", 
-  "fieldname": "projected_qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
-  "permlevel": 1, 
+  "fieldname": "projected_qty", 
+  "fieldtype": "Float", 
+  "label": "Projected Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "projected_qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
-  "options": "UOM"
+  "options": "UOM", 
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Prevdoc DocType", 
-  "oldfieldname": "prevdoc_doctype", 
   "fieldname": "prevdoc_doctype", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Prevdoc DocType", 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Check", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Page Break", 
-  "oldfieldname": "page_break", 
   "fieldname": "page_break", 
   "fieldtype": "Check", 
-  "permlevel": 1
+  "label": "Page Break", 
+  "oldfieldname": "page_break", 
+  "oldfieldtype": "Check", 
+  "read_only": 1
  }
 ]

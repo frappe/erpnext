@@ -1,0 +1,20 @@
+{
+ "Allocate": "Asignar", 
+ "Branch": "Rama", 
+ "Carry Forward": "Llevar adelante", 
+ "Department": "Departamento", 
+ "Designation": "Designaci\u00f3n", 
+ "Employee Type": "Tipo de empleado", 
+ "Fiscal Year": "A\u00f1o Fiscal", 
+ "Grade": "Grado", 
+ "HR": "HR", 
+ "Leave Control Panel": "Deja Panel de control", 
+ "Leave Type": "Deja Tipo", 
+ "Leave blank if considered for all branches": "Dejar en blanco si se considera para todas las ramas", 
+ "Leave blank if considered for all departments": "Dejar en blanco si se considera para todos los departamentos", 
+ "Leave blank if considered for all designations": "Dejar en blanco si se considera para todas las designaciones", 
+ "Leave blank if considered for all employee types": "Dejar en blanco si se considera para todos los tipos de empleados", 
+ "Leave blank if considered for all grades": "Dejar en blanco si se considera para todos los grados", 
+ "New Leaves Allocated (In Days)": "Las hojas nuevas asignado (en d\u00edas)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "Por favor, seleccione Arrastre de si tambi\u00e9n desea incluir saldo del ejercicio fiscal anterior deja a este a\u00f1o fiscal"
+}

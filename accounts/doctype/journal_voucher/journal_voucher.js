@@ -151,7 +151,7 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 		method: "accounts.utils.get_balance_on",
 		args: {account: d.account, date: doc.posting_date},
 		callback: function(r) {
-			d.balance = fmt_money(r.message);
+			d.balance = format_currency(r.message, erpnext.get_currency(doc.company));
 			refresh_field('balance', d.name, 'entries');
 		}
 	});
@@ -161,7 +161,6 @@ cur_frm.cscript.validate = function(doc,cdt,cdn) {
 	cur_frm.cscript.update_totals(doc);
 }
 
-// ***************** Get Print Heading based on Sales Invoice *****************
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }

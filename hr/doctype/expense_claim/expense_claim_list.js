@@ -17,8 +17,7 @@ wn.doclistviews['Expense Claim'] = wn.views.ListView.extend({
 		this._super(data);
 		data.posting_date = wn.datetime.str_to_user(data.posting_date);
 		data.employee_name = data.employee_name + ' claimed '
-			+ wn.boot.company[data.company].default_currency + ' '
-			+ fmt_money(data.total_claimed_amount);
+			+ format_currency(data.total_claimed_amount, erpnext.get_currency(data.company));
 	},
 	
 	columns: [
@@ -31,8 +30,8 @@ wn.doclistviews['Expense Claim'] = wn.views.ListView.extend({
 		{
 			width: '12%',
 			content: function(parent, data) {
-				$(parent).html(wn.boot.company[data.company].default_currency
-					+ ' ' + fmt_money(data.total_sanctioned_amount));
+				$(parent).html(format_currency(data.total_sanctioned_amount, 
+					erpnext.get_currency(data.company)));
 			},
 			css: {'text-align': 'right'},
 		},

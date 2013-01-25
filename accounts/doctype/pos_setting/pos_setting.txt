@@ -1,230 +1,217 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "creation": "2012-06-11 12:09:53", 
+  "modified": "2013-01-22 16:55:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-16 16:27:51"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Accounts", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
   "autoname": "POS/.####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1322549700", 
-  "show_in_menu": 0, 
-  "version": 1
+  "doctype": "DocType", 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "POS Setting", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "POS Setting", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "POS Setting", 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
   "report": 1, 
-  "permlevel": 0, 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "POS Setting", 
-  "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "User", 
-  "oldfieldname": "user", 
-  "fieldname": "user", 
-  "fieldtype": "Link", 
-  "options": "Profile"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Territory", 
-  "oldfieldname": "territory", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Territory"
- }, 
- {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Series", 
-  "oldfieldname": "naming_series", 
-  "fieldname": "naming_series", 
-  "fieldtype": "Select", 
-  "reqd": 1
- }, 
- {
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Currency", 
-  "oldfieldname": "currency", 
-  "fieldname": "currency", 
-  "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Currency"
- }, 
- {
-  "default": "1", 
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Conversion Rate", 
-  "oldfieldname": "conversion_rate", 
-  "fieldname": "conversion_rate", 
-  "fieldtype": "Float", 
-  "reqd": 1
- }, 
- {
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Price List", 
-  "oldfieldname": "price_list_name", 
-  "fieldname": "price_list_name", 
-  "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Price List"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Company"
- }, 
- {
-  "oldfieldtype": "Column Break", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Customer Account", 
-  "oldfieldname": "customer_account", 
-  "fieldname": "customer_account", 
-  "fieldtype": "Link", 
-  "reqd": 0, 
-  "options": "Account"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Cash/Bank Account", 
-  "oldfieldname": "cash_bank_account", 
-  "fieldname": "cash_bank_account", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Income Account", 
-  "oldfieldname": "income_account", 
-  "fieldname": "income_account", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Warehouse", 
-  "oldfieldname": "warehouse", 
-  "fieldname": "warehouse", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Warehouse"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Cost Center", 
-  "oldfieldname": "cost_center", 
-  "fieldname": "cost_center", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Cost Center"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Charge", 
-  "oldfieldname": "charge", 
-  "fieldname": "charge", 
-  "fieldtype": "Link", 
-  "options": "Sales Taxes and Charges Master"
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Letter Head", 
-  "oldfieldname": "letter_head", 
-  "fieldname": "letter_head", 
-  "fieldtype": "Select", 
-  "options": "link:Letter Head"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Terms and Conditions", 
-  "oldfieldname": "tc_name", 
-  "fieldname": "tc_name", 
-  "fieldtype": "Link", 
-  "options": "Terms and Conditions"
- }, 
- {
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Select Print Heading", 
-  "oldfieldname": "select_print_heading", 
-  "fieldname": "select_print_heading", 
-  "fieldtype": "Select", 
-  "options": "link:Print Heading", 
-  "in_filter": 0
- }, 
- {
-  "write": 1, 
-  "create": 1, 
-  "role": "System Manager", 
-  "doctype": "DocPerm", 
   "submit": 0
  }, 
  {
-  "write": 1, 
+  "doctype": "DocType", 
+  "name": "POS Setting"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user", 
+  "fieldtype": "Link", 
+  "label": "User", 
+  "oldfieldname": "user", 
+  "oldfieldtype": "Link", 
+  "options": "Profile"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "oldfieldname": "currency", 
+  "oldfieldtype": "Select", 
+  "options": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "label": "Conversion Rate", 
+  "oldfieldname": "conversion_rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Select", 
+  "label": "Price List", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
+  "options": "link:Price List", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_account", 
+  "fieldtype": "Link", 
+  "label": "Customer Account", 
+  "oldfieldname": "customer_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cash_bank_account", 
+  "fieldtype": "Link", 
+  "label": "Cash/Bank Account", 
+  "oldfieldname": "cash_bank_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "income_account", 
+  "fieldtype": "Link", 
+  "label": "Income Account", 
+  "oldfieldname": "income_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "charge", 
+  "fieldtype": "Link", 
+  "label": "Charge", 
+  "oldfieldname": "charge", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Taxes and Charges Master"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Terms and Conditions", 
+  "oldfieldname": "tc_name", 
+  "oldfieldtype": "Link", 
+  "options": "Terms and Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Select Print Heading", 
+  "oldfieldname": "select_print_heading", 
+  "oldfieldtype": "Select", 
+  "options": "link:Print Heading"
+ }, 
+ {
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "System Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "Accounts Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "role": "Accounts User", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]

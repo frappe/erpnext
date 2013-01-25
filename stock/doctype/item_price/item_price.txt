@@ -1,79 +1,80 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-21 18:19:14", 
   "docstatus": 0, 
-  "creation": "2013-01-15 18:43:18", 
+  "modified": "2013-01-23 16:57:49", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 17:53:42"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 0, 
-  "istable": 1, 
   "autoname": "RFD/.#####", 
-  "in_create": 1, 
   "doctype": "DocType", 
+  "in_create": 1, 
+  "istable": 1, 
   "module": "Stock", 
-  "name": "__common__"
+  "name": "__common__", 
+  "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Item Price", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Item Price", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item Price"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Price List Name", 
-  "oldfieldname": "price_list_name", 
   "fieldname": "price_list_name", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Price List Name", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
   "options": "Price List", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Ref Rate", 
-  "oldfieldname": "ref_rate", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Ref Rate", 
+  "oldfieldname": "ref_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "ref_currency", 
   "reqd": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
+  "fieldname": "ref_currency", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
   "label": "Currency", 
   "oldfieldname": "ref_currency", 
-  "fieldname": "ref_currency", 
-  "fieldtype": "Select", 
-  "search_index": 1, 
+  "oldfieldtype": "Select", 
+  "options": "Currency", 
   "reqd": 1, 
-  "options": "link:Currency", 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
   "description": "Allow this price in sales related forms", 
   "doctype": "DocField", 
-  "label": "For Selling", 
   "fieldname": "selling", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "For Selling"
  }, 
  {
   "description": "Allow this price in purchase related forms", 
   "doctype": "DocField", 
-  "label": "For Buying", 
   "fieldname": "buying", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "For Buying"
  }
 ]

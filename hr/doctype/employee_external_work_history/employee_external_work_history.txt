@@ -1,75 +1,76 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:29:41", 
+  "modified": "2013-01-23 17:11:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-30 11:57:58"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "HR"
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Employee External Work History", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Employee External Work History", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Employee External Work History"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
   "label": "Company", 
   "oldfieldname": "company_name", 
-  "fieldname": "company_name", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Data", 
   "label": "Designation", 
   "oldfieldname": "designation", 
-  "fieldname": "designation", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "salary", 
+  "fieldtype": "Currency", 
   "label": "Salary", 
   "oldfieldname": "salary", 
-  "fieldname": "salary", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "options": "eval:erpnext.get_currency()"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "address", 
+  "fieldtype": "Small Text", 
   "label": "Address", 
   "oldfieldname": "address", 
-  "fieldname": "address", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "contact", 
+  "fieldtype": "Data", 
   "label": "Contact", 
   "oldfieldname": "contact", 
-  "fieldname": "contact", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "total_experience", 
+  "fieldtype": "Data", 
   "label": "Total Experience", 
   "oldfieldname": "total_experience", 
-  "fieldname": "total_experience", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }
 ]

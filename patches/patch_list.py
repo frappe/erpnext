@@ -155,4 +155,7 @@ patch_list = [
 	"patches.january_2013.purchase_price_list",
 	"execute:webnotes.reload_doc('accounts','Print Format','Payment Receipt Voucher')",
 	"patches.january_2013.update_fraction_for_usd",
+	"patches.january_2013.enable_currencies",
+	"patches.january_2013.remove_unwanted_permission",
+	"patches.january_2013.remove_landed_cost_master",
 ]

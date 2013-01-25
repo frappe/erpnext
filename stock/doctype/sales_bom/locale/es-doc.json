@@ -1,0 +1,11 @@
+{
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials": "Grupo global de productos ** ** en otro art\u00edculo **. ** Esto es \u00fatil si usted est\u00e1 empaquetando un cierto ** ** Los productos en un paquete y usted mantiene un balance de los art\u00edculos envasados \u200b\u200b** ** y no el agregado del art\u00edculo **. ** El paquete ** art\u00edculo ** habr\u00e1 &quot;es el tema de&quot; como &quot;No&quot; y &quot;\u00bfSales Item&quot; como &quot;S\u00ed&quot;, por ejemplo:. Si usted est\u00e1 vendiendo computadoras port\u00e1tiles y Mochilas por separado y recibir un descuento si el cliente compra a la vez , entonces el ordenador port\u00e1til + Mochila ser\u00e1 una nueva lista de materiales de ventas Item.Note: BOM = Bill de Materiales", 
+ "List items that form the package.": "Lista de tareas que forman el paquete.", 
+ "Package Items": "Art\u00edculos del embalaje", 
+ "Parent Item": "Art\u00edculo principal", 
+ "Sales BOM": "Ventas BOM", 
+ "Sales BOM Item": "Ventas de art\u00edculo de lista de materiales", 
+ "Sales BOM Items": "Los productos que la lista de materiales de ventas", 
+ "Stock": "Valores", 
+ "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"": "El punto que representa el paquete. Este elemento debe tener &quot;es el tema de&quot; como &quot;No&quot; y &quot;\u00bfSales Item&quot; como &quot;S\u00ed&quot;"
+}

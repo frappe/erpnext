@@ -1,107 +1,98 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:59", 
+  "modified": "2013-01-22 14:56:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:59"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "HR", 
-  "server_code_error": " ", 
-  "version": 6, 
   "doctype": "DocType", 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Other Income Detail", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Other Income Detail", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Other Income Detail", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Other Income Detail", 
-  "doctype": "DocType"
- }, 
- {
-  "write": 1, 
-  "report": 1, 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Other Income Detail"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Particulars", 
-  "oldfieldname": "particulars2", 
-  "width": "200px", 
   "fieldname": "particulars2", 
   "fieldtype": "Small Text", 
+  "label": "Particulars", 
+  "oldfieldname": "particulars2", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1, 
   "reqd": 1, 
-  "permlevel": 1
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Under Section", 
-  "oldfieldname": "under_section2", 
   "fieldname": "under_section2", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Under Section", 
+  "oldfieldname": "under_section2", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Max. Limit", 
-  "oldfieldname": "max_limit2", 
   "fieldname": "max_limit2", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Max. Limit", 
+  "oldfieldname": "max_limit2", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Actual Amount", 
-  "oldfieldname": "actual_amount2", 
   "fieldname": "actual_amount2", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Actual Amount", 
+  "oldfieldname": "actual_amount2", 
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Eligible Amount", 
-  "oldfieldname": "eligible_amount2", 
   "fieldname": "eligible_amount2", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Eligible Amount", 
+  "oldfieldname": "eligible_amount2", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Modified Amount", 
-  "oldfieldname": "modified_amount2", 
   "fieldname": "modified_amount2", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Modified Amount", 
+  "oldfieldname": "modified_amount2", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

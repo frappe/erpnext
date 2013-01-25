@@ -1,120 +1,101 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:17", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:17"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
   "allow_attach": 0, 
-  "allow_print": 1, 
-  "module": "Selling", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
-  "in_create": 0, 
-  "read_only": 1, 
+  "allow_copy": 1, 
   "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
   "hide_heading": 0, 
-  "issingle": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1322549700", 
-  "show_in_menu": 1, 
-  "version": 41, 
-  "menu_index": 4, 
   "hide_toolbar": 0, 
-  "allow_copy": 1
+  "in_create": 0, 
+  "issingle": 1, 
+  "module": "Selling", 
+  "name": "__common__", 
+  "read_only": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "SMS Center", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "SMS Center", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "SMS Center", 
-  "doctype": "DocType"
- }, 
- {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "SMS Center", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "write": 0, 
-  "create": 0, 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "SMS Center"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Send To", 
-  "trigger": "Client", 
   "fieldname": "send_to", 
   "fieldtype": "Select", 
+  "label": "Send To", 
   "options": "\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person"
  }, 
  {
   "depends_on": "eval:doc.send_to=='All Customer Contact'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
+  "label": "Customer", 
   "options": "Customer"
  }, 
  {
   "depends_on": "eval:doc.send_to=='All Supplier Contact'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Supplier", 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
+  "label": "Supplier", 
   "options": "Supplier"
  }, 
  {
   "depends_on": "eval:doc.send_to=='All Employee (Active)'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Department", 
   "fieldname": "department", 
   "fieldtype": "Select", 
+  "label": "Department", 
   "options": "link:Department"
  }, 
  {
   "depends_on": "eval:doc.send_to=='All Employee (Active)'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Branch", 
   "fieldname": "branch", 
   "fieldtype": "Select", 
+  "label": "Branch", 
   "options": "link:Branch"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Create Receiver List", 
   "fieldname": "create_receiver_list", 
   "fieldtype": "Button", 
+  "label": "Create Receiver List", 
   "options": "create_receiver_list"
  }, 
  {
@@ -124,24 +105,27 @@
   "label": "Receiver List"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break9", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "description": "Message greater than 160 character will be splitted into multiple mesage", 
   "doctype": "DocField", 
-  "label": "Message", 
   "fieldname": "message", 
   "fieldtype": "Text", 
+  "label": "Message", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Send SMS", 
   "fieldname": "send_sms", 
   "fieldtype": "Button", 
+  "label": "Send SMS", 
   "options": "send_sms"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

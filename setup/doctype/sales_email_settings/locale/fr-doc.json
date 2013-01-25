@@ -1,0 +1,15 @@
+{
+ "Check to activate": "V\u00e9rifiez pour activer", 
+ "Email Id": "Identification d&#39;email", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "Identification d&#39;email o\u00f9 un demandeur d&#39;emploi enverra par courriel par exemple &quot;jobs@example.com&quot;", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"": "Param\u00e8tres de messagerie pour extraire des ventes Leads e-mail par exemple id &quot;sales@example.com&quot;", 
+ "Extract Emails": "Extrait Emails", 
+ "Host": "H\u00f4te", 
+ "POP3 Mail Settings": "Param\u00e8tres de messagerie POP3", 
+ "POP3 server e.g. (pop.gmail.com)": "Serveur POP3 par exemple (pop.gmail.com)", 
+ "Password": "Mot de passe", 
+ "Sales Email Settings": "R\u00e9glages Courriel Ventes", 
+ "Setup": "Installation", 
+ "Use SSL": "Utiliser SSL", 
+ "Username": "Nom d&#39;utilisateur"
+}

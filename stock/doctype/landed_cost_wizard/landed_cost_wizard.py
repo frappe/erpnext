@@ -56,19 +56,6 @@ class DocType:
 			ch.purchase_receipt = i and i['name'] or ''
 			ch.save()
 
-
-	def get_landed_cost_master_details(self):
-		""" pull details from landed cost master"""
-		self.doclist = self.doc.clear_table(self.doclist, 'landed_cost_details')
-		idx = 0
-		landed_cost = sql("select account_head, description from `tabLanded Cost Master Detail` where parent=%s", (self.doc.landed_cost), as_dict = 1)
-		for cost in landed_cost:
-			lct = addchild(self.doc, 'landed_cost_details', 'Landed Cost Item', 
-				self.doclist)
-			lct.account_head = cost['account_head']
-			lct.description = cost['description']
-
-
 	def get_selected_pr(self):
 		""" Get selected purchase receipt no """
 		self.selected_pr = [d.purchase_receipt for d in getlist(self.doclist, 'lc_pr_details') if d.select_pr]
@@ -198,9 +185,6 @@ class DocType:
 		ocd[oc].total_amount = flt(tax_amount)
 		ocd[oc].total_tax_amount = flt(prev_total)
 		ocd[oc].tax_amount += flt(tax_amount)
-		
-		total_amount = flt(ocd[oc].tax_amount)
-		total_tax_amount = flt(ocd[oc].total_tax_amount) + (add_ded * flt(total_amount))
 		
 		if ocd[oc].category != "Valuation":	
 			prev_total += add_ded * flt(ocd[oc].total_amount)

@@ -1,0 +1,23 @@
+{
+ "Account Head": "Chefe conta", 
+ "Accounts": "Contas", 
+ "Actual": "Real", 
+ "Amount": "Quantidade", 
+ "Cheating FieldPlease do not delete ": "Engano FieldPlease n\u00e3o exclua", 
+ "Cost Center": "Centro de Custos", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Enter Row": "Digite Row", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Se selecionado, o valor do imposto ser\u00e1 considerado como j\u00e1 inclu\u00eddo na tarifa Impress\u00e3o / Quantidade de impress\u00e3o", 
+ "Is this Tax included in Basic Rate?": "\u00c9 este imposto inclu\u00eddo na Taxa B\u00e1sica?", 
+ "Item Wise Tax Detail ": "Detalhe Imposto item S\u00e1bio", 
+ "On Net Total": "Em L\u00edquida Total", 
+ "On Previous Row Amount": "Quantidade em linha anterior", 
+ "On Previous Row Total": "No total linha anterior", 
+ "Parenttype": "ParentType", 
+ "Rate": "Taxa", 
+ "Sales Taxes and Charges": "Vendas Impostos e Taxas", 
+ "Total": "Total", 
+ "Total Amount": "Valor Total", 
+ "Total Tax Amount": "Valor do imposto total", 
+ "Type": "Tipo"
+}

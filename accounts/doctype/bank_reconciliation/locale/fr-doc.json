@@ -1,0 +1,13 @@
+{
+ "Accounts": "Comptes", 
+ "Bank Account": "Compte bancaire", 
+ "Bank Reconciliation": "Rapprochement bancaire", 
+ "Company": "Entreprise", 
+ "Entries": "Entr\u00e9es", 
+ "From Date": "Partir de la date", 
+ "Get Non Reconciled Entries": "Obtenez Non Entr\u00e9es rapproch\u00e9es", 
+ "Select account head of the bank where cheque was deposited.": "S\u00e9lectionnez t\u00eate compte de la banque o\u00f9 ch\u00e8que a \u00e9t\u00e9 d\u00e9pos\u00e9.", 
+ "To Date": "\u00c0 ce jour", 
+ "Total Amount": "Montant total", 
+ "Update Clearance Date": "Mettre \u00e0 jour Date de Garde"
+}

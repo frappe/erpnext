@@ -1,106 +1,94 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:25", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:25"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 0, 
-  "allow_print": 1, 
-  "module": "Setup", 
-  "doctype": "DocType", 
-  "read_only": 0, 
+  "allow_copy": 1, 
   "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "in_create": 0, 
   "issingle": 1, 
+  "module": "Setup", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1306304974", 
-  "show_in_menu": 0, 
-  "version": 16, 
-  "allow_copy": 1
+  "read_only": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "SMS Settings", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "SMS Settings", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "SMS Settings", 
-  "doctype": "DocType"
- }, 
- {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "SMS Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "SMS Settings"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "description": "Eg. smsgateway.com/api/send_sms.cgi", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "SMS Gateway URL", 
   "fieldname": "sms_gateway_url", 
   "fieldtype": "Data", 
+  "label": "SMS Gateway URL", 
   "reqd": 1
  }, 
  {
   "description": "Enter url parameter for message", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Message Parameter", 
   "fieldname": "message_parameter", 
   "fieldtype": "Data", 
+  "label": "Message Parameter", 
   "reqd": 1
  }, 
  {
   "description": "Enter url parameter for receiver nos", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Receiver Parameter", 
   "fieldname": "receiver_parameter", 
   "fieldtype": "Data", 
+  "label": "Receiver Parameter", 
   "reqd": 1
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Static Parameters", 
-  "width": "50%", 
   "fieldname": "static_parameters", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "label": "Static Parameters", 
+  "width": "50%"
  }, 
  {
   "description": "Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "SMS Parameters", 
   "fieldname": "static_parameter_details", 
   "fieldtype": "Table", 
+  "label": "SMS Parameters", 
   "options": "SMS Parameter"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

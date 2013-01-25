@@ -1,7 +1,11 @@
 [
+ "Allow this price in purchase related forms", 
+ "Price List Name", 
+ "Item Price", 
+ "For Buying", 
  "Currency", 
  "Ref Rate", 
- "Item Price", 
- "Price List Name", 
+ "For Selling", 
+ "Allow this price in sales related forms", 
  "Stock"
 ]

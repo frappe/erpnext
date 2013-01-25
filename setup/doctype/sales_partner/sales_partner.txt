@@ -1,252 +1,195 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-07-12 23:29:44", 
+  "modified": "2013-01-22 15:04:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 14:03:00"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 0, 
-  "in_create": 0, 
   "autoname": "field:partner_name", 
-  "name": "__common__", 
-  "module": "Setup", 
+  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
   "doctype": "DocType", 
   "document_type": "Master", 
-  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
+  "in_create": 0, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Sales Partner", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Sales Partner", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Sales Partner", 
-  "doctype": "DocType"
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales Partner", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sales Partner"
  }, 
  {
   "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Sales Partner Details", 
   "fieldname": "basic_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Sales Partner Details", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Sales Partner Name", 
-  "oldfieldname": "partner_name", 
   "fieldname": "partner_name", 
   "fieldtype": "Data", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Sales Partner Name", 
+  "oldfieldname": "partner_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Partner Type", 
-  "oldfieldname": "partner_type", 
-  "permlevel": 0, 
   "fieldname": "partner_type", 
   "fieldtype": "Select", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Partner Type", 
+  "oldfieldname": "partner_type", 
+  "oldfieldtype": "Select", 
   "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "commission_rate", 
+  "fieldtype": "Float", 
   "label": "Commission Rate", 
   "oldfieldname": "commission_rate", 
-  "fieldname": "commission_rate", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Territory", 
-  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Territory"
+  "label": "Territory", 
+  "options": "Territory", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Address & Contacts", 
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Address & Contacts"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Address Desc", 
-  "permlevel": 0, 
   "fieldname": "address_desc", 
   "fieldtype": "HTML", 
+  "label": "Address Desc", 
   "options": "<em>Addresses will appear only when you save the customer</em>"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Address HTML", 
   "fieldname": "address_html", 
   "fieldtype": "HTML", 
-  "permlevel": 1
+  "label": "Address HTML", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Contact Desc", 
-  "permlevel": 0, 
   "fieldname": "contact_desc", 
   "fieldtype": "HTML", 
+  "label": "Contact Desc", 
   "options": "<em>Contact Details will appear only when you save the customer</em>"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact HTML", 
   "fieldname": "contact_html", 
   "fieldtype": "HTML", 
-  "permlevel": 1
+  "label": "Contact HTML", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Sales Partner Target", 
   "fieldname": "partner_target_details_section_break", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Sales Partner Target", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Partner Target Detail", 
-  "oldfieldname": "partner_target_details", 
-  "permlevel": 0, 
   "fieldname": "partner_target_details", 
   "fieldtype": "Table", 
-  "reqd": 0, 
-  "options": "Target Detail"
+  "label": "Partner Target Detail", 
+  "oldfieldname": "partner_target_details", 
+  "oldfieldtype": "Table", 
+  "options": "Target Detail", 
+  "reqd": 0
  }, 
  {
   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Target Distribution", 
-  "oldfieldname": "distribution_id", 
-  "permlevel": 0, 
   "fieldname": "distribution_id", 
   "fieldtype": "Link", 
+  "label": "Target Distribution", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Link", 
   "options": "Budget Distribution"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
   "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales Manager", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
   "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
   "role": "Sales Master Manager", 
+  "write": 1
+ }, 
+ {
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
   "role": "System Manager", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "System Manager", 
-  "permlevel": 1
+  "write": 1
  }
 ]

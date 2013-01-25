@@ -45,8 +45,8 @@ cur_frm.pformat.other_charges= function(doc){
 	var make_row = function(title,val,bold){
 		var bstart = '<b>'; var bend = '</b>';
 		return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-		 +'<td style="width:25%;text-align:right;">'+doc.currency+'</td>'
-		 +'<td style="width:25%;text-align:right;">'+val+'</td>'
+		 +'<td style="width:25%;text-align:right;"></td>'
+		 +'<td style="width:25%;text-align:right;">'+format_currency(val, doc.currency)+'</td>'
 		 +'</tr>'
 	}
 
@@ -73,24 +73,24 @@ cur_frm.pformat.other_charges= function(doc){
 
 		out +='<table class="noborder" style="width:100%">';
 		if(!print_hide_dict['net_total']) {
-			out +=make_row('Net Total',fmt_money(convert_rate(doc.net_total)),1);
+			out +=make_row('Net Total',convert_rate(doc.net_total),1);
 		}
 
 		// add rows
 		if(cl.length){
 			for(var i=0;i<cl.length;i++){
-				if(fmt_money(convert_rate(cl[i].tax_amount))!=0 && !cl[i].included_in_print_rate)
-				  out += make_row(cl[i].description,fmt_money(convert_rate(cl[i].tax_amount)),0);
+				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
+				  out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
 			}
 		}
 
 		// grand total
 		if(!print_hide_dict['grand_total_export']) {
-			out += make_row('Grand Total',fmt_money(doc.grand_total_export),1);
+			out += make_row('Grand Total',doc.grand_total_export,1);
 		}
 		
 		if(!print_hide_dict['rounded_total_export']) {
-			out += make_row('Rounded Total',fmt_money(doc.rounded_total_export),1);
+			out += make_row('Rounded Total',doc.rounded_total_export,1);
 		}
 
 		if(doc.in_words_export && !print_hide_dict['in_words_export']){
@@ -184,4 +184,4 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
   }
   validated = false;
   refresh_field('tax_amount',d.name,'other_charges');
-}
+};

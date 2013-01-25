@@ -1,51 +1,46 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:27", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:33", 
+  "modified": "2013-01-23 16:54:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:33"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Stock", 
-  "show_in_menu": 0, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Item Tax", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Item Tax", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item Tax"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Tax", 
-  "oldfieldname": "tax_type", 
-  "trigger": "Client", 
   "fieldname": "tax_type", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
+  "label": "Tax", 
+  "oldfieldname": "tax_type", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "tax_rate", 
+  "fieldtype": "Float", 
   "label": "Tax Rate", 
   "oldfieldname": "tax_rate", 
-  "fieldname": "tax_rate", 
-  "fieldtype": "Currency", 
+  "oldfieldtype": "Currency", 
   "reqd": 0
  }
 ]

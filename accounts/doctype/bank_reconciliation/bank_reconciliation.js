@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+cur_frm.add_fetch("bank_account", "company", "company");
 cur_frm.cscript.onload = function(doc, cdt, cdn){
-  // add page head
-  var ph = new PageHeader(cur_frm.fields_dict['head_html'].wrapper, 'Bank Reconciliation', '');
 }

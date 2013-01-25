@@ -1,0 +1,13 @@
+{
+ "Accounts": "Comptes", 
+ "Against Account": "Contre compte", 
+ "Bank Reconciliation Detail": "D\u00e9tail de rapprochement bancaire", 
+ "Cheque Date": "Date de ch\u00e8ques", 
+ "Cheque Number": "Num\u00e9ro de ch\u00e8que", 
+ "Clearance Date": "Date de la clairance", 
+ "Credit": "Cr\u00e9dit", 
+ "Debit": "D\u00e9bit", 
+ "Posting Date": "Date de publication", 
+ "The date at which current entry will get or has actually executed.": "La date \u00e0 laquelle l&#39;entr\u00e9e actuelle permet de lire ou a r\u00e9ellement ex\u00e9cut\u00e9.", 
+ "Voucher ID": "ID Bon"
+}
