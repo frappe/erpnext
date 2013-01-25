@@ -756,6 +756,7 @@ def manage_recurring_invoices(next_date=None):
 
 def make_new_invoice(ref_wrapper, posting_date):
 	from webnotes.model.wrapper import clone
+	from accounts.utils import get_fiscal_year
 	new_invoice = clone(ref_wrapper)
 	
 	mcount = month_map[ref_wrapper.doc.recurring_type]
@@ -772,7 +773,7 @@ def make_new_invoice(ref_wrapper, posting_date):
 			
 		"invoice_period_to_date": \
 			get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount),
-		
+		"fiscal_year": get_fiscal_year(posting_date)[0],
 		"owner": ref_wrapper.doc.owner,
 	})
 	
