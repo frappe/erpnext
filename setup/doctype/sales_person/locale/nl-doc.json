@@ -1,0 +1,21 @@
+{
+ "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.": "All Sales Transacties kunnen worden gelabeld tegen meerdere ** Sales Personen **, zodat u kunt instellen en bewaken doelstellingen.", 
+ "Employee": "Werknemer", 
+ "Has Child Node": "Heeft het kind Node", 
+ "No": "Geen", 
+ "Parent Sales Person": "Parent Sales Person", 
+ "Sales Person": "Sales Person", 
+ "Sales Person Name": "Sales Person Name", 
+ "Sales Person Targets": "Sales Person Doelen", 
+ "Select Budget Distribution to unevenly distribute targets across months.": "Selecteer Budget Uitkering aan ongelijk verdelen doelen uit maanden.", 
+ "Select company name first.": "Kies eerst een bedrijfsnaam.", 
+ "Set targets Item Group-wise for this Sales Person.": "Set richt Item Group-wise voor deze verkoper.", 
+ "Setup": "Setup", 
+ "Target Details1": "Target Details1", 
+ "Target Distribution": "Target Distributie", 
+ "Trash Reason": "Trash Reden", 
+ "Yes": "Ja", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "RGT"
+}

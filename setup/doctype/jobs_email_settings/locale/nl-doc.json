@@ -1,0 +1,16 @@
+{
+ "Check to activate": "Controleer activeren", 
+ "Email Id": "E-mail Identiteitskaart", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "E-mail Identiteitskaart waar een sollicitant zal bijvoorbeeld &quot;jobs@example.com&quot; e-mail", 
+ "Email settings for jobs email id \"jobs@example.com\"": "E-mail instellingen voor banen e-id &quot;jobs@example.com&quot;", 
+ "Extract Emails": "Extract Emails", 
+ "Host": "Gastheer", 
+ "Jobs Email Settings": "Vacatures E-mailinstellingen", 
+ "POP3 Mail Settings": "POP3-mailinstellingen", 
+ "POP3 server e.g. (pop.gmail.com)": "POP3-server bijvoorbeeld (pop.gmail.com)", 
+ "Password": "Wachtwoord", 
+ "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"": "Instellingen om sollicitanten halen uit een mailbox bijv. &quot;jobs@example.com&quot;", 
+ "Setup": "Setup", 
+ "Use SSL": "Gebruik SSL", 
+ "Username": "Gebruikersnaam"
+}

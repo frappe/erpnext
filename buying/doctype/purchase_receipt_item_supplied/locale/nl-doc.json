@@ -1,0 +1,16 @@
+{
+ "Amount": "Bedrag", 
+ "BOM Detail No": "BOM Detail Geen", 
+ "Buying": "Het kopen", 
+ "Consumed Qty": "Consumed Aantal", 
+ "Conversion Factor": "Conversie Factor", 
+ "Current Stock": "Huidige voorraad", 
+ "Description": "Beschrijving", 
+ "Item Code": "Artikelcode", 
+ "Purchase Receipt Item Supplied": "Aankoopbewijs Item ingevoerd", 
+ "Rate": "Tarief", 
+ "Raw Material Item Code": "Grondstof Artikelcode", 
+ "Reference Name": "Referentie Naam", 
+ "Required Qty": "Vereist aantal", 
+ "Stock Uom": "Stock Verpakking"
+}

@@ -1,0 +1,18 @@
+{
+ "Actual Qty": "Werkelijke Aantal", 
+ "Batch No": "Batch nr.", 
+ "Delivery Note Packing Item": "Levering Opmerking Verpakking Item", 
+ "Description": "Beschrijving", 
+ "Item Code": "Artikelcode", 
+ "Item Name": "Naam van het punt", 
+ "Page Break": "Pagina-einde", 
+ "Parent Detail docname": "Parent Detail docname", 
+ "Parent Item": "Parent Item", 
+ "Prevdoc DocType": "Prevdoc DocType", 
+ "Projected Qty": "Verwachte Aantal", 
+ "Qty": "Aantal", 
+ "Serial No": "Serienummer", 
+ "Stock": "Voorraad", 
+ "UOM": "Verpakking", 
+ "Warehouse": "Magazijn"
+}

@@ -1,0 +1,16 @@
+{
+ "Customer Group": "Klantengroep", 
+ "Customer Group Name": "Klant Groepsnaam", 
+ "Default Price List": "Standaard Prijslijst", 
+ "Has Child Node": "Heeft het kind Node", 
+ "No": "Geen", 
+ "Only leaf nodes are allowed in transaction": "Alleen leaf nodes zijn toegestaan \u200b\u200bin transactie", 
+ "Parent Customer Group": "Bovenliggende klant Group", 
+ "Setup": "Setup", 
+ "This Price List will be selected as default for all Customers under this Group.": "Deze prijslijst zal worden geselecteerd als standaard voor alle klanten in deze groep.", 
+ "Trash Reason": "Trash Reden", 
+ "Yes": "Ja", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "RGT"
+}

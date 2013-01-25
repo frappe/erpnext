@@ -78,7 +78,6 @@ class DocType():
 			
 			self.send(email_list, "Lead")
 		
-		webnotes.conn.set(self.doc, "email_sent", 1)
 		webnotes.msgprint("""Scheduled to send to %s""" % \
 			", ".join(["%d %s(s)" % (self.send_count[s], s) for s in self.send_count]))
 			
@@ -118,6 +117,8 @@ class DocType():
 		send(recipients = recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = doctype, email_field = args["email_field"])
+
+		webnotes.conn.set(self.doc, "email_sent", 1)
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):

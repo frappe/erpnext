@@ -1,0 +1,21 @@
+{
+ "Company": "Vennootschap", 
+ "Cust/Supp Address": "Cust / Supp Adres", 
+ "Cust/Supp Name": "Cust / Supp Naam", 
+ "Customer/Supplier": "Klant / leverancier", 
+ "Delivery Note No": "Levering aantekening", 
+ "Get Items": "Get Items", 
+ "Make Credit Note": "Maak Creditnota", 
+ "Make Debit Note": "Maak debetnota", 
+ "Make Excise Invoice": "Maak Accijnzen Factuur", 
+ "Make Stock Entry": "Maak Stock Entry", 
+ "Purchase Receipt No": "Aankoopbewijs Geen", 
+ "Purchase Return": "Aankoop Return", 
+ "Return Date": "Keer terug Datum", 
+ "Return Type": "Terug Type", 
+ "Sales Invoice No": "Verkoop Factuur nr.", 
+ "Sales Return": "Verkoop Terug", 
+ "Sales and Purchase Return Items": "Verkoop en Inkoop Return Items", 
+ "Sales and Purchase Return Tool": "Verkoop en Inkoop Return Tool", 
+ "Stock": "Voorraad"
+}

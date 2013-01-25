@@ -1,0 +1,12 @@
+{
+ "Amended From": "Gewijzigd Van", 
+ "Posting Date": "Plaatsingsdatum", 
+ "Posting Time": "Posting Time", 
+ "Reconciliation Data": "Reconciliatiegegevens", 
+ "Reconciliation HTML": "Verzoening HTML", 
+ "Reconciliation JSON": "Verzoening JSON", 
+ "Stock": "Voorraad", 
+ "Stock Reconciliation": "Stock Verzoening", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Deze tool helpt u bij te werken of vast te stellen de hoeveelheid en waardering van de voorraad in het systeem. Het wordt meestal gebruikt om het systeem waarden te synchroniseren en wat werkelijk bestaat in uw magazijnen.", 
+ "Upload HTML": "Upload HTML"
+}

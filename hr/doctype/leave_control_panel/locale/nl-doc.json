@@ -1,0 +1,20 @@
+{
+ "Allocate": "Toewijzen", 
+ "Branch": "Tak", 
+ "Carry Forward": "Carry Forward", 
+ "Department": "Afdeling", 
+ "Designation": "Benaming", 
+ "Employee Type": "Type werknemer", 
+ "Fiscal Year": "Boekjaar", 
+ "Grade": "Graad", 
+ "HR": "HR", 
+ "Leave Control Panel": "Laat het Configuratiescherm", 
+ "Leave Type": "Laat Type", 
+ "Leave blank if considered for all branches": "Laat leeg indien dit voor alle vestigingen", 
+ "Leave blank if considered for all departments": "Laat leeg indien dit voor alle afdelingen", 
+ "Leave blank if considered for all designations": "Laat leeg indien overwogen voor alle aanduidingen", 
+ "Leave blank if considered for all employee types": "Laat leeg indien overwogen voor alle werknemer soorten", 
+ "Leave blank if considered for all grades": "Laat leeg indien dit voor alle soorten", 
+ "New Leaves Allocated (In Days)": "Nieuwe Bladeren Toegewezen (in dagen)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "Selecteer Carry Forward als u ook wilt opnemen vorige boekjaar uit balans laat dit fiscale jaar"
+}
