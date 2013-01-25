@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:06", 
+  "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:59", 
+  "modified": "2013-01-25 15:04:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -87,16 +87,6 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company_abbr", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Company Abbr", 
-  "oldfieldname": "company_abbr", 
-  "oldfieldtype": "Data", 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

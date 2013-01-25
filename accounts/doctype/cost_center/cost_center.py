@@ -27,15 +27,9 @@ class DocType(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_cost_center'
 				
 	def autoname(self):
-		self.doc.name = self.doc.cost_center_name + ' - ' + self.doc.company_abbr		
-			
-	def get_abbr(self):
-		abbr = webnotes.conn.sql("select abbr from tabCompany where company_name=%s", 
-			self.doc.company_name)[0][0] or ''
-		ret = {
-			'company_abbr'	: abbr
-		}
-		return ret
+		company_abbr = webnotes.conn.sql("select abbr from tabCompany where name=%s", 
+			self.doc.company_name)[0][0]
+		self.doc.name = self.doc.cost_center_name + ' - ' + company_abbr		
 		
 	def validate_mandatory(self):
 		if not self.doc.group_or_ledger:
