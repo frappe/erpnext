@@ -1,0 +1,12 @@
+{
+ "Company": "Vennootschap", 
+ "Customer": "Klant", 
+ "From Date": "Van Datum", 
+ "Get Open Sales Order": "Get Open Verkooporder", 
+ "Manufacturing": "Productie", 
+ "Sales Order": "Verkooporder", 
+ "Territory": "Grondgebied", 
+ "To Date": "To-date houden", 
+ "Update Delivery Date": "Werk Leveringsdatum", 
+ "Update Sales Order": "Werk Verkooporder"
+}

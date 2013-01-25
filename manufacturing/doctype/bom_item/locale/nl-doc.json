@@ -1,0 +1,14 @@
+{
+ "Amount": "Bedrag", 
+ "BOM Item": "BOM Item", 
+ "BOM No": "BOM Geen", 
+ "Item Code": "Artikelcode", 
+ "Item Description": "Item Beschrijving", 
+ "Manufacturing": "Productie", 
+ "Operation No": "Operation No", 
+ "Qty": "Aantal", 
+ "Qty Consumed Per Unit": "Aantal verbruikt per eenheid", 
+ "Rate": "Tarief", 
+ "Scrap %": "Scrap%", 
+ "Stock UOM": "Stock Verpakking"
+}

@@ -1,0 +1,20 @@
+{
+ "Actual Qty (at source/target)": "Werkelijke Aantal (bij de bron / doel)", 
+ "Amount": "Bedrag", 
+ "BOM No": "BOM Geen", 
+ "BOM No. for a Finished Good Item": "BOM Nee voor een afgewerkte goed item", 
+ "Batch No": "Batch nr.", 
+ "Conversion Factor": "Conversie Factor", 
+ "Description": "Beschrijving", 
+ "Item Code": "Artikelcode", 
+ "Qty": "Aantal", 
+ "Qty as per Stock UOM": "Aantal per Voorraad Verpakking", 
+ "Serial No": "Serienummer", 
+ "Source Warehouse": "Bron Warehouse", 
+ "Stock": "Voorraad", 
+ "Stock Entry Detail": "Stock Entry Detail", 
+ "Stock UOM": "Stock Verpakking", 
+ "Target Warehouse": "Target Warehouse", 
+ "UOM": "Verpakking", 
+ "Valuation Rate": "Waardering Prijs"
+}

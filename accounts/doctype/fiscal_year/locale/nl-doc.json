@@ -1,0 +1,14 @@
+{
+ "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.": "** Boekjaar ** staat voor een boekjaar. Alle boekingen en andere grote transacties worden bijgehouden tegen ** boekjaar **.", 
+ "Accounts": "Accounts", 
+ "Entries are not allowed against this Fiscal Year if the year is closed.": "Inzendingen zijn niet toegestaan \u200b\u200btegen deze fiscale jaar als het jaar gesloten is.", 
+ "Fiscal Year": "Boekjaar", 
+ "Fiscal Year Details": "Boekjaar Details", 
+ "For e.g. 2012, 2012-13": "Voor bijvoorbeeld 2012, 2012-13", 
+ "No": "Geen", 
+ "Trash Reason": "Trash Reden", 
+ "Year Closed": "Jaar Gesloten", 
+ "Year Name": "Jaar Naam", 
+ "Year Start Date": "Jaar Startdatum", 
+ "Yes": "Ja"
+}

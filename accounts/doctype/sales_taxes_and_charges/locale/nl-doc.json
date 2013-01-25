@@ -1,0 +1,23 @@
+{
+ "Account Head": "Account Hoofd", 
+ "Accounts": "Accounts", 
+ "Actual": "Daadwerkelijk", 
+ "Amount": "Bedrag", 
+ "Cheating FieldPlease do not delete ": "Vreemdgaan FieldPlease niet verwijderen", 
+ "Cost Center": "Kostenplaats", 
+ "Description": "Beschrijving", 
+ "Enter Row": "Voer Row", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Indien aangevinkt, zal de BTW-bedrag worden beschouwd als reeds in de Print Tarief / Print Bedrag", 
+ "Is this Tax included in Basic Rate?": "Is dit inbegrepen in de Basic Rate?", 
+ "Item Wise Tax Detail ": "Item Wise Tax Detail", 
+ "On Net Total": "On Net Totaal", 
+ "On Previous Row Amount": "Op de vorige toer Bedrag", 
+ "On Previous Row Total": "Op de vorige toer Totaal", 
+ "Parenttype": "Parenttype", 
+ "Rate": "Tarief", 
+ "Sales Taxes and Charges": "Verkoop en-heffingen", 
+ "Total": "Totaal", 
+ "Total Amount": "Totaal bedrag", 
+ "Total Tax Amount": "Totaal BTW-bedrag", 
+ "Type": "Type"
+}

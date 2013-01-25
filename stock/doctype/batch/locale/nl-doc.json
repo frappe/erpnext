@@ -1,0 +1,11 @@
+{
+ "Batch": "Partij", 
+ "Batch Finished Date": "Batch Afgewerkt Datum", 
+ "Batch ID": "Batch ID", 
+ "Batch Started Date": "Batch Gestart Datum", 
+ "Description": "Beschrijving", 
+ "Expiry Date": "Vervaldatum", 
+ "Item": "Item", 
+ "Stock": "Voorraad", 
+ "Trash Reason": "Trash Reden"
+}

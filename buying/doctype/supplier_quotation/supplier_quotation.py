@@ -75,7 +75,6 @@ class DocType(BuyingController):
 			
 	def validate_common(self):
 		pc = get_obj('Purchase Common')
-		pc.validate_mandatory(self)
 		pc.validate_for_items(self)
 		pc.get_prevdoc_date(self)
 		pc.validate_reference_value(self)
