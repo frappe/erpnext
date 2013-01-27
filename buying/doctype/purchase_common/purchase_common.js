@@ -66,27 +66,24 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 		var me = this;
 		
 		if(this.frm.doc.price_list_name) {
-			// set price list currency
-			this.frm.call({
-				method: "setup.utils.get_price_list_currency",
-				args: {args: {
-					price_list_name: this.frm.doc.price_list_name,
-					use_for: "buying"
-				}},
-				callback: function(r) {
-					if(!r.exc) {
-						// for now, setting it as 1.0
-						if(me.frm.doc.price_list_currency === me.get_company_currency())
-							me.frm.set_value("plc_conversion_rate", 1.0);
-						else if(me.frm.doc.price_list_currency === me.frm.doc.currency)
-							me.frm.set_value("plc_conversion_rate", me.frm.doc.conversion_rate);
-						
-						if(r.message.price_list_currency)
+			if(!this.frm.doc.price_list_currency) {
+				// set price list currency
+				this.frm.call({
+					method: "setup.utils.get_price_list_currency",
+					args: {args: {
+						price_list_name: this.frm.doc.price_list_name,
+						use_for: "buying"
+					}},
+					callback: function(r) {
+						if(!r.exc) {
 							me.price_list_currency();
+						}
 					}
-				}
-			});
-		}
+				});
+			} else {
+				me.price_list_currency();
+			}
+		} 
 	},
 	
 	item_code: function(doc, cdt, cdn) {
@@ -145,9 +142,10 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	price_list_currency: function() {
 		this.set_dynamic_labels();
 		
-		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
+		if(this.frm.doc.price_list_currency === this.get_company_currency())
 			this.frm.set_value("plc_conversion_rate", 1.0);
-		}
+		else if(this.frm.doc.price_list_currency === this.frm.doc.currency)
+			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate || 1.0);
 	},
 	
 	set_dynamic_labels: function(doc, dt, dn) {

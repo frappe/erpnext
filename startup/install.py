@@ -20,7 +20,6 @@ def make_modules():
 		doc = webnotes.doc(fielddata = {
 			"doctype": "Module Def",
 			"module_name": m,
-			"disabled":"No"
 		})
 		doc.insert()
 	
@@ -79,6 +78,7 @@ def feature_setup():
 def import_country_and_currency():
 	from webnotes.country_info import get_all
 	data = get_all()
+	
 	for name in data:
 		country = webnotes._dict(data[name])
 		webnotes.doc({
@@ -88,7 +88,7 @@ def import_country_and_currency():
 			"time_zones": "\n".join(country.timezones or [])
 		}).insert()
 		
-		if country.currency:
+		if country.currency and not webnotes.conn.exists("Currency", country.currency):
 			webnotes.doc({
 				"doctype": "Currency",
 				"currency_name": country.currency,

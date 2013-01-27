@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-19 11:14:50", 
+  "creation": "2013-01-27 16:31:07", 
   "docstatus": 0, 
-  "modified": "2013-01-22 15:07:36", 
+  "modified": "2013-01-27 13:32:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,24 +56,28 @@
   "label": "Enabled"
  }, 
  {
+  "description": "Sub-currency. For e.g. \"Cent\"", 
   "doctype": "DocField", 
   "fieldname": "fraction", 
   "fieldtype": "Data", 
   "label": "Fraction"
  }, 
  {
+  "description": "1 Currency = [?] Fraction\nFor e.g. 1 USD = 100 Cent", 
   "doctype": "DocField", 
   "fieldname": "fraction_units", 
   "fieldtype": "Int", 
   "label": "Fraction Units"
  }, 
  {
+  "description": "A symbol for this currency. For e.g. $", 
   "doctype": "DocField", 
   "fieldname": "symbol", 
   "fieldtype": "Data", 
   "label": "Symbol"
  }, 
  {
+  "description": "How should the number be formatted?\n#,###.## or #.###,## etc.", 
   "doctype": "DocField", 
   "fieldname": "number_format", 
   "fieldtype": "Data", 
