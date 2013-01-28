@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-27 16:31:07", 
+  "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-27 13:32:26", 
+  "modified": "2013-01-28 10:37:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -77,11 +77,12 @@
   "label": "Symbol"
  }, 
  {
-  "description": "How should the number be formatted?\n#,###.## or #.###,## etc.", 
+  "description": "How should this currency be formatted? If not set, will use system defaults", 
   "doctype": "DocField", 
   "fieldname": "number_format", 
-  "fieldtype": "Data", 
-  "label": "Number Format"
+  "fieldtype": "Select", 
+  "label": "Number Format", 
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n#.###\n#,###"
  }, 
  {
   "cancel": 1, 

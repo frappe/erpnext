@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 14:20:19", 
+  "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-25 11:51:16", 
+  "modified": "2013-01-28 10:36:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -108,7 +106,7 @@
   "fieldname": "number_format", 
   "fieldtype": "Select", 
   "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n######"
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n#.###\n#,###"
  }, 
  {
   "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
