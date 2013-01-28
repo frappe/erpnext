@@ -37,6 +37,7 @@
  "Consultant", 
  "Date on which the lead was last contacted", 
  "Naming Series", 
+ "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
  "Customer", 
  "Website", 
  "Remark", 
@@ -76,6 +77,5 @@
  "Request for Information", 
  "Open", 
  "Campaign", 
- "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>", 
  "Email Id"
 ]

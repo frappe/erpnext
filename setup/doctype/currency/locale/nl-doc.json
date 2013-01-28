@@ -1,11 +1,21 @@
 {
+ "# ###.##": "# # # #. # #", 
+ "#,###": "#, # # #", 
+ "#,###.##": "#, # # #. # #", 
+ "#,##,###.##": "#, # #, # # #. # #", 
+ "#.###": "#. # # #", 
+ "#.###,##": "#. # # #, # #", 
  "**Currency** Master": "** Valuta ** Master", 
+ "1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent": "1 Valuta = [?] FractionFor bijv. 1 USD = 100 Cent", 
+ "A symbol for this currency. For e.g. $": "Een symbool voor deze valuta. Voor bijvoorbeeld $", 
  "Currency": "Valuta", 
  "Currency Name": "De Naam van", 
  "Enabled": "Ingeschakeld", 
  "Fraction": "Fractie", 
  "Fraction Units": "Fractie Units", 
+ "How should this currency be formatted? If not set, will use system defaults": "Hoe moet deze valuta worden geformatteerd? Indien niet ingesteld, zal gebruik maken van het systeem standaard", 
  "Number Format": "Getalnotatie", 
  "Setup": "Setup", 
+ "Sub-currency. For e.g. \"Cent\"": "Sub-valuta. Voor bijvoorbeeld &quot;Cent&quot;", 
  "Symbol": "Symbool"
 }

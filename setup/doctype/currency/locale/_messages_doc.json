@@ -4,8 +4,18 @@
  "Setup", 
  "Symbol", 
  "Enabled", 
+ "#,##,###.##", 
+ "How should this currency be formatted? If not set, will use system defaults", 
  "Currency", 
+ "A symbol for this currency. For e.g. $", 
  "Currency Name", 
+ "1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent", 
  "Fraction", 
- "**Currency** Master"
+ "#.###,##", 
+ "#,###", 
+ "# ###.##", 
+ "Sub-currency. For e.g. \"Cent\"", 
+ "**Currency** Master", 
+ "#,###.##", 
+ "#.###"
 ]

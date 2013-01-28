@@ -1,4 +1,5 @@
 {
+ "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>": "<a href=\"#!Sales Browser/Territory\">\u0915\u094d\u0937\u0947\u0924\u094d\u0930 \u0915\u093e \u092a\u094d\u0930\u092c\u0902\u0927\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f, \u092f\u0939\u093e\u0901 \u0915\u094d\u0932\u093f\u0915 \u0915\u0930\u0947\u0902</a>", 
  "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">\u0915\u094d\u0937\u0947\u0924\u094d\u0930 \u0915\u093e \u092a\u094d\u0930\u092c\u0902\u0927\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f, \u092f\u0939\u093e\u0901 \u0915\u094d\u0932\u093f\u0915 \u0915\u0930\u0947\u0902</a>", 
  "Address Line 1": "\u092a\u0924\u093e \u092a\u0902\u0915\u094d\u0924\u093f 1", 
  "Address Line 2": "\u092a\u0924\u093e \u092a\u0902\u0915\u094d\u0924\u093f 2", 

@@ -2,6 +2,7 @@
  "Accounts": "Cuentas", 
  "Amount": "Cantidad", 
  "Amount (Default Curr.)": "Importe (Curr predeterminado.)", 
+ "Amount*": "Importe *", 
  "Brand": "Marca", 
  "Cost Center": "De centros de coste", 
  "Description": "Descripci\u00f3n", 
@@ -21,8 +22,10 @@
  "Qty": "Cantidad", 
  "Rate ": "Velocidad", 
  "Rate *(Default Curr.)": "* Rate (Curr predeterminado.)", 
+ "Rate*": "* Evaluar", 
  "Ref Rate ": "Precio ref", 
  "Ref Rate *": "Ref * Tarifa", 
+ "Ref Rate*": "Ref * Tarifa", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges": "Tabla de impuestos detalle descargue de maestro de art\u00edculos en forma de cadena y se almacenan en esta field.Used de Impuestos y Cargos", 
  "UOM": "UOM"
 }

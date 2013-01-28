@@ -1,11 +1,21 @@
 {
+ "# ###.##": "# # # #. # #", 
+ "#,###": "# # # #", 
+ "#,###.##": "# # # #. # #", 
+ "#,##,###.##": "#, # #, # # #. # #", 
+ "#.###": "#. # # #", 
+ "#.###,##": "#. # # #, # #", 
  "**Currency** Master": "Monnaie ** ** Ma\u00eetre", 
+ "1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent": "1 Monnaie = [?] FractionFor exemple 1 USD = 100 Cent", 
+ "A symbol for this currency. For e.g. $": "Un symbole de cette monnaie. Pour exemple $", 
  "Currency": "Monnaie", 
  "Currency Name": "Nom de la devise", 
  "Enabled": "Activ\u00e9", 
  "Fraction": "Fraction", 
  "Fraction Units": "Unit\u00e9s fraction", 
+ "How should this currency be formatted? If not set, will use system defaults": "Comment cette monnaie est format\u00e9? S&#39;il n&#39;est pas d\u00e9fini, utilisera par d\u00e9faut du syst\u00e8me", 
  "Number Format": "Format num\u00e9rique", 
  "Setup": "Installation", 
+ "Sub-currency. For e.g. \"Cent\"": "Sous-monnaie. Pour exemple: &quot;Cent&quot;", 
  "Symbol": "Symbole"
 }
