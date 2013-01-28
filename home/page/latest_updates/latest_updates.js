@@ -1,4 +1,10 @@
 erpnext.updates = [
+	["28st January, 2013", [
+		"List Views are now configurable: To set list views, check 'In List View' in Setup > Customize Form View in the fields table.",
+	]],
+	["24st January, 2013", [
+		"Integrated Languages in Profile and via browser settings. To set your language, click on your name in the toolbar then 'My Settings...'",
+	]],
 	["21st January, 2013", [
 		"Number Formatting: Added Number Format to Global Defaults & Currency",
 	]],
