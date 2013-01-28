@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 16:50:33", 
+  "creation": "2013-01-28 10:06:01", 
   "docstatus": 0, 
-  "modified": "2013-01-24 16:06:05", 
+  "modified": "2013-01-28 15:28:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,6 +57,7 @@
   "fieldname": "lead_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Contact Name", 
   "oldfieldname": "lead_name", 
   "oldfieldtype": "Data", 
@@ -84,6 +85,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Status", 
   "no_copy": 1, 
   "oldfieldname": "status", 
@@ -98,6 +100,7 @@
   "fieldname": "source", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Source", 
   "no_copy": 1, 
   "oldfieldname": "source", 
@@ -132,6 +135,7 @@
   "fieldname": "company_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Company Name", 
   "oldfieldname": "company_name", 
   "oldfieldtype": "Data", 
@@ -470,6 +474,6 @@
  {
   "cancel": 0, 
   "doctype": "DocPerm", 
-  "role": "Guest"
+  "role": "System Manager"
  }
 ]

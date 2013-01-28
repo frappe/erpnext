@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:40", 
+  "modified": "2013-01-28 15:28:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -116,6 +116,7 @@
   "doctype": "DocField", 
   "fieldname": "subject", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Subject", 
   "reqd": 1
  }, 
@@ -157,6 +158,7 @@
   "doctype": "DocField", 
   "fieldname": "email_sent", 
   "fieldtype": "Check", 
+  "in_list_view": 1, 
   "label": "Email Sent?", 
   "no_copy": 1, 
   "read_only": 1

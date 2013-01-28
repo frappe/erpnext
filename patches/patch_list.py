@@ -160,4 +160,5 @@ patch_list = [
 	"patches.january_2013.remove_landed_cost_master",
 	"patches.january_2013.reload_print_format",
 	"patches.january_2013.rebuild_tree",
+	"execute:webnotes.reload_doc('core','doctype','docfield') #2013-01-28",
 ]
