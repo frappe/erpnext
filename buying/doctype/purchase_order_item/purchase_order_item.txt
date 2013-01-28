@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-24 11:03:31", 
   "docstatus": 0, 
-  "modified": "2013-01-25 18:26:49", 
+  "modified": "2013-01-28 11:56:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -344,7 +344,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 1, 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
