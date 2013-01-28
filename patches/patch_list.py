@@ -161,5 +161,5 @@ patch_list = [
 	"patches.january_2013.reload_print_format",
 	"patches.january_2013.rebuild_tree",
 	"execute:webnotes.reload_doc('core','doctype','docfield') #2013-01-28",
-	"patches.january_2013.tabsessions_to_myisam.py",
+	"patches.january_2013.tabsessions_to_myisam",
 ]
