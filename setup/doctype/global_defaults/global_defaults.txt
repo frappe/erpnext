@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-28 10:36:35", 
+  "modified": "2013-01-28 15:09:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -91,6 +91,14 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "width": "50%"
+ }, 
+ {
+  "description": "Do not show any symbol like $ etc next to currencies.", 
+  "doctype": "DocField", 
+  "fieldname": "hide_currency_symbol", 
+  "fieldtype": "Select", 
+  "label": "Hide Currency Symbol", 
+  "options": "\nNo\nYes"
  }, 
  {
   "default": "INR", 

@@ -23,6 +23,7 @@ keydict = {
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',
+	'hide_currency_symbol':'hide_currency_symbol',
 	'price_list_name': 'default_price_list',
 	'price_list_currency': 'default_price_list_currency',
 	'item_group': 'default_item_group',
