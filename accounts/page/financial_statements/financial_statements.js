@@ -86,10 +86,10 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
   var company = sel_val($i('stmt_company'))
 
   var arg = {
-  	statement:sel_val($i('stmt_type'))
-  	,company:company,
-  	,period:sel_val($i('stmt_period'))
-  	,year:sel_val($i('stmt_fiscal_year'))
+  	statement:sel_val($i('stmt_type')),
+  	company:company,
+  	period:sel_val($i('stmt_period')),
+  	year:sel_val($i('stmt_fiscal_year'))
   }
 
   $c_obj('MIS Control', 'get_statement', docstring(arg), function(r,rt) {
