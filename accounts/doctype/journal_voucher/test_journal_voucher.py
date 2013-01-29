@@ -44,6 +44,14 @@ data = {
 		"is_pl_account": "No",
 		"group_or_ledger": "Ledger"
 	},
+	"test_cost_center": {
+		"doctype": "Cost Center",
+		"cost_center_name": "Test Cost Center",
+		"parent_cost_center": "Root - %s" % abbr,
+		"company_name": company,
+		"group_or_ledger": "Ledger",
+		"company_abbr": abbr
+	},
 	"journal_voucher": [
 		{
 			"doctype": "Journal Voucher",
@@ -59,7 +67,7 @@ data = {
 			"parentfield": "entries",
 			"account": "Test Expense - %s" % abbr,
 			"debit": 5000,
-			"cost_center": "Default CC Ledger - %s" % abbr,
+			"cost_center": "Test Cost Center - %s" % abbr,
 		},
 		{
 			"doctype": "Journal Voucher Detail",
@@ -80,6 +88,7 @@ class TestJournalVoucher(unittest.TestCase):
 		# create a dummy account
 		webnotes.model.insert([data["expense_account"]])
 		webnotes.model.insert([data["supplier_account"]])
+		webnotes.model.insert([data["test_cost_center"]])
 		
 	def tearDown(self):
 		webnotes.conn.rollback()
