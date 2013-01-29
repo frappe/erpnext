@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-14 16:33:26", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:26", 
+  "modified": "2013-01-29 16:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -181,7 +181,7 @@
   "label": "Incoming Rate", 
   "oldfieldname": "incoming_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -211,7 +211,7 @@
   "label": "Valuation Rate", 
   "oldfieldname": "valuation_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_width": "150px", 
   "width": "150px"
  }, 
@@ -222,7 +222,7 @@
   "label": "Stock Value", 
   "oldfieldname": "stock_value", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 

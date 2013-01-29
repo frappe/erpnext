@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:56", 
+  "modified": "2013-01-29 13:24:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -79,6 +79,7 @@
   "fieldname": "city", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "City/Town", 
   "reqd": 1, 
   "search_index": 1
@@ -96,6 +97,7 @@
   "fieldname": "country", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Country", 
   "options": "link:Country", 
   "reqd": 1, 
@@ -151,6 +153,7 @@
   "doctype": "DocField", 
   "fieldname": "is_shipping_address", 
   "fieldtype": "Check", 
+  "in_list_view": 1, 
   "label": "Is Shipping Address"
  }, 
  {
@@ -173,6 +176,7 @@
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
  }, 
@@ -190,6 +194,7 @@
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Supplier Name", 
   "read_only": 1, 
   "search_index": 0

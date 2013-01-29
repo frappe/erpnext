@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:20", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:22", 
+  "modified": "2013-01-29 16:27:54", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -63,7 +63,7 @@
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

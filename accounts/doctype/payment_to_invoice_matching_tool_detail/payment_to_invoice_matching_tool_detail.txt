@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:17", 
+  "modified": "2013-01-29 16:27:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,7 +40,7 @@
   "fieldname": "amt_due", 
   "fieldtype": "Currency", 
   "label": "Unmatched Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -48,7 +48,7 @@
   "fieldname": "amt_to_be_reconciled", 
   "fieldtype": "Currency", 
   "label": "Allocated Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 1
  }, 
  {
@@ -63,7 +63,7 @@
   "fieldname": "total_amt", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

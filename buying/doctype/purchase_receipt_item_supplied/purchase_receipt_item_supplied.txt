@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:10", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:19", 
+  "modified": "2013-01-29 16:27:51", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -98,7 +98,7 @@
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -117,7 +117,7 @@
   "label": "Amount", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

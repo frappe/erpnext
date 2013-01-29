@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:37", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:28", 
+  "modified": "2013-01-29 16:27:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "parent": "Purchase Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -435,7 +436,7 @@
   "no_copy": 1, 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0
@@ -448,7 +449,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -460,7 +461,7 @@
   "no_copy": 0, 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -472,7 +473,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -484,7 +485,7 @@
   "no_copy": 1, 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -495,7 +496,7 @@
   "label": "Rounded Total", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -814,7 +815,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
@@ -822,21 +822,13 @@
  {
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
   "role": "Supplier"
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "All", 
-  "write": 1
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -846,7 +838,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material User", 
   "submit": 0, 
   "write": 0

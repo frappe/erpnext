@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:34", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:26", 
+  "modified": "2013-01-29 16:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -120,7 +120,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -152,7 +152,7 @@
   "fieldname": "total_invoiced_amount", 
   "fieldtype": "Currency", 
   "label": "Total Invoiced Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 0, 
   "read_only": 1
  }, 

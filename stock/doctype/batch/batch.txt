@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:25", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:57", 
+  "modified": "2013-01-29 13:40:32", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -42,15 +42,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "batch_id", 
   "fieldtype": "Data", 
   "label": "Batch ID", 
@@ -61,12 +52,33 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item", 
+  "oldfieldname": "item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expiry_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Expiry Date", 
+  "oldfieldname": "expiry_date", 
+  "oldfieldtype": "Date"
  }, 
  {
   "doctype": "DocField", 
@@ -86,21 +98,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "expiry_date", 
-  "fieldtype": "Date", 
-  "label": "Expiry Date", 
-  "oldfieldname": "expiry_date", 
-  "oldfieldtype": "Date"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item", 
-  "fieldtype": "Link", 
-  "label": "Item", 
-  "oldfieldname": "item", 
-  "oldfieldtype": "Link", 
-  "options": "Item", 
-  "reqd": 1
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocPerm"

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:55:25", 
+  "modified": "2013-01-29 14:35:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,7 @@
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Supplier Name", 
   "no_copy": 1, 
   "oldfieldname": "supplier_name", 
@@ -62,6 +63,7 @@
   "doctype": "DocField", 
   "fieldname": "supplier_type", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Supplier Type", 
   "oldfieldname": "supplier_type", 
   "oldfieldtype": "Link", 

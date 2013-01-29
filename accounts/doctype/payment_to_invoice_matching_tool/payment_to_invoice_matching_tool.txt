@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 15:27:14", 
+  "creation": "2013-01-21 18:19:17", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:27", 
+  "modified": "2013-01-29 16:27:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,14 +56,6 @@
   "label": "Company", 
   "options": "Company", 
   "print_hide": 1
- },
- {
-  "doctype": "DocField", 
-  "fieldname": "account_type", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Account Type", 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -100,7 +92,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -108,7 +100,7 @@
   "fieldname": "pending_amt_to_reconcile", 
   "fieldtype": "Currency", 
   "label": "Outstanding Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

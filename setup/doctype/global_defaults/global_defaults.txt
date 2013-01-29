@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-28 15:09:04", 
+  "modified": "2013-01-29 14:55:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -114,7 +114,7 @@
   "fieldname": "number_format", 
   "fieldtype": "Select", 
   "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n#.###\n#,###"
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
  }, 
  {
   "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 

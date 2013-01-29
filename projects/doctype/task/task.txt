@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:21", 
+  "modified": "2013-01-29 16:27:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,6 +57,7 @@
   "fieldname": "subject", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Subject", 
   "oldfieldname": "subject", 
   "oldfieldtype": "Data", 
@@ -94,6 +95,7 @@
   "doctype": "DocField", 
   "fieldname": "project", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Project", 
   "oldfieldname": "project", 
   "oldfieldtype": "Link", 
@@ -103,6 +105,7 @@
   "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Status", 
   "no_copy": 1, 
   "oldfieldname": "status", 
@@ -114,6 +117,7 @@
   "fieldname": "priority", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Priority", 
   "oldfieldname": "priority", 
   "oldfieldtype": "Select", 
@@ -171,7 +175,7 @@
   "label": "Allocated Budget", 
   "oldfieldname": "allocated_budget", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -205,7 +209,7 @@
   "label": "Actual Budget", 
   "oldfieldname": "actual_budget", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 

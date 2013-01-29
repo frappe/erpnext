@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:16:20", 
+  "modified": "2013-01-29 17:52:06", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -73,6 +73,7 @@
   "doctype": "DocField", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Employee Name", 
   "oldfieldname": "employee_name", 
   "oldfieldtype": "Data"
@@ -82,6 +83,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Status", 
   "no_copy": 1, 
   "oldfieldname": "status", 
@@ -95,6 +97,7 @@
   "fieldname": "leave_type", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "Leave Type", 
   "oldfieldname": "leave_type", 
   "oldfieldtype": "Link", 

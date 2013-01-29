@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:16", 
+  "modified": "2013-01-29 16:27:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -105,7 +105,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "label": "Total Amount", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

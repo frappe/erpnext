@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:18", 
+  "creation": "2013-01-23 19:57:18", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:21", 
+  "modified": "2013-01-29 16:28:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,7 @@
   "fieldtype": "Data", 
   "hidden": 0, 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Customer Name", 
   "no_copy": 1, 
   "oldfieldname": "customer_name", 
@@ -127,6 +128,7 @@
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Territory", 
   "oldfieldname": "territory", 
   "oldfieldtype": "Link", 
@@ -277,7 +279,7 @@
   "label": "Credit Limit", 
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "permlevel": 2
  }, 
  {

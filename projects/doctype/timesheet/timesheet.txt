@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:26", 
+  "modified": "2013-01-29 14:36:53", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -53,6 +53,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 0, 
+  "in_list_view": 1, 
   "label": "Status", 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
@@ -116,6 +117,7 @@
   "doctype": "DocField", 
   "fieldname": "notes", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "label": "Notes"
  }, 
  {

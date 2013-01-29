@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:22", 
+  "modified": "2013-01-29 16:27:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -85,7 +85,7 @@
   "label": "Basic Rate", 
   "oldfieldname": "basic_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1
  }, 
  {

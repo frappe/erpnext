@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:04", 
+  "modified": "2013-01-28 17:35:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,6 +60,7 @@
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 0, 
   "label": "Customer", 
   "oldfieldname": "customer", 
   "oldfieldtype": "Link", 
@@ -89,7 +90,8 @@
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
-  "label": "Name", 
+  "in_list_view": 1, 
+  "label": "Customer Name", 
   "oldfieldname": "customer_name", 
   "oldfieldtype": "Data", 
   "read_only": 1, 

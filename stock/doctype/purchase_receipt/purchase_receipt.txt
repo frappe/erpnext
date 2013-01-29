@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:24:18", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:30", 
+  "modified": "2013-01-29 16:28:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "parent": "Purchase Receipt", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -80,7 +81,8 @@
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "Name", 
+  "in_list_view": 1, 
+  "label": "Supplier Name", 
   "read_only": 1
  }, 
  {
@@ -241,6 +243,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_order_no", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "Purchase Order", 
   "no_copy": 1, 
   "oldfieldname": "purchase_order_no", 
@@ -451,7 +454,7 @@
   "label": "Net Total", 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -465,7 +468,7 @@
   "label": "Taxes and Charges Added", 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -476,7 +479,7 @@
   "label": "Taxes and Charges Deducted", 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -487,7 +490,7 @@
   "label": "Total Tax", 
   "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -498,7 +501,7 @@
   "label": "Grand Total", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -509,7 +512,7 @@
   "label": "Rounded Total", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -895,7 +898,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
@@ -903,21 +905,13 @@
  {
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
   "role": "Supplier"
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "All", 
-  "write": 1
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material Manager", 
   "submit": 1, 
   "write": 1
@@ -927,7 +921,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1
