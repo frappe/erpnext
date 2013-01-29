@@ -12,15 +12,13 @@
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
 patch_list = [
 	"patches.mar_2012.so_rv_mapper_fix", 
 	"patches.mar_2012.clean_property_setter", 
-	"patches.jan_mar_2012.sync_ref_db", 
 	"patches.april_2012.naming_series_patch", 
-	"patches.jan_mar_2012.rename_dt", 
 	"patches.mar_2012.cleanup_control_panel", 
 	"patches.mar_2012.doctype_get_refactor", 
 	"patches.mar_2012.delete_docformat", 
