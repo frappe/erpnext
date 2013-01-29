@@ -220,77 +220,9 @@ class DocType:
 	def clear_advances(self, obj,table_name,table_field_name):
 		for d in getlist(obj.doclist,table_field_name):
 			if not flt(d.allocated_amount):
-				webnotes.conn.sql("update `tab%s` set parent = '' where name = '%s' and parent = '%s'" % (table_name, d.name, d.parent))
+				webnotes.conn.sql("update `tab%s` set parent = '' where name = '%s' \
+					and parent = '%s'" % (table_name, d.name, d.parent))
 				d.parent = ''
-
-	# Update aginst document in journal voucher
-	#------------------------------------------
-	def update_against_document_in_jv(self, obj, table_field_name, against_document_no, against_document_doctype, account_head, dr_or_cr,doctype):
-		for d in getlist(obj.doclist, table_field_name):
-			self.validate_jv_entry(d, account_head, dr_or_cr)
-			if flt(d.advance_amount) == flt(d.allocated_amount):
-				# cancel JV
-				jv_obj = get_obj('Journal Voucher', d.journal_voucher, with_children=1)
-				get_obj(dt='GL Control').make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj =1)
-
-				# update ref in JV Detail
-				webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s' where name = '%s'" % (doctype=='Purchase Invoice' and 'against_voucher' or 'against_invoice', cstr(against_document_no), d.jv_detail_no))
-
-				# re-submit JV
-				jv_obj = get_obj('Journal Voucher', d.journal_voucher, with_children =1)
-				get_obj(dt='GL Control').make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel = 0, adv_adj =1)
-
-			elif flt(d.advance_amount) > flt(d.allocated_amount):
-				# cancel JV
-				jv_obj = get_obj('Journal Voucher', d.journal_voucher, with_children=1)
-				get_obj(dt='GL Control').make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj = 1)
-
-				# add extra entries
-				self.add_extra_entry(jv_obj, d.journal_voucher, d.jv_detail_no, flt(d.allocated_amount), account_head, doctype, dr_or_cr, against_document_no)
-
-				# re-submit JV
-				jv_obj = get_obj('Journal Voucher', d.journal_voucher, with_children =1)
-				get_obj(dt='GL Control').make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel = 0, adv_adj = 1)
-			else:
-				msgprint("Allocation amount cannot be greater than advance amount")
-				raise Exception
-				
-
-	# Add extra row in jv detail for unadjusted amount
-	#--------------------------------------------------
-	def add_extra_entry(self,jv_obj,jv,jv_detail_no, allocate, account_head, doctype, dr_or_cr, against_document_no):
-		# get old entry details
-
-		jvd = webnotes.conn.sql("select %s, cost_center, balance, against_account from `tabJournal Voucher Detail` where name = '%s'" % (dr_or_cr,jv_detail_no))
-		advance = jvd and flt(jvd[0][0]) or 0
-		balance = flt(advance) - flt(allocate)
-
-		# update old entry
-		webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s', %s = '%s' where name = '%s'" % (dr_or_cr, flt(allocate), doctype == "Purchase Invoice" and 'against_voucher' or 'against_invoice',cstr(against_document_no), jv_detail_no))
-
-		# new entry with balance amount
-		add = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', jv_obj.doclist)
-		add.account = account_head
-		add.cost_center = cstr(jvd[0][1])
-		add.balance = cstr(jvd[0][2])
-		add.fields[dr_or_cr] = balance
-		add.against_account = cstr(jvd[0][3])
-		add.is_advance = 'Yes'
-		add.save(1)
-		
-	# check if advance entries are still valid
-	# ----------------------------------------
-	def validate_jv_entry(self, d, account_head, dr_or_cr):
-		# 1. check if there is already a voucher reference
-		# 2. check if amount is same
-		# 3. check if is_advance is 'Yes'
-		# 4. check if jv is submitted
-		ret = webnotes.conn.sql("select t2.%s from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 where t1.name = t2.parent and ifnull(t2.against_voucher, '') = '' and ifnull(t2.against_invoice, '') = '' and t2.account = '%s' and t1.name = '%s' and t2.name = '%s' and t2.is_advance = 'Yes' and t1.docstatus=1 and t2.%s = %s" % (dr_or_cr, account_head, d.journal_voucher, d.jv_detail_no, dr_or_cr, d.advance_amount))
-		if (not ret):
-			msgprint("Please click on 'Get Advances Paid' button as the advance entries have been changed.")
-			raise Exception
-		return
-
 
 	def reconcile_against_document(self, args):
 		"""
