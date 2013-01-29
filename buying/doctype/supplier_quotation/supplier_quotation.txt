@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-21 18:19:20", 
+  "creation": "2013-01-29 17:54:11", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:59", 
+  "modified": "2013-01-29 18:11:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,6 +71,7 @@
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "Name", 
   "read_only": 1
  }, 
@@ -357,6 +358,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total_import", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Grand Total (Import)", 
   "no_copy": 0, 
   "oldfieldname": "grand_total_import", 

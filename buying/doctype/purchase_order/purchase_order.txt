@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 15:11:37", 
+  "creation": "2013-01-29 17:54:10", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:59", 
+  "modified": "2013-01-29 18:16:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,6 +71,7 @@
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "Name", 
   "read_only": 1
  }, 
@@ -402,6 +403,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total_import", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Grand Total (Import)", 
   "no_copy": 0, 
   "oldfieldname": "grand_total_import", 
@@ -725,7 +727,8 @@
   "description": "% of materials received against this Purchase Order", 
   "doctype": "DocField", 
   "fieldname": "per_received", 
-  "fieldtype": "Float", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
   "label": "% Received", 
   "no_copy": 1, 
   "oldfieldname": "per_received", 
@@ -738,7 +741,8 @@
   "description": "% of materials billed against this Purchase Order.", 
   "doctype": "DocField", 
   "fieldname": "per_billed", 
-  "fieldtype": "Float", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
   "label": "% Billed", 
   "no_copy": 1, 
   "oldfieldname": "per_billed", 
