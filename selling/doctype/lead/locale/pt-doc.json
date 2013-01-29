@@ -1,4 +1,5 @@
 {
+ "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>": "<a href=\"#!Sales Browser/Territory\">Para gerenciar Territ\u00f3rio, clique aqui</a>", 
  "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">Para gerenciar Territ\u00f3rio, clique aqui</a>", 
  "Address Line 1": "Endere\u00e7o Linha 1", 
  "Address Line 2": "Endere\u00e7o Linha 2", 

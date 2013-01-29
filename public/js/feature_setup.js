@@ -135,12 +135,30 @@ pscript.feature_dict = {
 		'Sales BOM': {'fields':['currency']},
 		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','amount','basic_rate']}
 	},
+	
 	'fs_imports': {
-		'Purchase Invoice': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'entries':['purchase_ref_rate', 'amount','rate']},
-		'Purchase Order': {'fields':['Note HTML','conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'po_details':['purchase_ref_rate', 'amount','purchase_rate']},
-		'Purchase Receipt': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'purchase_receipt_details':['purchase_ref_rate','amount','purchase_rate']},
-		'Supplier Quotation': {'fields':['conversion_rate','currency']}
+		'Purchase Invoice': {
+			'fields': ['conversion_rate', 'currency', 'grand_total',
+		 		'in_words', 'net_total', 'other_charges_added',
+		 		'other_charges_deducted'], 
+			'entries': ['purchase_ref_rate', 'amount','rate']
+		},
+		'Purchase Order': {
+			'fields': ['Note HTML', 'conversion_rate','currency', 'grand_total',
+			'in_words', 'net_total', 'other_charges_added',
+			 'other_charges_deducted'],
+			'po_details': ['purchase_ref_rate', 'amount','purchase_rate']
+		},
+		'Purchase Receipt': {
+			'fields': ['conversion_rate', 'currency','grand_total', 'in_words',
+			 	'net_total', 'other_charges_added', 'other_charges_deducted'],
+			'purchase_receipt_details': ['purchase_ref_rate','amount','purchase_rate']
+		},
+		'Supplier Quotation': {
+			'fields':['conversion_rate','currency']
+		}
 	},
+	
 	'fs_item_advanced': {
 		'Item': {'fields':['item_customer_details']}
 	},

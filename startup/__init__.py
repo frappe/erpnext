@@ -26,6 +26,8 @@ lang_names = {
 	"français": "fr",
 	"português": "pt",
 	"nederlands": "nl",
+	"српски":"sr",
+	"தமிழ்": "ta",
 	"العربية":"ar"
 }
 

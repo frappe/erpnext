@@ -1,0 +1,3210 @@
+,
+ against same operation,एक ही आपरेशन के खिलाफ
+ by Role ,भूमिका द्वारा
+ cannot be 0,0 नहीं हो सकते हैं
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item","कम से कम के लिए प्रणाली में शून्य के बराबर होती है, \ मूल्यांकन दर इस मद के लिए अनिवार्य है"
+ is mandatory,अनिवार्य है
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,अब डिफ़ॉल्ट वित्त वर्ष है. \ कृपया को प्रभावी करने के बदलाव के लिए अपने ब्राउज़र को ताज़ा.
+ or the BOM is cancelled or inactive,या BOM रद्द कर दिया है या निष्क्रिय
+ should be same as that in ,में उस के रूप में ही किया जाना चाहिए
+"""Company History""",&quot;कंपनी इतिहास&quot;
+"""Team Members"" or ""Management""",&quot;टीम के सदस्यों&quot; या &quot;प्रबंधन&quot;
+# ###.##,# # # # # #
+"#,###",# # # #
+"#,###.##",# # # # # #
+"#,##,###.##",# # # # # # # #
+#.###,# # # #
+"#.###,##",# # # # # #
+%  Delivered,% वितरित
+% Amount Billed,% बिल की राशि
+% Billed,% बिल
+% Installed,% Installed
+% Ordered,% का आदेश दिया
+% Received,% प्राप्त
+% of materials billed against this Delivery Note,सामग्री का% इस डिलिवरी नोट के खिलाफ बिल
+% of materials billed against this Purchase Order.,सामग्री का% इस खरीद के आदेश के खिलाफ बिल.
+% of materials billed against this Purchase Receipt,सामग्री का% इस खरीद रसीद के खिलाफ बिल
+% of materials billed against this Sales Order,% सामग्री की बिक्री के इस आदेश के खिलाफ बिल
+% of materials delivered against this Delivery Note,इस डिलिवरी नोट के खिलाफ दिया सामग्री का%
+% of materials delivered against this Sales Order,इस बिक्री आदेश के खिलाफ दिया सामग्री का%
+% of materials ordered against this Purchase Requisition,सामग्री के% इस खरीद अधिग्रहण के खिलाफ आदेश दिया है
+% of materials received against this Purchase Order,इस खरीद के आदेश के खिलाफ प्राप्त सामग्री की%
+"' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;स्टॉक सुलह का उपयोग करने में कामयाब नहीं कर सकते हैं. \ आप जोड़ सकते हैं / सीरियल हटाने के कोई सीधे, से \ इस मद के स्टॉक को संशोधित करने के लिए कर सकते हैं."
+' does not exists in ,&#39;में नहीं मौजूद है
+* Will be calculated in the transaction.,* लेनदेन में गणना की जाएगी.
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**","** बजट वितरण ** मदद करता है और आप महीने भर में आपका बजट वितरित अगर आप अपने business.To में इस वितरण का उपयोग कर बजट है, इस बजट ** वितरण सेट ** ** ** लागत केंद्र में वितरित मौसम है"
+**Currency** Master,** मुद्रा ** मास्टर
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,** वित्त वर्ष ** एक वित्तीय वर्ष का प्रतिनिधित्व करता है. सभी लेखा प्रविष्टियों और अन्य प्रमुख लेनदेन ** वित्त वर्ष के खिलाफ ट्रैक कर रहे हैं.
+0,0
+01,01
+02,02
+03,03
+04,04
+05,05
+06,06
+07,07
+08,08
+09,09
+1,1
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,मुद्रा 1 = FractionFor उदा 1 अमरीकी डालर [?] = 100 प्रतिशत
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. इस विकल्प का उपयोग ग्राहक बुद्धिमान आइटम कोड को बनाए रखने और अपने कोड के आधार पर बनाने के लिए उन्हें खोजा
+10,10
+100,100
+11,11
+12,12
+12px,12px
+13px,13px
+14px,14px
+15,15
+15px,15px
+16px,16px
+2,2
+2 days ago,2 दिन पहले
+20,20
+25,25
+3,3
+30,30
+35,35
+4,4
+40,40
+45,45
+5,5
+50,50
+55,55
+6,6
+60,60
+65,65
+70,70
+75,75
+80,80
+85,85
+90,90
+95,95
+: It is linked to other active BOM(s),: यह अन्य सक्रिय बीओएम (ओं) से जुड़ा हुआ है
+: Mandatory for a Recurring Invoice.,: एक आवर्ती चालान के लिए अनिवार्य है.
+<,&lt;
+<=,&lt;=
+"<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Sales Browser/Customer Group"">ग्राहक समूहों को प्रबंधित करने के लिए, यहाँ क्लिक करें</a>"
+"<a href=""#!Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#!Sales Browser/Item Group"">आइटम समूह का प्रबंधन</a>"
+"<a href=""#!Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#!Sales Browser/Territory"">क्षेत्र का प्रबंधन करने के लिए, यहाँ क्लिक करें</a>"
+"<a href=""#Sales Browser/Customer Group"">To manage Territory, click here</a>","<a href=""#Sales Browser/Customer Group"">क्षेत्र का प्रबंधन करने के लिए, यहाँ क्लिक करें</a>"
+"<a href=""#Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#Sales Browser/Territory"">क्षेत्र का प्रबंधन करने के लिए, यहाँ क्लिक करें</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">नामकरण विकल्प</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>रद्द</b> आप उन्हें रद्द करने और उन्हें में संशोधन प्रस्तुत दस्तावेजों को बदलने की अनुमति देता है.
+"<span class=""sys_manager"">To setup, please go to Setup > Naming Series</span>","<span class=""sys_manager"">सेटअप करने के लिए, जाने के लिए कृपया सेटअप&gt; नामकरण सीरीज</span>"
+=,=
+>,&gt;
+>=,=&gt;
+A,एक
+A Lead with this email id should exist,इस ईमेल आईडी के साथ एक लीड मौजूद होना चाहिए
+A Product is shown on the website and is linked to an item.,एक उत्पाद की वेबसाइट पर दिखाया जाता है और एक आइटम के लिए जुड़ा हुआ है.
+"A Product or a Service that is bought, sold or kept in stock.","एक उत्पाद या सेवा है कि खरीदा है, बेचा या स्टॉक में रखा."
+A logical Warehouse against which stock entries are made.,एक तार्किक वेयरहाउस के खिलाफ जो शेयर प्रविष्टियों बना रहे हैं.
+A new popup will open that will ask you to select further conditions.,एक नया पॉपअप खुल जाएगा कि आप से पूछना आगे शर्तों का चयन करेंगे.
+A symbol for this currency. For e.g. $,इस मुद्रा के लिए एक प्रतीक है. उदाहरण के लिए $
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,एक तीसरे पक्ष के वितरक / डीलर / कमीशन एजेंट / सहबद्ध / पुनर्विक्रेता जो एक आयोग के लिए कंपनियों के उत्पादों को बेचता है.
+A user can have multiple values for a property.,एक उपयोगकर्ता एक संपत्ति के लिए एकाधिक मान हो सकते हैं.
+A+,A +
+A-,A-
+AB+,AB +
+AB-,अटल बिहारी
+AMC Expiry Date,एएमसी समाप्ति तिथि
+ATT,ATT
+Abbr,Abbr
+About,के बारे में
+About Us Settings,हमारे बारे में सेटिंग्स
+About Us Team Member,हमारे दल के सदस्य के बारे में
+Above Value,मूल्य से ऊपर
+Absent,अनुपस्थित
+Acceptance Criteria,स्वीकृति मानदंड
+Accepted,स्वीकार किया
+Accepted Quantity,स्वीकार किए जाते हैं मात्रा
+Accepted Warehouse,स्वीकार किए जाते हैं वेअरहाउस
+Account,खाता
+Account Balance,खाता शेष
+Account Details,खाता विवरण
+Account Head,लेखाशीर्ष
+Account Id,खाता आईडी
+Account Info,खाता जानकारी
+Account Name,खाते का नाम
+Account Type,खाता प्रकार
+"Accounting entry frozen up to this date, nobody can do / modify entry except authorized person","लेखा प्रविष्टि इस तिथि के लिए जमे हुए, कोई भी / अधिकृत व्यक्ति के अलावा कर सकते हैं प्रविष्टि को संशोधित"
+Accounting journal entries.,लेखा पत्रिका प्रविष्टियों.
+Accounts,लेखा
+Accounts Browser,लेखा ब्राउज़र
+Accounts Frozen Upto,लेखा तक जमे हुए
+Accounts Home,लेखा घर
+Accounts Payable,लेखा देय
+Accounts Receivable,लेखा प्राप्य
+Action,कार्रवाई
+Action Detail,लड़ाई विस्तार
+Action html,लड़ाई html
+Active,सक्रिय
+Active: Will extract emails from ,सक्रिय: ईमेल से निकालने
+Activity,सक्रियता
+Activity Log,गतिविधि लॉग
+Activity Name,गतिविधि नाम
+Activity Type,गतिविधि प्रकार
+Actual,वास्तविक
+Actual Budget,वास्तविक बजट
+Actual Completion Date,वास्तविक पूरा करने की तिथि
+Actual Date,वास्तविक तारीख
+Actual End Date,वास्तविक समाप्ति तिथि
+Actual End Time,वास्तविक अंत समय
+Actual Qty,वास्तविक मात्रा
+Actual Qty (at source/target),वास्तविक मात्रा (स्रोत / लक्ष्य पर)
+Actual Qty After Transaction,लेन - देन के बाद वास्तविक मात्रा
+Actual Quantity,वास्तविक मात्रा
+Actual Start Date,वास्तविक प्रारंभ दिनांक
+Actual Start Time,वास्तविक प्रारंभ समय
+Add,जोड़ना
+Add / Edit Taxes and Charges,कर और प्रभार जोड़ें / संपादित करें
+Add A New Rule,एक नया नियम जोड़ें
+Add A Property,एक संपत्ति जोड़ें
+Add Attachments,अनुलग्नकों को जोड़
+Add CSS,सीएसएस जोड़ें
+Add Column,कॉलम जोड़ें
+Add Message,संदेश जोड़ें
+Add New Permission Rule,नई अनुमति नियम जोड़ें
+Add Reply,प्रत्युत्तर जोड़ें
+Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.,खरीद रसीद के लिए नियम और शर्तों को जोड़ें. तुम भी एक नियम और शर्तें मास्टर को तैयार कर सकते हैं और टेम्पलेट का उपयोग करें.
+Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template,खरीद अधिग्रहण के लिए नियम और शर्तों को जोड़ें. तुम भी एक नियम और शर्तें मास्टर तैयार कर सकते हैं टेम्पलेट का उपयोग करें
+"Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template","कोटेशन के लिए नियम और शर्तों को जोड़ें प्रस्ताव आदि के भुगतान, नियम की वैधता की तरह आप भी एक नियम और शर्तें मास्टर तैयार कर सकते हैं और टेम्पलेट का उपयोग करें"
+Add code as &lt;script&gt;,&lt;script&gt; कोड के रूप में जोड़ें
+Add custom code to forms,रूपों के लिए कस्टम कोड जोड़ें
+Add fields to forms,रूपों के लिए क्षेत्रों जोड़ें
+Add headers for standard print formats,मानक प्रिंट प्रारूपों के लिए हेडर जोड़ें
+Add or Deduct,जोड़ें या घटा
+Add rows to set annual budgets on Accounts.,पंक्तियाँ जोड़ें लेखा पर वार्षिक बजट निर्धारित.
+Add to To Do,जोड़ें करने के लिए क्या
+Add to To Do List of,को जोड़ने के लिए की सूची
+Add/Remove Recipients,प्राप्तकर्ता जोड़ें / निकालें
+"Add/remove users, set roles, passwords etc","जोड़ें / उपयोगकर्ताओं को दूर करने के लिए, सेट भूमिकाओं, पासवर्ड आदि"
+Additional Columns,अतिरिक्त स्तंभ
+Additional Conditions,अतिरिक्त शर्तों
+Additional Info,अतिरिक्त जानकारी
+Additional Tables,अतिरिक्त टेबल्स
+Address,पता
+Address & Contacts,पता और संपर्क
+Address Desc,जानकारी पता करने के लिए
+Address Details,पते की जानकारी
+Address HTML,HTML पता करने के लिए
+Address Line 1,पता पंक्ति 1
+Address Line 2,पता पंक्ति 2
+Address Line1,पता लाइन 1
+Address Line2,लाइन 2 पता
+Address Title,पता शीर्षक
+Address Type,पता प्रकार
+Address and other legal information you may want to put in the footer.,पता और अन्य कानूनी जानकारी आप पाद लेख में डाल सकते हैं.
+Address to be displayed on the Contact Page,पता संपर्क पृष्ठ पर प्रदर्शित किया
+Adds a custom field to a DocType,एक DOCTYPE एक कस्टम फ़ील्ड जोड़ता है
+Adds a custom script (client or server) to a DocType,एक DOCTYPE के लिए एक कस्टम स्क्रिप्ट (क्लाइंट या सर्वर) जोड़ता है
+Advance Amount,अग्रिम राशि
+Advance amount,अग्रिम राशि
+Advanced Scripting,उन्नत स्क्रीप्टिंग
+Advanced Settings,उन्नत सेटिंग्स
+Advances,अग्रिम
+Advertisement,विज्ञापन
+After Sale Installations,बिक्री के प्रतिष्ठान के बाद
+"After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field","खरीद अधिग्रहण रद्द करने के बाद, एक संवाद बॉक्स आप रद्द करने के लिए कारण है जो इस क्षेत्र में परिलक्षित होगा पूछना होगा"
+Against,के खिलाफ
+Against Account,खाते के खिलाफ
+Against Docname,Docname खिलाफ
+Against Doctype,Doctype के खिलाफ
+Against Document Date,दस्तावेज़ तारीख के खिलाफ
+Against Document Detail No,दस्तावेज़ विस्तार नहीं के खिलाफ
+Against Document No,दस्तावेज़ के खिलाफ कोई
+Against Expense Account,व्यय खाते के खिलाफ
+Against Income Account,आय खाता के खिलाफ
+Against Journal Voucher,जर्नल वाउचर के खिलाफ
+Against Purchase Invoice,खरीद चालान के खिलाफ
+Against Sales Invoice,बिक्री चालान के खिलाफ
+Against Voucher,वाउचर के खिलाफ
+Against Voucher Type,वाउचर प्रकार के खिलाफ
+Agent,एजेंट
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials","** आइटम के सकल समूह में एक और आइटम ** **. यह उपयोगी है अगर आप एक पैकेज में ** कुछ ** आइटम bundling हैं और आप पैक ** और नहीं कुल ** आइटम ** ** आइटम के स्टॉक को बनाए रखने. पैकेज ** आइटम ** है &quot;स्टॉक आइटम है&quot; &quot;नहीं&quot; के रूप में और के रूप में &quot;हाँ&quot; &quot;बिक्री आइटम है,&quot; उदाहरण के लिए: यदि आप लैपटॉप और Backpacks बेच रहे हैं और अलग से एक विशेष मूल्य है अगर ग्राहक दोनों खरीदता BOM = विधेयक की सामग्री:, तो एक नया लैपटॉप + बैग बिक्री बीओएम Item.Note होगा"
+Aging Date,तिथि एजिंग
+All Active Leads,सभी सक्रिय सुराग
+All Addresses.,सभी पते.
+All Blog Subscribers,सभी ब्लॉग सदस्य
+All Contact,सभी संपर्क
+All Contacts,सभी संपर्क
+All Contacts.,सभी संपर्क.
+All Customer Contact,सभी ग्राहक संपर्क
+All Customer Contacts,सभी ग्राहक संपर्क
+All Employee (Active),सभी कर्मचारी (सक्रिय)
+All Lead (Open),सभी लीड (ओपन)
+All Leads,सभी सुराग
+All Products or Services.,सभी उत्पादों या सेवाओं.
+All Sales Partner Contact,सभी बिक्री साथी संपर्क
+All Sales Person,सभी बिक्री व्यक्ति
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,सभी बिक्री लेनदेन कई ** बिक्री व्यक्तियों ** इतनी है कि आप सेट और लक्ष्यों की निगरानी कर सकते हैं के खिलाफ चिह्नित किया जा सकता है.
+All Supplier Contact,सभी आपूर्तिकर्ता संपर्क
+All attendance dates inbetween selected Attendance From Date and Attendance To Date will come in the template with employees list.,सभी उपस्थिति तिथियाँ inbetween तिथि और तिथि उपस्थिति टेम्पलेट में कर्मचारियों की सूची के साथ आ जाएगा से चयनित उपस्थिति.
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","मुद्रा, रूपांतरण दर, निर्यात कुल निर्यात महायोग आदि की तरह सभी के निर्यात से संबंधित क्षेत्रों में उपलब्ध हैं <br> डिलिवरी नोट, स्थिति, कोटेशन, बिक्री चालान, विक्रय आदेश आदि"
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","मुद्रा, रूपांतरण दर, आयात कुल आयात भव्य कुल आदि की तरह सभी के आयात से संबंधित क्षेत्रों में उपलब्ध हैं <br> खरीद रसीद, प्रदायक कोटेशन, खरीद चालान, आदेश आदि खरीद"
+All items have already been transferred \				for this Production Order.,सभी आइटम पहले से ही इस आदेश के लिए उत्पादन किया गया है \ स्थानांतरित कर दिया.
+"All possible Workflow States and roles of the workflow. <br>Docstatus Options: 0 is""Saved"", 1 is ""Submitted"" and 2 is ""Cancelled""","सभी संभव कार्यप्रवाह राज्यों और कार्यप्रवाह की भूमिका. <br> Docstatus विकल्प: 0 &quot;बच&quot;, 1 &quot;प्रस्तुत&quot; है और 2 &quot;रद्द&quot;"
+Allocate,आवंटित
+Allocate leaves for the year.,वर्ष के लिए पत्तियों आवंटित.
+Allocated (%),आवंटित (%)
+Allocated Amount,आवंटित राशि
+Allocated Budget,आवंटित बजट
+Allocated amount,आवंटित राशि
+Allow Attach,अनुमति देते
+Allow Bill of Materials,सामग्री के बिल की अनुमति दें
+Allow Negative Stock,नकारात्मक स्टॉक की अनुमति दें
+Allow Production Order,उत्पादन का आदेश दें
+Allow Rename,नाम बदलें की अनुमति दें
+Allow Samples,नमूने की अनुमति दें
+Allow on Submit,भेजें पर अनुमति दें
+Allow this price in purchase related forms,खरीद में इस मूल्य से संबंधित प्रपत्रों की अनुमति दें
+Allow this price in sales related forms,बिक्री से संबंधित रूपों में इस मूल्य की अनुमति दें
+Allow user to login only after this hour (0-24),उपयोगकर्ता इस घंटे के बाद ही प्रवेश करने की अनुमति दें (0-24)
+Allow user to login only before this hour (0-24),उपयोगकर्ता इस घंटे से पहले ही प्रवेश करने की अनुमति दें (0-24)
+Allowance Percent,भत्ता प्रतिशत
+Allowed,रख सकते है
+Amend,संशोधन करना
+Amended From,से संशोधित
+Amendment Date,संशोधन तिथि
+Amount,राशि
+Amount <=,राशि &lt;=
+Amount >=,राशि&gt; =
+Amount*,राशि *
+"An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a>]","Ico विस्तार के साथ एक आइकन फ़ाइल. 16 x 16 पिक्सल होना चाहिए. एक favicon जनरेटर का उपयोग करते हुए उत्पन्न. [ <a href=""http://favicon-generator.org/"" target=""_blank"">favicon generator.org</a> ]"
+Analytics,विश्लेषिकी
+Answer,जवाब
+"Any other comments, noteworthy effort that should go in the records.","किसी भी अन्य टिप्पणी, उल्लेखनीय प्रयास है कि रिकॉर्ड में जाना चाहिए."
+Applicable Holiday List,लागू अवकाश सूची
+Applicable To (Designation),के लिए लागू (पद)
+Applicable To (Employee),के लिए लागू (कर्मचारी)
+Applicable To (Role),के लिए लागू (रोल)
+Applicable To (User),के लिए लागू (उपयोगकर्ता)
+Applicable only if valuation method is moving average,लागू सिर्फ अगर मूल्यांकन विधि औसत बढ़ रहा है
+Applicant Name,आवेदक के नाम
+Applicant for a Job,एक नौकरी के लिए आवेदक
+Applicant for a Job (extracted from jobs email).,एक नौकरी के लिए आवेदक (नौकरियों ईमेल से निकाले).
+Applications for leave.,छुट्टी के लिए आवेदन.
+Apply / Approve Leaves,पत्तियां लागू / स्वीकृत
+Appraisal,मूल्यांकन
+Appraisal Goal,मूल्यांकन लक्ष्य
+Appraisal Goals,मूल्यांकन लक्ष्य
+Appraisal Template,मूल्यांकन टेम्पलेट
+Appraisal Template Goal,मूल्यांकन टेम्पलेट लक्ष्य
+Appraisal Template Title,मूल्यांकन टेम्पलेट शीर्षक
+Approval Status,स्वीकृति स्थिति
+Approved,अनुमोदित
+Approver,सरकारी गवाह
+Approving Role,रोल की स्वीकृति
+Approving User,उपयोगकर्ता के स्वीकृति
+Are you sure you want to delete the attachment?,क्या आप सुनिश्चित करें कि आप अनुलग्नक हटाना चाहते हैं?
+Arial,Arial
+Arrear Amount,बकाया राशि
+"As a best practice, do not assign the same set of permission rule to different Roles instead set multiple Roles to the User","एक सबसे अच्छा अभ्यास के रूप में, अलग भूमिकाओं बजाय उपयोगकर्ता को कई भूमिकाएं निर्धारित अनुमति शासन के एक ही सेट प्रदान नहीं करते"
+As existing qty for item: ,आइटम के लिए मौजूदा मात्रा के रूप में:
+As per Stock UOM,स्टॉक UOM के अनुसार
+Ascending,आरोही
+Assign To,करने के लिए निरुपित
+Assigned By,द्वारा सौंपा
+Associate a DocType to the Print Format,प्रिंट प्रारूप एक DOCTYPE संबद्ध
+Atleast one warehouse is mandatory,कम से कम एक गोदाम अनिवार्य है
+Attach,संलग्न करना
+Attach Document Print,दस्तावेज़ प्रिंट संलग्न
+Attachments,किए गए अनुलग्नकों के
+Attempted to Contact,संपर्क करने का प्रयास
+Attendance,उपस्थिति
+Attendance Control Panel,उपस्थिति नियंत्रण कक्ष
+Attendance Date,उपस्थिति तिथि
+Attendance Details,उपस्थिति विवरण
+Attendance From Date,दिनांक से उपस्थिति
+Attendance To Date,तिथि उपस्थिति
+Attendance record.,उपस्थिति रिकॉर्ड.
+Attributions,Attributions
+Authorization Control,प्राधिकरण नियंत्रण
+Authorization Rule,प्राधिकरण नियम
+Authorized Role (Frozen Entry),प्राधिकृत रोल (जमे हुए एंट्री)
+Authourized Role (Frozen Entry),Authourized रोल (जमे हुए एंट्री)
+Auto Email Id,ऑटो ईमेल आईडी
+Auto Name,ऑटो नाम
+Auto generated,उत्पन्न ऑटो
+Automatically updated via Stock Entry of type Manufacture/Repack,स्वतः प्रकार निर्माण / Repack स्टॉक प्रविष्टि के माध्यम से अद्यतन
+Autoreply when a new mail is received,स्वतः जब एक नया मेल प्राप्त होता है
+Available Qty at Warehouse,गोदाम में उपलब्ध मात्रा
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","बीओएम, डिलिवरी नोट, खरीद चालान, उत्पादन का आदेश, खरीद आदेश, खरीद रसीद, बिक्री चालान, विक्रय आदेश, स्टॉक एंट्री, Timesheet में उपलब्ध"
+Average Discount,औसत छूट
+B,बी
+B+,B +
+B-,बी
+BILL,विधेयक
+BILLJ,BILLJ
+BOM,बीओएम
+BOM Detail No,बीओएम विस्तार नहीं
+BOM Explosion Item,बीओएम धमाका आइटम
+BOM Item,बीओएम आइटम
+BOM No,नहीं बीओएम
+BOM No. for a Finished Good Item,एक समाप्त अच्छा आइटम के लिए बीओएम सं.
+BOM Operation,बीओएम ऑपरेशन
+BOM Operations,बीओएम संचालन
+BOM Replace Tool,बीओएम बदलें उपकरण
+BOM replaced,बीओएम प्रतिस्थापित
+Background Color,पृष्ठभूमि रंग
+Background Image,पृष्ठभूमि छवि
+Background shade of the top menu bar,शीर्ष मेनू पट्टी की पृष्ठभूमि छाया
+Bank,बैंक
+Bank A/C No.,बैंक ए / सी सं.
+Bank Account,बैंक खाता
+Bank Account No.,बैंक खाता नहीं
+Bank Balance,बैंक शेष
+Bank Name,बैंक का नाम
+Bank Reconciliation,बैंक समाधान
+Bank Reconciliation Detail,बैंक सुलह विस्तार
+Bank Voucher,बैंक वाउचर
+Bank or Cash,बैंक या कैश
+Banner,बैनर
+Banner HTML,बैनर HTML
+Barcode,बारकोड
+Based On,के आधार पर
+Based on,के आधार पर
+Basic Info,मूल जानकारी
+Basic Information,बुनियादी जानकारी
+Basic Rate,मूल दर
+Basic Rate*,मूल दर *
+Batch,बैच
+Batch (lot) of an Item.,एक आइटम के बैच (बहुत).
+Batch Finished Date,बैच तिथि समाप्त
+Batch ID,बैच आईडी
+Batch No,कोई बैच
+Batch Started Date,बैच तिथि शुरू किया
+Begin this page with a slideshow of images,छवियों का एक स्लाइड शो के साथ शुरू इस पृष्ठ
+Better Prospects,बेहतर संभावनाओं
+Bill Date,बिल की तारीख
+Bill No,विधेयक नहीं
+Bill of Material to be considered for manufacturing,सामग्री का बिल के लिए निर्माण के लिए विचार किया
+Bill of Materials,सामग्री के बिल
+Bill of Materials (BOM),सामग्री के बिल (बीओएम)
+Billed,का बिल
+Billed Amt,बिल भेजा राशि
+Billed Quantity,का बिल मात्रा
+Billing Status,बिलिंग स्थिति
+Bills raised by Suppliers.,विधेयकों आपूर्तिकर्ता द्वारा उठाए गए.
+Bills raised to Customers.,बिलों ग्राहकों के लिए उठाया.
+Bin,बिन
+Bio,जैव
+Birth Date,जन्म तिथि
+Black,काला
+Blob,बूँद
+Blog,ब्लॉग
+Blog Subscriber,ब्लॉग सब्सक्राइबर
+Blog entry.,प्रविष्टि ब्लॉग.
+Blood Group,रक्त वर्ग
+Branch,शाखा
+Brand,ब्रांड
+Brand HTML,ब्रांड HTML
+Brand Name,ब्रांड नाम
+"Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px","ब्रांड है क्या सही उपकरण पट्टी के शीर्ष पर प्रकट होता है. यदि यह एक छवि है, यकीन है कि एक पारदर्शी पृष्ठभूमि ithas और &lt;img /&gt; टैग का उपयोग करें. 200px x 30px के रूप में आकार रखें"
+Brand master.,ब्रांड गुरु.
+Branding and Printing,ब्रांडिंग और मुद्रण
+Brands,ब्रांड
+Breakdown,भंग
+Budget,बजट
+Budget Allocated,बजट आवंटित
+Budget Control,बजट नियंत्रण
+Budget Detail,बजट विस्तार
+Budget Details,बजट विवरण
+Budget Distribution,बजट वितरण
+Budget Distribution Detail,बजट वितरण विस्तार
+Budget Distribution Details,बजट वितरण विवरण
+Build Report,रिपोर्ट बनाएँ
+Bulk Email,थोक ईमेल
+Bulk Email records.,थोक ईमेल रिकॉर्ड.
+Bundle items at time of sale.,बिक्री के समय में आइटम बंडल.
+Button,बटन
+Buyer of Goods and Services.,सामान और सेवाओं के खरीदार.
+Buying,क्रय
+Buying Cost,लागत खरीदना
+Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.,ख़रीदना लागत खरीद आदेश और खरीद रसीद से अद्यतन किया जाएगा. <br> खरीद लागत औसत पद्धति चलती द्वारा गणना करेंगे.
+Buying Home,घर खरीदना
+By,द्वारा
+C,सी
+C-FORM/,/ सी - फार्म
+C-Form,सी - फार्म
+C-Form Applicable,लागू सी फार्म
+C-Form Invoice Detail,सी - फार्म के चालान विस्तार
+C-Form No,कोई सी - फार्म
+CGHelp,CGHelp
+CI/2010-2011/,CI/2010-2011 /
+COMM-,कॉम -
+CSS,सीएसएस
+CTC,सीटीसी
+CUST,कस्टमर
+CUSTMUM,CUSTMUM
+Calculate Charges,शुल्क की गणना
+Calculate Tax,कर की गणना
+Calculate Taxes and Charges,कर और शुल्क की गणना
+Calculate Total Score,कुल स्कोर की गणना
+Calendar,कैलेंडर
+Call,कॉल
+Campaign,अभियान
+Campaign Name,अभियान का नाम
+Can only be exported by users with role 'Report Manager',उपयोगकर्ताओं द्वारा केवल भूमिका &#39;रिपोर्ट प्रबंधक&#39; के साथ निर्यात किया जा सकता है
+Cancel,रद्द करें
+Cancel Reason,कारण रद्द करें
+Cancel permission also allows the user to delete a document (if it is not linked to any other document).,रद्द करें अनुमति भी उपयोगकर्ता एक दस्तावेज़ (अगर यह किसी भी अन्य दस्तावेज से नहीं जुड़ा है) को नष्ट करने के लिए अनुमति देता है.
+Cancelled,Cancelled
+Cannot ,नहीं कर सकते
+Capacity,क्षमता
+Capacity Units,क्षमता इकाइयों
+Career History,कैरियर इतिहास
+Carry Forward,आगे ले जाना
+Carry Forwarded Leaves,कैर्री अग्रेषित पत्तियां
+Cash,नकद
+Cash Voucher,कैश वाउचर
+Cash/Bank Account,नकद / बैंक खाता
+Category,श्रेणी
+Category of customer as entered in Customer master,ग्राहक की श्रेणी के रूप में ग्राहक मास्टर में प्रवेश
+Cell Number,सेल नंबर
+Center,केंद्र
+"Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.","कुछ दस्तावेजों एक बार अंतिम नहीं उदाहरण के लिए एक चालान की तरह बदल गया है,. ऐसे दस्तावेजों के लिए अंतिम राज्य <b>प्रस्तुत</b> कहा जाता है. आप को सीमित कर सकते हैं जो भूमिका प्रस्तुत कर सकते हैं."
+Certificate,प्रमाणपत्र
+Challan Date,चालान तिथि
+Challan No,नहीं चालान
+Change UOM for an Item.,एक आइटम के लिए UOM बदलें.
+Change background fonts etc,पृष्ठभूमि फोंट आदि बदलें
+"Change entry properties (hide fields, make mandatory etc)","प्रवेश गुण (छुपाने के क्षेत्रों, आदि अनिवार्य बनाने के लिए) बदलें"
+Change the starting / current sequence number of an existing series.,एक मौजूदा श्रृंखला के शुरू / वर्तमान अनुक्रम संख्या बदलें.
+Channel Partner,चैनल पार्टनर
+Charge,प्रभार
+Chargeable,प्रभार्य
+Chart of Accounts,खातों का चार्ट
+Chart of Cost Centers,लागत केंद्र के चार्ट
+Chat,बातचीत
+Cheating FieldPlease do not delete ,धोखा FieldPlease को नष्ट नहीं करते
+Check,चेक
+Check / Uncheck roles assigned to the Profile. Click on the Role to find out what permissions that Role has.,/ अनचेक करें प्रोफ़ाइल को सौंपा भूमिकाओं की जाँच करें. रोल पर क्लिक करें पता लगाने के लिए अनुमति है कि क्या भूमिका है.
+Check all the items below that you want to send in this digest.,सभी आइटम नीचे है कि आप इस डाइजेस्ट में भेजना चाहते हैं की जाँच करें.
+Check how the newsletter looks in an email by sending it to your email.,कैसे न्यूजलेटर अपने ईमेल करने के लिए भेजने से एक ईमेल में लग रहा है की जाँच करें.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","आवर्ती चालान यदि जांच, अचयनित आवर्ती रोकने के लिए या उचित समाप्ति तिथि डाल"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","यदि आप स्वत: आवर्ती चालान की जरूरत की जाँच करें. किसी भी बिक्री चालान प्रस्तुत करने के बाद, आवर्ती अनुभाग दिखाई जाएगी."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,अगर आप मेल में प्रत्येक कर्मचारी को वेतन पर्ची भेजना चाहते हैं की जाँच करते समय वेतन पर्ची प्रस्तुत
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,यह जाँच लें कि आप उपयोगकर्ता बचत से पहले एक श्रृंखला का चयन करने के लिए मजबूर करना चाहते हैं. कोई डिफ़ॉल्ट हो सकता है अगर आप इस जाँच करेगा.
+Check this if you want to show in website,यह जाँच लें कि आप वेबसाइट में दिखाना चाहते हैं
+Check this to make this the default letter head in all prints,इस जाँच के लिए सभी प्रिंट में इस डिफ़ॉल्ट पत्र सिर
+Check this to pull emails from your mailbox,इस जाँच के लिए अपने मेलबॉक्स से ईमेल खींच
+Check to activate,सक्रिय करने के लिए जाँच करें
+Check to make Shipping Address,शिपिंग पता करने के लिए
+Check to make primary address,प्राथमिक पते की जांच करें
+Checked,जाँचा गया
+"Checking Operator (To Fld, Operator, From Fld)","ऑपरेटर जाँच (FLD से FLD, ऑपरेटर के लिए)"
+Cheque,चैक
+Cheque Date,चेक तिथि
+Cheque Number,चेक संख्या
+Child Tables are shown as a Grid in other DocTypes.,बाल टेबल्स अन्य doctypes में एक ग्रिड के रूप में दिखाया जाता है.
+City,शहर
+City/Town,शहर / नगर
+Claim Amount,दावे की राशि
+Claims for expenses made on behalf of the organization.,संगठन की ओर से किए गए खर्च के लिए दावा.
+Class / Percentage,/ कक्षा प्रतिशत
+Classification of Customers by region,ग्राहक के क्षेत्र द्वारा वर्गीकरण
+Clear Cache & Refresh,कैशे साफ और ताज़ा
+Clear Pending,लंबित साफ़
+Clear Table,स्पष्ट मेज
+Clearance Date,क्लीयरेंस तिथि
+Click on button in the 'Condition' column and select the option 'User is the creator of the document',&#39;स्थिति&#39; कॉलम में बटन पर क्लिक करें और चुनें विकल्प &#39;प्रयोक्ता दस्तावेज़ के निर्माता है&#39;
+Click on edit button to start a new report.,एक नई रिपोर्ट शुरू संपादित करें बटन पर क्लिक करें.
+Click to Expand / Collapse,/ विस्तार करें संकुचित करने के लिए क्लिक करें
+Client,ग्राहक
+Client Script,ग्राहक स्क्रिप्ट
+Closed,बंद
+Closing Account Head,बंद लेखाशीर्ष
+Closing Date,तिथि समापन
+Closing Fiscal Year,वित्तीय वर्ष और समापन
+CoA Help,सीओए मदद
+Code,कोड
+Cold Calling,सर्द पहुँच
+Collections,संग्रह
+Color,रंग
+Column Break,स्तंभ विराम
+Columns,कॉलम
+Comma separated list of email addresses,ईमेल पतों की अल्पविराम अलग सूची
+Comment,टिप्पणी
+Comment By,द्वारा टिप्पणी
+Comment By Fullname,Fullname द्वारा टिप्पणी
+Comment Date,तिथि टिप्पणी
+Comment Docname,Docname टिप्पणी
+Comment Doctype,Doctype टिप्पणी
+Comment Time,समय टिप्पणी
+Comments,टिप्पणियां
+Commission Rate,आयोग दर
+Commission Rate (%),आयोग दर (%)
+Commission partners and targets,आयोग भागीदारों और लक्ष्य
+Communication,संचार
+Communication HTML,संचार HTML
+Communication History,संचार इतिहास
+Communication Log,संचार प्रवेश करें
+Communication Medium,संचार माध्यम
+Communication by,द्वारा संचार
+Communication log.,संचार लॉग इन करें.
+Communication type,संचार प्रकार
+Company,कंपनी
+Company Control,कंपनी के नियंत्रण
+Company Details,कंपनी विवरण
+Company History,कंपनी इतिहास
+Company History Heading,कंपनी के मुखिया इतिहास
+Company Info,कंपनी की जानकारी
+Company Introduction,कंपनी का परिचय
+Company Name,कंपनी का नाम
+Company branches.,कंपनी शाखाएं.
+Company departments.,कंपनी विभागों.
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,कंपनी अपने संदर्भ के लिए पंजीकरण संख्या. उदाहरण: वैट पंजीकरण नंबर आदि
+Company registration numbers for your reference. Tax numbers etc.,कंपनी अपने संदर्भ के लिए पंजीकरण संख्या. टैक्स आदि संख्या
+Complaint,शिकायत
+Complete By,द्वारा पूरा करें
+Completed,पूरा
+Completion Date,पूरा करने की तिथि
+Completion Status,समापन स्थिति
+Confirmed orders from Customers.,ग्राहकों से आदेश की पुष्टि की है.
+Consider Tax or Charge for,टैक्स या प्रभार के लिए पर विचार
+"Consider this Price List for fetching rate. (only which have ""For Buying"" as checked)",दर मोहक के लिए इस मूल्य सूची पर विचार करें. (जो केवल &quot;खरीदने के लिए&quot; के रूप में जाँच)
+Consultant,सलाहकार
+Consumed Qty,खपत मात्रा
+Contact,संपर्क
+Contact Control,नियंत्रण संपर्क
+Contact Desc,संपर्क जानकारी
+Contact Details,जानकारी के लिए संपर्क
+Contact Email,संपर्क ईमेल
+Contact HTML,संपर्क HTML
+Contact Info,संपर्क जानकारी
+Contact Mobile No,मोबाइल संपर्क नहीं
+Contact Name,संपर्क का नाम
+Contact No,कोई संपर्क नहीं
+Contact No.,सं संपर्क
+Contact Person,संपर्क व्यक्ति
+Contact Us Settings,हमसे सेटिंग्स संपर्क
+Contact in Future,भविष्य में संपर्क
+"Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.","संपर्क विकल्प, आदि एक नई लाइन पर प्रत्येक &quot;बिक्री प्रश्न, प्रश्न समर्थन&quot; कोमा से विभाजित."
+Contacted,Contacted
+Content,सामग्री
+Content Type,सामग्री प्रकार
+Content in markdown format that appears on the main side of your page,Markdown प्रारूप में सामग्री है कि अपने पृष्ठ के मुख्य पक्ष पर प्रकट होता है
+Content web page.,सामग्री वेब पेज.
+Contra Voucher,कॉन्ट्रा वाउचर
+Contract End Date,अनुबंध समाप्ति तिथि
+Control Panel,नियंत्रण कक्ष
+Conversion Factor,परिवर्तनकारक तत्व
+Conversion Rate,रूपांतरण दर
+Convert into Recurring Invoice,आवर्ती चालान में कन्वर्ट
+Converted,परिवर्तित
+Copyright,सर्वाधिकार
+Core,मूल
+Cost Center,लागत केंद्र
+Cost Center Details,लागत केंद्र विवरण
+Cost Center Name,लागत केन्द्र का नाम
+Cost to Company,कंपनी के लिए मूल्य
+Costing,लागत
+Country,देश
+Country Name,देश का नाम
+Create,बनाना
+Create Bank Voucher for the total salary paid for the above selected criteria,कुल ऊपर चयनित मानदंड के लिए वेतन भुगतान के लिए बैंक वाउचर बनाएँ
+Create Production Orders,उत्पादन के आदेश बनाएँ
+Create Receiver List,रिसीवर सूची बनाएँ
+Create Salary Slip,वेतनपर्ची बनाएँ
+"Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.","मूल्य सूची मास्टर से एक मूल्य सूची बनाएं और उनमें से प्रत्येक के खिलाफ मानक रेफरी दर दर्ज. कोटेशन, बिक्री आदेश या डिलिवरी नोट में एक मूल्य सूची के चयन पर, इसी रेफरी दर इस मद के लिए दिलवाया जाएगा."
+Create and Send Newsletters,समाचारपत्रिकाएँ बनाएँ और भेजें
+Created Customer Issue,बनाया ग्राहक के मुद्दे
+Created Opportunity,अवसर पैदा
+Created Support Ticket,बनाया समर्थन टिकट
+Created by,द्वारा निर्मित
+Creates salary slip for above mentioned criteria.,उपरोक्त मानदंडों के लिए वेतन पर्ची बनाता है.
+Credit,श्रेय
+Credit Amt,क्रेडिट राशि
+Credit Card Voucher,क्रेडिट कार्ड वाउचर
+Credit Controller,क्रेडिट नियंत्रक
+Credit Days,क्रेडिट दिन
+Credit Limit,साख सीमा
+Credit Note,जमापत्र
+Credit To,करने के लिए क्रेडिट
+Criteria Name,मानदंड नाम
+Cross List Item Group,क्रॉस सूची आइटम समूह
+Cross Listing of Item in multiple groups,कई समूहों में आइटम लिस्टिंग पार
+Currency,मुद्रा
+Currency & Price List,मुद्रा मूल्य सूची
+Currency Format,मुद्रा स्वरूप
+Currency Name,मुद्रा का नाम
+Current Accommodation Type,वर्तमान आवास के प्रकार
+Current Address,वर्तमान पता
+Current BOM,वर्तमान बीओएम
+Current Fiscal Year,चालू वित्त वर्ष
+Current Stock,मौजूदा स्टॉक
+Current Stock UOM,वर्तमान स्टॉक UOM
+Current Value,वर्तमान मान
+Current status,वर्तमान स्थिति
+Cust/Supp Address,Cust / Supp पता
+Cust/Supp Name,Cust / Supp नाम
+Custom Autoreply Message,कस्टम स्वतः संदेश
+Custom CSS,कस्टम सीएसएस
+Custom Field,कस्टम फ़ील्ड
+Custom Message,कस्टम संदेश
+Custom Query,कस्टम क्वेरी
+Custom Reports,कस्टम रिपोर्ट
+Custom Script,कस्टम स्क्रिप्ट
+Custom Startup Code,कस्टम स्टार्टअप कोड
+Custom?,कस्टम?
+Customer,ग्राहक
+Customer / Item Name,ग्राहक / मद का नाम
+Customer Account,ग्राहक खाता
+Customer Address,ग्राहक पता
+Customer Addresses And Contacts,ग्राहक के पते और संपर्क
+Customer Code,ग्राहक कोड
+Customer Codes,ग्राहक संहिताओं
+Customer Details,ग्राहक विवरण
+Customer Feedback,ग्राहक प्रतिक्रिया
+Customer Group,ग्राहक समूह
+Customer Group Name,ग्राहक समूह का नाम
+Customer Intro,ग्राहक पहचान
+Customer Issue,ग्राहक के मुद्दे
+Customer Issue No,ग्राहक के मुद्दे नहीं
+Customer Issue against a Serial No (warranty).,एक धारावाहिक नहीं के खिलाफ ग्राहक अंक (वारंटी).
+Customer Master created by ,ग्राहक द्वारा बनाई गई मास्टर
+Customer Name,ग्राहक का नाम
+Customer Type,ग्राहक प्रकार
+Customer classification tree.,ग्राहक वर्गीकरण पेड़.
+Customer database.,ग्राहक डेटाबेस.
+Customer's Currency,ग्राहक की मुद्रा
+Customer's Item Code,ग्राहक आइटम कोड
+Customer's Vendor,ग्राहक विक्रेता
+Customer's currency,ग्राहक की मुद्रा
+"Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.","ग्राहक की मुद्रा - यदि आप एक मुद्रा है कि डिफ़ॉल्ट मुद्रा नहीं है का चयन करना चाहते हैं, तो आप भी मुद्रा रूपांतरण दर को निर्दिष्ट करना चाहिए."
+Customer/Supplier,ग्राहक / आपूर्तिकर्ता
+Customerwise Discount,Customerwise डिस्काउंट
+Customize,को मनपसंद
+Customize Form,प्रपत्र को अनुकूलित
+Customize Form Field,प्रपत्र फ़ील्ड अनुकूलित
+"Customize Label, Print Hide, Default etc.","लेबल, प्रिंट छिपाएँ, Default आदि अनुकूलित"
+Customize the Notification,अधिसूचना को मनपसंद
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,परिचयात्मक पाठ है कि कि ईमेल के एक भाग के रूप में चला जाता है अनुकूलित. प्रत्येक लेनदेन एक अलग परिचयात्मक पाठ है.
+DN,डी.एन.
+DN Detail,डी.एन. विस्तार
+Daily,दैनिक
+"Daily, weekly, monthly email Digests","दैनिक, साप्ताहिक, मासिक ईमेल हज़म"
+Danger,खतरा
+Data,डेटा
+Data Import,डेटा आयात
+Data Import Tool,डेटा आयात उपकरण
+Database,डेटाबेस
+Database of potential customers.,संभावित ग्राहकों के लिए धन्यवाद.
+Date,तारीख
+Date Format,दिनांक स्वरूप
+Date Of Retirement,सेवानिवृत्ति की तारीख
+Date of Birth,जन्म तिथि
+Date of Issue,जारी करने की तारीख
+Date of Joining,शामिल होने की तिथि
+Date on which lorry started from supplier warehouse,जिस पर तिथि लॉरी आपूर्तिकर्ता गोदाम से शुरू
+Date on which lorry started from your warehouse,जिस पर तिथि लॉरी अपने गोदाम से शुरू
+Date on which the lead was last contacted,"तारीख, जिस पर आगे अंतिम बार संपर्क किया था"
+Dates,तिथियां
+Datetime,Datetime
+Dealer,व्यापारी
+Dear,प्रिय
+Debit,नामे
+Debit Amt,डेबिट राशि
+Debit Note,डेबिट नोट
+Debit To,करने के लिए डेबिट
+Debit or Credit,डेबिट या क्रेडिट
+Deduct,घटाना
+Deduction,कटौती
+Deduction Type,कटौती के प्रकार
+Deduction1,Deduction1
+Deductions,कटौती
+Default,चूक
+Default Account,डिफ़ॉल्ट खाता
+Default BOM,Default बीओएम
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,डिफ़ॉल्ट खाता / बैंक कैश स्वतः स्थिति चालान में अद्यतन किया जाएगा जब इस मोड का चयन किया जाता है.
+Default Bank Account,डिफ़ॉल्ट बैंक खाता
+Default Commission Rate,डिफ़ॉल्ट कमीशन दर
+Default Company,Default कंपनी
+Default Cost Center,डिफ़ॉल्ट लागत केंद्र
+Default Cost Center for tracking expense for this item.,इस मद के लिए खर्च पर नज़र रखने के लिए डिफ़ॉल्ट लागत केंद्र.
+Default Currency,डिफ़ॉल्ट मुद्रा
+Default Customer Group,डिफ़ॉल्ट ग्राहक समूह
+Default Expense Account,डिफ़ॉल्ट व्यय खाते
+Default Home Page,डिफॉल्ट होम पेज
+Default Home Pages,डिफॉल्ट होम पेज
+Default Income Account,डिफ़ॉल्ट आय खाता
+Default Item Group,डिफ़ॉल्ट आइटम समूह
+Default Price List,डिफ़ॉल्ट मूल्य सूची
+Default Price List Currency,डिफ़ॉल्ट मूल्य सूची मुद्रा
+Default Print Format,डिफ़ॉल्ट प्रिंट प्रारूप
+Default Product Category,डिफ़ॉल्ट उत्पाद श्रेणी
+Default Purchase Account in which cost of the item will be debited.,डिफ़ॉल्ट खरीद खाता जिसमें मद की लागत डेबिट हो जाएगा.
+Default Reserved Warehouse,Default सुरक्षित वेयरहाउस
+Default Sales Partner,डिफ़ॉल्ट बिक्री साथी
+Default Settings,डिफ़ॉल्ट सेटिंग
+Default Source Warehouse,डिफ़ॉल्ट स्रोत वेअरहाउस
+Default Stock UOM,Default स्टॉक UOM
+Default Supplier Type,डिफ़ॉल्ट प्रदायक प्रकार
+Default Target Warehouse,डिफ़ॉल्ट लक्ष्य वेअरहाउस
+Default Territory,Default टेरिटरी
+Default Unit of Measure,माप की मूलभूत इकाई
+Default Valuation Method,डिफ़ॉल्ट मूल्यन विधि
+Default Value,डिफ़ॉल्ट मान
+Default Warehouse Type,डिफ़ॉल्ट वेअरहाउस प्रकार
+Default values are set across the role and can be over-ridden by user permissions.,डिफ़ॉल्ट मान भूमिका भर में स्थापित कर रहे हैं और उपयोगकर्ता अनुमतियाँ से अधिक ग्रस्त हो सकता है.
+"Default: ""Product Search""",डिफ़ॉल्ट: &quot;उत्पाद खोज&quot;
+DefaultValue,DefaultValue
+Defaults,डिफ़ॉल्ट्स
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","इस लागत केंद्र के लिए बजट निर्धारित. बजट कार्रवाई तय करने के लिए, देखने के लिए <a href=""#!List/Company"">कंपनी मास्टर</a>"
+Define Rule,नियम परिभाषित
+Defines actions on states and the next step and allowed roles.,राज्यों पर कार्रवाई और अगले कदम और अनुमति भूमिकाओं को परिभाषित करता है.
+Defines workflow states and rules for a document.,कार्यप्रवाह राज्यों और एक दस्तावेज़ के लिए नियमों को परिभाषित करता है.
+Delete,हटाना
+Delivered,दिया गया
+Delivered Items To Be Billed,वितरित करने के लिए बिल आइटम
+Delivered Qty,वितरित मात्रा
+Delivery (shipment) to customers.,ग्राहकों को डिलीवरी (शिपमेंट).
+Delivery Address,डिलिवरी पता
+Delivery Date,प्रसव की तारीख
+Delivery Details,वितरण विवरण
+Delivery Document No,डिलिवरी दस्तावेज़
+Delivery Document Type,डिलिवरी दस्तावेज़ प्रकार
+Delivery Note,बिलटी
+Delivery Note Item,डिलिवरी नोट आइटम
+Delivery Note Items,डिलिवरी नोट आइटम
+Delivery Note Message,डिलिवरी नोट संदेश
+Delivery Note No,डिलिवरी नोट
+Delivery Note Packing Item,डिलिवरी नोट पैकिंग आइटम
+Delivery Note Required,डिलिवरी नोट आवश्यक
+Delivery Status,डिलिवरी स्थिति
+Delivery Time,सुपुर्दगी समय
+Department,विभाग
+Depend on LWP,LWP पर निर्भर करती है
+Depends On,पर निर्भर करता है
+Depends on LWP,LWP पर निर्भर करता है
+Descending,अवरोही
+Description,विवरण
+Description HTML,विवरण HTML
+Description of a Job Opening,एक नौकरी खोलने का विवरण
+Desert,रेगिस्तान
+Designation,पदनाम
+Desktop,डेस्कटॉप
+Detail Name,विस्तार से नाम
+Detailed Breakup of the totals,योग की विस्तृत ब्रेकअप
+Details,विवरण
+Did not add.,जोड़ नहीं था.
+Did not cancel,रद्द नहीं किया
+Did not save,बचाने के लिए नहीं किया
+Difference,अंतर
+"Different ""States"" this document can exist in. Like ""Open"", ""Pending Approval"" etc.","विभिन्न इस दस्तावेज़ &quot;राज्य अमेरिका&quot; की तरह &quot;ओपन&quot; अंदर मौजूद है, &quot;अनुमोदन लंबित&quot; आदि कर सकते हैं"
+Disabled,विकलांग
+Disabled Filters,विकलांग फ़िल्टर
+Discount  %,डिस्काउंट%
+Discount %,डिस्काउंट%
+Discount (%),डिस्काउंट (%)
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","डिस्काउंट फील्ड्स खरीद आदेश, खरीद रसीद, खरीद चालान में उपलब्ध हो जाएगा"
+Discount(%),डिस्काउंट (%)
+Display,प्रदर्शन
+Display Settings,सेटिंग्स प्रदर्शित करें
+Display all the individual items delivered with the main items,सभी व्यक्तिगत मुख्य आइटम के साथ वितरित आइटम प्रदर्शित
+Distinct unit of an Item,एक आइटम की अलग इकाई
+Distribute transport overhead across items.,आइटम में परिवहन उपरि बांटो.
+Distribution Id,वितरण आईडी
+Distribution Name,वितरण नाम
+Distributor,वितरक
+Divorced,तलाकशुदा
+Doc Name,डॉक्टर का नाम
+Doc Status,डॉक्टर स्थिति
+Doc Type,डॉक्टर के प्रकार
+DocField,DocField
+DocPerm,DocPerm
+DocType,Doctype
+DocType Details,DOCTYPE विवरण
+DocType Label,DOCTYPE लेबल
+DocType Mapper,DOCTYPE प्रतिचित्रण
+DocType is a Table / Form in the application.,DOCTYPE / आवेदन तालिका के रूप में है.
+DocType on which this Workflow is applicable.,Doctype जिस पर इस कार्यप्रवाह लागू है.
+DocType or Field,Doctype या फील्ड
+Document,दस्तावेज़
+Document Description,दस्तावेज का विवरण
+Document Status transition from ,दस्तावेज़ स्थिति से संक्रमण
+Document Type,दस्तावेज़ प्रकार
+Document is only editable by users of role,दस्तावेज़ भूमिका के उपयोगकर्ताओं द्वारा केवल संपादन है
+Document to rename,नाम बदलने के दस्तावेज़
+Documentation,प्रलेखन
+Documents,दस्तावेज़
+Domain List,डोमेन सूची
+Download Backup,बैकअप डाउनलोड
+Download Materials Required,आवश्यक सामग्री डाउनलोड करें
+Download Template,टेम्पलेट डाउनलोड करें
+Download a report containing all raw materials with their latest inventory status,उनकी नवीनतम सूची की स्थिति के साथ सभी कच्चे माल युक्त रिपोर्ट डाउनलोड करें
+Draft,मसौदा
+Drafts,ड्राफ्ट्स
+Drag to sort columns,तरह स्तंभों को खींचें
+Due Date,नियत तारीख
+Duration,अवधि
+EMP/,/ ईएमपी
+ESIC CARD No,ईएसआईसी कार्ड नहीं
+ESIC No.,ईएसआईसी सं.
+Earning,कमाई
+Earning & Deduction,अर्जन कटौती
+Earning Type,प्रकार कमाई
+Earning1,Earning1
+Edit,संपादित करें
+Editable,संपादन
+Educational Qualification,शैक्षिक योग्यता
+Educational Qualification Details,शैक्षिक योग्यता विवरण
+Eg. smsgateway.com/api/send_sms.cgi,उदा. एपीआई smsgateway.com / / send_sms.cgi
+Email,ईमेल
+Email (By company),ईमेल (कंपनी के द्वारा)
+Email Digest,ईमेल डाइजेस्ट
+Email Digest Settings,ईमेल डाइजेस्ट सेटिंग
+Email Host,ईमेल होस्ट
+Email Id,ईमेल आईडी
+"Email Id must be unique, already exists for: ","ईमेल आईडी अद्वितीय होना चाहिए, के लिए पहले से ही मौजूद है:"
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",ईमेल आईडी जहां एक नौकरी आवेदक जैसे &quot;jobs@example.com&quot; ईमेल करेंगे
+Email Login,ईमेल लॉगइन
+Email Password,ईमेल पासवर्ड
+Email Sent,ईमेल भेजा गया
+Email Sent?,ईमेल भेजा है?
+Email Settings,ईमेल सेटिंग
+Email Settings for Outgoing and Incoming Emails.,निवर्तमान और आने वाली ईमेल के लिए ईमेल सेटिंग्स.
+Email Signature,ईमेल हस्ताक्षर
+Email Use SSL,ईमेल में इस्तेमाल SSL
+"Email addresses, separted by commas","ईमेल पते, अल्पविराम के द्वारा separted"
+"Email settings for jobs email id ""jobs@example.com""",नौकरियाँ ईमेल आईडी &quot;jobs@example.com&quot; के लिए ईमेल सेटिंग्स
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",ईमेल सेटिंग्स बिक्री ईमेल आईडी जैसे &quot;sales@example.com से सुराग निकालने के लिए
+Embed image slideshows in website pages.,वेबसाइट के पन्नों में छवि स्लाइडशो चलाने एम्बेड करें.
+Emergency Contact Details,आपातकालीन सम्पर्क करने का विवरण
+Emergency Phone Number,आपातकालीन फोन नंबर
+Employee,कर्मचारी
+Employee Details,कर्मचारी विवरण
+Employee Education,कर्मचारी शिक्षा
+Employee External Work History,कर्मचारी बाहरी काम इतिहास
+Employee Internal Work History,कर्मचारी आंतरिक कार्य इतिहास
+Employee Internal Work Historys,कर्मचारी आंतरिक कार्य Historys
+Employee Name,कर्मचारी का नाम
+Employee Number,कर्मचारियों की संख्या
+Employee Records to be created by ,कर्मचारी रिकॉर्ड्स द्वारा बनाया जाना
+Employee Setup,कर्मचारी सेटअप
+Employee Training,कर्मचारी प्रशिक्षण
+Employee Type,कर्मचारी प्रकार
+Employee grades,कर्मचारी ग्रेड
+Employee record is created using selected field. ,कर्मचारी रिकॉर्ड चयनित क्षेत्र का उपयोग कर बनाया है.
+Employee records.,कर्मचारी रिकॉर्ड.
+Employees Email Id,ईमेल आईडी कर्मचारी
+Employment Details,रोजगार के विवरण
+Employment Type,रोजगार के प्रकार
+Enable / disable currencies.,मुद्राओं सक्षम / अक्षम करें.
+Enabled,Enabled
+Enables <b>More Info.</b> in all documents,<b>अधिक जानकारी के लिए</b> सभी दस्तावेजों में <b>सक्षम</b> बनाता है
+Encashment Date,नकदीकरण तिथि
+End Date,समाप्ति तिथि
+End date of current invoice's period,वर्तमान चालान की अवधि की समाप्ति की तारीख
+End of Life,जीवन का अंत
+Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,ईमेल आईडी दर्ज करें त्रुटि users.Eg द्वारा भेजा प्राप्त रिपोर्ट: support@iwebnotes.com
+Enter Form Type,प्रपत्र प्रकार दर्ज करें
+Enter Row,पंक्ति दर्ज
+Enter campaign name if the source of lead is campaign.,अभियान का नाम दर्ज करें अगर नेतृत्व के स्रोत अभियान है.
+"Enter default value fields (keys) and values. If you add multiple values for a field, the first one will be picked. These defaults are also used to set ""match"" permission rules. To see list of fields, go to <a href=""#Form/Customize Form/Customize Form"">Customize Form</a>.","डिफ़ॉल्ट मान (कुंजी) क्षेत्रों और मूल्यों दर्ज करें. यदि आप एक क्षेत्र के लिए अनेक मान जोड़ने के लिए, 1 एक उठाया जाएगा. ये चूक भी &quot;मैच&quot; अनुमति नियमों के सेट करने के लिए किया जाता है. क्षेत्रों की सूची देखने के लिए <a href=""#Form/Customize Form/Customize Form"">प्रपत्र को अनुकूलित</a> ."
+Enter department to which this Contact belongs,विभाग को जो इस संपर्क के अंतर्गत आता दर्ज करें
+Enter designation of this Contact,इस संपर्क के पद पर नियुक्ति दर्ज करें
+"Enter domain names associated to this website, each on a new line","इस वेबसाइट से जुड़े एक नई लाइन पर डोमेन नाम, प्रत्येक दर्ज करें"
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","अल्पविराम के द्वारा अलग ईमेल आईडी दर्ज करें, चालान विशेष तिथि पर स्वचालित रूप से भेज दिया जाएगा"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,"वस्तुओं और योजना बनाई मात्रा दर्ज करें, जिसके लिए आप उत्पादन के आदेश को बढ़ाने या विश्लेषण के लिए कच्चे माल के डाउनलोड करना चाहते हैं."
+Enter message,संदेश दर्ज करें
+Enter name of campaign if source of enquiry is campaign,अभियान का नाम दर्ज़ अगर जांच के स्रोत अभियान
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","स्थैतिक यूआरएल यहाँ मानकों (Eg. प्रेषक = ERPNext, username = ERPNext, पासवर्ड = 1234 आदि) दर्ज करें"
+Enter the company name under which Account Head will be created for this Supplier,कंपनी का नाम है जिसके तहत इस प्रदायक लेखाशीर्ष के लिए बनाया जाएगा दर्ज करें
+Enter the date by which payments from customer is expected against this invoice.,तारीख है जिसके द्वारा ग्राहक से भुगतान इस चालान के खिलाफ उम्मीद है दर्ज करें.
+Enter url parameter for message,संदेश के लिए url पैरामीटर दर्ज करें
+Enter url parameter for receiver nos,रिसीवर ओपन स्कूल के लिए url पैरामीटर दर्ज करें
+Entries,प्रविष्टियां
+Entries are not allowed against this Fiscal Year if the year is closed.,"प्रविष्टियों इस वित्त वर्ष के खिलाफ की अनुमति नहीं है, अगर साल बंद कर दिया जाता है."
+Error,त्रुटि
+Estimated Material Cost,अनुमानित मटेरियल कॉस्ट
+Event,घटना
+Event Date,घटना तिथि
+Event Individuals,घटना व्यक्तियों
+Event Name,घटना नाम
+Event Role,घटना रोल
+Event Roles,घटना भूमिकाओं
+Event Time,ईवेंट समय
+Event Type,इवेंट प्रकार
+Event Updates,घटना अद्यतन
+Event User,इवेंट उपयोगकर्ता के
+Exchange Rate,विनिमय दर
+Excise Page Number,आबकारी पृष्ठ संख्या
+Excise Voucher,आबकारी वाउचर
+Execute,निष्पादित करना
+Exemption Limit,छूट की सीमा
+Exhibition,प्रदर्शनी
+Existing Customer,मौजूदा ग्राहक
+Exit,निकास
+Exit Interview Details,साक्षात्कार विवरण से बाहर निकलें
+Expected,अपेक्षित
+Expected Delivery Date,उम्मीद डिलीवरी की तारीख
+Expected End Date,उम्मीद समाप्ति तिथि
+Expected Start Date,उम्मीद प्रारंभ दिनांक
+Expense Account,व्यय लेखा
+Expense Claim,व्यय दावा
+Expense Claim Approved,व्यय दावे को मंजूरी
+Expense Claim Approved Message,व्यय दावा संदेश स्वीकृत
+Expense Claim Detail,व्यय दावा विवरण
+Expense Claim Details,व्यय दावा विवरण
+Expense Claim Rejected,व्यय दावे का खंडन किया
+Expense Claim Rejected Message,व्यय दावा संदेश अस्वीकृत
+Expense Claim Type,व्यय दावा प्रकार
+Expense Date,व्यय तिथि
+Expense Details,व्यय विवरण
+Expense Head,व्यय प्रमुख
+Expenses Booked,व्यय बुक
+Expiry Date,समाप्ति दिनांक
+Export,निर्यात
+Exports,निर्यात
+External,बाहरी
+Extra Condition,अतिरिक्त शर्त
+Extract Emails,ईमेल निकालें
+Extract Job Applicant from jobs email id e.g. jobs@example.com,नौकरियों ईमेल आईडी जैसे jobs@example.com से नौकरी आवेदक निकालें
+Extract Leads from sales email id e.g. sales@example.com,बिक्री ईमेल आईडी जैसे sales@example.com से बिक्रीसूत्र निकालें
+FCFS Rate,FCFS दर
+FIFO,फीफो
+Family Background,पारिवारिक पृष्ठभूमि
+FavIcon,FavIcon
+Fax,फैक्स
+Featured Item,विशेष रुप से प्रदर्शित आइटम
+Featured Item in Item Group,आइटम समूह में चित्रित आइटम
+Features Setup,सुविधाएँ सेटअप
+Feed,खिलाना
+Feed Type,प्रकार फ़ीड
+Feedback,प्रतिपुष्टि
+Female,महिला
+Fetch lead which will be converted into customer.,नेतृत्व जो ग्राहक में परिवर्तित किया जाएगा लायें.
+Field,क्षेत्र
+Field Description,फील्ड विवरण
+Field Mapper Detail,क्षेत्र प्रतिचित्रण विस्तार
+Field Mapper Details,क्षेत्र प्रतिचित्रण विवरण
+Field Name,फ़ील्ड का नाम
+Field Type,फ़ील्ड प्रकार
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","डिलिवरी नोट, कोटेशन, बिक्री चालान, विक्रय आदेश में उपलब्ध फील्ड"
+Field from other forms,अन्य रूपों से फील्ड
+"Field that represents the Workflow State of the transaction (if field is not present, a new hidden Custom Field will be created)","फील्ड है कि लेन - देन की कार्यप्रवाह राज्य का प्रतिनिधित्व करता है (अगर क्षेत्र मौजूद नहीं है, एक नया छिपा कस्टम फ़ील्ड बनाया जाएगा)"
+Fieldname,FIELDNAME
+Fields,फील्ड्स
+"Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box","अल्पविराम (,) द्वारा अलग क्षेत्रों में शामिल किया जाएगा <br /> खोज संवाद बॉक्स की सूची <b>तक खोजें</b>"
+File Data,डेटा फ़ाइल
+File LIst,फ़ाइल सूची
+File List,फ़ाइल सूची
+File Name,फ़ाइल नाम
+File URL,फ़ाइल URL
+File Uploaded Sucessfully.,फ़ाइल सफलतापूर्वक अपलोड किया है.
+Filing in Additional Information about the Opportunity will help you analyze your data better.,अवसर के बारे में अतिरिक्त सूचना में फाइलिंग में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filing in Additional Information about the Purchase Receipt will help you analyze your data better.,खरीद रसीद के बारे में अतिरिक्त सूचना में फाइलिंग में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filing in Additional Information about the Purchase Requisition will help you analyze your data better.,खरीद अधिग्रहण के बारे में अतिरिक्त सूचना में फाइलिंग में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filling in Additional Information about the Delivery Note will help you analyze your data better.,डिलिवरी नोट के बारे में अतिरिक्त जानकारी में भरने में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filling in additional information about the Quotation will help you analyze your data better.,कोटेशन के बारे में अतिरिक्त जानकारी में भरने में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filling in additional information about the Sales Order will help you analyze your data better.,बिक्री आदेश के बारे में अतिरिक्त जानकारी में भरने में मदद मिलेगी आप अपने डेटा का विश्लेषण बेहतर.
+Filter By Amount,राशि के द्वारा फिल्टर
+Filter By Date,तिथि फ़िल्टर
+Filter based on customer,ग्राहकों के आधार पर फ़िल्टर
+Filter based on item,आइटम के आधार पर फ़िल्टर
+Filters,फ़िल्टर
+Final Confirmation Date,अंतिम पुष्टि तिथि
+Financial Analytics,वित्तीय विश्लेषिकी
+Financial Statements,वित्तीय विवरण
+Financial Years for books of accounts,खातों की पुस्तकों के लिए वित्तीय वर्ष
+First Name,प्रथम नाम
+First Responded On,पर पहले जवाब
+Fiscal Year,वित्तीय वर्ष
+Fiscal Year Details,वित्त वर्ष विवरण
+Fixed Asset Account,फिक्स्ड आस्ति खाता
+Float,नाव
+Float Precision,प्रेसिजन फ्लोट
+Floral,पुष्प
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",तालिका के बाद मूल्यों को दिखाने अगर आइटम उप - अनुबंध. अनुबंधित आइटम - इन मूल्यों को उप &quot;सामग्री के विधेयक&quot; के मालिक से दिलवाया जाएगा.
+Font,फॉन्ट
+Font Size,फ़ॉन्ट का आकार
+Footer,पाद लेख
+Footer Items,पाद लेख आइटम
+For All Users,सभी उपयोगकर्ताओं के लिए
+For Buying,खरीदने के लिए
+For Company,कंपनी के लिए
+For Employee,कर्मचारी के लिए
+For Employee Name,कर्मचारी का नाम
+For Item ,आइटम के लिए
+"For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma","लिंक के लिए, rangeFor चयन के रूप में doctype दर्ज करें, अल्पविराम के द्वारा अलग विकल्प की सूची में प्रवेश"
+"For Links, use define linked",लिंक के लिए उपयोग को परिभाषित जुड़ा हुआ
+For Production,उत्पादन के लिए
+For Reference Only.,संदर्भ के लिए ही.
+For Selling,बेचने के लिए
+For Warehouse,गोदाम के लिए
+"For comparative filters, start with","तुलनात्मक फिल्टर करने के लिए, के साथ शुरू"
+"For e.g. 2012, 2012-13","जैसे 2012, 2012-13 के लिए"
+For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,उदाहरण के लिए यदि आप रद्द और &#39;INV004&#39; में संशोधन करने के लिए यह एक नया दस्तावेज़ INV004-1 &#39;बन जाएगा. यह आप प्रत्येक संशोधन का ट्रैक रखने में मदद करता है.
+For example: You want to restrict users to transactions marked with a certain property called 'Territory',उदाहरण के लिए: आप एक निश्चित &#39;क्षेत्र&#39; कहा जाता है संपत्ति के साथ लेनदेन के रूप में चिह्नित करने के लिए उपयोगकर्ताओं को सीमित करना चाहते हैं
+"For opening invoice entry, this date will reflect in the period-wise aging report.","चालान प्रविष्टि खोलने के लिए, अवधि के लिहाज से उम्र बढ़ने की रिपोर्ट में इस तिथि को प्रतिबिंबित करेगा."
+For ranges,श्रेणियों के लिए
+For reference,संदर्भ के लिए
+For reference only.,संदर्भ के लिए ही है.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",ग्राहकों की सुविधा के लिए इन कोड प्रिंट स्वरूपों में चालान और वितरण नोट की तरह इस्तेमाल किया जा सकता है
+Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,प्रारूप: hh: मिमी एक घंटे 01:00 के रूप में सेट समाप्ति के लिए उदाहरण. अधिकतम समाप्ति 72 घंटे का होगा. डिफ़ॉल्ट रूप से 24 घंटे
+Forum,फोरम
+Fraction,अंश
+Fraction Units,अंश इकाइयों
+Friday,शुक्रवार
+From Company,कंपनी से
+From Customer,ग्राहक से
+From Date,दिनांक से
+From Date must be before To Date,दिनांक से पहले तिथि करने के लिए होना चाहिए
+From DocType,DOCTYPE से
+From Employee,कर्मचारी से
+From Field,क्षेत्र से
+From PR Date,पीआर तारीख से
+From Package No.,पैकेज सं से
+From Table,मेज से
+Frozen,फ्रोजन
+Full Name,पूरा नाम
+Fully Billed,पूरी तरह से बिल
+Fully Completed,पूरी तरह से पूरा
+GL Control,जीएल नियंत्रण
+GL Entry,जीएल एंट्री
+GL Mapper,जीएल प्रतिचित्रण
+GL Mapper Detail,जीएल प्रतिचित्रण विस्तार
+GRN,GRN
+Gantt Chart,Gantt चार्ट
+Gantt chart of all tasks.,सभी कार्यों के गैंट चार्ट.
+Gender,लिंग
+General,सामान्य
+General Ledger,सामान्य खाता
+Generate Description HTML,विवरण HTML उत्पन्न करें
+Generate Purchase Requests (MRP) and Production Orders.,खरीद अनुरोध (एमआरपी) और उत्पादन के आदेश उत्पन्न.
+Generate Salary Slips,वेतन स्लिप्स उत्पन्न
+Generate Schedule,कार्यक्रम तय करें उत्पन्न
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","दिया जा संकुल के लिए निकल जाता है पैकिंग उत्पन्न करता है. पैकेज संख्या, पैकेज सामग्री और अपने वजन को सूचित करने के लिए किया जाता है."
+Generates HTML to include selected image in the description,विवरण में चयनित छवि को शामिल करने के लिए HTML उत्पन्न
+Georgia,जॉर्जिया
+Get Advances Paid,भुगतान किए गए अग्रिम जाओ
+Get Advances Received,अग्रिम प्राप्त
+Get Current Stock,मौजूदा स्टॉक
+Get Items,आइटम पाने के लिए
+Get Last Purchase Rate,पिछले खरीद दर
+Get Non Reconciled Entries,गैर मेल मिलाप प्रविष्टियां
+Get Open Sales Order,ओपन बिक्री आदेश
+Get Outstanding Invoices,बकाया चालान
+Get Purchase Receipt,खरीद रसीद
+Get Sales Orders,विक्रय आदेश
+Get Specification Details,विशिष्टता विवरण
+Get Stock and Rate,स्टॉक और दर
+Get Tax Detail,टैक्स विस्तार
+Get Taxes and Charges,कर और प्रभार
+Get Template,टेम्पलेट जाओ
+Get Terms and Conditions,नियम और शर्तें
+Get Weekly Off Dates,साप्ताहिक ऑफ तिथियां
+Get the template of the Attendance for which you want to import in CSV (Comma seperated values) format.Fill data in the template. Save the template in CSV format.All attendance dates inbetween 'Attendance From Date' and 'Attendance To Date' will come in the template with employees list.,उपस्थिति की टेम्पलेट जिसके लिए आप CSV में आयात टेम्पलेट (कॉमा से अलग मान) में format.Fill डेटा चाहते. CSV format.All उपस्थिति में टेम्पलेट सहेजें तिथियाँ inbetween और कर्मचारियों की सूची के साथ टेम्पलेट में आ जाएगा &#39;तिथि&#39; उपस्थिति &#39;तिथि से उपस्थिति&#39;.
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","मूल्यांकन और स्रोत / लक्ष्य पर गोदाम में उपलब्ध स्टाक दर दिनांक - समय पोस्टिंग का उल्लेख किया. यदि आइटम serialized, धारावाहिक नग में प्रवेश करने के बाद इस बटन को दबाएं."
+Global Defaults,वैश्विक मूलभूत
+Go back to home,घर वापस जाओ
+Go to Setup > <a href='#user-properties'>User Properties</a> to set \			'territory' for diffent Users.,&gt; सेटअप <a href='#user-properties'>उपयोगकर्ता गुण</a> diffent उपयोगकर्ता के लिए \ &#39;क्षेत्र&#39; स्थापित.
+Goal,लक्ष्य
+Goals,लक्ष्य
+Goods received from Suppliers.,माल आपूर्तिकर्ता से प्राप्त किया.
+Grade,ग्रेड
+Graduate,परिवर्धित
+Grand Total,महायोग
+Grand Total (Export),महायोग (निर्यात)
+Grand Total (Import),महायोग (आयात)
+Grand Total*,महायोग *
+Gratuity LIC ID,उपदान एलआईसी ID
+Gross Margin %,सकल मार्जिन%
+Gross Margin Value,सकल मार्जिन मूल्य
+Gross Pay,सकल वेतन
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,सकल वेतन + बकाया राशि + नकदीकरण राशि कुल कटौती
+Gross Profit,सकल लाभ
+Gross Profit (%),सकल लाभ (%)
+Gross Weight,सकल भार
+Gross Weight UOM,सकल वजन UOM
+Group,समूह
+Group By,द्वारा समूह
+Group or Ledger,समूह या लेजर
+Groups,समूह
+HR,मानव संसाधन
+HTML,HTML
+HTML / Banner that will show on the top of product list.,HTML बैनर / कि उत्पाद सूची के शीर्ष पर दिखाई देगा.
+"HTML print formats for quotes, invoices etc","उद्धरण, चालान आदि के लिए HTML प्रिंट प्रारूप"
+Half Day,आधे दिन
+Half Yearly,छमाही
+Half-yearly,आधे साल में एक बार
+Has Batch No,बैच है नहीं
+Has Child Node,बाल नोड है
+Has Serial No,नहीं सीरियल गया है
+Header,हैडर
+Heading,शीर्षक
+Heading Font,फ़ॉन्ट शीर्षक
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,(या समूह) प्रमुखों के खिलाफ जो लेखा प्रविष्टियां बना रहे हैं और शेष राशि बनाए रखा जाता है.
+Health Concerns,स्वास्थ्य चिंताएं
+Health Details,स्वास्थ्य विवरण
+Held On,पर Held
+Help,मदद
+Help HTML,HTML मदद
+Helper for managing return of goods (sales or purchase),माल की वापसी (बिक्री या खरीद) के प्रबंधन के लिए सहायक
+Helvetica Neue,Helvetica Neue
+"Hence, maximum allowed Manufacturing Quantity","इसलिए, अधिकतम अनुमति विनिर्माण मात्रा"
+"Here you can maintain family details like name and occupation of parent, spouse and children","यहाँ आप परिवार और माता - पिता, पति या पत्नी और बच्चों के नाम, व्यवसाय की तरह बनाए रख सकते हैं"
+"Here you can maintain height, weight, allergies, medical concerns etc","यहाँ आप ऊंचाई, वजन, एलर्जी, चिकित्सा चिंताओं आदि बनाए रख सकते हैं"
+Hey there! You need to put at least one item in \				the item table.,अरे वहाँ! आप \ आइटम तालिका में कम से कम एक आइटम डाल करने की आवश्यकता है.
+Hey! You seem to be using the wrong template. \				Click on 'Download Template' button to get the correct template.,अरे! तुम गलत टेम्पलेट उपयोग लग रहे हो. \ &#39;डाउनलोड टेम्पलेट के बटन पर क्लिक करें सही टेम्पलेट.
+Hidden,छुपा
+Hide Actions,प्रक्रिया छिपाएँ
+Hide Copy,प्रतिलिपि बनाएँ छिपाएँ
+Hide Email,ईमेल छुपाएँ
+Hide Heading,शीर्षक छिपाएँ
+Hide Print,प्रिंट छिपाएँ
+Hide Toolbar,टूलबार छिपाएँ
+High,उच्च
+Highlight,हाइलाइट
+History In Company,कंपनी में इतिहास
+Hold,पकड़
+Holiday,छुट्टी
+Holiday List,अवकाश सूची
+Holiday List Name,अवकाश सूची नाम
+Holidays,छुट्टियां
+Home,घर
+Home Control,होम नियंत्रण
+Home Page,मुख पृष्ठ
+Home Page is Products,होम पेज उत्पाद है
+Home Pages,घर पन्ने
+Host,मेजबान
+"Host, Email and Password required if emails are to be pulled","मेजबान, ईमेल और पासवर्ड की आवश्यकता अगर ईमेल को खींचा जा रहे हैं"
+Hour Rate,घंटा दर
+Hour Rate Consumable,घंटो के लिए दर उपभोज्य
+Hour Rate Electricity,घंटो के लिए दर बिजली
+Hour Rate Labour,घंटो के लिए दर श्रम
+Hour Rate Rent,घंटा दर किराया
+Hours,घंटे
+How frequently?,कितनी बार?
+"How should this currency be formatted? If not set, will use system defaults","इस मुद्रा को कैसे स्वरूपित किया जाना चाहिए? अगर सेट नहीं किया, प्रणाली चूक का उपयोग करेगा"
+How to upload,कैसे अपलोड करने के लिए
+Human Resources,मानवीय संसाधन
+Human Resources Home,मानव होम संसाधन
+I,मैं
+ID (name) of the entity whose property is to be set,इकाई जिनकी संपत्ति को सेट किया जा रहा है की आईडी (नाम)
+IDT,IDT
+IGHelp,IGHelp
+II,द्वितीय
+III,III
+IN,में
+INV,INV
+INV/10-11/,INV/10-11 /
+IV,चतुर्थ
+Icon,आइकॉन
+Icon will appear on the button,आइकन बटन पर दिखाई देगा
+Id of the profile will be the email.,प्रोफ़ाइल के ईद ईमेल किया जाएगा.
+Identification of the package for the delivery (for print),प्रसव के लिए पैकेज की पहचान (प्रिंट के लिए)
+If,अगर
+If Monthly Budget Exceeded,अगर मासिक बजट से अधिक
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order","यदि बिक्री बीओएम में परिभाषित किया गया है, पैक के वास्तविक बीओएम table.Available डिलिवरी नोट और विक्रय आदेश के रूप में प्रदर्शित किया जाता है"
+"If Supplier Part Number exists for given Item, it gets stored here","यदि प्रदायक भाग संख्या दिए गए आइटम के लिए मौजूद है, यह यहाँ जमा हो जाता है"
+If Yearly Budget Exceeded,अगर वार्षिक बजट से अधिक हो
+"If a User does not have access at Level 0, then higher levels are meaningless","यदि एक उपयोगकर्ता पहुंच 0 स्तर पर नहीं है, तो उच्च स्तर व्यर्थ कर रहे हैं"
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","अगर चेक्ड उप विधानसभा आइटम के लिए बीओएम कच्चे माल प्राप्त करने के लिए विचार किया जाएगा. अन्यथा, सभी उप विधानसभा वस्तुओं एक कच्चे माल के रूप में इलाज किया जाएगा."
+"If checked, all other workflows become inactive.","अगर जाँच की है, सभी अन्य वर्कफ़्लोज़ निष्क्रिय हो जाते हैं."
+"If checked, the Home page will be the default Item Group for the website.",अगर चेक्ड होम पेज वेबसाइट के लिए डिफ़ॉल्ट आइटम समूह होगा.
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","अगर जाँच की है, कर की राशि के रूप में पहले से ही प्रिंट दर / प्रिंट राशि में शामिल माना जाएगा"
+"If image is selected, color will be ignored (attach first)","यदि छवि का चयन किया गया है, रंग (1 देते हैं) पर ध्यान नहीं दिया जाएगा"
+If more than one package of the same type (for print),यदि एक ही प्रकार के एक से अधिक पैकेज (प्रिंट के लिए)
+If non standard port (e.g. 587),यदि गैर मानक बंदरगाह (587 जैसे)
+If not applicable please enter: NA,यदि लागू नहीं दर्ज करें: NA
+"If not, create a","यदि नहीं, तो एक बनाने के लिए"
+"If specified, send the newsletter using this email address","अगर निर्दिष्ट, न्यूज़लेटर भेजने के इस ईमेल पते का उपयोग"
+"If the 'territory' Link Field exists, it will give you an option to select it","यदि &#39;क्षेत्र&#39; लिंक क्षेत्र में मौजूद है, यह आप एक का चयन करने के लिए यह विकल्प दे देंगे"
+"If the account is frozen, entries are allowed for the ""Account Manager"" only.","यदि खाते में जमे हुए है, प्रविष्टियों &quot;खाता प्रबंधक&quot; के लिए ही अनुमति दी जाती है."
+"If this Account represents a Customer, Supplier or Employee, set it here.","अगर यह खाता एक ग्राहक प्रदायक, या कर्मचारी का प्रतिनिधित्व करता है, इसे यहां सेट."
+If you follow Quality Inspection<br>Enables item QA Required and QA No in Purchase Receipt,यदि आप गुणवत्ता निरीक्षण का पालन करें <br> खरीद रसीद में आइटम क्यूए आवश्यक और गुणवत्ता आश्वासन नहीं देती है
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,यदि आप बिक्री टीम और बिक्री (चैनल पार्टनर्स) पार्टनर्स वे चिह्नित किया जा सकता है और बिक्री गतिविधि में बनाए रखने के लिए उनके योगदान
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","यदि आप खरीद कर और शुल्क मास्टर में एक मानक टेम्पलेट बनाया है, एक का चयन करें और नीचे के बटन पर क्लिक करें."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","यदि आप बिक्री कर और शुल्क मास्टर में एक मानक टेम्पलेट बनाया है, एक का चयन करें और नीचे के बटन पर क्लिक करें."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","यदि आप लंबे समय स्वरूपों मुद्रित किया है, इस सुविधा के लिए प्रत्येक पृष्ठ पर सभी हेडर और पाद लेख के साथ एकाधिक पृष्ठों पर मुद्रित विभाजित करने के लिए इस्तेमाल किया जा सकता है"
+If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,यदि आप विनिर्माण गतिविधि में शामिल <br> सक्षम बनाता है आइटम <b>निर्मित है</b>
+Ignore,उपेक्षा
+Image,छवि
+Image View,छवि देखें
+Implementation Partner,कार्यान्वयन साथी
+Import,आयात
+Import Date Format ,आयात दिनांक स्वरूप
+Import Log,प्रवेश करें आयात
+Import Log1,Log1 आयात
+Import data from spreadsheet (csv) files,स्प्रेडशीट फ़ाइलों (csv) से डेटा आयात
+Important dates and commitments in your project life cycle,अपनी परियोजना के जीवन चक्र में महत्वपूर्ण तिथियाँ और प्रतिबद्धताओं
+Imports,आयात
+In Dialog,संवाद में
+In Filter,फिल्टर में
+In Process,इस प्रक्रिया में
+In Report Filter,रिपोर्ट फिल्टर में
+In Store,दुकान में
+In Words,शब्दों में
+In Words (Export),शब्दों में (निर्यात)
+In Words (Export) will be visible once you save the Delivery Note.,शब्दों में (निर्यात) दिखाई हो सकता है एक बार आप डिलिवरी नोट बचाने के लिए होगा.
+In Words (Import),शब्दों में (आयात)
+In Words will be visible once you save the Delivery Note.,शब्दों में दिखाई हो सकता है एक बार आप डिलिवरी नोट बचाने के लिए होगा.
+In Words will be visible once you save the Purchase Invoice.,शब्दों में दिखाई हो सकता है एक बार आप खरीद चालान बचाने के लिए होगा.
+In Words will be visible once you save the Purchase Order.,शब्दों में दिखाई हो सकता है एक बार आप खरीद आदेश को बचाने के लिए होगा.
+In Words will be visible once you save the Purchase Receipt.,शब्दों में दिखाई हो सकता है एक बार आप खरीद रसीद को बचाने के लिए होगा.
+In Words will be visible once you save the Quotation.,शब्दों में दिखाई हो सकता है एक बार आप उद्धरण बचाने के लिए होगा.
+In Words will be visible once you save the Sales Invoice.,शब्दों में दिखाई हो सकता है एक बार आप बिक्री चालान बचाने के लिए होगा.
+In Words will be visible once you save the Sales Order.,शब्दों में दिखाई हो सकता है एक बार तुम बिक्री आदेश को बचाने के लिए होगा.
+In Words(Import),शब्दों में (आयात)
+In response to,के जवाब में
+"In the Permission Manager, click on the button in the 'Condition' column for the Role you want to restrict.","अनुमति मैनेजर में, &#39;स्थिति&#39; कॉलम में रोल आप प्रतिबंधित करना चाहते हैं, उसके लिए बटन पर क्लिक करें."
+Inactive,निष्क्रिय
+Incentives,प्रोत्साहन
+Incharge Name,नाम प्रभारी
+Income,आय
+Income Account,आय खाता
+Income Year to Date,आय तिथि वर्ष
+Incoming,आवक
+Incoming Mail Setting,आने वाली मेल सेटिंग
+Incoming Rate,आवक दर
+Incoming Time,आवक समय
+Incoming quality inspection.,इनकमिंग गुणवत्ता निरीक्षण.
+Indent,मांगपत्र
+Index,अनुक्रमणिका
+Indicates that the package is a part of this delivery,इंगित करता है कि पैकेज इस वितरण का एक हिस्सा है
+Individual,व्यक्ति
+Individuals,व्यक्तियों
+Industry,उद्योग
+Industry Type,उद्योग के प्रकार
+Info,जानकारी
+Insert After,बाद सम्मिलित करें
+Insert Code,कोड डालने के लिए
+Insert Style,शैली सम्मिलित करें
+Inspected By,द्वारा निरीक्षण किया
+Inspection Criteria,निरीक्षण मानदंड
+Inspection Required,आवश्यक निरीक्षण
+Inspection Type,निरीक्षण के प्रकार
+Installation Date,स्थापना की तारीख
+Installation Note,स्थापना नोट
+Installation Note Item,अधिष्ठापन नोट आइटम
+Installation Status,स्थापना स्थिति
+Installation Time,अधिष्ठापन काल
+Installation record for a Serial No.,एक सीरियल नंबर के लिए स्थापना रिकॉर्ड
+Installed Qty,स्थापित मात्रा
+Institute / Conducted By,/ संस्थान द्वारा आयोजित
+Instructions,निर्देश
+Int,इंट
+Interested,इच्छुक
+Internal,आंतरिक
+Intro HTML,पहचान HTML
+Introduce your company to the website visitor.,वेबसाइट आगंतुक के लिए अपनी कंपनी शुरू.
+Introduction,परिचय
+Introductory information for the Contact Us Page,हमसे संपर्क करें पृष्ठ के लिए परिचयात्मक जानकारी
+Invalid Email Address,अमान्य ईमेल पता
+Inventory,इनवेंटरी
+Inverse,उलटा
+Invoice Date,चालान तिथि
+Invoice Details,चालान विवरण
+Invoice No,कोई चालान
+Invoice Period From Date,दिनांक से चालान अवधि
+Invoice Period To Date,तिथि करने के लिए चालान अवधि
+Is Active,सक्रिय है
+Is Advance,अग्रिम है
+Is Asset Item,एसेट आइटम है
+Is Cancelled,क्या Cancelled
+Is Carry Forward,क्या आगे ले जाना
+Is Child Table,चाइल्ड तालिका
+Is Default,डिफ़ॉल्ट है
+Is Encash,तुड़ाना है
+Is LWP,LWP है
+Is Mandatory Field,अनिवार्य क्षेत्र है
+Is Opening,है खोलने
+Is PL Account,पीएल खाता है
+Is POS,स्थिति है
+Is Primary Address,प्राथमिक पता
+Is Primary Contact,प्राथमिक संपर्क
+Is Purchase Item,खरीद आइटम है
+Is Sales Item,बिक्री आइटम है
+Is Service Item,सेवा आइटम
+Is Shipping Address,शिपिंग पता है
+Is Single,एकल
+Is Standard,मानक है
+Is Stock Item,स्टॉक आइटम है
+Is Sub Contracted Item,उप अनुबंधित आइटम है
+Is Subcontracted,क्या subcontracted
+Is Submittable,Submittable है
+Is it a Custom DocType created by you?,यह एक कस्टम आप के द्वारा बनाई doctype है?
+Is this Tax included in Basic Rate?,इस टैक्स मूल दर में शामिल है?
+Issue,मुद्दा
+Issue Date,जारी करने की तिथि
+Issue Details,अंक विवरण
+Item,मद
+Item Advanced,आइटम उन्नत
+Item Barcode,आइटम बारकोड
+Item Batch Nos,आइटम बैच Nos
+Item Classification,आइटम वर्गीकरण
+Item Code,आइटम कोड
+Item Customer Detail,आइटम ग्राहक विस्तार
+Item Description,आइटम विवरण
+Item Desription,आइटम desription
+Item Details,आइटम विवरण
+Item Group,आइटम समूह
+Item Group Name,आइटम समूह का नाम
+Item Groups in Details,विवरण में आइटम समूह
+Item Image (if not slideshow),छवि (यदि नहीं स्लाइड शो)
+Item Name,मद का नाम
+Item Price,मद मूल्य
+Item Prices,आइटम मूल्य
+Item Quality Inspection Parameter,आइटम गुणवत्ता निरीक्षण पैरामीटर
+Item Serial No,आइटम कोई धारावाहिक
+Item Serial Nos,आइटम सीरियल नं
+Item Supplier,आइटम प्रदायक
+Item Supplier Details,आइटम प्रदायक विवरण
+Item Tax,आइटम टैक्स
+Item Tax Amount,आइटम कर राशि
+Item Tax Rate,आइटम कर की दर
+Item Tax1,Tax1 आइटम
+Item To Manufacture,आइटम करने के लिए निर्माण
+Item UOM,आइटम UOM
+Item Website Specification,आइटम वेबसाइट विशिष्टता
+Item Website Specifications,आइटम वेबसाइट निर्दिष्टीकरण
+Item Wise Tax Detail ,आइटम वार कर विस्तार
+Item classification.,वर्गीकरण आइटम.
+Item to be manufactured or repacked,आइटम निर्मित किया जा या repacked
+Item will be saved by this name in the data base.,आइटम डाटा बेस में इस नाम से बचाया जाएगा.
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","आइटम, वारंटी, एएमसी विवरण (वार्षिक रखरखाव अनुबंध) होगा स्वतः दिलवाया जब सीरियल नंबर का चयन किया जाता है."
+Item-Wise Price List,आइटम वार मूल्य सूची
+Item: ',आइटम: &#39;
+Items,आइटम
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",अनुमानित मात्रा और न्यूनतम आदेश मात्रा के आधार पर सभी गोदामों पर विचार करने के लिए अनुरोध किया जा आइटम जो &quot;स्टॉक से बाहर कर रहे हैं&quot;
+Items which do not exist in Item master can also be entered on customer's request,आइटम जो आइटम मास्टर में मौजूद नहीं है ग्राहक के अनुरोध पर भी दर्ज किया जा सकता है
+Itemwise Discount,Itemwise डिस्काउंट
+JSON,JSON
+JV,जेवी
+Javascript,जावास्क्रिप्ट
+Javascript to append to the head section of the page.,जावास्क्रिप्ट पृष्ठ के सिर अनुभाग को संलग्न करने के लिए.
+Job Applicant,नौकरी आवेदक
+Job Opening,नौकरी खोलने
+Job Profile,नौकरी प्रोफाइल
+Job Title,कार्य शीर्षक
+"Job profile, qualifications required etc.","नौकरी प्रोफाइल योग्यता, आदि की आवश्यकता"
+Jobs Email Settings,नौकरियां ईमेल सेटिंग
+Journal Entries,जर्नल प्रविष्टियां
+Journal Entry,जर्नल प्रविष्टि
+Journal Voucher,जर्नल वाउचर
+Journal Voucher Detail,जर्नल वाउचर विस्तार
+Journal Voucher Detail No,जर्नल वाउचर विस्तार नहीं
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","बिक्री अभियान का ट्रैक रखें. बिक्रीसूत्र, कोटेशन, अभियान से बिक्री आदेश आदि करने के लिए निवेश पर वापसी गेज ट्रैक रखें."
+Keep a track of all communications,सभी संचार के एक ट्रैक रखें
+Keep a track of communication related to this enquiry which will help for future reference.,जांच है जो भविष्य में संदर्भ के लिए मदद करने के लिए संबंधित संचार का ट्रैक रखें.
+Keep a track on communications regarding this Quotation. This will help you remember earlier communications in case the Customer comes back again,इस उद्धरण के बारे में संचार पर एक ट्रैक रखें. यह आप पहले संचार याद करने में मदद के मामले में ग्राहक फिर से वापस आता है
+Key,कुंजी
+Key Performance Area,परफ़ॉर्मेंस क्षेत्र
+Key Responsibility Area,कुंजी जिम्मेदारी क्षेत्र
+Knowledge Base,ज्ञानकोश
+LEAD,सीसा
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,सीसा / / मुंबई
+LR Date,LR तिथि
+LR No,नहीं LR
+Label,लेबल
+Label Help,लेबल मदद
+Lacs,लाख
+Landed Cost Item,आयातित माल की लागत मद
+Landed Cost Items,आयातित माल की लागत आइटम
+Landed Cost Purchase Receipt,आयातित माल की लागत खरीद रसीद
+Landed Cost Purchase Receipts,उतरा लागत खरीद रसीद
+Landed Cost Wizard,आयातित माल की लागत विज़ार्ड
+Landing Page,लैंडिंग पेज
+Language,भाषा
+Language preference for user interface (only if available).,उपयोगकर्ता इंटरफ़ेस के लिए भाषा वरीयता (केवल यदि उपलब्ध हो).
+Last Contact Date,पिछले संपर्क तिथि
+Last IP,अंतिम IP
+Last Login,अंतिम लॉगिन
+Last Modified On:,अंतिम बार संशोधित:
+Last Name,सरनेम
+Last Purchase Rate,पिछले खरीद दर
+Last Update,अंतिम अद्यतन
+Last Update By,द्वारा अंतिम अद्यतन
+Latest Updates,नवीनतम अद्यतन
+Lato,Lato
+Lead,नेतृत्व
+Lead Details,विवरण लीड
+Lead Lost,खोया लीड
+Lead Name,नाम लीड
+Lead Owner,मालिक लीड
+Lead Ref,रेफरी लीड
+Lead Time Date,लीड दिनांक और समय
+Lead Time Days,लीड समय दिन
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.,लीड समय दिनों दिन जिसके द्वारा इस आइटम अपने गोदाम में उम्मीद है की संख्या है. इस दिन खरीद के अनुरोध में दिलवाया है जब आप इस मद का चयन करें.
+Lead Type,प्रकार लीड
+Leave Allocation,आबंटन छोड़ दो
+Leave Allocation Tool,आबंटन उपकरण छोड़ दो
+Leave Application,छुट्टी की अर्ज़ी
+Leave Approver,अनुमोदक छोड़ दो
+Leave Balance Before Application,आवेदन से पहले शेष छोड़ो
+Leave Control Panel,नियंत्रण कक्ष छोड़ दो
+Leave Encashed?,भुनाया छोड़ दो?
+Leave Encashment Amount,नकदीकरण राशि छोड़ दो
+Leave Setup,सेटअप छोड़ दो
+Leave Type,प्रकार छोड़ दो
+Leave Type Name,प्रकार का नाम छोड़ दो
+Leave Without Pay,बिना वेतन छुट्टी
+Leave allocations.,आवंटन छोड़ दें.
+Leave blank if considered for all branches,रिक्त छोड़ अगर सभी शाखाओं के लिए माना जाता है
+Leave blank if considered for all departments,रिक्त छोड़ अगर सभी विभागों के लिए विचार
+Leave blank if considered for all designations,रिक्त छोड़ अगर सभी पदनाम के लिए विचार
+Leave blank if considered for all employee types,रिक्त छोड़ दो अगर सभी कर्मचारी प्रकार के लिए विचार
+Leave blank if considered for all grades,रिक्त छोड़ अगर सभी ग्रेड के लिए माना जाता है
+"Leave can be approved by users with Role, ""Leave Approver""",", &quot;अनुमोदक&quot; छोड़ छोड़ भूमिका के साथ उपयोगकर्ताओं द्वारा अनुमोदित किया जा सकता है"
+Ledger,खाता
+Left,वाम
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,कानूनी संगठन से संबंधित खातों की एक अलग चार्ट के साथ इकाई / सहायक.
+Letter Head,पत्रशीर्ष
+Letter Head Image,लेटर हेड छवि
+Letter Head Name,लेटर हेड का नाम
+Letter heads for print,प्रिंट के लिए पत्र सिर
+Level,स्तर
+"Level 0 is for document level permissions, higher levels for field level permissions.","0 स्तर दस्तावेज़ स्तर अनुमतियाँ, क्षेत्र स्तर अनुमति के लिए उच्च स्तर के लिए है."
+Lft,LFT
+Link,लिंक
+Link to other pages in the side bar and next section,साइड बार में अन्य पृष्ठों और अगले अनुभाग लिंक
+Linked With,के साथ जुड़ा हुआ
+List,सूची
+List items that form the package.,सूची आइटम है कि पैकेज का फार्म.
+"List of Item Groups to be shown in ""All Products"" menu - in the sequence wanted and with number of indents (left spacing to show a tree effect).",आइटम समूह की सूची &quot;सभी उत्पाद&quot; मेनू में दिखाया जा सकता है - अनुक्रम में करना चाहता था और इंडेंट (बाएं रिक्ति के लिए एक पेड़ के प्रभाव को दिखाने के लिए) की संख्या के साथ.
+List of companies (not customers / suppliers),"कंपनियों की सूची (ग्राहकों, आपूर्तिकर्ताओं / नहीं)"
+List of holidays.,छुट्टियों की सूची.
+List of patches executed,निष्पादित पैच की सूची
+List of records in which this document is linked,रिकॉर्ड की सूची है जो इस दस्तावेज़ में जुड़ा हुआ है
+List this Item in multiple groups on the website.,कई समूहों में वेबसाइट पर इस मद की सूची.
+Live Chat,लाइव चैट
+Load Print View on opening of an existing form,एक मौजूदा फार्म के उद्घाटन के अवसर पर प्रिंट लोड
+Loading,लदान
+Loading Report,रिपोर्ट लोड हो रहा है
+Location,स्थान
+Log of Scheduler Errors,समयबद्धक त्रुटियों की लॉग इन करें
+Login After,बाद कीजिये
+Login Before,इससे पहले कीजिये
+Login Id,आईडी लॉगिन
+Login Page,लॉग
+Logout,लॉगआउट
+Long Text,लंबी पाठ
+Lost Reason,खोया कारण
+Low,निम्न
+Lower Income,कम आय
+Lucida Grande,ल्युसिडा Grande
+MIS Control,एमआईएस नियंत्रण
+MTN Details,एमटीएन विवरण
+Mail Footer,मेल फूटर
+Mail Password,मेल पासवर्ड
+Mail Port,मेल पोर्ट
+Mail Server,मेल सर्वर
+Main Reports,मुख्य रिपोर्ट
+Main Section,मुख्य धारा
+Maintain same rate throughout purchase cycle,खरीद चक्र के दौरान एक ही दर बनाए रखें
+Maintenance,रखरखाव
+Maintenance Date,रखरखाव तिथि
+Maintenance Details,रखरखाव विवरण
+Maintenance Schedule,रखरखाव अनुसूची
+Maintenance Schedule Detail,रखरखाव अनुसूची विवरण
+Maintenance Schedule Item,रखरखाव अनुसूची आइटम
+Maintenance Status,रखरखाव स्थिति
+Maintenance Time,अनुरक्षण काल
+Maintenance Type,रखरखाव के प्रकार
+Maintenance Visit,रखरखाव भेंट
+Maintenance Visit Purpose,रखरखाव भेंट प्रयोजन
+Major/Optional Subjects,मेजर / वैकल्पिक विषय
+Make Bank Voucher,बैंक वाउचर
+Make Credit Note,क्रेडिट नोट
+Make Debit Note,डेबिट नोट
+Make Difference Entry,अंतर एंट्री
+Make Excise Invoice,उत्पाद शुल्क चालान
+Make Stock Entry,स्टॉक एंट्री
+Make a new,एक नया
+Make sure that the transactions you want to restrict have a Link field 'territory' that maps to a 'Territory' master.,कि यह सुनिश्चित करें कि आप लेनदेन के लिए प्रतिबंधित करना चाहते हैं एक लिंक फ़ील्ड &#39;क्षेत्र&#39; एक &#39;क्षेत्र&#39; मास्टर नक्शे.
+Male,नर
+Manage cost of operations,संचालन की लागत का प्रबंधन
+Manage numbering series,श्रृंखला क्रमांकन प्रबंधन
+Manage sales or purchase returns,बिक्री या खरीद रिटर्न प्रबंधित
+Mandatory,अनिवार्य
+"Mandatory if Stock Item is ""Yes""",अनिवार्य अगर स्टॉक आइटम है &quot;हाँ&quot;
+Manufacture against Sales Order,बिक्री आदेश के खिलाफ निर्माण
+Manufacture/Repack,/ निर्माण Repack
+Manufactured Qty,निर्मित मात्रा
+Manufactured quantity will be updated in this warehouse,निर्मित मात्रा इस गोदाम में अद्यतन किया जाएगा
+Manufacturer,निर्माता
+Manufacturer Part Number,निर्माता भाग संख्या
+Manufacturing,विनिर्माण
+Manufacturing Home,विनिर्माण होम
+Manufacturing Quantity,विनिर्माण मात्रा
+Map,नक्शा
+Margin,हाशिया
+Marital Status,वैवाहिक स्थिति
+Markdown Reference,Markdown संदर्भ
+Market Segment,बाजार खंड
+Married,विवाहित
+Mass Mailing,मास मेलिंग
+Master,मास्टर
+Master Name,मास्टर नाम
+Master Type,मास्टर प्रकार
+Masters,स्नातकोत्तर
+Mat Detail No,चटाई विस्तार नहीं
+Match,मैच
+Match Id,आईडी से मेल
+Match non-linked Invoices and Payments.,गैर जुड़े चालान और भुगतान का मिलान.
+Material Issue,महत्त्वपूर्ण विषय
+Material Receipt,सामग्री प्राप्ति
+Material Transfer,सामग्री स्थानांतरण
+Materials,सामग्री
+Materials Required (Exploded),माल आवश्यक (विस्फोट)
+Materials Requirement Planning (MRP),सामग्री आवश्यकताएँ योजना (एमआरपी)
+Max Attachments,अधिकतम किए गए अनुलग्नकों के
+Max Days Leave Allowed,अधिकतम दिन छोड़ने की अनुमति दी
+Max Discount (%),अधिकतम डिस्काउंट (%)
+"Meaning of Submit, Cancel, Amend","अर्थ की सबमिट रद्द, संशोधन"
+Medium,मध्यम
+Merge,मर्ज
+Merge Warehouses,गोदामों मर्ज
+Merge With,के साथ विलय
+Message,संदेश
+Message Parameter,संदेश पैरामीटर
+Message greater than 160 character will be splitted into multiple mesage,160 चरित्र से अधिक संदेश कई mesage में splitted जाएगा
+Message when Cond. False,जब Cond संदेश. झूठा
+Messages,संदेश
+Method,विधि
+Middle Income,मध्य आय
+Middle Name (Optional),मध्य नाम (वैकल्पिक)
+Milestone,मील का पत्थर
+Milestone Date,माइलस्टोन तिथि
+Milestones,मील के पत्थर
+Milestones will be added as Events in the Calendar,उपलब्धि कैलेंडर में घटनाक्रम के रूप में जोड़ दिया जाएगा
+Millions,लाखों
+Min Order Qty,न्यूनतम आदेश मात्रा
+Minimum Order Qty,न्यूनतम आदेश मात्रा
+Misc,विविध
+Misc Details,विविध विवरण
+Miscellaneous,विविध
+Miscelleneous,Miscelleneous
+Mobile No,नहीं मोबाइल
+Mobile No.,मोबाइल नंबर
+Mode of Payment,भुगतान की रीति
+Modified Amount,संशोधित राशि
+Modified by,के द्वारा जाँचा गया
+Module,मॉड्यूल
+Module Def,मॉड्यूल Def
+Module Name,मॉड्यूल नाम
+Modules,मॉड्यूल
+Modules Setup,मॉड्यूल सेटअप
+Monday,सोमवार
+Month,माह
+Monthly,मासिक
+Monthly salary statement.,मासिक वेतन बयान.
+Monthly salary template.,मासिक वेतन टेम्पलेट.
+More,अधिक
+More Details,अधिक जानकारी
+More Info,अधिक जानकारी
+More content for the bottom of the page.,पृष्ठ के नीचे के लिए सामग्री.
+Moving Average,चलायमान औसत
+Moving Average Rate,मूविंग औसत दर
+Mr,श्री
+Ms,सुश्री
+Multi Ledger Report Detail,मल्टी लेजर रिपोर्ट विस्तार
+Multiple Item Prices,एकाधिक आइटम मूल्य
+Mupltiple Item prices.,Mupltiple आइटम की कीमतों.
+My Company,मेरी कंपनी
+My Settings,मेरी सेटिंग्स
+NL-,NL-
+Name,नाम
+Name Case,नाम प्रकरण
+Name as entered in Sales Partner master,नाम के रूप में बिक्री साथी मास्टर में प्रवेश
+Name of organization from where lead has come,जहां नेतृत्व आ गया है से संगठन के नाम
+Name of person or organization that this address belongs to.,कि इस पते पर संबधित व्यक्ति या संगठन का नाम.
+Name of the Budget Distribution,बजट वितरण के नाम
+Name of the entity who has requested for the Purchase Requisition,इकाई है जो खरीद अधिग्रहण के लिए अनुरोध किया है के नाम
+Naming,नामकरण
+Naming Series,श्रृंखला का नामकरण
+Naming Series Options,श्रृंखला विकल्प नामकरण
+Net Pay,शुद्ध वेतन
+Net Pay (in words) will be visible once you save the Salary Slip.,शुद्ध वेतन (शब्दों में) दिखाई हो सकता है एक बार आप वेतन पर्ची बचाने के लिए होगा.
+Net Total,शुद्ध जोड़
+Net Total (Import),शुद्ध कुल (आयात)
+Net Total*,नेट कुल *
+Net Weight,निवल भार
+Net Weight UOM,नेट वजन UOM
+Net Weight of each Item,प्रत्येक आइटम के नेट वजन
+New,नई
+New BOM,नई बीओएम
+New Communications,नई संचार
+New Delivery Notes,नई वितरण नोट
+New Enquiries,नई पूछताछ
+New Leads,नए सुराग
+New Leaves Allocated,नई आवंटित पत्तियां
+New Leaves Allocated (In Days),नई पत्तियों आवंटित (दिनों में)
+New Name,नया नाम
+New Password,नया पासवर्ड
+New Projects,नई परियोजनाएं
+New Purchase Orders,नई खरीद आदेश
+New Purchase Receipts,नई खरीद रसीद
+New Purchase Requests,नई खरीद अनुरोध
+New Quotations,नई कोटेशन
+New Record,नया रिकॉर्ड
+New Sales Orders,नई बिक्री आदेश
+New Stock Entries,नई स्टॉक प्रविष्टियां
+New Stock UOM,नई स्टॉक UOM
+New Supplier Quotations,नई प्रदायक कोटेशन
+New Support Tickets,नया समर्थन टिकट
+New Update,नई अद्यतन
+New Workplace,नए कार्यस्थल
+New value to be set,नई करने के लिए सेट किया जा मूल्य
+Newsletter,न्यूज़लैटर
+Newsletter Content,न्यूजलेटर सामग्री
+Newsletter Status,न्यूज़लैटर स्थिति
+Next Communcation On,अगला कम्युनिकेशन
+Next Contact By,द्वारा अगले संपर्क
+Next Contact Date,अगले संपर्क तिथि
+Next Date,अगली तारीख
+Next State,अगले राज्य
+Next actions,अगली कार्रवाई
+Next email will be sent on:,अगले ईमेल पर भेजा जाएगा:
+No,नहीं
+No Action,कोई कार्रवाई नहीं
+No Communication tagged with this ,इस के साथ टैग संचार
+No Copy,कोई नकल
+No Permission,अनुमति नहीं है
+No Permission to ,कोई अनुमति नहीं
+No Permissions set for this criteria.,कोई अनुमतियाँ इस मापदंड के लिए निर्धारित किया है.
+No User Properties found.,कोई उपयोगकर्ता के गुण पाया.
+No of Requested SMS,अनुरोधित एसएमएस की संख्या
+No of Sent SMS,भेजे गए एसएमएस की संख्या
+No of Visits,यात्राओं की संख्या
+No records tagged.,कोई रिकॉर्ड टैग.
+"No table is created for Single DocTypes, all values are stored in tabSingles as a tuple.","कोई तालिका एकल doctypes के लिए बनाया है, सभी मूल्यों एक टपल tabSingles में संग्रहीत कर रहे हैं."
+None: End of Workflow,कोई नहीं: कार्यप्रवाह समाप्ति
+Not,नहीं
+Not Active,सक्रिय नहीं
+Not Applicable,लागू नहीं
+Not Billed,नहीं बिल
+Not Delivered,नहीं वितरित
+Not Found,नहीं मिला
+Not Linked to any record.,लिंक्ड कोई रिकॉर्ड नहीं है.
+Not Permitted,अनुमति नहीं
+Not allowed,अनुमति नहीं
+Not allowed for: ,अनुमति नहीं है:
+Not enough permission to see links.,पर्याप्त के लिए लिंक को देखने की अनुमति नहीं है.
+Not in Use,व्यर्थ
+Not interested,कोई दिलचस्पी नहीं
+Not linked,नहीं जुड़ा हुआ
+Note: Email will not be sent to disabled users,नोट: ईमेल अक्षम उपयोगकर्ताओं के लिए नहीं भेजा जाएगा
+Note: Other permission rules may also apply,नोट: अन्य अनुमति के नियम भी लागू हो सकता है
+Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts,नोट: आप पते और संपर्क के माध्यम से एकाधिक पता या संपर्क प्रबंधित कर सकते हैं
+Note: maximum attachment size = 1mb,नोट: अधिकतम कुर्की आकार 1mb =
+Notes,नोट्स
+Nothing to show,दिखाने के लिए कुछ भी नहीं
+Notice - Number of Days,सूचना - दिनों की संख्या
+Notification Control,अधिसूचना नियंत्रण
+Notification Email Address,सूचना ईमेल पता
+Notify By Email,ईमेल से सूचित
+Notify by Email on Re-order,", पुनः आदेश पर ईमेल द्वारा सूचित"
+Number Format,संख्या स्वरूप
+O+,O +
+O-,O-
+OPPT,OPPT
+Ocean,सागर
+Old Parent,पुरानी माता - पिता
+Old Style Reports,पुरानी शैली रिपोर्ट
+On,पर
+On Net Total,नेट कुल
+On Previous Row Amount,पिछली पंक्ति राशि पर
+On Previous Row Total,पिछली पंक्ति कुल पर
+"Once you have set this, the users will only be able access documents with that property.","एक बार जब आप यह निर्धारित किया है, उपयोगकर्ताओं को केवल उस संपत्ति के साथ सक्षम पहुँच दस्तावेज होगा."
+One or multiple Sales Order no which generated this Purchase Requisition,एक या कई बिक्री आदेश नहीं जो इस खरीद अधिग्रहण उत्पन्न
+Only Allow Edit For,केवल के लिए संपादित करें अनुमति दें
+Only System Manager can create / edit reports,केवल सिस्टम मैनेजर रिपोर्ट बनाने / संपादित कर सकते हैं
+Only leaf nodes are allowed in transaction,केवल पत्ता नोड्स के लेनदेन में की अनुमति दी जाती है
+Open,खुला
+Open Sans,ओपन संस
+Open Tickets,ओपन टिकट
+Opening Date,तिथि खुलने की
+Opening Time,समय खुलने की
+Opening for a Job.,एक नौकरी के लिए खोलना.
+Operating Cost,संचालन लागत
+Operation Description,ऑपरेशन विवरण
+Operation No,कोई ऑपरेशन
+Operation Time (mins),आपरेशन समय (मिनट)
+Operations,संचालन
+Operator,ऑपरेटर
+Opportunity,अवसर
+Opportunity Date,अवसर तिथि
+Opportunity From,अवसर से
+Opportunity Item,अवसर आइटम
+Opportunity Items,अवसर आइटम
+Opportunity Lost,मौका खो दिया
+Opportunity No,कोई मौका
+Opportunity Type,अवसर प्रकार
+Options,विकल्प
+Options Help,विकल्पों की मदद से
+Order Confirmed,आदेश की पुष्टि की
+Order Lost,आदेश खोया
+Order Type,आदेश प्रकार
+Ordered Items To Be Billed,हिसाब से बिलिंग किए आइटम
+Ordered Items To Be Delivered,हिसाब से दिया जा आइटम
+Ordered Qty,हिसाब से मात्रा
+Ordered Quantity,आदेशित मात्रा
+Orders released for production.,उत्पादन के लिए आदेश जारी किया.
+Organization,संगठन
+Original Message,मूल संदेश
+Other,अन्य
+Other Details,अन्य विवरण
+Other Income Detail,अन्य आय विस्तार
+Out going mail server and support ticket mailbox,मेल सर्वर और समर्थन टिकट मेलबॉक्स बाहर जा रहा है
+Out of AMC,एएमसी के बाहर
+Out of Warranty,वारंटी के बाहर
+Outgoing,बाहर जाने वाला
+Outgoing Mail Server,जावक मेल सर्वर
+Outgoing Mails,जावक मेल
+Outstanding Amount,बकाया राशि
+Over Heads,सिर पर
+Overhead,उपरि
+Overload Query,अधिभार प्रश्न
+Overwrite,अधिलेखित करें
+Owned,स्वामित्व
+P.O. Date,पीओ तिथि
+P.O. No,पीओ नहीं
+PAN Number,पैन नंबर
+PF No.,पीएफ सं.
+PF Number,पीएफ संख्या
+PI/2011/,PI/2011 /
+PIN,पिन
+PO,पीओ
+PO Date,पीओ तिथि
+PO No,पीओ नहीं
+POP3 Mail Server,POP3 मेल सर्वर
+POP3 Mail Server (e.g. pop.gmail.com),POP3 मेल सर्वर (जैसे pop.gmail.com)
+POP3 Mail Settings,POP3 मेल सेटिंग्स
+POP3 mail server (e.g. pop.gmail.com),POP3 मेल सर्वर (जैसे pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),POP3 सर्वर जैसे (pop.gmail.com)
+POS Setting,स्थिति सेटिंग
+PR Detail,पीआर विस्तार
+PRO,प्रो
+PS,पुनश्च
+Package Item Details,संकुल आइटम विवरण
+Package Items,पैकेज आइटम
+Package Weight Details,पैकेज वजन विवरण
+Packed Quantity,लंच मात्रा
+Packing Details,पैकिंग विवरण
+Packing Detials,पैकिंग detials
+Packing List,सूची पैकिंग
+Packing Slip,पर्ची पैकिंग
+Packing Slip Item,पैकिंग स्लिप आइटम
+Packing Slip Items,पैकिंग स्लिप आइटम
+Page,पेज
+Page Break,पृष्ठातर
+Page HTML,पृष्ठ HTML
+Page Len,पेज लेन
+Page Name,पेज का नाम
+Page Role,पृष्ठ रोल
+Page content,पृष्ठ सामग्री
+Page not found,पृष्ठ नहीं मिला
+Page to show on the website,वेबसाइट पर दिखाने के लिए
+"Page url name (auto-generated) (add "".html"")",पृष्ठ url (ऑटो उत्पन्न) नाम (जोड़ &quot;html.&quot;)
+Paid Amount,राशि भुगतान
+Parameter,प्राचल
+Parent Account,खाते के जनक
+Parent BOM,माता - पिता बीओएम
+Parent Cost Center,माता - पिता लागत केंद्र
+Parent Customer Group,माता - पिता ग्राहक समूह
+Parent Detail docname,माता - पिता विस्तार docname
+Parent Doc Type,माता - पिता डॉक्टर के प्रकार
+Parent Item,मूल आइटम
+Parent Item Group,माता - पिता आइटम समूह
+Parent Label,माता - पिता लेबल
+Parent Sales Person,माता - पिता बिक्री व्यक्ति
+Parent Territory,माता - पिता टेरिटरी
+Parenttype,Parenttype
+Partially Completed,आंशिक रूप से पूरा
+Participants,प्रतिभागियों
+Partly Billed,आंशिक रूप से बिल
+Partly Delivered,आंशिक रूप से वितरित
+Partner,साथी
+Partner Target Detail,साथी लक्ष्य विवरण
+Partner Type,साथी के प्रकार
+Passport Number,पासपोर्ट नंबर
+Password,पासवर्ड
+Password Expires in (days),पासवर्ड में समाप्त (दिन)
+Patch,पैच
+Patch Log,पैच प्रवेश करें
+Pay To / Recd From,/ रिसी डी से भुगतान
+Payables,देय
+Payables Group,देय समूह
+Payment Entries,भुगतान प्रविष्टियां
+Payment Reconciliation,भुगतान सुलह
+Payment Terms,अदायगी की शर्तें
+Payment days,भुगतान दिन
+Payment to Invoice Matching Tool,चालान मिलान उपकरण के लिए भुगतान
+Payment to Invoice Matching Tool Detail,चालान मिलान उपकरण विस्तार करने के लिए भुगतान
+Payments,भुगतान
+Payroll Setup,पेरोल सेटअप
+Pending,अपूर्ण
+Pending Review,समीक्षा के लिए लंबित
+Percent Complete,पूरा प्रतिशत
+Percentage Allocation,प्रतिशत आवंटन
+Percentage variation in quantity to be allowed while receiving or delivering this item.,मात्रा में प्रतिशत परिवर्तन प्राप्त करने या इस मद के लिए अनुमति दी गई है.
+Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>,प्रतिशत आप को प्राप्त करने के लिए या मात्रा के खिलाफ और अधिक देने के लिए अनुमति दी जाती है के आदेश दिए. <p> उदाहरण के लिए: यदि आप 100 इकाइयों का आदेश दिया है. और अपने भत्ता 10% है तो आप कर रहे हैं 110 इकाइयों को प्राप्त करने की अनुमति दी </p>
+Performance appraisal.,प्रदर्शन मूल्यांकन.
+Period Closing Voucher,अवधि समापन वाउचर
+Periodicity,आवधिकता
+Perm Level,स्तर Perm
+Permanent Accommodation Type,स्थायी आवास प्रकार
+Permanent Address,स्थायी पता
+Permission Control,अनुमति नियंत्रण
+Permission Engine,अनुमति इंजन
+Permission Level,अनुमति स्तर
+Permission Levels,अनुमति स्तरों
+Permission Manager,अनुमति प्रबंधक
+Permission Rules,अनुमति नियम
+Permissions,अनुमतियाँ
+Permissions Settings,अनुमतियाँ सेटिंग्स
+Permissions are automatically translated to Standard Reports and Searches,अनुमतियाँ स्वतः मानक रिपोर्टों और खोज पर अनुवाद कर रहे हैं
+"Permissions are set on Roles and Document Types (called DocTypes) by restricting read, edit, make new, submit, cancel, amend and report rights.","अनुमतियाँ भूमिकाओं और दस्तावेज़ प्रकार (नामक doctypes) पर पढ़ने, संपादित, नया बनाने के लिए सीमित द्वारा स्थापित कर रहे हैं, सबमिट रद्द, संशोधन और अधिकार की रिपोर्ट."
+Permissions at higher levels are 'Field Level' permissions. All Fields have a 'Permission Level' set against them and the rules defined at that permissions apply to the field. This is useful incase you want to hide or make certain field read-only.,उच्च स्तर पर अनुमतियाँ &#39;फील्ड लेवल अनुमतियाँ हैं. सभी क्षेत्रों उनके खिलाफ एक &#39;अनुमति स्तर&#39; सेट और कि अनुमति पर परिभाषित नियमों क्षेत्र के लिए लागू होते हैं. यह उपयोगी है बैठाना आप को छिपाने के लिए या कुछ क्षेत्र केवल पढ़ने के लिए करना चाहते हैं.
+"Permissions at level 0 are 'Document Level' permissions, i.e. they are primary for access to the document.","स्तर 0 पर अनुमतियाँ हैं &#39;दस्तावेज़ स्तर&#39; की अनुमति है, यानी वे दस्तावेज़ तक पहुँच के लिए प्राथमिक रहे हैं."
+Permissions translate to Users based on what Role they are assigned,अनुमतियाँ क्या भूमिका वे आवंटित कर रहे है इस आधार पर उपयोगकर्ताओं के लिए अनुवाद
+Permissions will be based on this DocType,अनुमतियाँ इस doctype पर आधारित जाएगा
+Person,व्यक्ति
+Person To Be Contacted,व्यक्ति से संपर्क किया जा
+Personal Details,व्यक्तिगत विवरण
+Personal Email,व्यक्तिगत ईमेल
+Phone,फ़ोन
+Phone No,कोई फोन
+Phone No.,फोन नंबर
+Pick Columns,स्तंभ उठाओ
+Pin Code,पिन कोड
+Pincode,Pincode
+Place of Issue,जारी करने की जगह
+Plan for scheduled maintenance contracts.,अनुसूचित रखरखाव अनुबंध के लिए योजना.
+Planned Qty,नियोजित मात्रा
+Planned Quantity,नियोजित मात्रा
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,संक्षिप्त या लघु नाम ठीक से दर्ज करें सभी खाता प्रमुखों को प्रत्यय के रूप में जोड़ दिया जाएगा.
+Please check,कृपया जाँच करें
+Please click on another report from the menu.,मेनू से एक और रिपोर्ट पर क्लिक करें.
+Please enter valid ,वैध दर्ज करें
+Please save the Newsletter before sending.,भेजने से पहले न्यूज़लैटर बचाने.
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,का चयन करें कृपया आगे ले जाना है अगर तुम भी शामिल करना चाहते हैं पिछले राजकोषीय वर्ष की शेष राशि इस वित्त वर्ष के लिए छोड़ देता है
+Please select: ,का चयन करें:
+Please specify Default Currency in Company Master \			and Global Defaults,कंपनी \ मास्टर और वैश्विक मूलभूत में डिफ़ॉल्ट मुद्रा निर्दिष्ट करें
+Please specify a valid,एक वैध निर्दिष्ट करें
+Plot Control,प्लॉट नियंत्रण
+Point of Sale,बिक्री के प्वाइंट
+Point-of-Sale Setting,प्वाइंट की बिक्री की सेटिंग
+Points,»
+Post Graduate,स्नातकोत्तर
+Post Topic,विषय पोस्ट
+Posting Date,तिथि पोस्टिंग
+Posting Time,बार पोस्टिंग
+Potential Sales Deal,संभावित बिक्री सौदा
+Potential opportunities for selling.,बेचने के लिए संभावित अवसरों.
+"Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.","प्रेसिजन केवल प्रदर्शन के लिए फ्लोट क्षेत्र (मात्रा, छूट, प्रतिशत आदि) के लिए. तैरता अभी भी 6 दशमलव की गणना की जा."
+Prefix,उपसर्ग
+Present,पेश
+Prevdoc DocType,Prevdoc doctype
+Prevdoc Doctype,Prevdoc Doctype
+Preview,पूर्वावलोकन
+Previous Work Experience,पिछले कार्य अनुभव
+Price List,कीमत सूची
+Price List Currency,मूल्य सूची मुद्रा
+Price List Currency Conversion Rate,मूल्य सूची मुद्रा रूपांतरण दर
+Price List Exchange Rate,मूल्य सूची विनिमय दर
+Price List Master,मूल्य सूची मास्टर
+Price List Name,मूल्य सूची का नाम
+Price List Rate,मूल्य सूची दर
+Price List Rate*,मूल्य सूची दर *
+Price List and Currency,मूल्य सूची और मुद्रा
+Price Lists and Rates,मूल्य सूची और दरें
+Primary,प्राथमिक
+Print Format,प्रारूप प्रिंट
+Print Heading,शीर्षक प्रिंट
+Print Hide,छिपाएँ प्रिंट
+Print Width,प्रिंट चौड़ाई
+Print Without Amount,राशि के बिना प्रिंट
+Priority,प्राथमिकता
+Private,निजी
+Process,प्रक्रिया
+Process Payroll,प्रक्रिया पेरोल
+Produced Quantity,उत्पादित मात्रा
+Product,उत्पाद
+Product Categories,उत्पाद श्रेणियों
+Product Category for website,वेबसाइट के लिए उत्पाद श्रेणी
+Product Enquiry,उत्पाद पूछताछ
+Product Group,उत्पाद समूह
+"Product Groups that are listed on the website. The first product group from this list will be listed by default on the ""Products Page""",उत्पाद समूह है कि वेबसाइट पर सूचीबद्ध हैं. इस सूची में से पहला उत्पाद समूह &quot;उत्पाद&quot; पेज पर डिफ़ॉल्ट रूप से सूचीबद्ध किया जाएगा
+Product Settings,उत्पाद सेटिंग
+Production,उत्पादन
+Production Order,उत्पादन का आदेश
+Production Plan Item,उत्पादन योजना मद
+Production Plan Items,उत्पादन योजना आइटम
+Production Plan Sales Order,उत्पादन योजना बिक्री आदेश
+Production Plan Sales Orders,उत्पादन योजना विक्रय आदेश
+Production Planning (MRP),उत्पादन योजना (एमआरपी)
+Production Planning Tool,उत्पादन योजना उपकरण
+Products Settings,उत्पाद सेटिंग्स
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","उत्पाद डिफ़ॉल्ट खोजों में वजन उम्र के द्वारा हल किया जाएगा. अधिक वजन उम्र, उच्च उत्पाद की सूची में दिखाई देगा."
+Profile,रूपरेखा
+Profile Control,प्रोफ़ाइल नियंत्रण
+Profile Defaults,प्रोफ़ाइल डिफ़ॉल्ट्स
+Profile Represents a User in the system.,प्रणाली में एक उपयोगकर्ता का प्रतिनिधित्व करता है.
+Program / Seminar Title,कार्यक्रम / शीर्षक संगोष्ठी
+Project,परियोजना
+Project Activity,परियोजना गतिविधि
+Project Activity Update,परियोजना गतिविधि अपडेट
+Project Control,परियोजना नियंत्रण
+Project Costing,लागत परियोजना
+Project Details,परियोजना विवरण
+Project Milestone,परियोजना मील का पत्थर
+Project Milestones,परियोजना मील के पत्थर
+Project Name,इस परियोजना का नाम
+Project Start Date,परियोजना प्रारंभ दिनांक
+Project Tasks,प्रोजेक्ट कार्य
+Project Type,परियोजना के प्रकार
+Project Value,परियोजना मूल्य
+Project activity / task.,परियोजना / कार्य कार्य.
+Project master.,मास्टर परियोजना.
+Project will get saved and will be searchable with project name given,परियोजना और बच जाएगा परियोजना भी नाम के साथ खोजा होगा
+Projected Qty,अनुमानित मात्रा
+Projects,परियोजनाओं
+Projects Home,परियोजनाओं घर
+Prompt email sending to customers and suppliers,प्रॉम्प्ट आपूर्तिकर्ताओं और ग्राहकों को ईमेल भेजने
+Prompt for Email on Submission of,प्रस्तुत करने पर ईमेल के लिए संकेत
+Properties,गुण
+Property,संपत्ति
+Property Setter,संपत्ति सेटर
+Property Setter overrides a standard DocType or Field property,संपत्ति सेटर ओवरराइड एक मानक doctype या फील्ड संपत्ति
+Property Type,सम्पत्ती के प्रकार
+Provide email id registered in company,कंपनी में पंजीकृत ईमेल आईडी प्रदान
+Public,सार्वजनिक
+Published,प्रकाशित
+Pull Emails from the Inbox and attach them as Communication records (for known contacts).,ईमेल इनबॉक्स से खींचो और उन्हें संचार रिकॉर्ड (ज्ञात संपर्कों के लिए) के रूप में देते हैं.
+Pull Opportunity Detail,अवसर विस्तार खींचो
+Pull Payment Entries,भुगतान प्रविष्टियां खींचो
+Pull Purchase Order Details,खरीद आदेश विवरण खींचो
+Pull Quotation Items,कोटेशन आइटम खींचो
+Pull Sales Order Items,बिक्री आदेश आइटम खींचो
+Pull items from Sales Order mentioned in the above table.,उपरोक्त तालिका में उल्लिखित बिक्री आदेश से आइटम खींचो.
+Pull sales orders (pending to deliver) based on the above criteria,उपरोक्त मानदंडों के आधार पर बिक्री के आदेश (वितरित करने के लिए लंबित) खींचो
+Pur Order,पुर आदेश
+Pur Receipt,पुर रसीद
+Purchase,क्रय
+Purchase Analytics,खरीद विश्लेषिकी
+Purchase Common,आम खरीद
+Purchase Date,तिथि खरीद
+Purchase Details,खरीद विवरण
+Purchase Discounts,खरीद छूट
+Purchase Document No,कोई दस्तावेज़ खरीद
+Purchase Document Type,दस्तावेज़ प्रकार की खरीद
+Purchase Invoice,चालान खरीद
+Purchase Invoice Advance,चालान अग्रिम खरीद
+Purchase Invoice Advances,चालान अग्रिम खरीद
+Purchase Invoice Item,चालान आइटम खरीद
+Purchase Order,आदेश खरीद
+Purchase Order Date,खरीद आदेश दिनांक
+Purchase Order Item,खरीद आदेश आइटम
+Purchase Order Item No,आदेश आइटम नहीं खरीद
+Purchase Order Item Supplied,खरीद आदेश आइटम की आपूर्ति
+Purchase Order Items,आदेश आइटम खरीद
+Purchase Order Items Supplied,खरीद आदेश वस्तुओं की आपूर्ति
+Purchase Order Message,खरीद आदेश संदेश
+Purchase Order Required,खरीदने के लिए आवश्यक आदेश
+Purchase Order sent by customer,खरीद ग्राहक द्वारा भेजे गए आदेश
+Purchase Orders given to Suppliers.,खरीद आपूर्तिकर्ताओं के लिए दिए गए आदेश.
+Purchase Receipt,रसीद खरीद
+Purchase Receipt Item,रसीद आइटम खरीद
+Purchase Receipt Item Supplied,खरीद रसीद आइटम की आपूर्ति
+Purchase Receipt Item Supplieds,खरीद रसीद आइटम Supplieds
+Purchase Receipt Items,रसीद वस्तुओं की खरीद
+Purchase Receipt Message,खरीद रसीद संदेश
+Purchase Receipt No,रसीद खरीद नहीं
+Purchase Receipt Required,खरीद रसीद आवश्यक
+Purchase Request,अनुरोध खरीद
+Purchase Request Date,खरीद अनुरोध तिथि
+Purchase Request Detail No,अनुरोध विस्तार से नहीं खरीद
+Purchase Request For Warehouse,खरीद गोदाम के लिए अनुरोध
+Purchase Request Item,अनुरोध आइटम खरीद
+Purchase Request No,कोई अनुरोध खरीद
+Purchase Requisition Details,खरीद माँग विवरण
+Purchase Requisition No,माँग खरीद नहीं
+Purchase Return,क्रय वापसी
+Purchase Returned,खरीद वापस आ गए
+Purchase Returns,खरीद रिटर्न
+Purchase Taxes and Charges,खरीद कर और शुल्क
+Purchase Taxes and Charges Master,खरीद कर और शुल्क मास्टर
+Purpose,उद्देश्य
+Purpose must be one of ,प्रयोजन एक का होना चाहिए
+QA Inspection,क्यूए निरीक्षण
+QA No,नहीं क्यूए
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,मात्रा
+Qty Consumed Per Unit,मात्रा रूपये प्रति यूनिट की खपत
+Qty To Manufacture,विनिर्माण मात्रा
+Qty as per Stock UOM,मात्रा स्टॉक UOM के अनुसार
+Qualification,योग्यता
+Quality,गुणवत्ता
+Quality Inspection,गुणवत्ता निरीक्षण
+Quality Inspection Parameters,गुणवत्ता निरीक्षण पैरामीटर
+Quality Inspection Reading,गुणवत्ता निरीक्षण पढ़ना
+Quality Inspection Readings,गुणवत्ता निरीक्षण रीडिंग
+Quantity,मात्रा
+Quantity Requested for Purchase,मात्रा में खरीद करने के लिए अनुरोध
+Quantity already manufactured,मात्रा पहले से ही निर्मित
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,वस्तु की मात्रा विनिर्माण / कच्चे माल की दी गई मात्रा से repacking के बाद प्राप्त
+Quantity should be equal to Manufacturing Quantity. ,मात्रा विनिर्माण मात्रा के बराबर होना चाहिए.
+Quarter,तिमाही
+Quarterly,त्रैमासिक
+Query,प्रश्न
+Query Options,क्वेरी विकल्प
+Query Report,क्वेरी रिपोर्ट
+Question,सवाल
+Quick Help for Setting Permissions,अनुमतियाँ सेट करने के लिए त्वरित मदद
+Quick Help for User Properties,उपयोगकर्ता के गुण के लिए त्वरित सहायता
+Quotation,उद्धरण
+Quotation Date,कोटेशन तिथि
+Quotation Item,कोटेशन आइटम
+Quotation Items,कोटेशन आइटम
+Quotation Lost Reason,कोटेशन कारण खोया
+Quotation Message,कोटेशन संदेश
+Quotation No,कोई कोटेशन
+Quotation No.,कोटेशन सं.
+Quotation Sent,कोटेशन भेजे गए
+Quotation To,करने के लिए कोटेशन
+Quotation no against which this Sales Order is made ,कोटेशन के खिलाफ जो कोई इस बिक्री आदेश किया जाता है
+Quotes to Leads or Customers.,सुराग या ग्राहक के लिए उद्धरण.
+Raise Exception,अपवाद उठाएँ
+Raise Production Order,उत्पादन का आदेश उठाएँ
+Raise Purchase Request,खरीद के अनुरोध उठाएँ
+Raise Purchase Request when stock reaches re-order level,खरीद अनुरोध जब शेयर पुनः आदेश के स्तर तक पहुँच उठाएँ
+Raised By,द्वारा उठाए गए
+Raised By (Email),(ई) द्वारा उठाए गए
+Random,यादृच्छिक
+Range,रेंज
+Rate,दर
+Rate ,दर
+Rate Of Materials Based On,सामग्री के आधार पर दर
+Rate at which Customer Currency is converted to customer's base currency,जिस पर दर ग्राहक की मुद्रा ग्राहक आधार मुद्रा में परिवर्तित किया जाता है
+Rate at which Price list currency is converted to company's base currency,दर जिस पर मूल्य सूची मुद्रा कंपनी के बेस मुद्रा में परिवर्तित किया जाता है
+Rate at which Price list currency is converted to customer's base currency,दर जिस पर मूल्य सूची मुद्रा ग्राहक आधार मुद्रा में परिवर्तित किया जाता है
+Rate at which customer's currency is converted to company's base currency,जिस पर दर ग्राहक की मुद्रा कंपनी के बेस मुद्रा में परिवर्तित किया जाता है
+Rate at which supplier's currency is converted to company's base currency,दर जिस पर आपूर्तिकर्ता मुद्रा कंपनी के बेस मुद्रा में परिवर्तित किया जाता है
+Rate at which this tax is applied,दर जिस पर इस कर को लागू किया जाता है
+Rate*,दर *
+Raw Material Details,कच्चे माल विवरण
+Raw Material Item Code,कच्चे माल के मद कोड
+Raw Materials Supplied Cost,कच्चे माल की लागत की आपूर्ति
+Re-Calculate Values,पुनः गणना मान
+Re-Order Level,पुन आदेश स्तर
+Re-Order Qty,पुन आदेश मात्रा
+Read,पढ़ना
+Read Only,केवल पठनीय
+Reading 1,1 पढ़ना
+Reading 10,10 पढ़ना
+Reading 2,2 पढ़ना
+Reading 3,3 पढ़ना
+Reading 4,4 पढ़ना
+Reading 5,5 पढ़ना
+Reading 6,6 पढ़ना
+Reading 7,7 पढ़ना
+Reading 8,8 पढ़ना
+Reading 9,9 पढ़ना
+Reason,कारण
+Reason for Leaving,छोड़ने के लिए कारण
+Reason for Resignation,इस्तीफे का कारण
+Recalculate,पुनर्गणना
+Recd Quantity,रिसी डी मात्रा
+Receivables,प्राप्य
+Receivables Group,प्राप्तियों समूह
+Received Date,प्राप्त तिथि
+Received Qty,प्राप्त मात्रा
+Receiver List,रिसीवर सूची
+Receiver Name,रिसीवर नाम
+Receiver Parameter,रिसीवर पैरामीटर
+Recent,हाल ही में
+Recipient,प्राप्तकर्ता
+Recipients,प्राप्तकर्ता
+Reconciliation Data,सुलह डेटा
+Reconciliation HTML,सुलह HTML
+Reconciliation JSON,सुलह JSON
+Recurring Id,आवर्ती आईडी
+Recurring Invoice,आवर्ती चालान
+Recurring Type,आवर्ती प्रकार
+Ref Code,रेफरी कोड
+Ref Doc should be submitted?,रेफरी डॉक्टर प्रस्तुत किया जाना चाहिए?
+Ref DocType,रेफरी doctype
+Ref Name,रेफरी नाम
+Ref Rate,रेफरी दर
+Ref Rate ,रेफरी दर
+Ref Rate*,रेफरी दर *
+Ref SQ,रेफरी वर्ग
+Ref Type,रेफरी के प्रकार
+Reference,संदर्भ
+Reference Date,संदर्भ तिथि
+Reference DocType Key,संदर्भ doctype कुंजी
+Reference Docname Key,संदर्भ Docname कुंजी
+Reference Name,संदर्भ नाम
+Reference Number,संदर्भ संख्या
+Reference Type,संदर्भ प्रकार
+Refresh,ताज़ा करना
+Registration Details,पंजीकरण के विवरण
+Registration Info,पंजीकरण जानकारी
+Reject HTML,HTML को अस्वीकार करें
+Rejected,अस्वीकृत
+Rejected Quantity,अस्वीकृत मात्रा
+Rejected Serial No,अस्वीकृत धारावाहिक नहीं
+Rejected Warehouse,अस्वीकृत वेअरहाउस
+Related Page,संबंधित पेज
+Relation,संबंध
+Relieving Date,तिथि राहत
+Remark,टिप्पणी
+Remarks,टिप्पणियाँ
+Remove,हटाना
+Rename,नाम बदलें
+Rename Tool,उपकरण का नाम बदलें
+Rented,किराये पर
+Repeat on Day of Month,महीने का दिन पर दोहराएँ
+Replace,बदलें
+Replace Item / BOM in all BOMs,सभी BOMs आइटम / BOM बदलें
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","अन्य सभी BOMs जहां यह प्रयोग किया जाता है में एक विशेष बीओएम बदलें. यह पुराने बीओएम लिंक की जगह, लागत अद्यतन और नया बीओएम के अनुसार &quot;BOM धमाका आइटम&quot; तालिका पुनर्जन्म"
+Replied,उत्तर
+Report,रिपोर्ट
+Report Date,तिथि रिपोर्ट
+Report Hide,छिपाएँ रिपोर्ट
+Report Name,रिपोर्ट नाम
+Report Saved,सहेजी गई रिपोर्ट
+Report Script,रिपोर्ट स्क्रिप्ट
+Report Server Script,सर्वर स्क्रिप्ट की रिपोर्ट
+Report was not saved (there were errors),रिपोर्ट नहीं बचाया (वहाँ त्रुटियों थे)
+Reports,रिपोर्ट
+Reports to,करने के लिए रिपोर्ट
+Represents the states allowed in one document and role assigned to change the state.,एक दस्तावेज़ और राज्य में बदल सौंपा भूमिका में अनुमति दी राज्यों का प्रतिनिधित्व करता है.
+Reqd,Reqd
+Reqd By Date,तिथि reqd
+Request Type,अनुरोध प्रकार
+Request for Information,सूचना के लिए अनुरोध
+Request for purchase.,खरीद के लिए अनुरोध.
+Requested By,द्वारा अनुरोध किया
+Required By,द्वारा आवश्यक
+Required Date,आवश्यक तिथि
+Required Qty,आवश्यक मात्रा
+Required only for sample item.,केवल नमूना आइटम के लिए आवश्यक है.
+Required raw materials issued to the supplier for producing a sub - contracted item.,आवश्यक कच्चे एक उप के उत्पादन के लिए आपूर्तिकर्ता को जारी सामग्री - अनुबंधित आइटम.
+Reseller,पुनर्विक्रेता
+Reserved Quantity,आरक्षित मात्रा
+Reserved Warehouse,सुरक्षित वेयरहाउस
+Resignation Letter Date,इस्तीफा पत्र दिनांक
+Resolution,संकल्प
+Resolution Date,संकल्प तिथि
+Resolution Details,संकल्प विवरण
+Resolved By,द्वारा हल किया
+Restrict IP,आईपी ​​प्रतिबंधित करें
+Restrict submission rights based on amount,जमा राशि पर आधारित अधिकार प्रतिबंधित
+Restrict user from this IP address only. Multiple IP addresses can be added by separating with commas. Also accepts partial IP addresses like (111.111.111),इस आईपी पते से ही उपयोगकर्ता प्रतिबंधित. एकाधिक आईपी पतों को अल्पविरामों से अलग से जोड़ा जा सकता है. इसके अलावा तरह आंशिक आईपी पते (111.111.111) स्वीकार
+Restricting By User,USER के द्वारा प्रतिबंधित
+Retailer,खुदरा
+Return Date,तिथि लौटें
+Return Type,प्रकार लौटें
+Returned Qty,वापस आ गए मात्रा
+Review Date,तिथि की समीक्षा
+Rgt,RGT
+Right,सही
+Role,भूमिका
+Role Name,भूमिका का नाम
+Roles,भूमिकाओं
+Roles HTML,भूमिकाओं HTML
+Rounded Total,गोल कुल
+Rounded Total (Export),गोल कुल (निर्यात)
+Row,पंक्ति
+Row #,# पंक्ति
+Row # ,# पंक्ति
+Rule Definition,नियम परिभाषा
+Rule Name,नियम का नाम
+Rule Priority,नियम प्राथमिकता
+Rule Status,नियम स्थिति
+Rules defining transition of state in the workflow.,नियम कार्यप्रवाह में राज्य के संक्रमण को परिभाषित.
+"Rules for how states are transitions, like next state and which role is allowed to change state etc.","कैसे राज्यों बदलाव अगले राज्य और जो भूमिका की तरह कर रहे हैं, के लिए नियम आदि राज्य को बदलने की अनुमति दी है"
+Run,दौड़
+SLE Exists,SLE मौजूद
+SMS,एसएमएस
+SMS Center,एसएमएस केंद्र
+SMS Control,एसएमएस नियंत्रण
+SMS Gateway URL,एसएमएस गेटवे URL
+SMS Log,एसएमएस प्रवेश
+SMS Parameter,एसएमएस पैरामीटर
+SMS Parameters,एसएमएस पैरामीटर्स
+SMS Receiver,एसएमएस रिसीवर
+SMS Sender Name,एसएमएस प्रेषक का नाम
+SMS Settings,एसएमएस सेटिंग्स
+SMTP Server (e.g. smtp.gmail.com),एसएमटीपी सर्वर (जैसे smtp.gmail.com)
+SO,अतः
+SO Date,इतना तिथि
+SO Detail ,विस्तार अतः
+SO Pending Qty,तो मात्रा लंबित
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,STE
+SUP,SUP
+SUPP,SUPP
+SUPP/10-11/,SUPP/10-11 /
+Salary,वेतन
+Salary Information,वेतन की जानकारी
+Salary Manager,वेतन प्रबंधक
+Salary Mode,वेतन मोड
+Salary Slip,वेतनपर्ची
+Salary Slip Deduction,वेतनपर्ची कटौती
+Salary Slip Earning,कमाई वेतनपर्ची
+Salary Structure,वेतन संरचना
+Salary Structure Deduction,वेतन संरचना कटौती
+Salary Structure Earning,कमाई वेतन संरचना
+Salary Structure Earnings,वेतन संरचना आय
+Salary components.,वेतन घटकों.
+Sales,विक्रय
+Sales Analytics,बिक्री विश्लेषिकी
+Sales BOM,बिक्री बीओएम
+Sales BOM Help,बिक्री बीओएम मदद
+Sales BOM Item,बिक्री बीओएम आइटम
+Sales BOM Items,बिक्री बीओएम आइटम
+Sales Browser,बिक्री ब्राउज़र
+Sales Browser Control,बिक्री ब्राउज़र नियंत्रण
+Sales Common,आम बिक्री
+Sales Dashboard,बिक्री डैशबोर्ड
+Sales Details,बिक्री विवरण
+Sales Discounts,बिक्री छूट
+Sales Email Settings,बिक्री ईमेल सेटिंग
+Sales Extras,बिक्री अतिरिक्त
+Sales Invoice,बिक्री चालान
+Sales Invoice Advance,बिक्री चालान अग्रिम
+Sales Invoice Item,बिक्री चालान आइटम
+Sales Invoice Message,बिक्री चालान संदेश
+Sales Invoice No,बिक्री चालान नहीं
+Sales Order,बिक्री आदेश
+Sales Order Date,बिक्री आदेश दिनांक
+Sales Order Item,बिक्री आदेश आइटम
+Sales Order Items,बिक्री आदेश आइटम
+Sales Order Message,बिक्री आदेश संदेश
+Sales Order No,बिक्री आदेश नहीं
+Sales Order Required,बिक्री आदेश आवश्यक
+Sales Orders Pending To Be Delivered,विक्रय आदेश दिया जा लंबित
+Sales Orders Pending to be Delivered,विक्रय आदेश दिया जा लंबित
+Sales Partner,बिक्री साथी
+Sales Partner Details,बिक्री साथी विवरण
+Sales Partner Name,बिक्री भागीदार नाम
+Sales Partner Target,बिक्री साथी लक्ष्य
+Sales Person,बिक्री व्यक्ति
+Sales Person Name,बिक्री व्यक्ति का नाम
+Sales Person Targets,बिक्री व्यक्ति लक्ष्य
+Sales Rate,बिक्री दर
+Sales Return,बिक्री लौटें
+Sales Returns,बिक्री रिटर्न
+Sales Taxes and Charges,बिक्री कर और शुल्क
+Sales Taxes and Charges Master,बिक्री कर और शुल्क मास्टर
+Sales Team,बिक्री टीम
+Sales Team Details,बिक्री टीम विवरण
+Sales Team1,Team1 बिक्री
+Sales and Purchase,बिक्री और खरीद
+Sales and Purchase Return Item,बिक्री और खरीद के मद वापसी
+Sales and Purchase Return Items,बिक्री और खरीद के रिटर्न आइटम
+Sales and Purchase Return Tool,बिक्री और खरीद के रिटर्न टूल
+Sales campaigns,बिक्री अभियान
+Sales persons and targets,बिक्री व्यक्तियों और लक्ष्य
+Sales taxes template.,बिक्री टेम्पलेट करों.
+Sales territories.,बिक्री क्षेत्रों.
+Salutation,अभिवादन
+Sample Size,नमूने का आकार
+Sanctioned Amount,स्वीकृत राशि
+Sandbox,Sandbox
+Saturday,शनिवार
+Save,बचाना
+Schedule,अनुसूची
+Scheduled,अनुसूचित
+Scheduled Confirmation Date,अनुसूचित पुष्टि तिथि
+Scheduled Date,अनुसूचित तिथि
+Scheduler Log,समयबद्धक प्रवेश
+School/University,स्कूल / विश्वविद्यालय
+Score (0-5),कुल (0-5)
+Score Earned,स्कोर अर्जित
+Scrap %,% स्क्रैप
+Script,लिपि
+Script Type,लिखावट टाइप
+Script to attach to all web pages.,स्क्रिप्ट सभी वेब पृष्ठों के लिए देते हैं.
+Search,खोजें
+Search Criteria,खोज मापदंड
+Search Fields,खोज फ़ील्ड्स
+Search Help,खोज सहायता
+Seasonality for setting budgets.,बजट की स्थापना के लिए मौसम.
+Section Break,अनुभाग विराम
+Security Settings,सुरक्षा सेटिंग्स
+Segment Name,खण्ड नाम
+Select,चयन
+"Select ""Yes"" for sub - contracting items",उप के लिए &quot;हाँ&quot; चुनें आइटम करार
+"Select ""Yes"" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.","&quot;हाँ&quot; चुनें यदि इस मद के लिए एक ग्राहक के लिए भेजा जा सकता है या एक नमूना के रूप में एक सप्लायर से प्राप्त है. डिलिवरी नोट्स और खरीद रसीद स्टॉक के स्तर को अपडेट कर सकते हैं, लेकिन वहाँ इस आइटम के खिलाफ कोई चालान हो जाएगा."
+"Select ""Yes"" if this item is used for some internal purpose in your company.",&quot;हाँ&quot; चुनें अगर इस मद में अपनी कंपनी में कुछ आंतरिक उद्देश्य के लिए इस्तेमाल किया जाता है.
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","चुनें यदि इस मद के प्रशिक्षण जैसे कुछ काम करते हैं, डिजाइन, परामर्श आदि का प्रतिनिधित्व करता है &quot;हाँ&quot;"
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",&quot;हाँ&quot; अगर आप अपनी सूची में इस मद के शेयर को बनाए रखने रहे हैं.
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",&quot;हाँ&quot; अगर आप अपने सप्लायर के लिए कच्चे माल की आपूर्ति करने के लिए इस मद के निर्माण.
+Select All,सभी का चयन
+Select Attachments,किए गए अनुलग्नकों के चयन करें
+Select Budget Distribution to unevenly distribute targets across months.,बजट वितरण चुनें unevenly महीने भर में लक्ष्य को वितरित करने के लिए.
+"Select Budget Distribution, if you want to track based on seasonality.","बजट वितरण का चयन करें, यदि आप मौसमी आधार पर ट्रैक करना चाहते हैं."
+Select Customer,ग्राहक चुनें
+Select Digest Content,डाइजेस्ट सामग्री का चयन करें
+Select DocType,Doctype का चयन करें
+Select Document Type,दस्तावेज़ प्रकार का चयन करें
+Select Document Type or Role to start.,दस्तावेज़ प्रकार या शुरू करने के लिए रोल का चयन करें.
+Select Form,प्रपत्र का चयन
+Select Items from Delivery Note,डिलिवरी नोट से आइटम का चयन करें
+Select Items from Purchase Order,खरीद आदेश से आइटम का चयन करें
+Select Items from Purchase Receipt,खरीद रसीद से आइटम का चयन करें
+Select Items from Sales Order,बिक्री आदेश से आइटम का चयन करें
+Select PR,का चयन करें पीआर
+Select Print Format,प्रिंट प्रारूप का चयन करें
+Select Print Heading,चयन शीर्षक प्रिंट
+Select Purchase Request,खरीद के अनुरोध का चयन करें
+Select Report Name,रिपोर्ट नाम का चयन करें
+Select Role,रोल का चयन करें
+Select Sales Orders,विक्रय आदेश का चयन करें
+Select Sales Orders from which you want to create Production Orders.,विक्रय आदेश का चयन करें जिसमें से आप उत्पादन के आदेश बनाना चाहते.
+Select Shipping Address,शिपिंग पते का चयन करें
+Select Supplier Quotation,प्रदायक कोटेशन का चयन करें
+Select Terms and Conditions,नियमों और शर्तों का चयन करें
+Select Transaction,लेन - देन का चयन करें
+Select Type,प्रकार का चयन करें
+Select User or Property to start.,उपयोगकर्ता या शुरू करने के लिए संपत्ति का चयन करें.
+Select account head of the bank where cheque was deposited.,बैंक के खाते में जहां चेक जमा किया गया था सिर का चयन करें.
+Select company name first.,कंपनी 1 नाम का चयन करें.
+Select name of Customer to whom project belongs,परियोजना जिसे अंतर्गत आता है ग्राहक के नाम का चयन करें
+Select template from which you want to get the Goals,जो टेम्पलेट से आप लक्ष्यों को प्राप्त करना चाहते हैं का चयन करें
+Select the Employee for whom you are creating the Appraisal.,जिसे तुम पैदा कर रहे हैं मूल्यांकन करने के लिए कर्मचारी का चयन करें.
+Select the currency in which price list is maintained,जिस मुद्रा में मूल्य सूची बनाए रखा है का चयन करें
+Select the label after which you want to insert new field.,लेबल का चयन करें जिसके बाद आप नए क्षेत्र सम्मिलित करना चाहते हैं.
+Select the period when the invoice will be generated automatically,अवधि का चयन करें जब चालान स्वतः उत्पन्न हो जाएगा
+"Select the price list as entered in ""Price List"" master. This will pull the reference rates of items against this price list as specified in ""Item"" master.",&quot;मूल्य सूची&quot; मास्टर में प्रवेश के रूप में मूल्य सूची का चयन करें. यह इस मूल्य सूची के खिलाफ मदों की संदर्भ दर पुल के रूप में &quot;आइटम&quot; मास्टर में निर्दिष्ट.
+Select the relevant company name if you have multiple companies,अगर आप कई कंपनियों प्रासंगिक कंपनी के नाम का चयन करें
+Select the relevant company name if you have multiple companies.,अगर आप कई कंपनियों प्रासंगिक कंपनी के नाम का चयन करें.
+Select who you want to send this newsletter to,चयन करें कि आप जो करने के लिए इस समाचार पत्र भेजना चाहते हैं
+Selected Attendance date will comes in the attendance template.,चयनित उपस्थिति तारीख उपस्थिति टेम्पलेट में आता है.
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","&quot;हाँ&quot; का चयन इस आइटम खरीद आदेश, खरीद रसीद में प्रदर्शित करने की अनुमति देगा."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","चयन इस आइटम बिक्री आदेश में निकालने के लिए, डिलिवरी नोट &quot;हाँ&quot; की अनुमति देगा"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",&quot;हाँ&quot; का चयन आप कच्चे माल और संचालन करने के लिए इस मद के निर्माण के लिए खर्च दिखा सामग्री के बिल बनाने के लिए अनुमति देगा.
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",&quot;हाँ&quot; का चयन आप इस मद के लिए उत्पादन का आदेश करने की अनुमति होगी.
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",&quot;हाँ&quot; का चयन जो कोई मास्टर सीरियल में देखा जा सकता है इस मद की प्रत्येक इकाई के लिए एक अद्वितीय पहचान दे देंगे.
+Selling,विक्रय
+Selling Home,घर बेचना
+Send,भेजें
+Send Autoreply,स्वतः भेजें
+Send Email,ईमेल भेजें
+Send From,से भेजें
+Send Me A Copy,मुझे एक कॉपी भेज
+"Send Newsletters to your contacts, leads.",अपने संपर्कों को समाचारपत्रिकाएँ भेजें जाता है.
+Send SMS,एसएमएस भेजें
+Send To,इन्हें भेजें
+"Send an email to users of role ""Material Manager"" and ""Purchase Manager"" when re-order level is crossed.",भूमिका &quot;सामग्री प्रबंधक&quot; और &quot;खरीद प्रबंधक&quot; जब पुनः आदेश के स्तर को पार कर जाता है के उपयोगकर्ताओं के लिए एक ईमेल भेजें.
+Send automatic emails to Contacts on Submitting transactions.,लेनदेन भेजने पर संपर्क करने के लिए स्वत: ईमेल भेजें.
+"Send bulk SMS to leads, customers, contacts","जाता है, ग्राहकों, संपर्क, थोक एसएमएस भेजें"
+Send mass SMS to your contacts,अपने संपर्कों के लिए बड़े पैमाने पर एसएमएस भेजें
+Send regular summary reports via Email.,ईमेल के माध्यम से नियमित रूप से सारांश रिपोर्ट भेजें.
+Send to this list,इस सूची को भेजें
+Sender,प्रेषक
+Sender Name,प्रेषक का नाम
+"Sending newsletters is not allowed for Trial users, \				to prevent abuse of this feature.","न्यूज़लेटर भेजा जा रहा है परीक्षण उपयोगकर्ताओं के लिए अनुमति नहीं है, \ इस सुविधा का दुरुपयोग रोकने के लिए."
+Sent Mail,भेजी गई मेल
+Sent On,पर भेजा
+Sent Quotation,भेजे गए कोटेशन
+Separate production order will be created for each finished good item.,अलग उत्पादन का आदेश प्रत्येक समाप्त अच्छा आइटम के लिए बनाया जाएगा.
+Serial No,नहीं सीरियल
+Serial No Details,धारावाहिक नहीं विवरण
+Serial No Service Contract Expiry,सीरियल कोई सेवा अनुबंध समाप्ति
+Serial No Status,सीरियल कोई स्थिति
+Serial No Warranty Expiry,सीरियल कोई वारंटी समाप्ति
+Serialized Item: ',श्रृंखलाबद्ध आइटम: &#39;
+Series,कई
+Series Detail,सीरीज विस्तार
+Series List for this Transaction,इस लेन - देन के लिए सीरीज सूची
+Series Options,श्रृंखला विकल्प
+Server,सेवक
+Server Script,सर्वर स्क्रिप्ट
+Service Address,सेवा पता
+Service Person,सेवा व्यक्ति
+Session Expired. Logging you out,सत्र समाप्त हो गया. आप लॉग आउट
+Session Expires in (time),सत्र में समाप्त (समय)
+Session Expiry,सत्र समाप्ति
+Session Expiry in Hours e.g. 06:00,घंटे में सत्र समाप्ति जैसे 06:00
+Set From Image,छवि से सेट
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,इस क्षेत्र पर आइटम ग्रुप - वाईस बजट निर्धारित करें. तुम भी वितरण की स्थापना द्वारा मौसमी शामिल कर सकते हैं.
+Set Login and Password if authentication is required.,लॉगिन और पासवर्ड सेट अगर प्रमाणीकरण की आवश्यकता है.
+Set New Password,नया पासवर्ड सेट
+Set Value,मूल्य सेट
+"Set a new password and ""Save""",एक नया पासवर्ड और &quot;सहेजें&quot; सेट
+Set default values for entry,प्रविष्टि के लिए डिफ़ॉल्ट मान सेट
+Set default values for users (also used for permissions).,उपयोगकर्ताओं के लिए डिफ़ॉल्ट मान सेट (भी अनुमति के लिए प्रयोग किया जाता है).
+Set multiple numbering series for transactions,लेनदेन के लिए कई नंबर श्रृंखला की स्थापना
+Set permissions on transactions / masters,लेनदेन / स्वामी पर अनुमतियाँ सेट
+Set prefix for numbering series on your transactions,अपने लेनदेन पर श्रृंखला नंबरिंग के लिए उपसर्ग सेट
+Set targets Item Group-wise for this Sales Person.,सेट आइटम इस बिक्री व्यक्ति के लिए समूह - वार लक्ष्य.
+Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets,POP3 ईमेल सेटिंग्स सेट करने के लिए ईमेल एक मेलबॉक्स से सीधे और पुल समर्थन टिकट बनाने
+Set workflow rules.,सेट कार्यप्रवाह नियमों.
+"Set your background color, font and image (tiled)","अपनी पृष्ठभूमि रंग, फ़ॉन्ट और छवि (टाइलों) सेट"
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.","अपने निवर्तमान मेल SMTP सेटिंग्स यहाँ सेट. सभी प्रणाली सूचनाएं उत्पन्न, ईमेल इस मेल सर्वर से जाना जाएगा. यदि आप सुनिश्चित नहीं कर रहे हैं, इस लिए ERPNext सर्वर (ईमेल अभी भी अपनी ईमेल आईडी से भेजा जाएगा) का उपयोग करने के लिए या अपने ईमेल प्रदाता से संपर्क करने के लिए खाली छोड़ दें."
+Setting Account Type helps in selecting this Account in transactions.,की स्थापना खाता प्रकार के लेनदेन में इस खाते का चयन करने में मदद करता है.
+Settings for About Us Page.,हमारे बारे में पृष्ठ के लिए सेटिंग्स.
+Settings for Contact Us Page,हमसे संपर्क करें पृष्ठ के लिए सेटिंग्स
+Settings for Contact Us Page.,के लिए सेटिंग्स हमसे संपर्क पृष्ठ.
+Settings for Product Catalog on the website,वेबसाइट पर उत्पाद कैटलॉग के लिए सेटिंग्स
+Settings for Product Catalog on the website.,वेबसाइट पर उत्पाद कैटलॉग के लिए सेटिंग्स.
+Settings for the About Us Page,हमारे बारे में पृष्ठ के लिए सेटिंग्स
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",एक मेलबॉक्स जैसे &quot;jobs@example.com से नौकरी के आवेदकों को निकालने सेटिंग्स
+Setup,व्यवस्था
+Setup Control,नियंत्रण सेटअप
+Setup Series,सेटअप सीरीज
+Setup of fonts and background.,फ़ॉन्ट और पृष्ठभूमि का सेटअप.
+"Setup of top navigation bar, footer and logo.","शीर्ष नेविगेशन पट्टी, पाद लेख, और लोगो का सेटअप."
+Setup outgoing SMS via your bulk SMS provider,अपने थोक एसएमएस प्रदाता के माध्यम से निवर्तमान एसएमएस सेटअप
+Setup to pull emails from support email account,समर्थन ईमेल खाते से ईमेल खींचने सेटअप
+Ship To,करने के लिए शिप
+Shipping Address,शिपिंग पता
+Shipping Address Name,शिपिंग पता नाम
+Shipping Details,शिपिंग विवरण
+Short biography for website and other publications.,वेबसाइट और अन्य प्रकाशनों के लिए लघु जीवनी.
+Shortcut,शॉर्टकट
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",स्टॉक में दिखाएँ &quot;&quot; या &quot;नहीं&quot; स्टॉक में इस गोदाम में उपलब्ध स्टॉक के आधार पर.
+Show / Hide Modules,मॉड्यूल दिखाएँ / छुपाएँ
+Show Details,विवरण दिखाएं
+Show Filters,फ़िल्टर दिखाएं
+Show Price in Website (if set),वेबसाइट में मूल्य दिखाएं (यदि सेट)
+Show Print First,शो के पहले प्रिंट
+Show a slideshow at the top of the page,पृष्ठ के शीर्ष पर एक स्लाइड शो दिखाएँ
+Show in Website,वेबसाइट में दिखाने
+Show rows with zero values,शून्य मान के साथ पंक्तियों दिखाएं
+Show this slideshow at the top of the page,पृष्ठ के शीर्ष पर इस स्लाइड शो दिखाएँ
+"Show, hide modules","दिखाएँ, मॉड्यूल को छिपाने के"
+Showing only for,के लिए ही दिखा रहा है
+Signature,हस्ताक्षर
+Signature to be appended at the end of every email,हर ईमेल के अंत में संलग्न किया हस्ताक्षर
+Simplify entry forms by disabling features,सुविधाओं को अक्षम द्वारा प्रवेश फार्म सरल
+Single,एक
+Single unit of an Item.,एक आइटम के एकल इकाई.
+Sky,आकाश
+Slideshow,स्लाइड शो
+Slideshow Items,स्लाइड शो आइटम
+Slideshow Name,स्लाइड शो नाम
+Slideshow like display for the website,वेबसाइट के लिए प्रदर्शन की तरह स्लाइड शो
+Small Text,छोटे पाठ
+Snow,बर्फ
+Solid background color (default light gray),ठोस पृष्ठभूमि रंग (डिफ़ॉल्ट हल्के भूरे रंग)
+Sorry we were unable to find what you were looking for.,खेद है कि हम खोजने के लिए आप क्या देख रहे थे करने में असमर्थ थे.
+Sorry you are not permitted to view this page.,खेद है कि आपको इस पृष्ठ को देखने की अनुमति नहीं है.
+Sorry! We can only allow upto 100 rows for Stock Reconciliation.,क्षमा करें! हम केवल स्टॉक सुलह के लिए 100 पंक्तियों तक अनुमति दे सकते हैं.
+Sort By,द्वारा क्रमबद्ध करें
+Sort Order,सॉर्ट क्रम
+Source,स्रोत
+Source Warehouse,स्रोत वेअरहाउस
+Source and Target Warehouse cannot be same,स्रोत और लक्ष्य वेअरहाउस समान नहीं हो सकते
+Source of th,वें के स्रोत
+"Source of the lead. If via a campaign, select ""Campaign""","नेतृत्व के स्रोत. यदि एक अभियान के माध्यम से, &quot;अभियान&quot; का चयन करें"
+Special Page Settings,विशेष पृष्ठ सेटिंग
+Specification Details,विशिष्टता विवरण
+Split Delivery Note into packages.,संकुल में डिलिवरी नोट भाजित.
+Standard,मानक
+Standard Rate,मानक दर
+"Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.","1: मानक नियमों और शर्तों कि बिक्री और Purchases.Examples के लिए जोड़ा जा सकता है. Offer.1 की वैधता. भुगतान (एडवांस में, क्रेडिट, भाग अग्रिम आदि) शर्तें .1. क्या (या ग्राहक द्वारा देय) अतिरिक्त .1 है. / सुरक्षा warning.1 उपयोग. वारंटी अगर any.1. Policy.1 देता है. शिपिंग के applicable.1 अगर शर्तें. विवादों को संबोधित करने के तरीके, क्षतिपूर्ति, दायित्व, etc.1. पता है और अपनी कंपनी के संपर्क करें."
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.10. Add or Deduct: Whether you want to add or deduct the tax.","मानक कर टेम्पलेट है कि सभी खरीद लेनदेन के लिए लागू किया जा सकता है. इस टेम्पलेट के &quot;नौवहन&quot; की तरह कर भी सिर और अन्य खर्च सिर सूची, &quot;बीमा&quot;, &quot;हैंडलिंग&quot; होते हैं आदि # # # # NoteThe कर तुम यहाँ को परिभाषित करने के लिए मानक दर कर की दर सभी ** आइटम के लिए करेंगे कर सकते हैं . अगर वहाँ ** ** आइटम है कि अलग दरों कर रहे हैं, वे आइटम ** में आइटम ** तालिका ** टैक्स में जोड़ा जाना चाहिए Columns1 का विवरण ** मास्टर. # # # #. गणना के प्रकार: - यह ** नेट कुल पर हो सकता है (कि मूल राशि का योग है). - ** / पिछला पंक्ति पर कुल ** राशि (संचयी करों या शुल्कों के लिए). यदि आप इस विकल्प का चयन करते हैं, कर पिछले पंक्ति के एक प्रतिशत (कर तालिका में) या कुल राशि के रूप में लागू किया जाएगा. - ** समाचा (के रूप में उल्लेख किया है) ** .2. खाता सिर: खाता बही खाता है जिसके तहत यह कर booked3 होगा. लागत केंद्र: यदि कर प्रभारी / एक शिपिंग जैसे आय या खर्च है यह एक Center.4 लागत के खिलाफ आरक्षण की जरूरत है. विवरण: कर का विवरण (कि चालान / उद्धरण में मुद्रित किया जाएगा) 0.5. दर: rate.6 कर. राशि: amount.7 कर. कुल: point.8 इस संचयी कुल. पंक्ति दर्ज करें: यदि &quot;पिछली पंक्ति कुल&quot; के आधार पर आप पंक्ति संख्या है जो इस गणना (पिछली पंक्ति मूलभूत है) .9 के लिए एक आधार के रूप में ले जाया जाएगा का चयन कर सकते हैं. के लिए टैक्स या शुल्क पर विचार करें: इस अनुभाग में आप अगर कर प्रभारी / मूल्यांकन (कुल का एक हिस्सा नहीं) के लिए केवल एक या केवल कुल के लिए निर्दिष्ट कर सकते हैं (आइटम को जोड़ नहीं मान) या both.10 के लिए. जोड़ें या घटा: चाहे आप जोड़ सकते हैं या घटा कर करना चाहते हैं."
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","मानक कर टेम्पलेट है कि सभी बिक्री लेनदेन के लिए लागू किया जा सकता है. इस टेम्पलेट कर प्रमुखों की सूची में और भी तरह &quot;नौवहन&quot; अन्य व्यय / आय सिर, &quot;बीमा&quot;, &quot;हैंडलिंग&quot; आदि # # # # NoteThe कर दर तुम यहाँ को परिभाषित मानक सभी ** आइटम के लिए कर की दर होगा शामिल कर सकते हैं **. अगर वहाँ ** ** आइटम है कि अलग दरों कर रहे हैं, वे आइटम ** में आइटम ** तालिका ** टैक्स में जोड़ा जाना चाहिए Columns1 का विवरण ** मास्टर. # # # #. गणना के प्रकार: - यह ** नेट कुल पर हो सकता है (कि मूल राशि का योग है). - ** / पिछला पंक्ति पर कुल ** राशि (संचयी करों या शुल्कों के लिए). यदि आप इस विकल्प का चयन करते हैं, कर पिछले पंक्ति के एक प्रतिशत (कर तालिका में) या कुल राशि के रूप में लागू किया जाएगा. - ** समाचा (के रूप में उल्लेख किया है) ** .2. खाता सिर: खाता बही खाता है जिसके तहत यह कर booked3 होगा. लागत केंद्र: यदि कर प्रभारी / एक शिपिंग जैसे आय या खर्च है यह एक Center.4 लागत के खिलाफ आरक्षण की जरूरत है. विवरण: कर का विवरण (कि चालान / उद्धरण में मुद्रित किया जाएगा) 0.5. दर: rate.6 कर. राशि: amount.7 कर. कुल: point.8 इस संचयी कुल. पंक्ति दर्ज करें: यदि &quot;पिछली पंक्ति कुल&quot; के आधार पर आप पंक्ति संख्या है जो इस गणना (पिछली पंक्ति मूलभूत है) .9 के लिए एक आधार के रूप में ले जाया जाएगा का चयन कर सकते हैं. इस टैक्स मूल दर में शामिल: यदि आप इस चेक, इसका मतलब है कि इस कर आइटम मेज के नीचे नहीं दिखाया जाएगा, लेकिन अपने मुख्य आइटम तालिका में मूल दर में शामिल किया जाएगा. यह उपयोगी है, जहां आप एक फ्लैट की कीमत दे (सभी करों सहित) ग्राहकों के लिए कीमत चाहते हैं."
+Start Date,प्रारंभ दिनांक
+Start Report For,प्रारंभ लिए रिपोर्ट
+Start date of current invoice's period,वर्तमान चालान की अवधि के आरंभ तिथि
+Startup,स्टार्टअप
+State,राज्य
+State Name,राज्य का नाम
+States,राज्य अमेरिका
+Static Parameters,स्टेटिक पैरामीटर
+Status,हैसियत
+Status must be one of ,स्थिति एक का होना चाहिए
+Statutory info and other general information about your Supplier,वैधानिक अपने सप्लायर के बारे में जानकारी और अन्य सामान्य जानकारी
+Stock,स्टॉक
+Stock Ageing,स्टॉक बूढ़े
+Stock Analytics,स्टॉक विश्लेषिकी
+Stock Balance,बाकी स्टाक
+Stock Entry,स्टॉक एंट्री
+Stock Entry Detail,शेयर एंट्री विस्तार
+Stock Frozen Upto,स्टॉक तक जमे हुए
+Stock Home,स्टॉक होम
+Stock Ledger,स्टॉक लेजर
+Stock Ledger Entry,स्टॉक खाता प्रविष्टि
+Stock Level,स्टॉक स्तर
+Stock Qty,स्टॉक मात्रा
+Stock Queue (FIFO),स्टॉक कतार (फीफो)
+Stock Reconciliation,स्टॉक सुलह
+Stock Reconciliation file not uploaded,स्टॉक सुलह नहीं अपलोड की गई फ़ाइल
+Stock UOM,स्टॉक UOM
+Stock UOM Replace Utility,स्टॉक UOM बदलें उपयोगिता
+Stock Uom,स्टॉक Uom
+Stock Value,शेयर मूल्य
+"Stock level frozen up to this date, nobody can do / modify entry except authorized person","शेयर इस तिथि के लिए जमे हुए स्तर के, कोई भी / अधिकृत व्यक्ति के अलावा कर सकते हैं प्रविष्टि को संशोधित"
+Stop,रोक
+Stopped,रोक
+Structure cost centers for budgeting.,बजट के लिए संरचना लागत केन्द्रों.
+Structure of books of accounts.,खातों की पुस्तकों की संरचना.
+Style,शैली
+Style Settings,शैली सेटिंग्स
+"Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange","- ग्रीन, खतरा - लाल, उलटा - काले, प्राथमिक - डार्क ब्लू जानकारी, लाइट ब्लू, चेतावनी - ऑरेंज सफलता: शैली बटन रंग का प्रतिनिधित्व करता है"
+"Sub-currency. For e.g. ""Cent""",उप - मुद्रा. उदाहरण के लिए &quot;प्रतिशत&quot;
+Sub-domain provided by erpnext.com,Erpnext.com द्वारा प्रदान की उप - डोमेन
+Subcontract,उपपट्टा
+Subdomain,उपडोमेन
+Subject,विषय
+Submit,प्रस्तुत करना
+Submit Salary Slip,वेतनपर्ची सबमिट करें
+Submit all salary slips for the above selected criteria,ऊपर चयनित मानदंड के लिए सभी वेतन निकल जाता है भेजें
+Submitted,पेश
+Success,सफलता
+Suggestion,सुझाव
+Suggestions,सुझाव
+Sunday,रविवार
+Sunny,सनी
+Supplier,प्रदायक
+Supplier (vendor) name as entered in supplier master,प्रदायक नाम (विक्रेता) के रूप में आपूर्तिकर्ता मास्टर में प्रवेश
+Supplier Address,प्रदायक पता
+Supplier Details,आपूर्तिकर्ता विवरण
+Supplier Intro,प्रदायक पहचान
+Supplier Master created by ,प्रदायक द्वारा बनाई गई मास्टर
+Supplier Name,प्रदायक नाम
+Supplier Part Number,प्रदायक भाग संख्या
+Supplier Quotation,प्रदायक कोटेशन
+Supplier Quotation Item,प्रदायक कोटेशन आइटम
+Supplier Reference,प्रदायक संदर्भ
+Supplier Type,प्रदायक प्रकार
+Supplier Warehouse,प्रदायक वेअरहाउस
+Supplier classification.,प्रदायक वर्गीकरण.
+Supplier database.,प्रदायक डेटाबेस.
+Supplier of Goods or Services.,सामान या सेवाओं की प्रदायक.
+Supplier warehouse where you have issued raw materials for sub - contracting,प्रदायक गोदाम जहाँ आप उप के लिए कच्चे माल के जारी किए गए हैं - करार
+Supplier's currency,प्रदायक मुद्रा
+Support,समर्थन
+Support Analytics,समर्थन विश्लेषिकी
+Support Email,ईमेल समर्थन
+Support Email Id,ईमेल आईडी का समर्थन
+Support Home,समर्थन मुख
+Support Password,सहायता पासवर्ड
+Support Ticket,समर्थन टिकट
+Support Ticket Mail Settings,टिकट मेल सेटिंग्स का समर्थन
+Support queries from customers via email or website.,ईमेल या वेबसाइट के माध्यम से ग्राहकों से प्रश्नों का समर्थन करें.
+Symbol,प्रतीक
+Sync Inbox,सिंक इनबॉक्स
+Sync Support Mails,समर्थन मेल समन्वयित
+System,प्रणाली
+System Console,सिस्टम कंसोल
+System Defaults,सिस्टम मूलभूत
+System User,सिस्टम उपयोगकर्ता को
+"System User (login) ID. If set, it will become default for all HR forms.","सिस्टम प्रयोक्ता आईडी (प्रवेश). अगर सेट किया जाता है, यह सभी मानव संसाधन रूपों के लिए डिफ़ॉल्ट बन जाएगा."
+System generated mails will be sent from this email id.,सिस्टम उत्पन्न मेल इस ईमेल आईडी से भेजा जाएगा.
+Table,तालिका
+Table Field,टेबल फील्ड
+Table Mapper Detail,टेबल प्रतिचित्रण विस्तार
+Table Mapper Details,टेबल प्रतिचित्रण विवरण
+Table for Item that will be shown in Web Site,टेबल आइटम के लिए है कि वेब साइट में दिखाया जाएगा
+Tag,टैग
+Tag Name,टैग का नाम
+Tags,टैग
+Tahoma,Tahoma
+Target,लक्ष्य
+Target  Amount,लक्ष्य की राशि
+Target Detail,लक्ष्य विस्तार
+Target Details,लक्ष्य विवरण
+Target Details1,Details1 लक्ष्य
+Target Distribution,लक्ष्य वितरण
+Target Qty,लक्ष्य मात्रा
+Target Warehouse,लक्ष्य वेअरहाउस
+Task,कार्य
+Task Details,कार्य विवरण
+Task Id,टास्क आईडी
+Task Name,कार्य का नाम
+Tasks,कार्य
+Tasks belonging to this Project.,इस परियोजना से संबंधित कार्य.
+Tax,कर
+Tax Amount,कर राशि
+Tax Calculation,कर गणना
+Tax Rate,कर की दर
+Tax Template for Purchase,खरीद के लिए कर टेम्पलेट
+Tax Template for Sales,बिक्री के लिए टैक्स टेम्पलेट
+Tax and other salary deductions.,टैक्स और अन्य वेतन कटौती.
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,टैक्स विस्तार तालिका में एक स्ट्रिंग के रूप में आइटम मास्टर से दिलवाया और करों और प्रभार के लिए इस field.Used में संग्रहीत
+Taxable,कर योग्य
+Taxes,कर
+Taxes and Charges,करों और प्रभार
+Taxes and Charges Added,कर और शुल्क जोड़ा
+Taxes and Charges Added (Import),कर और शुल्क जोड़ा (आयात)
+Taxes and Charges Calculation,कर और शुल्क गणना
+Taxes and Charges Deducted,कर और शुल्क कटौती
+Taxes and Charges Deducted (Import),कर और शुल्क कटौती (आयात)
+Taxes and Charges Total,कर और शुल्क कुल
+Taxes and Charges Total*,कर और शुल्क कुल *
+Taxes and Charges1,करों और Charges1
+Team Members,टीम के सदस्यों को
+Team Members Heading,टीम के सदस्यों शीर्षक
+Template for employee performance appraisals.,कर्मचारी प्रदर्शन appraisals के लिए खाका.
+Template of terms or contract.,शब्दों या अनुबंध के टेम्पलेट.
+Term Details,अवधि विवरण
+Terms and Conditions,नियम और शर्तें
+Terms and Conditions Content,नियम और शर्तें सामग्री
+Terms and Conditions Details,नियमों और शर्तों के विवरण
+Terms and Conditions HTML,नियमों और शर्तों HTML
+Terms and Conditions Template,नियमों और शर्तों टेम्पलेट
+Terms and Conditions1,नियम और Conditions1
+Territory,क्षेत्र
+Territory Manager,क्षेत्र प्रबंधक
+Territory Name,टेरिटरी नाम
+Territory Targets,टेरिटरी लक्ष्य
+TerritoryHelp,TerritoryHelp
+Test,परीक्षण
+Test Data,परीक्षण ऑकड़ा
+Test Date,परीक्षा की तारीख
+Test Email Id,टेस्ट ईमेल आईडी
+Test Link,टेस्ट लिंक
+Test Select,का चयन करें टेस्ट
+Test Text,परीक्षण पाठ
+Test the Newsletter,न्यूज़लैटर टेस्ट
+Text,पाठ
+Text Align,पाठ संरेखित
+Text Editor,पाठ संपादक
+"The ""Web Page"" that is the website home page",&quot;वेब पेज&quot; कि वेबसाइट के होम पेज
+The BOM which will be replaced,बीओएम जो प्रतिस्थापित किया जाएगा
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",आइटम है कि पैकेज का प्रतिनिधित्व करता है. इस मद &quot;स्टॉक आइटम&quot; &quot;नहीं&quot; के रूप में और के रूप में &quot;हाँ&quot; &quot;बिक्री आइटम है&quot;
+The account to which you will pay (have paid) the money to.,खाते जो आप भुगतान भुगतान किया जाएगा करने के लिए पैसा है.
+The date at which current entry is corrected in the system.,जो तारीख वर्तमान प्रविष्टि प्रणाली में सही है.
+The date at which current entry is made in system.,"तारीख, जिस पर वर्तमान प्रविष्टि प्रणाली में किया जाता है."
+The date at which current entry will get or has actually executed.,"तारीख, जिस पर वर्तमान प्रविष्टि पाने के लिए या वास्तव में मार डाला गया है."
+The date on which next invoice will be generated. It is generated on submit.,"तारीख, जिस पर अगले चालान उत्पन्न हो जाएगा. यह प्रस्तुत करने पर उत्पन्न होता है."
+The date on which recurring invoice will be stop,"तारीख, जिस पर आवर्ती चालान रोकने के लिए किया जाएगा"
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","महीने के दिन है जिस पर ऑटो चालान 05, 28 आदि जैसे उत्पन्न हो जाएगा"
+The gross weight of the package. Usually net weight + packaging material weight. (for print),पैकेज के कुल वजन. आमतौर पर शुद्ध + वजन पैकेजिंग सामग्री के वजन. (प्रिंट के लिए)
+The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,/ अपनी कंपनी की वेबसाइट के नाम के रूप में आप ब्राउज़र शीर्षक पट्टी पर प्रकट करना चाहते हैं. सभी पृष्ठों शीर्षक उपसर्ग के रूप में होगा.
+The net weight of this package. (calculated automatically as sum of net weight of items),इस पैकेज के शुद्ध वजन. (वस्तुओं का शुद्ध वजन की राशि के रूप में स्वतः गणना)
+The new BOM after replacement,बदलने के बाद नए बीओएम
+The quantity for the Purchase Request when the stock goes below re-order level.,खरीद के अनुरोध के लिए मात्रा जब शेयर पुनः आदेश के स्तर से नीचे चला जाता है.
+The rate at which Bill Currency is converted into company's base currency,जिस दर पर विधेयक मुद्रा कंपनी के बेस मुद्रा में परिवर्तित किया जाता है
+"The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions","प्रणाली पूर्व निर्धारित भूमिका प्रदान करता है, लेकिन आप यह कर सकते हैं <a href='#List/Role'>नई भूमिकाओं को जोड़ने के</a> लिए बेहतर अनुमतियाँ सेट"
+"The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type ""Stores"" or ""Reserved Warehouse"".",प्रणाली एक खरीद के अनुरोध स्वतः उत्पन्न जब स्टॉक मात्रा नीचे प्रकार &quot;स्टोर&quot; या &quot;आरक्षित वेयरहाउस के गोदाम में फिर से आदेश स्तर चला जाता है.
+The unique id for tracking all recurring invoices. It is generated on submit.,सभी आवर्ती चालान पर नज़र रखने के लिए अद्वितीय आईडी. यह प्रस्तुत करने पर उत्पन्न होता है.
+Theme,विषय
+Then By (optional),तब तक (वैकल्पिक)
+These properties are Link Type fields from all Documents.,इन गुणों लिंक सभी दस्तावेजों से टाइप क्षेत्रों हैं.
+"These properties can also be used to 'assign' a particular document, whose property matches with the User's property to a User. These can be set using the <a href='#permission-manager'>Permission Manager</a>","इन गुणों को भी &#39;निर्दिष्ट&#39; करने के लिए एक विशेष दस्तावेज़, जिनकी संपत्ति उपयोगकर्ता एक उपयोगकर्ता के लिए संपत्ति के साथ मैच करने के लिए इस्तेमाल किया जा सकता है. इन का उपयोग कर सेट किया जा सकता है <a href='#permission-manager'>अनुमति प्रबंधक</a>"
+These properties will appear as values in forms that contain them.,इन गुणों रूपों है कि उन्हें रोकने में मूल्यों के रूप में दिखाई देगा.
+These values will be automatically updated in transactions and also will be useful to restrict permissions for this user on transactions containing these values.,लेनदेन में इन मूल्यों को स्वचालित रूप से अद्यतन किया जाएगा और भी इन मूल्यों से युक्त लेनदेन पर इस उपयोगकर्ता के लिए अनुमति को प्रतिबंधित करने के लिए उपयोगी हो जाएगा.
+"This Item Group represents ""products.html""",इस मद समूह है &quot;products.html&quot; का प्रतिनिधित्व करता है
+This Price List will be selected as default for all Customers under this Group.,इस मूल्य सूची इस समूह के तहत सभी ग्राहकों के लिए डिफ़ॉल्ट के रूप में चयन किया जाएगा.
+This currency will get fetched in Purchase transactions of this supplier,इस मुद्रा के इस आपूर्तिकर्ता की खरीद लेनदेन में कौड़ी हो जाएगी
+This currency will get fetched in Sales transactions of this customer,इस मुद्रा के इस ग्राहक की बिक्री लेनदेन में कौड़ी हो जाएगी
+"This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by ""Merge With"" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.","इस सुविधा डुप्लिकेट गोदामों विलय के लिए है. यह गोदाम &quot;के साथ विलय से इस गोदाम के सभी लिंक की जगह लेगा. विलय के बाद आप इस गोदाम को हटाने के लिए, के रूप में इस गोदाम के लिए स्टॉक स्तर शून्य हो जाएगा कर सकते हैं."
+This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>myfieldeval:doc.myfield=='My Value'<br>eval:doc.age>18,इस क्षेत्र में केवल यदि यहां परिभाषित fieldname मूल्य है या नियमों को सच कर रहे हैं (उदाहरण के लिए) दिखाई देगा: <br> myfieldeval doc.myfield: == &#39;मेरा मान&#39; <br> eval: doc.age&gt; 18
+This goes above the slideshow.,इस स्लाइड शो से ऊपर चला जाता है.
+This is PERMANENT action and you cannot undo. Continue?,यह स्थायी कार्रवाई की है और आप पूर्ववत नहीं कर सकते. जारी रखें?
+This is permanent action and you cannot undo. Continue?,यह स्थायी कार्रवाई है और आप पूर्ववत नहीं कर सकते. जारी रखें?
+This is the number of the last created transaction with this prefix,यह इस उपसर्ग के साथ पिछले बनाई गई लेन - देन की संख्या
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,यह उपकरण आपको या अद्यतन करने और प्रणाली में शेयर की वैल्यूएशन मात्रा को ठीक करने में मदद करता है. यह आमतौर पर प्रणाली मूल्यों सिंक्रनाइज़ करने के लिए प्रयोग किया जाता है और क्या वास्तव में अपने गोदामों में मौजूद है.
+This will be used for setting rule in HR module,इस मॉड्यूल में मानव संसाधन सेटिंग शासन के लिए इस्तेमाल किया जाएगा
+Thread HTML,धागा HTML
+Thursday,बृहस्पतिवार
+Time,समय
+Time Zone,समय क्षेत्र
+Time Zones,टाइम जोन
+Time and Budget,समय और बजट
+Time at which items were delivered from warehouse,जिस पर समय आइटम गोदाम से दिया गया था
+Time at which materials were received,जो समय पर सामग्री प्राप्त हुए थे
+Timesheet,Timesheet
+Timesheet By,द्वारा Timesheet
+Timesheet Date,Timesheet तिथि
+Timesheet Detail,Timesheet विस्तार
+Timesheet Details,Timesheet विवरण
+Timesheet for tasks.,कार्यों के लिए Timesheet.
+Title,शीर्षक
+Title / headline of your page,शीर्षक / अपने पृष्ठ का शीर्षक
+Title Case,शीर्षक केस
+Title Prefix,शीर्षक उपसर्ग
+To,से
+To Date,तिथि करने के लिए
+To Discuss,चर्चा करने के लिए
+To Do,करने के लिए क्या
+To DocType,करने के लिए doctype
+To Field,क्षेत्र के लिए
+To PR Date,पीआर तिथि
+To Package No.,सं पैकेज
+To Reply,का जवाब दें
+To Table,मेज पर
+To Warehouse,गोदाम के लिए
+"To add a tag, open the document and click on ""Add Tag"" on the sidebar","एक टैग जोड़ने के लिए, दस्तावेज़ को खोलने और साइडबार पर &quot;जोड़ें टैग&quot; पर क्लिक करें"
+"To assign this issue, use the ""Assign"" button in the sidebar.","इस मुद्दे को असाइन करने के लिए, साइडबार में &quot;निरुपित&quot; बटन का उपयोग करें."
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.","स्वचालित रूप से अपनी आने वाली मेल से समर्थन टिकट बनाने के लिए, अपने POP3 सेटिंग्स यहाँ सेट. तुम आदर्श erp प्रणाली के लिए एक अलग ईमेल आईडी बनाने के लिए इतना है कि सभी ईमेल प्रणाली में है कि मेल आईडी से synced जाएगा चाहिए. यदि आप सुनिश्चित नहीं कर रहे हैं, अपने ईमेल प्रदाता से संपर्क करें."
+"To create Quotation against Opportunity, Select Opportunity No. and click on 'Pull Opportunity Details' ","बनाने के अवसर के खिलाफ कोटेशन, अवसर सं का चयन करें और &#39;खींचो अवसर विवरण&#39; पर क्लिक करें"
+"To create an Account Head under a different company, select the company and save customer.","एक अलग कंपनी के तहत एक खाता प्रमुख बनाने के लिए, कंपनी का चयन करें और ग्राहक को बचाने."
+To enable <b>Point of Sale</b> features,<b>बिक्री</b> सुविधाओं <b>के प्वाइंट को</b> सक्षम
+"To fetch items again, click on 'Get Items' button \						or update the Quantity manually.","आइटम फिर से लाने, बटन &#39;जाओ आइटम \&#39; या मात्रा मैन्युअल रूप से अद्यतन पर क्लिक करें."
+"To further restrict permissions based on certain values in a document, use the 'Condition' settings.","आगे एक दस्तावेज़ में कुछ मूल्यों के आधार पर अनुमति को प्रतिबंधित करने के लिए, &#39;स्थिति&#39; सेटिंग का उपयोग करें."
+To get Item Group in details table,विवरण तालिका में आइटम समूह
+"To import attendance data, click on ""Add"" button, select the saved CSV file and click on ""Upload"".Select the date format as attendance date format in CSV file.Click on ""Import"".","उपस्थिति डेटा आयात करने के लिए, &quot;जोड़ें&quot; बटन पर क्लिक करें, बचाया CSV फ़ाइल का चयन करें और &quot;अपलोड&quot; पर क्लिक करें CSV file.Click में &quot;आयात&quot; पर उपस्थिति दिनांक स्वरूप के रूप में दिनांक स्वरूप का चयन करें."
+To manage multiple series please go to Setup > Manage Series,एकाधिक श्रृंखला का प्रबंधन करने के लिए सेटअप करने के लिए जाने के लिए कृपया श्रृंखला प्रबंधन
+To restrict a User of a particular Role to documents that are explicitly assigned to them,दस्तावेजों है कि स्पष्ट रूप से उन्हें करने के लिए आवंटित कर रहे हैं एक विशेष भूमिका के एक प्रयोक्ता को प्रतिबंधित
+To restrict a User of a particular Role to documents that are only self-created.,दस्तावेजों कि केवल स्वयं बनाया हैं एक विशेष भूमिका के एक प्रयोक्ता को प्रतिबंधित.
+"To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.","उपयोगकर्ता भूमिकाओं सेट, बस जाने के <a href='#List/Profile'>सेटअप&gt; उपयोगकर्ता</a> और उपयोगकर्ता पर क्लिक करने के लिए भूमिकाएँ असाइन."
+To track any installation or commissioning related work after sales,किसी भी स्थापना या बिक्री के बाद कमीशन से संबंधित काम को ट्रैक
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","निम्नलिखित दस्तावेजों में ब्रांड नाम ट्रैक <br> डिलिवरी नोट, enuiry, खरीद अनुरोध, मद, खरीद आदेश, खरीद वाउचर, क्रेता रसीद, कोटेशन, बिक्री चालान, बिक्री BOM, विक्रय आदेश, नहीं सीरियल"
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,बिक्री और खरीद के दस्तावेजों के आधार पर उनके धारावाहिक नग में आइटम पर नज़र रखने के लिए. यह भी उत्पाद की वारंटी के विवरण को ट्रैक करने के लिए प्रयोग किया जाता है.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,बैच ओपन स्कूल के साथ बिक्री और खरीद दस्तावेजों में आइटम्स ट्रैक <br> <b>पसंदीदा उद्योग: आदि रसायन</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,बारकोड का उपयोग करके आइटम्स ट्रैक. आप आइटम के बारकोड स्कैनिंग द्वारा डिलिवरी नोट और बिक्री चालान में आइटम दर्ज करने में सक्षम हो जाएगा.
+"To update your HTML from attachment, click here","लगाव से अपने HTML को अद्यतन करने के लिए, यहाँ क्लिक करें"
+ToDo,ToDo
+Tools,उपकरण
+Top Bar,शीर्ष बार
+Top Bar Background,शीर्ष बार पृष्ठभूमि
+Top Bar Item,शीर्ष बार आइटम
+Top Bar Items,शीर्ष बार आइटम
+Total,संपूर्ण
+Total (sum of) points distribution for all goals should be 100.,सभी लक्ष्यों के लिए कुल अंक वितरण (का योग) 100 होना चाहिए.
+Total +Tax,+ कुल टैक्स
+Total Advance,कुल अग्रिम
+Total Amount,कुल राशि
+Total Amount To Pay,कुल भुगतान राशि
+Total Amount in Words,शब्दों में कुल राशि
+Total Claimed Amount,कुल दावा किया राशि
+Total Commission,कुल आयोग
+Total Cost,कुल लागत
+Total Credit,कुल क्रेडिट
+Total Debit,कुल डेबिट
+Total Deduction,कुल कटौती
+Total Earning,कुल अर्जन
+Total Experience,कुल अनुभव
+Total Hours (Actual),कुल घंटे (वास्तविक)
+Total Hours (Expected),कुल घंटे (उम्मीद)
+Total Invoiced Amount,कुल चालान राशि
+Total Leave Days,कुल छोड़ दो दिन
+Total Leaves Allocated,कुल पत्तियां आवंटित
+Total Operating Cost,कुल परिचालन लागत
+Total Points,कुल अंक
+Total Raw Material Cost,कुल कच्चे माल की लागत
+Total SMS Sent,कुल एसएमएस भेजा
+Total Sanctioned Amount,कुल स्वीकृत राशि
+Total Score (Out of 5),कुल स्कोर (5 से बाहर)
+Total Tax,कुल टैक्स
+Total Tax Amount,कुल कर राशि
+Total Tax*,कुल टैक्स *
+Total Taxes and Charges,कुल कर और शुल्क
+Total days in month,महीने में कुल दिनों
+Total in words,शब्दों में कुल
+Totals,योग
+Track Quotations received from Suppliers.,कोटेशन आपूर्तिकर्ताओं से प्राप्त हुए.
+Track separate Income and Expense for product verticals or divisions.,अलग और उत्पाद कार्यक्षेत्र या विभाजन के लिए आय और खर्च हुए.
+Track this Delivery Note against any Project,किसी भी परियोजना के खिलाफ इस डिलिवरी नोट हुए
+Track this Sales Invoice against any Project,किसी भी परियोजना के खिलाफ हुए इस बिक्री चालान
+Track this Sales Order against any Project,किसी भी परियोजना के खिलाफ हुए इस बिक्री आदेश
+Transaction,लेन - देन
+Transaction Date,लेनदेन की तारीख
+Transfer stock from one warehouse to another.,एक गोदाम से दूसरे शेयर हस्तांतरण.
+Transition Rules,संक्रमण नियम
+Transporter Info,ट्रांसपोर्टर जानकारी
+Transporter Name,ट्रांसपोर्टर नाम
+Transporter lorry number,ट्रांसपोर्टर लॉरी नंबर
+Trash,कचरा पेटी
+Trash Control,ट्रैश नियंत्रण
+Trash Reason,ट्रैश कारण
+Tree of item classification,आइटम वर्गीकरण के पेड़
+Trend Analyzer,रुझान विश्लेषक
+Trend Analyzer Control,रुझान विश्लेषक नियंत्रण
+Trial Balance,शेष - परीक्षण
+Tropic,उष्ण कटिबंध
+Tuesday,मंगलवार
+Type,टाइप
+Type of employment master.,रोजगार गुरु के टाइप करें.
+"Type of leaves like casual, sick etc.","आकस्मिक, बीमार आदि की तरह पत्तियों के प्रकार"
+Types of Expense Claim.,व्यय दावा के प्रकार.
+Types of activities for Time Sheets,गतिविधियों के समय पत्रक के लिए प्रकार
+Types of warehouse,गोदाम के प्रकार
+UOM,UOM
+UOM Conversion Detail,UOM रूपांतरण विस्तार
+UOM Conversion Details,UOM रूपांतरण विवरण
+UOM Conversion Factor,UOM रूपांतरण फैक्टर
+UOM Details,UOM विवरण
+UOM Name,UOM नाम
+UOM Replace Utility,UOM बदलें उपयोगिता
+UPPER CASE,बड़े अक्षर
+URL,यूआरएल
+Unable to complete request: ,अनुरोध को पूरा करने में असमर्थ:
+Under AMC,एएमसी के तहत
+Under Graduate,पूर्व - स्नातक
+Under Warranty,वारंटी के अंतर्गत
+Unit of Measure,माप की इकाई
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","इस मद के माप की इकाई (जैसे किलोग्राम, यूनिट, नहीं, जोड़ी)."
+Units/Hour,इकाइयों / घंटा
+Units/Shifts,इकाइयों / पाली
+Unmatched Amount,बेजोड़ राशि
+Unread Messages,अपठित संदेशों
+Unscheduled,अनिर्धारित
+Unsubscribe,सदस्यता रद्द करें
+Unsubscribed,आपकी सदस्यता समाप्त कर दी
+Update,अद्यतन
+Update Clearance Date,अद्यतन क्लीयरेंस तिथि
+Update Delivery Date,अद्यतन डिलीवरी की तारीख
+Update Field,फील्ड अद्यतन
+Update PR,अद्यतन पीआर
+Update Sales Order,अद्यतन बिक्री आदेश
+Update Series,अद्यतन श्रृंखला
+Update Series Number,अद्यतन सीरीज नंबर
+Update Stock,स्टॉक अद्यतन
+Update Value,मूल्य अद्यतन
+"Update allocated amount in the above table and then click ""Allocate"" button",उपरोक्त तालिका में आवंटित राशि का अद्यतन और फिर &quot;आवंटित&quot; बटन पर क्लिक करें
+Update bank payment dates with journals.,अद्यतन बैंक भुगतान पत्रिकाओं के साथ तिथियाँ.
+Updates,अपडेट
+Updates HTML,अद्यतन HTML
+Upload Attachment,अनुलग्नक अपलोड करें
+Upload Attendance Data,उपस्थिति डेटा अपलोड
+Upload HTML,HTML अपलोड
+Upload a file,एक फ़ाइल अपलोड करें
+Upload attendance,उपस्थिति अपलोड
+Upload attendance from a .csv file,. Csv फ़ाइल से उपस्थिति अपलोड करें
+Upload stock balance via csv.,Csv के माध्यम से शेयर संतुलन अपलोड करें.
+Upper Income,ऊपरी आय
+Urgent,अत्यावश्यक
+Use Multi-Level BOM,मल्टी लेवल बीओएम का उपयोग करें
+Use SSL,SSL का उपयोग
+User,उपयोगकर्ता
+User Cannot Create,प्रयोक्ता नहीं बना सकते हैं
+User Cannot Search,प्रयोक्ता नहीं खोज सकते हैं
+User ID,प्रयोक्ता आईडी
+User Image,User Image
+User Name,यूज़र नेम
+User Properties,उपयोगकर्ता के गुण
+User Remark,उपयोगकर्ता के टिप्पणी
+User Remark will be added to Auto Remark,उपयोगकर्ता टिप्पणी ऑटो टिप्पणी करने के लिए जोड़ दिया जाएगा
+User Tags,उपयोगकर्ता के टैग
+User Type,प्रयोक्ता प्रकार
+User must always select,उपयोगकर्ता हमेशा का चयन करना होगा
+UserRole,UserRole
+Username,प्रयोक्ता नाम
+Users,उपयोगकर्ता
+Users Voted,उपयोगकर्ता वोट दिया
+Users with this role are allowed to do / modify accounting entry before frozen date,इस भूमिका के साथ उपयोगकर्ता / जमे हुए तारीख से पहले लेखा प्रविष्टि को संशोधित करने के लिए अनुमति दी जाती है
+Users with this role are allowed to do / modify stock entry before frozen date,इस भूमिका के साथ उपयोगकर्ता / जमे हुए तारीख से पहले शेयर प्रविष्टि को संशोधित करने के लिए अनुमति दी जाती है
+Utilities,उपयोगिताएँ
+Utility,उपयोगिता
+Valid Upto,विधिमान्य
+Validation Logic,सत्यापन तर्क
+Valuation,मूल्याकंन
+Valuation Control,मूल्यांकन नियंत्रण
+Valuation Method,मूल्यन विधि
+Valuation Rate,मूल्यांकन दर
+Valuation and Total,मूल्यांकन और कुल
+Value,मूल्य
+Verdana,Verdana
+Verified By,द्वारा सत्यापित
+Visit,भेंट
+Visit report for maintenance call.,रखरखाव कॉल के लिए रिपोर्ट पर जाएँ.
+Voucher Detail No,वाउचर विस्तार नहीं
+Voucher ID,वाउचर आईडी
+Voucher Import Tool,वाउचर आयात उपकरण
+Voucher No,कोई वाउचर
+Voucher Type,वाउचर प्रकार
+WIP Monitor,WIP मॉनिटर
+Waiting for Customer,ग्राहक के लिए प्रतीक्षा की जा रही है
+Walk In,में चलो
+Warehouse,गोदाम
+Warehouse Contact Info,वेयरहाउस संपर्क जानकारी
+Warehouse Detail,वेअरहाउस विस्तार
+Warehouse Name,वेअरहाउस नाम
+Warehouse Type,वेअरहाउस प्रकार
+Warehouse where you are maintaining stock of rejected items,वेअरहाउस जहाँ आप को अस्वीकार कर दिया आइटम के शेयर को बनाए रखने रहे हैं
+Warn,चेतावनी देना
+Warning,चेतावनी
+Warranty / AMC Details,वारंटी / एएमसी विवरण
+Warranty / AMC Status,वारंटी / एएमसी स्थिति
+Warranty Expiry Date,वारंटी समाप्ति तिथि
+Warranty Period (Days),वारंटी अवधि (दिन)
+Warranty Period (in days),वारंटी अवधि (दिनों में)
+Web Content,वेब सामग्री
+Web Page,वेब पेज
+Webforms,WebForms
+Website,वेबसाइट
+Website Description,वेबसाइट विवरण
+Website Home,वेबसाइट के होम
+Website Item Group,वेबसाइट आइटम समूह
+Website Item Groups,वेबसाइट आइटम समूह
+Website Overall Settings,वेबसाइट कुल मिलाकर सेटिंग्स
+Website Price List,वेबसाइट मूल्य सूची
+Website Product Categories,वेबसाइट उत्पाद श्रेणियाँ
+Website Product Category,वेबसाइट उत्पाद श्रेणी
+Website Script,वेबसाइट स्क्रिप्ट
+Website Settings,वेबसाइट सेटिंग
+Website Slideshow,वेबसाइट स्लाइड शो
+Website Slideshow Item,वेबसाइट स्लाइड शो आइटम
+Website Warehouse,वेबसाइट वेअरहाउस
+Wednesday,बुधवार
+Weekly,साप्ताहिक
+Weekly Off,ऑफ साप्ताहिक
+Weight UOM,वजन UOM
+Weightage,महत्व
+Weightage (%),वेटेज (%)
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.",", एक चेक किए गए लेनदेन के किसी भी &quot;प्रस्तुत कर रहे हैं&quot; पॉप - अप ईमेल स्वचालित रूप से जुड़े है कि सौदे में &quot;संपर्क&quot; के लिए एक ईमेल भेजने के लिए, एक अनुलग्नक के रूप में लेन - देन के साथ खोला. उपयोगकर्ता या ईमेल भेजने के लिए नहीं हो सकता."
+"When you <b>Amend</b> a document after cancel and save it, it will get a new number that is a version of the old number.","जब आप किसी दस्तावेज़ में <b>संशोधन के</b> बाद रद्द कर सकते हैं और इसे बचाने के लिए, यह एक नया नंबर कि पुराना नंबर के एक संस्करण है मिल जाएगा."
+Where items are stored.,आइटम कहाँ संग्रहीत हैं.
+Where manufacturing operations are carried out.,जहां निर्माण कार्यों से बाहर किया जाता है.
+White,सफ़ेद
+Widowed,विधवा
+Width,चौडाई
+Will be calculated automatically when you enter the details,स्वचालित रूप से गणना की जाएगी जब आप विवरण दर्ज करें
+Will be fetched from Customer,ग्राहक से दिलवाया जाएगा
+With Operations,आपरेशनों के साथ
+Work Done,करेंकिया गया काम
+Work In Progress,अर्धनिर्मित उत्पादन
+Workflow,कार्यप्रवाह
+Workflow Action,वर्कफ़्लो लड़ाई
+Workflow Action Detail,वर्कफ़्लो कार्रवाई विस्तार
+Workflow Action Details,कार्यप्रवाह क्रिया विवरण
+Workflow Action Master,वर्कफ़्लो कार्रवाई मास्टर
+Workflow Action Name,वर्कफ़्लो कार्य का नाम
+Workflow Document State,वर्कफ़्लो दस्तावेज़ राज्य
+Workflow Document States,कार्यप्रवाह दस्तावेज़ राज्य अमेरिका
+Workflow Engine,कार्यप्रवाह इंजन
+Workflow Name,वर्कफ़्लो नाम
+Workflow Rule,वर्कफ़्लो नियम
+Workflow Rule Detail,वर्कफ़्लो नियम विस्तार
+Workflow Rule Details,वर्कफ़्लो नियम विवरण
+Workflow State,कार्यप्रवाह राज्य
+Workflow State Field,वर्कफ़्लो राज्य फील्ड
+Workflow State Name,वर्कफ़्लो राज्य का नाम
+Workflow Transition,वर्कफ़्लो संक्रमण
+Workflow Transitions,कार्यप्रवाह बदलाव
+Workflow state represents the current state of a document.,कार्यप्रवाह राज्य एक दस्तावेज़ की वर्तमान स्थिति का प्रतिनिधित्व करता है.
+Workflow will start after saving.,कार्यप्रवाह सहेजने के बाद शुरू कर देंगे.
+Workfow,Workfow
+Working,कार्य
+Workstation,वर्कस्टेशन
+Workstation Name,वर्कस्टेशन नाम
+Write,लिखना
+Write Off Account,ऑफ खाता लिखें
+Write Off Amount,बंद राशि लिखें
+Write Off Amount <=,ऑफ राशि लिखें &lt;=
+Write Off Based On,के आधार पर बंद लिखने के लिए
+Write Off Cost Center,ऑफ लागत केंद्र लिखें
+Write Off Outstanding Amount,ऑफ बकाया राशि लिखें
+Write Off Voucher,ऑफ वाउचर लिखें
+Year,वर्ष
+Year Closed,साल बंद कर दिया
+Year Name,वर्ष नाम
+Year Start Date,वर्ष प्रारंभ दिनांक
+Year of Passing,पासिंग का वर्ष
+Yearly,वार्षिक
+Yes,हां
+Yesterday,कल
+You can create more earning and deduction type from Setup --> HR,आप अधिक कमाई और सेटअप से कटौती प्रकार बना सकते हैं -&gt; मानव संसाधन
+You can enter any date manually,आप किसी भी तारीख को मैन्युअल रूप से दर्ज कर सकते हैं
+You can enter the minimum quantity of this item to be ordered.,आप इस मद की न्यूनतम मात्रा में करने के लिए आदेश दिया जा में प्रवेश कर सकते हैं.
+You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.,आप कई बिक्री के आदेश से एक प्रसव नोट कर सकते हैं. बिक्री आदेश एक के बाद एक का चयन करें और नीचे के बटन पर क्लिक करें.
+You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.,आप कई खरीद अनुरोध से एक खरीद आदेश कर सकते हैं. खरीद अनुरोध एक के बाद एक का चयन करें और नीचे के बटन पर क्लिक करें.
+You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.,आप कई प्रदायक कोटेशन से एक खरीद आदेश कर सकते हैं. प्रदायक कोटेशन एक के बाद एक का चयन करें और नीचे के बटन पर क्लिक करें.
+You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,आप कई खरीद के आदेश से एक खरीद रसीद कर सकते हैं. खरीद के आदेश के एक से एक का चयन करें और नीचे के बटन पर क्लिक करें.
+You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,आप विभिन्न &#39;गुण&#39; उपयोगकर्ताओं को स्थापित करने के लिए मूलभूत मूल्यों को निर्धारित करने के लिए और अनुमति विभिन्न रूपों में इन गुणों के मूल्य के आधार पर नियमों को लागू कर सकते हैं.
+You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,आप <a href='#Form/Customize Form'>प्रपत्र को अनुकूलित</a> करने के लिए खेतों पर स्तर सेट का उपयोग कर सकते हैं .
+Your Customer's TAX registration numbers (if applicable) or any general information,अपने ग्राहक कर पंजीकरण संख्या (यदि लागू हो) या किसी भी सामान्य जानकारी
+"Your download is being built, this may take a few moments...","आपका डाउनलोड का निर्माण किया जा रहा है, इसमें कुछ समय लग सकता है ..."
+Your letter head content in HTML.,HTML में आपका पत्र सिर सामग्री.
+Your sales person who will contact the customer in future,अपनी बिक्री व्यक्ति जो भविष्य में ग्राहकों से संपर्क करेंगे
+Your sales person who will contact the lead in future,अपनी बिक्री व्यक्ति जो भविष्य में नेतृत्व संपर्क करेंगे
+Your sales person will get a reminder on this date to contact the customer,अपनी बिक्री व्यक्ति इस तिथि पर एक चेतावनी प्राप्त करने के लिए ग्राहकों से संपर्क करेंगे
+Your sales person will get a reminder on this date to contact the lead,अपनी बिक्री व्यक्ति इस तिथि पर एक चेतावनी प्राप्त करने के लिए नेतृत्व संपर्क करेंगे
+Your support email id - must be a valid email - this is where your emails will come!,आपका समर्थन ईमेल आईडी - एक मान्य ईमेल होना चाहिए - यह है जहाँ आपके ईमेल आ जाएगा!
+[],[]
+add your own CSS (careful!),अपने खुद के सीएसएस (careful!) जोड़ें
+adjust,को समायोजित
+align-center,संरेखित करें केंद्र
+align-justify,संरेखित करें - का औचित्य साबित
+align-left,संरेखित करें बाएं
+align-right,संरेखित करें सही
+and,और
+arrow-down,नीचे तीर
+arrow-left,तीर बाएँ
+arrow-right,तीर सही
+arrow-up,तीर अप
+asterisk,तारांकन
+backward,पिछड़ा
+ban-circle,प्रतिबंध चक्र
+barcode,बारकोड
+bell,घंटी
+bold,बोल्ड
+book,किताब
+bookmark,बुकमार्क
+briefcase,ब्रीफ़केस
+bullhorn,bullhorn
+calendar,कैलेंडर
+camera,कैमरा
+cancel,रद्द करें
+cannot be included in item's rate,आइटम की दर में शामिल नहीं किया जा सकता
+certificate,प्रमाणपत्र
+check,चेक
+checked,की जाँच की
+chevron-down,शेवरॉन नीचे
+chevron-left,शेवरॉन छोड़ दिया
+chevron-right,शेवरॉन सही
+chevron-up,शहतीर अप
+circle-arrow-down,वृत्त - तीर - नीचे
+circle-arrow-left,वृत्त - तीर बाएँ
+circle-arrow-right,वृत्त - तीर - सही
+circle-arrow-up,वृत्त - तीर अप
+cog,दांत
+comment,टिप्पणी
+create a Custom Field of type Link (Profile) and then use the 'Condition' settings to map that field to the Permission rule.,प्रकार लिंक (प्रोफाइल) के एक कस्टम फ़ील्ड बना सकते हैं और फिर &#39;स्थिति&#39; सेटिंग का उपयोग करने के लिए अनुमति शासन करने के लिए है कि क्षेत्र के नक्शे.
+dashboard,डैशबोर्ड
+dd-mm-yyyy,डीडी-mm-yyyy
+dd/mm/yyyy,dd / mm / yyyy
+deactivate,निष्क्रिय करें
+does not belong to BOM: ,बीओएम से संबंधित नहीं है:
+download,डाउनलोड
+download-alt,डाउनलोड-Alt
+"e.g. 0.5, 2.5 etc","0.5 उदाहरण के लिए, 2.5 आदि"
+"e.g. Bank, Cash, Credit Card","जैसे बैंक, नकद, क्रेडिट कार्ड"
+"e.g. Kg, Unit, Nos, m","जैसे किलोग्राम, यूनिट, ओपन स्कूल, मीटर"
+"e.g. Office, Billing, Shipping","जैसे कार्यालय, नौवहन, बिलिंग"
+edit,संपादित करें
+eg. Cheque Number,उदा. चेक संख्या
+eject,बेदखल करना
+english,अंग्रेज़ी
+envelope,लिफाफा
+equal,बराबर
+español,español
+exclamation-sign,विस्मयादिबोधक हस्ताक्षर
+eye-close,आंख को बंद
+eye-open,आंख खोलने के
+facetime-video,FaceTime वीडियो
+fast-backward,तेजी से पिछड़े
+fast-forward,तेजी से आगे
+file,फ़ाइल
+film,फ़िल्म
+filter,फ़िल्टर करने के लिए
+fire,आग
+flag,झंडा
+folder-close,फ़ोल्डर बंद
+folder-open,फ़ोल्डर खोलने के
+font,फॉन्ट
+forward,आगे
+français,français
+fullscreen,fullscreen
+gift,उपहार
+glass,कांच
+globe,ग्लोब
+greater than,से अधिक से अधिक
+greater than equal,बराबर या अधिक
+hand-down,हाथ नीचे
+hand-left,हाथ बाएँ
+hand-right,हाथ - सही
+hand-up,हाथ
+has been entered atleast twice,कम से कम दो बार दर्ज किया गया
+hdd,hdd
+headphones,headphones
+heart,दिल
+home,घर
+inbox,इनबॉक्स
+indent-left,इंडेंट - बाएँ
+indent-right,इंडेंट सही
+info-sign,जानकारी के संकेत
+is a cancelled Item,रद्द आइटम
+is checked for,के लिए जाँच
+is not a Stock Item,स्टॉक आइटम नहीं है
+is not allowed.,अनुमति नहीं है.
+italic,तिरछा
+leaf,पत्ती
+less than,की तुलना में कम
+less than equal,बराबर या कम
+lft,LFT
+list,सूची
+list-alt,सूची Alt
+lock,ताला
+magnet,चुंबक
+map-marker,नक्शा मार्कर
+minus,ऋण
+minus-sign,ऋण पर हस्ताक्षर
+mm-dd-yyyy,mm-dd-yyyy
+mm/dd/yy,dd / mm / yy
+mm/dd/yyyy,dd / mm / yyyy
+move,चाल
+music,संगीत
+nederlands,Nederlands
+not equal,बराबर नहीं
+not within Fiscal Year,नहीं वित्त वर्ष के भीतर
+of type Link,किस प्रकार की कड़ी
+off,बंद
+ok,ठीक
+ok-circle,ठीक चक्र
+ok-sign,ठीक है पर हस्ताक्षर
+old_parent,old_parent
+or,या
+pause,ठहराव
+pencil,पेंसिल
+picture,तस्वीर
+plane,विमान
+play,खेल
+play-circle,खेलने सर्कल
+plus,प्लस
+plus-sign,प्लस पर हस्ताक्षर
+português,पुर्तगाली
+print,प्रिंट
+qrcode,qrcode
+question-sign,सवाल संकेत
+question-view,सवाल दृश्य
+questions,सवालों
+random,यादृच्छिक
+reached its end of life on,पर अपने जीवन के अंत तक पहुँच
+refresh,ताज़ा करना
+remove,हटाना
+remove-circle,Remove-वृत्त
+remove-sign,हटाने के हस्ताक्षर
+repeat,दोहराना
+resize-full,का आकार परिवर्तन भरा
+resize-horizontal,का आकार परिवर्तन क्षैतिज
+resize-small,का आकार परिवर्तन छोटे
+resize-vertical,का आकार परिवर्तन खड़ी
+retweet,retweet
+rgt,rgt
+road,सड़क
+screenshot,स्क्रीनशॉट
+search,खोज
+share,शेयर
+share-alt,शेयर Alt
+shopping-cart,शॉपिंग गाड़ी
+should also have,भी होना चाहिए
+signal,संकेत
+star,सितारा
+star-empty,सितारा खाली
+step-backward,कदम से पिछड़े
+step-forward,कदम आगे
+stop,रोक
+tag,टैग
+tags,टैग
+"target = ""_blank""",लक्ष्य = &quot;_blank&quot;
+tasks,कार्यों
+text-height,पाठ ऊंचाई
+text-width,पाठ चौड़ाई
+th,वें
+th-large,वें बड़े
+th-list,वें सूची
+then,तो
+thumbs-down,नीचे अंगूठे
+thumbs-up,अंगूठे अप
+time,समय
+tint,टिंट
+to,से
+to be dropped,गिरा दिया जा
+trash,कचरा
+upload,अपलोड
+user,उपयोगकर्ता
+user_image_show,user_image_show
+values and dates,मूल्यों और तारीखें
+volume-down,मात्रा नीचे
+volume-off,वॉल्यूम बंद
+volume-up,मात्रा
+warning-sign,चेतावनी संकेत
+website page link,वेबसाइट के पेज लिंक
+wrench,रिंच
+yyyy-mm-dd,yyyy-mm-dd
+zoom-in,ज़ूम
+zoom-out,ज़ूम आउट
+العربية,العربية
+हिंदी,हिंदी

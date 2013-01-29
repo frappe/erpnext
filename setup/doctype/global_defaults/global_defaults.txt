@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 14:20:19", 
+  "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-25 11:51:16", 
+  "modified": "2013-01-28 15:09:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -95,6 +93,14 @@
   "width": "50%"
  }, 
  {
+  "description": "Do not show any symbol like $ etc next to currencies.", 
+  "doctype": "DocField", 
+  "fieldname": "hide_currency_symbol", 
+  "fieldtype": "Select", 
+  "label": "Hide Currency Symbol", 
+  "options": "\nNo\nYes"
+ }, 
+ {
   "default": "INR", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
@@ -108,7 +114,7 @@
   "fieldname": "number_format", 
   "fieldtype": "Select", 
   "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n######"
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n#.###\n#,###"
  }, 
  {
   "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 

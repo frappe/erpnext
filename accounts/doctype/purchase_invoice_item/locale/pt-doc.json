@@ -2,6 +2,7 @@
  "Accounts": "Contas", 
  "Amount": "Quantidade", 
  "Amount (Default Curr.)": "Montante (Curr padr\u00e3o.)", 
+ "Amount*": "* Quantidade", 
  "Brand": "Marca", 
  "Cost Center": "Centro de Custos", 
  "Description": "Descri\u00e7\u00e3o", 
@@ -21,8 +22,10 @@
  "Qty": "Qty", 
  "Rate ": "Taxa", 
  "Rate *(Default Curr.)": "* Pre\u00e7o (Curr padr\u00e3o.)", 
+ "Rate*": "* Taxa de", 
  "Ref Rate ": "Taxa de Ref", 
  "Ref Rate *": "* Taxa de Ref", 
+ "Ref Rate*": "* Taxa de Ref", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges": "Tabela de detalhes fiscal obtido a partir do cadastro de itens como uma string e armazenada neste field.Used dos Impostos e Encargos", 
  "UOM": "UOM"
 }

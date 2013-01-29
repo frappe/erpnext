@@ -1,6 +1,7 @@
 {
  "Amount": "Cantidad", 
  "Amount  (Default Curr.)": "Importe (Curr predeterminado.)", 
+ "Amount*": "Importe *", 
  "Brand": "Marca", 
  "Buying": "Comprar", 
  "Description": "Descripci\u00f3n", 
@@ -19,8 +20,10 @@
  "Quantity": "Cantidad", 
  "Rate ": "Velocidad", 
  "Rate (Default Curr.) *": "Tasa (por defecto Curr.) *", 
+ "Rate*": "* Evaluar", 
  "Ref Rate ": "Precio ref", 
  "Ref Rate *": "Ref * Tarifa", 
+ "Ref Rate*": "Ref * Tarifa", 
  "Supplier Part Number": "N\u00famero de pieza del proveedor", 
  "Supplier Quotation Item": "Proveedor del art\u00edculo Cotizaci\u00f3n", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges": "Tabla de impuestos detalle descargue de maestro de art\u00edculos en forma de cadena y se almacenan en esta field.Used de Impuestos y Cargos", 

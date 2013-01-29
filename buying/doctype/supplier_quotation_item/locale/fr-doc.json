@@ -1,6 +1,7 @@
 {
  "Amount": "Montant", 
  "Amount  (Default Curr.)": "Montant (Curr par d\u00e9faut.)", 
+ "Amount*": "* Montant", 
  "Brand": "Marque", 
  "Buying": "Achat", 
  "Description": "Description", 
@@ -19,8 +20,10 @@
  "Quantity": "Quantit\u00e9", 
  "Rate ": "Taux", 
  "Rate (Default Curr.) *": "Taux (par d\u00e9faut Curr.) *", 
+ "Rate*": "* Taux", 
  "Ref Rate ": "Prix \u200b\u200br\u00e9f", 
  "Ref Rate *": "* Taux Ref", 
+ "Ref Rate*": "* Taux Ref", 
  "Supplier Part Number": "Num\u00e9ro de pi\u00e8ce fournisseur", 
  "Supplier Quotation Item": "Article Devis Fournisseur", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges": "Table de d\u00e9tail imp\u00f4t extraites de ma\u00eetre \u00e9l\u00e9ment comme une cha\u00eene et stock\u00e9e dans ce field.Used de taxes et de frais", 

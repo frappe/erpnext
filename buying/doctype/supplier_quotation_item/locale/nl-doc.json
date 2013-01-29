@@ -1,6 +1,7 @@
 {
  "Amount": "Bedrag", 
  "Amount  (Default Curr.)": "Bedrag (Standaard Curr.)", 
+ "Amount*": "Bedrag *", 
  "Brand": "Merk", 
  "Buying": "Het kopen", 
  "Description": "Beschrijving", 
@@ -19,8 +20,10 @@
  "Quantity": "Hoeveelheid", 
  "Rate ": "Tarief", 
  "Rate (Default Curr.) *": "Rate (Standaard Curr.) *", 
+ "Rate*": "Rate *", 
  "Ref Rate ": "Ref Rate", 
  "Ref Rate *": "Ref Rate *", 
+ "Ref Rate*": "Ref Rate *", 
  "Supplier Part Number": "Leverancier Onderdeelnummer", 
  "Supplier Quotation Item": "Leverancier Offerte Item", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges": "Fiscale detail tabel opgehaald uit artikelstamgegevens als een string en opgeslagen in deze field.Used voor en-heffingen", 

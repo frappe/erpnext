@@ -1,4 +1,5 @@
 {
+ "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>": "<a href=\"#!Sales Browser/Territory\">Om Territory beheren, klik hier</a>", 
  "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">Om Territory beheren, klik hier</a>", 
  "Address Line 1": "Adres Lijn 1", 
  "Address Line 2": "Adres Lijn 2", 

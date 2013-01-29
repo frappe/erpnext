@@ -14,16 +14,16 @@
  "Purchase Request No", 
  "Buying", 
  "Rate ", 
- "Amount  (Default Curr.)", 
+ "Rate*", 
+ "Amount*", 
  "Amount", 
  "Ref Rate ", 
  "Item Group", 
  "Purchase Request Date", 
  "If Supplier Part Number exists for given Item, it gets stored here", 
  "Item Code", 
+ "Ref Rate*", 
  "Quantity", 
  "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges", 
- "Rate (Default Curr.) *", 
- "Page Break", 
- "Ref Rate *"
+ "Page Break"
 ]
