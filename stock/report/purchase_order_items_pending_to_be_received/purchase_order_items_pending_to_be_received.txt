@@ -1,0 +1,20 @@
+[
+ {
+  "creation": "2013-01-29 13:12:48", 
+  "docstatus": 0, 
+  "modified": "2013-01-29 13:16:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select \n `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n `tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n `tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n `tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n `tabPurchase Order Item`.description as \"Description::180\",\n `tabPurchase Order Item`.qty as \"Qty:Float:100\",\n `tabPurchase Order Item`.received_qty as \"Received Qty:Float:100\"\nfrom\n `tabPurchase Order`, `tabPurchase Order Item`\nwhere\n `tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n and `tabPurchase Order`.docstatus = 1\n and ifnull(`tabPurchase Order Item`.received_qty, 0) < ifnull(`tabPurchase Order Item`.qty, 0)\norder by `tabPurchase Order`.transaction_date asc", 
+  "ref_doctype": "Purchase Receipt"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Purchase Order Items Pending To Be Received"
+ }
+]
