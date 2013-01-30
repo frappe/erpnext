@@ -17,9 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, get_defaults
+from webnotes.utils import cstr, cint, get_defaults
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 from webnotes.model.doc import make_autoname
 
 sql = webnotes.conn.sql
@@ -35,28 +35,18 @@ class DocType(TransactionBase):
 		self.add_communication_list()
 
 	def autoname(self):
-		#get default naming conventional from control panel
 		supp_master_name = get_defaults()['supp_master_name']
-
+		
 		if supp_master_name == 'Supplier Name':
-		
-			# filter out bad characters in name
-			#supp = self.doc.supplier_name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','').replace('`','')
-			supp = self.doc.supplier_name
-			
-			cust = sql("select name from `tabCustomer` where name = '%s'" % (supp))
-			cust = cust and cust[0][0] or ''
-		
-			if cust:
-				msgprint("You already have a Customer with same name")
-				raise Exception
-			self.doc.name = supp
-			
+			if webnotes.conn.exists("Customer", self.doc.supplier_name):
+				webnotes.msgprint(_("A Customer exists with same name"), raise_exception=1)
+			self.doc.name = self.doc.supplier_name
 		else:
-			self.doc.name = make_autoname(self.doc.naming_series+'.#####')
+			self.doc.name = make_autoname(self.doc.naming_series + '.#####')
 
 	def update_credit_days_limit(self):
-		sql("update tabAccount set credit_days = '%s' where name = '%s'" % (self.doc.credit_days, self.doc.name + " - " + self.get_company_abbr()))
+		sql("""update tabAccount set credit_days = %s where name = %s""", 
+			(cint(self.doc.credit_days), self.doc.name + " - " + self.get_company_abbr()))
 
 	def on_update(self):
 		if not self.doc.naming_series:

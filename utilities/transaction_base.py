@@ -16,16 +16,13 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import load_json, cstr, flt, get_defaults
+from webnotes.utils import load_json, cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import copy_doclist
 
 from webnotes.model.controller import DocListController
 
 class TransactionBase(DocListController):
-
 	# Get Customer Default Primary Address - first load
-	# -----------------------
 	def get_default_customer_address(self, args=''):
 		address_text, address_name = self.get_address_text(customer=self.doc.customer)
 		self.doc.customer_address = address_name or ''

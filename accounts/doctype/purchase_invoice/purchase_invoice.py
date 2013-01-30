@@ -427,8 +427,97 @@ class DocType(BuyingController):
 
 
 	def make_gl_entries(self, is_cancel = 0):
-		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist, cancel = is_cancel, \
-			use_mapper = (self.doc.write_off_account and self.doc.write_off_amount and 'Purchase Invoice with write off' or ''))
+		from accounts.general_ledger import make_gl_entries
+		gl_entries = []
+		valuation_tax = 0
+		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
+		 	"automatic_inventory_accounting")
+		abbr = self.get_company_abbr()
+		
+		# parent's gl entry
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": self.doc.credit_to,
+				"against": self.doc.against_expense_account,
+				"credit": self.doc.grand_total,
+				"remarks": self.doc.remarks,
+				"against_voucher": self.doc.name,
+				"against_voucher_type": self.doc.doctype,
+			}, is_cancel)
+		)
+	
+		# tax table gl entries
+		for tax in getlist(self.doclist, "other_charges"):
+			if tax.category in ("Total", "Valuation and Total"):
+				valuation_tax += flt(tax.tax_amount)
+				
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": tax.account_head,
+						"against": self.doc.credit_to,
+						"debit": tax.tax_amount,
+						"remarks": self.doc.remarks,
+						"cost_center": tax.cost_center
+					}, is_cancel)
+				)
+					
+		# item gl entries
+		stock_item_and_auto_accounting = False
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if auto_inventory_accounting and \
+					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
+				# if auto inventory accounting enabled and stock item, 
+				# then do stock related gl entries, expense will be booked in sales invoice
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": "Stock Received But Not Billed - %s" % (abbr,),
+						"against": self.doc.credit_to,
+						"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
+							*  item.qty,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					}, is_cancel)
+				)
+			
+				stock_item_and_auto_accounting = True
+			
+			else:
+				# if not a stock item or auto inventory accounting disabled, book the expense
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.expense_head,
+						"against": self.doc.credit_to,
+						"debit": item.amount,
+						"remarks": self.doc.remarks,
+						"cost_center": item.cost_center
+					}, is_cancel)
+				)
+				
+		if stock_item_and_auto_accounting and valuation_tax:
+			# credit valuation tax amount in "Expenses Included In Valuation"
+			# this will balance out valuation amount included in cost of goods sold
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": "Expenses Included In Valuation - %s" % (abbr,),
+					"cost_center": "ERP - %s" % abbr, # to-do
+					"against": self.doc.credit_to,
+					"credit": valuation_tax,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock"
+				}, is_cancel)
+			)
+		
+		# writeoff account includes petty difference in the invoice amount 
+		# and the amount that is paid
+		if self.doc.write_off_account and self.doc.write_off_amount:
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.doc.write_off_account,
+					"against": self.doc.credit_to,
+					"credit": self.doc.write_off_amount,
+					"remarks": self.doc.remarks,
+					"cost_center": self.doc.write_off_cost_center
+				}, is_cancel)
+			)
+		make_gl_entries(gl_entries, cancel=is_cancel)
 
 
 	def check_next_docstatus(self):

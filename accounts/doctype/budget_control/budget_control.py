@@ -52,6 +52,7 @@ class DocType:
 
 	def check_budget(self,gle,cancel):
 		# get allocated budget
+		
 		bgt = webnotes.conn.sql("""select t1.budget_allocated, t1.actual, t2.distribution_id 
 			from `tabBudget Detail` t1, `tabCost Center` t2 
 			where t1.account='%s' and t1.parent=t2.name and t2.name = '%s' 

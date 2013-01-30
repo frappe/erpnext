@@ -18,15 +18,11 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money, get_first_day, get_last_day, getdate
-from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
 	
-
-
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl
@@ -38,28 +34,18 @@ class DocType:
 		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
 		for k in mandatory:
 			if not self.doc.fields.get(k):
-				msgprint("%s is mandatory for GL Entry" % k)
-				raise Exception
+				msgprint("%s is mandatory for GL Entry" % k, raise_exception=1)
 				
 		# Zero value transaction is not allowed
 		if not (flt(self.doc.debit) or flt(self.doc.credit)):
 			msgprint("GL Entry: Debit or Credit amount is mandatory for %s" % self.doc.account)
 			raise Exception
 			
-			
-		# COMMMENTED below to allow zero amount (+ and -) entry in tax table
-		# Debit and credit can not done at the same time
-		#if flt(self.doc.credit) != 0 and flt(self.doc.debit) != 0:
-		#	msgprint("Sorry you cannot credit and debit under same account head.")
-		#	raise Exception, "Validation Error."
-		
-	# Cost center is required only if transaction made against pl account
-	#--------------------------------------------------------------------
 	def pl_must_have_cost_center(self):
 		if sql("select name from tabAccount where name=%s and is_pl_account='Yes'", self.doc.account):
 			if not self.doc.cost_center and self.doc.voucher_type != 'Period Closing Voucher':
-				msgprint("Error: Cost Center must be specified for PL Account: %s" % self.doc.account)
-				raise Exception
+				msgprint("Error: Cost Center must be specified for PL Account: %s" %
+				 	self.doc.account, raise_exception=1)
 		else: # not pl
 			if self.doc.cost_center:
 				self.doc.cost_center = ''

@@ -246,9 +246,10 @@ class DocType(AccountsController):
 				msgprint("Credit account is not matching with Purchase Invoice", raise_exception=1)
 
 	def make_gl_entries(self, cancel=0):
-		gl_entries = []
+		from accounts.general_ledger import make_gl_entries
+		gl_map = []
 		for d in self.doclist.get({"parentfield": "entries"}):
-			gl_entries.append(
+			gl_map.append(
 				self.get_gl_dict({
 					"account": d.account,
 					"against": d.against_account,
@@ -263,7 +264,7 @@ class DocType(AccountsController):
 				}, cancel)
 			)
 			
-		super(DocType, self).make_gl_entries(cancel=cancel, gl_map=gl_entries)
+		make_gl_entries(gl_map, cancel=cancel)
 
 	def get_outstanding(self, args):
 		args = eval(args)

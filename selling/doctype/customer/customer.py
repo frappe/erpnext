@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import cstr, get_defaults
 from webnotes.model.doc import Document, make_autoname
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -37,17 +37,9 @@ class DocType(TransactionBase):
 	def autoname(self):
 		cust_master_name = get_defaults().get('cust_master_name')
 		if cust_master_name == 'Customer Name':
-			# filter out bad characters in name
-			#cust = self.doc.customer_name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','').replace('`','')
-			cust = self.doc.customer_name
-
-			supp = sql("select name from `tabSupplier` where name = %s", (cust))
-			supp = supp and supp[0][0] or ''
-			if supp:
-				msgprint("You already have a Supplier with same name")
-				raise Exception("You already have a Supplier with same name")
-			else:
-				self.doc.name = cust
+			if webnotes.conn.exists("Supplier", self.doc.customer_name):
+				msgprint(_("A Supplier exists with same name"), raise_exception=1)
+			self.doc.name = self.doc.customer_name
 		else:
 			self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 

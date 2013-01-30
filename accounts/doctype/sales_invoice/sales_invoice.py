@@ -196,13 +196,10 @@ class DocType(SellingController):
 		"""Set Due Date = Posting Date + Credit Days"""
 		credit_days = 0
 		if self.doc.debit_to:
-			credit_days = webnotes.conn.sql("select credit_days from `tabAccount` where name='%s' and docstatus != 2" % self.doc.debit_to)
-			credit_days = credit_days and cint(credit_days[0][0]) or 0
+			credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
 		if self.doc.company and not credit_days:
-			credit_days = webnotes.conn.sql("select credit_days from `tabCompany` where name='%s'" % self.doc.company)
-			credit_days = credit_days and cint(credit_days[0][0]) or 0
-		# Customer has higher priority than company
-		# i.e.if not entered in customer will take credit days from company
+			credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
+
 		self.doc.due_date = add_days(cstr(self.doc.posting_date), credit_days)
 		
 		if self.doc.debit_to:
@@ -211,17 +208,25 @@ class DocType(SellingController):
 
 	def pull_details(self):
 		"""Pull Details of Delivery Note or Sales Order Selected"""
-		# Delivery Note
 		if self.doc.delivery_note_main:
 			self.validate_prev_docname('delivery note')
 			self.doclist = self.doc.clear_table(self.doclist,'other_charges')			
-			self.doclist = get_obj('DocType Mapper', 'Delivery Note-Sales Invoice').dt_map('Delivery Note', 'Sales Invoice', self.doc.delivery_note_main, self.doc, self.doclist, "[['Delivery Note', 'Sales Invoice'],['Delivery Note Item', 'Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]")			
+			self.doclist = get_obj('DocType Mapper', 'Delivery Note-Sales Invoice').dt_map(
+				'Delivery Note', 'Sales Invoice', self.doc.delivery_note_main, self.doc, 
+				self.doclist, """[['Delivery Note', 'Sales Invoice'],
+					['Delivery Note Item', 'Sales Invoice Item'],
+					['Sales Taxes and Charges','Sales Taxes and Charges'],
+					['Sales Team','Sales Team']]""")								
 			self.get_income_account('entries')
-		# Sales Order
+			
 		elif self.doc.sales_order_main:
 			self.validate_prev_docname('sales order')
 			self.doclist = self.doc.clear_table(self.doclist,'other_charges')
-			get_obj('DocType Mapper', 'Sales Order-Sales Invoice').dt_map('Sales Order', 'Sales Invoice', self.doc.sales_order_main, self.doc, self.doclist, "[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'], ['Sales Team', 'Sales Team']]")
+			get_obj('DocType Mapper', 'Sales Order-Sales Invoice').dt_map('Sales Order', 
+				'Sales Invoice', self.doc.sales_order_main, self.doc, self.doclist, 
+				"""[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'], 
+				['Sales Taxes and Charges','Sales Taxes and Charges'], 
+				['Sales Team', 'Sales Team']]""")
 			self.get_income_account('entries')
 			
 		ret = self.get_debit_to()
@@ -238,9 +243,11 @@ class DocType(SellingController):
 	def get_income_account(self,doctype):		
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
-				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-				d.income_account = item and item[0]['default_income_account'] or ''
-				d.cost_center = item and item[0]['default_sales_cost_center'] or ''				
+				item = webnotes.conn.get_value("Item", d.item_code, 
+					["default_income_account", "default_sales_cost_center"])
+					
+				d.income_account = item['default_income_account'] or ""
+				d.cost_center = item['default_sales_cost_center'] or ""			
 
 
 	def get_item_details(self, args=None):
@@ -620,10 +627,120 @@ class DocType(SellingController):
 
 
 	def make_gl_entries(self, is_cancel=0):
-		mapper = self.doc.is_pos and self.doc.write_off_account and 'POS with write off' or self.doc.is_pos and not self.doc.write_off_account and 'POS' or ''
-		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
-		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist,cancel = is_cancel, use_mapper = mapper, update_outstanding = update_outstanding, merge_entries = cint(self.doc.is_pos) != 1 and 1 or 0)
+		from accounts.general_ledger import make_gl_entries
+		gl_entries = []
+		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
+		 	"automatic_inventory_accounting")
+		abbr = self.get_company_abbr()
 		
+		# parent's gl entry
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": self.doc.debit_to,
+				"against": self.doc.against_income_account,
+				"debit": self.doc.grand_total,
+				"remarks": self.doc.remarks,
+				"against_voucher": self.doc.name,
+				"against_voucher_type": self.doc.doctype,
+			}, is_cancel)
+		)
+	
+		# tax table gl entries
+		for tax in self.doclist.get({"parentfield": "other_charges"}):
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": tax.account_head,
+					"against": self.doc.debit_to,
+					"credit": flt(tax.tax_amount),
+					"remarks": self.doc.remarks,
+					"cost_center": tax.cost_center_other_charges
+				}, is_cancel)
+			)
+		
+		# item gl entries
+		for item in getlist(self.doclist, 'entries'):
+			# income account gl entries
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": item.income_account,
+					"against": self.doc.debit_to,
+					"credit": item.amount,
+					"remarks": self.doc.remarks,
+					"cost_center": item.cost_center
+				}, is_cancel)
+			)
+			# if auto inventory accounting enabled and stock item, 
+			# then do stock related gl entries
+			if auto_inventory_accounting and item.delivery_note and \
+					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
+				# to-do
+				purchase_rate = webnotes.conn.get_value("Delivery Note Item", 
+					item.dn_detail, "purchase_rate")
+				valuation_amount =  purchase_rate * item.qty
+				# expense account gl entries
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.expense_account,
+						"against": "Stock Delivered But Not Billed - %s" % (abbr,),
+						"debit": valuation_amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					}, is_cancel)
+				)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": "Stock Delivered But Not Billed - %s" % (abbr,),
+						"against": item.expense_account,
+						"credit": valuation_amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					}, is_cancel)
+				)
+		if self.doc.is_pos and self.doc.cash_bank_account and self.doc.paid_amount:
+			# POS, make payment entries
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.doc.debit_to,
+					"against": self.doc.cash_bank_account,
+					"credit": self.doc.paid_amount,
+					"remarks": self.doc.remarks,
+					"against_voucher": self.doc.name,
+					"against_voucher_type": self.doc.doctype,
+				}, is_cancel)
+			)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.doc.cash_bank_account,
+					"against": self.doc.debit_to,
+					"debit": self.doc.paid_amount,
+					"remarks": self.doc.remarks,
+				}, is_cancel)
+			)
+			# write off entries, applicable if only pos
+			if self.doc.write_off_account and self.doc.write_off_amount:
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.doc.debit_to,
+						"against": self.doc.write_off_account,
+						"credit": self.doc.write_off_amount,
+						"remarks": self.doc.remarks,
+						"against_voucher": self.doc.name,
+						"against_voucher_type": self.doc.doctype,
+					}, is_cancel)
+				)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.doc.write_off_account,
+						"against": self.doc.debit_to,
+						"debit": self.doc.write_off_amount,
+						"remarks": self.doc.remarks,
+						"cost_center": self.doc.write_off_cost_center
+					}, is_cancel)
+				)
+		
+		
+		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
+		merge_entries=cint(self.doc.is_pos)!=1 and 1 or 0
+		make_gl_entries(gl_entries, cancel=is_cancel, 
+			update_outstanding=update_outstanding, merge_entries=merge_entries)
 
 	def update_c_form(self):
 		"""Update amended id in C-form"""

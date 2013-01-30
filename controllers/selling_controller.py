@@ -18,8 +18,9 @@ from __future__ import unicode_literals
 import webnotes
 from setup.utils import get_company_currency
 
-from utilities.transaction_base import TransactionBase
-class SellingController(TransactionBase):
+from controllers.accounts_controller import AccountsController
+
+class SellingController(AccountsController):
 	def validate(self):
 		self.set_total_in_words()
 		

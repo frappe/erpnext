@@ -19,8 +19,8 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 import webnotes.model
+from webnotes.model.doclist import DocList
 from webnotes.utils import nowdate
-from accounts.utils import get_fiscal_year
 
 company = webnotes.conn.get_default("company")
 abbr = webnotes.conn.get_value("Company", company, "abbr")
@@ -53,7 +53,7 @@ def load_data():
 		
 	# create default cost center if not exists
 	if not webnotes.conn.exists("Cost Center", "Default Cost Center - %s" % abbr):
-		dl = webnotes.insert({"doctype": "Cost Center", "group_or_ledger": "Ledger",
+		webnotes.insert({"doctype": "Cost Center", "group_or_ledger": "Ledger",
 			"cost_center_name": "Default Cost Center", 
 			"parent_cost_center": "Root - %s" % abbr,
 			"company_name": company, "company_abbr": abbr})
@@ -75,15 +75,14 @@ def load_data():
 		"group_or_ledger": "Ledger"})
 		
 	# create BOM
-	webnotes.insert([
-		{"doctype": "BOM", "item": "Nebula 7", "quantity": 1,
-			"is_active": "Yes", "is_default": 1, "uom": "Nos"},
-		{"doctype": "BOM Operation", "operation_no": 1, "parentfield": "bom_operations",
-			"opn_description": "Development"}, 
-		{"doctype": "BOM Item", "item_code": "Android Jack D", "operation_no": 1, 
-			"qty": 5, "rate": 20, "amount": 100, "stock_uom": "Nos", 
-			"parentfield": "bom_materials"}
-	])
+	# webnotes.insert(DocList([
+	# 	{"doctype": "BOM", "item": "Nebula 7", "quantity": 1,
+	# 		"is_active": "Yes", "is_default": 1, "uom": "Nos"},
+	# 	{"doctype": "BOM Operation", "operation_no": 1, "parentfield": "bom_operations",
+	# 		"opn_description": "Development"}, 
+	# 	{"doctype": "BOM Item", "item_code": "Android Jack D", "operation_no": 1, "qty": 5, 
+	# 		"rate": 20, "amount": 100, "stock_uom": "Nos", "parentfield": "bom_materials"}
+	# ]))
 
 
 base_purchase_receipt = [
@@ -139,8 +138,6 @@ def insert_accounts():
 			acc_name = "%s - %s" % (acc['account_name'], d['abbr'])
 			if not webnotes.conn.exists('Account', acc_name):
 				webnotes.insert(acc)
-			else:
-				print "Account %s already exists" % acc_name
 						
 def make_account_dict(account, parent, company_detail, group_or_ledger):
 	return {
@@ -166,7 +163,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 	
 	def run_purchase_receipt_test(self, purchase_receipt, debit_account, 
 			credit_account, stock_value):
-		from webnotes.model.doclist import DocList	
 		dl = webnotes.insert(DocList(purchase_receipt))
 		
 		from controllers.tax_controller import TaxController
