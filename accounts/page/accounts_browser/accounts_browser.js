@@ -236,12 +236,15 @@ erpnext.AccountsChart = Class.extend({
 			v.master_type = '';
 			v.company = me.company;
 			
-		    $c_obj('GL Control', 'add_ac', v, 
-				function(r,rt) { 
+			wn.call({
+				args: v,
+				method:'accounts.utils.add_ac',
+				callback: function(r) {
 					$(btn).done_working();
 					d.hide();
-					node.trigger('reload'); 	
-				});
+					node.trigger('reload');
+				}
+			});
 		});
 		
 		// show
@@ -280,12 +283,15 @@ erpnext.AccountsChart = Class.extend({
 			v.parent_cost_center = node.data('label');
 			v.company_name = me.company;
 			
-		    $c_obj('GL Control', 'add_cc', v, 
-				function(r,rt) { 
+			wn.call({
+				args: v,
+				method:'accounts.utils.add_cc',
+				callback: function(r) {
 					$(btn).done_working();
 					d.hide();
-					node.trigger('reload'); 	
-				});
+					node.trigger('reload');
+				}
+			});
 		});
 		d.show();
 	}

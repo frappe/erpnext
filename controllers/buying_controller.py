@@ -25,7 +25,7 @@ from setup.utils import get_company_currency
 from controllers.accounts_controller import AccountsController
 
 class BuyingController(AccountsController):
-	def validate(self):
+	def validate(self):		
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")

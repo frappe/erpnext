@@ -245,7 +245,7 @@ class DocType(AccountsController):
 						d.against_voucher, "debit_to") != d.account:
 				msgprint("Credit account is not matching with Purchase Invoice", raise_exception=1)
 
-	def make_gl_entries(self, cancel=0):
+	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from accounts.general_ledger import make_gl_entries
 		gl_map = []
 		for d in self.doclist.get({"parentfield": "entries"}):
@@ -264,7 +264,7 @@ class DocType(AccountsController):
 				}, cancel)
 			)
 			
-		make_gl_entries(gl_map, cancel=cancel)
+		make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 
 	def get_outstanding(self, args):
 		args = eval(args)

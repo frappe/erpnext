@@ -74,7 +74,7 @@ class DocType:
 				end_date = webnotes.conn.sql("select LAST_DAY('%s')" % gle['posting_date'])
 			
 				# get Actual
-				actual = webnotes.get_obj('GL Control').get_period_difference(gle['account'] + 
+				actual = self.get_period_difference(gle['account'] + 
 					'~~~' + cstr(start_date) + '~~~' + cstr(end_date[0][0]), gle['cost_center'])
 		
 				# Get Monthly	budget
@@ -89,3 +89,22 @@ class DocType:
 			webnotes.conn.sql("""update `tabBudget Detail` set actual = ifnull(actual,0) + %s 
 				where account = '%s' and fiscal_year = '%s' and parent = '%s'""" % 
 				(curr_amt, gle['account'],gle['fiscal_year'], gle['cost_center']))
+
+
+	def get_period_difference(self, arg, cost_center =''):
+		# used in General Ledger Page Report
+		# used for Budget where cost center passed as extra argument
+		acc, f, t = arg.split('~~~')
+		c, fy = '', get_defaults()['fiscal_year']
+
+		det = webnotes.conn.sql("select debit_or_credit, lft, rgt, is_pl_account from tabAccount where name=%s", acc)
+		if f: c += (' and t1.posting_date >= "%s"' % f)
+		if t: c += (' and t1.posting_date <= "%s"' % t)
+		if cost_center: c += (' and t1.cost_center = "%s"' % cost_center)
+		bal = webnotes.conn.sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1 where t1.account='%s' %s" % (acc, c))
+		bal = bal and flt(bal[0][0]) or 0
+
+		if det[0][0] != 'Debit':
+			bal = (-1) * bal
+
+		return flt(bal)

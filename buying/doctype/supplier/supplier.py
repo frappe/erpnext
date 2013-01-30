@@ -17,13 +17,13 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, cint, get_defaults
-from webnotes.model.code import get_obj
+from webnotes.utils import cint, get_defaults
 from webnotes import msgprint, _
 from webnotes.model.doc import make_autoname
 
 sql = webnotes.conn.sql
 
+from accounts.utils import add_ac
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -70,16 +70,16 @@ class DocType(TransactionBase):
 		return g
 
 	def add_account(self, ac, par, abbr):
-		arg = {
+		ac = add_ac({
 			'account_name':ac,
 			'parent_account':par,
 			'group_or_ledger':'Group',
 			'company':self.doc.company,
 			'account_type':'',
 			'tax_rate':'0'
-		}
-		t = get_obj('GL Control').add_ac(cstr(arg))
-		msgprint("Created Group " + t)
+		})
+		
+		msgprint(_("Created Group ") + ac)
 	
 	def get_company_abbr(self):
 		return sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
@@ -109,7 +109,7 @@ class DocType(TransactionBase):
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_parent_account(abbr)
 				
-				arg = {
+				ac = add_ac({
 					'account_name': self.doc.name,
 					'parent_account': parent_account,
 					'group_or_ledger':'Ledger',
@@ -118,10 +118,8 @@ class DocType(TransactionBase):
 					'tax_rate': '0',
 					'master_type': 'Supplier',
 					'master_name': self.doc.name,
-				}
-				# create
-				ac = get_obj('GL Control').add_ac(cstr(arg))
-				msgprint("Created Account Head: "+ac)
+				})
+				msgprint(_("Created Account Head: ") + ac)
 				
 		else : 
 			msgprint("Please select Company under which you want to create account head")

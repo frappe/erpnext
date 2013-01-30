@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import add_days, cint, cstr, flt, formatdate, get_defaults
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
@@ -99,11 +99,9 @@ class DocType(BuyingController):
 				d.expense_head = item and item[0]['purchase_account'] or ''
 				d.cost_center = item and item[0]['cost_center'] or ''
 
-	# Advance Allocation
-	# -------------------
 	def get_advances(self):
-		self.doclist = get_obj('GL Control').get_advances(self, self.doc.credit_to, 'Purchase Invoice Advance','advance_allocation_details','debit')
-		
+		super(DocType, self).get_advances(self.doc.credit_to, 
+			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
@@ -187,16 +185,7 @@ class DocType(BuyingController):
 	# ---------------------
 	def validate_bill_no_date(self):
 		if self.doc.bill_no and not self.doc.bill_date and self.doc.bill_no.lower().strip() not in ['na', 'not applicable', 'none']:
-			msgprint("Please enter Bill Date")
-			raise Exception					
-
-
- 
-	# Clear Advances
-	# ---------------
-	def clear_advances(self):
-		get_obj('GL Control').clear_advances( self, 'Purchase Invoice Advance','advance_allocation_details')
-
+			msgprint(_("Please enter Bill Date"), raise_exception=1)
 
 	# 1. Credit To Account Exists
 	# 2. Is a Credit Account
@@ -326,8 +315,6 @@ class DocType(BuyingController):
 		if self.doc.write_off_amount and not self.doc.write_off_account:
 			msgprint("Please enter Write Off Account", raise_exception=1)
 
-	# VALIDATE
-	# ====================================================================================
 	def validate(self):
 		super(DocType, self).validate()
 		
@@ -338,8 +325,8 @@ class DocType(BuyingController):
 		self.validate_bill_no_date()
 		self.validate_bill_no()
 		self.validate_reference_value()
-		self.clear_advances()
 		self.validate_credit_acc()
+		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 
@@ -406,8 +393,8 @@ class DocType(BuyingController):
 				lst.append(args)
 		
 		if lst:
-			get_obj('GL Control').reconcile_against_document(lst)
-
+			from accounts.utils import reconcile_against_document
+			reconcile_against_document(lst)
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")

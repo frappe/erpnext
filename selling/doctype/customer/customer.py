@@ -19,7 +19,6 @@ import webnotes
 
 from webnotes.utils import cstr, get_defaults
 from webnotes.model.doc import Document, make_autoname
-from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
@@ -55,7 +54,6 @@ class DocType(TransactionBase):
 		return g
 	
 	def validate_values(self):
-		# Master name by naming series -> Series field mandatory
 		if get_defaults().get('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
 			msgprint("Series is Mandatory.")
 			raise Exception
@@ -113,13 +111,21 @@ class DocType(TransactionBase):
 	def create_account_head(self):
 		if self.doc.company :
 			abbr = self.get_company_abbr()
-			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
+			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_receivables_group()
-				arg = {'account_name':self.doc.name,'parent_account': parent_account, 'group_or_ledger':'Ledger', 'company':self.doc.company,'account_type':'','tax_rate':'0','master_type':'Customer','master_name':self.doc.name}
 				# create
-				
-				ac = get_obj('GL Control').add_ac(cstr(arg))
-				msgprint("Account Head created for "+ac)
+				from accounts.utils import add_ac
+				ac = add_ac({
+					'account_name':self.doc.name,
+					'parent_account': parent_account, 
+					'group_or_ledger':'Ledger',
+					'company':self.doc.company, 
+					'account_type':'', 
+					'tax_rate':'0', 
+					'master_type':'Customer', 
+					'master_name':self.doc.name
+				})
+				msgprint("Account Head: %s created" % ac)
 		else :
 			msgprint("Please Select Company under which you want to create account head")
 

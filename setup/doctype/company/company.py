@@ -18,11 +18,8 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, get_defaults, set_default
-from webnotes.model import db_exists
 from webnotes.model.doc import Document
-from webnotes.model.wrapper import copy_doclist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
@@ -197,11 +194,23 @@ class DocType:
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
-		glc = get_obj('GL Control')
-		cc_list = [{'cost_center_name':'Root','company_name':self.doc.name,'group_or_ledger':'Group','parent_cost_center':''}, {'cost_center_name':'Default CC Ledger','company_name':self.doc.name,'group_or_ledger':'Ledger','parent_cost_center':'Root - ' + self.doc.abbr}]
-		for c in cc_list:
-			glc.add_cc(str(c))
-			
+		from accounts.utils import add_cc
+		cc_list = [
+			{
+				'cost_center_name':'Root',
+				'company_name':self.doc.name,
+				'group_or_ledger':'Group',
+				'parent_cost_center':''
+			}, 
+			{
+				'cost_center_name':'Default CC Ledger', 
+				'company_name':self.doc.name,
+				'group_or_ledger':'Ledger',
+				'parent_cost_center':'Root - ' + self.doc.abbr
+			}
+		]
+		for cc in cc_list:
+			add_cc(cc)
 			
 	def on_update(self):
 		self.set_letter_head()

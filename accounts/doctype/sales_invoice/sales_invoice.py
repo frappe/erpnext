@@ -50,13 +50,15 @@ class DocType(SellingController):
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
-		sales_com_obj.validate_max_discount(self, 'entries')	 #verify whether rate is not greater than tolerance
-		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
-		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
+		sales_com_obj.validate_max_discount(self, 'entries')
+		sales_com_obj.get_allocated_sum(self)
+		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year, 
+			self.doc.posting_date,'Posting Date')
 		self.validate_customer()
 		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
+		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
 		self.add_remarks()
 		if cint(self.doc.is_pos):
 			self.validate_pos()
@@ -71,7 +73,6 @@ class DocType(SellingController):
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
 		self.set_aging_date()
-		self.clear_advances()
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_recurring_invoice()
@@ -90,12 +91,13 @@ class DocType(SellingController):
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
-				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+				 	self.doc.company, self.doc.grand_total, self)
 
 		self.check_prev_docstatus()
 		get_obj("Sales Common").update_prevdoc_detail(1,self)
 		
-		# this sequence because outstanding may get -ve		
+		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
 		if not cint(self.doc.is_pos) == 1:
@@ -194,13 +196,17 @@ class DocType(SellingController):
 
 	def get_cust_and_due_date(self):
 		"""Set Due Date = Posting Date + Credit Days"""
-		credit_days = 0
-		if self.doc.debit_to:
-			credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
-		if self.doc.company and not credit_days:
-			credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
-
-		self.doc.due_date = add_days(cstr(self.doc.posting_date), credit_days)
+		if self.doc.posting_date:
+			credit_days = 0
+			if self.doc.debit_to:
+				credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
+			if self.doc.company and not credit_days:
+				credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
+				
+			if credit_days:
+				self.doc.due_date = add_days(self.doc.posting_date, credit_days)
+			else:
+				self.doc.due_date = self.doc.posting_date
 		
 		if self.doc.debit_to:
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
@@ -326,8 +332,9 @@ class DocType(SellingController):
 
 
 	def get_advances(self):
-		self.doclist = get_obj('GL Control').get_advances(self, self.doc.debit_to, 'Sales Invoice Advance', 'advance_adjustment_details', 'credit')
-
+		super(DocType, self).get_advances(self.doc.debit_to, 
+			"Sales Invoice Advance", "advance_adjustment_details", "credit")
+		
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 		
@@ -368,7 +375,8 @@ class DocType(SellingController):
 				lst.append(args)
 		
 		if lst:
-			get_obj('GL Control').reconcile_against_document(lst)
+			from accounts.utils import reconcile_against_document
+			reconcile_against_document(lst)
 	
 	
 	def validate_customer(self):
@@ -417,10 +425,6 @@ class DocType(SellingController):
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
 				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code)
 				raise Exception
-
-	def clear_advances(self):
-		get_obj('GL Control').clear_advances(self, 'Sales Invoice Advance','advance_adjustment_details')
-
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':

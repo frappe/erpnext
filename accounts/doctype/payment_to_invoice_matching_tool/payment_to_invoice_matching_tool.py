@@ -20,7 +20,6 @@ import webnotes
 from webnotes.utils import flt
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 class DocType:
@@ -137,7 +136,8 @@ class DocType:
 				lst.append(args)
 		
 		if lst:
-			get_obj('GL Control').reconcile_against_document(lst)
+			from accounts.utils import reconcile_against_document
+			reconcile_against_document(lst)
 			msgprint("Successfully allocated.")
 		else:
 			msgprint("No amount allocated.", raise_exception=1)
