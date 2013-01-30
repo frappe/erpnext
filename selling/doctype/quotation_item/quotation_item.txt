@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "modified": "2013-01-23 15:46:18", 
+  "modified": "2013-01-29 16:27:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -161,7 +161,7 @@
   "label": "Price List Rate*", 
   "oldfieldname": "base_ref_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency(cur_frm.doc.company);", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "width": "100px"
@@ -175,7 +175,7 @@
   "label": "Basic Rate*", 
   "oldfieldname": "basic_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency(cur_frm.doc.company);", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "reqd": 0, 
   "search_index": 0, 
@@ -190,7 +190,7 @@
   "label": "Amount*", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency(cur_frm.doc.company);", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0, 

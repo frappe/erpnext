@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:23", 
+  "modified": "2013-01-29 16:27:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -73,7 +73,7 @@
   "label": "Allocated Amount", 
   "oldfieldname": "allocated_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 0, 
   "width": "120px"
  }, 
@@ -96,6 +96,6 @@
   "label": "Incentives", 
   "oldfieldname": "incentives", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }
 ]

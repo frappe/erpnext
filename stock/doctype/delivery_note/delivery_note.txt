@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:25", 
+  "creation": "2013-01-23 19:57:19", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:24", 
+  "modified": "2013-01-29 16:28:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "parent": "Delivery Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -81,6 +82,7 @@
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
  }, 
@@ -254,7 +256,7 @@
   "no_copy": 0, 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 0, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -280,6 +282,7 @@
   "doctype": "DocField", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Sales Order No", 
   "no_copy": 0, 
   "oldfieldname": "sales_order_no", 
@@ -428,7 +431,7 @@
   "label": "Taxes and Charges Total", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -468,7 +471,7 @@
   "no_copy": 0, 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -483,7 +486,7 @@
   "no_copy": 0, 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
@@ -1094,7 +1097,7 @@
   "no_copy": 0, 
   "oldfieldname": "total_commission", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1131,7 +1134,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 0, 
   "write": 0
@@ -1141,7 +1143,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
@@ -1149,25 +1150,13 @@
  {
   "doctype": "DocPerm", 
   "match": "customer_name", 
-  "permlevel": 0, 
   "role": "Customer"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "All", 
-  "submit": 0, 
-  "write": 1
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material Manager", 
   "submit": 1, 
   "write": 1
@@ -1177,7 +1166,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:17", 
+  "modified": "2013-01-29 16:27:50", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -72,7 +72,7 @@
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 0
  }, 
  {
@@ -82,7 +82,7 @@
   "label": "Amount", 
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 0
  }, 
  {
@@ -92,7 +92,7 @@
   "label": "Total", 
   "oldfieldname": "total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -159,7 +159,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_tax_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "report_hide": 1
  }, 
@@ -173,7 +173,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "report_hide": 1
  }

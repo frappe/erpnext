@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-22 15:07:00", 
+  "modified": "2013-01-29 13:29:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -59,6 +59,8 @@
   "doctype": "DocField", 
   "fieldname": "warehouse_type", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Warehouse Type", 
   "oldfieldname": "warehouse_type", 
   "oldfieldtype": "Link", 
@@ -146,6 +148,7 @@
   "doctype": "DocField", 
   "fieldname": "city", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "City", 
   "oldfieldname": "city", 
   "oldfieldtype": "Data", 

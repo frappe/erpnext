@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:06", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:17", 
+  "modified": "2013-01-29 16:27:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -98,7 +98,7 @@
   "label": "Debit Amt", 
   "oldfieldname": "debit", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -107,7 +107,7 @@
   "label": "Credit Amt", 
   "oldfieldname": "credit", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:15", 
+  "creation": "2013-01-23 19:57:18", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:20", 
+  "modified": "2013-01-29 17:35:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,6 +58,7 @@
   "doctype": "DocField", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Employee Name", 
   "oldfieldname": "employee_name", 
   "oldfieldtype": "Data", 
@@ -123,6 +124,7 @@
   "fieldname": "is_active", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Is Active", 
   "oldfieldname": "is_active", 
   "oldfieldtype": "Select", 
@@ -133,6 +135,7 @@
   "doctype": "DocField", 
   "fieldname": "from_date", 
   "fieldtype": "Date", 
+  "in_list_view": 1, 
   "label": "From Date", 
   "oldfieldname": "from_date", 
   "oldfieldtype": "Date", 
@@ -142,6 +145,7 @@
   "doctype": "DocField", 
   "fieldname": "to_date", 
   "fieldtype": "Date", 
+  "in_list_view": 1, 
   "label": "To Date", 
   "oldfieldname": "to_date", 
   "oldfieldtype": "Date"
@@ -155,7 +159,7 @@
   "label": "CTC", 
   "oldfieldname": "ctc", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 1
  }, 
  {
@@ -235,7 +239,7 @@
   "label": "Total Earning", 
   "oldfieldname": "total_earning", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -245,7 +249,7 @@
   "label": "Total Deduction", 
   "oldfieldname": "total_deduction", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -259,7 +263,7 @@
   "fieldname": "net_pay", 
   "fieldtype": "Currency", 
   "label": "Net Pay", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

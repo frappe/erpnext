@@ -1,77 +1,80 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2013-01-15 16:32:13", 
+  "docstatus": 0, 
+  "modified": "2013-01-29 17:44:52", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 17:40:29"
+  "owner": "Administrator"
  }, 
  {
-  "autoname": "field:applicant_name", 
   "allow_attach": 1, 
+  "autoname": "field:applicant_name", 
   "description": "Applicant for a Job", 
   "doctype": "DocType", 
-  "module": "HR", 
   "document_type": "Transaction", 
+  "module": "HR", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Job Applicant", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Job Applicant", 
-  "read": 1, 
   "cancel": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "HR User", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "write": 1
  }, 
  {
-  "name": "Job Applicant", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Job Applicant"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Applicant Name", 
   "fieldname": "applicant_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Applicant Name", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Email Id", 
   "fieldname": "email_id", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Email Id"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Status", 
   "fieldname": "status", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Status", 
   "options": "Open\nReplied\nRejected\nHold"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break_3", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Job Opening", 
   "fieldname": "job_opening", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Job Opening", 
   "options": "Job Opening"
  }, 
  {
@@ -81,18 +84,19 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Thread HTML", 
   "fieldname": "thread_html", 
-  "fieldtype": "HTML"
+  "fieldtype": "HTML", 
+  "label": "Thread HTML"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
-  "hidden": 1
+  "hidden": 1, 
+  "in_list_view": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:34", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:27", 
+  "modified": "2013-01-29 18:19:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,6 +62,7 @@
   "fieldname": "voucher_type", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Voucher Type", 
   "oldfieldname": "voucher_type", 
   "oldfieldtype": "Select", 
@@ -119,11 +120,12 @@
   "fieldname": "total_debit", 
   "fieldtype": "Currency", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Total Debit", 
   "no_copy": 1, 
   "oldfieldname": "total_debit", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -135,7 +137,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_credit", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -151,7 +153,7 @@
   "no_copy": 1, 
   "oldfieldname": "difference", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -222,6 +224,7 @@
   "doctype": "DocField", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Remark", 
   "no_copy": 1, 
   "oldfieldname": "remark", 
@@ -311,7 +314,7 @@
   "fieldname": "write_off_amount", 
   "fieldtype": "Currency", 
   "label": "Write Off Amount <=", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "report_hide": 1
  }, 
@@ -346,6 +349,7 @@
   "fieldname": "total_amount", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 0, 
   "label": "Total Amount", 
   "no_copy": 1, 
   "print_hide": 1, 

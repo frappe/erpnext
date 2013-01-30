@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:04", 
+  "modified": "2013-01-28 17:31:01", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -73,6 +73,7 @@
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
  }, 
@@ -147,6 +148,7 @@
   "doctype": "DocField", 
   "fieldname": "completion_status", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Completion Status", 
   "oldfieldname": "completion_status", 
   "oldfieldtype": "Select", 
@@ -159,6 +161,7 @@
   "fieldname": "maintenance_type", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Maintenance Type", 
   "oldfieldname": "maintenance_type", 
   "oldfieldtype": "Select", 

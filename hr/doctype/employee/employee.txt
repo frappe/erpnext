@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:01", 
+  "modified": "2013-01-29 17:47:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,6 +56,7 @@
   "doctype": "DocField", 
   "fieldname": "image_view", 
   "fieldtype": "Image", 
+  "in_list_view": 1, 
   "label": "Image View", 
   "options": "image"
  }, 
@@ -95,6 +96,7 @@
   "doctype": "DocField", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Full Name", 
   "oldfieldname": "employee_name", 
   "oldfieldtype": "Data", 
@@ -191,6 +193,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Status", 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
@@ -203,6 +206,7 @@
   "fieldname": "employment_type", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Employment Type", 
   "oldfieldname": "employment_type", 
   "oldfieldtype": "Link", 

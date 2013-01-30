@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-28 10:37:18", 
+  "modified": "2013-01-29 14:55:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,6 +53,7 @@
   "doctype": "DocField", 
   "fieldname": "enabled", 
   "fieldtype": "Check", 
+  "in_list_view": 1, 
   "label": "Enabled"
  }, 
  {
@@ -60,6 +61,7 @@
   "doctype": "DocField", 
   "fieldname": "fraction", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Fraction"
  }, 
  {
@@ -67,6 +69,7 @@
   "doctype": "DocField", 
   "fieldname": "fraction_units", 
   "fieldtype": "Int", 
+  "in_list_view": 1, 
   "label": "Fraction Units"
  }, 
  {
@@ -74,6 +77,7 @@
   "doctype": "DocField", 
   "fieldname": "symbol", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Symbol"
  }, 
  {
@@ -81,8 +85,9 @@
   "doctype": "DocField", 
   "fieldname": "number_format", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,##,###.##\n#.###\n#,###"
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
  }, 
  {
   "cancel": 1, 

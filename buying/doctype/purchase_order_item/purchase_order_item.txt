@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 11:03:31", 
+  "creation": "2013-01-28 10:05:59", 
   "docstatus": 0, 
-  "modified": "2013-01-28 11:56:26", 
+  "modified": "2013-01-29 16:28:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -152,7 +152,7 @@
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
   "label": "Ref Rate*", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1
  }, 
  {
@@ -163,7 +163,7 @@
   "label": "Rate*", 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
   "reqd": 1, 
@@ -177,7 +177,7 @@
   "label": "Amount*", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
@@ -344,7 +344,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "width": "100px"
  }, 
  {

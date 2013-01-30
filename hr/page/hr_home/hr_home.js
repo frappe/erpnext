@@ -124,6 +124,11 @@ wn.module_page["HR"] = [
 				doctype: "Employment Type"
 			},	
 			{
+				"label": wn._("Designation"),
+				"description": wn._("Employee Designation."),
+				doctype: "Designation"
+			},	
+			{
 				"label": wn._("Appraisal Template"),
 				"description": wn._("Template for employee performance appraisals."),
 				doctype: "Appraisal Template"

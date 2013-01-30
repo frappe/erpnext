@@ -20,7 +20,7 @@ erpnext.get_currency = function(company) {
 	if(!company && cur_frm)
 		company = cur_frm.doc.company;
 	if(company)
-		return wn.boot.company[company].default_currency || wn.boot.sysdefaults.currency;
+		return wn.model.get(":Company", company).default_currency || wn.boot.sysdefaults.currency;
 	else
 		return wn.boot.sysdefaults.currency;
 }

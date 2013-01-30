@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:29", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:26", 
+  "modified": "2013-01-29 16:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,6 +56,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Status", 
   "no_copy": 1, 
   "oldfieldname": "status", 
@@ -82,6 +83,7 @@
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -98,6 +100,7 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Item Name", 
   "read_only": 1
  }, 
@@ -196,7 +199,7 @@
   "no_copy": 1, 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -211,6 +214,7 @@
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Warehouse", 
   "no_copy": 1, 
   "oldfieldname": "warehouse", 

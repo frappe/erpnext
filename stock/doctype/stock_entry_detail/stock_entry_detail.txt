@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-14 16:33:34", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:26", 
+  "modified": "2013-01-29 16:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -101,7 +101,7 @@
   "label": "Valuation Rate", 
   "oldfieldname": "incoming_rate", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 0, 
   "reqd": 0
  }, 
@@ -112,7 +112,7 @@
   "label": "Amount", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

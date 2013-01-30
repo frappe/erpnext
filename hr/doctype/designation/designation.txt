@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:46:41", 
+  "modified": "2013-01-29 19:06:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_rename": 1, 
   "autoname": "field:designation_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -32,6 +33,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "HR User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -58,15 +60,6 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR Manager"
+  "doctype": "DocPerm"
  }
 ]

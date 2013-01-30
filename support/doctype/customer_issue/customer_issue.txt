@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:59", 
+  "modified": "2013-01-28 17:54:09", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -57,6 +57,7 @@
   "fieldname": "status", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Status", 
   "no_copy": 1, 
   "oldfieldname": "status", 
@@ -89,6 +90,7 @@
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Customer", 
   "oldfieldname": "customer", 
   "oldfieldtype": "Link", 
@@ -136,6 +138,7 @@
   "doctype": "DocField", 
   "fieldname": "serial_no", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "Serial No", 
   "options": "Serial No"
  }, 
@@ -144,6 +147,7 @@
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -185,6 +189,7 @@
   "fieldtype": "Select", 
   "hidden": 0, 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Warranty / AMC Status", 
   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC"
  }, 

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 11:03:30", 
+  "creation": "2013-01-24 15:56:19", 
   "docstatus": 0, 
-  "modified": "2013-01-24 14:15:49", 
+  "modified": "2013-01-29 16:28:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -82,7 +82,7 @@
   "label": "Amount", 
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "reqd": 0
  }, 
  {
@@ -92,7 +92,7 @@
   "label": "Total", 
   "oldfieldname": "total", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -136,7 +136,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_tax_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "report_hide": 1
  }, 
@@ -150,7 +150,7 @@
   "no_copy": 1, 
   "oldfieldname": "total_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "report_hide": 1
  }, 

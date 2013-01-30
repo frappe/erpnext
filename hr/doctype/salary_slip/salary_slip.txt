@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-01-23 17:11:20", 
+  "modified": "2013-01-29 17:38:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,7 @@
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Employee Name", 
   "oldfieldname": "employee_name", 
   "oldfieldtype": "Data", 
@@ -153,6 +154,7 @@
   "fieldname": "fiscal_year", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Data", 
@@ -174,6 +176,7 @@
   "fieldname": "month", 
   "fieldtype": "Select", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Month", 
   "oldfieldname": "month", 
   "oldfieldtype": "Select", 
@@ -326,7 +329,7 @@
   "label": "Arrear Amount", 
   "oldfieldname": "arrear_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -335,7 +338,7 @@
   "label": "Leave Encashment Amount", 
   "oldfieldname": "encashment_amount", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()"
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -344,7 +347,7 @@
   "label": "Gross Pay", 
   "oldfieldname": "gross_pay", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -354,7 +357,7 @@
   "label": "Total Deduction", 
   "oldfieldname": "total_deduction", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -372,7 +375,7 @@
   "label": "Net Pay", 
   "oldfieldname": "net_pay", 
   "oldfieldtype": "Currency", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -380,7 +383,7 @@
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
   "label": "Rounded Total", 
-  "options": "eval:erpnext.get_currency()", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
