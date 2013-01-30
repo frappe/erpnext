@@ -44,7 +44,7 @@ class AccountsController(TransactionBase):
 		if not stock_in_hand:
 			webnotes.msgprint("""Please specify "Stock In Hand" account 
 				for company: %s""" % (self.doc.company,), raise_exception=1)
-				
+		
 		return stock_in_hand
 		
 	def clear_unallocated_advances(self, parenttype, parentfield):
