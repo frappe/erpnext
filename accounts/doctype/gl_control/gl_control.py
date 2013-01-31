@@ -51,7 +51,7 @@ class DocType:
 		ac.doc.doctype = "Account"
 		ac.doc.old_parent = ""
 		ac.doc.freeze_account = "No"
-		ac.ignore_permission = 1
+		ac.ignore_permissions = 1
 		ac.insert()
 
 		return ac.doc.name
@@ -62,7 +62,7 @@ class DocType:
 		cc = webnotes.model_wrapper(eval(arg))
 		cc.doc.doctype = "Cost Center"
 		cc.doc.old_parent = ""
-		cc.ignore_permission = 1
+		cc.ignore_permissions = 1
 		cc.insert()
 
 		return cc.doc.name
