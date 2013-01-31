@@ -145,31 +145,9 @@ cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 var fld = cur_frm.fields_dict['mtn_details'].grid.get_field('item_code');
 fld.query_description = "If Source Warehouse is selected, items with existing stock \
 	for that warehouse will be selected";
-	
-fld.get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(d.s_warehouse) {
-		return 'SELECT tabItem.name, tabItem.description, tabBin.actual_qty '
-			+ 'FROM tabItem, tabBin '
-			+ 'WHERE tabItem.name = tabBin.item_code '
-			+ 'AND tabItem.is_stock_item = "Yes"'
-			+ 'AND ifnull(`tabBin`.`actual_qty`,0) > 0 '
-			+ 'AND tabBin.warehouse="'+ d.s_warehouse +'" '
-			+ 'AND tabItem.docstatus < 2 '
-			+ 'AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") '
-			+ 'AND tabItem.%(key)s LIKE "%s" '
-			+ 'ORDER BY tabItem.name ASC '
-			+ 'LIMIT 50'
-	} else {
-		return 'SELECT tabItem.name, tabItem.description '
-			+ 'FROM tabItem '
-			+ 'WHERE tabItem.docstatus < 2 '
-			+ 'AND tabItem.is_stock_item = "Yes"'
-			+ 'AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") '
-			+ 'AND tabItem.%(key)s LIKE "%s" '
-			+ 'ORDER BY tabItem.name ASC '
-			+ 'LIMIT 50'
-	}
+
+fld.get_query = function() {
+	return erpnext.queries.item({is_stock_item: "Yes"});
 }
 
 // copy over source and target warehouses
