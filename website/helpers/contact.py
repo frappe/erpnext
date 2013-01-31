@@ -32,7 +32,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		return
 
 	# make lead / communication
-	
+		
 	name = webnotes.conn.get_value("Lead", {"email_id": sender}, "name")
 	if name:
 		lead = webnotes.model_wrapper("Lead", name)

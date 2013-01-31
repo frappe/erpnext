@@ -8,7 +8,7 @@ erpnext.send_message = function(opts) {
 	}
 		
 	$.ajax({
-		method: "POST",
+		type: "POST",
 		url: "server.py",
 		data: {
 			cmd: "website.helpers.contact.send_message",
