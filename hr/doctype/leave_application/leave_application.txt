@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:41:32", 
+  "modified": "2013-02-01 10:34:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -196,7 +196,7 @@
   "fieldtype": "Link", 
   "label": "Amended From", 
   "no_copy": 1, 
-  "options": "Sales Invoice", 
+  "options": "Leave Application", 
   "permlevel": 0, 
   "print_hide": 1, 
   "read_only": 1
