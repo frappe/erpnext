@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-21 18:19:17", 
+  "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:58", 
+  "modified": "2013-02-01 14:05:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,7 +32,6 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 0, 
-  "role": "Accounts User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -47,6 +46,14 @@
   "label": "Account", 
   "options": "Account", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_type", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Account Type", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -178,6 +185,15 @@
   "label": "Amount <="
  }, 
  {
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]
