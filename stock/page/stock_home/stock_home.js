@@ -174,8 +174,8 @@ wn.module_page["Stock"] = [
 				doctype: "Delivery Note"
 			},
 			{
-				"label":wn._("Purchase Order Items Pending To Be Received"),
-				route: "query-report/Purchase Order Items Pending To Be Received",
+				"label":wn._("Purchase Order Items To Be Received"),
+				route: "query-report/Purchase Order Items To Be Received",
 				doctype: "Purchase Receipt"
 			},
 			{
