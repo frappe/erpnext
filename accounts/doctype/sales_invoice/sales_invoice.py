@@ -250,8 +250,7 @@ class DocType(SellingController):
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
 				item = webnotes.conn.get_value("Item", d.item_code, 
-					["default_income_account", "default_sales_cost_center"])
-					
+					["default_income_account", "default_sales_cost_center"], as_dict=True)
 				d.income_account = item['default_income_account'] or ""
 				d.cost_center = item['default_sales_cost_center'] or ""			
 

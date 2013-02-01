@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-19 10:23:34", 
+  "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-01-29 18:19:58", 
+  "modified": "2013-02-01 10:50:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -83,6 +83,7 @@
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Posting Date", 
   "no_copy": 1, 
   "oldfieldname": "posting_date", 
@@ -176,6 +177,7 @@
   "fieldname": "cheque_no", 
   "fieldtype": "Data", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Reference Number", 
   "no_copy": 1, 
   "oldfieldname": "cheque_no", 
@@ -224,7 +226,7 @@
   "doctype": "DocField", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
-  "in_list_view": 1, 
+  "in_list_view": 0, 
   "label": "Remark", 
   "no_copy": 1, 
   "oldfieldname": "remark", 
@@ -236,6 +238,7 @@
   "doctype": "DocField", 
   "fieldname": "bill_no", 
   "fieldtype": "Data", 
+  "in_list_view": 0, 
   "label": "Bill No", 
   "oldfieldname": "bill_no", 
   "oldfieldtype": "Data", 

@@ -143,7 +143,6 @@ class DocType(AccountsController):
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					bill_no = bill_no and bill_no[0]
 					r.append('%s %s against Bill %s dated %s' % 
 						(cstr(bill_no[0][2]), fmt_money(flt(d.debit)), bill_no[0][0], 
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or ''))
@@ -238,11 +237,11 @@ class DocType(AccountsController):
 	def check_account_against_entries(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.against_invoice and webnotes.conn.get_value("Sales Invoice", 
-					d.against_invoice, "credit_to") != d.account:
+					d.against_invoice, "debit_to") != d.account:
 				msgprint("Debit account is not matching with Sales Invoice", raise_exception=1)
 			
 			if d.against_voucher and webnotes.conn.get_value("Purchase Invoice", 
-						d.against_voucher, "debit_to") != d.account:
+						d.against_voucher, "credit_to") != d.account:
 				msgprint("Credit account is not matching with Purchase Invoice", raise_exception=1)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
