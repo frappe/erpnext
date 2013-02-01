@@ -434,7 +434,7 @@ class DocType(BuyingController):
 		)
 	
 		# tax table gl entries
-		for tax in getlist(self.doclist, "other_charges"):
+		for tax in getlist(self.doclist, "purchase_tax_details"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				valuation_tax += flt(tax.tax_amount)
 				
