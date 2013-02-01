@@ -95,7 +95,7 @@ class DocType:
 		# used in General Ledger Page Report
 		# used for Budget where cost center passed as extra argument
 		acc, f, t = arg.split('~~~')
-		c, fy = '', get_defaults()['fiscal_year']
+		c, fy = '', webnotes.conn.get_defaults()['fiscal_year']
 
 		det = webnotes.conn.sql("select debit_or_credit, lft, rgt, is_pl_account from tabAccount where name=%s", acc)
 		if f: c += (' and t1.posting_date >= "%s"' % f)
