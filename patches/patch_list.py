@@ -162,4 +162,5 @@ patch_list = [
 	"patches.january_2013.tabsessions_to_myisam",
 	"patches.february_2013.remove_gl_mapper",
 	"patches.february_2013.reload_bom_replace_tool_permission",
+	"patches.february_2013.payment_reconciliation_reset_values",
 ]
