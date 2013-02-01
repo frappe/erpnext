@@ -650,15 +650,16 @@ class DocType(SellingController):
 	
 		# tax table gl entries
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": tax.account_head,
-					"against": self.doc.debit_to,
-					"credit": flt(tax.tax_amount),
-					"remarks": self.doc.remarks,
-					"cost_center": tax.cost_center_other_charges
-				}, is_cancel)
-			)
+			if flt(tax.tax_amount):
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": tax.account_head,
+						"against": self.doc.debit_to,
+						"credit": flt(tax.tax_amount),
+						"remarks": self.doc.remarks,
+						"cost_center": tax.cost_center_other_charges
+					}, is_cancel)
+				)
 		
 		# item gl entries
 		for item in getlist(self.doclist, 'entries'):

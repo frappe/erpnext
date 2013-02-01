@@ -80,7 +80,6 @@ cur_frm.cscript.quotation_to = function(doc,cdt,cdn){
 // REFRESH
 // ===================================================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-
 	cur_frm.clear_custom_buttons();
 
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
@@ -119,7 +118,7 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 		'get_default_customer_address', '', callback);
 	if(doc.customer) unhide_field(['customer_address','contact_person','territory', 'customer_group']);
 	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
-	
+		console.log(doc.customer_group);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
