@@ -664,15 +664,16 @@ class DocType(SellingController):
 		# item gl entries
 		for item in getlist(self.doclist, 'entries'):
 			# income account gl entries
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": item.income_account,
-					"against": self.doc.debit_to,
-					"credit": item.amount,
-					"remarks": self.doc.remarks,
-					"cost_center": item.cost_center
-				}, is_cancel)
-			)
+			if flt(item.amount):
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.income_account,
+						"against": self.doc.debit_to,
+						"credit": item.amount,
+						"remarks": self.doc.remarks,
+						"cost_center": item.cost_center
+					}, is_cancel)
+				)
 			# if auto inventory accounting enabled and stock item, 
 			# then do stock related gl entries
 			if auto_inventory_accounting and item.delivery_note and \
@@ -682,22 +683,23 @@ class DocType(SellingController):
 					item.dn_detail, "purchase_rate")
 				valuation_amount =  purchase_rate * item.qty
 				# expense account gl entries
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"against": "Stock Delivered But Not Billed - %s" % (abbr,),
-						"debit": valuation_amount,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock"
-					}, is_cancel)
-				)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": "Stock Delivered But Not Billed - %s" % (abbr,),
-						"against": item.expense_account,
-						"credit": valuation_amount,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock"
-					}, is_cancel)
-				)
+				if flt(valuation_amount):
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.expense_account,
+							"against": "Stock Delivered But Not Billed - %s" % (abbr,),
+							"debit": valuation_amount,
+							"remarks": self.doc.remarks or "Accounting Entry for Stock"
+						}, is_cancel)
+					)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": "Stock Delivered But Not Billed - %s" % (abbr,),
+							"against": item.expense_account,
+							"credit": valuation_amount,
+							"remarks": self.doc.remarks or "Accounting Entry for Stock"
+						}, is_cancel)
+					)
 		if self.doc.is_pos and self.doc.cash_bank_account and self.doc.paid_amount:
 			# POS, make payment entries
 			gl_entries.append(

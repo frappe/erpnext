@@ -451,7 +451,7 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_accounting = False
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_inventory_accounting and \
+			if auto_inventory_accounting and flt(item.valuation_rate) and \
 					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
 				# if auto inventory accounting enabled and stock item, 
 				# then do stock related gl entries, expense will be booked in sales invoice
@@ -467,7 +467,7 @@ class DocType(BuyingController):
 			
 				stock_item_and_auto_accounting = True
 			
-			else:
+			elif flt(item.amount):
 				# if not a stock item or auto inventory accounting disabled, book the expense
 				gl_entries.append(
 					self.get_gl_dict({
