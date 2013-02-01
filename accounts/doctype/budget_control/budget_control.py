@@ -83,7 +83,7 @@ class DocType:
 		
 				# validate monthly budget
 				self.validate_budget(gle['account'], gle['cost_center'], \
-					flt(actual) + flt(curr_amt), budget, 'monthly_bgt_flag')
+					flt(actual) + flt(curr_amt), budget, bgt_flag[0]['monthly_bgt_flag'])
 
 			# update actual against budget allocated in cost center
 			webnotes.conn.sql("""update `tabBudget Detail` set actual = ifnull(actual,0) + %s 
