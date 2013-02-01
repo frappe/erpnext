@@ -174,6 +174,11 @@ wn.module_page["Stock"] = [
 				doctype: "Delivery Note"
 			},
 			{
+				"label":wn._("Purchase Order Items Pending To Be Received"),
+				route: "query-report/Purchase Order Items Pending To Be Received",
+				doctype: "Purchase Receipt"
+			},
+			{
 				"label":wn._("Serial No Service Contract Expiry"),
 				route: "Report2/Serial No/Serial No Service Contract Expiry",
 				doctype: "Serial No"

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 13:12:48", 
+  "creation": "2013-02-01 13:09:34", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:16:52", 
+  "modified": "2013-02-01 13:09:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,6 +15,6 @@
  }, 
  {
   "doctype": "Report", 
-  "name": "Purchase Order Items Pending To Be Received"
+  "name": "Purchase Order Items To Be Received"
  }
 ]
