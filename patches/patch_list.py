@@ -160,4 +160,6 @@ patch_list = [
 	"patches.january_2013.rebuild_tree",
 	"execute:webnotes.reload_doc('core','doctype','docfield') #2013-01-28",
 	"patches.january_2013.tabsessions_to_myisam",
+	"patches.february_2013.remove_gl_mapper",
+	"patches.february_2013.reload_bom_replace_tool_permission",
 ]
