@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-28 15:29:06", 
+  "modified": "2013-01-31 22:17:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -159,7 +159,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer", 
   "print_hide": 1, 
-  "read_only": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
