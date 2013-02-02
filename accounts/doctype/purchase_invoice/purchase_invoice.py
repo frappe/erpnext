@@ -436,13 +436,15 @@ class DocType(BuyingController):
 		# tax table gl entries
 		for tax in getlist(self.doclist, "purchase_tax_details"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
-				valuation_tax += flt(tax.tax_amount)
+				valuation_tax += tax.add_deduct_tax == "Add" \
+					and flt(tax.tax_amount) or -1 * flt(tax.tax_amount)
 				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.doc.credit_to,
-						"debit": tax.tax_amount,
+						"debit": tax.add_deduct_tax == "Add" and tax.tax_amount or 0,
+						"credit": tax.add_deduct_tax == "Deduct" and tax.tax_amount or 0,
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center
 					}, is_cancel)
