@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:19", 
+  "creation": "2013-01-29 17:54:12", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:03", 
+  "modified": "2013-02-02 19:18:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -862,8 +862,9 @@
   "description": "% of materials billed against this Delivery Note", 
   "doctype": "DocField", 
   "fieldname": "per_billed", 
-  "fieldtype": "Float", 
+  "fieldtype": "Percent", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "% Amount Billed", 
   "no_copy": 1, 
   "oldfieldname": "per_billed", 
@@ -888,8 +889,9 @@
   "description": "% of materials delivered against this Delivery Note", 
   "doctype": "DocField", 
   "fieldname": "per_installed", 
-  "fieldtype": "Float", 
+  "fieldtype": "Percent", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "% Installed", 
   "no_copy": 1, 
   "oldfieldname": "per_installed", 
