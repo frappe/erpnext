@@ -25,10 +25,12 @@ def get_list(arg=None):
 	webnotes.form_dict['user'] = webnotes.session['user']
 
 	# set all messages as read
+	webnotes.conn.begin()
 	webnotes.conn.sql("""UPDATE `tabComment`
 	set docstatus = 1 where comment_doctype in ('My Company', 'Message')
 	and comment_docname = %s
 	""", webnotes.user.name)
+	webnotes.conn.commit()
 
 	if webnotes.form_dict['contact'] == webnotes.session['user']:
 		# return messages
