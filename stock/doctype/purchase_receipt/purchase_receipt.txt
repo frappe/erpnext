@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:24:18", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:01", 
+  "modified": "2013-02-02 19:09:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -627,7 +627,8 @@
   "description": "% of materials billed against this Purchase Receipt", 
   "doctype": "DocField", 
   "fieldname": "per_billed", 
-  "fieldtype": "Float", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
   "label": "% Billed", 
   "no_copy": 1, 
   "oldfieldname": "per_billed", 

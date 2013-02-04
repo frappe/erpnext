@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:29:21", 
+  "modified": "2013-02-04 11:35:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -79,6 +79,21 @@
   "options": "Company", 
   "permlevel": 0, 
   "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_4", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.", 
+  "doctype": "DocField", 
+  "fieldname": "warehouse_users", 
+  "fieldtype": "Table", 
+  "label": "Warehouse Users", 
+  "options": "Warehouse User", 
+  "permlevel": 0
  }, 
  {
   "description": "For Reference Only.", 

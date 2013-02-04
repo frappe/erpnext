@@ -147,3 +147,20 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 			raise_exception=1)
 		
 	return valid_serial_nos
+	
+def get_warehouse_list(doctype, txt, searchfield, start, page_len):
+	"""used in search queries"""
+	wlist = []
+	for w in webnotes.conn.sql_list("""select name from tabWarehouse 
+		where name like '%%%s%%'""" % txt):
+		if webnotes.session.user=="Administrator":
+			wlist.append([w])
+		else:
+			warehouse_users = webnotes.conn.sql_list("""select user from `tabWarehouse User` 
+				where parent=%s""", w)
+			if not warehouse_users:
+				wlist.append([w])
+			elif webnotes.session.user in warehouse_users:
+				wlist.append([w])
+	return wlist
+	

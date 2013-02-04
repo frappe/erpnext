@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:02", 
+  "modified": "2013-02-04 10:30:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -70,7 +70,7 @@
   "oldfieldname": "actual_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
-  "read_only": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
