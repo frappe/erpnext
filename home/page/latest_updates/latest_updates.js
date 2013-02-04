@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["2nd February, 2013", [
+		"Warehouse: Added table Warehouse User to restrict Warehouse Entry per user.",
+	]],
 	["28st January, 2013", [
 		"List Views are now configurable: To set list views, check 'In List View' in Setup > Customize Form View in the fields table.",
 	]],

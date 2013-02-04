@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 from webnotes.utils import cint, flt, getdate
 
@@ -33,6 +34,7 @@ class DocType:
 	def validate(self):
 		self.validate_mandatory()
 		self.validate_item()
+		self.validate_warehouse_user()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
 		self.scrub_posting_time()
@@ -51,6 +53,15 @@ class DocType:
 
 			self.doc.fields.pop('batch_bal')
 			 
+	def validate_warehouse_user(self):
+		if webnotes.session.user=="Administrator":
+			return
+		warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
+			where parent=%s""", self.doc.warehouse)]
+			
+		if warehouse_users and not webnotes.session.user in warehouse_users:
+			webnotes.msgprint(_("User not allowed entry in the Warehouse") \
+				+ ": " + webnotes.session.user + " / " + self.doc.warehouse, raise_exception = 1)
 
 	def validate_mandatory(self):		
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
