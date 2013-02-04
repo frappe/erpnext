@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:56", 
+  "modified": "2013-02-04 09:52:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,6 +26,7 @@
   "name": "Purchase Request Item"
  }, 
  {
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "schedule_date", 
   "fieldtype": "Date", 
