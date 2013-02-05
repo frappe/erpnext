@@ -39,7 +39,7 @@ class DocType:
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
-		#self.validate_block_days()
+		self.validate_block_days()
 	
 	def on_submit(self):
 		if self.doc.status != "Approved":

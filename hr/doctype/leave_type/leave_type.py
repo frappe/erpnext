@@ -20,3 +20,10 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+test_records = [
+	[{
+		"leave_type_name": "_Test Leave Type",
+		"doctype": "Leave Type"
+	}]
+]
