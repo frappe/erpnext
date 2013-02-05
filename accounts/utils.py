@@ -42,7 +42,7 @@ def get_fiscal_year(date, verbose=1):
 	
 def validate_fiscal_year(date, fiscal_year, label="Date"):
 	if get_fiscal_year(date)[0] != fiscal_year:
-		msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
+		webnotes.msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
 			": '%(fiscal_year)s'") % {
 				"label": label,
 				"posting_date": formatdate(date),
