@@ -80,6 +80,11 @@ wn.module_page["HR"] = [
 				"description":wn._("List of holidays."),
 				doctype: "Holiday List"
 			},
+			{
+				"label":wn._("Holiday Block List"),
+				"description":wn._("Block leave applications by department."),
+				doctype: "Holiday Block List"
+			},
 		]
 	},
 	{

@@ -248,22 +248,23 @@ class DocType(AccountsController):
 		from accounts.general_ledger import make_gl_entries
 		gl_map = []
 		for d in self.doclist.get({"parentfield": "entries"}):
-			gl_map.append(
-				self.get_gl_dict({
-					"account": d.account,
-					"against": d.against_account,
-					"debit": d.debit,
-					"credit": d.credit,
-					"against_voucher_type": ((d.against_voucher and "Purchase Invoice") 
-						or (d.against_invoice and "Sales Invoice") 
-						or (d.against_jv and "Journal Voucher")),
-					"against_voucher": d.against_voucher or d.against_invoice or d.against_jv,
-					"remarks": self.doc.remark,
-					"cost_center": d.cost_center
-				}, cancel)
-			)
-			
-		make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
+			if d.debit or d.credit:
+				gl_map.append(
+					self.get_gl_dict({
+						"account": d.account,
+						"against": d.against_account,
+						"debit": d.debit,
+						"credit": d.credit,
+						"against_voucher_type": ((d.against_voucher and "Purchase Invoice") 
+							or (d.against_invoice and "Sales Invoice") 
+							or (d.against_jv and "Journal Voucher")),
+						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv,
+						"remarks": self.doc.remark,
+						"cost_center": d.cost_center
+					}, cancel)
+				)
+		if gl_map:
+			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 
 	def get_outstanding(self, args):
 		args = eval(args)

@@ -17,10 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, date_diff, getdate
-from webnotes.model import db_exists
+from webnotes.utils import add_days, cstr, getdate
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -54,7 +53,6 @@ class DocType(TransactionBase):
 	# generate maintenance schedule
 	#-------------------------------------
 	def generate_schedule(self):
-		import datetime
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
 		count = 0
 		sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
@@ -158,9 +156,7 @@ class DocType(TransactionBase):
 	#get count on the basis of periodicity selected
 	#----------------------------------------------------
 	def get_no_of_visits(self, arg):
-		arg1 = eval(arg)
-		start_date = arg1['start_date']
-		
+		arg1 = eval(arg)		
 		self.validate_period(arg)
 		period = (getdate(arg1['end_date'])-getdate(arg1['start_date'])).days+1
 		
@@ -279,7 +275,7 @@ class DocType(TransactionBase):
 	
 	def validate_serial_no_warranty(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if d.serial_no.strip():
+			if cstr(d.serial_no).strip():
 				dt = sql("""select warranty_expiry_date, amc_expiry_date 
 					from `tabSerial No` where name = %s""", d.serial_no, as_dict=1)
 				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
@@ -290,7 +286,7 @@ class DocType(TransactionBase):
 				if dt[0]['amc_expiry_date'] and dt[0]['amc_expiry_date'] >= d.start_date:
 					webnotes.msgprint("""Serial No: %s is already under AMC upto %s.
 						Please check AMC Start Date.""" % 
-						(d.serial_no, sr[0]["amc_expiry_date"]), raise_exception=1)
+						(d.serial_no, dt[0]["amc_expiry_date"]), raise_exception=1)
 
 	def validate_schedule(self):
 		item_lst1 =[]

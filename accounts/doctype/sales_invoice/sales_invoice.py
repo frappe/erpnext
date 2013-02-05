@@ -637,16 +637,17 @@ class DocType(SellingController):
 		abbr = self.get_company_abbr()
 		
 		# parent's gl entry
-		gl_entries.append(
-			self.get_gl_dict({
-				"account": self.doc.debit_to,
-				"against": self.doc.against_income_account,
-				"debit": self.doc.grand_total,
-				"remarks": self.doc.remarks,
-				"against_voucher": self.doc.name,
-				"against_voucher_type": self.doc.doctype,
-			}, is_cancel)
-		)
+		if self.doc.grand_total:
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.doc.debit_to,
+					"against": self.doc.against_income_account,
+					"debit": self.doc.grand_total,
+					"remarks": self.doc.remarks,
+					"against_voucher": self.doc.name,
+					"against_voucher_type": self.doc.doctype,
+				}, is_cancel)
+			)
 	
 		# tax table gl entries
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
@@ -745,8 +746,9 @@ class DocType(SellingController):
 		
 		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
 		merge_entries=cint(self.doc.is_pos)!=1 and 1 or 0
-		make_gl_entries(gl_entries, cancel=is_cancel, 
-			update_outstanding=update_outstanding, merge_entries=merge_entries)
+		if gl_entries:
+			make_gl_entries(gl_entries, cancel=is_cancel, 
+				update_outstanding=update_outstanding, merge_entries=merge_entries)
 
 	def update_c_form(self):
 		"""Update amended id in C-form"""

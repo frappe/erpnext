@@ -422,16 +422,17 @@ class DocType(BuyingController):
 		abbr = self.get_company_abbr()
 		
 		# parent's gl entry
-		gl_entries.append(
-			self.get_gl_dict({
-				"account": self.doc.credit_to,
-				"against": self.doc.against_expense_account,
-				"credit": self.doc.grand_total,
-				"remarks": self.doc.remarks,
-				"against_voucher": self.doc.name,
-				"against_voucher_type": self.doc.doctype,
-			}, is_cancel)
-		)
+		if self.doc.grand_total:
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.doc.credit_to,
+					"against": self.doc.against_expense_account,
+					"credit": self.doc.grand_total,
+					"remarks": self.doc.remarks,
+					"against_voucher": self.doc.name,
+					"against_voucher_type": self.doc.doctype,
+				}, is_cancel)
+			)
 	
 		# tax table gl entries
 		for tax in getlist(self.doclist, "purchase_tax_details"):
@@ -506,7 +507,9 @@ class DocType(BuyingController):
 					"cost_center": self.doc.write_off_cost_center
 				}, is_cancel)
 			)
-		make_gl_entries(gl_entries, cancel=is_cancel)
+		
+		if gl_entries:
+			make_gl_entries(gl_entries, cancel=is_cancel)
 
 
 	def check_next_docstatus(self):
