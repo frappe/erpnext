@@ -599,14 +599,8 @@ class DocType(TransactionBase):
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
 
 	def validate_fiscal_year(self, fiscal_year, transaction_date, label):
-		from accounts.utils import get_fiscal_year
-		if get_fiscal_year(transaction_date)[0] != fiscal_year:
-			msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
-				": '%(fiscal_year)s'") % {
-					"label": label,
-					"posting_date": formatdate(transaction_date),
-					"fiscal_year": fiscal_year
-				}, raise_exception=1)
+		import accounts.utils
+		accounts.utils.validate_fiscal_year(transaction_date, fiscal_year, label)
 
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):

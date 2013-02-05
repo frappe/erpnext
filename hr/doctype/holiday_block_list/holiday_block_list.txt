@@ -1,0 +1,66 @@
+[
+ {
+  "creation": "2013-02-04 15:31:29", 
+  "docstatus": 0, 
+  "modified": "2013-02-04 15:38:57", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:holiday_block_list_name", 
+  "description": "Block Holidays on important days.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Holiday Block List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Holiday Block List", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "HR User", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Holiday Block List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "holiday_block_list_name", 
+  "fieldtype": "Data", 
+  "label": "Holiday Block List Name", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "year", 
+  "fieldtype": "Link", 
+  "label": "Year", 
+  "options": "Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "holiday_block_list_dates", 
+  "fieldtype": "Table", 
+  "label": "Holiday Block List Dates", 
+  "options": "Holiday Block List Date"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

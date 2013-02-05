@@ -1,0 +1,40 @@
+[
+ {
+  "creation": "2013-02-04 15:33:14", 
+  "docstatus": 0, 
+  "modified": "2013-02-04 15:36:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Holiday Block List Date", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Holiday Block List Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "block_date", 
+  "fieldtype": "Date", 
+  "label": "Block Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reason", 
+  "fieldtype": "Text", 
+  "label": "Reason"
+ }
+]
