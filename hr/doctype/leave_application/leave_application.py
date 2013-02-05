@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate
 from webnotes.model import db_exists
@@ -24,6 +25,8 @@ from webnotes import form, msgprint
 
 sql = webnotes.conn.sql
 import datetime
+
+class LeaveDayBlockedError(Exception): pass
 	
 class DocType:
 	def __init__(self, doc, doclist):
@@ -36,16 +39,30 @@ class DocType:
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
-		
+		#self.validate_block_days()
+	
 	def on_submit(self):
 		if self.doc.status != "Approved":
 			webnotes.msgprint("""Only Leave Applications with status 'Approved' can be Submitted.""",
 				raise_exception=True)
 
+	def validate_block_days(self):
+		from_date = getdate(self.doc.from_date)
+		to_date = getdate(self.doc.to_date)
+		
+		department = webnotes.conn.get_value("Employee", self.doc.employee, "department")
+		if department:
+			block_list = webnotes.conn.get_value("Department", department, "holiday_block_list")
+			if block_list:
+				for d in webnotes.conn.sql("""select block_date, reason from
+					`tabHoliday Block List Date` where parent=%s""", block_list):
+					block_date = getdate(d.block_date)
+					if block_date > from_date and block_date < to_date:
+						webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
+							+ ": " + formatdate(d.block_date) + _(" Reason: ") + d.reason)
+						raise LeaveDayBlockedError
+
 	def get_holidays(self):
-		"""
-			get total holidays
-		"""
 		tot_hol = sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
 			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
 			and h1.holiday_date between %s and %s""", (self.doc.employee, self.doc.from_date, self.doc.to_date))
