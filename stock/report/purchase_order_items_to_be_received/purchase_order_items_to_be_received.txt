@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-01 14:03:42", 
+  "creation": "2013-02-02 22:33:12", 
   "docstatus": 0, 
-  "modified": "2013-02-01 18:28:47", 
+  "modified": "2013-02-05 16:54:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,7 +10,7 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "query": "select \n `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n `tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n `tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n `tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n `tabPurchase Order Item`.description as \"Description::180\",\n `tabPurchase Order Item`.qty as \"Qty:Float:100\",\n `tabPurchase Order Item`.received_qty as \"Received Qty:Float:100\", \n (`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) as \"Qty to Receive:Float:100\"\nfrom\n `tabPurchase Order`, `tabPurchase Order Item`\nwhere\n `tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n and `tabPurchase Order`.docstatus = 1\n and ifnull(`tabPurchase Order Item`.received_qty, 0) < ifnull(`tabPurchase Order Item`.qty, 0)\norder by `tabPurchase Order`.transaction_date asc", 
+  "query": "select \n `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n `tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n `tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n `tabPurchase Order`.`project_name` as \"Project\",\n `tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n `tabPurchase Order Item`.description as \"Description::180\",\n `tabPurchase Order Item`.qty as \"Qty:Float:100\",\n `tabPurchase Order Item`.received_qty as \"Received Qty:Float:100\", \n (`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) as \"Qty to Receive:Float:100\"\nfrom\n `tabPurchase Order`, `tabPurchase Order Item`\nwhere\n `tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n and `tabPurchase Order`.docstatus = 1\n and ifnull(`tabPurchase Order Item`.received_qty, 0) < ifnull(`tabPurchase Order Item`.qty, 0)\norder by `tabPurchase Order`.transaction_date asc", 
   "ref_doctype": "Purchase Receipt"
  }, 
  {
