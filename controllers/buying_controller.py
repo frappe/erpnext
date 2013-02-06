@@ -84,3 +84,6 @@ class BuyingController(AccountsController):
 		if self.meta.get_field("in_words_import"):
 			self.doc.in_words_import = money_in_words(self.doc.grand_total_import,
 		 		self.doc.currency)
+		
+	def calculate_taxes_and_totals(self):
+		pass
