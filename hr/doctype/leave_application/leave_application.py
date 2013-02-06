@@ -23,7 +23,6 @@ from webnotes.model import db_exists
 from webnotes.model.wrapper import copy_doclist
 from webnotes import form, msgprint
 
-sql = webnotes.conn.sql
 import datetime
 
 class LeaveDayBlockedError(Exception): pass
@@ -39,7 +38,7 @@ class DocType:
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
-		#self.validate_block_days()
+		self.validate_block_days()
 	
 	def on_submit(self):
 		if self.doc.status != "Approved":
@@ -55,7 +54,7 @@ class DocType:
 			block_list = webnotes.conn.get_value("Department", department, "holiday_block_list")
 			if block_list:
 				for d in webnotes.conn.sql("""select block_date, reason from
-					`tabHoliday Block List Date` where parent=%s""", block_list):
+					`tabHoliday Block List Date` where parent=%s""", block_list, as_dict=1):
 					block_date = getdate(d.block_date)
 					if block_date > from_date and block_date < to_date:
 						webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
@@ -63,11 +62,11 @@ class DocType:
 						raise LeaveDayBlockedError
 
 	def get_holidays(self):
-		tot_hol = sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
+		tot_hol = webnotes.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
 			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
 			and h1.holiday_date between %s and %s""", (self.doc.employee, self.doc.from_date, self.doc.to_date))
 		if not tot_hol:
-			tot_hol = sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
+			tot_hol = webnotes.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
 				where h1.parent = h2.name and h1.holiday_date between %s and %s
 				and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
 				(self.doc.from_date, self.doc.to_date, self.doc.fiscal_year))
@@ -95,13 +94,13 @@ class DocType:
 			self.doc.leave_balance = get_leave_balance(self.doc.employee,
 				self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
 			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
-			
+
 			if self.doc.leave_balance - self.doc.total_leave_days < 0:
 				msgprint("There is not enough leave balance for Leave Type: %s" % \
 					(self.doc.leave_type,), raise_exception=1)
 
 	def validate_leave_overlap(self):
-		for d in sql("""select name, leave_type, posting_date, from_date, to_date 
+		for d in webnotes.conn.sql("""select name, leave_type, posting_date, from_date, to_date 
 			from `tabLeave Application` 
 			where 
 			(from_date <= %(to_date)s and to_date >= %(from_date)s)
@@ -112,7 +111,7 @@ class DocType:
 			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : %s" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name']), raise_exception = 1)
 
 	def validate_max_days(self):
-		max_days = sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
+		max_days = webnotes.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
 		max_days = max_days and flt(max_days[0][0]) or 0
 		if max_days and self.doc.total_leave_days > max_days:
 			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
@@ -120,12 +119,12 @@ class DocType:
 
 
 @webnotes.whitelist()
-def get_leave_balance(employee, leave_type, fiscal_year):
+def get_leave_balance(employee, leave_type, fiscal_year):	
 	leave_all = webnotes.conn.sql("""select total_leaves_allocated 
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
 		and fiscal_year = %s and docstatus = 1""", (employee, 
 			leave_type, fiscal_year))
-			
+	
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 	
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
@@ -147,5 +146,24 @@ def get_approver_list():
 	return roles
 
 def is_lwp(leave_type):
-	lwp = sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
+	lwp = webnotes.conn.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
 	return lwp and cint(lwp[0][0]) or 0
+
+test_records = [
+	[{
+		"doctype": "Leave Allocation",
+		"leave_type": "_Test Leave Type",
+		"fiscal_year": "_Test Fiscal Year",
+		"employee":"_T-Employee-0001",
+		"new_leaves_allocated": 15,
+		"docstatus": 1
+	}],
+	[{
+		"doctype": "Leave Application",
+		"leave_type": "_Test Leave Type",
+		"from_date": "2013-05-01",
+		"to_date": "2013-05-05",
+		"posting_date": "2013-01-02",
+		"fiscal_year": "_Test Fiscal Year",
+		"employee": "_T-Employee-0001"
+	}]]

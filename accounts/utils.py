@@ -25,6 +25,9 @@ from webnotes.utils import formatdate
 class FiscalYearError(webnotes.ValidationError): pass
 
 def get_fiscal_year(date, verbose=1):
+	return get_fiscal_years(date, verbose=1)[0]
+	
+def get_fiscal_years(date, verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	fy = webnotes.conn.sql("""select name, year_start_date, 
 		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
@@ -38,10 +41,11 @@ def get_fiscal_year(date, verbose=1):
 		if verbose: webnotes.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	
-	return fy[0]
+	return fy
 	
 def validate_fiscal_year(date, fiscal_year, label="Date"):
-	if get_fiscal_year(date)[0] != fiscal_year:
+	years = [f[0] for f in get_fiscal_years(date)]
+	if fiscal_year not in years:
 		webnotes.msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
 			": '%(fiscal_year)s'") % {
 				"label": label,
