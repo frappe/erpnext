@@ -56,7 +56,7 @@ def load_data():
 		webnotes.insert({"doctype": "Cost Center", "group_or_ledger": "Ledger",
 			"cost_center_name": "Default Cost Center", 
 			"parent_cost_center": "Root - %s" % abbr,
-			"company_name": company, "company_abbr": abbr})
+			"company_name": company})
 		
 	# create account heads for taxes
 	
@@ -67,11 +67,11 @@ def load_data():
 	webnotes.insert({"doctype": "Account", "account_name": "Customs Duty",
 		"parent_account": "Stock Expenses - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
-	webnotes.insert({"doctype": "Account", "account_name": "Tax Assets",
+	webnotes.insert({"doctype": "Account", "account_name": "_Test Tax Assets",
 		"parent_account": "Current Assets - %s" % abbr, "company": company,
 		"group_or_ledger": "Group"})
 	webnotes.insert({"doctype": "Account", "account_name": "VAT - Test",
-		"parent_account": "Tax Assets - %s" % abbr, "company": company,
+		"parent_account": "_Test Tax Assets - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
 		
 	# create BOM

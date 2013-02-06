@@ -18,8 +18,6 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money
-from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
