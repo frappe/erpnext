@@ -70,6 +70,11 @@ class DocType:
 			webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
 			webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
 			webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
+			
+			# add employee role if missing
+			if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
+				where parent=%s""", self.doc.user_id):
+				webnotes.get_obj("Profile", self.doc.user_id).add_role("Employee")
 	
 	def validate_date(self):
 		import datetime
@@ -134,4 +139,15 @@ test_records = [[{
 	"status": "Active",
 	"company": "_Test Company",
 	"user_id": "test@erpnext.com"
+}],
+[{
+	"doctype":"Employee",
+	"employee_name": "_Test Employee 1",
+	"naming_series": "_T-Employee-",
+	"date_of_joining": "2010-01-01",
+	"date_of_birth": "1980-01-01",
+	"gender": "Male",
+	"status": "Active",
+	"company": "_Test Company",
+	"user_id": "test1@erpnext.com"
 }]]

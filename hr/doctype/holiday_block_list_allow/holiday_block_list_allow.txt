@@ -1,0 +1,35 @@
+[
+ {
+  "creation": "2013-02-06 14:31:03", 
+  "docstatus": 0, 
+  "modified": "2013-02-06 14:31:03", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_user", 
+  "fieldtype": "Link", 
+  "label": "Allow User", 
+  "name": "__common__", 
+  "options": "Profile", 
+  "parent": "Holiday Block List Allow", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Holiday Block List Allow"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]
