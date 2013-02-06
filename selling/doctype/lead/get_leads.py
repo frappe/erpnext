@@ -21,8 +21,8 @@ from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
 
 class SalesMailbox(POP3Mailbox):	
-	def setup(self):
-		self.settings = webnotes.doc("Sales Email Settings", "Sales Email Settings")
+	def setup(self, args=None):
+		self.settings = args or webnotes.doc("Sales Email Settings", "Sales Email Settings")
 	
 	def check_mails(self):
 		return webnotes.conn.sql("select user from tabSessions where \
