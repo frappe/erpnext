@@ -45,7 +45,10 @@ class BuyingController(AccountsController):
 				"warehouse": item.warehouse,
 				"supplier": self.doc.supplier,
 				"transaction_date": self.doc.posting_date,
-				"conversion_rate": self.doc.conversion_rate
+				"conversion_rate": self.doc.conversion_rate,
+				"price_list_name": self.doc.price_list_name,
+				"price_list_currency": self.doc.price_list_currency,
+				"plc_conversion_rate": self.doc.plc_conversion_rate
 			})
 			for r in ret:
 				if not item.fields.get(r):
