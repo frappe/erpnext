@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-12-17 12:57:24", 
+  "creation": "2013-02-02 22:33:12", 
   "docstatus": 0, 
-  "modified": "2013-02-01 18:27:52", 
+  "modified": "2013-02-05 16:53:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,7 +10,7 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n `tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.description as \"Description\",\n `tabSales Order Item`.qty as \"Qty:Float\",\n `tabSales Order Item`.delivered_qty as \"Delivered Qty:Float\",\n (`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0)) as \"Qty to Deliver:Float\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and ifnull(`tabSales Order Item`.delivered_qty,0) < ifnull(`tabSales Order Item`.qty,0)\norder by `tabSales Order`.transaction_date asc", 
+  "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n `tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order`.`project_name` as \"Project\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.description as \"Description\",\n `tabSales Order Item`.qty as \"Qty:Float\",\n `tabSales Order Item`.delivered_qty as \"Delivered Qty:Float\",\n (`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0)) as \"Qty to Deliver:Float\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and ifnull(`tabSales Order Item`.delivered_qty,0) < ifnull(`tabSales Order Item`.qty,0)\norder by `tabSales Order`.transaction_date asc", 
   "ref_doctype": "Delivery Note"
  }, 
  {

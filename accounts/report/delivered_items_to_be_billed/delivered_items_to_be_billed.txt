@@ -1,20 +1,20 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-11-28 11:24:29", 
+  "docstatus": 0, 
+  "modified": "2013-02-05 16:54:57", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-19 11:54:55"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "ref_doctype": "Sales Invoice", 
   "doctype": "Report", 
   "is_standard": "Yes", 
-  "query": "select \n `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n`tabDelivery Note`.`customer` as \"Customer:Link/Customer:120\",\n`tabDelivery Note`.`status` as \"Status\",\n `tabDelivery Note`.`posting_date` as \"Date:Date\",\n `tabDelivery Note Item`.item_code as \"Item:Link/Item:120\",\n `tabDelivery Note Item`.description as \"Description:Data:120\",\n `tabDelivery Note Item`.amount as \"Amount:Currency:110\",\n (`tabDelivery Note Item`.billed_amt * ifnull(`tabDelivery Note`.conversion_rate, 1)) as \"Billed Amount:Currency:110\",\n (ifnull(`tabDelivery Note Item`.amount,0) - (ifnull(`tabDelivery Note Item`.billed_amt,0) * ifnull(`tabDelivery Note`.conversion_rate, 1))) as \"Pending Amount:Currency:120\"\nfrom\n `tabDelivery Note`, `tabDelivery Note Item`\nwhere\n `tabDelivery Note Item`.`parent` = `tabDelivery Note`.`name`\n and `tabDelivery Note`.docstatus = 1\n and ifnull(`tabDelivery Note Item`.billed_amt,0) < ifnull(`tabDelivery Note Item`.export_amount,0)\norder by `tabDelivery Note`.posting_date asc"
+  "name": "__common__", 
+  "query": "select \n `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n`tabDelivery Note`.`customer` as \"Customer:Link/Customer:120\",\n`tabDelivery Note`.`status` as \"Status\",\n `tabDelivery Note`.`posting_date` as \"Date:Date\",\n `tabDelivery Note`.`project_name` as \"Project\",\n `tabDelivery Note Item`.item_code as \"Item:Link/Item:120\",\n `tabDelivery Note Item`.description as \"Description:Data:120\",\n `tabDelivery Note Item`.amount as \"Amount:Currency:110\",\n (`tabDelivery Note Item`.billed_amt * ifnull(`tabDelivery Note`.conversion_rate, 1)) as \"Billed Amount:Currency:110\",\n (ifnull(`tabDelivery Note Item`.amount,0) - (ifnull(`tabDelivery Note Item`.billed_amt,0) * ifnull(`tabDelivery Note`.conversion_rate, 1))) as \"Pending Amount:Currency:120\"\nfrom\n `tabDelivery Note`, `tabDelivery Note Item`\nwhere\n `tabDelivery Note Item`.`parent` = `tabDelivery Note`.`name`\n and `tabDelivery Note`.docstatus = 1\n and ifnull(`tabDelivery Note Item`.billed_amt,0) < ifnull(`tabDelivery Note Item`.export_amount,0)\norder by `tabDelivery Note`.posting_date asc", 
+  "ref_doctype": "Sales Invoice"
  }, 
  {
-  "name": "Delivered Items To Be Billed", 
-  "doctype": "Report"
+  "doctype": "Report", 
+  "name": "Delivered Items To Be Billed"
  }
 ]
