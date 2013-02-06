@@ -51,7 +51,8 @@ erpnext.toolbar.setup = function() {
 erpnext.toolbar.add_modules = function() {
 	$('<li class="dropdown">\
 		<a class="dropdown-toggle" data-toggle="dropdown" href="#"\
-			onclick="return false;">'+wn._('Modules')+'<b class="caret"></b></a>\
+			title="'+wn._("Modules")+'"\
+			onclick="return false;"><i class="icon-th"></i> <b class="caret"></b></a>\
 		<ul class="dropdown-menu modules">\
 		</ul>\
 		</li>').prependTo('.navbar .nav:first');
