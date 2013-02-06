@@ -165,4 +165,5 @@ patch_list = [
 	"patches.february_2013.payment_reconciliation_reset_values",
 	"patches.february_2013.remove_sales_order_pending_items",
 	"patches.february_2013.account_negative_balance",
+	"patches.february_2013.remove_account_utils_folder",
 ]

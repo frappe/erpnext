@@ -53,6 +53,8 @@ class DocType:
 		if department:
 			block_list = webnotes.conn.get_value("Department", department, "holiday_block_list")
 			if block_list:
+				if self.is_user_in_allow_list(block_list):
+					return
 				for d in webnotes.conn.sql("""select block_date, reason from
 					`tabHoliday Block List Date` where parent=%s""", block_list, as_dict=1):
 					block_date = getdate(d.block_date)
@@ -60,6 +62,10 @@ class DocType:
 						webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
 							+ ": " + formatdate(d.block_date) + _(" Reason: ") + d.reason)
 						raise LeaveDayBlockedError
+
+	def is_user_in_allow_list(self, block_list):
+		return webnotes.session.user in webnotes.conn.sql_list("""select allow_user
+			from `tabHoliday Block List Allow` where parent=%s""", block_list)
 
 	def get_holidays(self):
 		tot_hol = webnotes.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
@@ -148,22 +154,3 @@ def get_approver_list():
 def is_lwp(leave_type):
 	lwp = webnotes.conn.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
 	return lwp and cint(lwp[0][0]) or 0
-
-test_records = [
-	[{
-		"doctype": "Leave Allocation",
-		"leave_type": "_Test Leave Type",
-		"fiscal_year": "_Test Fiscal Year",
-		"employee":"_T-Employee-0001",
-		"new_leaves_allocated": 15,
-		"docstatus": 1
-	}],
-	[{
-		"doctype": "Leave Application",
-		"leave_type": "_Test Leave Type",
-		"from_date": "2013-05-01",
-		"to_date": "2013-05-05",
-		"posting_date": "2013-01-02",
-		"fiscal_year": "_Test Fiscal Year",
-		"employee": "_T-Employee-0001"
-	}]]
