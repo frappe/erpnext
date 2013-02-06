@@ -51,7 +51,7 @@ class DocType(AccountsController):
 			self.doc.posting_date, 'Posting Date')
 		
 		self.set_against_account()
-		self.create_remarks()		
+		self.create_remarks()
 		self.set_aging_date()
 		self.set_print_format_fields()
 
@@ -152,6 +152,8 @@ class DocType(AccountsController):
 
 		if r:
 			self.doc.remark = ("\n").join(r)
+		else:
+			webnotes.msgprint("Remarks is mandatory", raise_exception=1)
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
