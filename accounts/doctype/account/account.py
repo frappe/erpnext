@@ -25,6 +25,8 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 
+test_records = []
+
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl

@@ -31,3 +31,6 @@ class DocType:
 		
 		msgprint(self.doc.name + _(""" is now the default Fiscal Year. \
 			Please refresh your browser for the change to take effect."""))
+			
+test_records = [[{"doctype":"Fiscal Year", "year":"_Test Fiscal Year", 
+	"year_start_date":"2013-01-01"}]]

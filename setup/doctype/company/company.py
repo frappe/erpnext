@@ -165,8 +165,6 @@ class DocType:
 		ac_obj.validate()
 		ac_obj.doc.save(1)
 		ac_obj.on_update()
-		sql("commit")
-		sql("start transaction")
 
 
 	# Set letter head
@@ -257,3 +255,12 @@ class DocType:
 		sql("update `tabSingles` set value = %s where doctype='Global Defaults' and field = 'default_company' and value = %s", (newdn, olddn))	
 		if get_defaults('company') == olddn:
 			set_default('company', newdn)
+
+test_records = [
+	[{
+		"company_name": "_Test Company",
+		"abbr": "TC",
+		"default_currency": "INR",
+		"doctype": "Company"
+	}]
+]
