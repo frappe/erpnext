@@ -201,3 +201,12 @@ class DocType:
 			(account_name, old))
 
 		return " - ".join(parts)
+
+def get_master_name(doctype, txt, searchfield, start, page_len, args):
+	return webnotes.conn.sql("""select name from `tab%s` where name like '%%%s%%'""" %
+		(args["master_type"], txt), as_list=1)
+		
+def get_parent_account(doctype, txt, searchfield, start, page_len, args):
+	return webnotes.conn.sql("""select name from tabAccount 
+		where group_or_ledger = 'Group' and docstatus != 2 and company = '%s' 
+		and name like '%%%s%%'""" % (args["company"], txt))
