@@ -32,16 +32,16 @@ def load_data():
 	
 	# create customer group
 	webnotes.insert({"doctype": "Customer Group",
-		"customer_group_name": "Default Customer Group",
+		"customer_group_name": "_Test Customer Group",
 		"parent_customer_group": "All Customer Groups", "is_group": "No"})
 	
 	# create customer
 	webnotes.insert({"doctype": "Customer", "customer_name": "West Wind Inc.",
 		"customer_type": "Company", "territory": "Default",
-		"customer_group": "Default Customer Group", "company": company,
+		"customer_group": "_Test Customer Group", "company": company,
 		"credit_days": 50, "credit_limit": 0})
 	
-	webnotes.insert({"doctype": "Account", "account_name": "Sales",
+	webnotes.insert({"doctype": "Account", "account_name": "_Test Account Sales",
 		"parent_account": "Income - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
 	
@@ -93,15 +93,15 @@ sales_invoice_doclist = [
 		"doctype": "Sales Invoice Item", "warehouse": "Default Warehouse",
 		"item_code": "Home Desktop 100", "qty": 10, "basic_rate": 50, "amount": 500, 
 		"parentfield": "entries", "so_detail": None, "dn_detail": None,
-		"uom": "Nos", "item_tax_rate": json.dumps({"Excise Duty - %s" % abbr: 10}),
-		"income_account": "Sales - %s" % abbr, 
+		"stock_uom": "Nos", "item_tax_rate": json.dumps({"Excise Duty - %s" % abbr: 10}),
+		"income_account": "_Test Account Sales - %s" % abbr, 
 		"cost_center": "Default Cost Center - %s" % abbr
 	},
 	{
 		"doctype": "Sales Invoice Item", "warehouse": "Default Warehouse",
 		"item_code": "Home Desktop 200", "qty": 5, "basic_rate": 150, "amount": 750,
 		"so_detail": None, "dn_detail": None, 
-		"parentfield": "entries", "uom": "Nos", "income_account": "Sales - %s" % abbr, 
+		"parentfield": "entries", "stock_uom": "Nos", "income_account": "_Test Account Sales - %s" % abbr, 
 		"cost_center": "Default Cost Center - %s" % abbr
 	},
 	# taxes
@@ -211,7 +211,7 @@ class TestSalesInvoice(unittest.TestCase):
 			
 		expected_gl_entries = {
 			"West Wind Inc. - %s" % abbr : [1627.05, 0.0],
-			"Sales - %s" % abbr: [0.0, 1250.00],
+			"_Test Account Sales - %s" % abbr: [0.0, 1250.00],
 			"Shipping Charges - %s" % abbr: [0.0, 100],
 			"Customs Duty - %s" % abbr: [0, 125.0],
 			"Excise Duty - %s" % abbr: [0, 140],

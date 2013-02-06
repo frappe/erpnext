@@ -20,6 +20,7 @@ import unittest
 import webnotes
 import webnotes.model
 from webnotes.utils import nowdate
+from webnotes.test_runner import make_test_records
 
 from stock.doctype.purchase_receipt import test_purchase_receipt
 
@@ -34,15 +35,15 @@ def load_data():
 		"group_or_ledger": "Ledger"})
 	
 	webnotes.insert({"doctype": "Account", "account_name": "Excise Duty",
-		"parent_account": "Tax Assets - %s" % abbr, "company": company,
+		"parent_account": "_Test Tax Assets - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
 	
 	webnotes.insert({"doctype": "Account", "account_name": "Education Cess",
-		"parent_account": "Tax Assets - %s" % abbr, "company": company,
+		"parent_account": "_Test Tax Assets - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
 	
 	webnotes.insert({"doctype": "Account", "account_name": "S&H Education Cess",
-		"parent_account": "Tax Assets - %s" % abbr, "company": company,
+		"parent_account": "_Test Tax Assets - %s" % abbr, "company": company,
 		"group_or_ledger": "Ledger"})
 		
 	webnotes.insert({"doctype": "Account", "account_name": "CST",
@@ -94,61 +95,66 @@ purchase_invoice_doclist = [
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
 		"account_head": "Shipping Charges - %s" % abbr, "rate": 100, "tax_amount": 100, 
-		"category": "Valuation and Total", "parentfield": "other_charges",
-		"cost_center": "Default Cost Center - %s" % abbr
+		"category": "Valuation and Total", "parentfield": "purchase_tax_details",
+		"cost_center": "Default Cost Center - %s" % abbr, "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Net Total",
 		"account_head": "Customs Duty - %s" % abbr, "rate": 10, "tax_amount": 125.00,
-		"category": "Valuation", "parentfield": "other_charges",
-		"cost_center": "Default Cost Center - %s" % abbr
+		"category": "Valuation", "parentfield": "purchase_tax_details",
+		"cost_center": "Default Cost Center - %s" % abbr, "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Net Total",
 		"account_head": "Excise Duty - %s" % abbr, "rate": 12, "tax_amount": 140.00, 
-		"category": "Total", "parentfield": "other_charges"
+		"category": "Total", "parentfield": "purchase_tax_details", "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Previous Row Amount",
 		"account_head": "Education Cess - %s" % abbr, "rate": 2, "row_id": 3, "tax_amount": 2.80,
-		"category": "Total", "parentfield": "other_charges"
+		"category": "Total", "parentfield": "purchase_tax_details", "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Previous Row Amount",
 		"account_head": "S&H Education Cess - %s" % abbr, "rate": 1, "row_id": 3, 
-		"tax_amount": 1.4, "category": "Total", "parentfield": "other_charges"
+		"tax_amount": 1.4, "category": "Total", "parentfield": "purchase_tax_details",
+		"add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Previous Row Total",
 		"account_head": "CST - %s" % abbr, "rate": 2, "row_id": 5, "tax_amount": 29.88, 
-		"category": "Total", "parentfield": "other_charges",
-		"cost_center": "Default Cost Center - %s" % abbr
+		"category": "Total", "parentfield": "purchase_tax_details",
+		"cost_center": "Default Cost Center - %s" % abbr, "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Net Total",
 		"account_head": "VAT - Test - %s" % abbr, "rate": 12.5, "tax_amount": 156.25, 
-		"category": "Total", "parentfield": "other_charges"
+		"category": "Total", "parentfield": "purchase_tax_details", "add_deduct_tax": "Add"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "On Previous Row Total",
-		"account_head": "Discount - %s" % abbr, "rate": -10, "row_id": 7, "tax_amount": -168.03, 
-		"category": "Total", "parentfield": "other_charges",
-		"cost_center": "Default Cost Center - %s" % abbr
+		"account_head": "Discount - %s" % abbr, "rate": 10, "row_id": 7, "tax_amount": 168.03, 
+		"category": "Total", "parentfield": "purchase_tax_details",
+		"cost_center": "Default Cost Center - %s" % abbr, "add_deduct_tax": "Deduct"
 	},
 ]
 
-class TestPurchaseReceipt(unittest.TestCase):
+class TestPurchaseInvoice(unittest.TestCase):
 	def setUp(self):
 		webnotes.conn.begin()
 		load_data()
 		# webnotes.conn.set_value("Global Defaults", None, "automatic_inventory_accounting", 1)
+		self.load_test_data()
+		
+	def load_test_data(self):
+		make_test_records("Company")
+		
 			
 	def test_gl_entries(self):
-		from webnotes.model.doclist import DocList
-		controller = webnotes.insert(DocList(purchase_invoice_doclist))
-		controller.submit()
-		controller.load_from_db()
-		dl = controller.doclist
+		wrapper = webnotes.model_wrapper(purchase_invoice_doclist).insert()
+		wrapper.submit()
+		wrapper.load_from_db()
+		dl = wrapper.doclist
 		
 		expected_gl_entries = {
 			"East Wind Inc. - %s" % abbr : [0, 1512.30],
@@ -165,6 +171,76 @@ class TestPurchaseReceipt(unittest.TestCase):
 			where voucher_type = 'Purchase Invoice' and voucher_no = %s""", dl[0].name, as_dict=1)
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
+			
+	def test_purchase_invoice_calculation(self):
+		test_doclist = [] + purchase_invoice_doclist
+		for doc in test_doclist:
+			if doc["doctype"] == "Purchase Taxes and Charges":
+				del doc["tax_amount"]
+				
+		wrapper = webnotes.model_wrapper(test_doclist).insert()
+		wrapper.load_from_db()
+		
+		# tax amounts
+		expected_values = [
+			["Shipping Charges - %s" % abbr, 100, 1350],
+			["Customs Duty - %s" % abbr, 125, 1350],
+			["Excise Duty - %s" % abbr, 140, 1490],
+			["Education Cess - %s" % abbr, 2.8, 1492.8],
+			["S&H Education Cess - %s" % abbr, 1.4, 1494.2],
+			["CST - %s" % abbr, 29.88, 1524.08],
+			["VAT - Test - %s" % abbr, 156.25, 1680.33],
+			["Discount - %s" % abbr, 168.03, 1512.30],
+		]
+		
+		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
+			self.assertEqual(tax.account_head, expected_values[i][0])
+			self.assertEqual(tax.tax_amount, expected_values[i][1])
+			self.assertEqual(tax.total, expected_values[i][2])
+
+		expected_values = [
+			["Home Desktop 100", 90],
+			["Home Desktop 200", 135]
+		]
+		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
+			self.assertEqual(item.item_code, expected_values[i][0])
+			self.assertEqual(item.item_tax_amount, expected_values[i][1])
+		
+		
+	# def test_purchase_invoice_calculation(self):
+	# 	from webnotes.model.doclist import DocList
+	# 	wrapper = webnotes.insert(DocList(purchase_invoice_doclist))
+	# 	wrapper.load_from_db()
+	# 	dl = wrapper.doclist
+	# 
+	# 	# test net total
+	# 	self.assertEqual(dl[0].net_total, 1250)
+	# 
+	# 	# test tax amounts and totals
+		# expected_values = [
+		# 	["Shipping Charges - %s" % abbr, 100, 1350],
+		# 	["Customs Duty - %s" % abbr, 125, 1350],
+		# 	["Excise Duty - %s" % abbr, 140, 1490],
+		# 	["Education Cess - %s" % abbr, 2.8, 1492.8],
+		# 	["S&H Education Cess - %s" % abbr, 1.4, 1494.2],
+		# 	["CST - %s" % abbr, 29.88, 1524.08],
+		# 	["VAT - Test - %s" % abbr, 156.25, 1680.33],
+		# 	["Discount - %s" % abbr, -168.03, 1512.30],
+		# ]		
+	# 	for i, tax in enumerate(dl.get({"parentfield": "taxes_and_charges"})):
+	# 		# print tax.account_head, tax.tax_amount, tax.total
+			# self.assertEqual(tax.account_head, expected_values[i][0])
+			# self.assertEqual(tax.tax_amount, expected_values[i][1])
+			# self.assertEqual(tax.total, expected_values[i][2])
+	# 
+	# 	# test item tax amount
+	# 	expected_values = [
+	# 		["Home Desktop 100", 90],
+	# 		["Home Desktop 200", 135]
+	# 	]
+	# 	for i, item in enumerate(dl.get({"parentfield": "purchase_invoice_items"})):
+	# 		self.assertEqual(item.item_code, expected_values[i][0])
+	# 		self.assertEqual(item.valuation_tax_amount, expected_values[i][1])
 
 	def tearDown(self):
 		webnotes.conn.rollback()

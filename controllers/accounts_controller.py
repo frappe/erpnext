@@ -17,7 +17,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
-from webnotes.model.doc import addchild
 from utilities.transaction_base import TransactionBase
 
 class AccountsController(TransactionBase):
@@ -47,15 +46,13 @@ class AccountsController(TransactionBase):
 		
 		return stock_in_hand
 		
-	def clear_unallocated_advances(self, parenttype, parentfield):
-		for d in self.doclist:
-			if d.parentfield == parentfield and flt(d.allocated_amount) == 0:
-				self.doclist.remove(d)
+	def clear_unallocated_advances(self, childtype, parentfield):
+		self.doclist.remove_items({"parentfield": parentfield, "allocated_amount": ["in", [0, None, ""]]})
 			
-		webnotes.conn.sql("""delete from `tab%s` where parent = %s 
-			and ifnull(allocated_amount, 0) = 0""" % (parenttype, '%s'), self.doc.name)			
+		webnotes.conn.sql("""delete from `tab%s` where parentfield=%s and parent = %s 
+			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.doc.name))
 		
-	def get_advances(self, account_head, parenttype, parentfield, dr_or_cr):
+	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
 		res = webnotes.conn.sql("""select t1.name as jv_no, t1.remark, 
 			t2.%s as amount, t2.name as jv_detail_no
 			from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 
@@ -68,9 +65,12 @@ class AccountsController(TransactionBase):
 			
 		self.doclist = self.doc.clear_table(self.doclist, parentfield)
 		for d in res:
-			add = addchild(self.doc, parentfield, parenttype, self.doclist)
-			add.journal_voucher = d.jv_no
-			add.jv_detail_no = d.jv_detail_no
-			add.remarks = d.remark
-			add.advance_amount = flt(d.amount)
-			add.allocate_amount = 0
+			self.doclist.append({
+				"doctype": child_doctype,
+				"parentfield": parentfield,
+				"journal_voucher": d.jv_no,
+				"jv_detail_no": d.jv_detail_no,
+				"remarks": d.remark,
+				"advance_amount": flt(d.amount),
+				"allocate_amount": 0
+			})
