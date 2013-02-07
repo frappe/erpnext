@@ -86,4 +86,12 @@ class BuyingController(AccountsController):
 		 		self.doc.currency)
 		
 	def calculate_taxes_and_totals(self):
-		pass
+		self.doc.conversion_rate = flt(self.doc.conversion_rate)
+		
+		# self.calculate_item_values()
+		# self.initialize_taxes()
+		# self.calculate_net_total()
+		# self.calculate_taxes()
+		# self.calculate_totals()
+		# self.set_total_in_words()
+		

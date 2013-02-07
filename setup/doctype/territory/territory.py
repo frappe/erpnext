@@ -32,4 +32,13 @@ class DocType(DocTypeNestedSet):
 		for d in getlist(self.doclist, 'target_details'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				msgprint("Either target qty or target amount is mandatory.")
-				raise Exception		
+				raise Exception
+				
+test_records = [
+	[{
+		"doctype": "Territory",
+		"territory_name": "_Test Territory",
+		"parent_territory": "All Territories",
+		"is_group": "No",
+	}]
+]
