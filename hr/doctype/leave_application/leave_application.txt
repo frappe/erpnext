@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:14", 
+  "creation": "2013-02-02 14:40:08", 
   "docstatus": 0, 
-  "modified": "2013-02-01 10:34:14", 
+  "modified": "2013-02-07 08:54:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -179,6 +179,15 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
