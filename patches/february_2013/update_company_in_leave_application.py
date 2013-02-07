@@ -7,5 +7,6 @@ def execute():
 		`tabLeave Application`.employee = `tabEmployee`.name""")
 		
 	company = webnotes.conn.get_default("company")
-	webnotes.conn.sql("""update `tabLeave Application`
-		set company = %s where ifnull(company,'')=''""", company)
+	if company:
+		webnotes.conn.sql("""update `tabLeave Application`
+			set company = %s where ifnull(company,'')=''""", company)
