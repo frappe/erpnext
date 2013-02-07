@@ -16,9 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-
-from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
@@ -64,3 +61,12 @@ class DocType(DocTypeNestedSet):
 
 		# rebuild tree
 		super(DocType, self).on_trash()
+
+test_records = [
+	[{
+		"doctype": "Customer Group",
+		"customer_group_name": "_Test Customer Group",
+		"parent_customer_group": "All Customer Groups",
+		"is_group": "No"
+	}]
+]
