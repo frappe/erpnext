@@ -122,21 +122,20 @@ class DocType:
 			cust_code.append(d.ref_code)
 		self.doc.customer_code=','.join(cust_code)
 
-	# Check whether Tax Rate is not entered twice for same Tax Type
 	def check_item_tax(self):
+		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list=[]
 		for d in getlist(self.doclist,'item_tax'):
-			account_type = sql("select account_type from tabAccount where name = %s",d.tax_type)
-			account_type = account_type and account_type[0][0] or ''
-			if account_type not in ['Tax', 'Chargeable']:
-				msgprint("'%s' is not Tax / Chargeable Account"%(d.tax_type))
-				raise Exception, "Tax Account validation"
-			else:
-				if d.tax_type in check_list:
-					msgprint("Rate is entered twice for Tax : '%s'." % (d.tax_type))
-					raise Exception
+			if d.tax_type:
+				account_type = webnotes.conn.get_value("Account", d.tax_type, "account_type")
+				
+				if account_type not in ['Tax', 'Chargeable']:
+					msgprint("'%s' is not Tax / Chargeable Account" % d.tax_type, raise_exception=1)
 				else:
-					check_list.append(d.tax_type)
+					if d.tax_type in check_list:
+						msgprint("Rate is entered twice for: '%s'" % d.tax_type, raise_exception=1)
+					else:
+						check_list.append(d.tax_type)
 
 	def check_for_active_boms(self, field_label):
 		if field_label in ['Is Active', 'Is Purchase Item']:
