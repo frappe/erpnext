@@ -120,7 +120,7 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 	if (doc.master_type) {
 		return {
 			query: "accounts.doctype.account.account.get_master_name",
-			args: {	"master_type": doc.master_type }
+			filters: {	"master_type": doc.master_type }
 		}
 	}
 }
@@ -128,6 +128,6 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
 		query: "accounts.doctype.account.account.get_parent_account",
-		args: { "company": doc.company}
+		filters: { "company": doc.company}
 	}
 }
