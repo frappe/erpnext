@@ -1,5 +1,7 @@
 def execute():
 	import webnotes
+	webnotes.reload_doc("hr", "doctype", "leave_application")
+	
 	webnotes.conn.sql("""update `tabLeave Application`, `tabEmployee` set
 		`tabLeave Application`.company = `tabEmployee`.company where
 		`tabLeave Application`.employee = `tabEmployee`.name""")
