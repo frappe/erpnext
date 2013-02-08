@@ -117,7 +117,12 @@ class DocType:
 			self.doc.leave_balance = get_leave_balance(self.doc.employee,
 				self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
 			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
-
+			
+			if self.doc.total_leave_days == 0:
+				msgprint(_("Hurray! The day(s) on which you are applying for leave \
+					coincide with holiday(s). You need not apply for leave."),
+					raise_exception=1)
+			
 			if self.doc.leave_balance - self.doc.total_leave_days < 0:
 				msgprint("There is not enough leave balance for Leave Type: %s" % \
 					(self.doc.leave_type,), raise_exception=1)
