@@ -21,6 +21,8 @@ from webnotes.utils import nowdate, cstr, flt
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
+from utilities import build_filter_conditions
+
 
 class FiscalYearError(webnotes.ValidationError): pass
 
@@ -210,3 +212,25 @@ def update_against_doc(d, jv_obj):
 		ch.is_advance = cstr(jvd[0][3])
 		ch.docstatus = 1
 		ch.save(1)
+		
+def get_account_list(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("group_or_ledger"):
+		filters["group_or_ledger"] = "Ledger"
+
+	conditions, filter_values = build_filter_conditions(filters)
+		
+	return webnotes.conn.sql("""select name, parent_account from `tabAccount` 
+		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" % 
+		(conditions, searchfield, "%s", "%s", "%s"), 
+		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
+		
+def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("group_or_ledger"):
+		filters["group_or_ledger"] = "Ledger"
+
+	conditions, filter_values = build_filter_conditions(filters)
+	
+	return webnotes.conn.sql("""select name, parent_cost_center from `tabCost Center` 
+		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" % 
+		(conditions, searchfield, "%s", "%s", "%s"), 
+		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))

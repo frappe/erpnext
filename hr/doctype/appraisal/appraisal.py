@@ -76,11 +76,11 @@ class DocType:
 		if int(total_w) != 100:
 			msgprint("Total weightage assigned should be 100%. It is :" + str(total_w) + "%", 
 				raise_exception=1)
-
-		if webnotes.conn.get_default("employee", webnotes.session.user) != self.doc.employee:
 		
-			if total==0:
-				msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
+		webnotes.errprint([webnotes.conn.get_value("Employee", self.doc.employee, "user_id")])
+		if webnotes.conn.get_value("Employee", self.doc.employee, "user_id") != \
+				webnotes.session.user and total == 0:
+			msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
 
 		self.doc.total_score = total
 			

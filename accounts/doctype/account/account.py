@@ -31,13 +31,12 @@ class DocType:
 		self.nsm_parent_field = 'parent_account'
 
 	def autoname(self):
-		company_abbr = sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
-		self.doc.name = self.doc.account_name.strip() + ' - ' + company_abbr
+		self.doc.name = self.doc.account_name.strip() + ' - ' + \
+			webnotes.conn.get_value("Company", self.doc.company, "abbr")
 
-	def get_address(self):		
-		add=sql("Select address from `tab%s` where name='%s'" % 
-			(self.doc.master_type, self.doc.master_name))
-		return {'address': add[0][0]}
+	def get_address(self):
+		address = webnotes.conn.get_value(self.doc.master_type, self.doc.master_name, "address")
+		return {'address': address}
 		
 	def validate_master_name(self):
 		if (self.doc.master_type == 'Customer' or self.doc.master_type == 'Supplier') \
@@ -48,7 +47,7 @@ class DocType:
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
 			par = sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
-				from tabAccount where name =%s""",self.doc.parent_account)
+				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				msgprint("Parent account does not exists", raise_exception=1)
 			elif par and par[0][0] == self.doc.name:
@@ -108,8 +107,8 @@ class DocType:
 
 	# Check if any previous balance exists
 	def check_gle_exists(self):
-		exists = sql("""select name from `tabGL Entry` where account = '%s' 
-			and ifnull(is_cancelled, 'No') = 'No'""" % (self.doc.name))
+		exists = sql("""select name from `tabGL Entry` where account = %s
+			and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name)
 		return exists and exists[0][0] or ''
 
 	def check_if_child_exists(self):
@@ -152,7 +151,7 @@ class DocType:
 		credit_limit_from = 'Customer'
 
 		cr_limit = sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
-			where t2.name='%s' and t1.name = t2.master_name""" % account)
+			where t2.name=%s and t1.name = t2.master_name""", account)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
 			credit_limit = webnotes.conn.get_value('Company', company, 'credit_limit')
@@ -195,16 +194,19 @@ class DocType:
 
 		# rename account name
 		account_name = " - ".join(parts[:-1])
-		sql("update `tabAccount` set account_name = '%s' where name = '%s'" % \
-			(account_name, old))
+		sql("update `tabAccount` set account_name = %s where name = %s", (account_name, old))
 
 		return " - ".join(parts)
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name from `tab%s` where name like '%%%s%%'""" %
-		(filters["master_type"], txt), as_list=1)
+	return webnotes.conn.sql("""select name from `tab%s` where %s like %s 
+		order by name limit %s, %s""" %
+		(filters["master_type"], searchfield, "%s", "%s", "%s"), 
+		("%%%s%%" % txt, start, page_len), as_list=1)
 		
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select name from tabAccount 
-		where group_or_ledger = 'Group' and docstatus != 2 and company = '%s' 
-		and name like '%%%s%%'""" % (filters["company"], txt))
+		where group_or_ledger = 'Group' and docstatus != 2 and company = %s
+		and %s like %s order by name limit %s, %s""" % 
+		("%s", searchfield, "%s", "%s", "%s"), 
+		(filters["company"], "%%%s%%" % txt, start, page_len), as_list=1)
