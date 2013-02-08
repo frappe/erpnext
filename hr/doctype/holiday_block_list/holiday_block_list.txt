@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-04 15:31:29", 
   "docstatus": 0, 
-  "modified": "2013-02-07 08:47:25", 
+  "modified": "2013-02-08 11:36:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -66,7 +66,7 @@
   "doctype": "DocField", 
   "fieldname": "applies_to_all_departments", 
   "fieldtype": "Check", 
-  "label": "Applies to all Departments"
+  "label": "Applies to Company"
  }, 
  {
   "description": "Stop users from making Leave Applications on following days.", 
