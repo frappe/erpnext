@@ -340,3 +340,26 @@ class DocType(AccountsController):
 			return webnotes.conn.sql("""select name, credit_to, outstanding_amount 
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
+
+
+def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
+	return webnotes.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
+		from `tabPurchase Invoice` where credit_to = %s and docstatus = 1 
+		and outstanding_amount > 0 and %s like %s order by name desc limit %s, %s""" %
+		("%s", searchfield, "%s", "%s", "%s"), 
+		(filters["account"], "%%%s%%" % txt, start, page_len))
+		
+def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filters):
+	return webnotes.conn.sql("""select name, debit_to, outstanding_amount 
+		from `tabSales Invoice` where debit_to = %s and docstatus = 1 
+		and outstanding_amount > 0 and `%s` like %s order by name desc limit %s, %s""" %
+		("%s", searchfield, "%s", "%s", "%s"), 
+		(filters["account"], "%%%s%%" % txt, start, page_len))
+		
+def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
+	return webnotes.conn.sql("""select name, posting_date, user_remark 
+		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail 
+		where jv_detail.parent = jv.name and jv_detail.account = %s and docstatus = 1 
+		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
+		("%s", searchfield, "%s", "%s", "%s"), 
+		(filters["account"], "%%%s%%" % txt, start, page_len))

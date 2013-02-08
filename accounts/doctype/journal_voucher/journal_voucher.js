@@ -49,44 +49,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
-	return "SELECT `tabAccount`.name, `tabAccount`.parent_account FROM `tabAccount` WHERE `tabAccount`.company='"+doc.company+"' AND tabAccount.group_or_ledger = 'Ledger' AND tabAccount.docstatus != 2 AND `tabAccount`.%(key)s LIKE '%s' ORDER BY `tabAccount`.name DESC LIMIT 50";
-}
-
-cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabCost Center`.`name`, `tabCost Center`.parent_cost_center FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.docstatus != 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
-}
-
-// Restrict Voucher based on Account
-// ---------------------------------
-cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
-	return "SELECT `tabPurchase Invoice`.name, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.outstanding_amount,`tabPurchase Invoice`.bill_no, `tabPurchase Invoice`.bill_date FROM `tabPurchase Invoice` WHERE `tabPurchase Invoice`.credit_to='"+d.account+"' AND `tabPurchase Invoice`.outstanding_amount > 0 AND `tabPurchase Invoice`.docstatus = 1 AND `tabPurchase Invoice`.%(key)s LIKE '%s' ORDER BY `tabPurchase Invoice`.name DESC LIMIT 200";
-}
-
-cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
-	return "SELECT `tabSales Invoice`.name, `tabSales Invoice`.debit_to, `tabSales Invoice`.outstanding_amount FROM `tabSales Invoice` WHERE `tabSales Invoice`.debit_to='"+d.account+"' AND `tabSales Invoice`.outstanding_amount > 0 AND `tabSales Invoice`.docstatus = 1 AND `tabSales Invoice`.%(key)s LIKE '%s' ORDER BY `tabSales Invoice`.name DESC LIMIT 200";
-}
-
-cur_frm.fields_dict['entries'].grid.get_field('against_jv').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
-	
-	if(!d.account) {
-		msgprint("Please select Account first!")
-		throw "account not selected"
-	}
-	
-	return "SELECT `tabJournal Voucher`.name, `tabJournal Voucher`.posting_date,\
-		`tabJournal Voucher`.user_remark\
-		from `tabJournal Voucher`, `tabJournal Voucher Detail`\
-		where `tabJournal Voucher Detail`.account = '"+ esc_quotes(d.account) + "'\
-		and `tabJournal Voucher`.name like '%s'\
-		and `tabJournal Voucher`.docstatus=1\
-		and `tabJournal Voucher`.voucher_type='Journal Entry'\
-		and `tabJournal Voucher Detail`.parent = `tabJournal Voucher`.name";
-}
-
 //Set debit and credit to zero on adding new row
 //----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
@@ -116,9 +78,8 @@ cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
 	}
 }
 
-
 // Update Totals
-// ---------------
+
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var el = getchildren('Journal Voucher Detail', doc.name, 'entries');
@@ -161,12 +122,6 @@ cur_frm.cscript.validate = function(doc,cdt,cdn) {
 	cur_frm.cscript.update_totals(doc);
 }
 
-cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
-}
-
-
-
 cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	if(doc.select_print_heading){
 		// print heading
@@ -199,5 +154,51 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	} else {
 		cur_frm.set_df_property("cheque_no", "reqd", false);
 		cur_frm.set_df_property("cheque_date", "reqd", false);		
+	}
+}
+
+// get_query
+
+cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
+	return {
+		query: "accounts.utils.get_account_list",
+		filters: { company: doc.company	}
+	}
+}
+
+cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
+	return {
+		query: "accounts.utils.get_cost_center_list",
+		filters: { company_name: doc.company}
+	}
+}
+
+cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {	
+	var d = locals[this.doctype][this.docname];
+	return {
+		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_purchase_invoice",
+		filters: { account: d.account }
+	}
+}
+
+cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
+	var d = locals[this.doctype][this.docname];
+	return {
+		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_sales_invoice",
+		filters: { account: d.account }
+	}
+}
+
+cur_frm.fields_dict['entries'].grid.get_field('against_jv').get_query = function(doc) {
+	var d = locals[this.doctype][this.docname];
+	
+	if(!d.account) {
+		msgprint("Please select Account first!")
+		throw "account not selected"
+	}
+	
+	return {
+		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
+		filters: { account: d.account }
 	}
 }
