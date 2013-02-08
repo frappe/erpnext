@@ -147,9 +147,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 	def load_test_data(self):
 		from webnotes.test_runner import make_test_records
+		make_test_records("Cost Center", verbose=0)
+		make_test_records("Item", verbose=0)
 		make_test_records("Purchase Invoice", verbose=0)
 		
-	def test_gl_entries(self):
+	def atest_gl_entries(self):
 		wrapper = webnotes.model_wrapper(purchase_invoice_doclist).insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -171,25 +173,161 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
-	def atest_purchase_invoice_calculation(self):
-		test_doclist = [] + purchase_invoice_doclist
-		for doc in test_doclist:
-			if doc["doctype"] == "Purchase Taxes and Charges":
-				del doc["tax_amount"]
+	def test_purchase_invoice_calculation(self):
+		test_doclist = [
+			# parent
+			{
+				"doctype": "Purchase Invoice",
+				"naming_series": "BILL",
+				"supplier_name": "_Test Supplier",
+				"credit_to": "_Test Supplier - _TC",
+				"bill_no": "NA",
+				"posting_date": "2013-02-03",
+				"fiscal_year": "_Test Fiscal Year",
+				"company": "_Test Company",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"grand_total_import": 0 # for feed
+			},
+			# items
+			{
+				"doctype": "Purchase Invoice Item",
+				"parentfield": "entries",
+				"item_code": "_Test Item Home Desktop 100",
+				"item_name": "_Test Item Home Desktop 100",
+				"qty": 10,
+				"import_rate": 50,
+				"import_amount": 500,
+				"rate": 50,
+				"amount": 50,
+				"uom": "_Test UOM",
+				"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
+				"expense_head": "_Test Account Cost for Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+				
+			},
+			{
+				"doctype": "Purchase Invoice Item",
+				"parentfield": "entries",
+				"item_code": "_Test Item Home Desktop 200",
+				"item_name": "_Test Item Home Desktop 200",
+				"qty": 5,
+				"import_rate": 150,
+				"import_amount": 750,
+				"rate": 150,
+				"amount": 750,
+				"uom": "_Test UOM",
+				"expense_head": "_Test Account Cost for Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+			},
+			# taxes
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Shipping Charges",
+				"category": "Valuation and Total",
+				"add_deduct_tax": "Add",
+				"rate": 100
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Customs Duty - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Customs Duty",
+				"category": "Valuation",
+				"add_deduct_tax": "Add",
+				"rate": 10
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Excise Duty - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Excise Duty",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"rate": 12
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Previous Row Amount",
+				"account_head": "_Test Account Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Education Cess",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"rate": 2,
+				"row_id": 3
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Previous Row Amount",
+				"account_head": "_Test Account S&H Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "S&H Education Cess",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"rate": 1,
+				"row_id": 3
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Previous Row Total",
+				"account_head": "_Test Account CST - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "CST",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"rate": 2,
+				"row_id": 5
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"rate": 12.5
+			},
+			{
+				"doctype": "Purchase Taxes and Charges",
+				"parentfield": "purchase_tax_details",
+				"charge_type": "On Previous Row Total",
+				"account_head": "_Test Account Discount - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Discount",
+				"category": "Total",
+				"add_deduct_tax": "Deduct",
+				"rate": 10,
+				"row_id": 7
+			},
+		]
 				
 		wrapper = webnotes.model_wrapper(test_doclist).insert()
 		wrapper.load_from_db()
 		
 		# tax amounts
 		expected_values = [
-			["Shipping Charges - %s" % abbr, 100, 1350],
-			["Customs Duty - %s" % abbr, 125, 1350],
-			["Excise Duty - %s" % abbr, 140, 1490],
-			["Education Cess - %s" % abbr, 2.8, 1492.8],
-			["S&H Education Cess - %s" % abbr, 1.4, 1494.2],
-			["CST - %s" % abbr, 29.88, 1524.08],
-			["VAT - Test - %s" % abbr, 156.25, 1680.33],
-			["Discount - %s" % abbr, 168.03, 1512.30],
+			["_Test Account Shipping Charges - _TC", 100, 1350],
+			["_Test Account Customs Duty - _TC", 125, 1350],
+			["_Test Account Excise Duty - _TC", 140, 1490],
+			["_Test Account Education Cess - _TC", 2.8, 1492.8],
+			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
+			["_Test Account CST - _TC", 29.88, 1524.08],
+			["_Test Account VAT - _TC", 156.25, 1680.33],
+			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 		
 		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
@@ -198,8 +336,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 
 		expected_values = [
-			["Home Desktop 100", 90],
-			["Home Desktop 200", 135]
+			["_Test Item Home Desktop 100", 90],
+			["_Test Item Home Desktop 200", 135]
 		]
 		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
 			self.assertEqual(item.item_code, expected_values[i][0])
