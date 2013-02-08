@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:47:25", 
+  "modified": "2013-02-08 13:07:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -542,14 +542,6 @@
   "fieldname": "valid_upto", 
   "fieldtype": "Date", 
   "label": "Valid Upto"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "salary_structure", 
-  "fieldtype": "Button", 
-  "hidden": 1, 
-  "label": "Salary Structure", 
-  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
