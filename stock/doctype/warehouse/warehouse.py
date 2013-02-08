@@ -18,7 +18,6 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, validate_email_add
-from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -204,7 +203,15 @@ class DocType:
 		# delete cancelled sle
 		if sql("""select name from `tabStock Ledger Entry` 
 				where warehouse = %s and ifnull('is_cancelled', '') = 'No'""", self.doc.name):
-			mdgprint("""Warehosue can not be deleted as stock ledger entry 
-				exists for this warehosue.""", raise_exception=1)
+			msgprint("""Warehosue can not be deleted as stock ledger entry 
+				exists for this warehouse.""", raise_exception=1)
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
+			
+test_records = [
+	[{
+		"doctype": "Warehouse",
+		"warehouse_name": "_Test Warehouse",
+		"warehouse_type": "_Test Warehouse Type"
+	}]
+]
