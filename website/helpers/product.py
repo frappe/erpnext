@@ -29,6 +29,8 @@ def get_product_info(item_code):
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_list(search=None, product_group=None, start=0, limit=10):
+	# DOUBT: why is product_group param passed?
+	
 	# base query
 	query = """select name, item_name, page_name, website_image, item_group, 
 			web_long_description as website_description
@@ -70,8 +72,8 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 def get_child_groups(item_group_name):
 	item_group = webnotes.doc("Item Group", item_group_name)
 	return webnotes.conn.sql("""select name 
-		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s""" \
-			% item_group.fields)
+		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
+			and show_in_website = 1""", item_group.fields)
 
 def get_group_item_count(item_group):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
