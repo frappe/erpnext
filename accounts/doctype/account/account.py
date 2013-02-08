@@ -18,14 +18,10 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money
-from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
-
-test_records = []
 
 class DocType:
 	def __init__(self,d,dl):
@@ -201,3 +197,40 @@ class DocType:
 			(account_name, old))
 
 		return " - ".join(parts)
+
+def get_master_name(doctype, txt, searchfield, start, page_len, args):
+	return webnotes.conn.sql("""select name from `tab%s` where name like '%%%s%%'""" %
+		(args["master_type"], txt), as_list=1)
+		
+def get_parent_account(doctype, txt, searchfield, start, page_len, args):
+	return webnotes.conn.sql("""select name from tabAccount 
+		where group_or_ledger = 'Group' and docstatus != 2 and company = '%s' 
+		and name like '%%%s%%'""" % (args["company"], txt))
+
+def make_test_records(verbose):
+	from webnotes.test_runner import load_module_and_make_records, make_test_objects
+	
+	load_module_and_make_records("Company", verbose)
+	
+	accounts = [
+		# [account_name, parent_account, group_or_ledger]
+		["_Test Account Stock Expenses", "Direct Expenses - _TC", "Group"],
+		["_Test Account Shipping Charges", "_Test Account Stock Expenses - _TC", "Ledger"],
+		["_Test Account Customs Duty", "_Test Account Stock Expenses - _TC", "Ledger"],
+		["_Test Account Tax Assets", "Current Assets - _TC", "Group"],
+		["_Test Account VAT", "_Test Account Tax Assets - _TC", "Ledger"],
+		["_Test Account Cost for Goods Sold", "Expenses - _TC", "Ledger"],
+		["_Test Account Excise Duty", "_Test Account Tax Assets - _TC", "Ledger"],
+		["_Test Account Education Cess", "_Test Account Tax Assets - _TC", "Ledger"],
+		["_Test Account S&H Education Cess", "_Test Account Tax Assets - _TC", "Ledger"],
+		["_Test Account CST", "Direct Expenses - _TC", "Ledger"],
+		["_Test Account Discount", "Direct Expenses - _TC", "Ledger"]
+	]
+
+	return make_test_objects([[{
+			"doctype": "Account",
+			"account_name": account_name,
+			"parent_account": parent_account,
+			"company": "_Test Company",
+			"group_or_ledger": group_or_ledger
+		}] for account_name, parent_account, group_or_ledger in accounts])

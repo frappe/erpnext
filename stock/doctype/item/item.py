@@ -122,21 +122,20 @@ class DocType:
 			cust_code.append(d.ref_code)
 		self.doc.customer_code=','.join(cust_code)
 
-	# Check whether Tax Rate is not entered twice for same Tax Type
 	def check_item_tax(self):
+		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list=[]
 		for d in getlist(self.doclist,'item_tax'):
-			account_type = sql("select account_type from tabAccount where name = %s",d.tax_type)
-			account_type = account_type and account_type[0][0] or ''
-			if account_type not in ['Tax', 'Chargeable']:
-				msgprint("'%s' is not Tax / Chargeable Account"%(d.tax_type))
-				raise Exception, "Tax Account validation"
-			else:
-				if d.tax_type in check_list:
-					msgprint("Rate is entered twice for Tax : '%s'." % (d.tax_type))
-					raise Exception
+			if d.tax_type:
+				account_type = webnotes.conn.get_value("Account", d.tax_type, "account_type")
+				
+				if account_type not in ['Tax', 'Chargeable']:
+					msgprint("'%s' is not Tax / Chargeable Account" % d.tax_type, raise_exception=1)
 				else:
-					check_list.append(d.tax_type)
+					if d.tax_type in check_list:
+						msgprint("Rate is entered twice for: '%s'" % d.tax_type, raise_exception=1)
+					else:
+						check_list.append(d.tax_type)
 
 	def check_for_active_boms(self, field_label):
 		if field_label in ['Is Active', 'Is Purchase Item']:
@@ -222,3 +221,49 @@ class DocType:
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow
 			get_slideshow(self)
+			
+test_records = [
+	[{
+		"doctype": "Item",
+		"item_code": "_Test Item Home Desktop 100",
+		"item_name": "_Test Item Home Desktop 100",
+		"description": "_Test Item Home Desktop 100",
+		"item_group": "_Test Item Group Desktops",
+		"is_stock_item": "Yes",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "No",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"is_sample_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "No",
+		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
+	},
+	{
+		"doctype": "Item Tax",
+		"tax_type": "_Test Account Excise Duty - _TC",
+		"tax_rate": 10
+	}],
+	[{
+		"doctype": "Item",
+		"item_code": "_Test Item Home Desktop 200",
+		"item_name": "_Test Item Home Desktop 200",
+		"description": "_Test Item Home Desktop 200",
+		"item_group": "_Test Item Group Desktops",
+		"is_stock_item": "Yes",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "No",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"is_sample_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "No",
+		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
+	}],
+]

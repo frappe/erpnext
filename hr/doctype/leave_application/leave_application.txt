@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:14", 
+  "creation": "2013-02-02 14:40:08", 
   "docstatus": 0, 
-  "modified": "2013-02-01 10:34:14", 
+  "modified": "2013-02-08 11:27:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -165,7 +165,7 @@
   "fieldtype": "Date", 
   "label": "Posting Date", 
   "no_copy": 1, 
-  "permlevel": 2, 
+  "permlevel": 0, 
   "reqd": 1
  }, 
  {
@@ -175,10 +175,19 @@
   "in_filter": 1, 
   "label": "Fiscal Year", 
   "options": "link:Fiscal Year", 
-  "permlevel": 2, 
+  "permlevel": 0, 
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -186,7 +195,7 @@
   "fieldtype": "Link", 
   "label": "Letter Head", 
   "options": "Letter Head", 
-  "permlevel": 2, 
+  "permlevel": 0, 
   "print_hide": 1, 
   "read_only": 0
  }, 

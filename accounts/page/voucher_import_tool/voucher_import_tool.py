@@ -168,7 +168,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 		webnotes.conn.commit()
 	except Exception, e:
 		webnotes.conn.rollback()
-		err_msg = webnotes.message_log and webnotes.message_log[0] or unicode(e)
+		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or unicode(e)
 		messages.append("""<p style='color: red'>[row #%s] %s failed: %s</p>"""
 			% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
 		messages.append("<p style='color: red'>All transactions rolled back</p>")

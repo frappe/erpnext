@@ -258,9 +258,9 @@ class DocType:
 
 test_records = [
 	[{
+		"doctype": "Company",
 		"company_name": "_Test Company",
-		"abbr": "TC",
+		"abbr": "_TC",
 		"default_currency": "INR",
-		"doctype": "Company"
-	}]
+	}],
 ]

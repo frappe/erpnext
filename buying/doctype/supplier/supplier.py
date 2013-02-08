@@ -182,3 +182,12 @@ class DocType(TransactionBase):
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
 			master_type = 'Supplier' where master_name = %s""" , (new,old))
+
+test_records = [
+	[{
+		"doctype": "Supplier",
+		"supplier_name": "_Test Supplier",
+		"supplier_type": "_Test Supplier Type",
+		"company": "_Test Company"
+	}]
+]

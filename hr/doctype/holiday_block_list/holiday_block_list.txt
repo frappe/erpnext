@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-04 15:31:29", 
   "docstatus": 0, 
-  "modified": "2013-02-06 14:39:09", 
+  "modified": "2013-02-07 08:47:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,21 @@
   "label": "Year", 
   "options": "Fiscal Year", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "description": "If not checked, the list will have to be added to each Department where it has to be applied.", 
+  "doctype": "DocField", 
+  "fieldname": "applies_to_all_departments", 
+  "fieldtype": "Check", 
+  "label": "Applies to all Departments"
  }, 
  {
   "description": "Stop users from making Leave Applications on following days.", 

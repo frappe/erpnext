@@ -116,19 +116,18 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
   });
 }
 
-// Master name get query
-// -----------------------------------------
-cur_frm.fields_dict['master_name'].get_query=function(doc){
- if (doc.master_type){
-    return 'SELECT `tab'+doc.master_type+'`.name FROM `tab'+doc.master_type+'` WHERE `tab'+doc.master_type+'`.name LIKE "%s" and `tab'+doc.master_type+'`.docstatus != 2 ORDER BY `tab'+doc.master_type+'`.name LIMIT 50';
-  }
+cur_frm.fields_dict['master_name'].get_query = function(doc) {
+	if (doc.master_type) {
+		return {
+			query: "accounts.doctype.account.account.get_master_name",
+			args: {	"master_type": doc.master_type }
+		}
+	}
 }
 
-// parent account get query
-// -----------------------------------------
-cur_frm.fields_dict['parent_account'].get_query = function(doc){
-  return 'SELECT DISTINCT `tabAccount`.name FROM `tabAccount` WHERE \
-	`tabAccount`.group_or_ledger="Group" AND `tabAccount`.docstatus != 2 AND \
-	`tabAccount`.company="'+ doc.company+'" AND `tabAccount`.company is not NULL AND \
-	`tabAccount`.name LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';
+cur_frm.fields_dict['parent_account'].get_query = function(doc) {
+	return {
+		query: "accounts.doctype.account.account.get_parent_account",
+		args: { "company": doc.company}
+	}
 }
