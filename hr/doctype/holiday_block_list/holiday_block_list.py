@@ -23,7 +23,7 @@ class DocType:
 test_records = [[{
 		"doctype":"Holiday Block List",
 		"holiday_block_list_name": "_Test Holiday Block List",
-		"year": "_Test Fiscal Year",
+		"year": "_Test Fiscal Year 2013",
 		"company": "_Test Company"
 	}, {
 		"doctype": "Holiday Block List Date",
