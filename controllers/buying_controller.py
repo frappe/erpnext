@@ -36,7 +36,7 @@ class BuyingController(AccountsController):
 				self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
 			
 			# IMPORTANT: enable this only when client side code is similar to this one
-			self.calculate_taxes_and_totals()
+			# self.calculate_taxes_and_totals()
 			
 			# set total in words
 			self.set_total_in_words()
