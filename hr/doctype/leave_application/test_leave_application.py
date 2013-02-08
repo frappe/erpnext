@@ -39,7 +39,7 @@ test_records = [
 	[{
 		"doctype": "Leave Allocation",
 		"leave_type": "_Test Leave Type",
-		"fiscal_year": "_Test Fiscal Year",
+		"fiscal_year": "_Test Fiscal Year 2013",
 		"employee":"_T-Employee-0001",
 		"new_leaves_allocated": 15,
 		"docstatus": 1
@@ -50,7 +50,7 @@ test_records = [
 		"from_date": "2013-05-01",
 		"to_date": "2013-05-05",
 		"posting_date": "2013-01-02",
-		"fiscal_year": "_Test Fiscal Year",
+		"fiscal_year": "_Test Fiscal Year 2013",
 		"employee": "_T-Employee-0001",
 		"company": "_Test Company"
 	}]]

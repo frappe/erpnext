@@ -117,21 +117,28 @@ class DocType:
 			self.doc.leave_balance = get_leave_balance(self.doc.employee,
 				self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
 			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
-
+			
+			if self.doc.total_leave_days == 0:
+				msgprint(_("Hurray! The day(s) on which you are applying for leave \
+					coincide with holiday(s). You need not apply for leave."),
+					raise_exception=1)
+			
 			if self.doc.leave_balance - self.doc.total_leave_days < 0:
 				msgprint("There is not enough leave balance for Leave Type: %s" % \
 					(self.doc.leave_type,), raise_exception=1)
 
 	def validate_leave_overlap(self):
-		for d in webnotes.conn.sql("""select name, leave_type, posting_date, from_date, to_date 
+		for d in webnotes.conn.sql("""select name, leave_type, posting_date, 
+			from_date, to_date 
 			from `tabLeave Application` 
 			where 
 			(from_date <= %(to_date)s and to_date >= %(from_date)s)
 			and employee = %(employee)s
-			and docstatus = 1 
+			and docstatus < 2
+			and status in ("Open", "Approved")
 			and name != %(name)s""", self.doc.fields, as_dict = 1):
  
-			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : %s" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name']), raise_exception = 1)
+			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = 1)
 
 	def validate_max_days(self):
 		max_days = webnotes.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))

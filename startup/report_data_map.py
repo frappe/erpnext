@@ -113,7 +113,7 @@ data_map = {
 		},
 	},
 	"Purchase Request Item": {
-		"columns": ["name", "item_code", "warehouse", 
+		"columns": ["item.name as name", "item_code", "warehouse", 
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
 		"from": "`tabPurchase Request Item` item, `tabPurchase Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
@@ -124,7 +124,7 @@ data_map = {
 		},
 	},
 	"Purchase Order Item": {
-		"columns": ["name", "item_code", "warehouse", 
+		"columns": ["item.name as name", "item_code", "warehouse", 
 			"(ifnull(qty, 0) - ifnull(received_qty, 0)) as qty"],
 		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
@@ -136,7 +136,7 @@ data_map = {
 	},
 	
 	"Sales Order Item": {
-		"columns": ["name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
+		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
 			"reserved_warehouse as warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 

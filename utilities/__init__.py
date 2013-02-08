@@ -58,3 +58,12 @@ def get_report_list():
 def validate_status(status, options):
 	if status not in options:
 		msgprint(_("Status must be one of ") + comma_or(options), raise_exception=True)
+
+def build_filter_conditions(filters):
+	conditions, filter_values = [], []
+	for key in filters:
+		conditions.append('`' + key + '` = %s')
+		filter_values.append(filters[key])
+
+	conditions = conditions and " and " + " and ".join(conditions) or ""
+	return conditions, filter_values

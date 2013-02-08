@@ -66,11 +66,8 @@ class DocType:
 				self.doc.cost_center = ""
 		
 	def validate_posting_date(self):
-		from accounts.utils import get_fiscal_year
-		fiscal_year = get_fiscal_year(self.doc.posting_date)[0]
-		
-		if fiscal_year != self.doc.fiscal_year:
-			msgprint(_("Posting date must be in the Selected Fiscal Year"), raise_exception=1)
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
 
 	def check_credit_limit(self):
 		master_type, master_name = webnotes.conn.get_value("Account", 

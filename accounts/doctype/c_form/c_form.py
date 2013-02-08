@@ -32,22 +32,23 @@ class DocType:
 			and no other c-form is received for that"""
 
 		for d in getlist(self.doclist, 'invoice_details'):
-			inv = webnotes.conn.sql("""select c_form_applicable, c_form_no from
-				`tabSales Invoice` where name = %s""", d.invoice_no)
+			if d.invoice_no:
+				inv = webnotes.conn.sql("""select c_form_applicable, c_form_no from
+					`tabSales Invoice` where name = %s""", d.invoice_no)
 				
-			if not inv:
-				webnotes.msgprint("Invoice: %s is not exists in the system, please check." % 
-					d.invoice_no, raise_exception=1)
+				if not inv:
+					webnotes.msgprint("Invoice: %s is not exists in the system, please check." % 
+						d.invoice_no, raise_exception=1)
 					
-			elif inv[0][0] != 'Yes':
-				webnotes.msgprint("C-form is not applicable for Invoice: %s" % 
-					d.invoice_no, raise_exception=1)
+				elif inv[0][0] != 'Yes':
+					webnotes.msgprint("C-form is not applicable for Invoice: %s" % 
+						d.invoice_no, raise_exception=1)
 					
-			elif inv[0][1] and inv[0][1] != self.doc.name:
-				webnotes.msgprint("""Invoice %s is tagged in another C-form: %s.
-					If you want to change C-form no for this invoice,
-					please remove invoice no from the previous c-form and then try again""" % 
-					(d.invoice_no, inv[0][1]), raise_exception=1)
+				elif inv[0][1] and inv[0][1] != self.doc.name:
+					webnotes.msgprint("""Invoice %s is tagged in another C-form: %s.
+						If you want to change C-form no for this invoice,
+						please remove invoice no from the previous c-form and then try again""" % 
+						(d.invoice_no, inv[0][1]), raise_exception=1)
 
 	def on_update(self):
 		"""	Update C-Form No on invoices"""
@@ -81,3 +82,13 @@ class DocType:
 			'net_total'    : inv and flt(inv[0][2]) or '',
 			'grand_total'  : inv and flt(inv[0][3]) or ''
 		}
+
+def get_invoice_nos(doctype, txt, searchfield, start, page_len, filters):
+	from utilities import build_filter_conditions
+	conditions, filter_values = build_filter_conditions(filters)
+	
+	return webnotes.conn.sql("""select name from `tabSales Invoice` where docstatus = 1 
+		and c_form_applicable = 'Yes' and ifnull(c_form_no, '') = '' %s 
+		and %s like %s order by name limit %s, %s""" % 
+		(conditions, searchfield, "%s", "%s", "%s"), 
+		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))

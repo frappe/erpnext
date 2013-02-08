@@ -127,8 +127,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 	},
 	
 	toggle_enable_brand: function() {
-		if(this.filter_inputs.item_code.val() ==
-				this.filter_inputs.item_code.get(0).opts.default_value) {
+		if(!this.filter_inputs.item_code.val()) {
 			this.filter_inputs.brand.removeAttr("disabled");
 		} else {
 			this.filter_inputs.brand

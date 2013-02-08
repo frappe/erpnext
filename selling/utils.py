@@ -16,31 +16,17 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
+	if webnotes.conn.get_default("cust_master_name") == "Customer Name":
+		fields = ["name", "customer_group", "territory"]
+	else:
+		fields = ["name", "customer_name", "customer_group", "territory"]
 		
-	def set_as_default(self):
-		webnotes.conn.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
-		webnotes.get_obj("Global Defaults").on_update()
-		
-		# clear cache
-		webnotes.clear_cache()
-		
-		msgprint(self.doc.name + _(""" is now the default Fiscal Year. \
-			Please refresh your browser for the change to take effect."""))
-
-test_records = [
-	[{
-		"doctype": "Fiscal Year", 
-		"year": "_Test Fiscal Year 2013", 
-		"year_start_date": "2013-01-01"
-	}],
-	[{
-		"doctype": "Fiscal Year",
-		"year": "_Test Fiscal Year 2014", 
-		"year_start_date": "2014-01-01"
-	}]
-]
+	return webnotes.conn.sql("""select %s from `tabCustomer` where docstatus < 2 
+		and (%s like %s or customer_name like %s) order by 
+		case when name like %s then 0 else 1 end,
+		case when customer_name like %s then 0 else 1 end,
+		name, customer_name limit %s, %s""" % 
+		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"), 
+		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))

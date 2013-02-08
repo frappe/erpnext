@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-30 12:49:56", 
+  "creation": "2013-02-07 08:28:23", 
   "docstatus": 0, 
-  "modified": "2013-02-07 10:50:00", 
+  "modified": "2013-02-08 14:06:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -407,7 +407,7 @@
   "print_width": "150px", 
   "read_only": 1, 
   "reqd": 0, 
-  "search_index": 1, 
+  "search_index": 0, 
   "width": "150px"
  }, 
  {

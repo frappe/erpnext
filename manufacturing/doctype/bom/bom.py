@@ -87,9 +87,6 @@ class DocType:
 			msgprint("Item_code: %s in materials tab cannot be same as FG Item", 
 				item[0]['name'], raise_exception=1)
 		
-		if item and item[0]['is_asset_item'] == 'Yes':
-			msgprint("Item: %s is an asset item, please check", item[0]['name'], raise_exception=1)
-
 		if not item or item[0]['docstatus'] == 2:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
 
@@ -147,11 +144,11 @@ class DocType:
 		rate = []
 		for wh in warehouse:
 			r = get_incoming_rate({
-				item_code: args.get("item_code"),
-				warehouse: wh[0],
-				posting_date: dt,
-				posting_time: time,
-				qty: args.get("qty") or 0
+				"item_code": args.get("item_code"),
+				"warehouse": wh[0],
+				"posting_date": dt,
+				"posting_time": time,
+				"qty": args.get("qty") or 0
 			})
 			if r:
 				rate.append(r)

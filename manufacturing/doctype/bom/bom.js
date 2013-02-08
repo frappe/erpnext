@@ -175,7 +175,7 @@ var calculate_total = function(doc) {
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
 	return erpnext.queries.item({
-		'ifnull(tabItem.is_manufactured_item, "No")': 'Yes'
+		'ifnull(tabItem.is_manufactured_item, "No")': 'Yes',
 	})
 }
 

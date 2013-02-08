@@ -148,7 +148,7 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 		
 	return valid_serial_nos
 	
-def get_warehouse_list(doctype, txt, searchfield, start, page_len, args):
+def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	"""used in search queries"""
 	wlist = []
 	for w in webnotes.conn.sql_list("""select name from tabWarehouse 
