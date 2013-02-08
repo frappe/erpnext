@@ -39,7 +39,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 		make_test_records("Purchase Invoice", verbose=0)
 		
 	def test_gl_entries(self):
-		wrapper = webnotes.model_wrapper(self.get_test_doclist()).insert()
+		wrapper = webnotes.model_wrapper(self.get_test_doclist())
+		
+		# circumvent the disabled calculation call
+		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)
+		obj.calculate_taxes_and_totals()
+		wrapper.set_doclist(obj.doclist)
+		
+		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
 		dl = wrapper.doclist
@@ -61,7 +68,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
 	def test_purchase_invoice_calculation(self):
-		wrapper = webnotes.model_wrapper(self.get_test_doclist()).insert()
+		wrapper = webnotes.model_wrapper(self.get_test_doclist())
+		
+		# circumvent the disabled calculation call
+		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)
+		obj.calculate_taxes_and_totals()
+		wrapper.set_doclist(obj.doclist)
+
+		wrapper.insert()
 		wrapper.load_from_db()
 		
 		self.assertEqual(wrapper.doclist[0].net_total, 1250)
