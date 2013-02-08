@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-28 10:05:58", 
+  "creation": "2013-01-29 20:53:00", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:04", 
+  "modified": "2013-02-08 14:06:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -267,6 +267,20 @@
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_tax_amount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Item Tax Amount", 
+  "no_copy": 1, 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
  }, 
  {
   "allow_on_submit": 1, 

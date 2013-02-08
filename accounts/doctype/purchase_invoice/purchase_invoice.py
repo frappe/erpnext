@@ -32,7 +32,6 @@ class DocType(BuyingController):
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
 
-
 # ************************** Trigger Functions ****************************
 
 	# Credit To
