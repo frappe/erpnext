@@ -240,6 +240,7 @@ test_records = [
 		"inspection_required": "No",
 		"is_pro_applicable": "No",
 		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
 	},
 	{
 		"doctype": "Item Tax",
@@ -263,5 +264,6 @@ test_records = [
 		"inspection_required": "No",
 		"is_pro_applicable": "No",
 		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
 	}],
 ]
