@@ -52,7 +52,7 @@ $(document).ready(function() {
 		
 		
 		$.ajax({
-			method: "POST",
+			type: "POST",
 			url: "server.py",
 			data: args,
 			dataType: "json",
