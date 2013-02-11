@@ -1,0 +1,23 @@
+{
+ "A Product or a Service that is bought, sold or kept in stock.": "Proizvod ili usluga koji je kupio, prodao ili \u010duva u skladi\u0161tu.", 
+ "A logical Warehouse against which stock entries are made.": "Logi\u010dno Skladi\u0161te protiv kojih dionica unosi su napravili.", 
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials": "Agregat skupina ** stavki ** u drugoj to\u010dki ** **. To je korisno ako ste vezanje odre\u0111ene artikle ** ** u paketu i odr\u017eavanje zalihe pakiran ** stavki ** a ne agregata ** artikla **. Paket ** artikla ** \u0107e &quot;Je katalo\u0161ki Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;, na primjer:. Ako prodajete Prijenosna ra\u010dunala i Ruksaci odvojeno i imaju posebnu cijenu ako kupac kupuje oboje , onda laptop + ruksak \u0107e biti novi Prodaja BOM Item.Note: BOM = Bill materijala", 
+ "Distinct unit of an Item": "Razlikovna jedinica stavku", 
+ "Featured Item in Item Group": "Prikazan artikla u to\u010dki Grupe", 
+ "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes": "Za prakti\u010dnost kupaca, te kodovi mogu se koristiti u tiskanim formata kao \u0161to su fakture i otpremnice", 
+ "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.": "Generirajte pakiranje ga\u0107ice za pakete koji \u0107e biti isporu\u010den. Rabljeni obavijestiti paket broj, sadr\u017eaj paketa i njegovu te\u017einu.", 
+ "Item-Wise Price List": "Stavka-Wise Cjenik", 
+ "Ordered Items To Be Delivered": "Naru\u010deni Proizvodi se dostavljaju", 
+ "Purchase Order Items To Be Received": "Narud\u017ebenica Proizvodi treba primiti", 
+ "Serial No Service Contract Expiry": "Serijski Bez isteka Ugovor o pru\u017eanju usluga", 
+ "Serial No Status": "Serijski Bez Status", 
+ "Serial No Warranty Expiry": "Serijski Nema jamstva isteka", 
+ "Stock Ageing": "Katalo\u0161ki Starenje", 
+ "Stock Analytics": "Stock Analytics", 
+ "Stock Balance": "Katalo\u0161ki bilanca", 
+ "Stock Home": "Katalo\u0161ki Po\u010detna", 
+ "Stock Ledger": "Stock Ledger", 
+ "Stock Level": "Katalo\u0161ki Razina", 
+ "Table for Item that will be shown in Web Site": "Tablica za predmet koji \u0107e biti prikazan u web stranice", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Ovaj alat poma\u017ee vam da a\u017eurirate ili popraviti koli\u010dinu i vrednovanja zaliha u sustavu. To se obi\u010dno koristi za sinkronizaciju sustava vrijednosti i \u0161to zapravo postoji u svojim skladi\u0161tima."
+}

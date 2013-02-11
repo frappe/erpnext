@@ -1,0 +1,15 @@
+{
+ "Check to activate": "Provjerite za aktiviranje", 
+ "Email Id": "E-mail ID", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "E-mail Id gdje posao zahtjeva \u0107e e-mail npr. &quot;jobs@example.com&quot;", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"": "E-mail postavke za izdvajanje vodi od prodaje email id npr. &quot;sales@example.com&quot;", 
+ "Extract Emails": "Ekstrakt e-po\u0161te", 
+ "Host": "Doma\u0107in", 
+ "POP3 Mail Settings": "POP3 Mail Postavke", 
+ "POP3 server e.g. (pop.gmail.com)": "POP3 poslu\u017eitelj npr. (pop.gmail.com)", 
+ "Password": "Lozinka", 
+ "Sales Email Settings": "Prodaja Postavke e-po\u0161te", 
+ "Setup": "Postavljanje", 
+ "Use SSL": "Koristite SSL", 
+ "Username": "Korisni\u010dko ime"
+}

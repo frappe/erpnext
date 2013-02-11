@@ -1,0 +1,23 @@
+{
+ "Check this if you want to show in website": "Ozna\u010dite ovo ako \u017eelite pokazati u web", 
+ "Description": "Opis", 
+ "File List": "Popis datoteka", 
+ "HTML / Banner that will show on the top of product list.": "HTML / bannera koji \u0107e se prikazivati \u200b\u200bna vrhu liste proizvoda.", 
+ "Has Child Node": "Je li \u010dvor dijete", 
+ "Item Classification": "Stavka klasifikacija", 
+ "Item Group": "Stavka Grupa", 
+ "Item Group Name": "Stavka Ime grupe", 
+ "No": "Ne", 
+ "Only leaf nodes are allowed in transaction": "Samo leaf \u010dvorovi su dozvoljeni u transakciji", 
+ "Page Name": "Stranica Ime", 
+ "Parent Item Group": "Roditelj artikla Grupa", 
+ "Setup": "Postavljanje", 
+ "Show in Website": "Prika\u017ei u web", 
+ "Show this slideshow at the top of the page": "Prika\u017ei ovaj slideshow na vrhu stranice", 
+ "Slideshow": "Slideshow", 
+ "Website Settings": "Website Postavke", 
+ "Yes": "Da", 
+ "lft": "LFT", 
+ "old_parent": "old_parent", 
+ "rgt": "usta\u0161a"
+}

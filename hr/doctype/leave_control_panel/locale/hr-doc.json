@@ -1,0 +1,20 @@
+{
+ "Allocate": "Dodijeliti", 
+ "Branch": "Grana", 
+ "Carry Forward": "Prenijeti", 
+ "Department": "Odsjek", 
+ "Designation": "Oznaka", 
+ "Employee Type": "Zaposlenik Tip", 
+ "Fiscal Year": "Fiskalna godina", 
+ "Grade": "Razred", 
+ "HR": "HR", 
+ "Leave Control Panel": "Ostavite Upravlja\u010dka plo\u010da", 
+ "Leave Type": "Ostavite Vid", 
+ "Leave blank if considered for all branches": "Ostavite prazno ako smatra za sve grane", 
+ "Leave blank if considered for all departments": "Ostavite prazno ako smatra za sve odjele", 
+ "Leave blank if considered for all designations": "Ostavite prazno ako smatra za sve oznake", 
+ "Leave blank if considered for all employee types": "Ostavite prazno ako smatra za sve tipove zaposlenika", 
+ "Leave blank if considered for all grades": "Ostavite prazno ako smatra za sve razrede", 
+ "New Leaves Allocated (In Days)": "Novi Li\u0161\u0107e alociran (u danima)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "Molimo odaberite prenositi ako \u017eelite uklju\u010diti prethodnoj fiskalnoj godini je ravnote\u017ea ostavlja na ovoj fiskalnoj godini"
+}

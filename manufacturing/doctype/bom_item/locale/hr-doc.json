@@ -1,0 +1,14 @@
+{
+ "Amount": "Iznos", 
+ "BOM Item": "BOM artikla", 
+ "BOM No": "BOM Ne", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Item Description": "Stavka Opis", 
+ "Manufacturing": "Proizvodnja", 
+ "Operation No": "Operacija Ne", 
+ "Qty": "Kol", 
+ "Qty Consumed Per Unit": "Kol Potro\u0161eno po jedinici", 
+ "Rate": "Stopa", 
+ "Scrap %": "Otpad%", 
+ "Stock UOM": "Katalo\u0161ki UOM"
+}

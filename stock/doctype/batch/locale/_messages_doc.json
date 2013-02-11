@@ -2,10 +2,10 @@
  "Trash Reason", 
  "Expiry Date", 
  "Description", 
- "Item", 
+ "Batch Finished Date", 
  "Batch Started Date", 
  "Batch", 
  "Batch ID", 
- "Batch Finished Date", 
+ "Item", 
  "Stock"
 ]

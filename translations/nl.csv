@@ -1,17 +1,25 @@
 ,
+ Reason: ,Reden:
  against same operation,tegen dezelfde handeling
  by Role ,door Rol
  cannot be 0,mag niet 0
+ does not belong to the company: ,behoort niet tot de onderneming:
+ has been freezed. \				Only Accounts Manager can do transaction against this account,is bevroren. \ Accounts Manager kan doen transactie tegen deze account
 " is less than equals to zero in the system, \						valuation rate is mandatory for this item",minder dan gelijk aan nul in het systeem \ waardering prijs is verplicht voor dit artikel
  is mandatory,is verplicht
+ is mandatory for GL Entry,is verplicht voor GL Entry
+ is not a ledger,is niet een grootboek
+ is not active,niet actief
  is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,is nu de standaard boekjaar. \ Vernieuw uw browser om de wijziging door te voeren.
  or the BOM is cancelled or inactive,of de BOM wordt geannuleerd of inactief
  should be same as that in ,moet dezelfde als in
+ will become ,zal
 """Company History""",&quot;Geschiedenis&quot;
 """Team Members"" or ""Management""",&quot;Team Members&quot; of &quot;Management&quot;
 # ###.##,# # # #. # #
 "#,###","#, # # #"
 "#,###.##","#, # # #. # #"
+"#,###.###","#, # # #. # # #"
 "#,##,###.##","#, # #, # # #. # #"
 #.###,#. # # #
 "#.###,##","#. # # #, # #"
@@ -96,9 +104,11 @@
 >,&gt;
 >=,&gt; =
 A,Een
+A Customer exists with same name,Een Klant bestaat met dezelfde naam
 A Lead with this email id should exist,Een Lead met deze e-mail-ID moet bestaan
 A Product is shown on the website and is linked to an item.,Een product wordt getoond op de website en is gekoppeld aan een item.
 "A Product or a Service that is bought, sold or kept in stock.","Een product of een dienst die wordt gekocht, verkocht of in voorraad gehouden."
+A Supplier exists with same name,Een leverancier bestaat met dezelfde naam
 A logical Warehouse against which stock entries are made.,Een logische Warehouse waartegen de voorraad worden gemaakt.
 A new popup will open that will ask you to select further conditions.,Een nieuwe pop-up opent die u vragen om nadere voorwaarden te selecteren.
 A symbol for this currency. For e.g. $,Een symbool voor deze valuta. Voor bijvoorbeeld $
@@ -128,6 +138,7 @@ Account Id,Account Id
 Account Info,Account Info
 Account Name,Accountnaam
 Account Type,Account Type
+Account: ,Account:
 "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person","Boekhoudkundige afschrijving bevroren tot aan deze datum, kan niemand / niets veranderen aan toegang behalve bevoegd persoon"
 Accounting journal entries.,Accounting journaalposten.
 Accounts,Accounts
@@ -162,6 +173,7 @@ Add / Edit Taxes and Charges,Toevoegen / bewerken en-heffingen
 Add A New Rule,Voeg een nieuwe regel
 Add A Property,Voeg een woning
 Add Attachments,Bijlagen toevoegen
+Add Bookmark,Voeg bladwijzer toe
 Add CSS,Voeg CSS
 Add Column,Kolom toevoegen
 Add Message,Bericht toevoegen
@@ -253,11 +265,15 @@ Allocated Budget,Toegekende budget
 Allocated amount,Toegewezen bedrag
 Allow Attach,Laat Bevestig
 Allow Bill of Materials,Laat Bill of Materials
+Allow Negative Balance,Laat negatief saldo
 Allow Negative Stock,Laat Negatieve voorraad
 Allow Production Order,Laat Productieorder
 Allow Rename,Laat hernoemen
 Allow Samples,Laat Monsters
+Allow User,Door gebruiker toestaan
+Allow Users,Gebruikers toestaan
 Allow on Submit,Laat op Submit
+Allow the following users to make Leave Applications for block days.,Laat de volgende gebruikers te vertrekken Toepassingen maken voor blok dagen.
 Allow this price in purchase related forms,Toestaan ​​dat deze prijs in aankoop verwante vormen
 Allow this price in sales related forms,Toestaan ​​dat deze prijs in de verkoop verwante vormen
 Allow user to login only after this hour (0-24),Gebruiker mag alleen inloggen na dit uur (0-24)
@@ -285,6 +301,7 @@ Applicant Name,Aanvrager Naam
 Applicant for a Job,Aanvrager van een baan
 Applicant for a Job (extracted from jobs email).,Aanvrager van het Job (uit werk e-mail).
 Applications for leave.,Aanvragen voor verlof.
+Applies to Company,Geldt voor Bedrijf
 Apply / Approve Leaves,Toepassen / goedkeuren Leaves
 Appraisal,Taxatie
 Appraisal Goal,Beoordeling Doel
@@ -393,10 +410,15 @@ Bio,Bio
 Birth Date,Geboortedatum
 Black,Zwart
 Blob,Bobbel
+Block Date,Blokkeren Datum
+Block Days,Blokkeren Dagen
+Block Holidays on important days.,Blok Vakantie op belangrijke dagen.
+Block leave applications by department.,Blok verlaten toepassingen per afdeling.
 Blog,Blog
 Blog Subscriber,Blog Abonnee
 Blog entry.,Blog entry.
 Blood Group,Bloedgroep
+Bookmarks,Bladwijzers
 Branch,Tak
 Brand,Merk
 Brand HTML,Brand HTML
@@ -599,6 +621,7 @@ Core,Kern
 Cost Center,Kostenplaats
 Cost Center Details,Kosten Center Details
 Cost Center Name,Kosten Center Naam
+Cost Center must be specified for PL Account: ,Kostenplaats moet worden opgegeven voor PL Account:
 Cost to Company,Kosten voor Bedrijf
 Costing,Costing
 Country,Land
@@ -610,10 +633,11 @@ Create Receiver List,Maak Receiver Lijst
 Create Salary Slip,Maak loonstrook
 "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.","Maak een prijslijst van prijslijst meester en voert standaard ref tarieven tegen elk van hen. Over de selectie van een prijslijst in Offerte, Sales Order of Delivery Note, zal overeenkomstige ref tarief worden opgehaald voor dit object."
 Create and Send Newsletters,Maken en versturen nieuwsbrieven
+Created Account Head: ,Gemaakt Account Hoofd:
 Created Customer Issue,Gemaakt op problemen van klanten
+Created Group ,Gemaakt Groep
 Created Opportunity,Gemaakt Opportunity
 Created Support Ticket,Gemaakt Hulpaanvraag
-Created by,Gemaakt door
 Creates salary slip for above mentioned criteria.,Maakt salarisstrook voor de bovengenoemde criteria.
 Credit,Krediet
 Credit Amt,Credit Amt
@@ -695,6 +719,7 @@ Database of potential customers.,Database van potentiële klanten.
 Date,Datum
 Date Format,Datumnotatie
 Date Of Retirement,Datum van pensionering
+Date is repeated,Datum wordt herhaald
 Date of Birth,Geboortedatum
 Date of Issue,Datum van afgifte
 Date of Joining,Datum van toetreding tot
@@ -703,6 +728,7 @@ Date on which lorry started from your warehouse,Datum waarop vrachtwagen gestart
 Date on which the lead was last contacted,Datum waarop het voortouw laatste werd benaderd
 Dates,Data
 Datetime,Datetime
+Days for which Holidays are blocked for this department.,Dagen waarvoor feestdagen zijn geblokkeerd voor deze afdeling.
 Dealer,Handelaar
 Dear,Lieve
 Debit,Debet
@@ -810,6 +836,7 @@ Distribution Id,Distributie Id
 Distribution Name,Distributie Naam
 Distributor,Verdeler
 Divorced,Gescheiden
+Do not show any symbol like $ etc next to currencies.,"Vertonen geen symbool zoals $, enz. naast valuta."
 Doc Name,Doc Naam
 Doc Status,Doc Status
 Doc Type,Doc Type
@@ -875,6 +902,7 @@ Embed image slideshows in website pages.,Afbeelding insluiten diavoorstellingen 
 Emergency Contact Details,Emergency Contactgegevens
 Emergency Phone Number,Telefoonnummer voor noodgevallen
 Employee,Werknemer
+Employee Designation.,Medewerker Aanduiding.
 Employee Details,Medewerker Details
 Employee Education,Medewerker Onderwijs
 Employee External Work History,Medewerker Buitendienst Medewerker Geschiedenis
@@ -1039,6 +1067,7 @@ For Warehouse,Voor Warehouse
 "For e.g. 2012, 2012-13","Voor bijvoorbeeld 2012, 2012-13"
 For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,Bijvoorbeeld als u wilt annuleren en wijzigen &#39;INV004&#39; het zal worden een nieuw document &#39;INV004-1&#39;. Dit helpt u bij te houden van elke wijziging.
 For example: You want to restrict users to transactions marked with a certain property called 'Territory',Bijvoorbeeld: U wilt gebruikers te beperken tot transacties gemarkeerd met een bepaalde eigenschap genaamd &#39;Territory&#39;
+For opening balance entry account can not be a PL account,Voor openingsbalans toegang account kan niet worden een PL rekening
 "For opening invoice entry, this date will reflect in the period-wise aging report.","Voor het openen van factuur binnenkomst, zal deze datum weerspiegelen in de periode-wijs veroudering rapport."
 For ranges,Voor bereiken
 For reference,Ter referentie
@@ -1065,6 +1094,7 @@ Fully Billed,Volledig Gefactureerd
 Fully Completed,Volledig ingevulde
 GL Control,GL Controle
 GL Entry,GL Entry
+GL Entry: Debit or Credit amount is mandatory for ,GL Entry: Debet of Credit bedrag is verplicht voor
 GL Mapper,GL Mapper
 GL Mapper Detail,GL Mapper Detail
 GRN,GRN
@@ -1153,6 +1183,7 @@ Hey! You seem to be using the wrong template. \				Click on 'Download Template' 
 Hidden,Verborgen
 Hide Actions,Verberg Acties
 Hide Copy,Verberg Copy
+Hide Currency Symbol,Verberg Valutasymbool
 Hide Email,Verberg E-mail
 Hide Heading,Verberg rubriek
 Hide Print,Verberg Afdrukken
@@ -1162,6 +1193,12 @@ Highlight,Markeer
 History In Company,Geschiedenis In Bedrijf
 Hold,Houden
 Holiday,Feestdag
+Holiday Block List,Holiday Block List
+Holiday Block List Allow,Holiday Block List Laat
+Holiday Block List Allowed,Holiday toegestaan ​​Block List
+Holiday Block List Date,Holiday Block List Datum
+Holiday Block List Dates,Holiday Block List Data
+Holiday Block List Name,Holiday Block List Name
 Holiday List,Holiday Lijst
 Holiday List Name,Holiday Lijst Naam
 Holidays,Vakantie
@@ -1181,8 +1218,10 @@ Hours,Uur
 How frequently?,Hoe vaak?
 "How should this currency be formatted? If not set, will use system defaults","Hoe moet deze valuta worden geformatteerd? Indien niet ingesteld, zal gebruik maken van het systeem standaard"
 How to upload,Hoe om te uploaden
+Hrvatski,Hrvatski
 Human Resources,Human Resources
 Human Resources Home,Human Resources Startpagina
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,Hoera! De dag (en) waarop u een aanvraag voor verlof \ samenvallen met vakantie (s). Je moet niet van toepassing voor verlof.
 I,Ik
 ID (name) of the entity whose property is to be set,ID (naam) van de entiteit waarvan de eigenschap moet worden ingesteld
 IDT,IDT
@@ -1197,7 +1236,6 @@ Icon,Pictogram
 Icon will appear on the button,Pictogram verschijnt op de knop
 Id of the profile will be the email.,Id van het profiel zal de e-mail.
 Identification of the package for the delivery (for print),Identificatie van het pakket voor de levering (voor afdrukken)
-If,Indien
 If Monthly Budget Exceeded,Als Maandelijks Budget overschreden
 "If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order","Als Verkoop BOM is gedefinieerd, wordt de werkelijke BOM van de Pack weergegeven als table.Available in Delivery Note en Sales Order"
 "If Supplier Part Number exists for given Item, it gets stored here","Indien Leverancier Onderdeelnummer bestaat voor bepaalde Item, het wordt hier opgeslagen"
@@ -1211,7 +1249,9 @@ If Yearly Budget Exceeded,Als jaarlijks budget overschreden
 If more than one package of the same type (for print),Als er meer dan een pakket van hetzelfde type (voor afdrukken)
 If non standard port (e.g. 587),Als niet-standaard poort (bijv. 587)
 If not applicable please enter: NA,Indien niet van toepassing gelieve: Nvt
+"If not checked, the list will have to be added to each Department where it has to be applied.","Indien niet gecontroleerd, wordt de lijst worden toegevoegd aan elk Department waar het moet worden toegepast."
 "If not, create a","Zo niet, maak dan een"
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.","Indien ingesteld, wordt het invoeren van gegevens alleen toegestaan ​​voor bepaalde gebruikers. Else, is toegang toegestaan ​​voor alle gebruikers met de vereiste machtigingen."
 "If specified, send the newsletter using this email address","Als de opgegeven, stuurt u de nieuwsbrief via dit e-mailadres"
 "If the 'territory' Link Field exists, it will give you an option to select it","Als de &#39;grondgebied&#39; Link Field bestaat, zal het u een optie om deze te selecteren"
 "If the account is frozen, entries are allowed for the ""Account Manager"" only.","Als de account is bevroren, worden items toegestaan ​​voor de &quot;Account Manager&quot; alleen."
@@ -1235,6 +1275,7 @@ Important dates and commitments in your project life cycle,Belangrijke data en v
 Imports,Invoer
 In Dialog,In Dialog
 In Filter,In Filter
+In List View,In lijstweergave
 In Process,In Process
 In Report Filter,In Report Filter
 In Store,In Store
@@ -1416,7 +1457,7 @@ Language preference for user interface (only if available).,Taal voorkeur voor u
 Last Contact Date,Laatste Contact Datum
 Last IP,Laatste IP-
 Last Login,Laatst ingelogd
-Last Modified On:,Laatst gewijzigd op:
+Last Modified On,Laatst gewijzigd op
 Last Name,Achternaam
 Last Purchase Rate,Laatste Purchase Rate
 Last Update,Laatste update
@@ -1620,6 +1661,7 @@ Name of the entity who has requested for the Purchase Requisition,Naam van de in
 Naming,Benoemen
 Naming Series,Benoemen Series
 Naming Series Options,Benoemen Reeksopties
+Negative balance is not allowed for account ,Negatief saldo is niet toegestaan ​​voor rekening
 Net Pay,Nettoloon
 Net Pay (in words) will be visible once you save the Salary Slip.,Netto loon (in woorden) zal zichtbaar zodra het opslaan van de loonstrook.
 Net Total,Net Total
@@ -1759,6 +1801,8 @@ Outgoing,Uitgaande
 Outgoing Mail Server,Server uitgaande post
 Outgoing Mails,Uitgaande mails
 Outstanding Amount,Openstaande bedrag
+Outstanding cannot be less than zero. \				 	Please match exact outstanding.,Outstanding kan niet lager zijn dan nul. \ Gelieve overeenkomen met de exacte uitstekend.
+Outstanding for Voucher ,Uitstekend voor Voucher
 Over Heads,Meer dan Heads
 Overhead,Boven het hoofd
 Overload Query,Overbelasting Query
@@ -1833,6 +1877,7 @@ Pay To / Recd From,Pay To / RECD Van
 Payables,Schulden
 Payables Group,Schulden Groep
 Payment Entries,Betaling Entries
+Payment Entry has been modified after you pulled it. 			Please pull it again.,Betaling Bericht is gewijzigd nadat u trok het. Gelieve opnieuw te trekken.
 Payment Reconciliation,Betaling Verzoening
 Payment Terms,Betalingscondities
 Payment days,Betaling dagen
@@ -1842,6 +1887,7 @@ Payments,Betalingen
 Payroll Setup,Payroll Setup
 Pending,In afwachting van
 Pending Review,In afwachting Beoordeling
+Percent,Percentage
 Percent Complete,Percentage voltooid
 Percentage Allocation,Percentage Toewijzing
 Percentage variation in quantity to be allowed while receiving or delivering this item.,Percentage variërende hoeveelheid te mogen tijdens het ontvangen of versturen van dit item.
@@ -1883,6 +1929,7 @@ Planned Quantity,Geplande Aantal
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Gelieve goed op Enter Afkorting of korte naam als het zal worden toegevoegd als suffix aan alle Account Heads.
 Please check,Controleer
 Please click on another report from the menu.,Klik op een ander rapport in het menu.
+Please enter Bill Date,Vul Bill Datum
 Please enter valid ,Voer een geldige
 Please save the Newsletter before sending.,Sla de Nieuwsbrief voor verzending.
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Selecteer Carry Forward als u ook wilt opnemen vorige boekjaar uit balans laat dit fiscale jaar
@@ -2007,6 +2054,7 @@ Purchase Order Item No,Purchase Order Item No
 Purchase Order Item Supplied,Aankoop Bestelling ingevoerd
 Purchase Order Items,Purchase Order Items
 Purchase Order Items Supplied,Purchase Order Items ingevoerd
+Purchase Order Items To Be Received,Purchase Order Items te ontvangen
 Purchase Order Message,Purchase Order Bericht
 Purchase Order Required,Vereiste Purchase Order
 Purchase Order sent by customer,Purchase Order verzonden door de klant
@@ -2160,6 +2208,7 @@ Relieving Date,Het verlichten van Datum
 Remark,Opmerking
 Remarks,Opmerkingen
 Remove,Verwijderen
+Remove Bookmark,Bladwijzer verwijderen
 Rename,Andere naam geven
 Rename Tool,Wijzig de naam van Tool
 Rented,Verhuurd
@@ -2543,6 +2592,7 @@ Stock Uom,Stock Verpakking
 Stock Value,Stock Waarde
 "Stock level frozen up to this date, nobody can do / modify entry except authorized person","Voorraad bevroren tot deze datum, kan niemand / niets veranderen aan toegang behalve bevoegd persoon"
 Stop,Stop
+Stop users from making Leave Applications on following days.,Stop gebruikers van het maken van verlofaanvragen op de volgende dagen.
 Stopped,Gestopt
 Structure cost centers for budgeting.,Structuur kostenplaatsen voor budgettering.
 Structure of books of accounts.,Structuur van boeken van de rekeningen.
@@ -2879,6 +2929,7 @@ User Remark will be added to Auto Remark,Gebruiker Opmerking zal worden toegevoe
 User Tags,Gebruiker-tags
 User Type,Gebruikerstype
 User must always select,Gebruiker moet altijd kiezen
+User not allowed entry in the Warehouse,Gebruiker niet toegestaan ​​vermelding in het Warehouse
 UserRole,UserRole
 Username,Gebruikersnaam
 Users,Gebruikers
@@ -2912,6 +2963,8 @@ Warehouse Contact Info,Warehouse Contact Info
 Warehouse Detail,Magazijn Detail
 Warehouse Name,Warehouse Naam
 Warehouse Type,Warehouse Type
+Warehouse User,Magazijn Gebruiker
+Warehouse Users,Magazijn Gebruikers
 Warehouse where you are maintaining stock of rejected items,Warehouse waar u het handhaven voorraad van afgewezen artikelen
 Warn,Waarschuwen
 Warning,Waarschuwing
@@ -2995,6 +3048,7 @@ Year of Passing,Jaar van de Passing
 Yearly,Jaar-
 Yes,Ja
 Yesterday,Gisteren
+You are not authorized to do/modify back dated entries before ,U bent niet gemachtigd om / niets veranderen aan terug gedateerde gegevens voor het
 You can create more earning and deduction type from Setup --> HR,U kunt meer verdienen en deductie type uit Setup -&gt; HR
 You can enter any date manually,U kunt elke datum handmatig
 You can enter the minimum quantity of this item to be ordered.,U kunt de minimale hoeveelheid van dit product te bestellen.
@@ -3004,6 +3058,7 @@ You can make a purchase order from multiple Supplier Quotations. Select Supplier
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,U kunt een aankoopbewijs van meerdere inkooporders. Selecteer inkooporders een voor een en klikt u op de knop.
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,U kunt verschillende &#39;eigenschappen&#39; om gebruikers op de standaardwaarden in te stellen en toestemming regels op basis van de waarde van deze eigenschappen in verschillende vormen toe te passen.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,U kunt gebruik maken <a href='#Form/Customize Form'>Customize Form</a> om in te stellen op velden.
+You cannot apply for a leave on the following date because it is blocked,"Je kan niet van toepassing zijn voor een verlof op de volgende datum, omdat het is geblokkeerd"
 Your Customer's TAX registration numbers (if applicable) or any general information,Uw klant fiscale nummers (indien van toepassing) of een algemene informatie
 "Your download is being built, this may take a few moments...","Uw download wordt gebouwd, kan dit enige tijd duren ..."
 Your letter head content in HTML.,Uw brief hoofd-inhoud in HTML.
@@ -3037,10 +3092,8 @@ bullhorn,megafoon
 calendar,kalender
 camera,camera
 cancel,annuleren
-cannot be included in item's rate,kan niet worden opgenomen in het tarief item
 certificate,certificaat
 check,controleren
-checked,geruit
 chevron-down,chevron-down
 chevron-left,chevron-links
 chevron-right,chevron-rechts
@@ -3106,7 +3159,6 @@ indent-left,streepje links
 indent-right,streepje-rechts
 info-sign,info-teken
 is a cancelled Item,is een geannuleerde artikel
-is checked for,wordt gecontroleerd op
 is not a Stock Item,is niet een Stock Item
 is not allowed.,is niet toegestaan.
 italic,cursief
@@ -3169,7 +3221,6 @@ search,zoeken
 share,aandeel
 share-alt,aandeel-alt
 shopping-cart,shopping-cart
-should also have,moet ook
 signal,signaal
 star,ster
 star-empty,star-leeg
@@ -3185,7 +3236,6 @@ text-width,text breedte
 th,e
 th-large,th-large
 th-list,th-lijst
-then,dan
 thumbs-down,duim omlaag
 thumbs-up,duim omhoog
 time,tijd
@@ -3206,5 +3256,7 @@ wrench,moersleutel
 yyyy-mm-dd,yyyy-mm-dd
 zoom-in,zoom-in
 zoom-out,zoom-out
+српски,српски
 العربية,العربية
 हिंदी,हिंदी
+தமிழ்,தமிழ்
