@@ -30,12 +30,7 @@ class SupportMailbox(POP3Mailbox):
 			"username": self.email_settings.support_username,
 			"password": self.email_settings.support_password
 		})
-	
-	def check_mails(self):
-		self.auto_close_tickets()
-		return webnotes.conn.sql("select user from tabSessions where \
-			time_to_sec(timediff(now(), lastupdate)) < 1800")
-	
+		
 	def process_message(self, mail):
 		if mail.from_email == self.email_settings.fields.get('support_email'):
 			return
@@ -66,7 +61,7 @@ class SupportMailbox(POP3Mailbox):
 				
 		make(content=mail.content, sender=mail.from_email, 
 			doctype="Support Ticket", name=ticket.doc.name, 
-			lead = ticket.doc.lead, contact=ticket.doc.contact)
+			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
 
 	def send_auto_reply(self, d):
 		signature = self.email_settings.fields.get('support_signature') or ''
