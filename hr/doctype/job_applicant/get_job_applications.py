@@ -39,6 +39,7 @@ class JobsMailbox(POP3Mailbox):
 			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
 				+ mail.from_email
 			applicant = webnotes.model_wrapper({
+				"creation": mail.date,
 				"doctype":"Job Applicant",
 				"applicant_name": name,
 				"email_id": mail.from_email,

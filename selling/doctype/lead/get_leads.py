@@ -20,7 +20,8 @@ from webnotes.utils import cstr, cint
 from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
 
-def add_sales_communication(subject, content, sender, real_name, mail=None, status="Open"):
+def add_sales_communication(subject, content, sender, real_name, mail=None, 
+	status="Open", date=None):
 	def set_status(doctype, name):
 		w = webnotes.model_wrapper(doctype, name)
 		w.ignore_permissions = True
@@ -47,7 +48,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None, stat
 		lead_name = lead.doc.name
 
 	make(content=content, sender=sender, subject=subject,
-		lead=lead_name, contact=contact_name)
+		lead=lead_name, contact=contact_name, date=date)
 	
 	if contact_name:
 		set_status("Contact", contact_name)
@@ -64,7 +65,7 @@ class SalesMailbox(POP3Mailbox):
 			return
 		
 		add_sales_communication(mail.subject, mail.content, mail.form_email, 
-			mail.from_real_name, mail)
+			mail.from_real_name, mail=mail, date=mail.date)
 
 def get_leads():
 	if cint(webnotes.conn.get_value('Sales Email Settings', None, 'extract_emails')):

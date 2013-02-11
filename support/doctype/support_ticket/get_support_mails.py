@@ -61,7 +61,7 @@ class SupportMailbox(POP3Mailbox):
 				
 		make(content=mail.content, sender=mail.from_email, 
 			doctype="Support Ticket", name=ticket.doc.name, 
-			lead = ticket.doc.lead, contact=ticket.doc.contact)
+			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
 
 	def send_auto_reply(self, d):
 		signature = self.email_settings.fields.get('support_signature') or ''
