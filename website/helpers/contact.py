@@ -32,27 +32,8 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		return
 
 	# make lead / communication
-		
-	name = webnotes.conn.get_value("Lead", {"email_id": sender}, "name")
-	if name:
-		lead = webnotes.model_wrapper("Lead", name)
-		lead.doc.status = status
-		lead.ignore_permissions = True
-		lead.save()
-	else:
-		lead = webnotes.model_wrapper({
-			"doctype":"Lead",
-			"lead_name": sender,
-			"email_id": sender,
-			"status": status,
-			"source": "Website"
-		})
-		lead.ignore_permissions = True
-		lead.insert()
-	
-	make(content=message, sender=sender, subject=subject,
-		doctype="Lead", name=lead.doc.name, lead=lead.doc.name)
-
+	from selling.doctype.lead.get_leads import add_sales_communication
+	add_sales_communication(subject or "Website Query", message, sender, sender)
 	
 	# guest method, cap max writes per hour
 	if webnotes.conn.sql("""select count(*) from `tabCommunication`

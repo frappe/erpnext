@@ -28,6 +28,9 @@ class DocType(TransactionBase):
 	def onload(self):
 		self.add_communication_list()
 
+	def on_communication_sent(self, comm):
+		webnotes.conn.set(self.doc, 'status', 'Replied')
+
 	def autoname(self):
 		if self.doc.customer:
 			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.customer
