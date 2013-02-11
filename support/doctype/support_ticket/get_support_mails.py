@@ -59,7 +59,7 @@ class SupportMailbox(POP3Mailbox):
 
 		mail.save_attachments_in_doc(ticket.doc)
 				
-		make(content=mail.content, sender=mail.from_email, 
+		make(content=mail.content, sender=mail.from_email, subject = ticket.doc.subject,
 			doctype="Support Ticket", name=ticket.doc.name, 
 			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
 
