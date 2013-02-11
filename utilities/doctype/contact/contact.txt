@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:26:39", 
+  "modified": "2013-02-11 14:32:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,6 +60,13 @@
   "doctype": "DocField", 
   "fieldname": "cb00", 
   "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "label": "Status", 
+  "options": "\nOpen\nReplied"
  }, 
  {
   "doctype": "DocField", 
