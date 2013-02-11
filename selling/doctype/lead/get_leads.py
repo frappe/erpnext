@@ -58,11 +58,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None, stat
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):
 		self.settings = args or webnotes.doc("Sales Email Settings", "Sales Email Settings")
-	
-	def check_mails(self):
-		return webnotes.conn.sql("select user from tabSessions where \
-			time_to_sec(timediff(now(), lastupdate)) < 1800")
-	
+		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:
 			return

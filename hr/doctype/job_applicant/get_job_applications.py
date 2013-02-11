@@ -23,11 +23,7 @@ from core.doctype.communication.communication import make
 class JobsMailbox(POP3Mailbox):	
 	def setup(self, args=None):
 		self.settings = args or webnotes.doc("Jobs Email Settings", "Jobs Email Settings")
-	
-	def check_mails(self):
-		return webnotes.conn.sql("select user from tabSessions where \
-			time_to_sec(timediff(now(), lastupdate)) < 1800")
-	
+		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:
 			return
