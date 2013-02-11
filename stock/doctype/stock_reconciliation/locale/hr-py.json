@@ -1,0 +1,10 @@
+{
+ " is less than equals to zero in the system, \\\t\t\t\t\t\tvaluation rate is mandatory for this item": "je manje nego jednaka nuli u sustavu, \\ stopa za vrednovanje je obvezna za tu stavku", 
+ "' can not be managed using Stock Reconciliation.\\\t\t\t\t\tYou can add/delete Serial No directly, \\\t\t\t\t\tto modify stock of this item.": "&#39;Ne mo\u017ee se upravljati pomo\u0107u Stock pomirenja. \\ Mo\u017eete dodati / izbrisati Serijski Ne izravno, \\ mijenjati dionice ove stavke.", 
+ "As existing qty for item: ": "Kao postoje\u0107e Qty za stavke:", 
+ "Hey! You seem to be using the wrong template. \\\t\t\t\tClick on 'Download Template' button to get the correct template.": "Hej! \u010cini se da se pomo\u0107u krivi predlo\u017eak. \\ Kliknite na &#39;Download predlo\u017eak&#39; gumb da biste dobili ispravan predlo\u017eak.", 
+ "Row # ": "Redak #", 
+ "Serialized Item: '": "Serijaliziranom artikla: &#39;", 
+ "Sorry! We can only allow upto 100 rows for Stock Reconciliation.": "\u017dao nam je! Mi samo mo\u017eemo dopustiti upto 100 redova za burze pomirenja.", 
+ "Stock Reconciliation file not uploaded": "Katalo\u0161ki Pomirenje datoteka nije ustupio"
+}

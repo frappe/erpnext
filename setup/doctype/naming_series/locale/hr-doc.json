@@ -1,0 +1,18 @@
+{
+ "Change the starting / current sequence number of an existing series.": "Promjena polaznu / teku\u0107i redni broj postoje\u0107e serije.", 
+ "Check this if you want to force the user to select a series before saving. There will be no default if you check this.": "Ozna\u010dite ovo ako \u017eelite prisiliti korisniku odabir seriju prije spremanja. Tu \u0107e biti zadana ako to provjerili.", 
+ "Current Value": "Trenutna vrijednost", 
+ "Help HTML": "Pomo\u0107 HTML", 
+ "Naming Series": "Imenovanje serije", 
+ "Prefix": "Prefiks", 
+ "Select Transaction": "Odaberite transakcija", 
+ "Series List for this Transaction": "Serija Popis za ovu transakciju", 
+ "Set prefix for numbering series on your transactions": "Postavite prefiks za numeriranje niza na svoje transakcije", 
+ "Setup": "Postavljanje", 
+ "Setup Series": "Postavljanje Serija", 
+ "This is the number of the last created transaction with this prefix": "To je broj zadnjeg stvorio transakcije s ovim prefiksom", 
+ "Update": "A\u017eurirati", 
+ "Update Series": "Update serija", 
+ "Update Series Number": "Update serije Broj", 
+ "User must always select": "Korisni\u010dko uvijek mora odabrati"
+}

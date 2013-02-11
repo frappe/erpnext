@@ -1,0 +1,22 @@
+{
+ "# ###.##": "# # # #. # #", 
+ "#,###": "# # # #", 
+ "#,###.##": "# # # #. # #", 
+ "#,###.###": "# # # #. # # #", 
+ "#,##,###.##": "#, # #, # # #. # #", 
+ "#.###": "#. # # #", 
+ "#.###,##": "#. # # # # #", 
+ "**Currency** Master": "Valuta ** ** Master", 
+ "1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent": "1 valuta = [?] FractionFor npr. 1 USD = 100 centi", 
+ "A symbol for this currency. For e.g. $": "Simbol za ovu valutu. Za npr. $", 
+ "Currency": "Valuta", 
+ "Currency Name": "Valuta Ime", 
+ "Enabled": "Omogu\u0107eno", 
+ "Fraction": "Frakcija", 
+ "Fraction Units": "Frakcije Jedinice", 
+ "How should this currency be formatted? If not set, will use system defaults": "Kako bi se to valuta biti formatiran? Ako nije postavljeno, koristit \u0107e zadane postavke sustava", 
+ "Number Format": "Broj Format", 
+ "Setup": "Postavljanje", 
+ "Sub-currency. For e.g. \"Cent\"": "Sub-valuta. Za npr. &quot;centi&quot;", 
+ "Symbol": "Simbol"
+}

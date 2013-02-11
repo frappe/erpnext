@@ -1,0 +1,10 @@
+[
+ "BOM Replace Tool", 
+ "The BOM which will be replaced", 
+ "New BOM", 
+ "The new BOM after replacement", 
+ "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM", 
+ "Manufacturing", 
+ "Current BOM", 
+ "Replace"
+]

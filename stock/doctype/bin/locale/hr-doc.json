@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Stvarni Koli\u010dina", 
+ "Bin": "Kanta", 
+ "FCFS Rate": "FCFS Stopa", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Moving Average Rate": "Premje\u0161tanje prosje\u010dna stopa", 
+ "Ordered Quantity": "Koli\u010dina \u017d", 
+ "Planned Qty": "Planirani Kol", 
+ "Projected Qty": "Predvi\u0111en Kol", 
+ "Quantity Requested for Purchase": "Koli\u010dina Tra\u017eeni za kupnju", 
+ "Reserved Quantity": "Rezervirano Koli\u010dina", 
+ "Stock": "Zaliha", 
+ "Stock Value": "Stock vrijednost", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Vrednovanje Stopa", 
+ "Warehouse": "Skladi\u0161te", 
+ "Warehouse Type": "Skladi\u0161te Tip"
+}
