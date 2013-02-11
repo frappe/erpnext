@@ -20,11 +20,11 @@ from webnotes.utils import cstr, cint
 from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
 
-def add_sales_communication(subject, content, sender, real_name, mail=None):
-	def set_status_open(doctype, name):
+def add_sales_communication(subject, content, sender, real_name, mail=None, status="Open"):
+	def set_status(doctype, name):
 		w = webnotes.model_wrapper(doctype, name)
 		w.ignore_permissions = True
-		w.doc.status = "Open"
+		w.doc.status = status
 		w.doc.save()
 		if mail:
 			mail.save_attachments_in_doc(w.doc)
@@ -32,28 +32,28 @@ def add_sales_communication(subject, content, sender, real_name, mail=None):
 	lead_name = webnotes.conn.get_value("Lead", {"email_id": sender})
 	contact_name = webnotes.conn.get_value("Contact", {"email_id": sender})
 	is_system_user = webnotes.conn.get_value("Profile", sender)
-	
-	if not is_system_user:
-		if contact_name:
-			set_status_open("Contact", contact_name)
-		elif lead_name:
-			set_status_open("Lead", lead_name)
-		else:
-			# none, create a new Lead
-			lead = webnotes.model_wrapper({
-				"doctype":"Lead",
-				"lead_name": real_name or sender,
-				"email_id": sender,
-				"status": "Open",
-				"source": "Email"
-			})
-			lead.ignore_permissions = True
-			lead.insert()
-			if mail:
-				mail.save_attachments_in_doc(lead.doc)
+
+	if not (lead_name or contact_name):
+		# none, create a new Lead
+		lead = webnotes.model_wrapper({
+			"doctype":"Lead",
+			"lead_name": real_name or sender,
+			"email_id": sender,
+			"status": status,
+			"source": "Email"
+		})
+		lead.ignore_permissions = True
+		lead.insert()
+		lead_name = lead.doc.name
 
 	make(content=content, sender=sender, subject=subject,
 		lead=lead_name, contact=contact_name)
+	
+	if contact_name:
+		doc = set_status("Contact", contact_name, is_system_user and "Replied" or status)
+	elif lead_name:
+		doc set_status("Lead", lead_name, is_system_user and "Replied" or status)
+	
 
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):
