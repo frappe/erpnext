@@ -88,6 +88,8 @@ def get_item_for_list_in_html(r):
 def scrub_item_for_list(r):
 	if not r.website_description:
 		r.website_description = "No description given"
+	if len(r.website_description.split(" ")) > 24:
+		r.website_description = " ".join(r.website_description.split(" ")[:24]) + "..."
 	r.website_image = url_for_website(r.website_image)
 
 def get_parent_item_groups(item_group_name):
