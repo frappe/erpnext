@@ -22,7 +22,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
 }
 
-cur_frm.cscript.refresh = function() {
+cur_frm.cscript.refresh = function(doc) {
 	cur_frm.communication_view = new wn.views.CommunicationList({
 		list: wn.model.get("Communication", {"contact": doc.name}),
 		parent: cur_frm.fields_dict.communication_html.wrapper,

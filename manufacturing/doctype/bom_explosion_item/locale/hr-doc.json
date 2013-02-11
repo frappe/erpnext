@@ -1,0 +1,13 @@
+{
+ "Amount": "Iznos", 
+ "BOM Explosion Item": "BOM eksplozije artikla", 
+ "Description": "Opis", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Manufacturing": "Proizvodnja", 
+ "Mat Detail No": "Mat Detalj Ne", 
+ "Parent BOM": "Roditelj BOM", 
+ "Qty": "Kol", 
+ "Qty Consumed Per Unit": "Kol Potro\u0161eno po jedinici", 
+ "Rate": "Stopa", 
+ "Stock UOM": "Katalo\u0161ki UOM"
+}

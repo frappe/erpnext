@@ -1,0 +1,16 @@
+{
+ "Amount": "Iznos", 
+ "BOM Detail No": "BOM Detalj Ne", 
+ "Buying": "Kupovina", 
+ "Consumed Qty": "Potro\u0161eno Kol", 
+ "Conversion Factor": "Konverzijski faktor", 
+ "Current Stock": "Trenutni Stock", 
+ "Description": "Opis", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Purchase Receipt Item Supplied": "Kupnja Prijem artikla Isporuka", 
+ "Rate": "Stopa", 
+ "Raw Material Item Code": "Sirovine Stavka \u0160ifra", 
+ "Reference Name": "Referenca Ime", 
+ "Required Qty": "Potrebna Kol", 
+ "Stock Uom": "Katalo\u0161ki Uom"
+}

@@ -1,0 +1,14 @@
+{
+ "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.": "Fiskalna godina ** ** predstavlja financijsku godinu. Svi ra\u010dunovodstvene unose i druge glavne transakcije su pra\u0107eni od ** fiskalnu godinu **.", 
+ "Accounts": "Ra\u010duni", 
+ "Entries are not allowed against this Fiscal Year if the year is closed.": "Prijave nisu dozvoljeni protiv ove fiskalne godine, ako se godina zatvoren.", 
+ "Fiscal Year": "Fiskalna godina", 
+ "Fiscal Year Details": "Fiskalna godina Detalji", 
+ "For e.g. 2012, 2012-13": "Za npr. 2012, 2012-13", 
+ "No": "Ne", 
+ "Trash Reason": "Otpad Razlog", 
+ "Year Closed": "Godina Zatvoreno", 
+ "Year Name": "Godina Ime", 
+ "Year Start Date": "Godina Datum po\u010detka", 
+ "Yes": "Da"
+}

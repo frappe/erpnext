@@ -1,0 +1,13 @@
+{
+ "Customer": "Kupac", 
+ "Customer Address": "Kupac Adresa", 
+ "Customer Name": "Naziv klijenta", 
+ "Is Primary Address": "Je Osnovna adresa", 
+ "No": "Ne", 
+ "Selling": "Prodaja", 
+ "Ship To": "Brod za", 
+ "Shipping Address": "Dostava Adresa", 
+ "Shipping Details": "Dostava Detalji", 
+ "Trash Reason": "Otpad Razlog", 
+ "Yes": "Da"
+}

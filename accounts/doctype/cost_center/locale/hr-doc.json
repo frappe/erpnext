@@ -1,0 +1,22 @@
+{
+ "Accounts": "Ra\u010duni", 
+ "Add rows to set annual budgets on Accounts.": "Dodavanje redaka postaviti godi\u0161nje prora\u010dune na ra\u010dunima.", 
+ "Budget": "Bud\u017eet", 
+ "Budget Details": "Prora\u010dunski Detalji", 
+ "Company": "Dru\u0161tvo", 
+ "Cost Center": "Tro\u0161ka", 
+ "Cost Center Details": "Tro\u0161ka Detalji", 
+ "Cost Center Name": "Tro\u0161ka Name", 
+ "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>": "Odredite prora\u010dun za ovu tro\u0161ka. Da biste postavili prora\u010duna akciju, vidi <a href=\"#!List/Company\">Tvrtka Master</a>", 
+ "Distribution Id": "Distribucija Id", 
+ "Group": "Grupa", 
+ "Group or Ledger": "Grupa ili knjiga", 
+ "Ledger": "Glavna knjiga", 
+ "Parent Cost Center": "Roditelj tro\u0161ka", 
+ "Select Budget Distribution, if you want to track based on seasonality.": "Odaberite Budget Distribution, ako \u017eelite pratiti na temelju sezonalnosti.", 
+ "Track separate Income and Expense for product verticals or divisions.": "Pratite posebnu prihodi i rashodi za proizvode vertikalama ili podjele.", 
+ "Trash Reason": "Otpad Razlog", 
+ "lft": "LFT", 
+ "old_parent": "old_parent", 
+ "rgt": "usta\u0161a"
+}

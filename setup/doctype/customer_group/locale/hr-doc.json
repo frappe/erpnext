@@ -1,0 +1,16 @@
+{
+ "Customer Group": "Kupac Grupa", 
+ "Customer Group Name": "Kupac Grupa Ime", 
+ "Default Price List": "Zadani Cjenik", 
+ "Has Child Node": "Je li \u010dvor dijete", 
+ "No": "Ne", 
+ "Only leaf nodes are allowed in transaction": "Samo leaf \u010dvorovi su dozvoljeni u transakciji", 
+ "Parent Customer Group": "Roditelj Kupac Grupa", 
+ "Setup": "Postavljanje", 
+ "This Price List will be selected as default for all Customers under this Group.": "Ovaj Cjenik \u0107e biti odabran kao uobi\u010dajeni za sve kupce iz ove skupine.", 
+ "Trash Reason": "Otpad Razlog", 
+ "Yes": "Da", 
+ "lft": "LFT", 
+ "old_parent": "old_parent", 
+ "rgt": "usta\u0161a"
+}

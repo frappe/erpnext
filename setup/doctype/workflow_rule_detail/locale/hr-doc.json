@@ -1,0 +1,19 @@
+{
+ "Field": "Polje", 
+ "Field from other forms": "Podru\u010dje od drugih oblika", 
+ "Message when Cond. False": "Poruka kad Uslov. La\u017ean", 
+ "No": "Ne", 
+ "Operator": "Operator", 
+ "Raise Exception": "Podignite Iznimka", 
+ "Setup": "Postavljanje", 
+ "Value": "Vrijednost", 
+ "Workflow Rule Detail": "Workflow Pravilo Detalj", 
+ "Yes": "Da", 
+ "[]": "[]", 
+ "equal": "jednak", 
+ "greater than": "ve\u0107i od", 
+ "greater than equal": "ve\u0107e od jednako", 
+ "less than": "manje od", 
+ "less than equal": "manje od jednako", 
+ "not equal": "nije jednako"
+}

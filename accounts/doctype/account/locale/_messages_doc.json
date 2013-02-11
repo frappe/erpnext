@@ -15,6 +15,7 @@
  "If the account is frozen, entries are allowed for the \"Account Manager\" only.", 
  "Account Details", 
  "Is PL Account", 
+ "Allow Negative Balance", 
  "Rate at which this tax is applied", 
  "Company", 
  "Credit Limit", 

@@ -1,0 +1,13 @@
+{
+ "Eg. smsgateway.com/api/send_sms.cgi": "Npr.. smsgateway.com / api / send_sms.cgi", 
+ "Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)": "Unesite stati\u010dke parametre URL ovdje (npr. po\u0161iljatelj = ERPNext, username = ERPNext, lozinkom = 1234 itd.)", 
+ "Enter url parameter for message": "Unesite URL parametar za poruke", 
+ "Enter url parameter for receiver nos": "Unesite URL parametar za prijemnike br", 
+ "Message Parameter": "Poruka parametra", 
+ "Receiver Parameter": "Prijemnik parametra", 
+ "SMS Gateway URL": "SMS Gateway URL", 
+ "SMS Parameters": "SMS Parametri", 
+ "SMS Settings": "Postavke SMS", 
+ "Setup": "Postavljanje", 
+ "Static Parameters": "Stati\u010dki parametri"
+}

@@ -1,0 +1,20 @@
+{
+ "Actual Qty (at source/target)": "Stvarni Kol (na izvoru / ciljne)", 
+ "Amount": "Iznos", 
+ "BOM No": "BOM Ne", 
+ "BOM No. for a Finished Good Item": "BOM broj za Gotovi Dobar to\u010dki", 
+ "Batch No": "Hrpa Ne", 
+ "Conversion Factor": "Konverzijski faktor", 
+ "Description": "Opis", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Qty": "Kol", 
+ "Qty as per Stock UOM": "Koli\u010dina po burzi UOM", 
+ "Serial No": "Serijski br", 
+ "Source Warehouse": "Izvor galerija", 
+ "Stock": "Zaliha", 
+ "Stock Entry Detail": "Katalo\u0161ki Stupanje Detalj", 
+ "Stock UOM": "Katalo\u0161ki UOM", 
+ "Target Warehouse": "Ciljana galerija", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Vrednovanje Stopa"
+}

@@ -1,0 +1,11 @@
+{
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials": "Agregat skupina ** stavki ** u drugoj to\u010dki ** **. To je korisno ako ste vezanje odre\u0111ene artikle ** ** u paketu i odr\u017eavanje zalihe pakiran ** stavki ** a ne agregata ** artikla **. Paket ** artikla ** \u0107e &quot;Je katalo\u0161ki Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;, na primjer:. Ako prodajete Prijenosna ra\u010dunala i Ruksaci odvojeno i imaju posebnu cijenu ako kupac kupuje oboje , onda laptop + ruksak \u0107e biti novi Prodaja BOM Item.Note: BOM = Bill materijala", 
+ "List items that form the package.": "Popis stavki koje \u010dine paket.", 
+ "Package Items": "Paket Proizvodi", 
+ "Parent Item": "Roditelj artikla", 
+ "Sales BOM": "Prodaja BOM", 
+ "Sales BOM Item": "Prodaja BOM artikla", 
+ "Sales BOM Items": "Prodaja BOM Proizvodi", 
+ "Stock": "Zaliha", 
+ "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"": "Stavka koja predstavlja paket. Ova stavka mora imati &quot;Je katalo\u0161ki Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;"
+}

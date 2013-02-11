@@ -1,0 +1,20 @@
+{
+ "**Currency** Master": "Valuta ** ** Master", 
+ "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.": "Tre\u0107a strana distributer / prodava\u010d / komisionar / suradnik / prodava\u010d koji prodaje tvrtke proizvode za proviziju.", 
+ "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.": "Sve transakcije prodaje mogu biti ozna\u010dene protiv vi\u0161e osoba ** prodajnim **, tako da mo\u017eete postaviti i pratiti ciljeve.", 
+ "Classification of Customers by region": "Klasifikacija kupaca po regiji", 
+ "Email Settings for Outgoing and Incoming Emails.": "Postavke e-po\u0161te za odlazne i dolazne e-po\u0161te.", 
+ "Email settings for jobs email id \"jobs@example.com\"": "E-mail postavke za poslove email id &quot;jobs@example.com&quot;", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"": "E-mail postavke za izdvajanje vodi od prodaje email id npr. &quot;sales@example.com&quot;", 
+ "Item Classification": "Stavka klasifikacija", 
+ "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.": "Pravna osoba / Podru\u017enica s odvojenim kontnom planu pripadaju organizaciji.", 
+ "Modules Setup": "Moduli za postavljanje", 
+ "Permission Engine": "Dopu\u0161tenje motora", 
+ "Price List Master": "Cjenik Master", 
+ "Send automatic emails to Contacts on Submitting transactions.": "Po\u0161alji automatske poruke u Kontakte o podno\u0161enju transakcije.", 
+ "Send regular summary reports via Email.": "Po\u0161alji redovite sa\u017eetak izvje\u0161\u0107a putem e-po\u0161te.", 
+ "Set prefix for numbering series on your transactions": "Postavite prefiks za numeriranje niza na svoje transakcije", 
+ "Setup": "Postavljanje", 
+ "Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.": "Standardni uvjeti da se mo\u017ee dodati prodaje i Purchases.Examples: 1. Valjanost offer.1. Uvjeti pla\u0107anja (unaprijed, na kredit, dio unaprijed i sl) 0,1. \u0160to je ekstra (ili pla\u0107a kupac) 0,1. Sigurnost / kori\u0161tenje warning.1. Jamstvo ako any.1. Vra\u0107a Policy.1. Uvjeti shipping, ako applicable.1. Na\u010dinima rje\u0161avanja sporova, od\u0161teta, odgovornost, etc.1. Adresu i kontakt va\u0161e tvrtke.", 
+ "Webforms": "Web-obrasci"
+}

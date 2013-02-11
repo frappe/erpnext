@@ -1,5 +1,7 @@
 [
  "HR", 
  "Department", 
- "Trash Reason"
+ "Trash Reason", 
+ "Days for which Holidays are blocked for this department.", 
+ "Holiday Block List"
 ]

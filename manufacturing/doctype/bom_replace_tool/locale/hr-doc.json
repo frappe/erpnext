@@ -1,0 +1,10 @@
+{
+ "BOM Replace Tool": "BOM Zamijenite alat", 
+ "Current BOM": "Trenutni BOM", 
+ "Manufacturing": "Proizvodnja", 
+ "New BOM": "Novi BOM", 
+ "Replace": "Zamijeniti", 
+ "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Zamijenite odre\u0111eni BOM u svim drugim sastavnicama gdje se koriste. To \u0107e zamijeniti staru vezu BOM, a\u017eurirati tro\u0161kove i regenerirati &quot;BOM eksploziju predmeta&quot; stol kao i po novom BOM", 
+ "The BOM which will be replaced": "BOM koji \u0107e biti zamijenjen", 
+ "The new BOM after replacement": "Novi BOM nakon zamjene"
+}

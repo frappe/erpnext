@@ -1,0 +1,11 @@
+{
+ "Batch": "Serija", 
+ "Batch Finished Date": "Hrpa Zavr\u0161io Datum", 
+ "Batch ID": "Hrpa ID", 
+ "Batch Started Date": "Hrpa Autor Date", 
+ "Description": "Opis", 
+ "Expiry Date": "Datum isteka", 
+ "Item": "Stavka", 
+ "Stock": "Zaliha", 
+ "Trash Reason": "Otpad Razlog"
+}

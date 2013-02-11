@@ -1,0 +1,16 @@
+{
+ "Allow Users": "Autoriser les utilisateurs", 
+ "Allow the following users to make Leave Applications for block days.": "Autoriser les utilisateurs suivants pour faire demandes d&#39;autorisation pour les jours de bloc.", 
+ "Applies to Company": "S&#39;applique \u00e0 l&#39;entreprise", 
+ "Block Days": "Bloquer les jours", 
+ "Block Holidays on important days.": "Bloquer les jours f\u00e9ri\u00e9s importants.", 
+ "Company": "Entreprise", 
+ "HR": "RH", 
+ "Holiday Block List": "Block List vacances", 
+ "Holiday Block List Allowed": "Block List vacances accept\u00e9s", 
+ "Holiday Block List Dates": "Dates de vacances de listes rouges d&#39;", 
+ "Holiday Block List Name": "Nom de la liste de vacances Bloquer", 
+ "If not checked, the list will have to be added to each Department where it has to be applied.": "Si ce n&#39;est pas coch\u00e9e, la liste devra \u00eatre ajout\u00e9 \u00e0 chaque d\u00e9partement o\u00f9 il doit \u00eatre appliqu\u00e9.", 
+ "Stop users from making Leave Applications on following days.": "Emp\u00eacher les utilisateurs de faire des demandes d&#39;autorisation, les jours suivants.", 
+ "Year": "Ann\u00e9e"
+}

@@ -1,0 +1,12 @@
+{
+ "Amended From": "Izmijenjena Od", 
+ "Posting Date": "Objavljivanje Datum", 
+ "Posting Time": "Objavljivanje Vrijeme", 
+ "Reconciliation Data": "Pomirenje podataka", 
+ "Reconciliation HTML": "Pomirenje HTML", 
+ "Reconciliation JSON": "Pomirenje JSON", 
+ "Stock": "Zaliha", 
+ "Stock Reconciliation": "Katalo\u0161ki pomirenje", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Ovaj alat poma\u017ee vam da a\u017eurirate ili popraviti koli\u010dinu i vrednovanja zaliha u sustavu. To se obi\u010dno koristi za sinkronizaciju sustava vrijednosti i \u0161to zapravo postoji u svojim skladi\u0161tima.", 
+ "Upload HTML": "Prenesi HTML"
+}

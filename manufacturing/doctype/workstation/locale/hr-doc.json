@@ -1,0 +1,19 @@
+{
+ "Capacity": "Kapacitet", 
+ "Capacity Units": "Kapacitet jedinice", 
+ "Description": "Opis", 
+ "Hour Rate": "Sat Ocijenite", 
+ "Hour Rate Consumable": "Sat Ocijenite Potro\u0161ni", 
+ "Hour Rate Electricity": "Sat Ocijenite Struja", 
+ "Hour Rate Labour": "Sat Ocijenite rada", 
+ "Hour Rate Rent": "Sat Ocijenite Najam", 
+ "Manufacturing": "Proizvodnja", 
+ "Over Heads": "Vi\u0161e od \u0161efova", 
+ "Overhead": "Dometnut", 
+ "Trash Reason": "Otpad Razlog", 
+ "Units/Hour": "Jedinice / sat", 
+ "Units/Shifts": "Jedinice / smjene", 
+ "Warehouse": "Skladi\u0161te", 
+ "Workstation": "Workstation", 
+ "Workstation Name": "Ime Workstation"
+}

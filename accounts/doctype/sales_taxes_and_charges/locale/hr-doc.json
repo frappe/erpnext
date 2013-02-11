@@ -1,0 +1,23 @@
+{
+ "Account Head": "Ra\u010dun voditelj", 
+ "Accounts": "Ra\u010duni", 
+ "Actual": "Stvaran", 
+ "Amount": "Iznos", 
+ "Cheating FieldPlease do not delete ": "Varanje FieldPlease ne brisati", 
+ "Cost Center": "Tro\u0161ka", 
+ "Description": "Opis", 
+ "Enter Row": "Unesite Row", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Ako je ozna\u010deno, iznos poreza \u0107e se smatrati ve\u0107 uklju\u010dena u Print Rate / Ispis Iznos", 
+ "Is this Tax included in Basic Rate?": "Je li ovo pristojba uklju\u010dena u osnovne stope?", 
+ "Item Wise Tax Detail ": "Stavka Wise Porezna Detalj", 
+ "On Net Total": "Na Net Total", 
+ "On Previous Row Amount": "Na prethodnu Row visini", 
+ "On Previous Row Total": "Na prethodni redak Ukupno", 
+ "Parenttype": "Parenttype", 
+ "Rate": "Stopa", 
+ "Sales Taxes and Charges": "Prodaja Porezi i naknade", 
+ "Total": "Ukupan", 
+ "Total Amount": "Ukupan iznos", 
+ "Total Tax Amount": "Ukupno Iznos poreza", 
+ "Type": "Vrsta"
+}

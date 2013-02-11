@@ -6,6 +6,7 @@
  "Company": "Vennootschap", 
  "Email Id": "E-mail Identiteitskaart", 
  "For Reference Only.": "Alleen ter referentie.", 
+ "If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.": "Indien ingesteld, wordt het invoeren van gegevens alleen toegestaan \u200b\u200bvoor bepaalde gebruikers. Else, is toegang toegestaan \u200b\u200bvoor alle gebruikers met de vereiste machtigingen.", 
  "Merge": "Samensmelten", 
  "Merge Warehouses": "Samenvoegen Magazijnen", 
  "Merge With": "Fuseren met", 
@@ -19,5 +20,6 @@
  "Warehouse Contact Info": "Warehouse Contact Info", 
  "Warehouse Detail": "Magazijn Detail", 
  "Warehouse Name": "Warehouse Naam", 
- "Warehouse Type": "Warehouse Type"
+ "Warehouse Type": "Warehouse Type", 
+ "Warehouse Users": "Magazijn Gebruikers"
 }

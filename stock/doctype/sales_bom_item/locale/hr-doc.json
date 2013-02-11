@@ -1,0 +1,9 @@
+{
+ "Description": "Opis", 
+ "Item": "Stavka", 
+ "Qty": "Kol", 
+ "Rate": "Stopa", 
+ "Sales BOM Item": "Prodaja BOM artikla", 
+ "Stock": "Zaliha", 
+ "UOM": "UOM"
+}

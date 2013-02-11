@@ -1,0 +1,21 @@
+{
+ "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.": "Sve transakcije prodaje mogu biti ozna\u010dene protiv vi\u0161e osoba ** prodajnim **, tako da mo\u017eete postaviti i pratiti ciljeve.", 
+ "Employee": "Zaposlenik", 
+ "Has Child Node": "Je li \u010dvor dijete", 
+ "No": "Ne", 
+ "Parent Sales Person": "Roditelj Prodaja Osoba", 
+ "Sales Person": "Prodaja Osoba", 
+ "Sales Person Name": "Prodaja Osoba Ime", 
+ "Sales Person Targets": "Prodaje osobi Mete", 
+ "Select Budget Distribution to unevenly distribute targets across months.": "Odaberite Budget distribuciju neravnomjerno raspodijeliti ciljeve diljem mjeseci.", 
+ "Select company name first.": "Odaberite naziv tvrtke prvi.", 
+ "Set targets Item Group-wise for this Sales Person.": "Set cilja predmet Grupa-mudar za ovaj prodava\u010d.", 
+ "Setup": "Postavljanje", 
+ "Target Details1": "Ciljana Details1", 
+ "Target Distribution": "Ciljana Distribucija", 
+ "Trash Reason": "Otpad Razlog", 
+ "Yes": "Da", 
+ "lft": "LFT", 
+ "old_parent": "old_parent", 
+ "rgt": "usta\u0161a"
+}
