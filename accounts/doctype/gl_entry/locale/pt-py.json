@@ -1,0 +1,16 @@
+{
+ " does not belong to the company: ": "n\u00e3o pertence \u00e0 empresa:", 
+ " has been freezed. \\\t\t\t\tOnly Accounts Manager can do transaction against this account": "foi congelado. \\ Apenas Gerente de Contas pode fazer transa\u00e7\u00e3o contra essa conta", 
+ " is mandatory for GL Entry": "\u00e9 obrigat\u00f3ria para a entrada GL", 
+ " is not a ledger": "n\u00e3o \u00e9 um livro", 
+ " is not active": "n\u00e3o est\u00e1 ativo", 
+ " will become ": "ficar\u00e1", 
+ "Account: ": "Conta:", 
+ "Cost Center must be specified for PL Account: ": "Centro de custos deve ser especificado para Conta PL:", 
+ "For opening balance entry account can not be a PL account": "Para a abertura de conta de entrada saldo n\u00e3o pode ser uma conta de PL", 
+ "GL Entry: Debit or Credit amount is mandatory for ": "GL Entrada: montante de cr\u00e9dito ou d\u00e9bito \u00e9 obrigat\u00f3ria para", 
+ "Negative balance is not allowed for account ": "Saldo negativo n\u00e3o \u00e9 permitido por conta", 
+ "Outstanding cannot be less than zero. \\\t\t\t\t \tPlease match exact outstanding.": "Excelente n\u00e3o pode ser menor que zero. \\ Por favor correspond\u00eancia exata excelente.", 
+ "Outstanding for Voucher ": "Destaque para Vale", 
+ "You are not authorized to do/modify back dated entries before ": "Voc\u00ea n\u00e3o est\u00e1 autorizado a fazer / modificar volta entradas datadas antes"
+}

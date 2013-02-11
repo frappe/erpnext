@@ -1,0 +1,10 @@
+{
+ "BOM Replace Tool": "BOM Ferramenta Substituir", 
+ "Current BOM": "BOM atual", 
+ "Manufacturing": "Fabrico", 
+ "New BOM": "Novo BOM", 
+ "Replace": "Substituir", 
+ "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Substituir um BOM particular em todas as BOMs outros onde ele \u00e9 usado. Ele ir\u00e1 substituir o link BOM antigo, atualizar o custo e regenerar &quot;Explos\u00e3o BOM Item&quot; tabela como por novo BOM", 
+ "The BOM which will be replaced": "O BOM que ser\u00e1 substitu\u00eddo", 
+ "The new BOM after replacement": "O BOM novo ap\u00f3s substitui\u00e7\u00e3o"
+}

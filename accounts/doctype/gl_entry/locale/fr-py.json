@@ -1,0 +1,16 @@
+{
+ " does not belong to the company: ": "n&#39;appartient pas \u00e0 l&#39;entreprise:", 
+ " has been freezed. \\\t\t\t\tOnly Accounts Manager can do transaction against this account": "a \u00e9t\u00e9 gel\u00e9. \\ Seul Accounts Manager peut faire contre cette transaction compte", 
+ " is mandatory for GL Entry": "est obligatoire pour l&#39;entr\u00e9e GL", 
+ " is not a ledger": "n&#39;est pas un livre", 
+ " is not active": "n&#39;est pas actif", 
+ " will become ": "deviendra", 
+ "Account: ": "Compte:", 
+ "Cost Center must be specified for PL Account: ": "Centre de co\u00fbts doivent \u00eatre sp\u00e9cifi\u00e9s pour compte PL:", 
+ "For opening balance entry account can not be a PL account": "Pour ouvrir inscription en compte l&#39;\u00e9quilibre ne peut pas \u00eatre un compte de PL", 
+ "GL Entry: Debit or Credit amount is mandatory for ": "Entr\u00e9e GL: quantit\u00e9 de d\u00e9bit ou de cr\u00e9dit est obligatoire pour", 
+ "Negative balance is not allowed for account ": "Solde n\u00e9gatif n&#39;est pas autoris\u00e9 pour le compte", 
+ "Outstanding cannot be less than zero. \\\t\t\t\t \tPlease match exact outstanding.": "Exceptionnelle ne peut pas \u00eatre inf\u00e9rieur \u00e0 z\u00e9ro. \\ S&#39;il vous pla\u00eet correspondre exacte exceptionnelle.", 
+ "Outstanding for Voucher ": "Bon exceptionnelle pour", 
+ "You are not authorized to do/modify back dated entries before ": "Vous n&#39;\u00eates pas autoris\u00e9 \u00e0 faire / modifier les entr\u00e9es dat\u00e9es de retour avant"
+}
