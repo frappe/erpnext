@@ -24,7 +24,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None, stat
 	def set_status(doctype, name):
 		w = webnotes.model_wrapper(doctype, name)
 		w.ignore_permissions = True
-		w.doc.status = status
+		w.doc.status = is_system_user and "Replied" or status
 		w.doc.save()
 		if mail:
 			mail.save_attachments_in_doc(w.doc)
@@ -50,9 +50,9 @@ def add_sales_communication(subject, content, sender, real_name, mail=None, stat
 		lead=lead_name, contact=contact_name)
 	
 	if contact_name:
-		doc = set_status("Contact", contact_name, is_system_user and "Replied" or status)
+		set_status("Contact", contact_name)
 	elif lead_name:
-		doc set_status("Lead", lead_name, is_system_user and "Replied" or status)
+		set_status("Lead", lead_name)
 	
 
 class SalesMailbox(POP3Mailbox):	
