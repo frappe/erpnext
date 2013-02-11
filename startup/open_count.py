@@ -9,6 +9,7 @@ queries = {
 	"Customer Issue": {"status":"Open"},
 	"Task": {"status":"Open"},
 	"Lead": {"status":"Open"},
+	"Contact": {"status":"Open"},
 	"Opportunity": {"docstatus":0},
 	"Quotation": {"docstatus":0},
 	"Sales Order": {"docstatus":0},

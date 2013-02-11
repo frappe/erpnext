@@ -1,0 +1,22 @@
+{
+ "Classification of Customers by region": "Klasifikacija kupaca po regiji", 
+ "For reference": "Za referencu", 
+ "Has Child Node": "Je li \u010dvor dijete", 
+ "No": "Ne", 
+ "Only leaf nodes are allowed in transaction": "Samo leaf \u010dvorovi su dozvoljeni u transakciji", 
+ "Parent Territory": "Roditelj Regija", 
+ "Select Budget Distribution to unevenly distribute targets across months.": "Odaberite Budget distribuciju neravnomjerno raspodijeliti ciljeve diljem mjeseci.", 
+ "Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.": "Postavite Stavka Grupa-mudre prora\u010dune na ovom podru\u010dju. Tako\u0111er mo\u017eete uklju\u010diti sezonalnost postavljanjem Distribution.", 
+ "Setup": "Postavljanje", 
+ "Target Details": "Ciljane Detalji", 
+ "Target Distribution": "Ciljana Distribucija", 
+ "Territory": "Teritorija", 
+ "Territory Manager": "Teritorij Manager", 
+ "Territory Name": "Regija Ime", 
+ "Territory Targets": "Teritorij Mete", 
+ "Trash Reason": "Otpad Razlog", 
+ "Yes": "Da", 
+ "lft": "LFT", 
+ "old_parent": "old_parent", 
+ "rgt": "usta\u0161a"
+}

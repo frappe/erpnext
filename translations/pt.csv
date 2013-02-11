@@ -1,17 +1,25 @@
 ,
+ Reason: ,Motivo:
  against same operation,contra a mesma operação
  by Role ,por Função
  cannot be 0,não pode ser 0
+ does not belong to the company: ,não pertence à empresa:
+ has been freezed. \				Only Accounts Manager can do transaction against this account,foi congelado. \ Apenas Gerente de Contas pode fazer transação contra essa conta
 " is less than equals to zero in the system, \						valuation rate is mandatory for this item","é menor do que é igual a zero no sistema, \ taxa de avaliação é obrigatório para esse item"
  is mandatory,é obrigatória
+ is mandatory for GL Entry,é obrigatória para a entrada GL
+ is not a ledger,não é um livro
+ is not active,não está ativo
  is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,"é agora o padrão de Ano Fiscal. \ Por favor, atualize seu navegador para que a alteração tenha efeito."
  or the BOM is cancelled or inactive,ou o BOM é cancelado ou inativo
  should be same as that in ,deve ser o mesmo que na
+ will become ,ficará
 """Company History""",&quot;História da Companhia&quot;
 """Team Members"" or ""Management""",&quot;Membros da Equipe&quot; ou &quot;gerenciamento&quot;
 # ###.##,# # # #. # #
 "#,###",# # # #
 "#,###.##",# # # #. # #
+"#,###.###",# # # #. # # #
 "#,##,###.##",# # # # # #. # #
 #.###,#. # # #
 "#.###,##",#. # # # # #
@@ -96,9 +104,11 @@
 >,&gt;
 >=,&gt; =
 A,A
+A Customer exists with same name,Um cliente existe com mesmo nome
 A Lead with this email id should exist,Um chumbo com esse ID de e-mail deve existir
 A Product is shown on the website and is linked to an item.,Um produto é mostrado no site e está ligada a um item.
 "A Product or a Service that is bought, sold or kept in stock.","Um produto ou um serviço que é comprado, vendido ou mantidos em estoque."
+A Supplier exists with same name,Um Fornecedor existe com mesmo nome
 A logical Warehouse against which stock entries are made.,Um armazém lógico contra o qual as entradas de ações são feitas.
 A new popup will open that will ask you to select further conditions.,Um pop-up será aberto novo que vai pedir para você selecionar outras condições.
 A symbol for this currency. For e.g. $,Um símbolo para esta moeda. Por exemplo: $
@@ -128,6 +138,7 @@ Account Id,Id da conta
 Account Info,Informações da Conta
 Account Name,Nome da conta
 Account Type,Tipo de conta
+Account: ,Conta:
 "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person","Registro contábil congelado até a presente data, ninguém pode fazer / modificar entrada, exceto pessoa autorizada"
 Accounting journal entries.,Lançamentos contábeis jornal.
 Accounts,Contas
@@ -162,6 +173,7 @@ Add / Edit Taxes and Charges,Adicionar / Editar Impostos e Taxas
 Add A New Rule,Adicionar uma nova regra
 Add A Property,Adicione uma propriedade
 Add Attachments,Adicionar anexos
+Add Bookmark,Adicionar marcadores
 Add CSS,Adicionar CSS
 Add Column,Adicionar coluna
 Add Message,Adicionar mensagem
@@ -253,11 +265,15 @@ Allocated Budget,Orçamento atribuído
 Allocated amount,Montante atribuído
 Allow Attach,Permitir Anexar
 Allow Bill of Materials,Permitir Lista de Materiais
+Allow Negative Balance,Permitir saldo negativo
 Allow Negative Stock,Permitir estoque negativo
 Allow Production Order,Permitir Ordem de Produção
 Allow Rename,Permitir Renomear
 Allow Samples,Permitir Amostras
+Allow User,Permitir que o usuário
+Allow Users,Permitir que os usuários
 Allow on Submit,Permitir em Enviar
+Allow the following users to make Leave Applications for block days.,Permitir que os usuários a seguir para fazer aplicações deixam para os dias de bloco.
 Allow this price in purchase related forms,Permitir esse preço em formas de compra relacionados
 Allow this price in sales related forms,Permitir esse preço em vendas formas relacionadas
 Allow user to login only after this hour (0-24),Permitir que o usuário fazer o login somente após esta hora (0-24)
@@ -285,6 +301,7 @@ Applicant Name,Nome do requerente
 Applicant for a Job,Candidato a um emprego
 Applicant for a Job (extracted from jobs email).,Candidato a um emprego (extraído de e-mail empregos).
 Applications for leave.,Os pedidos de licença.
+Applies to Company,Aplica-se a Empresa
 Apply / Approve Leaves,Aplicar / Aprovar Folhas
 Appraisal,Avaliação
 Appraisal Goal,Meta de avaliação
@@ -393,10 +410,15 @@ Bio,Bio
 Birth Date,Data de Nascimento
 Black,Preto
 Blob,Gota
+Block Date,Bloquear Data
+Block Days,Dias bloco
+Block Holidays on important days.,Bloquear feriados em dias importantes.
+Block leave applications by department.,Bloquear deixar aplicações por departamento.
 Blog,Blog
 Blog Subscriber,Assinante Blog
 Blog entry.,Blog entrada.
 Blood Group,Grupo sanguíneo
+Bookmarks,Marcadores
 Branch,Ramo
 Brand,Marca
 Brand HTML,Marca HTML
@@ -599,6 +621,7 @@ Core,Núcleo
 Cost Center,Centro de Custos
 Cost Center Details,Custo Detalhes Centro
 Cost Center Name,Custo Nome Centro
+Cost Center must be specified for PL Account: ,Centro de custos deve ser especificado para Conta PL:
 Cost to Company,Custo para empresa
 Costing,Custeio
 Country,País
@@ -610,10 +633,11 @@ Create Receiver List,Criar Lista de Receptor
 Create Salary Slip,Criar folha de salário
 "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.","Criar uma lista de preços de mestre Lista de Preços e introduzir taxas de ref padrão contra cada um deles. Na seleção de uma lista de preços em Cotação Ordem de Vendas, ou nota de entrega, a taxa de ref correspondente será obtido para este item."
 Create and Send Newsletters,Criar e enviar Newsletters
+Created Account Head: ,Chefe Conta criada:
 Created Customer Issue,Problema do cliente criado
+Created Group ,Grupo criado
 Created Opportunity,Criado Oportunidade
 Created Support Ticket,Ticket Suporte criado
-Created by,Criado por
 Creates salary slip for above mentioned criteria.,Cria folha de salário para os critérios acima mencionados.
 Credit,Crédito
 Credit Amt,Crédito Amt
@@ -695,6 +719,7 @@ Database of potential customers.,Banco de dados de clientes potenciais.
 Date,Data
 Date Format,Formato de data
 Date Of Retirement,Data da aposentadoria
+Date is repeated,Data é repetido
 Date of Birth,Data de Nascimento
 Date of Issue,Data de Emissão
 Date of Joining,Data da Unir
@@ -703,6 +728,7 @@ Date on which lorry started from your warehouse,Data em que o camião começou a
 Date on which the lead was last contacted,Data em que a liderança foi passada contactado
 Dates,Datas
 Datetime,Datetime
+Days for which Holidays are blocked for this department.,Dias para que feriados são bloqueados para este departamento.
 Dealer,Revendedor
 Dear,Caro
 Debit,Débito
@@ -810,6 +836,7 @@ Distribution Id,Id distribuição
 Distribution Name,Nome de distribuição
 Distributor,Distribuidor
 Divorced,Divorciado
+Do not show any symbol like $ etc next to currencies.,Não mostrar qualquer símbolo como US $ etc ao lado de moedas.
 Doc Name,Nome Doc
 Doc Status,Estado Doc
 Doc Type,Tipo Doc
@@ -875,6 +902,7 @@ Embed image slideshows in website pages.,Incorporar apresentações de imagem em
 Emergency Contact Details,Detalhes de contato de emergência
 Emergency Phone Number,Número de telefone de emergência
 Employee,Empregado
+Employee Designation.,Designação empregado.
 Employee Details,Detalhes do Funcionários
 Employee Education,Educação empregado
 Employee External Work History,Empregado história de trabalho externo
@@ -1039,6 +1067,7 @@ For Warehouse,Para Armazém
 "For e.g. 2012, 2012-13","Para por exemplo 2012, 2012-13"
 For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,"Por exemplo, se você cancelar e alterar &#39;INV004&#39; ele vai se tornar um novo documento &quot;INV004-1 &#39;. Isso ajuda você a manter o controle de cada emenda."
 For example: You want to restrict users to transactions marked with a certain property called 'Territory',Por exemplo: Você quer restringir os usuários a transações marcadas com uma certa propriedade chamado &#39;Território&#39;
+For opening balance entry account can not be a PL account,Para a abertura de conta de entrada saldo não pode ser uma conta de PL
 "For opening invoice entry, this date will reflect in the period-wise aging report.","Para a abertura de entrada da fatura, esta data vai refletir no relatório período sábio envelhecimento."
 For ranges,Para faixas
 For reference,Para referência
@@ -1065,6 +1094,7 @@ Fully Billed,Totalmente faturado
 Fully Completed,Totalmente concluída
 GL Control,GL Controle
 GL Entry,Entrada GL
+GL Entry: Debit or Credit amount is mandatory for ,GL Entrada: montante de crédito ou débito é obrigatória para
 GL Mapper,GL Mapper
 GL Mapper Detail,GL Detalhe Mapper
 GRN,GRN
@@ -1153,6 +1183,7 @@ Hey! You seem to be using the wrong template. \				Click on 'Download Template' 
 Hidden,Escondido
 Hide Actions,Ocultar Ações
 Hide Copy,Ocultar Copiar
+Hide Currency Symbol,Ocultar Símbolo de Moeda
 Hide Email,Esconder-mail
 Hide Heading,Ocultar título
 Hide Print,Ocultar Imprimir
@@ -1162,6 +1193,12 @@ Highlight,Realçar
 History In Company,História In Company
 Hold,Segurar
 Holiday,Férias
+Holiday Block List,Lista de Bloqueios de férias
+Holiday Block List Allow,Lista de Bloqueios de férias Permitir
+Holiday Block List Allowed,Lista de feriado Bloco admitidos
+Holiday Block List Date,Data feriado Lista de Bloqueios
+Holiday Block List Dates,Datas de férias Lista de Bloqueios
+Holiday Block List Name,Nome de férias Lista de Bloqueios
 Holiday List,Lista de feriado
 Holiday List Name,Nome da lista férias
 Holidays,Férias
@@ -1181,8 +1218,10 @@ Hours,Horas
 How frequently?,Com que freqüência?
 "How should this currency be formatted? If not set, will use system defaults","Como deve ser essa moeda ser formatado? Se não for definido, vai usar padrões do sistema"
 How to upload,Como fazer upload
+Hrvatski,Hrvatski
 Human Resources,Recursos Humanos
 Human Resources Home,Home Recursos Humanos
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,Viva! O dia (s) em que você está aplicando para deixar \ coincidir com feriado (s). Você não precisa pedir licença.
 I,Eu
 ID (name) of the entity whose property is to be set,ID (nome) da entidade cuja propriedade está a ser definida
 IDT,IDT
@@ -1197,7 +1236,6 @@ Icon,Ícone
 Icon will appear on the button,Ícone aparecerá no botão
 Id of the profile will be the email.,ID do perfil será o e-mail.
 Identification of the package for the delivery (for print),Identificação do pacote para a entrega (para impressão)
-If,Se
 If Monthly Budget Exceeded,Se o orçamento mensal excedido
 "If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order","Se BOM venda é definido, o BOM real do pacote é exibido como table.Available na nota de entrega e Ordem de Vendas"
 "If Supplier Part Number exists for given Item, it gets stored here","Se Número da peça de Fornecedor existe para determinado item, ele fica armazenado aqui"
@@ -1211,7 +1249,9 @@ If Yearly Budget Exceeded,Se orçamento anual excedido
 If more than one package of the same type (for print),Se mais do que uma embalagem do mesmo tipo (por impressão)
 If non standard port (e.g. 587),"Se a porta não padrão (por exemplo, 587)"
 If not applicable please enter: NA,Se não for aplicável digite: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","Se não for controlada, a lista deverá ser adicionado a cada departamento onde tem de ser aplicado."
 "If not, create a","Se não, crie um"
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.","Se definido, a entrada de dados só é permitida para usuários especificados. Outra, a entrada é permitida para todos os usuários com permissões necessárias."
 "If specified, send the newsletter using this email address","Se especificado, enviar a newsletter usando esse endereço de e-mail"
 "If the 'territory' Link Field exists, it will give you an option to select it","Se o campo da &#39;território&#39; Link existe, ele vai te dar uma opção para selecioná-la"
 "If the account is frozen, entries are allowed for the ""Account Manager"" only.","Se a conta for congelada, as entradas são permitidos para o &quot;Account Manager&quot; apenas."
@@ -1235,6 +1275,7 @@ Important dates and commitments in your project life cycle,Datas importantes e c
 Imports,Importações
 In Dialog,Em diálogo
 In Filter,Em Filtro
+In List View,Na exibição de lista
 In Process,Em Processo
 In Report Filter,No Relatório Filtro
 In Store,Na loja
@@ -1416,7 +1457,7 @@ Language preference for user interface (only if available).,Preferência de idio
 Last Contact Date,Data do último contato
 Last IP,Última IP
 Last Login,Último Login
-Last Modified On:,Última modificação em:
+Last Modified On,Última modificação em
 Last Name,Sobrenome
 Last Purchase Rate,Compra de última
 Last Update,Atualização
@@ -1620,6 +1661,7 @@ Name of the entity who has requested for the Purchase Requisition,Nome da entida
 Naming,Nomeando
 Naming Series,Nomeando Series
 Naming Series Options,Nomeando Série Opções
+Negative balance is not allowed for account ,Saldo negativo não é permitido por conta
 Net Pay,Pagamento Net
 Net Pay (in words) will be visible once you save the Salary Slip.,Pagamento líquido (em palavras) será visível quando você salvar a folha de salário.
 Net Total,Líquida Total
@@ -1759,6 +1801,8 @@ Outgoing,Cessante
 Outgoing Mail Server,Outgoing Mail Server
 Outgoing Mails,E-mails de saída
 Outstanding Amount,Saldo em aberto
+Outstanding cannot be less than zero. \				 	Please match exact outstanding.,Excelente não pode ser menor que zero. \ Por favor correspondência exata excelente.
+Outstanding for Voucher ,Destaque para Vale
 Over Heads,Mais Cabeças
 Overhead,Despesas gerais
 Overload Query,Consulta sobrecarga
@@ -1833,6 +1877,7 @@ Pay To / Recd From,Para pagar / RECD De
 Payables,Contas a pagar
 Payables Group,Grupo de contas a pagar
 Payment Entries,Entradas de pagamento
+Payment Entry has been modified after you pulled it. 			Please pull it again.,"Entrada de pagamento foi modificada depois que você tirou isso. Por favor, puxe-o novamente."
 Payment Reconciliation,Reconciliação de pagamento
 Payment Terms,Condições de Pagamento
 Payment days,Dia de pagamento
@@ -1842,6 +1887,7 @@ Payments,Pagamentos
 Payroll Setup,Configuração da folha de pagamento
 Pending,Pendente
 Pending Review,Revisão pendente
+Percent,Por cento
 Percent Complete,Porcentagem Concluída
 Percentage Allocation,Alocação percentual
 Percentage variation in quantity to be allowed while receiving or delivering this item.,Variação percentual na quantidade a ser permitido ao receber ou entregar este item.
@@ -1883,6 +1929,7 @@ Planned Quantity,Quantidade planejada
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Por favor insira Abreviação ou Nome Curto corretamente como ele será adicionado como sufixo a todos os chefes de Conta.
 Please check,"Por favor, verifique"
 Please click on another report from the menu.,"Por favor, clique em outro relatório a partir do menu."
+Please enter Bill Date,Por favor insira Data Bill
 Please enter valid ,Por favor insira válido
 Please save the Newsletter before sending.,"Por favor, salve o boletim antes de enviar."
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Por favor seleccione Carry Forward se você também quer incluir equilíbrio ano fiscal anterior deixa para este ano fiscal
@@ -2007,6 +2054,7 @@ Purchase Order Item No,Comprar item Portaria n
 Purchase Order Item Supplied,Item da ordem de compra em actualização
 Purchase Order Items,Comprar Itens Encomendar
 Purchase Order Items Supplied,Itens ordem de compra em actualização
+Purchase Order Items To Be Received,Comprar itens para ser recebido
 Purchase Order Message,Mensagem comprar Ordem
 Purchase Order Required,Ordem de Compra Obrigatório
 Purchase Order sent by customer,Ordem de Compra enviada pelo cliente
@@ -2160,6 +2208,7 @@ Relieving Date,Aliviar Data
 Remark,Observação
 Remarks,Observações
 Remove,Remover
+Remove Bookmark,Remover Bookmark
 Rename,Rebatizar
 Rename Tool,Renomear Ferramenta
 Rented,Alugado
@@ -2543,6 +2592,7 @@ Stock Uom,Estoque Uom
 Stock Value,Valor da
 "Stock level frozen up to this date, nobody can do / modify entry except authorized person","Nível de estoque congelado até a presente data, ninguém pode fazer / modificar entrada, exceto pessoa autorizada"
 Stop,Pare
+Stop users from making Leave Applications on following days.,Pare de usuários de fazer aplicações deixam nos dias seguintes.
 Stopped,Parado
 Structure cost centers for budgeting.,Estrutura centros de custo para orçamentação.
 Structure of books of accounts.,Estrutura de livros de contas.
@@ -2879,6 +2929,7 @@ User Remark will be added to Auto Remark,Observação usuário será adicionado 
 User Tags,Etiquetas de usuários
 User Type,Tipo de Usuário
 User must always select,O usuário deve sempre escolher
+User not allowed entry in the Warehouse,Entrada do usuário não é permitido no Armazém
 UserRole,UserRole
 Username,Nome de Utilizador
 Users,Usuários
@@ -2912,6 +2963,8 @@ Warehouse Contact Info,Armazém Informações de Contato
 Warehouse Detail,Detalhe Armazém
 Warehouse Name,Nome Armazém
 Warehouse Type,Tipo de armazém
+Warehouse User,Usuário Armazém
+Warehouse Users,Usuários do Warehouse
 Warehouse where you are maintaining stock of rejected items,Armazém onde você está mantendo estoque de itens rejeitados
 Warn,Avisar
 Warning,Aviso
@@ -2995,6 +3048,7 @@ Year of Passing,Ano de Passagem
 Yearly,Anual
 Yes,Sim
 Yesterday,Ontem
+You are not authorized to do/modify back dated entries before ,Você não está autorizado a fazer / modificar volta entradas datadas antes
 You can create more earning and deduction type from Setup --> HR,Você pode criar mais salário e tipo de dedução do Setup -&gt; HR
 You can enter any date manually,Você pode entrar em qualquer data manualmente
 You can enter the minimum quantity of this item to be ordered.,Você pode inserir a quantidade mínima deste item a ser ordenada.
@@ -3004,6 +3058,7 @@ You can make a purchase order from multiple Supplier Quotations. Select Supplier
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,"Você pode fazer um recibo de compra de várias ordens de compra. Selecione as ordens de compra, um por um e clique no botão abaixo."
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,Você pode definir vários &#39;propriedades&#39; para usuários para definir os valores padrão e aplicar regras de permissão com base no valor dessas propriedades em várias formas.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,Você pode usar <a href='#Form/Customize Form'>Personalizar Formulário</a> para definir os níveis em campos.
+You cannot apply for a leave on the following date because it is blocked,Você não pode aplicar para uma licença na seguinte data porque está bloqueado
 Your Customer's TAX registration numbers (if applicable) or any general information,Seu cliente FISCAIS números de inscrição (se aplicável) ou qualquer outra informação geral
 "Your download is being built, this may take a few moments...","O seu download está sendo construída, isso pode demorar alguns instantes ..."
 Your letter head content in HTML.,Seu conteúdo cabeça carta em HTML.
@@ -3037,10 +3092,8 @@ bullhorn,megafone
 calendar,calendário
 camera,câmera
 cancel,cancelar
-cannot be included in item's rate,não pode ser incluído na taxa do item
 certificate,certidão
 check,verificar
-checked,verificado
 chevron-down,chevron-down
 chevron-left,chevron-esquerda
 chevron-right,Chevron-direito
@@ -3106,7 +3159,6 @@ indent-left,travessão esquerdo
 indent-right,travessão direito
 info-sign,Informações sinal-
 is a cancelled Item,é um item cancelado
-is checked for,está marcada para
 is not a Stock Item,não é um item de estoque
 is not allowed.,não é permitido.
 italic,itálico
@@ -3169,7 +3221,6 @@ search,pesquisar
 share,ação
 share-alt,partes alt-
 shopping-cart,carrinho de compras
-should also have,também deve ter
 signal,sinalizar
 star,estrela
 star-empty,estrelas vazio
@@ -3185,7 +3236,6 @@ text-width,texto de largura
 th,ª
 th-large,ª-grande
 th-list,ª-lista
-then,depois
 thumbs-down,polegares para baixo
 thumbs-up,polegar para cima
 time,tempo
@@ -3206,5 +3256,7 @@ wrench,chave inglesa
 yyyy-mm-dd,aaaa-mm-dd
 zoom-in,zoom-in
 zoom-out,zoom-out
+српски,српски
 العربية,العربية
 हिंदी,हिंदी
+தமிழ்,தமிழ்

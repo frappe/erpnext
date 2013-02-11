@@ -8,6 +8,7 @@
  "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.": "G\u00e9n\u00e9rer des bordereaux d&#39;emballage pour les colis \u00e0 livrer. Utilis\u00e9 pour avertir le num\u00e9ro du colis, contenu du paquet et son poids.", 
  "Item-Wise Price List": "Liste des Prix Article Wise", 
  "Ordered Items To Be Delivered": "Articles command\u00e9s \u00e0 livrer", 
+ "Purchase Order Items To Be Received": "Articles de bons de commande pour \u00eatre re\u00e7u", 
  "Serial No Service Contract Expiry": "N \u00b0 de s\u00e9rie expiration du contrat de service", 
  "Serial No Status": "N \u00b0 de s\u00e9rie Statut", 
  "Serial No Warranty Expiry": "N \u00b0 de s\u00e9rie expiration de garantie", 

@@ -1,0 +1,18 @@
+{
+ "Actual Qty": "Stvarni Kol", 
+ "Batch No": "Hrpa Ne", 
+ "Delivery Note Packing Item": "Dostava Napomena Pakiranje artikla", 
+ "Description": "Opis", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Item Name": "Stavka Ime", 
+ "Page Break": "Prijelom stranice", 
+ "Parent Detail docname": "Roditelj Detalj docname", 
+ "Parent Item": "Roditelj artikla", 
+ "Prevdoc DocType": "Prevdoc DOCTYPE", 
+ "Projected Qty": "Predvi\u0111en Kol", 
+ "Qty": "Kol", 
+ "Serial No": "Serijski br", 
+ "Stock": "Zaliha", 
+ "UOM": "UOM", 
+ "Warehouse": "Skladi\u0161te"
+}

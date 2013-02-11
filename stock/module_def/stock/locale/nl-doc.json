@@ -8,6 +8,7 @@
  "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.": "Genereer pakbonnen voor pakketten te leveren. Gebruikt voor het verpakken aantal, inhoud van de verpakking en het gewicht mee te delen.", 
  "Item-Wise Price List": "Item-Wise Prijslijst", 
  "Ordered Items To Be Delivered": "Besteld te leveren zaken", 
+ "Purchase Order Items To Be Received": "Purchase Order Items te ontvangen", 
  "Serial No Service Contract Expiry": "Serial No Service Contract Expiry", 
  "Serial No Status": "Serienummer Status", 
  "Serial No Warranty Expiry": "Serial Geen garantie Expiry", 

@@ -33,6 +33,9 @@ class DocType(SellingController):
 	def onload(self):
 		self.add_communication_list()
 
+	def on_communication_sent(self, comm):
+		webnotes.conn.set(self.doc, 'status', 'Replied')
+
 	def check_status(self):
 		chk = sql("select status from `tabLead` where name=%s", self.doc.name)
 		chk = chk and chk[0][0] or ''
@@ -89,9 +92,6 @@ class DocType(SellingController):
 		event_user = addchild(ev, 'event_individuals', 'Event User')
 		event_user.person = self.doc.contact_by
 		event_user.save()
-
-	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
 
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Sales Email Settings',None,'email_id')

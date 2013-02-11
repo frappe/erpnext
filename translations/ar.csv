@@ -1,17 +1,25 @@
 ,
+ Reason: ,السبب:
  against same operation,ضد نفس العملية
  by Role ,من دور
  cannot be 0,لا يمكن أن تكون 0
+ does not belong to the company: ,لا ينتمي إلى الشركة:
+ has been freezed. \				Only Accounts Manager can do transaction against this account,وقد جمدت. \ يمكن فقط إدارة حسابات القيام المعاملة ضد هذا الحساب
 " is less than equals to zero in the system, \						valuation rate is mandatory for this item",وأقل من يساوي إلى الصفر في النظام، \ معدل تقييم إلزامي لهذا البند
  is mandatory,إلزامي
+ is mandatory for GL Entry,إلزامي لدخول GL
+ is not a ledger,ليس دفتر الأستاذ
+ is not active,غير نشط
  is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,الآن السنة المالية الافتراضية. \ يرجى تحديث المتصفح الخاص بك لالتغيير نافذ المفعول.
  or the BOM is cancelled or inactive,أو يتم إلغاء BOM أو غير نشطة
  should be same as that in ,يجب أن يكون في نفس
+ will become ,سوف تصبح
 """Company History""",&quot;نبذة عن تاريخ الشركة&quot;
 """Team Members"" or ""Management""",&quot;أعضاء الفريق&quot; أو &quot;إدارة&quot;
 # ###.##,# # # # # #
 "#,###",# # # #
 "#,###.##",# # # # # #
+"#,###.###",# # # # # # #
 "#,##,###.##",# # #، # # # # #
 #.###,# # # #
 "#.###,##",# # # #، # #
@@ -96,9 +104,11 @@
 >,&gt;
 >=,&gt; =
 A,A
+A Customer exists with same name,العملاء من وجود نفس الاسم مع
 A Lead with this email id should exist,وينبغي أن يكون هذا المعرف الرصاص مع البريد الإلكتروني موجود
 A Product is shown on the website and is linked to an item.,ويرد المنتج على الموقع الإلكتروني، ويرتبط إلى عنصر.
 "A Product or a Service that is bought, sold or kept in stock.",منتج أو الخدمة التي يتم شراؤها أو بيعها أو حملها في سوق الأسهم.
+A Supplier exists with same name,وهناك مورد موجود مع نفس الاسم
 A logical Warehouse against which stock entries are made.,مستودع المنطقية التي تتم ضد مقالات الأسهم.
 A new popup will open that will ask you to select further conditions.,وهناك المنبثق الجديدة التي فتح سوف يطلب منك تحديد شروط أخرى.
 A symbol for this currency. For e.g. $,رمزا لهذه العملة. على سبيل المثال ل$
@@ -128,6 +138,7 @@ Account Id,رقم الحساب
 Account Info,معلومات الحساب
 Account Name,اسم الحساب
 Account Type,نوع الحساب
+Account: ,الحساب:
 "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person",القيد المحاسبي جمدت حتى هذا التاريخ، لا يمكن لأحد / تعديل إدخال باستثناء شخص مخول
 Accounting journal entries.,المحاسبة إدخالات دفتر اليومية.
 Accounts,حسابات
@@ -162,6 +173,7 @@ Add / Edit Taxes and Charges,إضافة / تعديل الضرائب والرسو
 Add A New Rule,إضافة قاعدة جديدة
 Add A Property,إضافة خاصية
 Add Attachments,إضافة مرفقات
+Add Bookmark,إضافة علامة
 Add CSS,إضافة CSS
 Add Column,إضافة عمود
 Add Message,إضافة رسالة
@@ -253,11 +265,15 @@ Allocated Budget,تخصيص الميزانية
 Allocated amount,تخصيص مبلغ
 Allow Attach,تسمح إرفاق
 Allow Bill of Materials,يسمح مشروع القانون للمواد
+Allow Negative Balance,تسمح الرصيد السلبي
 Allow Negative Stock,تسمح الأسهم السلبية
 Allow Production Order,تسمح أمر الإنتاج
 Allow Rename,تسمح إعادة تسمية
 Allow Samples,تسمح عينات
+Allow User,تسمح للمستخدم
+Allow Users,السماح للمستخدمين
 Allow on Submit,السماح على تقديم
+Allow the following users to make Leave Applications for block days.,تسمح للمستخدمين التالية لجعل تطبيقات إجازة لعدة أيام كتلة.
 Allow this price in purchase related forms,يسمح هذا السعر في أشكال شراء ذات صلة
 Allow this price in sales related forms,يسمح هذا السعر في أشكال المبيعات ذات الصلة
 Allow user to login only after this hour (0-24),تسمح للمستخدم لتسجيل الدخول فقط بعد هذه الساعة (0-24)
@@ -285,6 +301,7 @@ Applicant Name,اسم مقدم الطلب
 Applicant for a Job,طالب وظيفة
 Applicant for a Job (extracted from jobs email).,طالب وظيفة (وظائف البريد الإلكتروني المستخرجة من).
 Applications for leave.,طلبات الحصول على إجازة.
+Applies to Company,ينطبق على شركة
 Apply / Approve Leaves,تطبيق / الموافقة على أوراق
 Appraisal,تقييم
 Appraisal Goal,تقييم الهدف
@@ -393,10 +410,15 @@ Bio,الحيوية
 Birth Date,تاريخ الميلاد
 Black,أسود
 Blob,سائل
+Block Date,منع تاريخ
+Block Days,كتلة أيام
+Block Holidays on important days.,منع الإجازات في الأيام الهامة.
+Block leave applications by department.,منع مغادرة الطلبات المقدمة من الإدارة.
 Blog,بلوق
 Blog Subscriber,بلوق المشترك
 Blog entry.,مقال المدونة.
 Blood Group,فصيلة الدم
+Bookmarks,الإشارات المرجعية
 Branch,فرع
 Brand,علامة تجارية
 Brand HTML,العلامة التجارية HTML
@@ -599,6 +621,7 @@ Core,جوهر
 Cost Center,مركز التكلفة
 Cost Center Details,تفاصيل تكلفة مركز
 Cost Center Name,اسم مركز تكلفة
+Cost Center must be specified for PL Account: ,يجب تحديد مركز التكلفة لحساب PL:
 Cost to Company,تكلفة الشركة
 Costing,تكلف
 Country,بلد
@@ -610,10 +633,11 @@ Create Receiver List,إنشاء قائمة استقبال
 Create Salary Slip,إنشاء زلة الراتب
 "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.",إنشاء قائمة الأسعار من ماجستير وقائمة الأسعار القياسية إدخال أسعار المرجع ضد كل واحد منهم. على اختيار قائمة الأسعار في ترتيب المبيعات اقتباس، أو مذكرة التسليم، سوف يكون المرجع المناظرة معدل المنال لهذا البند.
 Create and Send Newsletters,إنشاء وإرسال الرسائل الإخبارية
+Created Account Head: ,إنشاء حساب الرئيسي:
 Created Customer Issue,إنشاء العدد العملاء
+Created Group ,إنشاء مجموعة
 Created Opportunity,خلق الفرص
 Created Support Ticket,إنشاء تذكرة دعم
-Created by,التي أنشأتها
 Creates salary slip for above mentioned criteria.,يخلق زلة مرتبات المعايير المذكورة أعلاه.
 Credit,ائتمان
 Credit Amt,الائتمان AMT
@@ -695,6 +719,7 @@ Database of potential customers.,قاعدة بيانات من العملاء ا�
 Date,تاريخ
 Date Format,تنسيق التاريخ
 Date Of Retirement,تاريخ التقاعد
+Date is repeated,ويتكرر التاريخ
 Date of Birth,تاريخ الميلاد
 Date of Issue,تاريخ الإصدار
 Date of Joining,تاريخ الانضمام
@@ -703,6 +728,7 @@ Date on which lorry started from your warehouse,التاريخ الذي بدأت
 Date on which the lead was last contacted,التاريخ الذي تم الاتصال الصدارة مشاركة
 Dates,التواريخ
 Datetime,التاريخ والوقت
+Days for which Holidays are blocked for this department.,يتم حظر أيام الأعياد التي لهذا القسم.
 Dealer,تاجر
 Dear,العزيز
 Debit,مدين
@@ -810,6 +836,7 @@ Distribution Id,توزيع رقم
 Distribution Name,توزيع الاسم
 Distributor,موزع
 Divorced,المطلقات
+Do not show any symbol like $ etc next to currencies.,لا تظهر أي رمز مثل $ الخ بجانب العملات.
 Doc Name,اسم الوثيقة
 Doc Status,الحالة ثيقة
 Doc Type,نوع الوثيقة
@@ -875,6 +902,7 @@ Embed image slideshows in website pages.,تضمين عرض الشرائح صور
 Emergency Contact Details,تفاصيل الاتصال في حالات الطوارئ
 Emergency Phone Number,رقم الهاتف في حالات الطوارئ
 Employee,عامل
+Employee Designation.,الموظف التعيين.
 Employee Details,موظف تفاصيل
 Employee Education,موظف التعليم
 Employee External Work History,التاريخ الموظف العمل الخارجي
@@ -1039,6 +1067,7 @@ For Warehouse,لمستودع
 "For e.g. 2012, 2012-13",ل، 2012 على سبيل المثال 2012-13
 For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,على سبيل المثال إذا قمت بإلغاء وتعديل &#39;INV004&#39; سوف تصبح الوثيقة الجديدة &quot;INV004-1&quot;. هذا يساعدك على تتبع كل تعديل.
 For example: You want to restrict users to transactions marked with a certain property called 'Territory',على سبيل المثال: كنت ترغب في تقييد المستخدمين من وضع علامة المعاملات مع خاصية معينة تسمى &quot;الأرض&quot;
+For opening balance entry account can not be a PL account,لفتح رصيد الحساب يمكن الدخول لا يكون حساب PL
 "For opening invoice entry, this date will reflect in the period-wise aging report.",لفتح دخول الفاتورة، سوف تعكس هذا التاريخ في التقرير الفترة من الحكمة الشيخوخة.
 For ranges,للنطاقات
 For reference,للرجوع إليها
@@ -1065,6 +1094,7 @@ Fully Billed,وصفت بالكامل
 Fully Completed,يكتمل
 GL Control,GL التحكم
 GL Entry,GL الدخول
+GL Entry: Debit or Credit amount is mandatory for ,GL الاشتراك: الائتمان أو السحب مبلغ إلزامي لل
 GL Mapper,GL مخطط
 GL Mapper Detail,GL مخطط تفصيلي
 GRN,GRN
@@ -1153,6 +1183,7 @@ Hey! You seem to be using the wrong template. \				Click on 'Download Template' 
 Hidden,مخفي
 Hide Actions,إخفاء عمليات
 Hide Copy,إخفاء نسخة
+Hide Currency Symbol,إخفاء رمز العملة
 Hide Email,إخفاء البريد الإلكتروني
 Hide Heading,إخفاء عنوان
 Hide Print,إخفاء طباعة
@@ -1162,6 +1193,12 @@ Highlight,تسليط الضوء على
 History In Company,وفي تاريخ الشركة
 Hold,عقد
 Holiday,عطلة
+Holiday Block List,إقامات قائمة
+Holiday Block List Allow,عطلة قائمة الحظر السماح
+Holiday Block List Allowed,عطلة قائمة الحظر مسموح
+Holiday Block List Date,تاريخ إقامات قائمة
+Holiday Block List Dates,مواعيد إقامات قائمة
+Holiday Block List Name,اسم إقامات قائمة
 Holiday List,عطلة قائمة
 Holiday List Name,عطلة اسم قائمة
 Holidays,العطل
@@ -1181,8 +1218,10 @@ Hours,ساعات
 How frequently?,كيف كثير من الأحيان؟
 "How should this currency be formatted? If not set, will use system defaults",كيف ينبغي أن يتم تنسيق هذه العملة؟ إذا لم يتم تعيين و، استخدم افتراضيات النظام
 How to upload,كيفية تحميل
+Hrvatski,هرفاتسكي
 Human Resources,الموارد البشرية
 Human Resources Home,الموارد البشرية الرئيسية
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,يا هلا! اليوم (ق) التي كنت متقدما للحصول على إذن \ تتزامن مع عطلة (ق). لا تحتاج إلى تطبيق للحصول على إذن.
 I,أنا
 ID (name) of the entity whose property is to be set,ID (اسم) للكيان الذي هو الملكية التي سيتم تحديدها
 IDT,IDT
@@ -1197,7 +1236,6 @@ Icon,رمز
 Icon will appear on the button,سوف تظهر أيقونة على زر
 Id of the profile will be the email.,سوف معرف الملف يكون البريد الإلكتروني.
 Identification of the package for the delivery (for print),تحديد حزمة لتسليم (للطباعة)
-If,إذا
 If Monthly Budget Exceeded,إذا تجاوز الميزانية الشهرية
 "If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order",إذا تم تعريف BOM بيع، يتم عرض BOM الفعلي للحزمة وtable.Available في مذكرة التسليم وترتيب المبيعات
 "If Supplier Part Number exists for given Item, it gets stored here",إذا مزود رقم الجزء وجود لبند معين، ويحصل على تخزينها هنا
@@ -1211,7 +1249,9 @@ If Yearly Budget Exceeded,إذا تجاوز الميزانية السنوية
 If more than one package of the same type (for print),إذا كان أكثر من حزمة واحدة من نفس النوع (للطباعة)
 If non standard port (e.g. 587),إذا غير المنفذ القياسي (على سبيل المثال 587)
 If not applicable please enter: NA,إذا لا ينطبق يرجى إدخال: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.",إن لم يكن تم، سيكون لديك قائمة تضاف إلى كل قسم حيث أنه لا بد من تطبيقها.
 "If not, create a",إن لم يكن، إنشاء
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.",إذا مجموعة، يسمح فقط للمستخدمين إدخال البيانات المحدد. آخر، يسمح لجميع المستخدمين الدخول مع أذونات المطلوبة.
 "If specified, send the newsletter using this email address",في حالة تحديد، وإرسال الرسالة الإخبارية باستخدام عنوان البريد الإلكتروني هذا
 "If the 'territory' Link Field exists, it will give you an option to select it",إذا حقل &#39;الأرض&#39; لينك موجود، وسوف تعطيك الخيار لتحديده
 "If the account is frozen, entries are allowed for the ""Account Manager"" only.",اذا تم تجميد الحساب، ويسمح للمقالات &quot;مدير حسابات&quot; فقط.
@@ -1235,6 +1275,7 @@ Important dates and commitments in your project life cycle,المهم التوا
 Imports,واردات
 In Dialog,في مربع حوار
 In Filter,في تصفية
+In List View,في عرض القائمة
 In Process,في عملية
 In Report Filter,في تصفية التقرير
 In Store,في المتجر
@@ -1416,7 +1457,7 @@ Language preference for user interface (only if available).,تفضيل لغة و
 Last Contact Date,مشاركة الاتصال تاريخ
 Last IP,مشاركة IP
 Last Login,آخر تسجيل دخول
-Last Modified On:,تم إجراء آخر تعديل في:
+Last Modified On,تم إجراء آخر تعديل في
 Last Name,اسم العائلة
 Last Purchase Rate,مشاركة الشراء قيم
 Last Update,آخر تحديث
@@ -1620,6 +1661,7 @@ Name of the entity who has requested for the Purchase Requisition,اسم الك�
 Naming,تسمية
 Naming Series,تسمية السلسلة
 Naming Series Options,خيارات تسمية السلسلة
+Negative balance is not allowed for account ,لا يسمح الرصيد السلبي لحساب
 Net Pay,صافي الراتب
 Net Pay (in words) will be visible once you save the Salary Slip.,سوف تدفع صافي (في كلمة) تكون مرئية بمجرد حفظ زلة الراتب.
 Net Total,مجموع صافي
@@ -1759,6 +1801,8 @@ Outgoing,المنتهية ولايته
 Outgoing Mail Server,خادم البريد الصادر
 Outgoing Mails,الرسائل الالكترونية الصادرة
 Outstanding Amount,المبلغ المعلقة
+Outstanding cannot be less than zero. \				 	Please match exact outstanding.,يمكن المعلقة لا يكون أقل من الصفر. \ الرجاء تطابق تام المعلقة.
+Outstanding for Voucher ,المعلقة للقسيمة
 Over Heads,على رؤوس
 Overhead,فوق
 Overload Query,الاستعلام الزائد
@@ -1833,6 +1877,7 @@ Pay To / Recd From,دفع إلى / من Recd
 Payables,الذمم الدائنة
 Payables Group,دائنو مجموعة
 Payment Entries,مقالات الدفع
+Payment Entry has been modified after you pulled it. 			Please pull it again.,تم تعديل الدخول الدفع بعد سحبها. يرجى تسحبه مرة أخرى.
 Payment Reconciliation,دفع المصالحة
 Payment Terms,شروط الدفع
 Payment days,الدفع أيام
@@ -1842,6 +1887,7 @@ Payments,المدفوعات
 Payroll Setup,الرواتب الإعداد
 Pending,ريثما
 Pending Review,في انتظار المراجعة
+Percent,في المئة
 Percent Complete,كاملة في المئة
 Percentage Allocation,نسبة توزيع
 Percentage variation in quantity to be allowed while receiving or delivering this item.,السماح الاختلاف في نسبة الكمية في حين تلقي أو تقديم هذا البند.
@@ -1883,6 +1929,7 @@ Planned Quantity,المخطط الكمية
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,الرجاء إدخال الإسم المختصر اختصار أو بشكل صحيح كما سيتم إضافة لاحقة على أنها لجميع رؤساء الحساب.
 Please check,يرجى مراجعة
 Please click on another report from the menu.,الرجاء النقر على تقرير آخر من القائمة.
+Please enter Bill Date,الرجاء إدخال تاريخ بيل
 Please enter valid ,من فضلك ادخل صالحة
 Please save the Newsletter before sending.,يرجى حفظ النشرة قبل الإرسال.
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,الرجاء تحديد مضي قدما إذا كنت تريد أيضا لتشمل التوازن العام المالي السابق يترك لهذه السنة المالية
@@ -2007,6 +2054,7 @@ Purchase Order Item No,شراء السلعة طلب No
 Purchase Order Item Supplied,شراء السلعة ترتيب الموردة
 Purchase Order Items,شراء سلع ترتيب
 Purchase Order Items Supplied,عناصر يوفرها أمر الشراء
+Purchase Order Items To Be Received,أمر شراء الأصناف التي سترد
 Purchase Order Message,رسالة طلب شراء
 Purchase Order Required,أمر الشراء المطلوبة
 Purchase Order sent by customer,أمر الشراء المرسلة من قبل العملاء
@@ -2160,6 +2208,7 @@ Relieving Date,تخفيف تاريخ
 Remark,كلام
 Remarks,تصريحات
 Remove,نزع
+Remove Bookmark,أضف إزالة
 Rename,إعادة تسمية
 Rename Tool,إعادة تسمية أداة
 Rented,مؤجر
@@ -2543,6 +2592,7 @@ Stock Uom,الأسهم UOM
 Stock Value,الأسهم القيمة
 "Stock level frozen up to this date, nobody can do / modify entry except authorized person",مستوى المخزون جمدت حتى هذا التاريخ، لا يمكن لأحد / تعديل إدخال باستثناء شخص مخول
 Stop,توقف
+Stop users from making Leave Applications on following days.,وقف المستخدمين من إجراء تطبيقات على إجازة الأيام التالية.
 Stopped,توقف
 Structure cost centers for budgeting.,مراكز التكلفة لهيكل الميزانية.
 Structure of books of accounts.,هيكل دفاتر الحسابات.
@@ -2879,6 +2929,7 @@ User Remark will be added to Auto Remark,ملاحظة سيتم إضافة مست
 User Tags,الكلمات المستخدم
 User Type,نوع المستخدم
 User must always select,يجب دائما مستخدم تحديد
+User not allowed entry in the Warehouse,المستخدم غير مسموح الدخول في مستودع
 UserRole,UserRole
 Username,اسم المستخدم
 Users,المستخدمين
@@ -2912,6 +2963,8 @@ Warehouse Contact Info,مستودع معلومات الاتصال
 Warehouse Detail,مستودع التفاصيل
 Warehouse Name,مستودع اسم
 Warehouse Type,مستودع نوع
+Warehouse User,مستودع العضو
+Warehouse Users,مستودع المستخدمين
 Warehouse where you are maintaining stock of rejected items,مستودع حيث كنت الحفاظ على المخزون من المواد رفضت
 Warn,حذر
 Warning,تحذير
@@ -2995,6 +3048,7 @@ Year of Passing,اجتياز سنة
 Yearly,سنويا
 Yes,نعم
 Yesterday,أمس
+You are not authorized to do/modify back dated entries before ,غير مصرح لك أن تفعل / تعديل مرة أخرى مؤرخة قبل مقالات
 You can create more earning and deduction type from Setup --> HR,يمكنك إنشاء المزيد من الأرباح وخصم نوع من الإعداد -&gt; HR
 You can enter any date manually,يمكنك إدخال أي تاريخ يدويا
 You can enter the minimum quantity of this item to be ordered.,يمكنك إدخال كمية الحد الأدنى في هذا البند إلى أن يؤمر.
@@ -3004,6 +3058,7 @@ You can make a purchase order from multiple Supplier Quotations. Select Supplier
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,يمكنك جعل إيصال الشراء من أوامر الشراء متعددة. حدد أوامر الشراء واحدا تلو الآخر ثم انقر على الزر أدناه.
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,يمكنك تعيين مختلف &#39;خصائص&#39; للمستخدمين لضبط القيم الافتراضية وتطبيق القواعد إذن على أساس قيمة هذه الخصائص في أشكال مختلفة.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,يمكنك استخدام <a href='#Form/Customize Form'>نموذج تخصيص</a> لتحديد مستويات على الحقول.
+You cannot apply for a leave on the following date because it is blocked,لا يمكنك التقدم للحصول على الإجازة في تاريخ التالية لتم حظره
 Your Customer's TAX registration numbers (if applicable) or any general information,عميلك أرقام التسجيل الضريبي (إن وجدت) أو أي معلومات عامة
 "Your download is being built, this may take a few moments...",ويجري بناء التنزيل، وهذا قد يستغرق بضع لحظات ...
 Your letter head content in HTML.,المحتوى رأس الرسالة في HTML.
@@ -3037,10 +3092,8 @@ bullhorn,البوق
 calendar,تقويم
 camera,كاميرا
 cancel,إلغاء
-cannot be included in item's rate,لا يمكن متضمنة في سعر العنصر
 certificate,شهادة
 check,تحقق
-checked,فحص
 chevron-down,شيفرون لأسفل
 chevron-left,شيفرون يسار
 chevron-right,شيفرون اليمين
@@ -3106,7 +3159,6 @@ indent-left,المسافة البادئة اليسرى
 indent-right,المسافة البادئة اليمنى
 info-sign,معلومات تسجيل الدخول،
 is a cancelled Item,هو بند إلغاء
-is checked for,يتم فحص لل
 is not a Stock Item,ليس الإغلاق للسهم
 is not allowed.,غير مسموح به.
 italic,مائل
@@ -3169,7 +3221,6 @@ search,البحث
 share,حصة
 share-alt,حصة بديل
 shopping-cart,عربة التسوق
-should also have,ينبغي أن يكون أيضا
 signal,إشارة
 star,نجم
 star-empty,النجوم فارغة
@@ -3185,7 +3236,6 @@ text-width,عرض النص
 th,ال
 th-large,TH-الكبيرة
 th-list,TH-قائمة
-then,ثم
 thumbs-down,علامة إستهجان
 thumbs-up,الابهام إلى أعلى
 time,مرة
@@ -3206,5 +3256,7 @@ wrench,وجع
 yyyy-mm-dd,YYYY-MM-DD
 zoom-in,التكبير في
 zoom-out,تكبير المغادرة
+српски,српски
 العربية,العربية
 हिंदी,हिंदी
+தமிழ்,தமிழ்

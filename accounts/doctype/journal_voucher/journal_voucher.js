@@ -161,8 +161,10 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_account_list",
-		filters: { company: doc.company	}
+		filters: { 
+			group_or_ledger: "Ledger",
+			company: doc.company
+		}
 	}
 }
 

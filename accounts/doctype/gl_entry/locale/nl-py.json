@@ -1,0 +1,16 @@
+{
+ " does not belong to the company: ": "behoort niet tot de onderneming:", 
+ " has been freezed. \\\t\t\t\tOnly Accounts Manager can do transaction against this account": "is bevroren. \\ Accounts Manager kan doen transactie tegen deze account", 
+ " is mandatory for GL Entry": "is verplicht voor GL Entry", 
+ " is not a ledger": "is niet een grootboek", 
+ " is not active": "niet actief", 
+ " will become ": "zal", 
+ "Account: ": "Account:", 
+ "Cost Center must be specified for PL Account: ": "Kostenplaats moet worden opgegeven voor PL Account:", 
+ "For opening balance entry account can not be a PL account": "Voor openingsbalans toegang account kan niet worden een PL rekening", 
+ "GL Entry: Debit or Credit amount is mandatory for ": "GL Entry: Debet of Credit bedrag is verplicht voor", 
+ "Negative balance is not allowed for account ": "Negatief saldo is niet toegestaan \u200b\u200bvoor rekening", 
+ "Outstanding cannot be less than zero. \\\t\t\t\t \tPlease match exact outstanding.": "Outstanding kan niet lager zijn dan nul. \\ Gelieve overeenkomen met de exacte uitstekend.", 
+ "Outstanding for Voucher ": "Uitstekend voor Voucher", 
+ "You are not authorized to do/modify back dated entries before ": "U bent niet gemachtigd om / niets veranderen aan terug gedateerde gegevens voor het"
+}

@@ -6,6 +6,7 @@
  "Company": "Empresa", 
  "Email Id": "Email Id", 
  "For Reference Only.": "S\u00f3lo de referencia.", 
+ "If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.": "Si se establece, la entrada de datos s\u00f3lo se permite a los usuarios especificados. Si no, se permite la entrada a todos los usuarios con los permisos necesarios.", 
  "Merge": "Unir", 
  "Merge Warehouses": "Combinar Almacenes", 
  "Merge With": "Combinar con", 
@@ -19,5 +20,6 @@
  "Warehouse Contact Info": "Almac\u00e9n de informaci\u00f3n de contacto", 
  "Warehouse Detail": "Almac\u00e9n Detalle", 
  "Warehouse Name": "Almac\u00e9n Nombre", 
- "Warehouse Type": "Dep\u00f3sito de tipo"
+ "Warehouse Type": "Dep\u00f3sito de tipo", 
+ "Warehouse Users": "Usuarios Almac\u00e9n"
 }
