@@ -39,16 +39,14 @@ class DocType:
 			(self.doc.voucher_type, self.doc.voucher_no, self.doc.account))
 			
 		total_amount = total_amount and flt(total_amount[0][0]) or 0
-		
 		reconciled_payment = webnotes.conn.sql("""
-			select sum(%s) - sum(%s) from `tabGL Entry` where 
+			select sum(ifnull(%s, 0)) - sum(ifnull(%s, 0)) from `tabGL Entry` where 
 			against_voucher = %s and voucher_no != %s
 			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
 			((self.doc.account_type == 'debit' and 'credit' or 'debit'), self.doc.account_type, 
 			 	'%s', '%s', '%s'), (self.doc.voucher_no, self.doc.voucher_no, self.doc.account))
 			
 		reconciled_payment = reconciled_payment and flt(reconciled_payment[0][0]) or 0
-		
 		ret = {
 			'total_amount': total_amount,	
 			'pending_amt_to_reconcile': total_amount - reconciled_payment
