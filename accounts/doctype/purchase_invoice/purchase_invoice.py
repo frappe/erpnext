@@ -269,9 +269,6 @@ class DocType(BuyingController):
 			if not cstr(data[0]['currency']) == cstr(self.doc.currency):
 				msgprint("Purchase Receipt: " + cstr(d.purchase_receipt) + " currency : " + cstr(data[0]['currency']) + " does not match with currency of current document.")
 				raise Exception
-			if not flt(data[0]['conversion_rate']) == flt(self.doc.conversion_rate):
-				msgprint("Purchase Receipt: " + cstr(d.purchase_receipt) + " conversion_rate : " + cstr(data[0]['conversion_rate']) + " does not match with conversion_rate of current document.")
-				raise Exception
 					
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
