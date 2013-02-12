@@ -1,8 +1,5 @@
-import sys
+import webnotes
 import unittest
-
-if __name__=="__main__":
-	sys.path.extend([".", "app", "lib"])
 
 from hr.doctype.leave_application.leave_application import LeaveDayBlockedError
 
@@ -54,13 +51,3 @@ test_records = [
 		"employee": "_T-Employee-0001",
 		"company": "_Test Company"
 	}]]
-
-if __name__=="__main__":
-	import webnotes
-	webnotes.connect()
-
-	from webnotes.test_runner import make_test_records
-	make_test_records("Leave Application")
-
-	unittest.main()
-

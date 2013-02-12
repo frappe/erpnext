@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-28 15:28:59", 
+  "modified": "2013-02-11 17:23:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,33 +58,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "contacts", 
-  "fieldtype": "Check", 
-  "label": "All Contacts"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_contacts", 
-  "fieldtype": "Check", 
-  "label": "All Customer Contacts"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "leads", 
-  "fieldtype": "Check", 
-  "label": "All Leads"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "active_leads", 
-  "fieldtype": "Check", 
-  "label": "All Active Leads"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "blog_subscribers", 
-  "fieldtype": "Check", 
-  "label": "All Blog Subscribers"
+  "fieldname": "send_to_type", 
+  "fieldtype": "Select", 
+  "label": "Send To Type", 
+  "options": "Lead\nContact\nCustom"
  }, 
  {
   "doctype": "DocField", 
@@ -92,6 +69,29 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "depends_on": "eval:doc.send_to_type==\"Lead\"", 
+  "doctype": "DocField", 
+  "fieldname": "lead_source", 
+  "fieldtype": "Select", 
+  "label": "Lead Source"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Lead\"", 
+  "doctype": "DocField", 
+  "fieldname": "lead_status", 
+  "fieldtype": "Select", 
+  "label": "Lead Status"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Contact\"", 
+  "doctype": "DocField", 
+  "fieldname": "contact_type", 
+  "fieldtype": "Select", 
+  "label": "Contact Type", 
+  "options": "Customer\nSupplier\nCustom"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Custom\"", 
   "description": "Comma separated list of email addresses", 
   "doctype": "DocField", 
   "fieldname": "email_list", 

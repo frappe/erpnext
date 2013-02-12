@@ -29,4 +29,13 @@ cur_frm.cscript.refresh = function(doc) {
 		cur_frm.set_value("send_from", 
 			repl("%(fullname)s <%(email)s>", wn.user_info(doc.owner)));
 	}
+	
+	wn.call({
+		method: "support.doctype.newsletter.newsletter.get_lead_options",
+		type: "GET",
+		callback: function(r) {
+			set_field_options("lead_source", r.message.sources.join("\n"))
+			set_field_options("lead_status", r.message.statuses.join("\n"))
+		}
+	})
 }

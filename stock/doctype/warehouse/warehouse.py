@@ -207,11 +207,3 @@ class DocType:
 				exists for this warehouse.""", raise_exception=1)
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
-			
-test_records = [
-	[{
-		"doctype": "Warehouse",
-		"warehouse_name": "_Test Warehouse",
-		"warehouse_type": "_Test Warehouse Type"
-	}]
-]
