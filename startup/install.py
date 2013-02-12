@@ -33,7 +33,7 @@ def make_roles():
 		"Partner", "Projects User", "Purchase Manager", "Purchase Master Manager",
 		"Purchase User", "Quality Manager", "Sales Manager",
 		"Sales Master Manager", "Sales User", "Supplier", "Support Manager",
-		"Support Team"]
+		"Support Team", "Website Manager"]
 		
 	for r in roles:
 		doc = webnotes.doc(fielddata = {
