@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:32", 
+  "creation": "2013-01-27 16:31:21", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:27", 
+  "modified": "2013-02-12 09:33:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -66,6 +66,7 @@
   "doctype": "DocField", 
   "fieldname": "page_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Page Name", 
   "read_only": 1
  }, 

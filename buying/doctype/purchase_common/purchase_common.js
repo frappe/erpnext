@@ -419,7 +419,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.calc_amount(doc, 1);
 
 	// calculate advances if pv
-	if(doc.doctype == 'Purchase Invoice') calc_total_advance(doc, cdt, cdn);
+	if(doc.docstatus == 0 && doc.doctype == 'Purchase Invoice') calc_total_advance(doc, cdt, cdn);
 }
 
 // **************** RE-CALCULATE VALUES ***************************

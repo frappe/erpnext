@@ -891,7 +891,8 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	}
 	cur_frm.cscript.calculate_charges (doc, cdt, cdn);
 
-	if (cur_frm.cscript.calc_adjustment_amount) cur_frm.cscript.calc_adjustment_amount(doc);
+	if (doc.docstatus == 0 && cur_frm.cscript.calc_adjustment_amount)
+	 	cur_frm.cscript.calc_adjustment_amount(doc);
 }
 
 

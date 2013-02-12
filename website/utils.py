@@ -19,7 +19,6 @@ from __future__ import unicode_literals
 import os
 import conf
 import webnotes
-from webnotes.utils import cstr
 
 page_map = {
 	'Web Page': webnotes._dict({
@@ -52,7 +51,7 @@ def render(page_name):
 			html = get_html(page_name)
 		else:
 			html = get_html('index')
-	except Exception, e:
+	except Exception:
 		html = get_html('error')
 
 	from webnotes.handler import eprint, print_zip
@@ -244,7 +243,7 @@ def get_outer_env():
 	})
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["brand_html", "copyright", "address", "top_bar_background"]:
+	for k in ["brand_html", "copyright", "address", "top_bar_background", "favicon"]:
 		if k in settings.fields:
 			ret[k] = settings.fields[k]
 
