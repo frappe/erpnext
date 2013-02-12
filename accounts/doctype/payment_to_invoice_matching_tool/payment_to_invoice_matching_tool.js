@@ -33,6 +33,7 @@ cur_frm.cscript.refresh = function(doc) {
 }
 
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
+	// TO-do: check for pos, it should not come
 	if (!doc.account) msgprint("Please select Account first");
 	else {
 		return repl("select gle.voucher_no, gle.posting_date, gle.%(account_type)s \
