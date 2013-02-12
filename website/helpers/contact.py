@@ -33,7 +33,8 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 
 	# make lead / communication
 	from selling.doctype.lead.get_leads import add_sales_communication
-	add_sales_communication(subject or "Website Query", message, sender, sender)
+	add_sales_communication(subject or "Website Query", message, sender, sender, 
+		mail=None, status=status)
 	
 	# guest method, cap max writes per hour
 	if webnotes.conn.sql("""select count(*) from `tabCommunication`
