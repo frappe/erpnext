@@ -28,9 +28,7 @@ def get_product_info(item_code):
 	}
 
 @webnotes.whitelist(allow_guest=True)
-def get_product_list(search=None, product_group=None, start=0, limit=10):
-	# DOUBT: why is product_group param passed?
-	
+def get_product_list(search=None, start=0, limit=10):
 	# base query
 	query = """select name, item_name, page_name, website_image, item_group, 
 			web_long_description as website_description
@@ -47,7 +45,6 @@ def get_product_list(search=None, product_group=None, start=0, limit=10):
 
 	data = webnotes.conn.sql(query, {
 		"search": search,
-		"product_group": product_group
 	}, as_dict=1)
 	
 	return [get_item_for_list_in_html(r) for r in data]
