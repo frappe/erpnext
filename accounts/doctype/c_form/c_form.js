@@ -26,6 +26,10 @@ cur_frm.fields_dict.invoice_details.grid.get_field("invoice_no").get_query = fun
 	}
 }
 
+cur_frm.fields_dict.state.get_query = function(doc) {
+	return {filters: { country: "India"}}
+}
+
 cur_frm.cscript.invoice_no = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	get_server_fields('get_invoice_details', d.invoice_no, 'invoice_details', doc, cdt, cdn, 1);
