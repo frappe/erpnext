@@ -20,7 +20,7 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		webnotes.session.user = "test1@erpnext.com"
 		
-		from core.doctype.profile.profile import add_role
+		from webnotes.profile import add_role
 		add_role("test1@erpnext.com", "HR User")
 		
 		self.assertTrue(application.insert())
