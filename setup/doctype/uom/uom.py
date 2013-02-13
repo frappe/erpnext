@@ -20,10 +20,3 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-		
-test_records = [
-	[{
-		"doctype": "UOM",
-		"uom_name": "_Test UOM"
-	}]
-]

@@ -89,16 +89,3 @@ class DocType:
 	def update_default_holiday_list(self):
 		webnotes.conn.sql("""update `tabHoliday List` set is_default = 0 
 			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.doc.fiscal_year,))
-
-test_records = [[{
-		"doctype": "Holiday List",
-		"holiday_list_name": "_Test Holiday List",
-		"fiscal_year": "_Test Fiscal Year 2013"
-	}, {
-		"doctype": "Holiday",
-		"parent": "_Test Holiday List",
-		"parenttype": "Holiday List",
-		"parentfield": "holiday_list_details",
-		"holiday_date": "2013-01-01",
-		"description": "New Year"
-	}]]

@@ -255,12 +255,3 @@ class DocType:
 		sql("update `tabSingles` set value = %s where doctype='Global Defaults' and field = 'default_company' and value = %s", (newdn, olddn))	
 		if get_defaults('company') == olddn:
 			set_default('company', newdn)
-
-test_records = [
-	[{
-		"doctype": "Company",
-		"company_name": "_Test Company",
-		"abbr": "_TC",
-		"default_currency": "INR",
-	}],
-]
