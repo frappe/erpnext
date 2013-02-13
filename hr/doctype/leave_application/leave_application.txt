@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-02 14:40:08", 
+  "creation": "2013-02-08 13:17:08", 
   "docstatus": 0, 
-  "modified": "2013-02-08 11:27:22", 
+  "modified": "2013-02-13 12:32:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,9 +29,7 @@
   "parent": "Leave Application", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1, 
-  "report": 1, 
-  "write": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -215,7 +213,18 @@
   "doctype": "DocPerm", 
   "match": "employee", 
   "permlevel": 0, 
-  "role": "Employee"
+  "report": 1, 
+  "role": "Employee", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All", 
+  "submit": 0
  }, 
  {
   "amend": 1, 
@@ -223,8 +232,10 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
+  "report": 1, 
   "role": "HR User", 
-  "submit": 1
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "amend": 1, 
@@ -233,13 +244,10 @@
   "doctype": "DocPerm", 
   "match": "leave_approver:user", 
   "permlevel": 0, 
+  "report": 1, 
   "role": "Leave Approver", 
-  "submit": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "HR User"
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "amend": 0, 
@@ -247,7 +255,25 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2, 
+  "report": 1, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "report": 1, 
   "role": "Leave Approver", 
-  "submit": 0
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Employee"
  }
 ]
