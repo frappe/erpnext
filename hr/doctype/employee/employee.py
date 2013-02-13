@@ -73,13 +73,13 @@ class DocType:
 		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
 		
 	def update_profile(self):
-		profile_wrapper = webnotes.model_wrapper("Profile", self.doc.user_id)
-
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
 			from core.doctype.profile.profile import add_role
 			add_role(self.doc.user_id, "HR User")
+			
+		profile_wrapper = webnotes.model_wrapper("Profile", self.doc.user_id)
 		
 		# copy details like Fullname, DOB and Image to Profile
 		if self.doc.employee_name:
@@ -97,9 +97,22 @@ class DocType:
 		
 		if self.doc.gender:
 			profile_wrapper.doc.gender = self.doc.gender
-				
-		profile_wrapper.save()		
-	
+			
+		if self.doc.image and self.doc.file_list:
+			# add to file list and user_image
+			for file_args in self.doc.file_list.split("\n"):
+				fname, fid = file_args.split(",")
+				if self.doc.image == fname:
+					new_file_args = fname + "," + fid
+					file_list = profile_wrapper.doc.file_list.split("\n")
+					if new_file_args not in file_list:
+						file_list += [new_file_args]
+					profile_wrapper.doc.file_list = "\n".join(file_list)
+					profile_wrapper.doc.user_image = fname
+					break
+			
+		profile_wrapper.save()
+		
 	def validate_date(self):
 		import datetime
 		if self.doc.date_of_birth and self.doc.date_of_joining and getdate(self.doc.date_of_birth) >= getdate(self.doc.date_of_joining):
