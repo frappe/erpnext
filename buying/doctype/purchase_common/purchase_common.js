@@ -778,10 +778,10 @@ cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 
 var calculate_outstanding = function(doc) {
 	// total amount to pay	
-	doc.total_amount_to_pay = flt(flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted));
+	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.write_off_amount);
 	
 	// outstanding amount 
-	if(doc.docstatus==0) doc.outstanding_amount = flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_advance);
+	if(doc.docstatus==0) doc.outstanding_amount = doc.total_amount_to_pay - flt(doc.total_advance);
 	
 	refresh_many(['total_amount_to_pay', 'outstanding_amount']);
 }
