@@ -63,18 +63,45 @@ class DocType:
 		return ret_sal_struct and ret_sal_struct[0][0] or ''
 
 	def on_update(self):
-		self.update_user_default()
+		if self.doc.user_id:
+			self.update_user_default()
+			self.update_profile()
 	
 	def update_user_default(self):
-		if self.doc.user_id:
-			webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
-			webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
-			webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
-			
-			# add employee role if missing
-			if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
+		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
+		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
+		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
+		
+	def update_profile(self):
+		profile_wrapper = webnotes.model_wrapper("Profile", self.doc.user_id)
+
+		# add employee role if missing
+		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
-				webnotes.get_obj("Profile", self.doc.user_id).add_role("Employee")
+			profile_wrapper.doclist.append({
+				"doctype": "UserRole",
+				"parentfield": "user_roles",
+				"role": "Employee"
+			})
+		
+		# copy details like Fullname, DOB and Image to Profile
+		if self.doc.employee_name:
+			employee_name = self.doc.employee_name.split(" ")
+			if len(employee_name) >= 3:
+				profile_wrapper.doc.last_name = " ".join(employee_name[2:])
+				profile_wrapper.doc.middle_name = employee_name[1]
+			elif len(employee_name) == 2:
+				profile_wrapper.doc.last_name = employee_name[1]
+			
+			profile_wrapper.doc.first_name = employee_name[0]
+				
+		if self.doc.date_of_birth:
+			profile_wrapper.doc.birth_date = self.doc.date_of_birth
+		
+		if self.doc.gender:
+			profile_wrapper.doc.gender = self.doc.gender
+				
+		profile_wrapper.save()		
 	
 	def validate_date(self):
 		import datetime
