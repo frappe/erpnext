@@ -23,10 +23,14 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(doc.__islocal) {
 		cur_frm.set_value("status", "Open")
 	}
+	cur_frm.set_df_property("leave_approver", "options", "");
 	cur_frm.call({
 		method:"get_approver_list",
 		callback: function(r) {
-			cur_frm.set_df_property("leave_approver", "options", r.message);
+			cur_frm.set_df_property("leave_approver", "options", $.map(r.message, 
+				function(profile) { 
+					return {value: profile, label: wn.user_info(profile).fullname}; 
+				}));
 			cur_frm.cscript.get_leave_balance(cur_frm.doc);
 		}
 	});
