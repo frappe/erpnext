@@ -1,0 +1,1 @@
+test_records = [[{"doctype":"Quotation Lost Reason", "order_lost_reason": "_Test Quotation Lost Reason"}]]

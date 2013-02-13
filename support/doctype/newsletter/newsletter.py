@@ -25,100 +25,72 @@ from webnotes import _
 class DocType():
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-		self.dt_map = {
-			"Contact": {
-				"email_field": "email_id",
-				"first_name_field": "first_name",
-			},
-			"Lead": {
-				"email_field": "email_id",
-				"first_name_field": "lead_name"
-			}
-		}
-		self.query_map = {
-			"contacts": """select distinct email_id from `tabContact`
-				where ifnull(email_id, '') != '' """,
-			"customer_contacts": """select distinct email_id from `tabContact`
-				where ifnull(customer, '') != '' and ifnull(email_id, '') != '' """,
-			"leads": """select distinct email_id from `tabLead`
-				where ifnull(email_id, '') != '' """,
-			"active_leads": """select distinct email_id from `tabLead`
-				where status = "Open" and ifnull(email_id, '') != '' """,
-			"blog_subscribers": """select distinct email_id from `tabLead`
-				where ifnull(blog_subscriber,0) = 1 and ifnull(email_id, '') != '' """
-		}
-		
+
+	def test_send(self, doctype="Lead"):
+		self.recipients = self.doc.test_email_id.split(",")
+		self.send_bulk()
+		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
+
 	def send_emails(self):
 		"""send emails to leads and customers"""
 		if self.doc.email_sent:
 			webnotes.msgprint("""Newsletter has already been sent""", raise_exception=1)
 
-		self.all_recipients = []
-		self.send_count = {}
+		self.recipients = self.get_recipients()
+		self.send_bulk()
 		
-		if self.doc.contacts:
-			self.send("contacts", "Contact")
-		elif self.doc.customer_contacts:
-			self.send("customer_contacts", "Contact")
-		
-		if self.doc.leads:
-			self.send("leads", "Lead")
-		else:
-			if self.doc.active_leads:
-				self.send("active_leads", "Lead")
+		webnotes.msgprint("""Scheduled to send to %d %s(s)""" % (len(self.recipients), 
+			self.send_to_doctype))
+
+		webnotes.conn.set(self.doc, "email_sent", 1)
+	
+	def get_recipients(self):
+		if self.doc.send_to_type=="Contact":
+			self.send_to_doctype = "Contact"
+			if self.doc.contact_type == "Customer":		
+				return webnotes.conn.sql_list("""select email_id from tabContact 
+					where ifnull(email_id, '') != '' and ifnull(customer, '') != ''""")
+
+			elif self.doc.contact_type == "Supplier":		
+				return webnotes.conn.sql_list("""select email_id from tabContact 
+					where ifnull(email_id, '') != '' and ifnull(supplier, '') != ''""")
+	
+		elif self.doc.send_to_type=="Lead":
+			self.send_to_doctype = "Lead"
+			conditions = []
+			if self.doc.lead_source and self.doc.lead_source != "All":
+				conditions.append(" and source='%s'" % self.doc.lead_source)
+			if self.doc.lead_status and self.doc.lead_status != "All":
+				conditions.append(" and status='%s'" % self.doc.lead_status)
+
+			if conditions:
+				conditions = "".join(conditions)
 				
-			if self.doc.blog_subscribers:
-				self.send("blog_subscribers", "Lead")
-				
-		if self.doc.email_list:
+			return webnotes.conn.sql_list("""select email_id from tabLead 
+				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
+
+		elif self.doc.email_list:
 			email_list = [cstr(email).strip() for email in self.doc.email_list.split(",")]
 			for email in email_list:
 				if not webnotes.conn.exists({"doctype": "Lead", "email_id": email}):
 					create_lead(email)
-			
-			self.send(email_list, "Lead")
-		
-		webnotes.msgprint("""Scheduled to send to %s""" % \
-			", ".join(["%d %s(s)" % (self.send_count[s], s) for s in self.send_count]))
-			
-	def test_send(self, doctype="Lead"):
+					
+			self.send_to_doctype = "Lead"
+			return email_list
+	
+	def send_bulk(self):
 		self.validate_send()
-
-		args = self.dt_map[doctype]
 
 		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
-		recipients = self.doc.test_email_id.split(",")
+		
 		from webnotes.utils.email_lib.bulk import send
-		send(recipients = recipients, sender = sender, 
-			subject = self.doc.subject, message = self.doc.message,
-			doctype = doctype, email_field = args["email_field"])
-		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
-		
-	def get_recipients(self, key):
-		recipients = webnotes.conn.sql(self.query_map[key])
-		recipients = [r[0] for r in recipients if r not in self.all_recipients]
-		self.all_recipients += recipients
-		return recipients
-		
-	def send(self, query_key, doctype):
-		self.validate_send()
-
 		webnotes.conn.auto_commit_on_many_writes = True
-		if isinstance(query_key, basestring) and self.query_map.has_key(query_key):
-			recipients = self.get_recipients(query_key)
-		else:
-			recipients = query_key
-		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
-		args = self.dt_map[doctype]
-		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + \
-			len(recipients)
 		
-		from webnotes.utils.email_lib.bulk import send
-		send(recipients = recipients, sender = sender, 
+		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
-			doctype = doctype, email_field = args["email_field"])
+			doctype = self.send_to_doctype, email_field = "email_id")
 
-		webnotes.conn.set(self.doc, "email_sent", 1)
+		webnotes.conn.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
@@ -129,6 +101,14 @@ class DocType():
 		if getattr(conf, "status", None) == "Trial":
 			webnotes.msgprint(_("""Sending newsletters is not allowed for Trial users, \
 				to prevent abuse of this feature."""), raise_exception=1)
+
+@webnotes.whitelist()
+def get_lead_options():
+	return {
+		"sources": ["All"] + webnotes.conn.sql_list("""select distinct source from tabLead"""),
+		"statuses": ["All"]+ webnotes.conn.sql_list("""select distinct status from tabLead""")
+	}
+
 
 lead_naming_series = None
 def create_lead(email_id):

@@ -21,23 +21,9 @@ import webnotes
 import webnotes.model
 import json	
 
+test_dependencies = ["Item", "Cost Center"]
+
 class TestPurchaseInvoice(unittest.TestCase):
-	def setUp(self):
-		webnotes.conn.begin()
-		self.load_test_data()
-		# webnotes.conn.set_value("Global Defaults", None, 
-		# 	"automatic_inventory_accounting", 1)
-		
-	def tearDown(self):
-		webnotes.conn.rollback()
-		
-	def load_test_data(self):
-		from webnotes.test_runner import make_test_records
-		webnotes.test_objects = {}
-		make_test_records("Cost Center", verbose=0)
-		make_test_records("Item", verbose=0)
-		make_test_records("Purchase Invoice", verbose=0)
-		
 	def test_gl_entries(self):
 		wrapper = webnotes.model_wrapper(self.get_test_doclist())
 		

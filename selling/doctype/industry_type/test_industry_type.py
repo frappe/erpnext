@@ -1,0 +1,4 @@
+test_records = [
+	[{"doctype":"Industry Type", "industry":"_Test Industry"}],
+	[{"doctype":"Industry Type", "industry":"_Test Industry 1"}],
+]

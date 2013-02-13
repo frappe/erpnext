@@ -33,6 +33,7 @@ cur_frm.cscript.refresh = function(doc) {
 }
 
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
+	// TO-do: check for pos, it should not come
 	if (!doc.account) msgprint("Please select Account first");
 	else {
 		return repl("select gle.voucher_no, gle.posting_date, gle.%(account_type)s \
@@ -44,7 +45,8 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 		    and (ifnull(gle.against_voucher, '') = '' \
 		        or ifnull(gle.against_voucher, '') = gle.voucher_no ) \
 			and ifnull(gle.%(account_type)s, 0) > 0 \
-		    and (select ifnull(abs(sum(debit) - sum(credit)), 0) from `tabGL Entry` \
+		    and (select ifnull(abs(sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))), 0) \
+				from `tabGL Entry` \
 		        where against_voucher_type = '%(dt)s' \
 		        and against_voucher = gle.voucher_no \
 		        and voucher_no != gle.voucher_no \
