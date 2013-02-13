@@ -19,7 +19,10 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(LeaveDayBlockedError, application.insert)
 		
 		webnotes.session.user = "test1@erpnext.com"
-		webnotes.get_obj("Profile", "test1@erpnext.com").add_role("HR User")
+		
+		from core.doctype.profile.profile import add_role
+		add_role("test1@erpnext.com", "HR User")
+		
 		self.assertTrue(application.insert())
 		
 	def test_global_block_list(self):

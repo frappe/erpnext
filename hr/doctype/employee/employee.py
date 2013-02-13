@@ -78,11 +78,8 @@ class DocType:
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
-			profile_wrapper.doclist.append({
-				"doctype": "UserRole",
-				"parentfield": "user_roles",
-				"role": "Employee"
-			})
+			from core.doctype.profile.profile import add_role
+			add_role(self.doc.user_id, "HR User")
 		
 		# copy details like Fullname, DOB and Image to Profile
 		if self.doc.employee_name:
