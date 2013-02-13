@@ -423,7 +423,7 @@ class DocType(BuyingController):
 				self.get_gl_dict({
 					"account": self.doc.credit_to,
 					"against": self.doc.against_expense_account,
-					"credit": self.doc.grand_total,
+					"credit": self.doc.total_amount_to_pay,
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,

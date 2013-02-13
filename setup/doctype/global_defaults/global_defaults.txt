@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-28 10:06:02", 
+  "creation": "2013-01-29 19:25:56", 
   "docstatus": 0, 
-  "modified": "2013-01-29 14:55:57", 
+  "modified": "2013-02-13 09:56:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -110,6 +110,7 @@
   "reqd": 1
  }, 
  {
+  "default": "This is the default number format. For currencies, please set the number format in the currency master.", 
   "doctype": "DocField", 
   "fieldname": "number_format", 
   "fieldtype": "Select", 
@@ -406,6 +407,11 @@
   "fieldname": "sms_sender_name", 
   "fieldtype": "Data", 
   "label": "SMS Sender Name"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"

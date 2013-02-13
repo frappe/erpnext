@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-19 10:23:34", 
+  "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:57", 
+  "modified": "2013-02-13 11:29:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -127,9 +127,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "state", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "State", 
-  "options": "link:State\ncountry='India'", 
+  "options": "State", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -171,7 +171,7 @@
   "fieldtype": "Link", 
   "label": "Amended From", 
   "no_copy": 1, 
-  "options": "Sales Invoice", 
+  "options": "C-Form", 
   "print_hide": 1, 
   "read_only": 1
  }, 

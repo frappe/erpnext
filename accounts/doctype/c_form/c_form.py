@@ -68,7 +68,7 @@ class DocType:
 		self.set_total_invoiced_amount()
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.total) for d in getlist(self.doclist, 'invoice_details')])
+		total = sum([flt(d.grand_total) for d in getlist(self.doclist, 'invoice_details')])
 		webnotes.conn.set(self.doc, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):

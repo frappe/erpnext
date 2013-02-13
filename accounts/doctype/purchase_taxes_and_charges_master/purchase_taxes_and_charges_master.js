@@ -76,8 +76,9 @@ cur_frm.cscript.add_deduct_tax = function(doc, cdt, cdn) {
     alert("Please select Category first");
     d.add_deduct_tax = '';
   }
-  else if(d.category != 'Total' && d.add_deduct_tax == 'Deduct'){
-    alert("You cannot Deduct when category is for valuation or for both(i.e total and valuation)");
+  else if(d.category != 'Total' && d.add_deduct_tax == 'Deduct') {
+	console.log([d.category, d.add_deduct_tax]);
+    msgprint("You cannot deduct when category is for 'Valuation' or 'Valuation and Total'");
     d.add_deduct_tax = '';
   }
 
