@@ -15,6 +15,6 @@ test_records = [[{
 		"parent": "_Test Holiday Block List",
 		"parenttype": "Holiday Block List",
 		"parentfield": "holiday_block_list_allowed",
-		"allow_user": "test1@erpnext.com",
+		"allow_user": "test1@example.com",
 		}
 	]]

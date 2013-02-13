@@ -78,7 +78,9 @@ class DocType:
 			if block_date > from_date and block_date < to_date:
 				webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
 					+ ": " + formatdate(d.block_date) + _(" Reason: ") + d.reason)
-				raise LeaveDayBlockedError
+				if self.doc.docstatus == 1:
+					# throw exception only when submitting
+					raise LeaveDayBlockedError
 
 	def is_user_in_allow_list(self, block_list):
 		return webnotes.session.user in webnotes.conn.sql_list("""select allow_user

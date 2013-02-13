@@ -167,5 +167,6 @@ patch_list = [
 	"patches.february_2013.account_negative_balance",
 	"patches.february_2013.remove_account_utils_folder",
 	"patches.february_2013.update_company_in_leave_application",
-	"execute:webnotes.conn.sql_ddl('alter table tabSeries change `name` `name` varchar(100)')"
+	"execute:webnotes.conn.sql_ddl('alter table tabSeries change `name` `name` varchar(100)')",
+	"execute:webnotes.conn.sql('update tabUserRole set parentfield=\"user_roles\" where parentfield=\"userroles\"')",
 ]
