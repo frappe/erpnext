@@ -169,4 +169,5 @@ patch_list = [
 	"patches.february_2013.update_company_in_leave_application",
 	"execute:webnotes.conn.sql_ddl('alter table tabSeries change `name` `name` varchar(100)')",
 	"execute:webnotes.conn.sql('update tabUserRole set parentfield=\"user_roles\" where parentfield=\"userroles\"')",
+	"patches.february_2013.fix_outstanding"
 ]

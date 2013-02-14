@@ -79,7 +79,7 @@ if group_by:
 	cols.append([group_by,'Data','150px',''])
 
 for c in col_names:
-	cols.append([c,'Currency','150px',''])
+	cols.append([c, ("Amt" in c) and 'Currency' or 'Float','150px',''])
 
 for c in cols:
 	colnames.append(c[0])
