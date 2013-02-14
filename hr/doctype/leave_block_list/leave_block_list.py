@@ -11,7 +11,7 @@ class DocType:
 		
 	def validate(self):
 		dates = []
-		for d in self.doclist.get({"doctype":"Holiday Block List Date"}):
+		for d in self.doclist.get({"doctype":"Leave Block List Date"}):
 			# validate fiscal year
 			validate_fiscal_year(d.block_date, self.doc.year, _("Block Date"))
 			
@@ -19,4 +19,3 @@ class DocType:
 			if d.block_date in dates:
 				webnotes.msgprint(_("Date is repeated") + ":" + d.block_date, raise_exception=1)
 			dates.append(d.block_date)
-

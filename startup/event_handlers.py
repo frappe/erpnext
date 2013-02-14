@@ -55,8 +55,6 @@ def boot_session(bootinfo):
 		bootinfo['letter_heads'] = get_letter_heads()
 
 		import webnotes.model.doctype
-		bootinfo['docs'] += webnotes.model.doctype.get('Event')
-		bootinfo['docs'] += webnotes.model.doctype.get('Search Criteria')
 		bootinfo['notification_settings'] = webnotes.doc("Notification Control", 
 			"Notification Control").get_values()
 		

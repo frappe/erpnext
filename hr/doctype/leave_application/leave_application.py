@@ -59,11 +59,11 @@ class DocType:
 		# per department
 		department = webnotes.conn.get_value("Employee", self.doc.employee, "department")
 		if department:
-			block_list = webnotes.conn.get_value("Department", department, "holiday_block_list")
+			block_list = webnotes.conn.get_value("Department", department, "leave_block_list")
 			add_block_list(block_list)
 
 		# global
-		for block_list in webnotes.conn.sql_list("""select name from `tabHoliday Block List`
+		for block_list in webnotes.conn.sql_list("""select name from `tabLeave Block List`
 			where ifnull(applies_to_all_departments,0)=1 and company=%s""", self.doc.company):
 			add_block_list(block_list)
 				
@@ -73,7 +73,7 @@ class DocType:
 		from_date = getdate(self.doc.from_date)
 		to_date = getdate(self.doc.to_date)
 		for d in webnotes.conn.sql("""select block_date, reason from
-			`tabHoliday Block List Date` where parent=%s""", block_list, as_dict=1):
+			`tabLeave Block List Date` where parent=%s""", block_list, as_dict=1):
 			block_date = getdate(d.block_date)
 			if block_date > from_date and block_date < to_date:
 				webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
@@ -84,7 +84,7 @@ class DocType:
 
 	def is_user_in_allow_list(self, block_list):
 		return webnotes.session.user in webnotes.conn.sql_list("""select allow_user
-			from `tabHoliday Block List Allow` where parent=%s""", block_list)
+			from `tabLeave Block List Allow` where parent=%s""", block_list)
 
 	def get_holidays(self):
 		tot_hol = webnotes.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 

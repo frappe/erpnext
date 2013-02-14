@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-04 15:33:14", 
+  "creation": "2013-02-06 17:43:44", 
   "docstatus": 0, 
-  "modified": "2013-02-04 15:36:10", 
+  "modified": "2013-02-14 17:15:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,8 +14,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "allow_user", 
+  "fieldtype": "Link", 
+  "label": "Allow User", 
   "name": "__common__", 
-  "parent": "Holiday Block List Date", 
+  "options": "Profile", 
+  "parent": "Leave Block List Allow", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -23,18 +27,9 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "Holiday Block List Date"
+  "name": "Leave Block List Allow"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "block_date", 
-  "fieldtype": "Date", 
-  "label": "Block Date"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "reason", 
-  "fieldtype": "Text", 
-  "label": "Reason"
+  "doctype": "DocField"
  }
 ]
