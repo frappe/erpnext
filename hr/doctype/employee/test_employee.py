@@ -7,7 +7,8 @@ test_records = [[{
 	"gender": "Female",
 	"status": "Active",
 	"company": "_Test Company",
-	"user_id": "test@example.com"
+	"user_id": "test@example.com",
+	"department": "_Test Department"
 }],
 [{
 	"doctype":"Employee",
@@ -18,7 +19,8 @@ test_records = [[{
 	"gender": "Male",
 	"status": "Active",
 	"company": "_Test Company",
-	"user_id": "test1@example.com"
+	"user_id": "test1@example.com",
+	"department": "_Test Department 1"
 }],
 [{
 	"doctype":"Employee",
@@ -29,6 +31,7 @@ test_records = [[{
 	"gender": "Male",
 	"status": "Active",
 	"company": "_Test Company",
-	"user_id": "test2@example.com"
+	"user_id": "test2@example.com",
+	"department": "_Test Department 1"
 }]
 ]

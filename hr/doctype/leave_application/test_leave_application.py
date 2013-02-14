@@ -46,6 +46,7 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test@example.com", "Leave Approver")
 		
 		self.assertRaises(LeaveDayBlockedError, application.submit)
+		
 
 test_records = [
 	[{

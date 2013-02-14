@@ -46,46 +46,19 @@ class DocType:
 				raise_exception=True)
 
 	def validate_block_days(self):
-		for block_list in self.get_applicable_block_lists():
-			self.check_block_dates(block_list)
+		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
-	def get_applicable_block_lists(self):
-		block_lists = []
-		def add_block_list(block_list):
-			if block_list:
-				if not self.is_user_in_allow_list(block_list):
-					block_lists.append(block_list)
-
-		# per department
-		department = webnotes.conn.get_value("Employee", self.doc.employee, "department")
-		if department:
-			block_list = webnotes.conn.get_value("Department", department, "leave_block_list")
-			add_block_list(block_list)
-
-		# global
-		for block_list in webnotes.conn.sql_list("""select name from `tabLeave Block List`
-			where ifnull(applies_to_all_departments,0)=1 and company=%s""", self.doc.company):
-			add_block_list(block_list)
+		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
+			self.doc.employee, self.doc.company)
+			
+		if block_dates:
+			webnotes.msgprint(_("Following dates are blocked for Leave") + ":")
+			for d in block_dates:
+				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
 				
-		return block_lists
-
-	def check_block_dates(self, block_list):
-		from_date = getdate(self.doc.from_date)
-		to_date = getdate(self.doc.to_date)
-		for d in webnotes.conn.sql("""select block_date, reason from
-			`tabLeave Block List Date` where parent=%s""", block_list, as_dict=1):
-			block_date = getdate(d.block_date)
-			if block_date > from_date and block_date < to_date:
-				webnotes.msgprint(_("You cannot apply for a leave on the following date because it is blocked")
-					+ ": " + formatdate(d.block_date) + _(" Reason: ") + d.reason)
-				if self.doc.docstatus == 1:
-					# throw exception only when submitting
-					raise LeaveDayBlockedError
-
-	def is_user_in_allow_list(self, block_list):
-		return webnotes.session.user in webnotes.conn.sql_list("""select allow_user
-			from `tabLeave Block List Allow` where parent=%s""", block_list)
-
+			if self.doc.docstatus == 1:
+				raise LeaveDayBlockedError
+			
 	def get_holidays(self):
 		tot_hol = webnotes.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
 			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
