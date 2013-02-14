@@ -91,6 +91,8 @@ def delete(arg=None):
 
 def notify(arg=None):
 	from webnotes.utils import cstr
+	from startup import get_url
+	
 	fn = webnotes.conn.sql('select first_name, last_name from tabProfile where name=%s', webnotes.user.name)[0]
 	if fn[0] or f[1]:
 		fn = cstr(fn[0]) + (fn[0] and ' ' or '') + cstr(fn[1])
@@ -111,13 +113,3 @@ def notify(arg=None):
 	from webnotes.utils.email_lib import sendmail
 	sendmail([arg['contact']], sender, message, "You have a message from %s" % (fn,))
 	
-def get_url():
-	from webnotes.utils import get_request_site_address
-	url = get_request_site_address()
-	if not url or "localhost" in url:
-		subdomain = webnotes.conn.get_value("Website Settings", "Website Settings",
-			"subdomain")
-		if subdomain:
-			if "http" not in subdomain:
-				url = "http://" + subdomain
-	return url

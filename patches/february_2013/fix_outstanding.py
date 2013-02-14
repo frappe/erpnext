@@ -12,4 +12,4 @@ def execute():
 			if flt(r[1]) != abs(flt(outstanding[0][0])):
 				# print r, outstanding
 				webnotes.conn.sql("update `tab%s` set outstanding_amount = %s where name = %s" %
-					(dt, '%s', '%s'), (abs(flt(outstanding[0][0])), si[0]))
+					(dt, '%s', '%s'), (abs(flt(outstanding[0][0])), r[0]))
