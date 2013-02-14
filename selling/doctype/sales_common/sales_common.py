@@ -734,13 +734,14 @@ class StatusUpdater:
 		"""
 		# get unique transactions to update
 		for d in self.obj.doclist:
-			if d.doctype == args['source_dt']:
+			if d.doctype == args['source_dt'] and d.fields.get(args["join_field"]):
 				args['name'] = d.fields[args['join_field']]
 
 				# get all qty where qty > compare_field
-				item = webnotes.conn.sql("""
-					select item_code, `%(compare_ref_field)s`, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
-					where `%(compare_ref_field)s` < `%(compare_field)s` and name="%(name)s" and docstatus=1
+				item = webnotes.conn.sql("""select item_code, `%(compare_ref_field)s`, 
+					`%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
+						where `%(compare_ref_field)s` < `%(compare_field)s` 
+						and name="%(name)s" and docstatus=1
 					""" % args, as_dict=1)
 				if item:
 					item = item[0]
