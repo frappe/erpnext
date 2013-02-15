@@ -18,19 +18,19 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 
-from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate
-from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
-from webnotes import form, msgprint
-
-import datetime
+from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, get_fullname
+from webnotes import msgprint
+from webnotes.utils.email_lib import sendmail
 
 class LeaveDayBlockedError(Exception): pass
 	
-class DocType:
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist
+from webnotes.model.controller import DocListController
+class DocType(DocListController):
+	def setup(self):
+		if webnotes.conn.exists(self.doc.doctype, self.doc.name):
+			self.previous_doc = webnotes.doc(self.doc.doctype, self.doc.name)
+		else:
+			self.previous_doc = None
 		
 	def validate(self):
 		# if self.doc.leave_approver == self.doc.owner:
@@ -39,11 +39,28 @@ class DocType:
 		self.validate_leave_overlap()
 		self.validate_max_days()
 		self.validate_block_days()
+		
+	def on_update(self):
+		if (not self.previous_doc and self.doc.leave_approver) or (self.doc.status == "Open" \
+				and self.previous_doc.leave_approver != self.doc.leave_approver):
+			# notify leave approver about creation
+			self.notify_leave_approver()
+		elif self.previous_doc and \
+				self.previous_doc.status == "Open" and self.doc.status == "Rejected":
+			# notify employee about rejection
+			self.notify_employee(self.doc.status)
 	
 	def on_submit(self):
 		if self.doc.status != "Approved":
 			webnotes.msgprint("""Only Leave Applications with status 'Approved' can be Submitted.""",
 				raise_exception=True)
+
+		# notify leave applier about approval
+		self.notify_employee(self.doc.status)
+				
+	def on_cancel(self):
+		# notify leave applier about cancellation
+		self.notify_employee("cancelled")
 
 	def validate_block_days(self):
 		for block_list in self.get_applicable_block_lists():
@@ -148,7 +165,54 @@ class DocType:
 		if max_days and self.doc.total_leave_days > max_days:
 			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
 			raise Exception
-
+			
+	def notify_employee(self, status):
+		employee = webnotes.doc("Employee", self.doc.employee)
+		if not employee.user_id:
+			return
+			
+		def _get_message(url=False):
+			if url:
+				name = get_url_to_form(self.doc.doctype, self.doc.name)
+			else:
+				name = self.doc.name
+				
+			return (_("Leave Application") + ": %s - %s") % (name, _(status))
+		
+		self.notify({
+			# for post in messages
+			"message": _get_message(url=True),
+			"message_to": employee.user_id,
+			
+			"subject": _get_message(),
+		})
+		
+	def notify_leave_approver(self):
+		employee = webnotes.doc("Employee", self.doc.employee)
+		
+		def _get_message(url=False):
+			name = self.doc.name
+			employee_name = get_fullname(employee.user_id)
+			if url:
+				name = get_url_to_form(self.doc.doctype, self.doc.name)
+				employee_name = get_url_to_form("Employee", self.doc.employee, label=employee_name)
+			
+			return (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (name, employee_name)
+		
+		self.notify({
+			# for post in messages
+			"message": _get_message(url=True),
+			"message_to": self.doc.leave_approver,
+			
+			# for email
+			"subject": _get_message()
+		})
+		
+	def notify(self, args):
+		args = webnotes._dict(args)
+		from utilities.page.messages.messages import post
+		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
+			"notify": True})
 
 @webnotes.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):	
