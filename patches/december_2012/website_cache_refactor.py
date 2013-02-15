@@ -19,6 +19,6 @@ def execute():
 		webnotes.conn.set_value("Blog", page[0], "content", m)
 
 	# delete website cache
-	webnotes.conn.commit()
 	webnotes.delete_doc("DocType", "Web Cache")
+	webnotes.conn.commit()
 	webnotes.conn.sql("""drop table if exists `tabWeb Cache`""")
