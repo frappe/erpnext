@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["15th February, 2013", [
+		"Calendar: Added new FullCalendar, and Calendar Views",
+		"Leave Application: Added email notifications on Leave Application",
+	]],
 	["13th February, 2013", [
 		"Employee: If Employee is linked to a Profile, copy Full Name, Date of Birth, \
 			Image and Gender to Profile",

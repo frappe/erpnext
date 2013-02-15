@@ -153,3 +153,59 @@ def get_approver_list():
 def is_lwp(leave_type):
 	lwp = webnotes.conn.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
 	return lwp and cint(lwp[0][0]) or 0
+	
+@webnotes.whitelist()
+def get_events(start, end):
+	events = []
+	employee = webnotes.conn.get_default("employee", webnotes.session.user)
+	company = webnotes.conn.get_default("company", webnotes.session.user)
+
+	add_department_leaves(events, start, end, employee, company)
+	add_block_dates(events, start, end, employee, company)
+	return events
+	
+def add_department_leaves(events, start, end, employee, company):
+	department = webnotes.conn.get_value("Employee", employee, "department")
+	
+	if not department:
+		return
+	
+	# department leaves
+	department_employees = webnotes.conn.sql_list("select name from tabEmployee where department=%s", 
+		department)
+	
+	for d in webnotes.conn.sql("""select name, from_date, to_date, employee_name, half_day, 
+		status, employee
+		from `tabLeave Application` where
+		(from_date between %s and %s or to_date between %s and %s)
+		and docstatus < 2
+		and status!="Rejected"
+		and employee in ('%s')""" % ("%s", "%s", "%s", "%s", "', '".join(department_employees)), 
+			(start, end, start, end), as_dict=True):
+			events.append({
+				"name": d.name,
+				"doctype": "Leave Application",
+				"from_date": d.from_date,
+				"to_date": d.to_date,
+				"status": d.status,
+				"title": _("Leave by") + " " +  d.employee_name + \
+					(d.half_day and _(" (Half Day)") or "")
+			})
+	
+
+def add_block_dates(events, start, end, employee, company):
+	# block days
+	from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+
+	cnt = 0
+	block_dates = get_applicable_block_dates(start, end, employee, company, all_lists=True)
+
+	for block_date in block_dates:
+		events.append({
+			"doctype": "Leave Block List Date",
+			"from_date": block_date.block_date,
+			"title": _("Leave Blocked") + ": " + block_date.reason,
+			"name": "_" + str(cnt),
+		})
+		cnt+=1
+	
