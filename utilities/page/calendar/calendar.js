@@ -23,6 +23,9 @@
 wn.provide("erpnext.calendar");
 
 pscript.onload_calendar = function(wrapper) {
+	
+	
+	
 	wn.ui.make_app_page({
 		parent: wrapper,
 		single_column: true,

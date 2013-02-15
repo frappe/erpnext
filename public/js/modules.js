@@ -82,7 +82,7 @@ $.extend(wn.modules, {
 		icon: "icon-check"
 	},
 	"Calendar": {
-		link: "calendar",
+		link: "Calendar/Event",
 		color: "#026584",
 		label: wn._("Calendar"),
 		icon: "icon-calendar"
