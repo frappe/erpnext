@@ -8,7 +8,7 @@ erpnext.updates = [
 		"Bookmarks: Add bookmarks via toolbar by clicking on the <i class='icon-star'></i> sign.",
 	]],
 	["5th February, 2013", [
-		"Holiday Block List: Block users from taking leave on certain days.",
+		"Leave Block List: Block users from taking leave on certain days.",
 	]],
 	["2nd February, 2013", [
 		"Warehouse: Added table Warehouse User to restrict Warehouse Entry per user.",

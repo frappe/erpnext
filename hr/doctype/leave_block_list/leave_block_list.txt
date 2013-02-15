@@ -1,13 +1,13 @@
 [
  {
-  "creation": "2013-02-04 15:31:29", 
+  "creation": "2013-02-08 15:13:29", 
   "docstatus": 0, 
-  "modified": "2013-02-08 11:36:20", 
+  "modified": "2013-02-14 17:15:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "field:holiday_block_list_name", 
+  "autoname": "field:leave_block_list_name", 
   "description": "Block Holidays on important days.", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -17,7 +17,7 @@
  {
   "doctype": "DocField", 
   "name": "__common__", 
-  "parent": "Holiday Block List", 
+  "parent": "Leave Block List", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0
@@ -26,7 +26,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
-  "parent": "Holiday Block List", 
+  "parent": "Leave Block List", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -36,13 +36,13 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "Holiday Block List"
+  "name": "Leave Block List"
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "holiday_block_list_name", 
+  "fieldname": "leave_block_list_name", 
   "fieldtype": "Data", 
-  "label": "Holiday Block List Name", 
+  "label": "Leave Block List Name", 
   "reqd": 1
  }, 
  {
@@ -77,10 +77,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "holiday_block_list_dates", 
+  "fieldname": "leave_block_list_dates", 
   "fieldtype": "Table", 
-  "label": "Holiday Block List Dates", 
-  "options": "Holiday Block List Date"
+  "label": "Leave Block List Dates", 
+  "options": "Leave Block List Date"
  }, 
  {
   "description": "Allow the following users to make Leave Applications for block days.", 
@@ -91,10 +91,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "holiday_block_list_allowed", 
+  "fieldname": "leave_block_list_allowed", 
   "fieldtype": "Table", 
-  "label": "Holiday Block List Allowed", 
-  "options": "Holiday Block List Allow"
+  "label": "Leave Block List Allowed", 
+  "options": "Leave Block List Allow"
  }, 
  {
   "doctype": "DocPerm"

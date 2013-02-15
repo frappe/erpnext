@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-02-05 11:48:26", 
   "docstatus": 0, 
-  "modified": "2013-02-04 15:34:55", 
+  "modified": "2013-02-14 17:21:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,10 +60,10 @@
  {
   "description": "Days for which Holidays are blocked for this department.", 
   "doctype": "DocField", 
-  "fieldname": "holiday_block_list", 
+  "fieldname": "leave_block_list", 
   "fieldtype": "Link", 
-  "label": "Holiday Block List", 
-  "options": "Holiday Block List"
+  "label": "Leave Block List", 
+  "options": "Leave Block List"
  }, 
  {
   "doctype": "DocPerm", 

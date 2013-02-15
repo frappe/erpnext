@@ -30,7 +30,7 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_global_block_list(self):
 		application = self.get_application(test_records[3])
 		application.doc.leave_approver = "test@example.com"
-		webnotes.conn.set_value("Holiday Block List", "_Test Holiday Block List", 
+		webnotes.conn.set_value("Leave Block List", "_Test Leave Block List", 
 			"applies_to_all_departments", 1)
 		webnotes.conn.set_value("Employee", "_T-Employee-0002", "department", 
 			"_Test Department")
@@ -46,6 +46,7 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test@example.com", "Leave Approver")
 		
 		self.assertRaises(LeaveDayBlockedError, application.submit)
+		
 
 test_records = [
 	[{
