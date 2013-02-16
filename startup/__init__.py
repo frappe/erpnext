@@ -19,6 +19,8 @@
 # default settings that can be made for a profile.
 from __future__ import unicode_literals
 
+import webnotes
+
 lang_names = {
 	"हिंदी": "hi",
 	"english": "en",
