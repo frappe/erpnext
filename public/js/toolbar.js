@@ -58,27 +58,32 @@ erpnext.toolbar.add_modules = function() {
 		</li>').prependTo('.navbar .nav:first');
 	
 	var modules_list = wn.user.get_desktop_items().sort();
+	
+	var _get_list_item = function(m) {
+		args = {
+			module: m,
+			module_page: wn.modules[m].link,
+			module_label: wn._(wn.modules[m].label || m),
+			icon: wn.modules[m].icon
+		}
+		
+		return repl('<li><a href="#!%(module_page)s" \
+			data-module="%(module)s"><i class="%(icon)s" style="display: inline-block; \
+				width: 21px; margin-top: -2px; margin-left: -7px;"></i>\
+			%(module_label)s</a></li>', args);
+	}
 
 	// add to dropdown
 	for(var i in modules_list) {
 		var m = modules_list[i]
-		
 		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1 && wn.modules[m]) {
-			args = {
-				module: m,
-				module_page: wn.modules[m].link,
-				module_label: wn._(wn.modules[m].label || m)
-			}
-
-			$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s" \
-				data-module="%(module)s">%(module_label)s</a></li>', args));			
+			$('.navbar .modules').append(_get_list_item(m));			
 		}
 	}
 	
 	// setup for system manager
 	if(user_roles.indexOf("System Manager")!=-1) {
-		$('.navbar .modules').append('<li class="divider"></li>\
-		<li><a href="#!Setup" data-module="Setup">'+wn._('Setup')+'</a></li>');
+		$('.navbar .modules').append('<li class="divider">' + _get_list_item("Setup"));
 	}
 	
 }

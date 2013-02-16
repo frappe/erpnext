@@ -16,19 +16,28 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc
+from webnotes import _
+from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, get_url_to_form
+from webnotes.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-content_sequence = ["income_year_to_date", "bank_balance",
-	"income", "expenses_booked", "collections", "payments",
-	"invoiced_amount", "payables",
-	"new_leads", "new_enquiries", "new_quotations", "new_sales_orders",
-	"new_delivery_notes", "new_purchase_requests", "new_supplier_quotations",
-	"new_purchase_orders", "new_purchase_receipts", "new_stock_entries",
-	"new_support_tickets", "new_communications", "new_projects", "open_tickets"]
+content_sequence = [
+	["Accounts", ["income_year_to_date", "bank_balance",
+		"income", "expenses_booked", "collections", "payments",
+		"invoiced_amount", "payables"]],
+	["Buying", ["new_purchase_requests", "new_supplier_quotations", "new_purchase_orders"]],
+	["Selling", ["new_leads", "new_enquiries", "new_quotations", "new_sales_orders"]], 
+	["Stock", ["new_delivery_notes",  "new_purchase_receipts", "new_stock_entries"]], 
+	["Support", ["new_communications", "new_support_tickets", "open_tickets"]], 
+	["Projects", ["new_projects"]]
+]
 
-digest_template = 	"""<h2>%(digest)s</h2>
+user_specific_content = ["calendar_events", "todo_list"]
+
+digest_template = 	"""\
+<style>p.ed-indent { margin-right: 17px; }</style>
+<h2>%(digest)s</h2>
 <p style='color: grey'>%(date)s</p>
 <h4>%(company)s</h4>
 <hr>
@@ -47,6 +56,10 @@ row_template = """<p style="%(style)s">
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc, self.doclist = doc, doclist
+		self.from_date, self.to_date = self.get_from_to_date()
+		self.future_from_date, self.future_to_date = self.get_future_from_to_date()
+		self.currency = webnotes.conn.get_value("Company", self.doc.company,
+			"default_currency")
 
 	def get_profiles(self):
 		"""get list of profiles"""
@@ -72,26 +85,49 @@ class DocType:
 		recipients = filter(lambda r: r in valid_users,
 			self.doc.recipient_list.split("\n"))
 		
+		common_msg = self.get_common_content()
 		if recipients:
-			from webnotes.utils.email_lib import sendmail
-			sendmail(recipients=recipients, subject=(self.doc.frequency + " Digest"),
-				sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
-				msg=self.get_digest_msg())
-				
+			for user_id in recipients:
+				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
+					common_msg)
+				from webnotes.utils.email_lib import sendmail
+				sendmail(recipients=user_id, subject=(self.doc.frequency + " Digest"),
+					sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
+					msg=msg_for_this_receipient)
+			
 	def get_digest_msg(self):
-		""""""
-		self.from_date, self.to_date = self.get_from_to_date()
-		self.currency = webnotes.conn.get_value("Company", self.doc.company,
-			"default_currency")
+		return self.get_msg_html(self.get_user_specific_content(webnotes.session.user) + \
+			self.get_common_content())
+	
+	def get_common_content(self):
+		out = []
+		for module, content in content_sequence:
+			module_out = []
+			for ctype in content:
+				if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
+					module_out.append(getattr(self, "get_"+ctype)())
+			if any([m[0] for m in module_out]):
+				out += [[1, "<h4>" + _(module) + "</h4>"]] + module_out + [[1, "<hr>"]]
+			else:
+				out += module_out
+				
+		return out
+		
+	def get_user_specific_content(self, user_id):
+		original_session_user = webnotes.session.user
+		
+		# setting session user for role base event fetching
+		webnotes.session.user = user_id
 		
 		out = []
-		for ctype in content_sequence:
+		for ctype in user_specific_content:
 			if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
-				# appends [not "no updates", html]
-				out.append(getattr(self, "get_"+ctype)())
+				out.append(getattr(self, "get_"+ctype)(user_id))
+				
+		webnotes.session.user = original_session_user
 		
-		return self.get_msg_html(out)
-		
+		return out
+				
 	def get_msg_html(self, out):
 		with_value = [o[1] for o in out if o[0]]
 		
@@ -103,7 +139,7 @@ class DocType:
 		# seperate out no value items
 		no_value = [o[1] for o in out if not o[0]]
 		if no_value:
-			no_value = """<hr><h4>No Updates For:</h4><br>""" + "\n".join(no_value)
+			no_value = """<h4>No Updates For:</h4>""" + "\n".join(no_value)
 		
 		date = self.doc.frequency == "Daily" and formatdate(self.from_date) or \
 			"%s to %s" % (formatdate(self.from_date), formatdate(self.to_date))
@@ -249,6 +285,39 @@ class DocType:
 		
 	def get_new_projects(self):
 		return self.get_new_count("Project", "New Projects", False)
+		
+	def get_calendar_events(self, user_id):
+		from core.doctype.event.event import get_events
+		events = get_events(self.future_from_date, self.future_to_date)
+		
+		html = ""
+		if events:
+			for i, e in enumerate(events):
+				if i>=10:
+					break
+				if e.all_day:
+					html += """<p>%s [%s (%s)]</p>""" % \
+						(e.subject, datetime_in_user_format(e.starts_on), _("All Day"))
+				else:
+					html += "<p>%s [%s - %s]</p>" % \
+						(e.subject, datetime_in_user_format(e.starts_on), datetime_in_user_format(e.ends_on))
+		
+		return html and 1 or 0, "<h4>Upcoming Calendar Events (max 10):</h4>" + html + "<hr>"
+	
+	def get_todo_list(self, user_id):
+		from utilities.page.todo.todo import get
+		todo_list = get()
+		
+		html = ""
+		if todo_list:
+			for i, todo in enumerate([todo for todo in todo_list if not todo.checked]):
+				if i>= 10:
+					break
+				html += "<p>%s: %s</p>" % (todo.priority, todo.description or \
+					get_url_to_form(todo.reference_type, todo.reference_name))
+				
+			
+		return html and 1 or 0, "<h4>To Do (max 10):</h4>" + html + "<hr>"
 	
 	def get_new_count(self, doctype, label, filter_by_company=True):
 		if filter_by_company:
@@ -329,6 +398,26 @@ class DocType:
 			# to date is the last day of the previous month
 			to_date = today - relativedelta(days=today.day)
 
+		return from_date, to_date
+		
+	def get_future_from_to_date(self):
+		today = now_datetime().date()
+		
+		# decide from date based on email digest frequency
+		if self.doc.frequency == "Daily":
+			# from date, to_date is today
+			from_date = to_date = today
+		elif self.doc.frequency == "Weekly":
+			# from date is the current week's monday
+			from_date = today - timedelta(days=today.weekday())
+			# to date is the current week's sunday
+			to_date = from_date + timedelta(days=6)
+		else:
+			# from date is the 1st day of the current month
+			from_date = today - relativedelta(days=today.day-1)
+			# to date is the last day of the current month
+			to_date = from_date + relativedelta(days=-1, months=1)
+			
 		return from_date, to_date
 
 	def get_next_sending(self):
