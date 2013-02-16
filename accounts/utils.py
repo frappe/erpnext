@@ -120,7 +120,7 @@ def add_ac(args=None):
 	if not args:
 		args = webnotes.form_dict
 		args.pop("cmd")
-	
+		
 	ac = webnotes.model_wrapper(args)
 	ac.doc.doctype = "Account"
 	ac.doc.old_parent = ""

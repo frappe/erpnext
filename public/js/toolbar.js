@@ -57,7 +57,7 @@ erpnext.toolbar.add_modules = function() {
 		</ul>\
 		</li>').prependTo('.navbar .nav:first');
 	
-	var modules_list = wn.user.get_desktop_items();
+	var modules_list = wn.user.get_desktop_items().sort();
 
 	// add to dropdown
 	for(var i in modules_list) {
