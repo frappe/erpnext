@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:23", 
+  "creation": "2013-01-25 11:35:08", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:01", 
+  "modified": "2013-02-16 14:43:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,19 +23,14 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Email Digest", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -112,92 +107,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "new_leads", 
-  "fieldtype": "Check", 
-  "label": "New Leads"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_enquiries", 
-  "fieldtype": "Check", 
-  "label": "New Enquiries"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_quotations", 
-  "fieldtype": "Check", 
-  "label": "New Quotations"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_sales_orders", 
-  "fieldtype": "Check", 
-  "label": "New Sales Orders"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_delivery_notes", 
-  "fieldtype": "Check", 
-  "label": "New Delivery Notes"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_purchase_requests", 
-  "fieldtype": "Check", 
-  "label": "New Purchase Requests"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_supplier_quotations", 
-  "fieldtype": "Check", 
-  "label": "New Supplier Quotations"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_purchase_orders", 
-  "fieldtype": "Check", 
-  "label": "New Purchase Orders"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_purchase_receipts", 
-  "fieldtype": "Check", 
-  "label": "New Purchase Receipts"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_stock_entries", 
-  "fieldtype": "Check", 
-  "label": "New Stock Entries"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_support_tickets", 
-  "fieldtype": "Check", 
-  "label": "New Support Tickets"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_communications", 
-  "fieldtype": "Check", 
-  "label": "New Communications"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "new_projects", 
-  "fieldtype": "Check", 
-  "label": "New Projects"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "open_tickets", 
-  "fieldtype": "Check", 
-  "label": "Open Tickets"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cb1", 
-  "fieldtype": "Column Break"
+  "fieldname": "accounts_module", 
+  "fieldtype": "Column Break", 
+  "label": "Accounts"
  }, 
  {
   "doctype": "DocField", 
@@ -248,6 +160,162 @@
   "label": "Payables"
  }, 
  {
-  "doctype": "DocPerm"
+  "doctype": "DocField", 
+  "fieldname": "buying_module", 
+  "fieldtype": "Column Break", 
+  "label": "Buying"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_requests", 
+  "fieldtype": "Check", 
+  "label": "New Purchase Requests"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_supplier_quotations", 
+  "fieldtype": "Check", 
+  "label": "New Supplier Quotations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_orders", 
+  "fieldtype": "Check", 
+  "label": "New Purchase Orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling_module", 
+  "fieldtype": "Column Break", 
+  "label": "Selling"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_leads", 
+  "fieldtype": "Check", 
+  "label": "New Leads"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_enquiries", 
+  "fieldtype": "Check", 
+  "label": "New Enquiries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_quotations", 
+  "fieldtype": "Check", 
+  "label": "New Quotations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_sales_orders", 
+  "fieldtype": "Check", 
+  "label": "New Sales Orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_34", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_module", 
+  "fieldtype": "Column Break", 
+  "label": "Stock"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_delivery_notes", 
+  "fieldtype": "Check", 
+  "label": "New Delivery Notes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_receipts", 
+  "fieldtype": "Check", 
+  "label": "New Purchase Receipts"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_stock_entries", 
+  "fieldtype": "Check", 
+  "label": "New Stock Entries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "support_module", 
+  "fieldtype": "Column Break", 
+  "label": "Support"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_support_tickets", 
+  "fieldtype": "Check", 
+  "label": "New Support Tickets"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "open_tickets", 
+  "fieldtype": "Check", 
+  "label": "Open Tickets"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_communications", 
+  "fieldtype": "Check", 
+  "label": "New Communications"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "projects_module", 
+  "fieldtype": "Column Break", 
+  "label": "Projects"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_projects", 
+  "fieldtype": "Check", 
+  "label": "New Projects"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_41", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "utilities_module", 
+  "fieldtype": "Column Break", 
+  "label": "General"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "calendar_events", 
+  "fieldtype": "Check", 
+  "label": "Calendar Events"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "todo_list", 
+  "fieldtype": "Check", 
+  "label": "To Do List"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]
