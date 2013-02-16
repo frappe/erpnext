@@ -171,4 +171,5 @@ patch_list = [
 	"execute:webnotes.conn.sql('update tabUserRole set parentfield=\"user_roles\" where parentfield=\"userroles\"')",
 	"patches.february_2013.fix_outstanding",
 	"patches.february_2013.p01_event",
+	"execute:webnotes.delete_doc('Page', 'Calendar')"
 ]
