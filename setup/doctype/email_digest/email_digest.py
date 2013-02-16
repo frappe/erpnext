@@ -296,13 +296,13 @@ class DocType:
 				if i>=10:
 					break
 				if e.all_day:
-					html += """<p>%s [%s (%s)]</p>""" % \
+					html += """<li style='line-height: 200%%'>%s [%s (%s)]</li>""" % \
 						(e.subject, datetime_in_user_format(e.starts_on), _("All Day"))
 				else:
-					html += "<p>%s [%s - %s]</p>" % \
+					html += "<li style='line-height: 200%%'>%s [%s - %s]</li>" % \
 						(e.subject, datetime_in_user_format(e.starts_on), datetime_in_user_format(e.ends_on))
 		
-		return html and 1 or 0, "<h4>Upcoming Calendar Events (max 10):</h4>" + html + "<hr>"
+		return html and 1 or 0, "<h4>Upcoming Calendar Events (max 10):</h4><ul>" + html + "</ul><hr>"
 	
 	def get_todo_list(self, user_id):
 		from utilities.page.todo.todo import get
@@ -313,11 +313,11 @@ class DocType:
 			for i, todo in enumerate([todo for todo in todo_list if not todo.checked]):
 				if i>= 10:
 					break
-				html += "<p>%s: %s</p>" % (todo.priority, todo.description or \
-					get_url_to_form(todo.reference_type, todo.reference_name))
+				html += "<li style='line-height: 200%%'>%s [%s]</li>" % (todo.description or \
+					get_url_to_form(todo.reference_type, todo.reference_name), todo.priority)
 				
 			
-		return html and 1 or 0, "<h4>To Do (max 10):</h4>" + html + "<hr>"
+		return html and 1 or 0, "<h4>To Do (max 10):</h4><ul>" + html + "</ul><hr>"
 	
 	def get_new_count(self, doctype, label, filter_by_company=True):
 		if filter_by_company:
