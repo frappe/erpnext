@@ -88,13 +88,13 @@ cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query 
 	}
 
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return "select distinct `tabPurchase Request`.`name` from `tabPurchase Request` \
-		where `tabPurchase Request`.company = \"" + doc.company +
-		"\" and `tabPurchase Request`.`docstatus` = 1 and \
-		`tabPurchase Request`.`status` != \"Stopped\" and \
-		ifnull(`tabPurchase Request`.`per_ordered`,0) < 99.99 and \
-		`tabPurchase Request`.%(key)s LIKE \"%s\" \
-		order by `tabPurchase Request`.`name` desc limit 50";
+	return "select distinct `tabMaterial Request`.`name` from `tabMaterial Request` \
+		where `tabMaterial Request`.company = \"" + doc.company +
+		"\" and `tabMaterial Request`.`docstatus` = 1 and \
+		`tabMaterial Request`.`status` != \"Stopped\" and \
+		ifnull(`tabMaterial Request`.`per_ordered`,0) < 99.99 and \
+		`tabMaterial Request`.%(key)s LIKE \"%s\" \
+		order by `tabMaterial Request`.`name` desc limit 50";
 }
 
 cur_frm.cscript.supplier_address = function(doc, dt, dn) {

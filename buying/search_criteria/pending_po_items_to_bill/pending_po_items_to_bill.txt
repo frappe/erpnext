@@ -21,7 +21,7 @@
   "sort_by": "`tabPurchase Order`.`name`", 
   "page_len": 50, 
   "criteria_name": "Pending PO Items To Bill", 
-  "columns": "Purchase Order\u0001ID,Purchase Order\u0001Supplier,Purchase Order\u0001Supplier Name,Purchase Order\u0001Status,Purchase Order\u0001PO Date,Purchase Order\u0001Fiscal Year,Purchase Order Item\u0001Purchase Request No,Purchase Order Item\u0001Item Code,Purchase Order Item\u0001Item Name,Purchase Order Item\u0001Description,Purchase Order Item\u0001Quantity,Purchase Order Item\u0001UOM,Purchase Order Item\u0001Received Qty"
+  "columns": "Purchase Order\u0001ID,Purchase Order\u0001Supplier,Purchase Order\u0001Supplier Name,Purchase Order\u0001Status,Purchase Order\u0001PO Date,Purchase Order\u0001Fiscal Year,Purchase Order Item\u0001Material Request No,Purchase Order Item\u0001Item Code,Purchase Order Item\u0001Item Name,Purchase Order Item\u0001Description,Purchase Order Item\u0001Quantity,Purchase Order Item\u0001UOM,Purchase Order Item\u0001Received Qty"
  }, 
  {
   "name": "pending_po_items_to_bill", 

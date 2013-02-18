@@ -119,17 +119,17 @@ class DocType:
 
 	def create_auto_indent(self, i , doc_type, doc_name, cur_qty):
 		"""	Create indent on reaching reorder level	"""
-		indent = Document('Purchase Request')
+		indent = Document('Material Request')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
 		indent.company = get_defaults()['company']
 		indent.fiscal_year = get_defaults()['fiscal_year']
-		indent.remark = """This is an auto generated Purchase Request. 
+		indent.remark = """This is an auto generated Material Request. 
 			It was raised because the (actual + ordered + indented - reserved) quantity 
 			reaches re-order level when %s %s was created""" % (doc_type,doc_name)
 		indent.save(1)
-		indent_obj = get_obj('Purchase Request',indent.name,with_children=1)
-		indent_details_child = addchild(indent_obj.doc,'indent_details','Purchase Request Item')
+		indent_obj = get_obj('Material Request',indent.name,with_children=1)
+		indent_details_child = addchild(indent_obj.doc,'indent_details','Material Request Item')
 		indent_details_child.item_code = self.doc.item_code
 		indent_details_child.uom = self.doc.stock_uom
 		indent_details_child.warehouse = self.doc.warehouse
@@ -140,11 +140,11 @@ class DocType:
 		indent_details_child.qty = i['re_order_qty'] or (flt(i['re_order_level']) - flt(cur_qty))
 		indent_details_child.brand = i['brand']
 		indent_details_child.save()
-		indent_obj = get_obj('Purchase Request',indent.name,with_children=1)
+		indent_obj = get_obj('Material Request',indent.name,with_children=1)
 		indent_obj.validate()
 		webnotes.conn.set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
-		msgprint("""Item: %s is to be re-ordered. Purchase Request %s raised. 
+		msgprint("""Item: %s is to be re-ordered. Material Request %s raised. 
 			It was generated from %s: %s""" % 
 			(self.doc.item_code, indent.name, doc_type, doc_name ))
 		if(i['email_notify']):
@@ -158,6 +158,6 @@ class DocType:
 			where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
 			and r.role in ('Purchase Manager','Material Manager') 
 			and p.name not in ('Administrator', 'All', 'Guest')""")]
-		msg="""A Purchase Request has been raised 
+		msg="""A Material Request has been raised 
 			for item %s: %s on %s """ % (doc_type, doc_name, nowdate())
-		sendmail(email_list, subject='Auto Purchase Request Generation Notification', msg = msg)	
+		sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)	

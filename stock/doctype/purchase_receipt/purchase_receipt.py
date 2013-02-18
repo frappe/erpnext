@@ -297,7 +297,7 @@ class DocType(BuyingController):
 		# 4.Update Bin
 		self.update_stock(is_submit = 0)
 
-		# 5.Update Purchase Requests Pending Qty and accordingly it's Status
+		# 5.Update Material Requests Pending Qty and accordingly it's Status
 		pc_obj.update_prevdoc_detail(self, is_submit = 0)
 
 		# 6. Update last purchase rate

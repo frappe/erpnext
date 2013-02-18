@@ -52,10 +52,10 @@ class DocType(BuyingController):
 		
 	def get_indent_details(self):
 		if self.doc.indent_no:
-			mapper = get_obj("DocType Mapper", "Purchase Request-Supplier Quotation")
-			mapper.dt_map("Purchase Request", "Supplier Quotation", self.doc.indent_no,
-				self.doc, self.doclist, """[['Purchase Request', 'Supplier Quotation'],
-				['Purchase Request Item', 'Supplier Quotation Item']]""")
+			mapper = get_obj("DocType Mapper", "Material Request-Supplier Quotation")
+			mapper.dt_map("Material Request", "Supplier Quotation", self.doc.indent_no,
+				self.doc, self.doclist, """[['Material Request', 'Supplier Quotation'],
+				['Material Request Item', 'Supplier Quotation Item']]""")
 			
 			from webnotes.model.wrapper import getlist
 			for d in getlist(self.doclist, self.fname):

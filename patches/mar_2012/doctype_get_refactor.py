@@ -102,7 +102,7 @@ def create_file_list():
 		'Project', 'Profile', 'Production Order', 'Product', 'Print Format',
 		'Price List', 'Purchase Invoice', 'Page', 
 		'Maintenance Visit', 'Maintenance Schedule', 'Letter Head',
-		'Leave Application', 'Lead', 'Journal Voucher', 'Item', 'Purchase Request',
+		'Leave Application', 'Lead', 'Journal Voucher', 'Item', 'Material Request',
 		'Expense Claim', 'Opportunity', 'Employee', 'Delivery Note',
 		'Customer Issue', 'Customer', 'Contact Us Settings', 'Company',
 		'Bulk Rename Tool', 'Blog', 'BOM', 'About Us Settings']

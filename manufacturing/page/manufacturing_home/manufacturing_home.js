@@ -20,7 +20,7 @@ wn.module_page["Manufacturing"] = [
 			{
 				"route":"Form/Production Planning Tool/Production Planning Tool",
 				"label":wn._("Production Planning Tool"),
-				"description":wn._("Generate Purchase Requests (MRP) and Production Orders."),
+				"description":wn._("Generate Material Requests (MRP) and Production Orders."),
 				doctype: "Production Planning Tool"
 			},
 		]

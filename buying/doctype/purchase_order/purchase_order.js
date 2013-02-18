@@ -109,7 +109,7 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 }
 
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabPurchase Request`.`name` FROM `tabPurchase Request` WHERE `tabPurchase Request`.company = "' + doc.company + '" and `tabPurchase Request`.`docstatus` = 1 and `tabPurchase Request`.`status` != "Stopped" and ifnull(`tabPurchase Request`.`per_ordered`,0) < 99.99 and `tabPurchase Request`.%(key)s LIKE "%s" ORDER BY `tabPurchase Request`.`name` DESC LIMIT 50';
+	return 'SELECT DISTINCT `tabMaterial Request`.`name` FROM `tabMaterial Request` WHERE `tabMaterial Request`.company = "' + doc.company + '" and `tabMaterial Request`.`docstatus` = 1 and `tabMaterial Request`.`status` != "Stopped" and ifnull(`tabMaterial Request`.`per_ordered`,0) < 99.99 and `tabMaterial Request`.%(key)s LIKE "%s" ORDER BY `tabMaterial Request`.`name` DESC LIMIT 50';
 }
 
 
@@ -208,7 +208,7 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 	if(cl.length){
 		prevdoc_list = new Array();
 		for(var i=0;i<cl.length;i++){
-			if(cl[i].prevdoc_doctype == 'Purchase Request' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
+			if(cl[i].prevdoc_doctype == 'Material Request' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
 				prevdoc_list.push(cl[i].prevdoc_docname);
 				if(prevdoc_list.length ==1)
 					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, cl[i].prevdoc_date,0);

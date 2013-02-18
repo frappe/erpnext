@@ -301,11 +301,11 @@ class DocType:
 		
 	def raise_purchase_request(self):
 		"""
-			Raise Purchase Request if projected qty is less than qty required
+			Raise Material Request if projected qty is less than qty required
 			Requested qty should be shortage qty considering minimum order qty
 		"""
 		if not self.doc.purchase_request_for_warehouse:
-			webnotes.msgprint("Please enter Warehouse for which Purchase Request will be raised",
+			webnotes.msgprint("Please enter Warehouse for which Material Request will be raised",
 			 	raise_exception=1)
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]
@@ -342,7 +342,7 @@ class DocType:
 				item_wrapper = webnotes.model_wrapper("Item", item)
 				pr_doclist = [
 					{
-						"doctype": "Purchase Request",
+						"doctype": "Material Request",
 						"__islocal": 1,
 						"naming_series": "IDT",
 						"transaction_date": nowdate(),
@@ -353,7 +353,7 @@ class DocType:
 						"remark": "Automatically raised from Production Planning Tool"
 					},
 					{
-						"doctype": "Purchase Request Item",
+						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"parentfield": "indent_details",
 						"item_code": item,
@@ -373,9 +373,9 @@ class DocType:
 				purchase_request_list.append(pr_wrapper.doc.name)
 			
 			if purchase_request_list:
-				pur_req = ["""<a href="#Form/Purchase Request/%s" target="_blank">%s</a>""" % \
+				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
 					(p, p) for p in purchase_request_list]
-				webnotes.msgprint("Following Purchase Request created successfully: \n%s" % 
+				webnotes.msgprint("Following Material Request created successfully: \n%s" % 
 					"\n".join(pur_req))
 		else:
 			webnotes.msgprint("Nothing to request")

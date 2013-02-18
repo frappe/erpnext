@@ -24,7 +24,7 @@ def delete_transactions():
 		'Stock Entry','Sales Order','Salary Slip','Sales Invoice','Quotation', 'Quality Inspection', \
 		'Purchase Receipt','Purchase Order','Production Order', 'POS Setting','Period Closing Voucher', \
 		'Purchase Invoice','Maintenance Visit','Maintenance Schedule','Leave Application', \
-		'Leave Allocation', 'Lead', 'Journal Voucher', 'Installation Note','Purchase Request', \
+		'Leave Allocation', 'Lead', 'Journal Voucher', 'Installation Note','Material Request', \
 		'GL Entry','Expense Claim','Opportunity','Delivery Note','Customer Issue','Bin', \
 		'Authorization Rule','Attendance', 'C-Form', 'Form 16A', 'Lease Agreement', \
 		'Lease Installment', 'TDS Payment', 'TDS Return Acknowledgement', 'Appraisal', \
