@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.model.doc import copy_common_fields
 
 def update_employee_details(controller, method=None):
 	"""update employee details in linked doctypes"""
@@ -14,14 +15,5 @@ def update_employee_details(controller, method=None):
 			return
 		
 		ss = webnotes.model_wrapper("Salary Structure", active_salary_structure)
-		ss_doctype = webnotes.get_doctype("Salary Structure")
-		update = False
-		for fieldname, value in controller.doc.fields.items():
-			if ss_doctype.get_field(fieldname) and ss.doc.fields[fieldname] != value:
-				ss.doc.fields[fieldname] = value
-				update = True
-				
-		if update:
-			ss.save()
-		
-	
+		copy_common_fields(controller.doc, ss.doc)
+		ss.save()
