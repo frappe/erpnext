@@ -163,7 +163,7 @@ class DocType(DocListController):
 		
 		def _get_message(url=False):
 			name = self.doc.name
-			employee_name = employee.employee_name
+			employee_name = cstr(employee.employee_name)
 			if url:
 				name = get_url_to_form(self.doc.doctype, self.doc.name)
 				employee_name = get_url_to_form("Employee", self.doc.employee, label=employee_name)
@@ -250,7 +250,7 @@ def add_department_leaves(events, start, end, employee, company):
 				"from_date": d.from_date,
 				"to_date": d.to_date,
 				"status": d.status,
-				"title": _("Leave by") + " " +  d.employee_name + \
+				"title": _("Leave by") + " " +  cstr(d.employee_name) + \
 					(d.half_day and _(" (Half Day)") or "")
 			})
 	
