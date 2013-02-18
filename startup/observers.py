@@ -17,5 +17,6 @@
 observer_map = {
 	"*:on_update": "home.update_feed",
 	"*:on_submit": "home.update_feed",
+	"Employee:on_update": "hr.helpers.employee.update_employee_details"
 #	"*:on_update": "webnotes.widgets.moduleview.update_count"
 }
