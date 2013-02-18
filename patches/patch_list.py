@@ -174,4 +174,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('Page', 'Calendar')",
 	"patches.february_2013.p02_email_digest",
 	"patches.february_2013.p03_material_request",
+	"patches.february_2013.p04_remove_old_doctypes",
 ]
