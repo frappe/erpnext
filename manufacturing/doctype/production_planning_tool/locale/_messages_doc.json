@@ -5,7 +5,6 @@
  "To Date", 
  "Filter based on item", 
  "From Date", 
- "Raise Purchase Request", 
  "Use Multi-Level BOM", 
  "Download Materials Required", 
  "Items to be requested which are \"Out of Stock\" considering all warehouses based on projected qty and minimum order qty", 
@@ -16,7 +15,7 @@
  "Select Sales Orders", 
  "Pull sales orders (pending to deliver) based on the above criteria", 
  "Create Production Orders", 
- "Purchase Request For Warehouse", 
+ "Material Request For Warehouse", 
  "Pull items from Sales Order mentioned in the above table.", 
  "Production Planning Tool", 
  "Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.", 
@@ -26,5 +25,6 @@
  "Raise Production Order", 
  "Production Plan Sales Orders", 
  "Separate production order will be created for each finished good item.", 
- "Clear Table"
+ "Clear Table", 
+ "Raise Material Request"
 ]

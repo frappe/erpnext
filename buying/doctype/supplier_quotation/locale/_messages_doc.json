@@ -17,7 +17,6 @@
  "Supplier Address", 
  "Select Print Heading", 
  "More Info", 
- "Select Purchase Request", 
  "Terms and Conditions HTML", 
  "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
  "Exchange Rate", 
@@ -39,6 +38,7 @@
  "Buying", 
  "Price List", 
  "Status", 
+ "Select Material Request", 
  "Rounded Total", 
  "Name", 
  "To manage multiple series please go to Setup > Manage Series", 
@@ -57,7 +57,6 @@
  "Totals", 
  "Supplier (vendor) name as entered in supplier master", 
  "Taxes and Charges Deducted", 
- "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.", 
  "Net Total*", 
  "The date at which current entry is made in system.", 
  "Currency & Price List", 
@@ -69,10 +68,11 @@
  "Grand Total", 
  "Get Tax Detail", 
  "Supplier Quotation", 
- "Taxes and Charges Deducted (Import)", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
  "Series", 
  "Draft", 
  "Yes", 
  "Total Tax*", 
- "In Words will be visible once you save the Purchase Order."
+ "In Words will be visible once you save the Purchase Order.", 
+ "Taxes and Charges Deducted (Import)"
 ]

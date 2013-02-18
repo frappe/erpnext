@@ -59,6 +59,7 @@
  "Remarks": "Remarques", 
  "Required raw materials issued to the supplier for producing a sub - contracted item.": "Mati\u00e8res premi\u00e8res n\u00e9cessaires d\u00e9livr\u00e9s au fournisseur pour la production d&#39;un \u00e9l\u00e9ment sous - traitance.", 
  "Rounded Total": "Totale arrondie", 
+ "Select Material Request": "S\u00e9lectionnez Demande de Mat\u00e9riel", 
  "Select Print Heading": "S\u00e9lectionnez Imprimer Cap", 
  "Select Purchase Request": "S\u00e9lectionnez la demande d&#39;achat", 
  "Select Supplier Quotation": "S\u00e9lectionnez Devis Fournisseur", 
@@ -87,6 +88,7 @@
  "Total Tax*": "* Total de la taxe", 
  "Totals": "Totaux", 
  "Yes": "Oui", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.": "Vous pouvez faire un bon de commande de mat\u00e9riel demandes multiples. S\u00e9lectionnez demandes de mat\u00e9riel, un par un et cliquez sur le bouton ci-dessous.", 
  "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.": "Vous pouvez faire une commande \u00e0 partir de demandes d&#39;achat multiples. S\u00e9lectionnez Demande d&#39;Achat un par un et cliquez sur le bouton ci-dessous.", 
  "You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.": "Vous pouvez faire une commande de citations multiples fournisseurs. S\u00e9lectionnez Citations fournisseurs un par un et cliquez sur le bouton ci-dessous."
 }

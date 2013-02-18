@@ -1,6 +1,7 @@
 {
  "Company": "Companhia", 
  "Customer": "Cliente", 
+ "Entries": "Entradas", 
  "From Date": "A partir da data", 
  "Get Open Sales Order": "Obter Ordem de vendas Abrir", 
  "Manufacturing": "Fabrico", 

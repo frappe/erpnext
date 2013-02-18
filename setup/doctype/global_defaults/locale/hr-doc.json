@@ -60,6 +60,7 @@
  "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.": "Precizna za Float polja (koli\u010dina, popusti, postoci itd.) samo za prikaz. Pluta i dalje \u0107e biti izra\u010dunata do \u0161est decimala.", 
  "Purchase Order Required": "Narud\u017ebenica Obvezno", 
  "Purchase Receipt Required": "Kupnja Potvrda Obvezno", 
+ "Raise Material Request when stock reaches re-order level": "Podignite Materijal Zahtjev kad dionica dosegne ponovno poredak razinu", 
  "Raise Purchase Request when stock reaches re-order level": "Podignite zahtjev za kupnju dionica kada dosegne ponovno poredak razinu", 
  "SMS Sender Name": "SMS Sender Ime", 
  "Sales Order Required": "Prodajnog naloga Obvezno", 
