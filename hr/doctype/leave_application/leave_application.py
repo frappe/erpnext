@@ -20,7 +20,6 @@ from webnotes import _
 
 from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, get_fullname
 from webnotes import msgprint
-from webnotes.utils.email_lib import sendmail
 
 class LeaveDayBlockedError(Exception): pass
 	
@@ -33,7 +32,6 @@ class DocType(DocListController):
 			self.previous_doc = None
 		
 	def validate(self):
-		# if self.doc.leave_approver == self.doc.owner:
 		self.validate_to_date()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
@@ -41,8 +39,8 @@ class DocType(DocListController):
 		self.validate_block_days()
 		
 	def on_update(self):
-		if (not self.previous_doc and self.doc.leave_approver) or (self.doc.status == "Open" \
-				and self.previous_doc.leave_approver != self.doc.leave_approver):
+		if (not self.previous_doc and self.doc.leave_approver) or (self.previous_doc and \
+				self.doc.status == "Open" and self.previous_doc.leave_approver != self.doc.leave_approver):
 			# notify leave approver about creation
 			self.notify_leave_approver()
 		elif self.previous_doc and \

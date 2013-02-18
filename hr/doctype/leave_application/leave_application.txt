@@ -1,12 +1,13 @@
 [
  {
-  "creation": "2013-02-18 13:36:20", 
+  "creation": "2013-02-18 17:08:32", 
   "docstatus": 0, 
-  "modified": "2013-02-18 16:59:53", 
+  "modified": "2013-02-18 17:20:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "LAP/.#####", 
   "description": "Apply / Approve Leaves", 
   "doctype": "DocType", 
