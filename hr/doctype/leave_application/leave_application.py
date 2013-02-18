@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 
-from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, get_fullname
+from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form
 from webnotes import msgprint
 
 class LeaveDayBlockedError(Exception): pass
@@ -163,7 +163,7 @@ class DocType(DocListController):
 		
 		def _get_message(url=False):
 			name = self.doc.name
-			employee_name = get_fullname(employee.user_id)
+			employee_name = employee.employee_name
 			if url:
 				name = get_url_to_form(self.doc.doctype, self.doc.name)
 				employee_name = get_url_to_form("Employee", self.doc.employee, label=employee_name)
