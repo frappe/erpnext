@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, cint, cstr, flt, formatdate, get_defaults
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from setup.utils import get_company_currency

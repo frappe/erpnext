@@ -20,7 +20,7 @@ cur_frm.cscript.fname = "indent_details";
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
-erpnext.buying.PurchaseRequestController = erpnext.buying.BuyingController.extend({
+erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc) {
 		this._super();
 		
@@ -39,7 +39,7 @@ erpnext.buying.PurchaseRequestController = erpnext.buying.BuyingController.exten
 	}
 });
 
-var new_cscript = new erpnext.buying.PurchaseRequestController({frm: cur_frm});
+var new_cscript = new erpnext.buying.MaterialRequestController({frm: cur_frm});
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new_cscript);

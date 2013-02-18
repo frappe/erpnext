@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import flt, getdate
 from webnotes.model import db_exists
 from webnotes.model.doc import Document
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql

@@ -79,7 +79,7 @@ class DocType:
 			from webnotes.profile import add_role
 			add_role(self.doc.user_id, "HR User")
 			
-		profile_wrapper = webnotes.model_wrapper("Profile", self.doc.user_id)
+		profile_wrapper = webnotes.bean("Profile", self.doc.user_id)
 		
 		# copy details like Fullname, DOB and Image to Profile
 		if self.doc.employee_name:

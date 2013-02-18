@@ -6,6 +6,8 @@ def execute():
 	webnotes.rename_doc("DocType", "Purchase Request", "Material Request", force=True)
 	webnotes.reload_doc("buying", "search_criteria", "pending_po_items_to_bill")
 	webnotes.reload_doc("buying", "search_criteria", "pending_po_items_to_receive")
+
+	webnotes.conn.sql("""update `tabMaterial Request` set material_request_type='Purchase'""")
 	
 	os.system("rm -rf app/buying/doctype/purchase_request")
 	os.system("rm -rf app/buying/doctype/purchase_request_item")

@@ -17,7 +17,7 @@
 import webnotes
 
 def get_slideshow(obj):
-	slideshow = webnotes.model_wrapper("Website Slideshow", obj.doc.slideshow)
+	slideshow = webnotes.bean("Website Slideshow", obj.doc.slideshow)
 	obj.slides = slideshow.doclist.get({"doctype":"Website Slideshow Item"})
 	obj.doc.slideshow_header = slideshow.doc.header or ""
 	for s in obj.slides:

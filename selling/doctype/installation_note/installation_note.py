@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import cstr, getdate
 from webnotes.model import db_exists
 from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 from stock.utils import get_valid_serial_nos

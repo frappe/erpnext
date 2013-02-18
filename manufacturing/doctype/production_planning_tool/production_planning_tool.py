@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, flt, cint, nowdate, add_days
 from webnotes.model.doc import addchild, Document
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -339,7 +339,7 @@ class DocType:
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
-				item_wrapper = webnotes.model_wrapper("Item", item)
+				item_wrapper = webnotes.bean("Item", item)
 				pr_doclist = [
 					{
 						"doctype": "Material Request",
@@ -367,7 +367,7 @@ class DocType:
 						"warehouse": self.doc.purchase_request_for_warehouse
 					}
 				]
-				pr_wrapper = webnotes.model_wrapper(pr_doclist)
+				pr_wrapper = webnotes.bean(pr_doclist)
 				pr_wrapper.ignore_permissions = 1
 				pr_wrapper.submit()
 				purchase_request_list.append(pr_wrapper.doc.name)

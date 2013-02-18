@@ -155,7 +155,7 @@ def prepare_args(page_name):
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
-			args.obj = webnotes.model_wrapper(page_settings_map[page_name]).obj
+			args.obj = webnotes.bean(page_settings_map[page_name]).obj
 	else:
 		args = get_doc_fields(page_name)
 	

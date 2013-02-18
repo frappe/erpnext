@@ -5,7 +5,7 @@ def execute():
 			webnotes.conn.sql("""update tabDocPerm set report = 0 where parent = %s""", dt[0])
 		
 		
-		doctype = webnotes.model_wrapper("DocType", dt[0])
+		doctype = webnotes.bean("DocType", dt[0])
 		for pl in [1, 2, 3]:
 			if not doctype.doclist.get({"doctype": "DocField", "permlevel": pl}):
 				if doctype.doclist.get({"doctype":"DocPerm", "permlevel":pl}):

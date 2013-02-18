@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, sendmail
 from webnotes.utils import comma_and
 from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
@@ -858,7 +858,7 @@ def manage_recurring_invoices(next_date=None):
 				where posting_date=%s and recurring_id=%s and docstatus=1""",
 				(next_date, recurring_id)):
 			try:
-				ref_wrapper = webnotes.model_wrapper('Sales Invoice', ref_invoice)
+				ref_wrapper = webnotes.bean('Sales Invoice', ref_invoice)
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				webnotes.conn.commit()
@@ -880,7 +880,7 @@ def manage_recurring_invoices(next_date=None):
 		raise Exception, exception_message
 
 def make_new_invoice(ref_wrapper, posting_date):
-	from webnotes.model.wrapper import clone
+	from webnotes.model.bean import clone
 	from accounts.utils import get_fiscal_year
 	new_invoice = clone(ref_wrapper)
 	

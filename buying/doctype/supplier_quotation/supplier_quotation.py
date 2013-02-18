@@ -57,7 +57,7 @@ class DocType(BuyingController):
 				self.doc, self.doclist, """[['Material Request', 'Supplier Quotation'],
 				['Material Request Item', 'Supplier Quotation Item']]""")
 			
-			from webnotes.model.wrapper import getlist
+			from webnotes.model.bean import getlist
 			for d in getlist(self.doclist, self.fname):
 				if d.item_code and not d.purchase_rate:
 					d.purchase_ref_rate = d.discount_rate = d.purchase_rate = 0.0

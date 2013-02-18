@@ -34,7 +34,7 @@ class DocType:
 				warehouse = %s", (item_code, warehouse))
 		bin = bin and bin[0][0] or ''
 		if not bin:
-			bin_wrapper = webnotes.model_wrapper([{
+			bin_wrapper = webnotes.bean([{
 				"doctype": "Bin",
 				"item_code": item_code,
 				"warehouse": warehouse,

@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, cstr, flt, get_defaults, get_first_day, get_last_day, has_common
 from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes import session, msgprint
 
 sql = webnotes.conn.sql

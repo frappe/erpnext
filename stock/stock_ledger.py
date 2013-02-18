@@ -86,7 +86,7 @@ def update_entries_after(args, verbose=1):
 	# update bin
 	if not webnotes.conn.exists({"doctype": "Bin", "item_code": args["item_code"], 
 			"warehouse": args["warehouse"]}):
-		bin_wrapper = webnotes.model_wrapper([{
+		bin_wrapper = webnotes.bean([{
 			"doctype": "Bin",
 			"item_code": args["item_code"],
 			"warehouse": args["warehouse"],

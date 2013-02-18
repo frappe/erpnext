@@ -17,10 +17,10 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, get_defaults, now, nowdate
+from webnotes.utils import add_days, cint, cstr, flt, now, nowdate
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 sql = webnotes.conn.sql
@@ -97,28 +97,34 @@ class DocType:
 
 	def reorder_item(self,doc_type,doc_name):
 		""" Reorder item if stock reaches reorder level"""
+		if not hasattr(webnotes, "auto_indent"): 
+			webnotes.auto_indent = webnotes.conn.get_value('Global Defaults', None, 'auto_indent')
 
-		if webnotes.conn.get_value('Global Defaults', None, 'auto_indent'):
+		if webnotes.auto_indent:
 			#check if re-order is required
-			ret = sql("""select re_order_level, item_name, description, brand, item_group,
-			 	lead_time_days, min_order_qty, email_notify, re_order_qty 
-				from tabItem where name = %s""", (self.doc.item_code), as_dict=1)
+			item_reorder = webnotes.conn.get("Item Reorder", 
+				{"parent": self.doc.item_code, "warehouse": self.doc.warehouse}, as_dict=1)
 			
-			current_qty = sql("""
-				select sum(t1.actual_qty) + sum(t1.indented_qty) + sum(t1.ordered_qty) -sum(t1.reserved_qty)
-				from tabBin t1, tabWarehouse t2
-				where t1.item_code = %s 
-				and t1.warehouse = t2.name
-				and t2.warehouse_type in ('Stores', 'Reserved', 'Default Warehouse Type')
-				and t1.docstatus != 2
-			""", self.doc.item_code)
+			if item_reorder:
+				reorder_level = item_reorder.warehouse_reorder_level
+				reorder_qty = item_reorder.warehouse_reorder_qty
+			else:
+				reorder_level, reorder_qty = webnotes.conn.get_valuee("Item", self.doc.item_code,
+					["re_order_level", "re_order_qty"])
+			
+			if flt(reorder_qty) and flt(self.doc.projected_qty) < flt(reorder_level):
+				self.create_material_request(doc_type, doc_name)
 
-			if ret[0]["re_order_level"] and current_qty and \
-					(flt(ret[0]['re_order_level']) > flt(current_qty[0][0])):
-				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
-
-	def create_auto_indent(self, i , doc_type, doc_name, cur_qty):
+	def create_material_request(self, doc_type, doc_name):
 		"""	Create indent on reaching reorder level	"""
+		defaults = webnotes.conn.get_defaults()
+		mr = webnotes.bean([{
+			"doctype": "Material Request",
+			"company": defaults.company,
+			
+		}])
+		
+			
 		indent = Document('Material Request')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
