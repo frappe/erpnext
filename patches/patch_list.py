@@ -173,4 +173,5 @@ patch_list = [
 	"patches.february_2013.p01_event",
 	"execute:webnotes.delete_doc('Page', 'Calendar')",
 	"patches.february_2013.p02_email_digest",
+	"patches.february_2013.p05_leave_application",
 ]
