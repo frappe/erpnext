@@ -169,9 +169,10 @@ patch_list = [
 	"patches.february_2013.update_company_in_leave_application",
 	"execute:webnotes.conn.sql_ddl('alter table tabSeries change `name` `name` varchar(100)')",
 	"execute:webnotes.conn.sql('update tabUserRole set parentfield=\"user_roles\" where parentfield=\"userroles\"')",
-	"patches.february_2013.fix_outstanding",
 	"patches.february_2013.p01_event",
 	"execute:webnotes.delete_doc('Page', 'Calendar')",
 	"patches.february_2013.p02_email_digest",
 	"patches.february_2013.p05_leave_application",
+	"patches.february_2013.gle_floating_point_issue_revisited",
+	"patches.february_2013.fix_outstanding",
 ]

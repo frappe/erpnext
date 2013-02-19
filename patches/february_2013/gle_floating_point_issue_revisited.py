@@ -13,7 +13,7 @@ def execute():
 			diff = round((flt(r.grand_total) - flt(gle[0]['debit'])), 2)
 		
 			if abs(diff) == 0.01:
-				# print r.name, r.grand_total, gle[0]['debit']
+				# print r.name, r.grand_total, gle[0]['debit'], diff
 				webnotes.conn.sql("""update `tabGL Entry` set debit = debit + %s 
 					where name = %s""", (diff, gle[0]['name']))
 				
