@@ -178,4 +178,8 @@ patch_list = [
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Classic") # 2013-02-19',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Modern") # 2013-02-19',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-02-19',
+	"execute:webnotes.delete_doc('DocType', 'Service Order')",
+	"execute:webnotes.delete_doc('DocType', 'Service Quotation')",
+	"execute:webnotes.delete_doc('DocType', 'Service Order Detail')",
+	"execute:webnotes.delete_doc('DocType', 'Service Quotation Detail')",
 ]
