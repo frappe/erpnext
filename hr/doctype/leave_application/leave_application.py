@@ -71,7 +71,7 @@ class DocType(DocListController):
 			for d in block_dates:
 				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
 				
-			if self.doc.docstatus == 1:
+			if self.doc.status == "Approved":
 				raise LeaveDayBlockedError
 			
 	def get_holidays(self):
