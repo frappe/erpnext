@@ -101,15 +101,19 @@ class DocType:
 		from core.doctype.doctype.doctype import DocType
 		dt = DocType()
 	
-		parent = sql("select parent from `tabDocField` where fieldname='naming_series' and parent != %s", self.doc.select_doc_for_series)
-		sr = ([webnotes.model.doctype.get_property(p[0], 'options', 'naming_series'), p[0]] for p in parent)
+		parent = sql("""select dt.name from `tabDocField` df, `tabDocType` dt 
+			where dt.name = df.parent and df.fieldname='naming_series' and dt.name != %s""", 
+			self.doc.select_doc_for_series)
+		sr = ([webnotes.model.doctype.get_property(p[0], 'options', 'naming_series'), p[0]] 
+			for p in parent)
 		options = self.scrub_options_list(self.doc.set_options.split("\n"))
 		for series in options:
 			dt.validate_series(series, self.doc.select_doc_for_series)
 			for i in sr:
 				if i[0]:
 					if series in i[0].split("\n"):
-						msgprint("Oops! Series name %s is already in use in %s. Please select a new one" % (series, i[1]), raise_exception=1)
+						msgprint("Oops! Series name %s is already in use in %s. \
+							Please select a new one" % (series, i[1]), raise_exception=1)
 			
 	def validate_series_name(self, n):
 		import re
