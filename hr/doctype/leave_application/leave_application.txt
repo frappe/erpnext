@@ -1,12 +1,13 @@
 [
  {
-  "creation": "2013-02-08 13:17:08", 
+  "creation": "2013-02-18 17:08:32", 
   "docstatus": 0, 
-  "modified": "2013-02-13 12:32:27", 
+  "modified": "2013-02-18 17:20:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "LAP/.#####", 
   "description": "Apply / Approve Leaves", 
   "doctype": "DocType", 
@@ -44,7 +45,7 @@
   "label": "Status", 
   "no_copy": 1, 
   "options": "Open\nApproved\nRejected", 
-  "permlevel": 2
+  "permlevel": 1
  }, 
  {
   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
@@ -218,15 +219,6 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All", 
-  "submit": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
@@ -254,8 +246,17 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "report": 1, 
+  "permlevel": 1, 
+  "role": "All", 
+  "submit": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
   "role": "HR User", 
   "submit": 0, 
   "write": 1
@@ -265,15 +266,10 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "report": 1, 
+  "permlevel": 1, 
+  "report": 0, 
   "role": "Leave Approver", 
   "submit": 0, 
   "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "Employee"
  }
 ]
