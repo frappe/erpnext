@@ -17,6 +17,7 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		application = self.get_application(test_records[1])
 		application.insert()
+		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
 		webnotes.session.user = "test1@example.com"

@@ -237,7 +237,7 @@ def add_department_leaves(events, start, end, employee, company):
 		department)
 	
 	for d in webnotes.conn.sql("""select name, from_date, to_date, employee_name, half_day, 
-		status, employee
+		status, employee, docstatus
 		from `tabLeave Application` where
 		(from_date between %s and %s or to_date between %s and %s)
 		and docstatus < 2
@@ -251,7 +251,8 @@ def add_department_leaves(events, start, end, employee, company):
 				"to_date": d.to_date,
 				"status": d.status,
 				"title": _("Leave by") + " " +  cstr(d.employee_name) + \
-					(d.half_day and _(" (Half Day)") or "")
+					(d.half_day and _(" (Half Day)") or ""),
+				"docstatus": d.docstatus
 			})
 	
 
