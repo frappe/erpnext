@@ -34,6 +34,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 			cur_frm.cscript.get_leave_balance(cur_frm.doc);
 		}
 	});
+	cur_frm.cscript.calculate_total_days(doc, dt, dn);
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
