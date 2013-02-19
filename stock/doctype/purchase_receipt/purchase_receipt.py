@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults
+from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -30,7 +30,6 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.defaults = get_defaults()
 		self.tname = 'Purchase Receipt Item'
 		self.fname = 'purchase_receipt_details'
 		self.count = 0

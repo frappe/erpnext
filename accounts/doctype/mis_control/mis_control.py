@@ -17,10 +17,12 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, get_defaults, get_first_day, get_last_day, has_common
+from webnotes.utils import cint, cstr, flt, get_first_day, get_last_day, has_common
 from webnotes.model import db_exists
 from webnotes.model.bean import copy_doclist
 from webnotes import session, msgprint
+
+import webnotes.defaults
 
 sql = webnotes.conn.sql
 
@@ -65,7 +67,7 @@ class DocType:
 			
 		#--- from month and to month (for MIS - Comparison Report) -------
 		month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-		fiscal_start_month = sql("select MONTH(year_start_date) from `tabFiscal Year` where name = %s",(get_defaults()['fiscal_year']))
+		fiscal_start_month = sql("select MONTH(year_start_date) from `tabFiscal Year` where name = %s",(webnotes.defaults.get_global_value("fiscal_year")))
 		fiscal_start_month = fiscal_start_month and fiscal_start_month[0][0] or 1
 		mon = ['']
 		for i in range(fiscal_start_month,13): mon.append(month_list[i-1])

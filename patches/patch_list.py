@@ -175,4 +175,5 @@ patch_list = [
 	"patches.february_2013.p02_email_digest",
 	"patches.february_2013.p03_material_request",
 	"patches.february_2013.p04_remove_old_doctypes",
+	"execute:webnotes.delete_doc('DocType', 'Plot Control')"
 ]

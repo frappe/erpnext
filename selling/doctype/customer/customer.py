@@ -17,9 +17,10 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, get_defaults
+from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
+import webnotes.defaults
 
 sql = webnotes.conn.sql
 
@@ -34,7 +35,7 @@ class DocType(TransactionBase):
 		self.add_communication_list()
 			
 	def autoname(self):
-		cust_master_name = get_defaults().get('cust_master_name')
+		cust_master_name = webnotes.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
 			if webnotes.conn.exists("Supplier", self.doc.customer_name):
 				msgprint(_("A Supplier exists with same name"), raise_exception=1)
@@ -54,7 +55,7 @@ class DocType(TransactionBase):
 		return g
 	
 	def validate_values(self):
-		if get_defaults().get('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
+		if webnotes.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
 			msgprint("Series is Mandatory.")
 			raise Exception
 
@@ -217,7 +218,7 @@ class DocType(TransactionBase):
 			
 	def on_rename(self, new, old):
 		#update customer_name if not naming series
-		if get_defaults().get('cust_master_name') == 'Customer Name':
+		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
 			update_fields = [
 			('Customer', 'name'),
 			('Address', 'customer'),

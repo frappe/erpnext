@@ -25,6 +25,8 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 sql = webnotes.conn.sql
 
+import webnotes.defaults
+
 
 class DocType:	
 	def __init__(self, doc, doclist=[]):
@@ -97,7 +99,7 @@ class DocType:
 
 	def reorder_item(self,doc_type,doc_name):
 		""" Reorder item if stock reaches reorder level"""
-		if not hasattr(webnotes, "auto_indent"): 
+		if not hasattr(webnotes, "auto_indent"):
 			webnotes.auto_indent = webnotes.conn.get_value('Global Defaults', None, 'auto_indent')
 
 		if webnotes.auto_indent:
@@ -117,10 +119,11 @@ class DocType:
 
 	def create_material_request(self, doc_type, doc_name):
 		"""	Create indent on reaching reorder level	"""
-		defaults = webnotes.conn.get_defaults()
+		defaults = webnotes.defaults.get_defaults()
 		mr = webnotes.bean([{
 			"doctype": "Material Request",
 			"company": defaults.company,
+			"fiscal_year": defaults.fiscal_year,
 			
 		}])
 		
@@ -128,8 +131,6 @@ class DocType:
 		indent = Document('Material Request')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
-		indent.company = get_defaults()['company']
-		indent.fiscal_year = get_defaults()['fiscal_year']
 		indent.remark = """This is an auto generated Material Request. 
 			It was raised because the (actual + ordered + indented - reserved) quantity 
 			reaches re-order level when %s %s was created""" % (doc_type,doc_name)

@@ -18,6 +18,7 @@ import webnotes
 from webnotes import msgprint, _
 import json
 from webnotes.utils import flt, cstr
+from webnotes.defaults import get_global_default
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -99,8 +100,7 @@ def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
 	val_method = webnotes.conn.get_value('Item', item_code, 'valuation_method')
 	if not val_method:
-		from webnotes.utils import get_defaults
-		val_method = get_defaults().get('valuation_method', 'FIFO')
+		val_method = get_global_default('valuation_method') or "FIFO"
 	return val_method
 		
 def get_fifo_rate(previous_stock_queue, qty):
