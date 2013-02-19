@@ -18,7 +18,7 @@ def get_companies():
 	
 	# if match == company is specified and companies are specified in user defaults
 	if match:
-		return webnotes.defaults.get_user_defaults("company")
+		return webnotes.defaults.get_user_default_as_list("company")
 	else:
 		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
 			where docstatus!=2""")]
