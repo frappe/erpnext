@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-18 18:37:56", 
   "docstatus": 0, 
-  "modified": "2013-02-19 15:21:03", 
+  "modified": "2013-02-19 16:30:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -160,6 +160,16 @@
   "permlevel": 0
  }, 
  {
+  "allow_on_submit": 1, 
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "follow_via_email", 
+  "fieldtype": "Check", 
+  "label": "Follow via Email", 
+  "permlevel": 0, 
+  "print_hide": 1
+ }, 
+ {
   "default": "Today", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
@@ -180,6 +190,12 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_17", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
