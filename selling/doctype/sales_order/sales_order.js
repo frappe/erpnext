@@ -28,6 +28,8 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
+	cur_frm.cscript.manage_rounded_total();
+	
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
 	if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});

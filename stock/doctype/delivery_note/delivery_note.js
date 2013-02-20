@@ -27,6 +27,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 // ONLOAD
 // ================================================================================================
 cur_frm.cscript.onload = function(doc, dt, dn) {
+	cur_frm.cscript.manage_rounded_total();
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(dt,dn,{transaction_date:get_today()});
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});

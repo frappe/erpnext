@@ -40,7 +40,8 @@ keydict = {
 	'account_url':'account_url',
 	'allow_negative_stock' : 'allow_negative_stock',
 	'maintain_same_rate' : 'maintain_same_rate',
-	'session_expiry': 'session_expiry'
+	'session_expiry': 'session_expiry',
+	'disable_rounded_total': 'disable_rounded_total',
 }
 
 class DocType:
