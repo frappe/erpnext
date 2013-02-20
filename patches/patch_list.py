@@ -174,7 +174,7 @@ patch_list = [
 	"patches.february_2013.p02_email_digest",
 	"patches.february_2013.p03_material_request",
 	"patches.february_2013.p04_remove_old_doctypes",
-	"execute:webnotes.delete_doc('DocType', 'Plot Control')"
+	"execute:webnotes.delete_doc('DocType', 'Plot Control')",
 	"patches.february_2013.p05_leave_application",
 	"patches.february_2013.gle_floating_point_issue_revisited",
 	"patches.february_2013.fix_outstanding",

@@ -2,11 +2,15 @@ import webnotes, os, sys
 
 def execute():
 	webnotes.reload_doc("core", "doctype", "doctype")
+	
 	webnotes.rename_doc("DocType", "Purchase Request Item", "Material Request Item", force=True)
 	webnotes.rename_doc("DocType", "Purchase Request", "Material Request", force=True)
 	webnotes.reload_doc("buying", "search_criteria", "pending_po_items_to_bill")
 	webnotes.reload_doc("buying", "search_criteria", "pending_po_items_to_receive")
 
+	webnotes.reload_doc("stock", "doctype", "material_request")
+	webnotes.reload_doc("stock", "doctype", "material_request_item")
+	
 	webnotes.conn.sql("""update `tabMaterial Request` set material_request_type='Purchase'""")
 	
 	os.system("rm -rf app/buying/doctype/purchase_request")
