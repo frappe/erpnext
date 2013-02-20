@@ -178,4 +178,11 @@ patch_list = [
 	"patches.february_2013.p05_leave_application",
 	"patches.february_2013.gle_floating_point_issue_revisited",
 	"patches.february_2013.fix_outstanding",
+	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Classic") # 2013-02-19',
+	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Modern") # 2013-02-19',
+	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-02-19',
+	"execute:webnotes.delete_doc('DocType', 'Service Order')",
+	"execute:webnotes.delete_doc('DocType', 'Service Quotation')",
+	"execute:webnotes.delete_doc('DocType', 'Service Order Detail')",
+	"execute:webnotes.delete_doc('DocType', 'Service Quotation Detail')",
 ]

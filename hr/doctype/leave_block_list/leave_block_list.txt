@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-08 15:13:29", 
+  "creation": "2013-02-18 17:43:12", 
   "docstatus": 0, 
-  "modified": "2013-02-14 17:15:32", 
+  "modified": "2013-02-19 18:42:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -83,7 +83,7 @@
   "options": "Leave Block List Date"
  }, 
  {
-  "description": "Allow the following users to make Leave Applications for block days.", 
+  "description": "Allow the following users to approve Leave Applications for block days.", 
   "doctype": "DocField", 
   "fieldname": "allow_list", 
   "fieldtype": "Section Break", 

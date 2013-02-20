@@ -21,7 +21,8 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
 	if(doc.__islocal) {
-		cur_frm.set_value("status", "Open")
+		cur_frm.set_value("status", "Open");
+		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
 	cur_frm.set_df_property("leave_approver", "options", "");
 	cur_frm.call({
