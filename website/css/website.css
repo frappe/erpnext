@@ -5,10 +5,15 @@
 div#body_div {
 	padding: 0px;
 	min-height: 400px;
-	margin: 40px auto;
+	margin: 40px auto 10px auto;
 	box-shadow: 1px 1px 3px 3px #bbb;
 	border-radius: 5px;
 	overflow: hidden;
+}
+
+footer {
+	width: 720px;
+	margin: auto;
 }
 
 .navbar-inner {
@@ -31,6 +36,16 @@ p, li {
 .layout-main {
 	min-height: 400px;
 	padding: 30px;
+}
+
+.social-icons {
+	font-size: 120%
+}
+.social-icons a:hover {
+	text-decoration: none;
+}
+.social-icons a i:hover {
+	text-decoration: none;
 }
 
 .web-footer-menu {
