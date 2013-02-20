@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-18 13:50:55", 
+  "creation": "2013-02-20 13:25:31", 
   "docstatus": 0, 
-  "modified": "2013-02-18 14:41:41", 
+  "modified": "2013-02-20 14:10:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -43,7 +43,8 @@
   "fieldtype": "Select", 
   "in_list_view": 1, 
   "label": "Material Request Type", 
-  "options": "Purchase\nTransfer"
+  "options": "Purchase\nTransfer", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -252,7 +253,7 @@
   "fieldname": "per_ordered", 
   "fieldtype": "Percent", 
   "in_list_view": 1, 
-  "label": "% Ordered", 
+  "label": "% Completed", 
   "no_copy": 1, 
   "oldfieldname": "per_ordered", 
   "oldfieldtype": "Currency", 

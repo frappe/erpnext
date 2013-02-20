@@ -109,7 +109,11 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 }
 
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabMaterial Request`.`name` FROM `tabMaterial Request` WHERE `tabMaterial Request`.company = "' + doc.company + '" and `tabMaterial Request`.`docstatus` = 1 and `tabMaterial Request`.`status` != "Stopped" and ifnull(`tabMaterial Request`.`per_ordered`,0) < 99.99 and `tabMaterial Request`.%(key)s LIKE "%s" ORDER BY `tabMaterial Request`.`name` DESC LIMIT 50';
+	return 'SELECT DISTINCT `name` FROM `tabMaterial Request` \
+		WHERE material_request_type="Purchase" and company = "' + doc.company 
+		+ '" and `docstatus` = 1 and `status` != "Stopped" \
+		and ifnull(`per_ordered`,0) < 99.99 and %(key)s LIKE "%s" \
+		ORDER BY `name` DESC LIMIT 50';
 }
 
 

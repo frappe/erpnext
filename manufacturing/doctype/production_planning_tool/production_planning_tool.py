@@ -350,7 +350,8 @@ class DocType:
 						"company": self.doc.company,
 						"fiscal_year": fiscal_year,
 						"requested_by": webnotes.session.user,
-						"remark": "Automatically raised from Production Planning Tool"
+						"remark": "Automatically raised from Production Planning Tool",
+						"material_request_type": "Purchase"
 					},
 					{
 						"doctype": "Material Request Item",

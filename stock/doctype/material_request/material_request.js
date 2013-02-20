@@ -25,9 +25,16 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		this._super();
 		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
-			cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
+			if(doc.material_request_type === "Purchase")
+				cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
+				
+			if(doc.material_request_type === "Transfer" && doc.status === "Submitted")
+				cur_frm.add_custom_button("Transfer Material", cur_frm.cscript.make_stock_entry);
+			
 			if(flt(doc.per_ordered, 2) < 100) {
-				cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
+				if(doc.material_request_type === "Purchase")
+					cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
+				
 				cur_frm.add_custom_button('Stop Material Request', cur_frm.cscript['Stop Material Request']);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
@@ -85,22 +92,6 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 // On Button Click Functions
 // ------------------------------------------------------------------------------
 
-// Make Purchase Order
-cur_frm.cscript['Make Purchase Order'] = function() {
-	var doc = cur_frm.doc;
-	n = wn.model.make_new_doc_and_get_name('Purchase Order');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Purchase Order'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Purchase Order',
-		'from_docname':doc.name,
-		'from_to_list':"[['Material Request','Purchase Order'],['Material Request Item','Purchase Order Item']]"
-		}, function(r,rt) {
-			 loaddoc('Purchase Order', n);
-		}
-	);
-}
-
 // Stop INDENT
 // ==================================================================================================
 cur_frm.cscript['Stop Material Request'] = function() {
@@ -128,14 +119,14 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 	}
 }
 
+cur_frm.cscript['Make Purchase Order'] = function() {
+	cur_frm.map([["Material Request", "Purchase Order"], ["Material Request Item", "Purchase Order Item"]]);
+}
+
 cur_frm.cscript.make_supplier_quotation = function() {
-	var new_sq_name = wn.model.make_new_doc_and_get_name("Supplier Quotation");
-	$c("dt_map", {
-		"docs": wn.model.compress([locals['Supplier Quotation'][new_sq_name]]),
-		"from_doctype": cur_frm.doc.doctype,
-		"to_doctype": "Supplier Quotation",
-		"from_docname": cur_frm.doc.name,
-		"from_to_list": JSON.stringify([['Material Request', 'Supplier Quotation'],
-			['Material Request Item', 'Supplier Quotation Item']]),
-	}, function(r, rt) { loaddoc("Supplier Quotation", new_sq_name) });
+	cur_frm.map([["Material Request", "Supplier Quotation"], ["Material Request Item", "Supplier Quotation Item"]]);
+}
+
+cur_frm.cscript.make_stock_entry = function() {
+	cur_frm.map([["Material Request", "Stock Entry"], ["Material Request Item", "Stock Entry Detail"]]);
 }

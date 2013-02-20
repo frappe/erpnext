@@ -261,7 +261,6 @@ class DocType(BuyingController):
 				
 			self.delete_irrelevant_raw_material()
 			#---------------calculate amt in	Purchase Order Item Supplied-------------
-			self.calculate_amount(d)
 			
 	def add_bom(self, d):
 		#----- fetching default bom from Bill of Materials instead of Item Master --
@@ -314,15 +313,6 @@ class DocType(BuyingController):
 				d.parent = 'old_par:'+self.doc.name
 				d.save()
 		
-	def calculate_amount(self, d):
-		amt = 0
-		for i in getlist(self.doclist,'po_raw_material_details'):
-			
-			if(i.reference_name == d.name):
-				i.amount = flt(i.required_qty)* flt(i.rate)
-				amt += i.amount
-		d.rm_supp_cost = amt
-
 	# On Update
 	# ----------------------------------------------------------------------------------------------------		
 	def on_update(self):

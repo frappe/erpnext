@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-18 13:36:21", 
+  "creation": "2013-02-20 13:26:14", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:46:29", 
+  "modified": "2013-02-20 18:14:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -301,6 +301,7 @@
   "options": "UOM"
  }, 
  {
+  "description": "Auto-raise Material Request if quantity goes below re-order level in a warehouse", 
   "doctype": "DocField", 
   "fieldname": "reorder_section", 
   "fieldtype": "Section Break", 

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-04 10:34:46", 
+  "creation": "2013-02-20 13:25:31", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:12:44", 
+  "modified": "2013-02-20 14:06:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -177,7 +177,7 @@
   "doctype": "DocField", 
   "fieldname": "ordered_qty", 
   "fieldtype": "Float", 
-  "label": "Ordered Qty", 
+  "label": "Completed Qty", 
   "no_copy": 1, 
   "oldfieldname": "ordered_qty", 
   "oldfieldtype": "Currency", 

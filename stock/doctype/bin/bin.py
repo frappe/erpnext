@@ -111,12 +111,15 @@ class DocType:
 			if item_reorder:
 				reorder_level = item_reorder.warehouse_reorder_level
 				reorder_qty = item_reorder.warehouse_reorder_qty
+				material_request_type = item_reorder.material_request_type
 			else:
 				reorder_level, reorder_qty = webnotes.conn.get_value("Item", self.doc.item_code,
 					["re_order_level", "re_order_qty"])
+				material_request_type = "Purchase"
 			
 			if flt(reorder_qty) and flt(self.doc.projected_qty) < flt(reorder_level):
-				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty, item_reorder.material_request_type)
+				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty,
+					material_request_type)
 
 	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty, material_request_type):
 		"""	Create indent on reaching reorder level	"""

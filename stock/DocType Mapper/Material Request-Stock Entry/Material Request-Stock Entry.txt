@@ -1,0 +1,107 @@
+[
+ {
+  "creation": "2013-02-20 16:54:17", 
+  "docstatus": 0, 
+  "modified": "2013-02-20 16:54:17", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Table Mapper Detail", 
+  "name": "__common__", 
+  "parent": "Material Request-Stock Entry", 
+  "parentfield": "table_mapper_details", 
+  "parenttype": "DocType Mapper"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "map": "Yes", 
+  "name": "__common__", 
+  "parent": "Material Request-Stock Entry", 
+  "parentfield": "field_mapper_details", 
+  "parenttype": "DocType Mapper"
+ }, 
+ {
+  "doctype": "DocType Mapper", 
+  "from_doctype": "Material Request", 
+  "module": "Stock", 
+  "name": "__common__", 
+  "ref_doc_submitted": 1, 
+  "to_doctype": "Stock Entry"
+ }, 
+ {
+  "doctype": "DocType Mapper", 
+  "name": "Material Request-Stock Entry"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval:\"Material Transfer\"", 
+  "match_id": 0, 
+  "to_field": "purpose"
+ }, 
+ {
+  "checking_operator": "=", 
+  "doctype": "Field Mapper Detail", 
+  "from_field": "company", 
+  "match_id": 0, 
+  "to_field": "company"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "parent", 
+  "match_id": 1, 
+  "to_field": "material_request"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "name", 
+  "match_id": 1, 
+  "to_field": "material_request_item"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "uom", 
+  "match_id": 1, 
+  "to_field": "stock_uom"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval:flt(1)", 
+  "match_id": 1, 
+  "to_field": "conversion_factor"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval:flt(obj.qty) - flt(obj.ordered_qty)", 
+  "match_id": 1, 
+  "to_field": "transfer_qty"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval:flt(obj.qty) - flt(obj.ordered_qty)", 
+  "match_id": 1, 
+  "to_field": "qty"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "warehouse", 
+  "match_id": 1, 
+  "to_field": "t_warehouse"
+ }, 
+ {
+  "doctype": "Table Mapper Detail", 
+  "from_table": "Material Request", 
+  "match_id": 0, 
+  "to_table": "Stock Entry", 
+  "validation_logic": "docstatus = 1"
+ }, 
+ {
+  "doctype": "Table Mapper Detail", 
+  "from_field": "indent_details", 
+  "from_table": "Material Request Item", 
+  "match_id": 1, 
+  "to_field": "mtn_details", 
+  "to_table": "Stock Entry Detail", 
+  "validation_logic": "qty > ifnull(ordered_qty,0) and docstatus =1"
+ }
+]

@@ -2,7 +2,7 @@
  {
   "creation": "2011-05-20 10:07:55", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:41:21", 
+  "modified": "2013-02-20 18:20:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -39,6 +39,13 @@
   "map": "No", 
   "match_id": 0, 
   "to_field": "transaction_date"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval:\"Purchase\"", 
+  "map": "Yes", 
+  "match_id": 0, 
+  "to_field": "material_request_type"
  }, 
  {
   "checking_operator": "=", 
