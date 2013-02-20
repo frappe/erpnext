@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 from webnotes.utils import add_days, cint, cstr, flt, now, nowdate
 from webnotes.model import db_exists
@@ -81,7 +82,7 @@ class DocType:
 		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		
 		self.doc.save()
-		
+				
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
 			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
@@ -105,56 +106,54 @@ class DocType:
 		if webnotes.auto_indent:
 			#check if re-order is required
 			item_reorder = webnotes.conn.get("Item Reorder", 
-				{"parent": self.doc.item_code, "warehouse": self.doc.warehouse}, as_dict=1)
+				{"parent": self.doc.item_code, "warehouse": self.doc.warehouse})
 			
 			if item_reorder:
 				reorder_level = item_reorder.warehouse_reorder_level
 				reorder_qty = item_reorder.warehouse_reorder_qty
 			else:
-				reorder_level, reorder_qty = webnotes.conn.get_valuee("Item", self.doc.item_code,
+				reorder_level, reorder_qty = webnotes.conn.get_value("Item", self.doc.item_code,
 					["re_order_level", "re_order_qty"])
 			
 			if flt(reorder_qty) and flt(self.doc.projected_qty) < flt(reorder_level):
-				self.create_material_request(doc_type, doc_name)
+				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty, item_reorder.material_request_type)
 
-	def create_material_request(self, doc_type, doc_name):
+	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty, material_request_type):
 		"""	Create indent on reaching reorder level	"""
 		defaults = webnotes.defaults.get_defaults()
+		item = webnotes.doc("Item", self.doc.item_code)
+		
 		mr = webnotes.bean([{
 			"doctype": "Material Request",
 			"company": defaults.company,
 			"fiscal_year": defaults.fiscal_year,
-			
+			"transaction_date": nowdate(),
+			"material_request_type": material_request_type,
+			"remark": _("This is an auto generated Material Request.") + \
+				_("It was raised because the (actual + ordered + indented - reserved) quantity reaches re-order level when the following record was created") + \
+				": " + _(doc_type) + " " + doc_name
+		}, {
+			"doctype": "Material Request Item",
+			"parenttype": "Material Request",
+			"parentfield": "indent_details",
+			"item_code": self.doc.item_code,
+			"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
+			"uom":	self.doc.stock_uom,
+			"warehouse": self.doc.warehouse,
+			"item_name": item.item_name,
+			"description": item.description,
+			"item_group": item.item_group,
+			"qty": reorder_qty,
+			"brand": item.brand,
 		}])
 		
-			
-		indent = Document('Material Request')
-		indent.transaction_date = nowdate()
-		indent.naming_series = 'IDT'
-		indent.remark = """This is an auto generated Material Request. 
-			It was raised because the (actual + ordered + indented - reserved) quantity 
-			reaches re-order level when %s %s was created""" % (doc_type,doc_name)
-		indent.save(1)
-		indent_obj = get_obj('Material Request',indent.name,with_children=1)
-		indent_details_child = addchild(indent_obj.doc,'indent_details','Material Request Item')
-		indent_details_child.item_code = self.doc.item_code
-		indent_details_child.uom = self.doc.stock_uom
-		indent_details_child.warehouse = self.doc.warehouse
-		indent_details_child.schedule_date= add_days(nowdate(),cint(i['lead_time_days']))
-		indent_details_child.item_name = i['item_name']
-		indent_details_child.description = i['description']
-		indent_details_child.item_group = i['item_group']
-		indent_details_child.qty = i['re_order_qty'] or (flt(i['re_order_level']) - flt(cur_qty))
-		indent_details_child.brand = i['brand']
-		indent_details_child.save()
-		indent_obj = get_obj('Material Request',indent.name,with_children=1)
-		indent_obj.validate()
-		webnotes.conn.set(indent_obj.doc,'docstatus',1)
-		indent_obj.on_submit()
+		mr.insert()
+		mr.submit()
+
 		msgprint("""Item: %s is to be re-ordered. Material Request %s raised. 
 			It was generated from %s: %s""" % 
-			(self.doc.item_code, indent.name, doc_type, doc_name ))
-		if(i['email_notify']):
+			(self.doc.item_code, mr.doc.name, doc_type, doc_name ))
+		if(item.email_notify):
 			self.send_email_notification(doc_type, doc_name)
 			
 	def send_email_notification(self, doc_type, doc_name):

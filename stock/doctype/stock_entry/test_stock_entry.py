@@ -9,7 +9,7 @@ class TestStockEntry(unittest.TestCase):
 		st1.insert()
 		st1.submit()
 
-		st2 = webnotes.bean(copy=test_records[0])
+		st2 = webnotes.bean(copy=test_records[1])
 		st2.insert()
 		st2.submit()
 		
