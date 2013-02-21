@@ -1,5 +1,5 @@
 ,
- Reason: ,Reden:
+ (Half Day),(Halve dag)
  against same operation,tegen dezelfde handeling
  by Role ,door Rol
  cannot be 0,mag niet 0
@@ -157,6 +157,7 @@ Activity Log,Activiteitenlogboek
 Activity Name,Activiteit Naam
 Activity Type,Activiteit Type
 Actual,Daadwerkelijk
+Actual Amount,Werkelijke bedrag
 Actual Budget,Werkelijk Begroting
 Actual Completion Date,Werkelijke Voltooiingsdatum
 Actual Date,Werkelijke Datum
@@ -236,17 +237,13 @@ Against Voucher Type,Tegen Voucher Type
 Agent,Agent
 "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials","De totale groep van ** Items ** in een andere ** Item **. Dit is handig als u de bundeling van een bepaalde ** Items ** in een pakket en u onderhoudt voorraad van de verpakte ** Items ** en niet de totale ** Item **. Het pakket ** Item ** zal hebben &quot;Is Stock Item&quot; als &quot;No&quot; en &quot;Is Sales Item&quot; als &quot;Ja&quot; Bijvoorbeeld:. Als je verkoopt laptops en Rugzakken apart en hebben een speciale prijs als de klant koopt zowel , dan is de laptop + Rugzak zal een nieuwe Sales BOM Item.Note: BOM = Bill of Materials"
 Aging Date,Aging Datum
-All Active Leads,Alle actieve Leads
 All Addresses.,Alle adressen.
-All Blog Subscribers,Alles Blog Abonnees
 All Contact,Alle Contact
-All Contacts,Alle contactpersonen
 All Contacts.,Alle contactpersonen.
 All Customer Contact,Alle Customer Contact
-All Customer Contacts,Alle klantcontacten
+All Day,All Day
 All Employee (Active),Alle medewerkers (Actief)
 All Lead (Open),Alle Lood (Open)
-All Leads,Alle Leads
 All Products or Services.,Alle producten of diensten.
 All Sales Partner Contact,Alle Sales Partner Contact
 All Sales Person,Alle Sales Person
@@ -436,7 +433,6 @@ Budget Details,Budget Details
 Budget Distribution,Budget Distributie
 Budget Distribution Detail,Budget Distributie Detail
 Budget Distribution Details,Budget Distributie Details
-Build Report,Build Report
 Bulk Email,Bulk Email
 Bulk Email records.,Bulk Email records.
 Bundle items at time of sale.,Bundel artikelen op moment van verkoop.
@@ -465,6 +461,7 @@ Calculate Tax,Bereken BTW
 Calculate Taxes and Charges,Bereken en-heffingen
 Calculate Total Score,Bereken Totaal Score
 Calendar,Kalender
+Calendar Events,Kalender Evenementen
 Call,Noemen
 Campaign,Campagne
 Campaign Name,Campagnenaam
@@ -601,6 +598,7 @@ Contact Name,Contact Naam
 Contact No,Contact Geen
 Contact No.,Contact No
 Contact Person,Contactpersoon
+Contact Type,Contact Type
 Contact Us Settings,Neem contact met ons op Instellingen
 Contact in Future,Contact in de toekomst
 "Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.","Contact opties, zoals &quot;Sales Query, ondersteuning Query&quot; etc elk op een nieuwe regel of gescheiden door komma&#39;s."
@@ -664,6 +662,7 @@ Current Value,Huidige waarde
 Current status,Actuele status
 Cust/Supp Address,Cust / Supp Adres
 Cust/Supp Name,Cust / Supp Naam
+Custom,Gewoonte
 Custom Autoreply Message,Aangepaste Autoreply Bericht
 Custom CSS,Custom CSS
 Custom Field,Aangepast veld
@@ -879,6 +878,7 @@ Editable,Bewerkbare
 Educational Qualification,Educatieve Kwalificatie
 Educational Qualification Details,Educatieve Kwalificatie Details
 Eg. smsgateway.com/api/send_sms.cgi,Bijv. smsgateway.com / api / send_sms.cgi
+Eligible Amount,In aanmerking komende bedrag
 Email,E-mail
 Email (By company),E-mail (Door bedrijf)
 Email Digest,E-mail Digest
@@ -927,6 +927,7 @@ Encashment Date,Inning Datum
 End Date,Einddatum
 End date of current invoice's period,Einddatum van de periode huidige factuur&#39;s
 End of Life,End of Life
+Ends on,Eindigt op
 Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,Voer E-mail Identiteitskaart naar foutrapport verstuurd door users.Eg ontvangen: support@iwebnotes.com
 Enter Form Type,Voer Form Type
 Enter Row,Voer Row
@@ -949,12 +950,9 @@ Entries are not allowed against this Fiscal Year if the year is closed.,Inzendin
 Error,Fout
 Estimated Material Cost,Geschatte Materiaal Kosten
 Event,Evenement
-Event Date,Evenement Datum
 Event Individuals,Event Personen
-Event Name,Naam van gebeurtenis
 Event Role,Event Rol
 Event Roles,Event Rollen
-Event Time,Event Time
 Event Type,Type gebeurtenis
 Event Updates,Event Updates
 Event User,Evenement Gebruiker
@@ -1046,6 +1044,7 @@ Fixed Asset Account,Fixed Asset account
 Float,Zweven
 Float Precision,Float Precision
 Floral,Bloemen
+Following dates are blocked for Leave,Volgende data zijn geblokkeerd voor Verlof
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Na tafel zal waarden als items zijn sub - gecontracteerde. Deze waarden zullen worden opgehaald van de meester van de &quot;Bill of Materials&quot; van sub - gecontracteerde items.
 Font,Doopvont
 Font Size,Lettergrootte
@@ -1073,6 +1072,7 @@ For ranges,Voor bereiken
 For reference,Ter referentie
 For reference only.,Alleen ter referentie.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Voor het gemak van de klanten, kunnen deze codes worden gebruikt in gedrukte formaten zoals facturen en de leveringsbonnen"
+Form,Vorm
 Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,Formaat: uu: mm voorbeeld voor een uur verstrijken ingesteld als 01:00 uur. Max afloop zal 72 uur. Standaard is 24 uur
 Forum,Forum
 Fraction,Fractie
@@ -1089,7 +1089,9 @@ From PR Date,Van PR Datum
 From Package No.,Van Pakket No
 From Table,Uit tabel
 Frozen,Bevroren
+Full Image,Full Image
 Full Name,Volledige naam
+Full description (formatted as markdown),Volledige beschrijving (geformatteerd als afwaardering)
 Fully Billed,Volledig Gefactureerd
 Fully Completed,Volledig ingevulde
 GL Control,GL Controle
@@ -1104,7 +1106,7 @@ Gender,Geslacht
 General,Algemeen
 General Ledger,Grootboek
 Generate Description HTML,Genereer Beschrijving HTML
-Generate Purchase Requests (MRP) and Production Orders.,Genereer inkoopaanvragen (MRP) en productieorders.
+Generate Material Requests (MRP) and Production Orders.,Genereer Materiaal Requests (MRP) en productieorders.
 Generate Salary Slips,Genereer Salaris Slips
 Generate Schedule,Genereer Plan
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Genereer pakbonnen voor pakketten te leveren. Gebruikt voor het verpakken aantal, inhoud van de verpakking en het gewicht mee te delen."
@@ -1265,6 +1267,8 @@ If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,
 Ignore,Negeren
 Image,Beeld
 Image View,Afbeelding View
+Image for listing (Width: 100px) (Attach First),Afbeelding voor lijst (Breedte: 100px) (Bevestig eerst)
+Image for listing (Width: 300px) (Attach First),Afbeelding voor lijst (Breedte: 300px) (Bevestig eerst)
 Implementation Partner,Implementatie Partner
 Import,Importeren
 Import Date Format ,Import Datumnotatie
@@ -1391,6 +1395,7 @@ Item Name,Naam van het punt
 Item Price,Item Prijs
 Item Prices,Item Prijzen
 Item Quality Inspection Parameter,Item Kwaliteitscontrole Parameter
+Item Reorder,Item opnieuw ordenen
 Item Serial No,Item Volgnr
 Item Serial Nos,Item serienummers
 Item Supplier,Item Leverancier
@@ -1470,15 +1475,24 @@ Lead Lost,Lood Verloren
 Lead Name,Lead Naam
 Lead Owner,Lood Owner
 Lead Ref,Lood Ref
+Lead Source,Lood Bron
+Lead Status,Lead Status
 Lead Time Date,Lead Tijd Datum
 Lead Time Days,Lead Time Dagen
-Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.,Levertijd dagen is het aantal dagen waarmee dit artikel wordt verwacht in uw magazijn. Deze dag wordt opgehaald in Purchase Request als u dit item.
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Levertijd dagen is het aantal dagen waarmee dit artikel wordt verwacht in uw magazijn. Deze dag wordt opgehaald in Laden en aanvragen als u dit item.
 Lead Type,Lood Type
 Leave Allocation,Laat Toewijzing
 Leave Allocation Tool,Laat Toewijzing Tool
 Leave Application,Verlofaanvraag
 Leave Approver,Laat Fiatteur
 Leave Balance Before Application,Laat Balance Voor het aanbrengen
+Leave Block List,Laat Block List
+Leave Block List Allow,Laat Block List Laat
+Leave Block List Allowed,Laat toegestaan ​​Block List
+Leave Block List Date,Laat Block List Datum
+Leave Block List Dates,Laat Block List Data
+Leave Block List Name,Laat Block List Name
+Leave Blocked,Laat Geblokkeerde
 Leave Control Panel,Laat het Configuratiescherm
 Leave Encashed?,Laat verzilverd?
 Leave Encashment Amount,Laat inning Bedrag
@@ -1492,6 +1506,7 @@ Leave blank if considered for all departments,Laat leeg indien dit voor alle afd
 Leave blank if considered for all designations,Laat leeg indien overwogen voor alle aanduidingen
 Leave blank if considered for all employee types,Laat leeg indien overwogen voor alle werknemer soorten
 Leave blank if considered for all grades,Laat leeg indien dit voor alle soorten
+Leave by,Laat door
 "Leave can be approved by users with Role, ""Leave Approver""",Laat kan worden goedgekeurd door gebruikers met Role: &quot;Laat Fiatteur&quot;
 Ledger,Grootboek
 Left,Links
@@ -1525,12 +1540,14 @@ Login Before,Login Voor
 Login Id,Login Id
 Login Page,Login Pagina
 Logout,Afmelden
+Long Description,Lange omschrijving
 Long Text,Lange tekst
 Lost Reason,Verloren Reden
 Low,Laag
 Lower Income,Lager inkomen
 Lucida Grande,Lucida Grande
 MIS Control,MIS Controle
+MREQ,MREQ
 MTN Details,MTN Details
 Mail Footer,Mail Footer
 Mail Password,Mail Wachtwoord
@@ -1591,6 +1608,14 @@ Match Id,Match Id
 Match non-linked Invoices and Payments.,Match niet-gekoppelde facturen en betalingen.
 Material Issue,Materiaal Probleem
 Material Receipt,Materiaal Ontvangst
+Material Request,Materiaal aanvragen
+Material Request Date,Materiaal Aanvraagdatum
+Material Request Detail No,Materiaal Aanvraag Detail Geen
+Material Request For Warehouse,Materiaal Request For Warehouse
+Material Request Item,Materiaal aanvragen Item
+Material Request Items,Materiaal aanvragen Items
+Material Request No,Materiaal aanvragen Geen
+Material Request Type,Materiaal Soort aanvraag
 Material Transfer,Materiaaloverdracht
 Materials,Materieel
 Materials Required (Exploded),Benodigde materialen (Exploded)
@@ -1598,6 +1623,7 @@ Materials Requirement Planning (MRP),Materials Requirement Planning (MRP)
 Max Attachments,Max Bijlagen
 Max Days Leave Allowed,Max Dagen Laat toegestaan
 Max Discount (%),Max Korting (%)
+Max. Limit,Max. Beperken
 "Meaning of Submit, Cancel, Amend","Betekenis van Indienen, Annuleren, wijzigen"
 Medium,Medium
 Merge,Samensmelten
@@ -1676,14 +1702,15 @@ New Communications,Nieuwe Communications
 New Delivery Notes,Nieuwe Delivery Notes
 New Enquiries,Nieuwe Inlichtingen
 New Leads,Nieuwe leads
+New Leave Application,Nieuwe verlofaanvraag
 New Leaves Allocated,Nieuwe bladeren Toegewezen
 New Leaves Allocated (In Days),Nieuwe Bladeren Toegewezen (in dagen)
+New Material Requests,Nieuw Materiaal Verzoeken
 New Name,Nieuwe naam
 New Password,Nieuw wachtwoord
 New Projects,Nieuwe projecten
 New Purchase Orders,Nieuwe bestellingen
 New Purchase Receipts,Nieuwe aankoopbonnen
-New Purchase Requests,Nieuwe inkoopaanvragen
 New Quotations,Nieuwe Citaten
 New Record,Nieuwe record
 New Sales Orders,Nieuwe Verkooporders
@@ -1863,6 +1890,7 @@ Parent Territory,Parent Territory
 Parenttype,Parenttype
 Partially Completed,Gedeeltelijk afgesloten
 Participants,Deelnemers
+Particulars,Bijzonderheden
 Partly Billed,Deels Gefactureerd
 Partly Delivered,Deels geleverd
 Partner,Partner
@@ -1953,6 +1981,7 @@ Prevdoc DocType,Prevdoc DocType
 Prevdoc Doctype,Prevdoc Doctype
 Preview,Voorbeeld
 Previous Work Experience,Vorige Werkervaring
+Price,Prijs
 Price List,Prijslijst
 Price List Currency,Prijslijst Valuta
 Price List Currency Conversion Rate,Prijslijst Currency Conversion Rate
@@ -2067,14 +2096,6 @@ Purchase Receipt Items,Aankoopbewijs Items
 Purchase Receipt Message,Aankoopbewijs Bericht
 Purchase Receipt No,Aankoopbewijs Geen
 Purchase Receipt Required,Aankoopbewijs Verplicht
-Purchase Request,Aankoop Request
-Purchase Request Date,Aankoop Aanvraagdatum
-Purchase Request Detail No,Aankoop Aanvraag Detail Geen
-Purchase Request For Warehouse,Koop Request For Warehouse
-Purchase Request Item,Aankoop Request Item
-Purchase Request No,Aankoop Verzoek Geen
-Purchase Requisition Details,Inkoopaanvraag Details
-Purchase Requisition No,Inkoopaanvraag Geen
 Purchase Return,Aankoop Return
 Purchase Returned,Aankoop Returned
 Purchase Returns,Aankoop retourneren
@@ -2122,9 +2143,9 @@ Quotation To,Offerte Voor
 Quotation no against which this Sales Order is made ,Offerte geen waartegen deze verkooporder wordt gemaakt
 Quotes to Leads or Customers.,Quotes om leads of klanten.
 Raise Exception,Raise Uitzondering
+Raise Material Request,Raise Materiaal aanvragen
+Raise Material Request when stock reaches re-order level,Raise Materiaal aanvragen bij voorraad strekt re-order niveau
 Raise Production Order,Raise Productieorder
-Raise Purchase Request,Raise Purchase Request
-Raise Purchase Request when stock reaches re-order level,Raise aankoop verzoek bij voorraad strekt re-order niveau
 Raised By,Opgevoed door
 Raised By (Email),Verhoogde Door (E-mail)
 Random,Toeval
@@ -2145,6 +2166,9 @@ Raw Materials Supplied Cost,Grondstoffen ingevoerd Kosten
 Re-Calculate Values,Re-waarden berekenen
 Re-Order Level,Re-Order Level
 Re-Order Qty,Re-Order Aantal
+Re-order,Re-order
+Re-order Level,Re-order Level
+Re-order Qty,Re-order Aantal
 Read,Lezen
 Read Only,Alleen lezen
 Reading 1,Reading 1
@@ -2261,6 +2285,8 @@ Right,Rechts
 Role,Rol
 Role Name,Rolnaam
 Roles,Rollen
+Roles Assigned,Toegewezen Rollen
+Roles Assigned To User,Rollen Toegewezen aan gebruiker
 Roles HTML,Rollen HTML
 Rounded Total,Afgeronde Totaal
 Rounded Total (Export),Afgeronde Totaal (Export)
@@ -2407,10 +2433,11 @@ Select Items from Delivery Note,Selecteer Items uit Delivery Note
 Select Items from Purchase Order,Selecteer Items uit Purchase Order
 Select Items from Purchase Receipt,Selecteer Items uit Aankoop Bon
 Select Items from Sales Order,Selecteer Items uit verkooporder
+Select Material Request,Selecteer Materiaal aanvragen
 Select PR,Selecteer PR
+Select Price List for the web. Leave blank to hide price.,Selecteer Prijslijst voor het web. Laat dit veld leeg om de prijs te verbergen.
 Select Print Format,Selecteer Print Format
 Select Print Heading,Selecteer Print rubriek
-Select Purchase Request,Selecteer Purchase Request
 Select Report Name,Selecteer Rapportnaam
 Select Role,Selecteer Rol
 Select Sales Orders,Selecteer Verkooporders
@@ -2423,7 +2450,10 @@ Select Type,Selecteer Type
 Select User or Property to start.,Selecteer Gebruiker of eigendom te beginnen.
 Select account head of the bank where cheque was deposited.,Selecteer met het hoofd van de bank waar cheque werd afgezet.
 Select company name first.,Kies eerst een bedrijfsnaam.
+Select dates to create a new ,Kies een datum om een ​​nieuwe te maken
 Select name of Customer to whom project belongs,Selecteer de naam van de klant aan wie het project behoort
+Select or drag across dates to create a new event.,Selecteer of sleep over de data van een nieuwe gebeurtenis te maken.
+"Select shipping warehouse to show ""In Stock"" or ""Out of Stock"". To hide, leave blank","Selecteer verzendkosten magazijn om te laten zien &quot;Op voorraad&quot; of &quot;Niet op voorraad&quot;. Te verbergen, laat leeg"
 Select template from which you want to get the Goals,Selecteer template van waaruit u de Doelen te krijgen
 Select the Employee for whom you are creating the Appraisal.,Selecteer de werknemer voor wie u het maken van de Beoordeling.
 Select the currency in which price list is maintained,Selecteer de valuta waarin prijslijst wordt aangehouden
@@ -2445,10 +2475,12 @@ Send,Sturen
 Send Autoreply,Stuur Autoreply
 Send Email,E-mail verzenden
 Send From,Stuur Van
+Send Invite Email,Uitnodiging verzenden E-mail
 Send Me A Copy,Stuur mij een kopie
 "Send Newsletters to your contacts, leads.","Stuur nieuwsbrieven naar uw contacten, leidt."
 Send SMS,SMS versturen
 Send To,Verzenden naar
+Send To Type,Verzenden naar type
 "Send an email to users of role ""Material Manager"" and ""Purchase Manager"" when re-order level is crossed.",Stuur een e-mail naar de gebruikers van de rol &quot;Materiaal Manager&quot; en &quot;Purchase Manager&quot; als re-order niveau wordt overschreden.
 Send automatic emails to Contacts on Submitting transactions.,Stuur automatische e-mails naar Contacten op Indienen van transacties.
 "Send bulk SMS to leads, customers, contacts","Stuur bulk SMS naar leads, klanten, contacten"
@@ -2515,6 +2547,7 @@ Ship To,Verzendadres
 Shipping Address,Verzendadres
 Shipping Address Name,Verzenden Adres Naam
 Shipping Details,Verzendgegevens
+Short Description,Korte beschrijving
 Short biography for website and other publications.,Korte biografie voor website en andere publicaties.
 Shortcut,Kortere weg
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Toon &quot;Op voorraad&quot; of &quot;Niet op voorraad&quot; op basis van de beschikbare voorraad in dit magazijn.
@@ -2563,6 +2596,7 @@ Standard Rate,Standaard Tarief
 Start Date,Startdatum
 Start Report For,Start Rapport Voor
 Start date of current invoice's period,Begindatum van de periode huidige factuur&#39;s
+Starts on,Begint op
 Startup,Startup
 State,Staat
 State Name,Staat Naam
@@ -2712,6 +2746,7 @@ Test Data,Test Data
 Test Date,Test Datum
 Test Email Id,Test E-mail Identiteitskaart
 Test Link,Test Link
+Test Runner,Test Runner
 Test Select,Test Selecteer
 Test Text,Test Tekst
 Test the Newsletter,Test de nieuwsbrief
@@ -2732,10 +2767,8 @@ The gross weight of the package. Usually net weight + packaging material weight.
 The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,De naam van uw bedrijf / website als u wilt weergeven op de browser titelbalk. Alle pagina&#39;s hebben dit als het voorvoegsel om de titel.
 The net weight of this package. (calculated automatically as sum of net weight of items),Het nettogewicht van dit pakket. (Wordt automatisch berekend als de som van de netto-gewicht van items)
 The new BOM after replacement,De nieuwe BOM na vervanging
-The quantity for the Purchase Request when the stock goes below re-order level.,De hoeveelheid voor de Purchase Request wanneer de voorraad lager is dan re-order niveau.
 The rate at which Bill Currency is converted into company's base currency,De snelheid waarmee Bill valuta worden omgezet in basis bedrijf munt
 "The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions","Het systeem biedt vooraf gedefinieerde rollen, maar u kunt <a href='#List/Role'>toevoegen van nieuwe functies</a> aan fijnere machtigingen in te stellen"
-"The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type ""Stores"" or ""Reserved Warehouse"".",Het systeem genereert een Purchase Request automatisch wanneer voorraadhoeveelheid gaat onder re-order niveau in entrepot van het type &quot;Stores&quot; of &quot;Gereserveerd Warehouse&quot;.
 The unique id for tracking all recurring invoices. It is generated on submit.,De unieke id voor het bijhouden van alle terugkerende facturen. Het wordt gegenereerd op te dienen.
 Theme,Thema
 Then By (optional),Vervolgens op (optioneel)
@@ -2756,6 +2789,7 @@ This is the number of the last created transaction with this prefix,Dit is het n
 This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Deze tool helpt u bij te werken of vast te stellen de hoeveelheid en waardering van de voorraad in het systeem. Het wordt meestal gebruikt om het systeem waarden te synchroniseren en wat werkelijk bestaat in uw magazijnen.
 This will be used for setting rule in HR module,Deze wordt gebruikt voor instelling regel HR module
 Thread HTML,Thread HTML
+Thumbnail Image,Kleine afbeelding
 Thursday,Donderdag
 Time,Tijd
 Time Zone,Time Zone
@@ -2777,6 +2811,7 @@ To,Naar
 To Date,To-date houden
 To Discuss,Om Bespreek
 To Do,To Do
+To Do List,To Do List
 To DocType,Om Doctype
 To Field,Om Field
 To PR Date,Om PR Datum
@@ -2799,7 +2834,7 @@ To restrict a User of a particular Role to documents that are explicitly assigne
 To restrict a User of a particular Role to documents that are only self-created.,Om een ​​gebruiker van een bepaalde rol te beperken tot documenten die alleen zelfgeschapen.
 "To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.","Om gebruikersrollen in te stellen, ga je gewoon naar <a href='#List/Profile'>&gt; Gebruikers Setup</a> en op de gebruiker Klik om rollen toe te wijzen."
 To track any installation or commissioning related work after sales,Om een ​​installatie of inbedrijfstelling gerelateerde werk na verkoop bij te houden
-"To track brand name in the following documents<br>Delivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Om merknaam te volgen in de volgende documenten <br> Levering Let op, Enuiry, Purchase Request, punt, Inkooporder, Aankoopbon, Koper Ontvangst, Offerte, Sales Invoice, Sales BOM, Sales Order, Serienummer"
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Om merknaam te volgen in de volgende documenten <br> Levering Let op, Enuiry, Materiaal Request, punt, Inkooporder, Aankoopbon, Koper Ontvangst, Offerte, Sales Invoice, Sales BOM, Sales Order, Serienummer"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Om object in verkoop-en inkoopdocumenten op basis van hun seriële nos. Dit wordt ook gebruikt om informatie over de garantie van het product volgen.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,"Als u items in verkoop-en inkoopdocumenten volgen met batch nos <br> <b>Voorkeur Industrie: Chemische stoffen, enz.</b>"
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Om items met behulp van barcode te volgen. Je zult in staat zijn om items in leveringsbon en Sales Invoice voer door het scannen van barcodes van item.
@@ -2850,6 +2885,7 @@ Track this Sales Invoice against any Project,Volg dit Sales Invoice tegen elke P
 Track this Sales Order against any Project,Volg dit Verkooporder tegen elke Project
 Transaction,Transactie
 Transaction Date,Transactie Datum
+Transfer,Overdracht
 Transfer stock from one warehouse to another.,Overdracht bestand van het ene magazijn naar het andere.
 Transition Rules,Overgang Regels
 Transporter Info,Transporter Info
@@ -2882,6 +2918,7 @@ URL,URL
 Unable to complete request: ,Kan verzoek niet voltooien:
 Under AMC,Onder AMC
 Under Graduate,Onder Graduate
+Under Section,Op grond van artikel
 Under Warranty,Onder de garantie
 Unit of Measure,Meeteenheid
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Meeteenheid van dit artikel (bijvoorbeeld kg, eenheid, Nee, Pair)."
@@ -2966,6 +3003,7 @@ Warehouse Type,Warehouse Type
 Warehouse User,Magazijn Gebruiker
 Warehouse Users,Magazijn Gebruikers
 Warehouse where you are maintaining stock of rejected items,Warehouse waar u het handhaven voorraad van afgewezen artikelen
+Warehouse-wise Item Reorder,Warehouse-wise Item opnieuw ordenen
 Warn,Waarschuwen
 Warning,Waarschuwing
 Warranty / AMC Details,Garantie / AMC Details
@@ -3053,12 +3091,11 @@ You can create more earning and deduction type from Setup --> HR,U kunt meer ver
 You can enter any date manually,U kunt elke datum handmatig
 You can enter the minimum quantity of this item to be ordered.,U kunt de minimale hoeveelheid van dit product te bestellen.
 You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.,U kunt een pakbon van meerdere verkooporders. Selecteer verkooporders een voor een en klikt u op de knop.
-You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.,U kunt een bestelling van meerdere aankoopverzoeken. Selecteer inkoopaanvragen een voor een en klikt u op de knop.
+You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.,U kunt een bestelling van meerdere Materiaal aanvragen. Selecteer Materiaal Verzoeken een voor een en klikt u op de knop.
 You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.,U kunt een bestelling van meerdere Leverancier Quotations. Selecteer Leverancier Offertes een voor een en klikt u op de knop.
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,U kunt een aankoopbewijs van meerdere inkooporders. Selecteer inkooporders een voor een en klikt u op de knop.
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,U kunt verschillende &#39;eigenschappen&#39; om gebruikers op de standaardwaarden in te stellen en toestemming regels op basis van de waarde van deze eigenschappen in verschillende vormen toe te passen.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,U kunt gebruik maken <a href='#Form/Customize Form'>Customize Form</a> om in te stellen op velden.
-You cannot apply for a leave on the following date because it is blocked,"Je kan niet van toepassing zijn voor een verlof op de volgende datum, omdat het is geblokkeerd"
 Your Customer's TAX registration numbers (if applicable) or any general information,Uw klant fiscale nummers (indien van toepassing) of een algemene informatie
 "Your download is being built, this may take a few moments...","Uw download wordt gebouwd, kan dit enige tijd duren ..."
 Your letter head content in HTML.,Uw brief hoofd-inhoud in HTML.
@@ -3231,6 +3268,7 @@ tag,label
 tags,-tags
 "target = ""_blank""",target = &quot;_blank&quot;
 tasks,taken
+test,test
 text-height,text-height
 text-width,text breedte
 th,e

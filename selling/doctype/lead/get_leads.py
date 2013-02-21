@@ -23,7 +23,7 @@ from core.doctype.communication.communication import make
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
 	status="Open", date=None):
 	def set_status(doctype, name):
-		w = webnotes.model_wrapper(doctype, name)
+		w = webnotes.bean(doctype, name)
 		w.ignore_permissions = True
 		w.doc.status = is_system_user and "Replied" or status
 		w.doc.save()
@@ -36,7 +36,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 
 	if not (lead_name or contact_name):
 		# none, create a new Lead
-		lead = webnotes.model_wrapper({
+		lead = webnotes.bean({
 			"doctype":"Lead",
 			"lead_name": real_name or sender,
 			"email_id": sender,

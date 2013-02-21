@@ -121,7 +121,7 @@ def add_ac(args=None):
 		args = webnotes.form_dict
 		args.pop("cmd")
 		
-	ac = webnotes.model_wrapper(args)
+	ac = webnotes.bean(args)
 	ac.doc.doctype = "Account"
 	ac.doc.old_parent = ""
 	ac.doc.freeze_account = "No"
@@ -135,7 +135,7 @@ def add_cc(args=None):
 		args = webnotes.form_dict
 		args.pop("cmd")
 		
-	cc = webnotes.model_wrapper(args)
+	cc = webnotes.bean(args)
 	cc.doc.doctype = "Cost Center"
 	cc.doc.old_parent = ""
 	cc.ignore_permissions = 1

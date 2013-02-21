@@ -9,7 +9,7 @@ erpnext.desktop.refresh = function() {
 			$("#icon-grid .case-wrapper").each(function(i, e) {
 				new_order.push($(this).attr("data-name"));
 			});
-			wn.user.set_default("_desktop_items", new_order);
+			wn.defaults.set_default("_desktop_items", new_order);
 		}
 	});
 }

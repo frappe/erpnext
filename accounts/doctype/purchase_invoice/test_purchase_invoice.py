@@ -25,7 +25,7 @@ test_dependencies = ["Item", "Cost Center"]
 
 class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries(self):
-		wrapper = webnotes.model_wrapper(self.get_test_doclist())
+		wrapper = webnotes.bean(self.get_test_doclist())
 		
 		# circumvent the disabled calculation call
 		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)
@@ -54,7 +54,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
 	def test_purchase_invoice_calculation(self):
-		wrapper = webnotes.model_wrapper(self.get_test_doclist())
+		wrapper = webnotes.bean(self.get_test_doclist())
 		
 		# circumvent the disabled calculation call
 		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)

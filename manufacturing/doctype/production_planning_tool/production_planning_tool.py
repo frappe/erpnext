@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, flt, cint, nowdate, add_days
 from webnotes.model.doc import addchild, Document
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -301,11 +301,11 @@ class DocType:
 		
 	def raise_purchase_request(self):
 		"""
-			Raise Purchase Request if projected qty is less than qty required
+			Raise Material Request if projected qty is less than qty required
 			Requested qty should be shortage qty considering minimum order qty
 		"""
 		if not self.doc.purchase_request_for_warehouse:
-			webnotes.msgprint("Please enter Warehouse for which Purchase Request will be raised",
+			webnotes.msgprint("Please enter Warehouse for which Material Request will be raised",
 			 	raise_exception=1)
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]
@@ -339,10 +339,10 @@ class DocType:
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
-				item_wrapper = webnotes.model_wrapper("Item", item)
+				item_wrapper = webnotes.bean("Item", item)
 				pr_doclist = [
 					{
-						"doctype": "Purchase Request",
+						"doctype": "Material Request",
 						"__islocal": 1,
 						"naming_series": "IDT",
 						"transaction_date": nowdate(),
@@ -350,10 +350,11 @@ class DocType:
 						"company": self.doc.company,
 						"fiscal_year": fiscal_year,
 						"requested_by": webnotes.session.user,
-						"remark": "Automatically raised from Production Planning Tool"
+						"remark": "Automatically raised from Production Planning Tool",
+						"material_request_type": "Purchase"
 					},
 					{
-						"doctype": "Purchase Request Item",
+						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"parentfield": "indent_details",
 						"item_code": item,
@@ -367,15 +368,15 @@ class DocType:
 						"warehouse": self.doc.purchase_request_for_warehouse
 					}
 				]
-				pr_wrapper = webnotes.model_wrapper(pr_doclist)
+				pr_wrapper = webnotes.bean(pr_doclist)
 				pr_wrapper.ignore_permissions = 1
 				pr_wrapper.submit()
 				purchase_request_list.append(pr_wrapper.doc.name)
 			
 			if purchase_request_list:
-				pur_req = ["""<a href="#Form/Purchase Request/%s" target="_blank">%s</a>""" % \
+				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
 					(p, p) for p in purchase_request_list]
-				webnotes.msgprint("Following Purchase Request created successfully: \n%s" % 
+				webnotes.msgprint("Following Material Request created successfully: \n%s" % 
 					"\n".join(pur_req))
 		else:
 			webnotes.msgprint("Nothing to request")

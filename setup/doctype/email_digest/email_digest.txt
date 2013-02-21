@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-25 11:35:08", 
+  "creation": "2013-02-18 13:36:19", 
   "docstatus": 0, 
-  "modified": "2013-02-16 14:43:52", 
+  "modified": "2013-02-18 13:43:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -169,7 +169,7 @@
   "doctype": "DocField", 
   "fieldname": "new_purchase_requests", 
   "fieldtype": "Check", 
-  "label": "New Purchase Requests"
+  "label": "New Material Requests"
  }, 
  {
   "doctype": "DocField", 

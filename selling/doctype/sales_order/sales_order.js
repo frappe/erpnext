@@ -78,7 +78,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 			// indent
 			if(!doc.order_type || (doc.order_type == 'Sales'))
-				cur_frm.add_custom_button('Make ' + wn._('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
+				cur_frm.add_custom_button('Make ' + wn._('Material Request'), cur_frm.cscript['Make Material Request']);
 			
 			// sales invoice
 			if(flt(doc.per_billed, 2) < 100)
@@ -246,19 +246,19 @@ cur_frm.cscript.make_maintenance_visit = function() {
 	}
 }
 
-cur_frm.cscript['Make Purchase Request'] = function() {
+cur_frm.cscript['Make Material Request'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
-	n = wn.model.make_new_doc_and_get_name("Purchase Request");
+	n = wn.model.make_new_doc_and_get_name("Material Request");
 	$c('dt_map', args={
-					'docs':wn.model.compress([locals["Purchase Request"][n]]),
+					'docs':wn.model.compress([locals["Material Request"][n]]),
 					'from_doctype':'Sales Order',
-					'to_doctype':'Purchase Request',
+					'to_doctype':'Material Request',
 					'from_docname':doc.name,
-		'from_to_list':"[['Sales Order', 'Purchase Request'], ['Sales Order Item', 'Purchase Request Item']]"
+		'from_to_list':"[['Sales Order', 'Material Request'], ['Sales Order Item', 'Material Request Item']]"
 	}
 	, function(r,rt) {
-		loaddoc("Purchase Request", n);
+		loaddoc("Material Request", n);
 		}
 		);
 	}

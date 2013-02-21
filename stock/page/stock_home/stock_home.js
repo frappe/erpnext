@@ -7,6 +7,11 @@ wn.module_page["Stock"] = [
 		icon: "icon-copy",
 		items: [
 			{
+				label: wn._("Material Request"),
+				description: wn._("Request Material for Transfer or Purchase."),
+				doctype:"Material Request"
+			},
+			{
 				label: wn._("Stock Entry"),
 				description: wn._("Transfer stock from one warehouse to another."),
 				doctype:"Stock Entry"

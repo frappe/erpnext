@@ -1,0 +1,207 @@
+[
+ {
+  "creation": "2013-02-20 13:25:31", 
+  "docstatus": 0, 
+  "modified": "2013-02-20 14:06:58", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "MREQD-.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Material Request Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Material Request Item"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "schedule_date", 
+  "fieldtype": "Date", 
+  "label": "Required Date", 
+  "no_copy": 1, 
+  "oldfieldname": "schedule_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "reqd": 1, 
+  "width": "250px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "print_hide": 0, 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "default": "0.00", 
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "label": "Quantity", 
+  "no_copy": 0, 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1, 
+  "width": "80px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "label": "Stock UOM", 
+  "no_copy": 0, 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lead_time_date", 
+  "fieldtype": "Date", 
+  "label": "Lead Time Date", 
+  "no_copy": 1, 
+  "oldfieldname": "lead_time_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Group", 
+  "no_copy": 0, 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "brand", 
+  "fieldtype": "Link", 
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "min_order_qty", 
+  "fieldtype": "Float", 
+  "label": "Min Order Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "min_order_qty", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "projected_qty", 
+  "fieldtype": "Float", 
+  "label": "Projected Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "projected_qty", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ordered_qty", 
+  "fieldtype": "Float", 
+  "label": "Completed Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "ordered_qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_order_no", 
+  "fieldtype": "Link", 
+  "label": "Sales Order No", 
+  "no_copy": 1, 
+  "options": "Sales Order", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "page_break", 
+  "fieldtype": "Check", 
+  "label": "Page Break", 
+  "no_copy": 1, 
+  "oldfieldname": "page_break", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1
+ }
+]

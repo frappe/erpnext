@@ -37,7 +37,7 @@ def get_item_details(args):
 		
 	args = webnotes._dict(args)
 	
-	item_wrapper = webnotes.model_wrapper("Item", args.item_code)
+	item_wrapper = webnotes.bean("Item", args.item_code)
 	item = item_wrapper.doc
 	
 	from stock.utils import validate_end_of_life
@@ -98,7 +98,7 @@ def get_item_details(args):
 
 def get_rates_as_per_price_list(args, item_doclist=None):
 	if not item_doclist:
-		item_doclist = webnotes.model_wrapper("Item", args.item_code).doclist
+		item_doclist = webnotes.bean("Item", args.item_code).doclist
 	
 	result = item_doclist.get({"parentfield": "ref_rate_details", 
 		"price_list_name": args.price_list_name, "ref_currency": args.price_list_currency,

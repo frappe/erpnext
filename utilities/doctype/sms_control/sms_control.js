@@ -89,7 +89,7 @@ cur_frm.cscript.send_sms = function(doc,dt,dn) {
 					+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),		
 		'Sales Invoice': 'Invoice ' + doc.name + ' has been sent via email '
 					+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
-		'Purchase Request'			: 'Purchase Request ' + doc.name + ' has been raised in the system',
+		'Material Request'			: 'Material Request ' + doc.name + ' has been raised in the system',
 		'Purchase Order'	: 'Purchase Order ' + doc.name + ' has been sent via email',
 		'Purchase Receipt'	: 'Items has been received against purchase receipt: ' + doc.name
 	}
@@ -102,6 +102,6 @@ cur_frm.cscript.send_sms = function(doc,dt,dn) {
 		sms_man.show('', '', '', doc.mobile_no, default_msg[doc.doctype]);
 	else if (doc.doctype == 'Opportunity')
 		sms_man.show('', '', '', doc.contact_no, default_msg[doc.doctype]);
-	else if (doc.doctype == 'Purchase Request')
+	else if (doc.doctype == 'Material Request')
 		sms_man.show('', '', '', '', default_msg[doc.doctype]);
 }

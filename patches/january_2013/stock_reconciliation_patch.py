@@ -23,7 +23,7 @@ def move_remarks_to_comments():
 		where ifnull(remark, '')!=''""")
 	fullname_map = {}
 	for reco, remark, modified_by in result:
-		webnotes.model_wrapper([{
+		webnotes.bean([{
 			"doctype": "Comment",
 			"comment": remark,
 			"comment_by": modified_by,

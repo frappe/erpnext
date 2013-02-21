@@ -17,11 +17,13 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, formatdate, get_defaults
-from webnotes.model.wrapper import getlist
+from webnotes.utils import add_days, cint, cstr, flt, formatdate
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from setup.utils import get_company_currency
+
+import webnotes.defaults
 
 sql = webnotes.conn.sql
 	
@@ -32,10 +34,6 @@ class DocType(BuyingController):
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
 
-# ************************** Trigger Functions ****************************
-
-	# Credit To
-	# ----------
 	def get_credit_to(self):
 		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.get_company_abbr(),self.doc.supplier))		
 
@@ -57,9 +55,6 @@ class DocType(BuyingController):
 			
 		return ret
 
-
-	# Get Default Cost Center and Expense Head from Item Master
-	# ----------------------------------------------------------
 	def get_default_values(self,args):
 		import json
 		args = json.loads(args)
@@ -73,9 +68,6 @@ class DocType(BuyingController):
 				ret['cost_center'] = cost_center and cost_center[0][0] or ''
 		return ret
 		 
-		
-	# Get Items based on PO or PR
-	# ----------------------------
 	def pull_details(self):
 		if self.doc.purchase_receipt_main:
 			self.validate_duplicate_docname('purchase_receipt')
@@ -118,16 +110,9 @@ class DocType(BuyingController):
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
 
-
-
-# *************************** Server Utility Functions *****************************
-	# Get Company abbr
-	# -----------------
 	def get_company_abbr(self):
 		return sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 
-	# Check whether PO or PR is already fetched
-	# ------------------------------------------
 	def validate_duplicate_docname(self,doctype):
 		for d in getlist(self.doclist, 'entries'): 
 			if doctype == 'purchase_receipt' and cstr(self.doc.purchase_receipt_main) == cstr(d.purchase_receipt):
@@ -138,11 +123,6 @@ class DocType(BuyingController):
 				msgprint(cstr(self.doc.purchase_order_main) + " purchase order details have already been pulled.")
 				raise Exception , " Validation Error. "
 
-		
-# **************************** VALIDATE ********************************
-
-	# Check for Item.is_Purchase_item = 'Yes' and Item is active
-	# ------------------------------------------------------------------
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
@@ -154,8 +134,6 @@ class DocType(BuyingController):
 					msgprint("Item : '%s' is not Purchase Item"%(d.item_code))
 					raise Exception
 						
-	# Check Conversion Rate
-	# ----------------------
 	def check_conversion_rate(self):
 		default_currency = get_company_currency(self.doc.company)		
 		if not default_currency:
@@ -259,7 +237,7 @@ class DocType(BuyingController):
 				raise Exception
 			# import_rate
 			rate = flt(sql('select import_rate from `tabPurchase Order Item` where item_code=%s and parent=%s and name = %s', (d.item_code, d.purchase_order, d.po_detail))[0][0])
-			if abs(rate - flt(d.import_rate)) > 1 and cint(get_defaults('maintain_same_rate')):
+			if abs(rate - flt(d.import_rate)) > 1 and cint(webnotes.defaults.get_global_default('maintain_same_rate')):
 				msgprint("Import Rate for %s in the Purchase Order is %s. Rate must be same as Purchase Order Rate" % (d.item_code,rate))
 				raise Exception
 									
@@ -277,9 +255,6 @@ class DocType(BuyingController):
 			msgprint("Aging Date is mandatory for opening entry")
 			raise Exception
 			
-
-	# Set against account for debit to account
-	#------------------------------------------
 	def set_against_expense_account(self):
 		against_acc = []
 		for d in getlist(self.doclist, 'entries'):
@@ -287,8 +262,6 @@ class DocType(BuyingController):
 				against_acc.append(d.expense_account)
 		self.doc.against_expense_account = ','.join(against_acc)
 
-	#check in manage account if purchase order required or not.
-	# ====================================================================================
 	def po_required(self):
 		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'po_required'")
 		if res and res[0][0] == 'Yes':
@@ -297,8 +270,6 @@ class DocType(BuyingController):
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
-	#check in manage account if purchase receipt required or not.
-	# ====================================================================================
 	def pr_required(self):
 		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'pr_required'")
 		if res and res[0][0] == 'Yes':

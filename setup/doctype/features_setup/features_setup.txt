@@ -1,53 +1,42 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2012-12-20 12:50:49", 
   "docstatus": 0, 
-  "creation": "2012-04-13 11:56:31", 
+  "modified": "2013-02-18 13:44:28", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Setup", 
   "doctype": "DocType", 
   "issingle": 1, 
+  "module": "Setup", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1323840127", 
-  "show_in_menu": 1, 
-  "name_case": "Title Case", 
-  "version": 1
+  "name_case": "Title Case"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Features Setup", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Features Setup", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Features Setup", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Features Setup", 
-  "doctype": "DocType"
- }, 
- {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Administrator", 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Features Setup"
  }, 
  {
   "doctype": "DocField", 
@@ -57,63 +46,57 @@
  }, 
  {
   "description": "To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Serial Nos", 
   "fieldname": "fs_item_serial_nos", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Item Serial Nos"
  }, 
  {
   "description": "To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Batch Nos", 
   "fieldname": "fs_item_batch_nos", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Item Batch Nos"
  }, 
  {
-  "description": "To track brand name in the following documents<br>\nDelivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No", 
-  "colour": "White:FFF", 
+  "description": "To track brand name in the following documents<br>\nDelivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No", 
   "doctype": "DocField", 
-  "label": "Brands", 
   "fieldname": "fs_brands", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Brands"
  }, 
  {
   "description": "To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.", 
   "doctype": "DocField", 
-  "label": "Item Barcode", 
   "fieldname": "fs_item_barcode", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Item Barcode"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "1. To maintain the customer wise item code and to make them searchable based on their code use this option", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Advanced", 
   "fieldname": "fs_item_advanced", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Item Advanced"
  }, 
  {
   "description": "If Sale BOM is defined, the actual BOM of the Pack is displayed as table.\nAvailable in Delivery Note and Sales Order", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Packing Detials", 
   "fieldname": "fs_packing_details", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Packing Detials"
  }, 
  {
   "description": "To get Item Group in details table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Groups in Details", 
   "fieldname": "fs_item_group_in_details", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Item Groups in Details"
  }, 
  {
   "doctype": "DocField", 
@@ -123,63 +106,57 @@
  }, 
  {
   "description": "All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>\nDelivery Note, POS, Quotation, Sales Invoice, Sales Order etc.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Exports", 
   "fieldname": "fs_exports", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Exports"
  }, 
  {
   "description": "All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>\nPurchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Imports", 
   "fieldname": "fs_imports", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Imports"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Sales Discounts", 
   "fieldname": "fs_discounts", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Sales Discounts"
  }, 
  {
   "description": "Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Purchase Discounts", 
   "fieldname": "fs_purchase_discounts", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Purchase Discounts"
  }, 
  {
   "description": "To track any installation or commissioning related work after sales", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "After Sale Installations", 
   "fieldname": "fs_after_sales_installations", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "After Sale Installations"
  }, 
  {
   "description": "Available in \nBOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet", 
   "doctype": "DocField", 
-  "label": "Projects", 
   "fieldname": "fs_projects", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Projects"
  }, 
  {
   "description": "If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Sales Extras", 
   "fieldname": "fs_sales_extras", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Sales Extras"
  }, 
  {
   "doctype": "DocField", 
@@ -189,24 +166,22 @@
  }, 
  {
   "description": "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Recurring Invoice", 
   "fieldname": "fs_recurring_invoice", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Recurring Invoice"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "To enable <b>Point of Sale</b> features", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Point of Sale", 
   "fieldname": "fs_pos", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Point of Sale"
  }, 
  {
   "doctype": "DocField", 
@@ -216,24 +191,22 @@
  }, 
  {
   "description": "If you involve in manufacturing activity<br>\nEnables item <b>Is Manufactured</b>", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Manufacturing", 
   "fieldname": "fs_manufacturing", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Manufacturing"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "If you follow Quality Inspection<br>\nEnables item QA Required and QA No in Purchase Receipt", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Quality", 
   "fieldname": "fs_quality", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Quality"
  }, 
  {
   "doctype": "DocField", 
@@ -243,23 +216,29 @@
  }, 
  {
   "description": "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Page Break", 
   "fieldname": "fs_page_break", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Page Break"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Enables <b>More Info.</b> in all documents", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "fs_more_info", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "More Info"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Administrator"
  }
 ]

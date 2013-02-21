@@ -19,7 +19,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes import session, msgprint
 from webnotes.utils import today
 

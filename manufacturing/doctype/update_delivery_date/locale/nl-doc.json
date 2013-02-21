@@ -1,6 +1,7 @@
 {
  "Company": "Vennootschap", 
  "Customer": "Klant", 
+ "Entries": "Inzendingen", 
  "From Date": "Van Datum", 
  "Get Open Sales Order": "Get Open Verkooporder", 
  "Manufacturing": "Productie", 

@@ -46,6 +46,7 @@
  "Re-Calculate Values": "Re-waarden berekenen", 
  "Rounded Total": "Afgeronde Totaal", 
  "SQTN": "SQTN", 
+ "Select Material Request": "Selecteer Materiaal aanvragen", 
  "Select Print Heading": "Selecteer Print rubriek", 
  "Select Purchase Request": "Selecteer Purchase Request", 
  "Select Terms and Conditions": "Selecteer Algemene Voorwaarden", 
@@ -74,5 +75,6 @@
  "Total Tax*": "Totaal BTW *", 
  "Totals": "Totalen", 
  "Yes": "Ja", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.": "U kunt een bestelling van meerdere Materiaal aanvragen. Selecteer Materiaal Verzoeken een voor een en klikt u op de knop.", 
  "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.": "U kunt een bestelling van meerdere aankoopverzoeken. Selecteer inkoopaanvragen een voor een en klikt u op de knop."
 }

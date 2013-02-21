@@ -120,6 +120,7 @@
  "Item Group": "Stavka Grupa", 
  "Item Price": "Stavka Cijena", 
  "Item Quality Inspection Parameter": "Stavka Provera kvaliteta parametara", 
+ "Item Reorder": "Stavka redoslijeda", 
  "Item Supplier": "Stavka Dobavlja\u010d", 
  "Item Tax": "Stavka poreza", 
  "Item Website Specification": "Stavka Web Specifikacija", 
@@ -135,6 +136,9 @@
  "Lead": "Dovesti", 
  "Leave Allocation": "Ostavite Raspodjela", 
  "Leave Application": "Ostavite aplikaciju", 
+ "Leave Block List": "Ostavite Block List", 
+ "Leave Block List Allow": "Ostavite Blok Popis Dopustite", 
+ "Leave Block List Date": "Ostavite Date Popis Block", 
  "Leave Control Panel": "Ostavite Upravlja\u010dka plo\u010da", 
  "Leave Type": "Ostavite Vid", 
  "Letter Head": "Pismo Head", 
@@ -147,6 +151,8 @@
  "Maintenance Visit Purpose": "Odr\u017eavanje Posjetite Namjena", 
  "Manufacturing": "Proizvodnja", 
  "Market Segment": "Tr\u017ei\u0161ni segment", 
+ "Material Request": "Materijal zahtjev", 
+ "Material Request Item": "Materijal Zahtjev artikla", 
  "Messages": "Poruke", 
  "Mode of Payment": "Na\u010din pla\u0107anja", 
  "Module Def": "Modul Def", 
@@ -310,5 +316,6 @@
  "Workflow Rule Detail": "Workflow Pravilo Detalj", 
  "Workflow State": "Workflow dr\u017eava", 
  "Workflow Transition": "Tijek tranzicije", 
- "Workstation": "Workstation"
+ "Workstation": "Workstation", 
+ "test": "test"
 }

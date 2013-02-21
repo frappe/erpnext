@@ -10,6 +10,6 @@ def execute():
 	sync('buying', 'purchase_order_item')
 	
 	from webnotes.modules import reload_doc
-	reload_doc('buying', 'DocType Mapper', 'Purchase Request-Supplier Quotation')
+	reload_doc('buying', 'DocType Mapper', 'Material Request-Supplier Quotation')
 	reload_doc('buying', 'DocType Mapper', 'Supplier Quotation-Purchase Order')
 	

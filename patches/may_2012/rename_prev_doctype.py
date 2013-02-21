@@ -4,7 +4,7 @@ def execute():
 	dt_list = webnotes.conn.sql("select parent, fieldname from `tabDocField` where fieldname in ('against_doctype', 'prevdoc_doctype')")
 	
 	ren_dt = {
-		'Indent' : 'Purchase Request',
+		'Indent' : 'Material Request',
 		'Enquiry' : 'Opportunity',
 		'Receivable Voucher' : 'Sales Invoice',
 		'Payable Voucher' : 'Purchase Invoice'

@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql

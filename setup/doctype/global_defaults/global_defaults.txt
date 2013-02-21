@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-19 12:28:27", 
   "docstatus": 0, 
-  "modified": "2013-02-20 14:08:59", 
+  "modified": "2013-02-20 14:09:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -185,7 +185,7 @@
   "doctype": "DocField", 
   "fieldname": "auto_indent", 
   "fieldtype": "Check", 
-  "label": "Raise Purchase Request when stock reaches re-order level"
+  "label": "Raise Material Request when stock reaches re-order level"
  }, 
  {
   "default": "1", 

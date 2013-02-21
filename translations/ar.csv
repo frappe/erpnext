@@ -1,5 +1,5 @@
 ,
- Reason: ,السبب:
+ (Half Day),(نصف يوم)
  against same operation,ضد نفس العملية
  by Role ,من دور
  cannot be 0,لا يمكن أن تكون 0
@@ -157,6 +157,7 @@ Activity Log,سجل النشاط
 Activity Name,اسم النشاط
 Activity Type,النشاط نوع
 Actual,فعلي
+Actual Amount,المبلغ الفعلي
 Actual Budget,الميزانية الفعلية
 Actual Completion Date,تاريخ الانتهاء الفعلي
 Actual Date,تاريخ الفعلية
@@ -236,17 +237,13 @@ Against Voucher Type,ضد نوع قسيمة
 Agent,وكيل
 "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials",إجمالي مجموعة من العناصر ** ** ** في بند آخر. ** هذا مفيد إذا كنت تجميع عناصر معينة ** ** في حزمة ويمكنك الحفاظ على المخزون من الأصناف ** ** معبأة وليس الكلي ** السلعة **. الحزمة السلعة ** ** سيكون &quot;هو المخزون السلعة&quot; ب &quot;لا&quot; و &quot;هل المبيعات السلعة&quot; ب &quot;نعم&quot; على سبيل المثال: إذا كنت تبيع أجهزة الكمبيوتر المحمولة وحقائب تحمل على الظهر بشكل منفصل ولها سعر خاص اذا كان الزبون يشتري كل ، ثم سيقوم الكمبيوتر المحمول + حقيبة الظهر تكون جديدة المبيعات BOM Item.Note: BOM = بيل المواد
 Aging Date,الشيخوخة تاريخ
-All Active Leads,كل العروض بالموقع
 All Addresses.,جميع العناوين.
-All Blog Subscribers,جميع المشتركين المدونة
 All Contact,جميع الاتصالات
-All Contacts,جميع اتصالات
 All Contacts.,جميع جهات الاتصال.
 All Customer Contact,جميع العملاء الاتصال
-All Customer Contacts,جميع العملاء اتصالات
+All Day,كل يوم
 All Employee (Active),جميع الموظفين (فعالة)
 All Lead (Open),جميع الرصاص (فتح)
-All Leads,كل العروض
 All Products or Services.,جميع المنتجات أو الخدمات.
 All Sales Partner Contact,جميع مبيعات الاتصال الشريك
 All Sales Person,كل عملية بيع شخص
@@ -436,7 +433,6 @@ Budget Details,تفاصيل الميزانية
 Budget Distribution,توزيع الميزانية
 Budget Distribution Detail,توزيع الميزانية التفاصيل
 Budget Distribution Details,تفاصيل الميزانية التوزيع
-Build Report,بناء التقرير
 Bulk Email,الجزء الأكبر البريد الإلكتروني
 Bulk Email records.,الجزء الأكبر البريد الإلكتروني السجلات.
 Bundle items at time of sale.,حزمة البنود في وقت البيع.
@@ -465,6 +461,7 @@ Calculate Tax,حساب الضرائب
 Calculate Taxes and Charges,حساب الضرائب والرسوم
 Calculate Total Score,حساب النتيجة الإجمالية
 Calendar,تقويم
+Calendar Events,الأحداث
 Call,دعوة
 Campaign,حملة
 Campaign Name,اسم الحملة
@@ -601,6 +598,7 @@ Contact Name,اسم جهة الاتصال
 Contact No,الاتصال لا
 Contact No.,الاتصال رقم
 Contact Person,اتصل شخص
+Contact Type,نوع الاتصال
 Contact Us Settings,الاتصال بنا إعدادات
 Contact in Future,الاتصال في المستقبل
 "Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.",خيارات الاتصال، مثل &quot;الاستعلام المبيعات والدعم الاستعلام&quot; الخ كل على سطر جديد أو مفصولة بفواصل.
@@ -664,6 +662,7 @@ Current Value,القيمة الحالية
 Current status,الوضع الحالي
 Cust/Supp Address,الزبون / الملحق العنوان
 Cust/Supp Name,الزبون / الملحق اسم
+Custom,عرف
 Custom Autoreply Message,رد تلقائي المخصصة رسالة
 Custom CSS,العرف CSS
 Custom Field,مخصص الميدانية
@@ -879,6 +878,7 @@ Editable,للتحرير
 Educational Qualification,المؤهلات العلمية
 Educational Qualification Details,تفاصيل المؤهلات العلمية
 Eg. smsgateway.com/api/send_sms.cgi,على سبيل المثال. smsgateway.com / API / send_sms.cgi
+Eligible Amount,المؤهلة المبلغ
 Email,البريد الإلكتروني
 Email (By company),البريد الإلكتروني (حسب الشركة)
 Email Digest,البريد الإلكتروني دايجست
@@ -927,6 +927,7 @@ Encashment Date,تاريخ التحصيل
 End Date,نهاية التاريخ
 End date of current invoice's period,تاريخ نهاية فترة الفاتورة الحالية
 End of Life,نهاية الحياة
+Ends on,ينتهي في
 Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,إدخال الرقم البريد الالكتروني لتلقي تقرير عن الخطأ التي بعث بها users.Eg: support@iwebnotes.com
 Enter Form Type,أدخل نوع النموذج
 Enter Row,دخول الصف
@@ -949,12 +950,9 @@ Entries are not allowed against this Fiscal Year if the year is closed.,لا ي�
 Error,خطأ
 Estimated Material Cost,تقدر تكلفة المواد
 Event,حدث
-Event Date,تاريخ الحدث
 Event Individuals,الحدث الأفراد
-Event Name,اسم الحدث
 Event Role,الحدث الدور
 Event Roles,الحدث الأدوار
-Event Time,وقت الحدث
 Event Type,نوع الحدث
 Event Updates,الحدث التحديثات
 Event User,حدث المستخدم
@@ -1046,6 +1044,7 @@ Fixed Asset Account,حساب الأصول الثابتة
 Float,الطفو
 Float Precision,تعويم الدقة
 Floral,الأزهار
+Following dates are blocked for Leave,يتم حظر المواعيد التالية لإجازة
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",سوف تظهر بعد الجدول القيم البنود الفرعية إذا - المتعاقد عليها. وسيتم جلب من هذه القيم سيد &quot;بيل من مواد&quot; من دون - البنود المتعاقد عليها.
 Font,الخط
 Font Size,حجم الخط
@@ -1073,6 +1072,7 @@ For ranges,للنطاقات
 For reference,للرجوع إليها
 For reference only.,للإشارة فقط.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",لراحة العملاء، ويمكن استخدام هذه الرموز في أشكال الطباعة مثل الفواتير والسندات التسليم
+Form,شكل
 Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,الصيغة: HH: مم سبيل المثال لانتهاء صلاحيتها ساعة واحدة على النحو 01:00. وسوف يكون الحد الأقصى انقضاء 72 ساعة. الافتراضي هو 24 ساعة
 Forum,منتدى
 Fraction,جزء
@@ -1089,7 +1089,9 @@ From PR Date,من تاريخ PR
 From Package No.,من رقم حزمة
 From Table,من الجدول
 Frozen,تجميد
+Full Image,الصورة
 Full Name,بدر تام
+Full description (formatted as markdown),الوصف الكامل (بتنسيق تخفيض السعر)
 Fully Billed,وصفت بالكامل
 Fully Completed,يكتمل
 GL Control,GL التحكم
@@ -1104,7 +1106,7 @@ Gender,جنس
 General,عام
 General Ledger,دفتر الأستاذ العام
 Generate Description HTML,توليد HTML وصف
-Generate Purchase Requests (MRP) and Production Orders.,إنشاء طلبات الشراء (MRP) وأوامر الإنتاج.
+Generate Material Requests (MRP) and Production Orders.,إنشاء طلبات المواد (MRP) وأوامر الإنتاج.
 Generate Salary Slips,توليد قسائم راتب
 Generate Schedule,توليد جدول
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",توليد التعبئة زلات لحزم ليتم تسليمها. المستخدمة لإخطار عدد حزمة، حزمة المحتويات وزنه.
@@ -1265,6 +1267,8 @@ If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,
 Ignore,تجاهل
 Image,صورة
 Image View,عرض الصورة
+Image for listing (Width: 100px) (Attach First),صورة لقائمة (العرض: 100px) (يرفق الأولى)
+Image for listing (Width: 300px) (Attach First),صورة لقائمة (العرض: 300px) (يرفق الأولى)
 Implementation Partner,تنفيذ الشريك
 Import,استيراد
 Import Date Format ,استيراد تنسيق التاريخ
@@ -1391,6 +1395,7 @@ Item Name,البند الاسم
 Item Price,البند السعر
 Item Prices,البند الأسعار
 Item Quality Inspection Parameter,معلمة البند التفتيش الجودة
+Item Reorder,البند إعادة ترتيب
 Item Serial No,البند رقم المسلسل
 Item Serial Nos,المسلسل ارقام البند
 Item Supplier,البند مزود
@@ -1470,15 +1475,24 @@ Lead Lost,يؤدي فقدان
 Lead Name,يؤدي اسم
 Lead Owner,يؤدي المالك
 Lead Ref,يؤدي المرجع
+Lead Source,تؤدي المصدر
+Lead Status,تؤدي الحالة
 Lead Time Date,تؤدي تاريخ الوقت
 Lead Time Days,يؤدي يوما مرة
-Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.,يؤدي الوقت هو أيام عدد الأيام التي من المتوقع هذا البند في المستودع الخاص بك. يتم إحضار هذه الأيام في طلب شراء عند اختيار هذا البند.
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,يؤدي الوقت هو أيام عدد الأيام التي من المتوقع هذا البند في المستودع الخاص بك. يتم إحضار هذه الأيام في طلب المواد عند اختيار هذا البند.
 Lead Type,يؤدي النوع
 Leave Allocation,ترك توزيع
 Leave Allocation Tool,ترك أداة تخصيص
 Leave Application,ترك التطبيق
 Leave Approver,ترك الموافق
 Leave Balance Before Application,ترك الرصيد قبل تطبيق
+Leave Block List,ترك قائمة الحظر
+Leave Block List Allow,ترك قائمة الحظر السماح
+Leave Block List Allowed,ترك قائمة الحظر مسموح
+Leave Block List Date,ترك بلوك تاريخ قائمة
+Leave Block List Dates,ترك التواريخ قائمة الحظر
+Leave Block List Name,ترك اسم كتلة قائمة
+Leave Blocked,ترك الممنوع
 Leave Control Panel,ترك لوحة التحكم
 Leave Encashed?,ترك صرفها؟
 Leave Encashment Amount,ترك المبلغ التحصيل
@@ -1492,6 +1506,7 @@ Leave blank if considered for all departments,اتركه فارغا إذا نظ�
 Leave blank if considered for all designations,ترك فارغا إذا نظرت لجميع التسميات
 Leave blank if considered for all employee types,ترك فارغا إذا نظرت لجميع أنواع موظف
 Leave blank if considered for all grades,اتركه فارغا إذا نظرت لجميع الصفوف
+Leave by,ترك من قبل
 "Leave can be approved by users with Role, ""Leave Approver""",يمكن الموافقة على الإجازة من قبل المستخدمين مع الدور &quot;اترك الموافق&quot;
 Ledger,دفتر الحسابات
 Left,ترك
@@ -1525,12 +1540,14 @@ Login Before,تسجيل الدخول قبل
 Login Id,الدخول معرف
 Login Page,الدخول الصفحة
 Logout,خروج
+Long Description,الوصف المطول
 Long Text,نص طويل
 Lost Reason,فقد السبب
 Low,منخفض
 Lower Income,ذات الدخل المنخفض
 Lucida Grande,سدا غراندي
 MIS Control,MIS التحكم
+MREQ,MREQ
 MTN Details,تفاصيل MTN
 Mail Footer,البريد تذييل
 Mail Password,البريد كلمة المرور
@@ -1591,6 +1608,14 @@ Match Id,تطابق رقم
 Match non-linked Invoices and Payments.,غير مطابقة الفواتير والمدفوعات المرتبطة.
 Material Issue,المواد العدد
 Material Receipt,المادة استلام
+Material Request,طلب المواد
+Material Request Date,طلب المواد تاريخ
+Material Request Detail No,تفاصيل طلب المواد لا
+Material Request For Warehouse,طلب للحصول على المواد مستودع
+Material Request Item,طلب المواد الإغلاق
+Material Request Items,العناصر المادية طلب
+Material Request No,طلب مواد لا
+Material Request Type,طلب نوع المواد
 Material Transfer,لنقل المواد
 Materials,المواد
 Materials Required (Exploded),المواد المطلوبة (انفجرت)
@@ -1598,6 +1623,7 @@ Materials Requirement Planning (MRP),مواد متطلبات التخطيط (MRP
 Max Attachments,المرفقات ماكس
 Max Days Leave Allowed,اترك أيام كحد أقصى مسموح
 Max Discount (%),ماكس الخصم (٪)
+Max. Limit,ماكس. قصر
 "Meaning of Submit, Cancel, Amend",معنى تقديم، إلغاء وتعديل
 Medium,متوسط
 Merge,دمج
@@ -1676,14 +1702,15 @@ New Communications,جديد الاتصالات
 New Delivery Notes,ملاحظات التسليم جديدة
 New Enquiries,استفسارات جديدة
 New Leads,جديد العروض
+New Leave Application,إجازة جديدة التطبيق
 New Leaves Allocated,الجديد يترك المخصصة
 New Leaves Allocated (In Days),أوراق الجديدة المخصصة (بالأيام)
+New Material Requests,تطلب المواد الجديدة
 New Name,اسم جديد
 New Password,كلمة مرور جديدة
 New Projects,مشاريع جديدة
 New Purchase Orders,أوامر الشراء الجديدة
 New Purchase Receipts,إيصالات شراء جديدة
-New Purchase Requests,طلبات شراء جديدة
 New Quotations,الاقتباسات الجديدة
 New Record,رقم قياسي جديد
 New Sales Orders,أوامر المبيعات الجديدة
@@ -1863,6 +1890,7 @@ Parent Territory,الأم الأرض
 Parenttype,Parenttype
 Partially Completed,أنجزت جزئيا
 Participants,المشاركين
+Particulars,تفاصيل
 Partly Billed,وصفت جزئيا
 Partly Delivered,هذه جزئيا
 Partner,شريك
@@ -1953,6 +1981,7 @@ Prevdoc DocType,Prevdoc DOCTYPE
 Prevdoc Doctype,Prevdoc DOCTYPE
 Preview,معاينة
 Previous Work Experience,خبرة العمل السابقة
+Price,السعر
 Price List,قائمة الأسعار
 Price List Currency,قائمة الأسعار العملات
 Price List Currency Conversion Rate,سعر تحويل عملة قائمة قيم
@@ -2067,14 +2096,6 @@ Purchase Receipt Items,شراء قطع الإيصال
 Purchase Receipt Message,رسالة إيصال شراء
 Purchase Receipt No,لا شراء استلام
 Purchase Receipt Required,مطلوب إيصال الشراء
-Purchase Request,طلب شراء
-Purchase Request Date,تاريخ طلب شراء
-Purchase Request Detail No,تفاصيل طلب شراء لا
-Purchase Request For Warehouse,شراء طلب للحصول على مستودع
-Purchase Request Item,شراء السلعة طلب
-Purchase Request No,طلب شراء رقم
-Purchase Requisition Details,تفاصيل الاستيلاء شراء
-Purchase Requisition No,طلب شراء رقم
 Purchase Return,شراء العودة
 Purchase Returned,عاد شراء
 Purchase Returns,شراء الإسترجاع
@@ -2122,9 +2143,9 @@ Quotation To,اقتباس
 Quotation no against which this Sales Order is made ,اقتباس لا والتي تتم ضد هذا أمر المبيعات
 Quotes to Leads or Customers.,اقتباسات لعروض أو العملاء.
 Raise Exception,رفع استثناء
+Raise Material Request,رفع طلب المواد
+Raise Material Request when stock reaches re-order level,رفع طلب المواد عند الأسهم تصل إلى مستوى إعادة الطلب
 Raise Production Order,رفع أمر الإنتاج
-Raise Purchase Request,رفع طلب شراء
-Raise Purchase Request when stock reaches re-order level,رفع طلب شراء الأسهم عندما يصل مستوى إعادة الطلب
 Raised By,التي أثارها
 Raised By (Email),التي أثارها (بريد إلكتروني)
 Random,عشوائي
@@ -2145,6 +2166,9 @@ Raw Materials Supplied Cost,المواد الخام الموردة التكلف�
 Re-Calculate Values,إعادة حساب القيم
 Re-Order Level,إعادة ترتيب مستوى
 Re-Order Qty,إعادة ترتيب الكمية
+Re-order,إعادة ترتيب
+Re-order Level,إعادة ترتيب مستوى
+Re-order Qty,إعادة ترتيب الكمية
 Read,قرأ
 Read Only,للقراءة فقط
 Reading 1,قراءة 1
@@ -2261,6 +2285,8 @@ Right,حق
 Role,دور
 Role Name,دور الاسم
 Roles,الأدوار
+Roles Assigned,الأدوار المسندة
+Roles Assigned To User,الأدوار المسندة إلى المستخدم
 Roles HTML,الأدوار HTML
 Rounded Total,تقريب إجمالي
 Rounded Total (Export),تقريب الإجمالي (تصدير)
@@ -2407,10 +2433,11 @@ Select Items from Delivery Note,اختيار العناصر من مذكرة ال
 Select Items from Purchase Order,اختيار العناصر من أمر الشراء
 Select Items from Purchase Receipt,اختيار العناصر من إيصال الشراء
 Select Items from Sales Order,اختيار العناصر من ترتيب المبيعات
+Select Material Request,حدد طلب المواد
 Select PR,حدد PR
+Select Price List for the web. Leave blank to hide price.,حدد قائمة السعر لشبكة الإنترنت. اتركه فارغا لإخفاء الأسعار.
 Select Print Format,حدد تنسيق طباعة
 Select Print Heading,حدد طباعة العنوان
-Select Purchase Request,حدد طلب شراء
 Select Report Name,حدد اسم التقرير
 Select Role,حدد دور
 Select Sales Orders,حدد أوامر المبيعات
@@ -2423,7 +2450,10 @@ Select Type,حدد نوع
 Select User or Property to start.,حدد المستخدم أو عقار للبدء.
 Select account head of the bank where cheque was deposited.,حدد رئيس حساب في البنك حيث أودع الاختيار.
 Select company name first.,حدد اسم الشركة الأول.
+Select dates to create a new ,قم بتحديد مواعيد جديدة لإنشاء
 Select name of Customer to whom project belongs,حدد اسم المشروع الزبائن الذين ينتمي
+Select or drag across dates to create a new event.,تحديد أو سحب عبر التواريخ وتعرف على إنشاء حدث جديد.
+"Select shipping warehouse to show ""In Stock"" or ""Out of Stock"". To hide, leave blank",حدد مستودع الشحن لإظهار &quot;في سوق الأسهم&quot; أو &quot;غير متاح&quot;. لإخفاء، اتركه فارغا
 Select template from which you want to get the Goals,حدد قالب الذي تريد للحصول على الأهداف
 Select the Employee for whom you are creating the Appraisal.,حدد موظف الذين تقوم بإنشاء تقييم.
 Select the currency in which price list is maintained,تحديد العملة التي يتم الاحتفاظ قائمة الأسعار
@@ -2445,10 +2475,12 @@ Send,إرسال
 Send Autoreply,إرسال رد تلقائي
 Send Email,إرسال البريد الإلكتروني
 Send From,أرسل من قبل
+Send Invite Email,إرسال دعوة لصديق
 Send Me A Copy,أرسل لي نسخة
 "Send Newsletters to your contacts, leads.",إرسال الرسائل الإخبارية لجهات الاتصال الخاصة بك، ويؤدي.
 Send SMS,إرسال SMS
 Send To,أرسل إلى
+Send To Type,إرسال إلى كتابة
 "Send an email to users of role ""Material Manager"" and ""Purchase Manager"" when re-order level is crossed.",إرسال بريد إلكتروني إلى مستخدمي &quot;مدير المواد&quot; دور و&quot;مدير المشتريات&quot; عندما عبرت إعادة ترتيب مستوى.
 Send automatic emails to Contacts on Submitting transactions.,إرسال رسائل البريد الإلكتروني تلقائيا إلى جهات الاتصال على تقديم المعاملات.
 "Send bulk SMS to leads, customers, contacts",إرسال الرسائل القصيرة بالجملة ل، اعلانات اتصالات، والزبائن
@@ -2515,6 +2547,7 @@ Ship To,السفينة
 Shipping Address,عنوان الشحن
 Shipping Address Name,عنوان الشحن الاسم
 Shipping Details,تفاصيل الشحن
+Short Description,وصف قصير
 Short biography for website and other publications.,نبذة عن سيرة حياة لموقع الويب وغيرها من المطبوعات.
 Shortcut,الاختصار
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",تظهر &quot;في سوق الأسهم&quot; أو &quot;ليس في الأوراق المالية&quot; على أساس الأسهم المتاحة في هذا المخزن.
@@ -2563,6 +2596,7 @@ Standard Rate,قيم القياسية
 Start Date,تاريخ البدء
 Start Report For,تقرير عن بدء
 Start date of current invoice's period,تاريخ بدء فترة الفاتورة الحالية
+Starts on,يبدأ يوم
 Startup,بدء التشغيل
 State,دولة
 State Name,اسم ولاية
@@ -2712,6 +2746,7 @@ Test Data,اختبار البيانات
 Test Date,اختبار تاريخ
 Test Email Id,اختبار البريد الإلكتروني معرف
 Test Link,اختبار الارتباط
+Test Runner,اختبار عداء
 Test Select,اختبار الاختيار
 Test Text,اختبار نص
 Test the Newsletter,اختبار النشرة الإخبارية
@@ -2732,10 +2767,8 @@ The gross weight of the package. Usually net weight + packaging material weight.
 The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,اسم الشركة / الموقع كما تريد أن يظهر على شريط العنوان في المتصفح. وسوف يكون هذا كل الصفحات كما البادئة على اللقب.
 The net weight of this package. (calculated automatically as sum of net weight of items),وزن صافي من هذه الحزمة. (تحسب تلقائيا مجموع الوزن الصافي للسلعة)
 The new BOM after replacement,وBOM الجديدة بعد استبدال
-The quantity for the Purchase Request when the stock goes below re-order level.,كمية للطلب شراء الأسهم عندما يذهب أدناه إعادة ترتيب مستوى.
 The rate at which Bill Currency is converted into company's base currency,المعدل الذي يتم تحويل العملة إلى عملة بيل قاعدة الشركة
 "The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions",ويوفر نظام أدوار محددة مسبقا، ولكن يمكنك <a href='#List/Role'>إضافة أدوار جديدة</a> لتعيين أذونات فاينر
-"The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type ""Stores"" or ""Reserved Warehouse"".",سيقوم النظام إنشاء طلب شراء الكمية المتبقية تلقائيا عندما يذهب أدناه إعادة ترتيب مستوى في مستودع &quot;متاجر&quot; أو نوع &quot;مستودع محفوظة&quot;.
 The unique id for tracking all recurring invoices. It is generated on submit.,المعرف الفريد لتتبع جميع الفواتير المتكررة. يتم إنشاء على الحلقة.
 Theme,موضوع
 Then By (optional),ثم (اختياري)
@@ -2756,6 +2789,7 @@ This is the number of the last created transaction with this prefix,هذا هو 
 This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,تساعدك هذه الأداة لتحديث أو تحديد الكمية وتقييم الأوراق المالية في النظام. وعادة ما تستخدم لمزامنة نظام القيم وما هو موجود فعلا في المخازن الخاصة بك.
 This will be used for setting rule in HR module,وسوف تستخدم هذه القاعدة لإعداد وحدة في HR
 Thread HTML,الموضوع HTML
+Thumbnail Image,صورة مصغرة
 Thursday,الخميس
 Time,مرة
 Time Zone,منطقة زمنية
@@ -2777,6 +2811,7 @@ To,إلى
 To Date,حتى الان
 To Discuss,لمناقشة
 To Do,هل ل
+To Do List,والقيام قائمة
 To DocType,لDOCTYPE
 To Field,لالميدانية
 To PR Date,لPR تاريخ
@@ -2799,7 +2834,7 @@ To restrict a User of a particular Role to documents that are explicitly assigne
 To restrict a User of a particular Role to documents that are only self-created.,لتقييد المستخدم من دور خاص للوثائق التي ليست سوى الذاتي الإنشاء.
 "To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.",لتعيين أدوار المستخدمين، واذهبوا إلى <a href='#List/Profile'>إعداد المستخدمين&gt;</a> وانقر على المستخدم لتعيين الأدوار.
 To track any installation or commissioning related work after sales,لتتبع أي تركيب أو الأعمال ذات الصلة التكليف بعد البيع
-"To track brand name in the following documents<br>Delivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",لتعقب اسم العلامة التجارية في الوثائق التالية <br> ملاحظة التسليم، Enuiry، طلب شراء، المدينة، أمر الشراء، قسيمة شراء واستلام المشتري، اقتباس، فاتورة المبيعات، BOM المبيعات، ترتيب المبيعات، رقم المسلسل
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",لتعقب اسم العلامة التجارية في الوثائق التالية <br> ملاحظة التسليم، Enuiry، طلب المواد، المدينة، أمر الشراء، قسيمة شراء واستلام المشتري، اقتباس، فاتورة المبيعات، BOM المبيعات، ترتيب المبيعات، رقم المسلسل
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,لتتبع البند في المبيعات وثائق الشراء على أساس غ من المسلسل. ويمكن أيضا استخدام هذه المعلومات لتعقب الضمان للمنتج.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,لتعقب العناصر في المبيعات وثائق الشراء مع NOS دفعة <br> <b>الصناعة المفضل: الكيمياء الخ</b>
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,لتعقب العناصر باستخدام الباركود. سوف تكون قادرة على الدخول في بنود مذكرة التسليم والفاتورة المبيعات عن طريق مسح الباركود من العنصر.
@@ -2850,6 +2885,7 @@ Track this Sales Invoice against any Project,تتبع هذه الفاتورة ا
 Track this Sales Order against any Project,تتبع هذا الأمر ضد أي مشروع المبيعات
 Transaction,صفقة
 Transaction Date,تاريخ المعاملة
+Transfer,نقل
 Transfer stock from one warehouse to another.,نقل الأسهم من مستودع إلى آخر.
 Transition Rules,الانتقال قوانين
 Transporter Info,نقل معلومات
@@ -2882,6 +2918,7 @@ URL,URL
 Unable to complete request: ,غير قادر على إكمال الطلب:
 Under AMC,تحت AMC
 Under Graduate,تحت الدراسات العليا
+Under Section,تحت القسم
 Under Warranty,تحت الكفالة
 Unit of Measure,وحدة القياس
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).",وحدة القياس في هذا البند (مثل كجم، وحدة، لا، الزوج).
@@ -2966,6 +3003,7 @@ Warehouse Type,مستودع نوع
 Warehouse User,مستودع العضو
 Warehouse Users,مستودع المستخدمين
 Warehouse where you are maintaining stock of rejected items,مستودع حيث كنت الحفاظ على المخزون من المواد رفضت
+Warehouse-wise Item Reorder,مستودع المدينة من الحكمة إعادة ترتيب
 Warn,حذر
 Warning,تحذير
 Warranty / AMC Details,الضمان / AMC تفاصيل
@@ -3053,12 +3091,11 @@ You can create more earning and deduction type from Setup --> HR,يمكنك إن
 You can enter any date manually,يمكنك إدخال أي تاريخ يدويا
 You can enter the minimum quantity of this item to be ordered.,يمكنك إدخال كمية الحد الأدنى في هذا البند إلى أن يؤمر.
 You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.,يمكنك تقديم مذكرة التسليم من أوامر البيع متعددة. حدد أوامر البيع واحدا تلو الآخر ثم انقر على الزر أدناه.
-You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.,يمكنك إصدار أمر شراء من طلبات الشراء متعددة. حدد طلبات الشراء واحدا تلو الآخر ثم انقر على الزر أدناه.
+You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.,يمكنك إصدار أمر شراء من طلبات المواد متعددة. حدد المواد تطلب واحدا تلو الآخر ثم انقر على الزر أدناه.
 You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.,يمكنك إصدار أمر شراء من الاقتباسات مزود متعددة. حدد مزود الاقتباسات واحدا تلو الآخر ثم انقر على الزر أدناه.
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,يمكنك جعل إيصال الشراء من أوامر الشراء متعددة. حدد أوامر الشراء واحدا تلو الآخر ثم انقر على الزر أدناه.
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,يمكنك تعيين مختلف &#39;خصائص&#39; للمستخدمين لضبط القيم الافتراضية وتطبيق القواعد إذن على أساس قيمة هذه الخصائص في أشكال مختلفة.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,يمكنك استخدام <a href='#Form/Customize Form'>نموذج تخصيص</a> لتحديد مستويات على الحقول.
-You cannot apply for a leave on the following date because it is blocked,لا يمكنك التقدم للحصول على الإجازة في تاريخ التالية لتم حظره
 Your Customer's TAX registration numbers (if applicable) or any general information,عميلك أرقام التسجيل الضريبي (إن وجدت) أو أي معلومات عامة
 "Your download is being built, this may take a few moments...",ويجري بناء التنزيل، وهذا قد يستغرق بضع لحظات ...
 Your letter head content in HTML.,المحتوى رأس الرسالة في HTML.
@@ -3231,6 +3268,7 @@ tag,بطاقة
 tags,به
 "target = ""_blank""",الهدف = &quot;_blank&quot;
 tasks,المهام
+test,اختبار
 text-height,ارتفاع النص
 text-width,عرض النص
 th,ال

@@ -40,7 +40,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
 			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Production Order", 
-				"Purchase Request Item", "Purchase Order Item", "Sales Order Item", "Brand"],
+				"Material Request Item", "Purchase Order Item", "Sales Order Item", "Brand"],
 		});
 		
 		this.wrapper.bind("make", function() {
@@ -164,7 +164,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 		$.each([
 			["Stock Ledger Entry", "actual_qty"], 
 			["Production Order", "planned_qty"], 
-			["Purchase Request Item", "requested_qty"],
+			["Material Request Item", "requested_qty"],
 			["Purchase Order Item", "ordered_qty"],
 			["Sales Order Item", "reserved_qty"]], 
 			function(i, v) {

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-21 18:19:22", 
+  "creation": "2013-02-20 13:26:14", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:32:21", 
+  "modified": "2013-02-20 18:14:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,14 +28,13 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Item", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "submit": 0
  }, 
  {
@@ -202,32 +201,6 @@
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type \"Stores\" or \"Reserved Warehouse\".", 
-  "doctype": "DocField", 
-  "fieldname": "re_order_level", 
-  "fieldtype": "Float", 
-  "label": "Re-Order Level", 
-  "oldfieldname": "re_order_level", 
-  "oldfieldtype": "Currency"
- }, 
- {
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "The quantity for the Purchase Request when the stock goes below re-order level.", 
-  "doctype": "DocField", 
-  "fieldname": "re_order_qty", 
-  "fieldtype": "Float", 
-  "label": "Re-Order Qty"
- }, 
- {
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
-  "doctype": "DocField", 
-  "fieldname": "email_notify", 
-  "fieldtype": "Check", 
-  "label": "Notify by Email on Re-order"
- }, 
- {
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "valuation_method", 
   "fieldtype": "Select", 
@@ -328,6 +301,55 @@
   "options": "UOM"
  }, 
  {
+  "description": "Auto-raise Material Request if quantity goes below re-order level in a warehouse", 
+  "doctype": "DocField", 
+  "fieldname": "reorder_section", 
+  "fieldtype": "Section Break", 
+  "label": "Re-order"
+ }, 
+ {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "doctype": "DocField", 
+  "fieldname": "re_order_level", 
+  "fieldtype": "Float", 
+  "label": "Re-Order Level", 
+  "oldfieldname": "re_order_level", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "doctype": "DocField", 
+  "fieldname": "re_order_qty", 
+  "fieldtype": "Float", 
+  "label": "Re-Order Qty"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_31", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
+  "doctype": "DocField", 
+  "fieldname": "email_notify", 
+  "fieldtype": "Check", 
+  "label": "Notify by Email on Re-order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_31", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_reorder", 
+  "fieldtype": "Table", 
+  "label": "Warehouse-wise Item Reorder", 
+  "options": "Item Reorder"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "purchase_details", 
   "fieldtype": "Section Break", 
@@ -348,7 +370,7 @@
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "description": "Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.", 
+  "description": "Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.", 
   "doctype": "DocField", 
   "fieldname": "lead_time_days", 
   "fieldtype": "Int", 
@@ -791,18 +813,38 @@
   "label": "Website Description"
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
   "role": "Material Manager", 
   "write": 0
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Material User", 
   "write": 0
  }, 
@@ -810,7 +852,36 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Material Master Manager", 
   "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Material Master Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "write": 0
  }
 ]

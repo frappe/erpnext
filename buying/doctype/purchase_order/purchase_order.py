@@ -17,9 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults
+from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 from buying.utils import get_last_purchase_details
@@ -32,7 +32,6 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.defaults = get_defaults()
 		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
 		
@@ -76,10 +75,10 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	# Pull Purchase Request
+	# Pull Material Request
 	def get_indent_details(self):
 		if self.doc.indent_no:
-			get_obj('DocType Mapper','Purchase Request-Purchase Order').dt_map('Purchase Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Purchase Request','Purchase Order'],['Purchase Request Item', 'Purchase Order Item']]")
+			get_obj('DocType Mapper','Material Request-Purchase Order').dt_map('Material Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Material Request','Purchase Order'],['Material Request Item', 'Purchase Order Item']]")
 			pcomm = get_obj('Purchase Common')
 			for d in getlist(self.doclist, 'po_details'):
 				if d.item_code and not d.purchase_rate:
@@ -105,7 +104,7 @@ class DocType(BuyingController):
 			self.get_default_schedule_date()
 			for d in getlist(self.doclist, 'po_details'):
 				if d.prevdoc_detail_docname and not d.schedule_date:
-					d.schedule_date = webnotes.conn.get_value("Purchase Request Item",
+					d.schedule_date = webnotes.conn.get_value("Material Request Item",
 							d.prevdoc_detail_docname, "schedule_date")
 	
 	def get_tc_details(self):
@@ -138,19 +137,19 @@ class DocType(BuyingController):
 					po_qty = flt(d.qty) > flt(d.received_qty) and \
 						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0 
 				
-				# No updates in Purchase Request on Stop / Unstop
-				if cstr(d.prevdoc_doctype) == 'Purchase Request' and not is_stopped:
+				# No updates in Material Request on Stop / Unstop
+				if cstr(d.prevdoc_doctype) == 'Material Request' and not is_stopped:
 					# get qty and pending_qty of prevdoc 
 					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Purchase Request Item', 
-						'Purchase Request - Purchase Order', self.doc.name)
+					 	d.prevdoc_detail_docname, 'Material Request Item', 
+						'Material Request - Purchase Order', self.doc.name)
 					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
 					 	flt(curr_ref_qty.split('~~~')[0]), 0
 					
 					if flt(qty) + flt(po_qty) > flt(max_qty):
 						curr_qty = flt(max_qty) - flt(qty)
 						# special case as there is no restriction 
-						# for Purchase Request - Purchase Order 
+						# for Material Request - Purchase Order 
 						curr_qty = curr_qty > 0 and curr_qty or 0
 					else:
 						curr_qty = flt(po_qty)
@@ -232,7 +231,7 @@ class DocType(BuyingController):
 		# 4.Set Status as Cancelled
 		webnotes.conn.set(self.doc,'status','Cancelled')
 
-		# 5.Update Purchase Requests Pending Qty and accordingly it's Status 
+		# 5.Update Material Requests Pending Qty and accordingly it's Status 
 		pc_obj.update_prevdoc_detail(self,is_submit = 0)
 		
 		# 6.Update Bin	
@@ -262,7 +261,6 @@ class DocType(BuyingController):
 				
 			self.delete_irrelevant_raw_material()
 			#---------------calculate amt in	Purchase Order Item Supplied-------------
-			self.calculate_amount(d)
 			
 	def add_bom(self, d):
 		#----- fetching default bom from Bill of Materials instead of Item Master --
@@ -315,15 +313,6 @@ class DocType(BuyingController):
 				d.parent = 'old_par:'+self.doc.name
 				d.save()
 		
-	def calculate_amount(self, d):
-		amt = 0
-		for i in getlist(self.doclist,'po_raw_material_details'):
-			
-			if(i.reference_name == d.name):
-				i.amount = flt(i.required_qty)* flt(i.rate)
-				amt += i.amount
-		d.rm_supp_cost = amt
-
 	# On Update
 	# ----------------------------------------------------------------------------------------------------		
 	def on_update(self):

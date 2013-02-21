@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import add_days, cint, cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
@@ -33,17 +33,17 @@ class DocType(BuyingController):
 		self.doc = doc
 		self.doclist = doclist
 
-		self.chk_tol_for_list = ['Purchase Request - Purchase Order', 'Purchase Order - Purchase Receipt', 'Purchase Order - Purchase Invoice']
+		self.chk_tol_for_list = ['Material Request - Purchase Order', 'Purchase Order - Purchase Receipt', 'Purchase Order - Purchase Invoice']
 
 		self.update_qty = {
-			'Purchase Request - Purchase Order': 'ordered_qty',
+			'Material Request - Purchase Order': 'ordered_qty',
 			'Purchase Order - Purchase Receipt': 'received_qty',
 			'Purchase Order - Purchase Invoice': 'billed_qty',
 			'Purchase Receipt - Purchase Invoice': 'billed_qty'
 		}
 
 		self.update_percent_field = {
-			'Purchase Request - Purchase Order': 'per_ordered',
+			'Material Request - Purchase Order': 'per_ordered',
 			'Purchase Order - Purchase Receipt': 'per_received',
 			'Purchase Order - Purchase Invoice': 'per_billed',
 			'Purchase Receipt - Purchase Invoice': 'per_billed'
@@ -51,7 +51,7 @@ class DocType(BuyingController):
 
 		# used in validation for items and update_prevdoc_detail
 		self.doctype_dict = {
-			'Purchase Request': 'Purchase Request Item',
+			'Material Request': 'Material Request Item',
 			'Purchase Order': 'Purchase Order Item',
 			'Purchase Receipt': 'Purchase Receipt Item'
 		}
@@ -75,7 +75,7 @@ class DocType(BuyingController):
 			item = sql("select lead_time_days from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())" % cstr(d.item_code) , as_dict = 1)
 			ltd = item and cint(item[0]['lead_time_days']) or 0
 			if ltd and obj.doc.transaction_date:
-				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Purchase Request':
+				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Material Request':
 					d.lead_time_date = cstr(add_days( obj.doc.transaction_date, cint(ltd)))
 				if not d.fields.has_key('prevdoc_docname') or (d.fields.has_key('prevdoc_docname') and not d.prevdoc_docname):
 					d.schedule_date =	cstr( add_days( obj.doc.transaction_date, cint(ltd)))
@@ -219,7 +219,7 @@ class DocType(BuyingController):
 					raise Exception
 				
 				#	Check if UOM has been modified.
-				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Purchase Request':
+				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Material Request':
 					msgprint("Please check UOM %s of Item %s which is not present in %s %s ." % (d.uom, d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
 					raise Exception
 			
@@ -288,11 +288,11 @@ class DocType(BuyingController):
 	def get_qty(self,curr_doctype,ref_tab_fname,ref_tab_dn,ref_doc_tname, transaction, curr_parent_name):
 		# Get total Quantities of current doctype (eg. PR) except for qty of this transaction
 		#------------------------------
-		# please check as UOM changes from Purchase Request - Purchase Order ,so doing following else uom should be same .
+		# please check as UOM changes from Material Request - Purchase Order ,so doing following else uom should be same .
 		# i.e. in PO uom is NOS then in PR uom should be NOS
-		# but if in Purchase Request uom KG it can change in PO
+		# but if in Material Request uom KG it can change in PO
 		
-		get_qty = (transaction == 'Purchase Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
+		get_qty = (transaction == 'Material Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
 		qty = sql("select sum(%s) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% ( get_qty, curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
 		qty = qty and flt(qty[0][0]) or 0 
 		
@@ -312,8 +312,8 @@ class DocType(BuyingController):
 		qty, max_qty, max_qty_plus_tol = flt(curr_ref_qty.split('~~~')[0]), flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[1])
 
 		# Qty above Tolerance should be allowed only once.
-		# But there is special case for Transaction 'Purchase Request-Purhcase Order' that there should be no restriction
-		# One can create any no. of PO against same Purchase Request!!!
+		# But there is special case for Transaction 'Material Request-Purhcase Order' that there should be no restriction
+		# One can create any no. of PO against same Material Request!!!
 		if qty >= max_qty and is_submit and flt(curr_qty) > 0:
 			reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Purchase Invoice') and 'Billed'
 			msgprint("Error: Item Code : '%s' of '%s' is already %s." %(item_code,ref_dn,reason))
@@ -364,7 +364,7 @@ class DocType(BuyingController):
 			
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname:
 				transaction = cstr(d.prevdoc_doctype) + ' - ' + cstr(obj.doc.doctype)
-				curr_qty = (transaction == 'Purchase Request - Purchase Order') and flt(d.qty) * flt(d.conversion_factor) or flt(d.qty)
+				curr_qty = (transaction == 'Material Request - Purchase Order') and flt(d.qty) * flt(d.conversion_factor) or flt(d.qty)
 				self.update_ref_doctype_dict( flt(curr_qty), d.doctype, d.prevdoc_docname, d.prevdoc_doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, transaction, d.item_code, is_submit, obj.doc.doctype, obj.doc.name)
 			
 			# for payable voucher

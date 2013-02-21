@@ -30,4 +30,4 @@ def add_node():
 		parent_field: webnotes.form_dict['parent'],
 		"is_group": webnotes.form_dict['is_group']
 	}]
-	webnotes.model_wrapper(doclist).save()
+	webnotes.bean(doclist).save()

@@ -1,7 +1,7 @@
 import webnotes
 def execute():
 	for name in webnotes.conn.sql("""select name from `tabHoliday List`"""):
-		holiday_list_wrapper = webnotes.model_wrapper("Holiday List", name[0])
+		holiday_list_wrapper = webnotes.bean("Holiday List", name[0])
 		
 		desc_count = _count([d.description for d in 
 			holiday_list_wrapper.doclist.get({"doctype": "Holiday"})])

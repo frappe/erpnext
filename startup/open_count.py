@@ -22,7 +22,7 @@ queries = {
 	"Purchase Receipt": {"docstatus":0},
 	"Delivery Note": {"docstatus":0},
 	"Stock Entry": {"docstatus":0},
-	"Purchase Request": {"docstatus":0},
+	"Material Request": {"docstatus":0},
 	"Purchase Order": {"docstatus":0},
 	"Production Order": {"docstatus":0},
 	"BOM": {"docstatus":0},

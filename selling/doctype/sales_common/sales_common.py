@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, cstr, flt, getdate, nowdate, formatdate
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from setup.utils import get_company_currency
