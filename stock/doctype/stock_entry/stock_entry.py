@@ -52,6 +52,8 @@ class DocType(TransactionBase):
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
 		
+		self.validate_with_material_request()
+		
 	def on_submit(self):
 		self.update_serial_no(1)
 		self.update_stock_ledger(0)
@@ -580,6 +582,18 @@ class DocType(TransactionBase):
 			'supplier_name' : res and res[0][0] or '',
 			'supplier_address' : addr and addr[0] or ''}
 		return ret
+		
+	def validate_with_material_request(self):
+		for item in self.doclist.get({"parentfield": "mtn_details"}):
+			if item.material_request:
+				mreq_item = webnotes.conn.get_value("Material Request Item", 
+					{"name": item.material_request_item, "parent": item.material_request},
+					["item_code", "warehouse", "idx"], as_dict=True)
+				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
+					msgprint(_("Row #") + (" %d: " % item.idx) + _("does not match")
+						+ " " + _("Row #") + (" %d %s " % (mreq_item.idx, _("of")))
+						+ _("Material Request") + (" - %s" % item.material_request), 
+						raise_exception=webnotes.MappingMismatchError)
 
 @webnotes.whitelist()
 def get_production_order_details(production_order):
