@@ -87,7 +87,7 @@ class DocType:
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
 			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
-	
+			
 	def get_first_sle(self):
 		sle = sql("""
 			select * from `tabStock Ledger Entry`
@@ -122,7 +122,8 @@ class DocType:
 				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty,
 					material_request_type)
 
-	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty, material_request_type):
+	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty,
+			material_request_type):
 		"""	Create indent on reaching reorder level	"""
 		defaults = webnotes.defaults.get_defaults()
 		item = webnotes.doc("Item", self.doc.item_code)
@@ -175,4 +176,5 @@ class DocType:
 				formatdate(), doc_type, doc_name, bean.doc.doctype, 
 				get_url_to_form(bean.doc.doctype, bean.doc.name))
 		
-		sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)	
+		sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
+		
