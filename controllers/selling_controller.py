@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.utils import cint
 from setup.utils import get_company_currency
 
 from controllers.accounts_controller import AccountsController
@@ -27,8 +28,13 @@ class SellingController(AccountsController):
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)
+		
+		disable_rounded_total = cint(webnotes.conn.get_value("Global Defaults", None, 
+			"disable_rounded_total"))
+			
 		if self.meta.get_field("in_words"):
-			self.doc.in_words = money_in_words(self.doc.rounded_total, company_currency)
+			self.doc.in_words = money_in_words(disable_rounded_total and 
+				self.doc.grand_total or self.doc.rounded_total, company_currency)
 		if self.meta.get_field("in_words_export"):
-			self.doc.in_words_export = money_in_words(self.doc.rounded_total_export,
-		 		self.doc.currency)
+			self.doc.in_words_export = money_in_words(disable_rounded_total and 
+				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)

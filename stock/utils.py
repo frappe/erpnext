@@ -30,7 +30,7 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 			"in Item master") % {
 				"item_code": item_code,
 				"date": formatdate(end_of_life),
-				"end_of_life_label": webnotes.get_label("Item", "end_of_life")
+				"end_of_life_label": webnotes.get_doctype("Item").get_label("end_of_life")
 			}
 		
 		_msgprint(msg, verbose)

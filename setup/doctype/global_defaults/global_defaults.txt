@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 19:25:56", 
+  "creation": "2013-02-19 12:28:27", 
   "docstatus": 0, 
-  "modified": "2013-02-13 09:56:28", 
+  "modified": "2013-02-20 14:08:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,6 +27,8 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -333,6 +335,13 @@
   "options": "No\nYes"
  }, 
  {
+  "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
+  "doctype": "DocField", 
+  "fieldname": "disable_rounded_total", 
+  "fieldtype": "Check", 
+  "label": "Disable Rounded Total"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "buying", 
   "fieldtype": "Section Break", 
@@ -407,11 +416,6 @@
   "fieldname": "sms_sender_name", 
   "fieldtype": "Data", 
   "label": "SMS Sender Name"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"
