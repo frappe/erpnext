@@ -185,4 +185,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Service Quotation')",
 	"execute:webnotes.delete_doc('DocType', 'Service Order Detail')",
 	"execute:webnotes.delete_doc('DocType', 'Service Quotation Detail')",
+	"patches.february_2013.p06_material_request_mappers",
 ]

@@ -19,5 +19,4 @@ def execute():
 	os.system("rm -rf app/hr/doctype/holiday_block_list")
 	os.system("rm -rf app/hr/doctype/holiday_block_list_allow")
 	os.system("rm -rf app/hr/doctype/holiday_block_list_date")
-
 	
