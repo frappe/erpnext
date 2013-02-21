@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["21st February, 2013", [
+		"Item: Warehouse-wise Re-order Level and Quantity",
+		"Buying: Purchase Request renamed to Material Request"
+	]],
 	["20th February, 2013", [
 		"Disable Rounded Total: If disable in 'Global Defaults', Rounding related fields \
 			in sales cycle transactions and in corresponding print formats will not be visible"

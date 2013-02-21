@@ -18,7 +18,8 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 
-from webnotes.utils import add_days, cint, cstr, flt, now, nowdate
+from webnotes.utils import add_days, cint, cstr, flt, now, nowdate, \
+	get_url_to_form, formatdate
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild
 from webnotes.model.bean import copy_doclist
@@ -151,15 +152,15 @@ class DocType:
 		}])
 		
 		mr.insert()
-		mr.submit()
 
 		msgprint("""Item: %s is to be re-ordered. Material Request %s raised. 
 			It was generated from %s: %s""" % 
-			(self.doc.item_code, mr.doc.name, doc_type, doc_name ))
+			(self.doc.item_code, mr.doc.name, doc_type, doc_name))
+
 		if(item.email_notify):
-			self.send_email_notification(doc_type, doc_name)
+			self.send_email_notification(doc_type, doc_name, mr)
 			
-	def send_email_notification(self, doc_type, doc_name):
+	def send_email_notification(self, doc_type, doc_name, bean):
 		""" Notify user about auto creation of indent"""
 		
 		from webnotes.utils.email_lib import sendmail
@@ -167,6 +168,10 @@ class DocType:
 			where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
 			and r.role in ('Purchase Manager','Material Manager') 
 			and p.name not in ('Administrator', 'All', 'Guest')""")]
-		msg="""A Material Request has been raised 
-			for item %s: %s on %s """ % (doc_type, doc_name, nowdate())
+		
+		msg="""A new Material Request has been raised for Item: %s and Warehouse: %s \
+			on %s due to %s: %s. See %s: %s """ % (self.doc.item_code, self.doc.warehouse,
+				formatdate(), doc_type, doc_name, bean.doc.doctype, 
+				get_url_to_form(bean.doc.doctype, bean.doc.name))
+		
 		sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)	
