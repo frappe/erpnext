@@ -14,7 +14,7 @@ class DocType:
 		else:
 			self.doc.query_options = ["Sales", "Support", "General"]
 		if self.doc.address:
-			self.address = webnotes.model_wrapper("Address", self.doc.address).doc
+			self.address = webnotes.bean("Address", self.doc.address).doc
 			
 	def on_update(self):
 		from website.utils import clear_cache

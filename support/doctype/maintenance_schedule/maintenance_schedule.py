@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import add_days, cstr, getdate
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 

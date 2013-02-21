@@ -59,6 +59,7 @@
  "Remarks": "Primjedbe", 
  "Required raw materials issued to the supplier for producing a sub - contracted item.": "Potrebna sirovina izdane dobavlja\u010d za proizvodnju pod - ugovoreni predmet.", 
  "Rounded Total": "Zaobljeni Ukupno", 
+ "Select Material Request": "Odaberite Materijal Zahtjev", 
  "Select Print Heading": "Odaberite Ispis Naslov", 
  "Select Purchase Request": "Odaberite zahtjev za kupnju", 
  "Select Supplier Quotation": "Odaberite Supplier ponudu", 
@@ -87,6 +88,7 @@
  "Total Tax*": "Ukupno poreza *", 
  "Totals": "Ukupan rezultat", 
  "Yes": "Da", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.": "Mo\u017eete napraviti redoslijed kupnje od vi\u0161e materijala zahtjeva. Odaberite materijalni zahtijevi jedan po jedan i kliknite na gumb ispod.", 
  "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.": "Mo\u017eete napraviti redoslijed kupnje iz vi\u0161e Kupiti zahtjeva. Odaberite kupnje Zahtjevi jednu po jednu i kliknite na gumb ispod.", 
  "You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.": "Mo\u017eete napraviti redoslijed kupnje iz vi\u0161e dobavlja\u010dima Citati. Odaberite dobavlja\u010d Citati jedan po jedan i kliknite na gumb ispod."
 }

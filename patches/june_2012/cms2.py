@@ -67,13 +67,13 @@ def save_pages():
 	}
 
 	import webnotes
-	from webnotes.model.wrapper import ModelWrapper
+	from webnotes.model.bean import Bean
 	import webnotes.modules.patch_handler
 
 	for dt in query_map:
 		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
 			try:
-				ModelWrapper(dt, result['name'].encode('utf-8')).save()
+				Bean(dt, result['name'].encode('utf-8')).save()
 			except Exception, e:
 				webnotes.modules.patch_handler.log(unicode(e))
 			

@@ -19,7 +19,7 @@ import unittest
 import webnotes
 import copy
 
-from webnotes.model.wrapper import ModelWrapper
+from webnotes.model.bean import Bean
 from webnotes.model.doc import Document
 from webnotes.utils import flt
 
@@ -34,7 +34,7 @@ class TestItem(unittest.TestCase):
 		webnotes.conn.rollback()
 		
 	def testInsert(self):
-		d = ModelWrapper()
+		d = Bean()
 
 		count_before =  flt(sql("select count(*) from tab"+_doctype)[0][0])
 		if docok:
@@ -49,7 +49,7 @@ class TestItem(unittest.TestCase):
 	def testFailAssert(self):
 		if docnotok:
 			with self.assertRaises(Exception) as context:
-				d = ModelWrapper()
+				d = Bean()
 				d.doc = docnotok[0]
 				d.children = None
 				d.doc.fields['__islocal']=1
@@ -77,6 +77,31 @@ docnotok = [Document(fielddata=r) for r in tabNotOK]
 
 
 test_records = [
+	[{
+		"doctype": "Item",
+		"item_code": "_Test Item",
+		"item_name": "_Test Item",
+		"description": "_Test Item",
+		"item_group": "_Test Item Group",
+		"is_stock_item": "Yes",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "No",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"is_sample_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "No",
+		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
+	}, {
+		"doctype": "Item Reorder",
+		"parentfield": "item_reorder",
+		"warehouse": "_Test Warehouse",
+		"warehouse_reorder_level": 20,
+		"warehouse_reorder_qty": 20
+	}],
 	[{
 		"doctype": "Item",
 		"item_code": "_Test Item Home Desktop 100",

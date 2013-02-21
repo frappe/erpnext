@@ -1,97 +1,97 @@
 [
  {
-  "owner": "jai@webnotestech.com", 
+  "creation": "2013-01-21 12:03:47", 
   "docstatus": 0, 
-  "creation": "2013-01-19 10:23:35", 
+  "modified": "2013-02-18 13:43:26", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-19 10:55:55"
+  "owner": "jai@webnotestech.com"
  }, 
  {
-  "read_only": 1, 
-  "issingle": 1, 
-  "in_create": 1, 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
+  "in_create": 1, 
+  "issingle": 1, 
   "module": "Manufacturing", 
-  "name": "__common__"
+  "name": "__common__", 
+  "read_only": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Production Planning Tool", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Production Planning Tool", 
-  "read": 1, 
-  "create": 1, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
-  "write": 1, 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "report": 0, 
-  "permlevel": 0, 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Production Planning Tool", 
-  "doctype": "DocType"
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Production Planning Tool", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Production Planning Tool"
  }, 
  {
   "description": "Select Sales Orders from which you want to create Production Orders.", 
   "doctype": "DocField", 
-  "label": "Select Sales Orders", 
   "fieldname": "select_sales_orders", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Select Sales Orders"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Filter based on item", 
   "fieldname": "fg_item", 
   "fieldtype": "Link", 
+  "label": "Filter based on item", 
   "options": "Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Filter based on customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
+  "label": "Filter based on customer", 
   "options": "Customer"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Company"
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "From Date", 
   "fieldname": "from_date", 
-  "fieldtype": "Date"
+  "fieldtype": "Date", 
+  "label": "From Date"
  }, 
  {
   "doctype": "DocField", 
-  "label": "To Date", 
   "fieldname": "to_date", 
-  "fieldtype": "Date"
+  "fieldtype": "Date", 
+  "label": "To Date"
  }, 
  {
   "doctype": "DocField", 
@@ -102,52 +102,52 @@
  {
   "description": "Pull sales orders (pending to deliver) based on the above criteria", 
   "doctype": "DocField", 
-  "label": "Get Sales Orders", 
   "fieldname": "get_sales_orders", 
   "fieldtype": "Button", 
+  "label": "Get Sales Orders", 
   "options": "get_open_sales_orders"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Production Plan Sales Orders", 
   "fieldname": "pp_so_details", 
   "fieldtype": "Table", 
+  "label": "Production Plan Sales Orders", 
   "options": "Production Plan Sales Order"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Clear Table", 
   "fieldname": "clear_so_table", 
   "fieldtype": "Button", 
+  "label": "Clear Table", 
   "options": "clear_so_table"
  }, 
  {
   "description": "Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.", 
   "doctype": "DocField", 
-  "label": "Create Production Orders", 
   "fieldname": "create_production_orders", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Create Production Orders"
  }, 
  {
   "description": "Pull items from Sales Order mentioned in the above table.", 
   "doctype": "DocField", 
-  "label": "Get Items", 
   "fieldname": "get_items_from_so", 
   "fieldtype": "Button", 
+  "label": "Get Items", 
   "options": "get_items_from_so"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Production Plan Items", 
   "fieldname": "pp_details", 
   "fieldtype": "Table", 
+  "label": "Production Plan Items", 
   "options": "Production Plan Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Clear Table", 
   "fieldname": "clear_item_table", 
   "fieldtype": "Button", 
+  "label": "Clear Table", 
   "options": "clear_item_table"
  }, 
  {
@@ -157,72 +157,72 @@
   "options": "Simple"
  }, 
  {
-  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
   "default": "1", 
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
   "doctype": "DocField", 
-  "label": "Use Multi-Level BOM", 
   "fieldname": "use_multi_level_bom", 
   "fieldtype": "Check", 
+  "label": "Use Multi-Level BOM", 
   "reqd": 0
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "cb5", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "description": "Separate production order will be created for each finished good item.", 
   "doctype": "DocField", 
-  "label": "Raise Production Order", 
   "fieldname": "raise_production_order", 
   "fieldtype": "Button", 
+  "label": "Raise Production Order", 
   "options": "raise_production_order"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Materials Requirement Planning (MRP)", 
   "fieldname": "sb5", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Materials Requirement Planning (MRP)"
  }, 
  {
   "description": "Download a report containing all raw materials with their latest inventory status", 
   "doctype": "DocField", 
-  "label": "Download Materials Required", 
   "fieldname": "download_materials_required", 
-  "fieldtype": "Button"
+  "fieldtype": "Button", 
+  "label": "Download Materials Required"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break6", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Purchase Request For Warehouse", 
   "fieldname": "purchase_request_for_warehouse", 
   "fieldtype": "Link", 
+  "label": "Material Request For Warehouse", 
   "options": "Warehouse"
  }, 
  {
   "description": "Items to be requested which are \"Out of Stock\" considering all warehouses based on projected qty and minimum order qty", 
   "doctype": "DocField", 
-  "label": "Raise Purchase Request", 
   "fieldname": "raise_purchase_request", 
   "fieldtype": "Button", 
+  "label": "Raise Material Request", 
   "options": "raise_purchase_request"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
-  "role": "Manufacturing User", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Manufacturing User"
  }, 
  {
-  "role": "Manufacturing Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Manufacturing Manager"
  }
 ]

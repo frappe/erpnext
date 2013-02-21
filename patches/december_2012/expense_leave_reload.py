@@ -4,10 +4,10 @@ def execute():
 	# new roles
 	roles = [r[0] for r in webnotes.conn.sql("""select name from tabRole""")]
 	if not "Leave Approver" in roles:
-		webnotes.model_wrapper([{"doctype":"Role", "role_name":"Leave Approver", 
+		webnotes.bean([{"doctype":"Role", "role_name":"Leave Approver", 
 			"__islocal":1, "module":"HR"}]).save()
 	if not "Expense Approver" in roles:
-		webnotes.model_wrapper([{"doctype":"Role", "role_name":"Expense Approver", 
+		webnotes.bean([{"doctype":"Role", "role_name":"Expense Approver", 
 			"__islocal":1, "module":"HR"}]).save()
 
 	# reload

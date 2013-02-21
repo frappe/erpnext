@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import add_days, cint, cstr, date_diff, flt, now, nowdate, add_days
 from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
 from webnotes.utils.email_lib import sendmail
 sql = webnotes.conn.sql

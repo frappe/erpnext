@@ -16,10 +16,11 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.default
 
-from webnotes.utils import cint, cstr, date_diff, formatdate, get_defaults, getdate, now
+from webnotes.utils import cint, cstr, date_diff, formatdate, getdate, now
 from webnotes.model import db_exists
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes import form, msgprint
 
 sql = webnotes.conn.sql
@@ -30,7 +31,6 @@ class DocType:
 	def __init__(self,d,dt):
 		self.doc, self.doclist = d,dt
 		
-	#==========================================================================
 	def get_att_list(self):
 		lst = [['Attendance','','','Please fill columns which are Mandatory.',' Please do not modify the structure','',''],['','','','','','',''],['[Mandatory]','','[Mandatory]','[Mandatory]','[Mandatory]','[Mandatory]','[Mandatory]'],['Employee','Employee Name','Attendance Date','Status','Fiscal Year','Company','Naming Series']]
 		
@@ -46,7 +46,6 @@ class DocType:
 
 		return lst
 	
-	#------------------------------------------------------------------------------
 	# get date list inbetween from date and to date
 	def date_diff_list(self):
 		import datetime
@@ -65,10 +64,9 @@ class DocType:
 		
 		return dt
 
-	#------------------------------------------------------------------------------
 	def get_att_data(self):
-		fy = get_defaults()['fiscal_year']		#get default fiscal year 
-		comp = get_defaults()['company']		#get default company
+		fy = webnotes.defaults.get_global_default('fiscal_year')
+		comp = webnotes.defaults.get_user_default('company')
 		
 		#get naming series of attendance
 		import webnotes.model.doctype
@@ -82,7 +80,6 @@ class DocType:
 		
 		return {'fy':fy,'comp':comp,'sr':sr}
 
-	#=================================================================================	
 	def import_att_data(self):
 		filename = self.doc.file_list.split(',')
 

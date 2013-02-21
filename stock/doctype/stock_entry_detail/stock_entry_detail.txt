@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-14 16:33:34", 
+  "creation": "2013-01-29 19:25:45", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:57", 
+  "modified": "2013-02-20 16:46:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -195,5 +195,28 @@
   "options": "BOM", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "description": "Material Request used to make this Stock Entry", 
+  "doctype": "DocField", 
+  "fieldname": "material_request", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Material Request", 
+  "no_copy": 1, 
+  "options": "Material Request", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "material_request_item", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Material Request Item", 
+  "no_copy": 1, 
+  "options": "Material Request Item", 
+  "print_hide": 1, 
+  "read_only": 1
  }
 ]

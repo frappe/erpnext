@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import add_days, cint, cstr, flt, getdate
 from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 from setup.utils import get_company_currency

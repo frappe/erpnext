@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 """Global Defaults"""
 import webnotes
+import webnotes.defaults
 from webnotes.utils import cint
 
 keydict = {
@@ -83,4 +84,4 @@ class DocType:
 				
 	
 	def get_defaults(self):
-		return webnotes.conn.get_defaults()
+		return webnotes.defaults.get_defaults()

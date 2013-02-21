@@ -17,9 +17,10 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, get_defaults, set_default
+from webnotes.utils import cstr, set_default
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
+import webnotes.defaults
 
 sql = webnotes.conn.sql
 
@@ -241,8 +242,7 @@ class DocType:
 			#delete cost center
 			sql("delete from `tabCost Center` WHERE company_name = %s order by lft desc, rgt desc", self.doc.name)
 			
-			#update value as blank for tabDefaultValue defkey=company
-			sql("update `tabDefaultValue` set defvalue = '' where defkey='company' and defvalue = %s", self.doc.name)
+			webnotes.defaults.clear_default("company", value=self.doc.name)
 			
 			#update value as blank for tabSingles Global Defaults
 			sql("update `tabSingles` set value = '' where doctype='Global Defaults' and field = 'default_company' and value = %s", self.doc.name)
@@ -250,8 +250,8 @@ class DocType:
 		
 	# on rename
 	# ---------
-	def on_rename(self,newdn,olddn):		
+	def on_rename(self,newdn,olddn):
 		sql("update `tabCompany` set company_name = '%s' where name = '%s'" %(newdn,olddn))	
 		sql("update `tabSingles` set value = %s where doctype='Global Defaults' and field = 'default_company' and value = %s", (newdn, olddn))	
-		if get_defaults('company') == olddn:
-			set_default('company', newdn)
+		if webnotes.defaults.get_global_default('company') == olddn:
+			webnotes.defaults.set_global_default('company', newdn)

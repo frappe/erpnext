@@ -1,0 +1,16 @@
+{
+ "Allow Users": "Permitir que los usuarios", 
+ "Allow the following users to make Leave Applications for block days.": "Permitir a los usuarios realizar las siguientes aplicaciones dejan para los d\u00edas de bloque.", 
+ "Applies to Company": "Corresponde a la Empresa", 
+ "Block Days": "D\u00edas de bloque", 
+ "Block Holidays on important days.": "Bloque Vacaciones en d\u00edas importantes.", 
+ "Company": "Empresa", 
+ "HR": "HR", 
+ "If not checked, the list will have to be added to each Department where it has to be applied.": "Si no est\u00e1 activada, la lista tendr\u00e1 que ser a\u00f1adido a cada Departamento donde se ha de aplicar.", 
+ "Leave Block List": "Deja lista de bloqueo", 
+ "Leave Block List Allowed": "Deja Lista de bloqueo animales", 
+ "Leave Block List Dates": "Dejar las fechas de listas de bloqueo", 
+ "Leave Block List Name": "Deja Bloquear Nombre de lista", 
+ "Stop users from making Leave Applications on following days.": "Deje que los usuarios realicen aplicaciones dejan en los d\u00edas siguientes.", 
+ "Year": "A\u00f1o"
+}

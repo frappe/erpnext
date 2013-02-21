@@ -1,20 +1,23 @@
-.content, div#body_div {
-	width: 780px;
-}	
-
-div#body_div {
-	padding: 0px;
-	min-height: 400px;
-	margin: 40px auto 10px auto;
-	box-shadow: 1px 1px 3px 3px #bbb;
+div.outer {
+	-moz-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	-webkit-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	background-color: #fff;
 	border-radius: 5px;
+	padding: 20px;
+	margin: 30px -20px 10px -20px;
+	min-height: 400px;
 	overflow: hidden;
+}
+
+.outer .navbar {
+	margin: -20px -20px 10px -20px;
 }
 
 footer {
 	text-align: left;
-	width: 720px;
 	margin: auto;
+	margin-bottom: 20px;
 }
 
 .navbar-inner {
@@ -37,6 +40,14 @@ p, li {
 .layout-main {
 	min-height: 400px;
 	padding: 30px;
+}
+
+.missing-image {
+	background-color: #eee;
+	padding: 40px;
+	width: 32px;
+	font-size: 32px;
+	color: #888;
 }
 
 .social-icons {
@@ -65,11 +76,6 @@ p, li {
 	display: inline;
 	padding: 2px 14px 2px 0px;
 	margin: 0px;
-}
-
-.two-column {
-	width: 50%;
-	float: left;
 }
 
 .clear {

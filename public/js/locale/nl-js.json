@@ -120,6 +120,7 @@
  "Item Group": "Item Group", 
  "Item Price": "Item Prijs", 
  "Item Quality Inspection Parameter": "Item Kwaliteitscontrole Parameter", 
+ "Item Reorder": "Item opnieuw ordenen", 
  "Item Supplier": "Item Leverancier", 
  "Item Tax": "Item Belasting", 
  "Item Website Specification": "Item Website Specificatie", 
@@ -135,6 +136,9 @@
  "Lead": "Leiden", 
  "Leave Allocation": "Laat Toewijzing", 
  "Leave Application": "Verlofaanvraag", 
+ "Leave Block List": "Laat Block List", 
+ "Leave Block List Allow": "Laat Block List Laat", 
+ "Leave Block List Date": "Laat Block List Datum", 
  "Leave Control Panel": "Laat het Configuratiescherm", 
  "Leave Type": "Laat Type", 
  "Letter Head": "Brief Hoofd", 
@@ -147,6 +151,8 @@
  "Maintenance Visit Purpose": "Onderhoud Bezoek Doel", 
  "Manufacturing": "Productie", 
  "Market Segment": "Marktsegment", 
+ "Material Request": "Materiaal aanvragen", 
+ "Material Request Item": "Materiaal aanvragen Item", 
  "Messages": "Berichten", 
  "Mode of Payment": "Wijze van betaling", 
  "Module Def": "Module Def", 
@@ -311,5 +317,6 @@
  "Workflow Rule Detail": "Workflow Regel Detail", 
  "Workflow State": "Workflow State", 
  "Workflow Transition": "Workflow Transition", 
- "Workstation": "Workstation"
+ "Workstation": "Workstation", 
+ "test": "test"
 }

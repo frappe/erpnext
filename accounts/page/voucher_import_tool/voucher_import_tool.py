@@ -65,7 +65,7 @@ def map_fields(field_list, source, target):
 
 def import_vouchers(common_values, data, start_idx, import_type):
 	from webnotes.model.doc import Document
-	from webnotes.model.wrapper import ModelWrapper
+	from webnotes.model.bean import Bean
 	from accounts.utils import get_fiscal_year
 	from webnotes.utils.dateutils import parse_date
 
@@ -159,7 +159,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 						If you entered accounts correctly, please check template once"""]
 					raise Exception
 					
-				doclist = ModelWrapper([jv]+details)
+				doclist = Bean([jv]+details)
 				doclist.submit()
 			
 				messages.append("""<p style='color: green'>[row #%s] 

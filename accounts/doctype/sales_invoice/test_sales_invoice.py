@@ -3,7 +3,7 @@ import unittest
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
-		w = webnotes.model_wrapper(webnotes.copy_doclist(test_records[0]))
+		w = webnotes.bean(webnotes.copy_doclist(test_records[0]))
 		w.insert()
 		w.submit()
 		return w
@@ -17,7 +17,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = webnotes.model_wrapper(webnotes.copy_doclist(jv_test_records[0]))
+		jv = webnotes.bean(webnotes.copy_doclist(jv_test_records[0]))
 		jv.doclist[1].against_invoice = w.doc.name
 		jv.insert()
 		jv.submit()

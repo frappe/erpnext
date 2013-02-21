@@ -65,6 +65,7 @@
  "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.": "Precisi\u00f3n de los campos de flotador (cantidades, descuentos, etc porcentajes) s\u00f3lo para su visualizaci\u00f3n. Siempre queda a\u00fan se calcular\u00e1n hasta 6 decimales.", 
  "Purchase Order Required": "Orden de Compra Requerido", 
  "Purchase Receipt Required": "Se requiere recibo de compra", 
+ "Raise Material Request when stock reaches re-order level": "Levante solicitar material cuando el stock llega a re-ordenar nivel", 
  "Raise Purchase Request when stock reaches re-order level": "Levante Solicitud de compra cuando el stock llega a re-ordenar nivel", 
  "SMS Sender Name": "SMS Sender Name", 
  "Sales Order Required": "Se requiere de \u00f3rdenes de venta", 

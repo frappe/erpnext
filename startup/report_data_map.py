@@ -112,12 +112,13 @@ data_map = {
 			"warehouse": ["Warehouse", "name"]
 		},
 	},
-	"Purchase Request Item": {
+	"Material Request Item": {
 		"columns": ["item.name as name", "item_code", "warehouse", 
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
-		"from": "`tabPurchase Request Item` item, `tabPurchase Request` main",
-		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
-			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
+			"material_request_type = 'Purchase'", "ifnull(warehouse, '')!=''", 
+			"ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

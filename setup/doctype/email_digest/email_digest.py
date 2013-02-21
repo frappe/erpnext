@@ -261,7 +261,7 @@ class DocType:
 		return self.get_new_sum("Delivery Note", "New Delivery Notes", "grand_total")
 		
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Purchase Request", "New Purchase Requests")
+		return self.get_new_count("Material Request", "New Material Requests")
 		
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", "New Supplier Quotations",

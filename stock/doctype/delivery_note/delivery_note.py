@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, getdate
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -312,9 +312,9 @@ class DocType(SellingController):
 			""", self.doc.name)
 
 		if res and res[0][1]>0:
-			from webnotes.model.wrapper import ModelWrapper
+			from webnotes.model.bean import Bean
 			for r in res:
-				ps = ModelWrapper(dt='Packing Slip', dn=r[0])
+				ps = Bean(dt='Packing Slip', dn=r[0])
 				ps.cancel()
 			webnotes.msgprint("%s Packing Slip(s) Cancelled" % res[0][1])
 

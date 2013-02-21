@@ -34,7 +34,7 @@ class DocType:
 				warehouse = %s", (item_code, warehouse))
 		bin = bin and bin[0][0] or ''
 		if not bin:
-			bin_wrapper = webnotes.model_wrapper([{
+			bin_wrapper = webnotes.bean([{
 				"doctype": "Bin",
 				"item_code": item_code,
 				"warehouse": warehouse,
@@ -158,7 +158,7 @@ class DocType:
 
 	def repost_indented_qty(self, bin):
 		indented_qty = webnotes.conn.sql("""select sum(pr_item.qty - pr_item.ordered_qty)
-			from `tabPurchase Request Item` pr_item, `tabPurchase Request` pr
+			from `tabMaterial Request Item` pr_item, `tabMaterial Request` pr
 			where pr_item.item_code=%s and pr_item.warehouse=%s 
 			and pr_item.qty > pr_item.ordered_qty and pr_item.parent=pr.name 
 			and pr.status!='Stopped' and pr.docstatus=1"""

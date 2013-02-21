@@ -1,5 +1,12 @@
 {
+ " (Half Day)": "(Meio Dia)", 
  " Reason: ": "Motivo:", 
+ "Employee": "Empregado", 
+ "Following dates are blocked for Leave": "Seguintes datas est\u00e3o bloqueadas para a licen\u00e7a", 
  "Hurray! The day(s) on which you are applying for leave \\\t\t\t\t\tcoincide with holiday(s). You need not apply for leave.": "Viva! O dia (s) em que voc\u00ea est\u00e1 aplicando para deixar \\ coincidir com feriado (s). Voc\u00ea n\u00e3o precisa pedir licen\u00e7a.", 
+ "Leave Application": "Deixe Aplica\u00e7\u00e3o", 
+ "Leave Blocked": "Deixe Bloqueados", 
+ "Leave by": "Deixe por", 
+ "New Leave Application": "Aplica\u00e7\u00e3o deixar Nova", 
  "You cannot apply for a leave on the following date because it is blocked": "Voc\u00ea n\u00e3o pode aplicar para uma licen\u00e7a na seguinte data porque est\u00e1 bloqueado"
 }

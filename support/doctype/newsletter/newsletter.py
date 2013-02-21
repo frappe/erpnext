@@ -28,6 +28,7 @@ class DocType():
 
 	def test_send(self, doctype="Lead"):
 		self.recipients = self.doc.test_email_id.split(",")
+		self.send_to_doctype = "Lead"
 		self.send_bulk()
 		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
 

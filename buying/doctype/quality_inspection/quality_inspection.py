@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.model import db_exists
 from webnotes.model.doc import addchild, make_autoname
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 
 sql = webnotes.conn.sql
 	

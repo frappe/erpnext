@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cstr
 from webnotes.model import db_exists
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.bean import getlist, copy_doclist
 from webnotes import form, msgprint
 
 sql = webnotes.conn.sql

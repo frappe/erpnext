@@ -7,9 +7,9 @@ wn.module_page["Buying"] = [
 		icon: "icon-copy",
 		items: [
 			{
-				label: wn._("Purchase Request"),
+				label: wn._("Material Request"),
 				description: wn._("Request for purchase."),
-				doctype:"Purchase Request"
+				doctype:"Material Request"
 			},
 			{
 				label: wn._("Supplier Quotation"),

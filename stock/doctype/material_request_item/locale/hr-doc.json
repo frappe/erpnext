@@ -1,0 +1,19 @@
+{
+ "Brand": "Marka", 
+ "Description": "Opis", 
+ "Item Code": "Stavka \u0160ifra", 
+ "Item Group": "Stavka Grupa", 
+ "Item Name": "Stavka Ime", 
+ "Lead Time Date": "Olovo Time Date", 
+ "Material Request Item": "Materijal Zahtjev artikla", 
+ "Min Order Qty": "Min Red Kol", 
+ "Ordered Qty": "\u017d Kol", 
+ "Page Break": "Prijelom stranice", 
+ "Projected Qty": "Predvi\u0111en Kol", 
+ "Quantity": "Koli\u010dina", 
+ "Required Date": "Potrebna Datum", 
+ "Sales Order No": "Prodajnog naloga Ne", 
+ "Stock": "Zaliha", 
+ "Stock UOM": "Katalo\u0161ki UOM", 
+ "Warehouse": "Skladi\u0161te"
+}

@@ -1,0 +1,19 @@
+{
+ "Brand": "Merk", 
+ "Description": "Beschrijving", 
+ "Item Code": "Artikelcode", 
+ "Item Group": "Item Group", 
+ "Item Name": "Naam van het punt", 
+ "Lead Time Date": "Lead Tijd Datum", 
+ "Material Request Item": "Materiaal aanvragen Item", 
+ "Min Order Qty": "Minimum Aantal", 
+ "Ordered Qty": "Besteld Aantal", 
+ "Page Break": "Pagina-einde", 
+ "Projected Qty": "Verwachte Aantal", 
+ "Quantity": "Hoeveelheid", 
+ "Required Date": "Vereiste Datum", 
+ "Sales Order No": "Sales Order No", 
+ "Stock": "Voorraad", 
+ "Stock UOM": "Stock Verpakking", 
+ "Warehouse": "Magazijn"
+}

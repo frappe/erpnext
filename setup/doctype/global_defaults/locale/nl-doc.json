@@ -65,6 +65,7 @@
  "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.": "Precisie voor Float velden (aantallen, kortingen, percentages, enz.) alleen voor weergave. Praalwagens worden nog steeds berekend tot 6 decimalen.", 
  "Purchase Order Required": "Vereiste Purchase Order", 
  "Purchase Receipt Required": "Aankoopbewijs Verplicht", 
+ "Raise Material Request when stock reaches re-order level": "Raise Materiaal aanvragen bij voorraad strekt re-order niveau", 
  "Raise Purchase Request when stock reaches re-order level": "Raise aankoop verzoek bij voorraad strekt re-order niveau", 
  "SMS Sender Name": "SMS Sender Name", 
  "Sales Order Required": "Verkooporder Vereiste", 

@@ -5,15 +5,14 @@ from hr.doctype.leave_application.leave_application import LeaveDayBlockedError
 
 class TestLeaveApplication(unittest.TestCase):
 	def get_application(self, doclist):
-		application = webnotes.model_wrapper(doclist)
+		application = webnotes.bean(copy=doclist)
 		application.doc.from_date = "2013-01-01"
 		application.doc.to_date = "2013-01-05"
 		return application
 
 	def test_block_list(self):
 		import webnotes
-		webnotes.conn.set_value("Employee", "_T-Employee-0001", "department", 
-			"_Test Department with Block List")
+		webnotes.conn.set_value("Department", "_Test Department", "leave_block_list", "_Test Leave Block List")
 		
 		application = self.get_application(test_records[1])
 		application.insert()
@@ -46,6 +45,7 @@ class TestLeaveApplication(unittest.TestCase):
 		from webnotes.profile import add_role
 		add_role("test@example.com", "Leave Approver")
 		
+		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
 

@@ -67,7 +67,7 @@ class DocType(TransactionBase):
 
 @webnotes.whitelist()
 def set_status(name, status):
-	st = webnotes.model_wrapper("Support Ticket", name)
+	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
 	

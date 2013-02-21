@@ -5,7 +5,7 @@ import webnotes
 from webnotes.utils import set_default
 from webnotes.model import db_exists
 from webnotes.model.doc import Document
-from webnotes.model.wrapper import copy_doclist
+from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 

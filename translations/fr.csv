@@ -1,5 +1,5 @@
 ,
- Reason: ,Raison:
+ (Half Day),(Demi-journée)
  against same operation,contre une même opération
  by Role ,par rôle
  cannot be 0,ne peut pas être égal à 0
@@ -157,6 +157,7 @@ Activity Log,Journal d&#39;activité
 Activity Name,Nom de l&#39;activité
 Activity Type,Type d&#39;activité
 Actual,Réel
+Actual Amount,Montant réel
 Actual Budget,Budget Réel
 Actual Completion Date,Date d&#39;achèvement réelle
 Actual Date,Date Réelle
@@ -236,17 +237,13 @@ Against Voucher Type,Contre Type de Bon
 Agent,Agent
 "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials","Groupe global de ** ** Articles dans un autre article **. ** Ceci est utile si vous mettez en place un certains articles ** ** dans un paquet et vous maintenir le stock des articles emballés ** ** et non pas le total ** Article **. Le paquet ** ** Point aura «Est Produit en stock&quot; comme &quot;No&quot; et &quot;Est Point de vente&quot; que &quot;Oui&quot; Par exemple:. Si vous vendez des ordinateurs portables et sacs à dos séparément et un prix spécial si le client achète à la fois , puis l&#39;ordinateur portable Sac à dos + sera une nouvelle nomenclature des ventes Item.Note: BOM = Bill of Materials"
 Aging Date,Vieillissement Date
-All Active Leads,Tous les prospects actifs
 All Addresses.,Toutes les adresses.
-All Blog Subscribers,Tous les abonnés Blog
 All Contact,Tout contact
-All Contacts,Tous les contacts
 All Contacts.,Tous les contacts.
 All Customer Contact,Tout contact avec la clientèle
-All Customer Contacts,Tous les contacts clients
+All Day,Toute la journée
 All Employee (Active),Tous les employés (Actif)
 All Lead (Open),Tous plomb (Ouvert)
-All Leads,Tous les fils
 All Products or Services.,Tous les produits ou services.
 All Sales Partner Contact,Tout contact Sales Partner
 All Sales Person,Tout Sales Person
@@ -436,7 +433,6 @@ Budget Details,Détails du budget
 Budget Distribution,Répartition du budget
 Budget Distribution Detail,Détail Répartition du budget
 Budget Distribution Details,Détails de la répartition du budget
-Build Report,Rapport construire
 Bulk Email,Bulk Email
 Bulk Email records.,Bulk Email enregistrements.
 Bundle items at time of sale.,Regrouper des envois au moment de la vente.
@@ -465,6 +461,7 @@ Calculate Tax,Calculer l&#39;impôt sur
 Calculate Taxes and Charges,Calculer les impôts et charges
 Calculate Total Score,Calculer Score total
 Calendar,Calendrier
+Calendar Events,Calendrier des événements
 Call,Appeler
 Campaign,Campagne
 Campaign Name,Nom de la campagne
@@ -601,6 +598,7 @@ Contact Name,Contact Nom
 Contact No,Contact Aucune
 Contact No.,Contactez No.
 Contact Person,Personne à contacter
+Contact Type,Type de contact
 Contact Us Settings,Contactez-nous Réglages
 Contact in Future,Contactez dans l&#39;avenir
 "Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.","Options de contact, comme &quot;Requête ventes, du support requête&quot; etc chacun sur une nouvelle ligne ou séparées par des virgules."
@@ -664,6 +662,7 @@ Current Value,Valeur actuelle
 Current status,Situation actuelle
 Cust/Supp Address,Cust / Supp Adresse
 Cust/Supp Name,Cust / Supp Nom
+Custom,Coutume
 Custom Autoreply Message,Message personnalisé Autoreply
 Custom CSS,CSS personnalisé
 Custom Field,Champ personnalisé
@@ -879,6 +878,7 @@ Editable,Editable
 Educational Qualification,Qualification pour l&#39;éducation
 Educational Qualification Details,Détails de qualification d&#39;enseignement
 Eg. smsgateway.com/api/send_sms.cgi,Par exemple. smsgateway.com / api / send_sms.cgi
+Eligible Amount,Montant admissible
 Email,Email
 Email (By company),Email (par entreprise)
 Email Digest,Email Digest
@@ -927,6 +927,7 @@ Encashment Date,Date de l&#39;encaissement
 End Date,Date de fin
 End date of current invoice's period,Date de fin de la période de facturation en cours
 End of Life,Fin de vie
+Ends on,Se termine le
 Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,Entrez Id email pour recevoir Rapport d&#39;erreur envoyé par users.Eg: support@iwebnotes.com
 Enter Form Type,Entrez le type de formulaire
 Enter Row,Entrez Row
@@ -949,12 +950,9 @@ Entries are not allowed against this Fiscal Year if the year is closed.,Les insc
 Error,Erreur
 Estimated Material Cost,Coût des matières premières estimée
 Event,Événement
-Event Date,Date de l&#39;événement
 Event Individuals,Les individus de l&#39;événement
-Event Name,Nom de l&#39;événement
 Event Role,Rôle de l&#39;événement
 Event Roles,Rôles de l&#39;événement
-Event Time,Heure de l&#39;événement
 Event Type,Type d&#39;événement
 Event Updates,Mises à jour de l&#39;événement
 Event User,L&#39;utilisateur d&#39;Event
@@ -1046,6 +1044,7 @@ Fixed Asset Account,Compte des immobilisations
 Float,Flotter
 Float Precision,Flotteur de précision
 Floral,Floral
+Following dates are blocked for Leave,Dates suivantes sont bloquées pendant le congé
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Le tableau suivant indique les valeurs si les articles sont en sous - traitance. Ces valeurs seront extraites de la maîtrise de la «Bill of Materials&quot; de sous - traitance articles.
 Font,Fonte
 Font Size,Taille de la police
@@ -1073,6 +1072,7 @@ For ranges,Pour les plages
 For reference,Pour référence
 For reference only.,À titre de référence seulement.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Pour la commodité des clients, ces codes peuvent être utilisés dans des formats d&#39;impression comme les factures et les bons de livraison"
+Form,Forme
 Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,Format: hh: mm Exemple pour une heure fixée d&#39;expiration 01:00. Max expiration sera de 72 heures. Défaut est 24 heures
 Forum,Forum
 Fraction,Fraction
@@ -1089,7 +1089,9 @@ From PR Date,De PR Date
 From Package No.,De Ensemble numéro
 From Table,D&#39;après le tableau
 Frozen,Frozen
+Full Image,L&#39;image complète
 Full Name,Nom et Prénom
+Full description (formatted as markdown),Description complète (format markdown)
 Fully Billed,Entièrement Facturé
 Fully Completed,Entièrement complété
 GL Control,GL contrôle
@@ -1104,7 +1106,7 @@ Gender,Sexe
 General,Général
 General Ledger,General Ledger
 Generate Description HTML,Générer HTML Description
-Generate Purchase Requests (MRP) and Production Orders.,Générer Demande d&#39;Achat (MRP) et de la procédure de production.
+Generate Material Requests (MRP) and Production Orders.,Lieu à des demandes de matériel (MRP) et de la procédure de production.
 Generate Salary Slips,Générer les bulletins de salaire
 Generate Schedule,Générer annexe
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Générer des bordereaux d&#39;emballage pour les colis à livrer. Utilisé pour avertir le numéro du colis, contenu du paquet et son poids."
@@ -1265,6 +1267,8 @@ If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,
 Ignore,Ignorer
 Image,Image
 Image View,Voir l&#39;image
+Image for listing (Width: 100px) (Attach First),Image de l&#39;inscription (Largeur: 100px) (Joindre en premier)
+Image for listing (Width: 300px) (Attach First),Image de l&#39;inscription (Largeur: 300px) (Joindre en premier)
 Implementation Partner,Partenaire de mise en œuvre
 Import,Importer
 Import Date Format ,Format de la date d&#39;importation
@@ -1391,6 +1395,7 @@ Item Name,Nom d&#39;article
 Item Price,Prix ​​de l&#39;article
 Item Prices,Prix ​​du lot
 Item Quality Inspection Parameter,Paramètre d&#39;inspection Article de qualité
+Item Reorder,Réorganiser article
 Item Serial No,Point No de série
 Item Serial Nos,Point n ° de série
 Item Supplier,Fournisseur d&#39;article
@@ -1470,15 +1475,24 @@ Lead Lost,Conduire perdu
 Lead Name,Nom du chef de
 Lead Owner,Conduire du propriétaire
 Lead Ref,Le plomb Réf
+Lead Source,Source plomb
+Lead Status,Lead Etat
 Lead Time Date,Plomb Date Heure
 Lead Time Days,Diriger jours Temps
-Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.,Diriger jours Temps est le nombre de jours dont cet article est prévu dans votre entrepôt. Ces jours sont récupérées dans la demande d&#39;achat lorsque vous sélectionnez cette option.
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Diriger jours Temps est le nombre de jours dont cet article est prévu dans votre entrepôt. Ces jours sont récupérées dans la Demande de Matériel quand vous sélectionnez cette option.
 Lead Type,Type de câbles
 Leave Allocation,Laisser Allocation
 Leave Allocation Tool,Laisser outil de répartition
 Leave Application,Demande de congés
 Leave Approver,Laisser approbateur
 Leave Balance Before Application,Laisser Solde Avant d&#39;application
+Leave Block List,Laisser Block List
+Leave Block List Allow,Laisser Block List Autoriser
+Leave Block List Allowed,Laisser Block List admis
+Leave Block List Date,Laisser Date de Block List
+Leave Block List Dates,Laisser Dates de listes rouges d&#39;
+Leave Block List Name,Laisser Nom de la liste de blocage
+Leave Blocked,Laisser Bloqué
 Leave Control Panel,Laisser le Panneau de configuration
 Leave Encashed?,Laisser encaissés?
 Leave Encashment Amount,Laisser Montant Encaissement
@@ -1492,6 +1506,7 @@ Leave blank if considered for all departments,Laisser vide si cela est jugé pou
 Leave blank if considered for all designations,Laisser vide si cela est jugé pour toutes les désignations
 Leave blank if considered for all employee types,Laisser vide si cela est jugé pour tous les types d&#39;employés
 Leave blank if considered for all grades,Laisser vide si cela est jugé pour tous les grades
+Leave by,Sortez par
 "Leave can be approved by users with Role, ""Leave Approver""",Le congé peut être approuvées par les utilisateurs avec le rôle «Laissez approbateur&quot;
 Ledger,Grand livre
 Left,Gauche
@@ -1525,12 +1540,14 @@ Login Before,Connexion Avant
 Login Id,Connexion Id
 Login Page,Page de connexion
 Logout,Déconnexion
+Long Description,Description longue
 Long Text,Texte long
 Lost Reason,Raison perdu
 Low,Bas
 Lower Income,Basse revenu
 Lucida Grande,Lucida Grande
 MIS Control,MIS contrôle
+MREQ,MREQ
 MTN Details,Détails MTN
 Mail Footer,Pied de messagerie
 Mail Password,Mail Mot de passe
@@ -1591,6 +1608,14 @@ Match Id,ID match
 Match non-linked Invoices and Payments.,Correspondre non liées factures et paiements.
 Material Issue,Material Issue
 Material Receipt,Réception matériau
+Material Request,Demande de matériel
+Material Request Date,Date de demande de matériel
+Material Request Detail No,Détail Demande Support Aucun
+Material Request For Warehouse,Demande de matériel pour l&#39;entrepôt
+Material Request Item,Article demande de matériel
+Material Request Items,Articles Demande de matériel
+Material Request No,Demande de Support Aucun
+Material Request Type,Type de demande de matériel
 Material Transfer,De transfert de matériel
 Materials,Matériels
 Materials Required (Exploded),Matériel nécessaire (éclatée)
@@ -1598,6 +1623,7 @@ Materials Requirement Planning (MRP),Planification des besoins matières (MRP)
 Max Attachments,Attachments Max
 Max Days Leave Allowed,Laisser jours Max admis
 Max Discount (%),Max Réduction (%)
+Max. Limit,Max. Limiter
 "Meaning of Submit, Cancel, Amend","Signification de soumettre, annuler, de modifier"
 Medium,Moyen
 Merge,Fusionner
@@ -1676,14 +1702,15 @@ New Communications,Communications Nouveau-
 New Delivery Notes,Nouveaux bons de livraison
 New Enquiries,New Renseignements
 New Leads,New Leads
+New Leave Application,Nouvelle demande d&#39;autorisation
 New Leaves Allocated,Nouvelle Feuilles alloué
 New Leaves Allocated (In Days),Feuilles de nouveaux alloués (en jours)
+New Material Requests,Demandes des matériaux nouveaux
 New Name,Nouveau nom
 New Password,Nouveau mot de passe
 New Projects,Nouveaux projets
 New Purchase Orders,De nouvelles commandes
 New Purchase Receipts,Reçus d&#39;achat de nouveaux
-New Purchase Requests,Demande d&#39;Achat de nouveaux
 New Quotations,Citations de nouvelles
 New Record,Nouveau record
 New Sales Orders,Nouvelles commandes clients
@@ -1863,6 +1890,7 @@ Parent Territory,Territoire Parent
 Parenttype,ParentType
 Partially Completed,Partiellement réalisé
 Participants,Les participants
+Particulars,Coordonnées
 Partly Billed,Présentée en partie
 Partly Delivered,Livré en partie
 Partner,Partenaire
@@ -1953,6 +1981,7 @@ Prevdoc DocType,Prevdoc DocType
 Prevdoc Doctype,Prevdoc Doctype
 Preview,Avant-première
 Previous Work Experience,L&#39;expérience de travail antérieure
+Price,Prix
 Price List,Liste des Prix
 Price List Currency,Devise Prix
 Price List Currency Conversion Rate,Liste de prix de conversion de devises Taux
@@ -2067,14 +2096,6 @@ Purchase Receipt Items,Acheter des articles reçus
 Purchase Receipt Message,Achat message de réception
 Purchase Receipt No,Achetez un accusé de réception
 Purchase Receipt Required,Réception achat requis
-Purchase Request,Demande d&#39;achat
-Purchase Request Date,Date d&#39;achat Demande d&#39;
-Purchase Request Detail No,Achetez Détail demande no
-Purchase Request For Warehouse,Demande d&#39;achat pour l&#39;entrepôt
-Purchase Request Item,Achetez article Demande d&#39;
-Purchase Request No,Achat Demande Non
-Purchase Requisition Details,Achat détails de réquisition
-Purchase Requisition No,Aucune demande d&#39;achat
 Purchase Return,Achat de retour
 Purchase Returned,Achetez retour
 Purchase Returns,Retours d&#39;achat
@@ -2122,9 +2143,9 @@ Quotation To,Devis Pour
 Quotation no against which this Sales Order is made ,Devis pas contre lequel cette commande effective
 Quotes to Leads or Customers.,Citations à prospects ou clients.
 Raise Exception,Soulever Exception
+Raise Material Request,Soulever la Demande de Matériel
+Raise Material Request when stock reaches re-order level,Soulever demande de matériel lorsque le stock atteint le niveau de réapprovisionnement
 Raise Production Order,Soulever des ordres de fabrication
-Raise Purchase Request,Soulever la demande d&#39;achat
-Raise Purchase Request when stock reaches re-order level,Soulever Demande d&#39;achat lorsque le stock atteint le niveau de réapprovisionnement
 Raised By,Raised By
 Raised By (Email),Raised By (e-mail)
 Random,Aléatoire
@@ -2145,6 +2166,9 @@ Raw Materials Supplied Cost,Coût des matières premières fournies
 Re-Calculate Values,Re-calculer les valeurs
 Re-Order Level,Re-Order niveau
 Re-Order Qty,Re-Cdt
+Re-order,Re-order
+Re-order Level,Re-order niveau
+Re-order Qty,Re-order Quantité
 Read,Lire
 Read Only,Lecture seule
 Reading 1,Lecture 1
@@ -2261,6 +2285,8 @@ Right,Droit
 Role,Rôle
 Role Name,Rôle Nom
 Roles,Rôles
+Roles Assigned,Les rôles assignés
+Roles Assigned To User,Rôles assignés à l&#39;utilisateur
 Roles HTML,Rôles HTML
 Rounded Total,Totale arrondie
 Rounded Total (Export),Totale arrondie (Exportation)
@@ -2407,10 +2433,11 @@ Select Items from Delivery Note,Sélectionner les éléments de la note de livra
 Select Items from Purchase Order,Sélectionner les éléments de commande
 Select Items from Purchase Receipt,Sélectionner les éléments du reçu d&#39;achat
 Select Items from Sales Order,Sélectionnez les objets à partir des commandes clients
+Select Material Request,Sélectionnez Demande de Matériel
 Select PR,Sélectionnez PR
+Select Price List for the web. Leave blank to hide price.,Sélectionnez Liste de prix pour le web. Laissez vide pour cacher prix.
 Select Print Format,Sélectionnez Format d&#39;impression
 Select Print Heading,Sélectionnez Imprimer Cap
-Select Purchase Request,Sélectionnez la demande d&#39;achat
 Select Report Name,Sélectionner Nom du rapport
 Select Role,Sélectionnez rôle
 Select Sales Orders,Sélectionnez les commandes clients
@@ -2423,7 +2450,10 @@ Select Type,Sélectionnez le type de
 Select User or Property to start.,Sélectionnez l&#39;utilisateur ou d&#39;un bien pour commencer.
 Select account head of the bank where cheque was deposited.,Sélectionnez tête compte de la banque où chèque a été déposé.
 Select company name first.,Sélectionnez le nom de la première entreprise.
+Select dates to create a new ,Choisissez la date pour créer une nouvelle
 Select name of Customer to whom project belongs,Sélectionnez le nom du client à qui appartient projet
+Select or drag across dates to create a new event.,Sélectionnez ou faites glisser sur les dates de créer un nouvel événement.
+"Select shipping warehouse to show ""In Stock"" or ""Out of Stock"". To hide, leave blank","Sélectionnez entrepôt d&#39;expédition pour voir &quot;En stock&quot; ou &quot;Out of Stock&quot;. Pour masquer, laissez en blanc"
 Select template from which you want to get the Goals,Sélectionnez le modèle à partir duquel vous souhaitez obtenir des Objectifs
 Select the Employee for whom you are creating the Appraisal.,Sélectionnez l&#39;employé pour lequel vous créez l&#39;évaluation.
 Select the currency in which price list is maintained,Sélectionnez la devise dans laquelle la liste de prix est maintenue
@@ -2445,10 +2475,12 @@ Send,Envoyer
 Send Autoreply,Envoyer Autoreply
 Send Email,Envoyer un email
 Send From,Envoyer partir de
+Send Invite Email,Envoyer une invitation e-mail
 Send Me A Copy,Envoyez-moi une copie
 "Send Newsletters to your contacts, leads.","Envoyer des newsletters à vos contacts, entraîne."
 Send SMS,Envoyer un SMS
 Send To,Send To
+Send To Type,Envoyer à taper
 "Send an email to users of role ""Material Manager"" and ""Purchase Manager"" when re-order level is crossed.",Envoyer un e-mail aux utilisateurs de &quot;Gestionnaire de matériaux« rôle et la «Purchase Manager&quot; quand la re-commande de niveau est franchi.
 Send automatic emails to Contacts on Submitting transactions.,Envoyer des emails automatiques vers les Contacts sur Envoi transactions.
 "Send bulk SMS to leads, customers, contacts","Envoyer un SMS en vrac de prospects, clients, contacts"
@@ -2515,6 +2547,7 @@ Ship To,Expédier à
 Shipping Address,Adresse de livraison
 Shipping Address Name,Adresse de livraison Nom
 Shipping Details,Détails d&#39;Envoi
+Short Description,Description courte
 Short biography for website and other publications.,Courte biographie pour le site Web et d&#39;autres publications.
 Shortcut,Raccourci
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Voir &quot;En stock&quot; ou &quot;Pas en stock» basée sur le stock disponible dans cet entrepôt.
@@ -2563,6 +2596,7 @@ Standard Rate,Prix ​​Standard
 Start Date,Date de début
 Start Report For,Démarrer Rapport pour
 Start date of current invoice's period,Date de début de la période de facturation en cours
+Starts on,Commence le
 Startup,Démarrage
 State,État
 State Name,Nom de l&#39;État
@@ -2712,6 +2746,7 @@ Test Data,Des données de test
 Test Date,Date du test
 Test Email Id,Id Test Email
 Test Link,Test Link
+Test Runner,Test Runner
 Test Select,Test Sélectionnez
 Test Text,Texte de test
 Test the Newsletter,Testez la Newsletter
@@ -2732,10 +2767,8 @@ The gross weight of the package. Usually net weight + packaging material weight.
 The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,Le nom de votre entreprise / site que vous souhaitez voir apparaître sur la barre de titre du navigateur. Toutes les pages auront ce que le préfixe du titre.
 The net weight of this package. (calculated automatically as sum of net weight of items),Le poids net de ce paquet. (Calculé automatiquement comme la somme du poids net des articles)
 The new BOM after replacement,La nouvelle nomenclature après le remplacement
-The quantity for the Purchase Request when the stock goes below re-order level.,La quantité de la demande d&#39;achat lorsque le stock passe en dessous de re-commander niveau.
 The rate at which Bill Currency is converted into company's base currency,La vitesse à laquelle le projet de loi Monnaie est convertie en monnaie de base entreprise
 "The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions","Le système fournit des rôles prédéfinis, mais vous pouvez <a href='#List/Role'>ajouter de nouveaux rôles</a> pour définir des autorisations plus fines"
-"The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type ""Stores"" or ""Reserved Warehouse"".",Le système va générer une demande d&#39;achat automatiquement lorsque quantité en stock descend en dessous de re-commander niveau dans l&#39;entrepôt de type «magasins» ou «entrepôt réservé».
 The unique id for tracking all recurring invoices. It is generated on submit.,L&#39;identifiant unique pour le suivi de toutes les factures récurrentes. Il est généré sur soumettre.
 Theme,Thème
 Then By (optional),Puis par (facultatif)
@@ -2756,6 +2789,7 @@ This is the number of the last created transaction with this prefix,Il s&#39;agi
 This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Cet outil vous permet de mettre à jour ou corriger la quantité et la valorisation de stock dans le système. Il est généralement utilisé pour synchroniser les valeurs du système et ce qui existe réellement dans vos entrepôts.
 This will be used for setting rule in HR module,Il sera utilisé pour la règle de réglage dans le module RH
 Thread HTML,Discussion HTML
+Thumbnail Image,Vignette
 Thursday,Jeudi
 Time,Temps
 Time Zone,Fuseau horaire
@@ -2777,6 +2811,7 @@ To,À
 To Date,À ce jour
 To Discuss,Pour discuter
 To Do,To Do
+To Do List,To Do List
 To DocType,Pour DOCTYPE
 To Field,Pour le terrain
 To PR Date,Date de PR
@@ -2799,7 +2834,7 @@ To restrict a User of a particular Role to documents that are explicitly assigne
 To restrict a User of a particular Role to documents that are only self-created.,Pour limiter un utilisateur d&#39;un rôle particulier aux documents qui ne sont auto-créé.
 "To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.","Pour définir les rôles des utilisateurs, allez à <a href='#List/Profile'>Configuration&gt; Utilisateurs</a> et cliquez sur l&#39;utilisateur d&#39;attribuer des rôles."
 To track any installation or commissioning related work after sales,Pour suivre toute installation ou mise en service après-vente des travaux connexes
-"To track brand name in the following documents<br>Delivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Pour suivre la marque dans les documents suivants <br> Remarque livraison, Enuiry, demande d&#39;achat, article, bon de commande, bon d&#39;achat, facture de l&#39;acheteur, devis, facture de vente, BOM des ventes, des commandes clients, N ° de série"
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Pour suivre la marque dans les documents suivants <br> Remarque livraison, Enuiry, Demande de Matériel, article, bon de commande, bon d&#39;achat, facture de l&#39;acheteur, devis, facture de vente, BOM des ventes, des commandes clients, N ° de série"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Pour suivre pièce documents de vente et d&#39;achat en fonction de leurs numéros de série. Ce n&#39;est peut également être utilisé pour suivre les détails de la garantie du produit.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,"Pour suivre les articles de chiffre d&#39;affaires et des documents d&#39;achat avec nos lots <br> <b>Industrie préféré: produits chimiques, etc</b>"
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Pour suivre les éléments à l&#39;aide de code à barres. Vous serez en mesure d&#39;entrer dans les articles bon de livraison et la facture de vente par balayage de code à barres de l&#39;article.
@@ -2850,6 +2885,7 @@ Track this Sales Invoice against any Project,Suivre ce facture de vente contre t
 Track this Sales Order against any Project,Suivre ce décret ventes contre tout projet
 Transaction,Transaction
 Transaction Date,Date de la transaction
+Transfer,Transférer
 Transfer stock from one warehouse to another.,Transfert de stocks d&#39;un entrepôt à un autre.
 Transition Rules,Règles de transition
 Transporter Info,Infos Transporter
@@ -2882,6 +2918,7 @@ URL,URL
 Unable to complete request: ,Impossible de terminer la requête:
 Under AMC,En vertu de l&#39;AMC
 Under Graduate,Sous Graduate
+Under Section,Conformément à l&#39;article
 Under Warranty,Sous garantie
 Unit of Measure,Unité de mesure
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Unité de mesure de cet article (Kg par exemple, unité, Non, Pair)."
@@ -2966,6 +3003,7 @@ Warehouse Type,Type d&#39;entrepôt
 Warehouse User,L&#39;utilisateur d&#39;entrepôt
 Warehouse Users,Les utilisateurs d&#39;entrepôt
 Warehouse where you are maintaining stock of rejected items,Entrepôt où vous êtes maintenant le bilan des éléments rejetés
+Warehouse-wise Item Reorder,Warehouse-sage Réorganiser article
 Warn,Avertir
 Warning,Avertissement
 Warranty / AMC Details,Garantie / AMC Détails
@@ -3053,12 +3091,11 @@ You can create more earning and deduction type from Setup --> HR,Vous pouvez cr�
 You can enter any date manually,Vous pouvez entrer une date manuellement
 You can enter the minimum quantity of this item to be ordered.,Vous pouvez entrer la quantité minimale de cet élément à commander.
 You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.,"Vous pouvez faire un bon de livraison de commandes de ventes multiples. Sélectionnez les ordres de vente, un par un et cliquez sur le bouton ci-dessous."
-You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.,Vous pouvez faire une commande à partir de demandes d&#39;achat multiples. Sélectionnez Demande d&#39;Achat un par un et cliquez sur le bouton ci-dessous.
+You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.,"Vous pouvez faire un bon de commande de matériel demandes multiples. Sélectionnez demandes de matériel, un par un et cliquez sur le bouton ci-dessous."
 You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.,Vous pouvez faire une commande de citations multiples fournisseurs. Sélectionnez Citations fournisseurs un par un et cliquez sur le bouton ci-dessous.
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,Vous pouvez faire une facture d&#39;achat de plusieurs bons de commande. Sélectionnez les commandes une par une et cliquez sur le bouton ci-dessous.
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,Vous pouvez définir plusieurs «propriétés» aux utilisateurs de définir des valeurs par défaut et d&#39;appliquer des règles d&#39;autorisation sur la base de la valeur de ces propriétés sous diverses formes.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,Vous pouvez utiliser <a href='#Form/Customize Form'>Personnaliser le formulaire</a> de fixer des niveaux de champs.
-You cannot apply for a leave on the following date because it is blocked,Vous ne pouvez pas demander un congé à la date suivante car il est bloqué
 Your Customer's TAX registration numbers (if applicable) or any general information,Votre Client numéros d&#39;immatriculation fiscale (le cas échéant) ou toute autre information générale
 "Your download is being built, this may take a few moments...","Votre téléchargement est en cours de construction, ce qui peut prendre quelques instants ..."
 Your letter head content in HTML.,Votre contenu tête lettre en HTML.
@@ -3231,6 +3268,7 @@ tag,balise
 tags,balises
 "target = ""_blank""",target = &quot;_blank&quot;
 tasks,tâches
+test,test
 text-height,Texte-hauteur
 text-width,Texte de largeur
 th,e

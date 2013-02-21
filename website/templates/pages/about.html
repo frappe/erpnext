@@ -3,8 +3,7 @@
 {% set title="About Us" %}
 
 {% block content %}
-<div class="layout-wrapper">
-	<div class="layout-main">
+<div class="span12">
 	{{ obj.doc.company_introduction or "<h2>About Us</h2><p>Some Introduction about your company that you would like your website visitor to know. More people than you think will read your About page. People always like to know who the are doing business with. Be authentic and avoid using jargon like 'value added services' etc. Be sure to update your company history and list of key team members in Website > About Us Settings</p>" }}
 	{% if obj.doclist.get({"doctype":"Company History"}) %}
 	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
@@ -35,6 +34,5 @@
 	</table>
 	{% endif %}
 	{{ obj.doc.footer or "" }}
-	</div>
 </div>
 {% endblock %}

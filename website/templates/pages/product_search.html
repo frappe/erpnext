@@ -17,22 +17,17 @@ $(document).ready(function() {
 });
 </script>
 
-<div class="layout-wrapper layout-wrapper-background">
-	<div class="web-content" id="content-product_search">
-		<div class="layout-main" style="padding: 30px;">
-			{% include 'html/product_search_box.html' %}
-			<h3 class="search-results">Search Results</h3>
-			<div id="search-list">
-				
-			</div>
-			<div style="text-align: center;">
-				<div class="more-btn" 
-					style="display: none; text-align: center;">
-					<button class="btn">More...</button>
-				</div>
-			</div>
+{% include 'html/product_search_box.html' %}
+<div class="span12">
+	<h3 class="search-results">Search Results</h3>
+	<div id="search-list" class="row">
+		
+	</div>
+	<div style="text-align: center;">
+		<div class="more-btn" 
+			style="display: none; text-align: center;">
+			<button class="btn">More...</button>
 		</div>
 	</div>
 </div>
-
 {% endblock %}

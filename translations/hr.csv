@@ -1,5 +1,5 @@
 ,
- Reason: ,Razlog:
+ (Half Day),(Poludnevni)
  against same operation,protiv istog radu
  by Role ,prema ulozi
  cannot be 0,ne može biti 0
@@ -157,6 +157,7 @@ Activity Log,Aktivnost Prijava
 Activity Name,Djelatnost Naziv
 Activity Type,Aktivnost Tip
 Actual,Stvaran
+Actual Amount,Stvarni iznos
 Actual Budget,Stvarni proračun
 Actual Completion Date,Stvarni datum dovršenja
 Actual Date,Stvarni datum
@@ -236,17 +237,13 @@ Against Voucher Type,Protiv voucher vrsti
 Agent,Agent
 "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials","Agregat skupina ** stavki ** u drugoj točki ** **. To je korisno ako ste vezanje određene artikle ** ** u paketu i održavanje zalihe pakiran ** stavki ** a ne agregata ** artikla **. Paket ** artikla ** će &quot;Je kataloški Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;, na primjer:. Ako prodajete Prijenosna računala i Ruksaci odvojeno i imaju posebnu cijenu ako kupac kupuje oboje , onda laptop + ruksak će biti novi Prodaja BOM Item.Note: BOM = Bill materijala"
 Aging Date,Starenje Datum
-All Active Leads,Svi Aktivne Vodi
 All Addresses.,Sve adrese.
-All Blog Subscribers,Svi Blog Pretplatnici
 All Contact,Sve Kontakt
-All Contacts,Svi kontakti
 All Contacts.,Svi kontakti.
 All Customer Contact,Sve Kupac Kontakt
-All Customer Contacts,Svi kupaca Kontakti
+All Day,All Day
 All Employee (Active),Sve zaposlenika (aktivna)
 All Lead (Open),Sve Olovo (Otvoreno)
-All Leads,Sve vodi
 All Products or Services.,Svi proizvodi i usluge.
 All Sales Partner Contact,Sve Kontakt Prodaja partner
 All Sales Person,Sve Prodaje Osoba
@@ -436,7 +433,6 @@ Budget Details,Proračunski Detalji
 Budget Distribution,Proračun Distribucija
 Budget Distribution Detail,Proračun Distribucija Detalj
 Budget Distribution Details,Proračun raspodjele Detalji
-Build Report,Izgradite izvješće
 Bulk Email,Bulk Email
 Bulk Email records.,Bulk Email Records.
 Bundle items at time of sale.,Bala stavke na vrijeme prodaje.
@@ -465,6 +461,7 @@ Calculate Tax,Izračun poreza
 Calculate Taxes and Charges,Izračun poreza i pristojbi
 Calculate Total Score,Izračunajte ukupni rezultat
 Calendar,Kalendar
+Calendar Events,Kalendar događanja
 Call,Nazvati
 Campaign,Kampanja
 Campaign Name,Naziv kampanje
@@ -601,6 +598,7 @@ Contact Name,Kontakt Naziv
 Contact No,Kontaktirajte Ne
 Contact No.,Kontakt broj
 Contact Person,Kontakt osoba
+Contact Type,Vrsta kontakta
 Contact Us Settings,Kontaktirajte nas Settings
 Contact in Future,Kontakt u budućnosti
 "Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.","Kontakt opcije, poput &quot;Sales Query, Podrška upit&quot; itd jedni na novoj liniji ili odvojene zarezima."
@@ -664,6 +662,7 @@ Current Value,Trenutna vrijednost
 Current status,Trenutni status
 Cust/Supp Address,Cust / Supp Adresa
 Cust/Supp Name,Cust / Supp Ime
+Custom,Običaj
 Custom Autoreply Message,Prilagođena Automatski Poruka
 Custom CSS,Prilagođena CSS
 Custom Field,Prilagođena polja
@@ -879,6 +878,7 @@ Editable,Uređivati
 Educational Qualification,Obrazovne kvalifikacije
 Educational Qualification Details,Obrazovni Pojedinosti kvalifikacije
 Eg. smsgateway.com/api/send_sms.cgi,Npr.. smsgateway.com / api / send_sms.cgi
+Eligible Amount,Prihvatljivo Iznos
 Email,E-mail
 Email (By company),E-mail (Po mjestu)
 Email Digest,E-pošta
@@ -927,6 +927,7 @@ Encashment Date,Encashment Datum
 End Date,Datum završetka
 End date of current invoice's period,Kraj datum tekućeg razdoblja dostavnice
 End of Life,Kraj života
+Ends on,Završava
 Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,Unesite Email ID primiti izvješće o pogrešci poslao users.Eg: support@iwebnotes.com
 Enter Form Type,Unesite Obrazac Vid
 Enter Row,Unesite Row
@@ -949,12 +950,9 @@ Entries are not allowed against this Fiscal Year if the year is closed.,"Prijave
 Error,Pogreška
 Estimated Material Cost,Procjena troškova materijala
 Event,Događaj
-Event Date,Događaj Datum
 Event Individuals,Događaj Pojedinci
-Event Name,Naziv događaja
 Event Role,Događaj Uloga
 Event Roles,Događaj Uloge
-Event Time,Vrijeme događaja
 Event Type,Vrsta događaja
 Event Updates,Događaj ažuriranja
 Event User,Događaj Upute
@@ -1046,6 +1044,7 @@ Fixed Asset Account,Dugotrajne imovine račun
 Float,Plutati
 Float Precision,Float Precision
 Floral,Cvijetan
+Following dates are blocked for Leave,Nakon datumi su blokirani dopusta
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Nakon stol će pokazati vrijednosti ako su stavke pod - ugovoreno. Ove vrijednosti će biti preuzeta od zapovjednika &quot;Bill of Materials&quot; pod - ugovoreni stavke.
 Font,Krstionica
 Font Size,Veličina fonta
@@ -1073,6 +1072,7 @@ For ranges,Za raspone
 For reference,Za referencu
 For reference only.,Za samo kao referenca.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Za praktičnost kupaca, te kodovi mogu se koristiti u tiskanim formata kao što su fakture i otpremnice"
+Form,Oblik
 Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,Format: hh: mm primjer za jedan sat isteka postavljen kao 01:00. Maks isteka će biti 72 sati. Default je 24 sati
 Forum,Forum
 Fraction,Frakcija
@@ -1089,7 +1089,9 @@ From PR Date,Iz PR Datum
 From Package No.,Iz paketa broj
 From Table,Iz tablice
 Frozen,Zaleđeni
+Full Image,Cijeli slike
 Full Name,Ime i prezime
+Full description (formatted as markdown),Cijeli opis (formatiran kao smanjenje)
 Fully Billed,Potpuno Naplaćeno
 Fully Completed,Potpuno Završeni
 GL Control,GL kontrola
@@ -1104,7 +1106,7 @@ Gender,Rod
 General,Opći
 General Ledger,Glavna knjiga
 Generate Description HTML,Generiranje Opis HTML
-Generate Purchase Requests (MRP) and Production Orders.,Generirajte Kupnja Upiti (MRP) i radne naloge.
+Generate Material Requests (MRP) and Production Orders.,Generirajte Materijal Upiti (MRP) i radne naloge.
 Generate Salary Slips,Generiranje plaće gaćice
 Generate Schedule,Generiranje Raspored
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Generirajte pakiranje gaćice za pakete koji će biti isporučen. Rabljeni obavijestiti paket broj, sadržaj paketa i njegovu težinu."
@@ -1265,6 +1267,8 @@ If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,
 Ignore,Ignorirati
 Image,Slika
 Image View,Slika Pogledaj
+Image for listing (Width: 100px) (Attach First),Slika za uvrštenje (Širina: 100px) (Priložiti Prvo)
+Image for listing (Width: 300px) (Attach First),Slika za uvrštenje (Širina: 300 x) (Priložiti Prvo)
 Implementation Partner,Provedba partner
 Import,Uvoz
 Import Date Format ,Uvoz Datum Format
@@ -1391,6 +1395,7 @@ Item Name,Stavka Ime
 Item Price,Stavka Cijena
 Item Prices,Stavka Cijene
 Item Quality Inspection Parameter,Stavka Provera kvaliteta parametara
+Item Reorder,Stavka redoslijeda
 Item Serial No,Stavka rednim brojem
 Item Serial Nos,Stavka Serijski br
 Item Supplier,Stavka Dobavljač
@@ -1470,15 +1475,24 @@ Lead Lost,Olovo Lost
 Lead Name,Olovo Ime
 Lead Owner,Olovo Vlasnik
 Lead Ref,Olovo Ref.
+Lead Source,Olovo Source
+Lead Status,Olovo Status
 Lead Time Date,Olovo Time Date
 Lead Time Days,Olovo vrijeme Dane
-Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.,Olovo vrijeme dana je broj dana koji ovaj predmet se očekuje u skladištu. Ovih dana je preuzeta u zahtjev za kupnju kada odaberete ovu stavku.
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Olovo vrijeme dana je broj dana koji ovaj predmet se očekuje u skladištu. Ovih dana je preuzeta u Materijal Zahtjev kada odaberete ovu stavku.
 Lead Type,Olovo Vid
 Leave Allocation,Ostavite Raspodjela
 Leave Allocation Tool,Ostavite raspodjele alat
 Leave Application,Ostavite aplikaciju
 Leave Approver,Ostavite odobravatelju
 Leave Balance Before Application,Ostavite Balance Prije primjene
+Leave Block List,Ostavite Block List
+Leave Block List Allow,Ostavite Blok Popis Dopustite
+Leave Block List Allowed,Ostavite Block List dopuštenih
+Leave Block List Date,Ostavite Date Popis Block
+Leave Block List Dates,Ostavite datumi lista blokiranih
+Leave Block List Name,Ostavite popis imena Block
+Leave Blocked,Ostavite blokirani
 Leave Control Panel,Ostavite Upravljačka ploča
 Leave Encashed?,Ostavite Encashed?
 Leave Encashment Amount,Ostavite Encashment Iznos
@@ -1492,6 +1506,7 @@ Leave blank if considered for all departments,Ostavite prazno ako smatra za sve 
 Leave blank if considered for all designations,Ostavite prazno ako smatra za sve oznake
 Leave blank if considered for all employee types,Ostavite prazno ako smatra za sve tipove zaposlenika
 Leave blank if considered for all grades,Ostavite prazno ako smatra za sve razrede
+Leave by,Ostavite po
 "Leave can be approved by users with Role, ""Leave Approver""","Ostavite može biti odobren od strane korisnika s uloge, &quot;Ostavite odobravatelju&quot;"
 Ledger,Glavna knjiga
 Left,Lijevo
@@ -1525,12 +1540,14 @@ Login Before,Prijavite Prije
 Login Id,Prijavite Id
 Login Page,Prijavite stranicu
 Logout,Odjava
+Long Description,Dugi opis
 Long Text,Dugo Tekst
 Lost Reason,Izgubili Razlog
 Low,Nisko
 Lower Income,Donja Prihodi
 Lucida Grande,Lucidi Grande
 MIS Control,MIS kontrola
+MREQ,MREQ
 MTN Details,MTN Detalji
 Mail Footer,Mail Footer
 Mail Password,Mail Lozinka
@@ -1591,6 +1608,14 @@ Match Id,Match ID
 Match non-linked Invoices and Payments.,Klađenje na ne-povezane faktura i plaćanja.
 Material Issue,Materijal Issue
 Material Receipt,Materijal Potvrda
+Material Request,Materijal zahtjev
+Material Request Date,Materijal Zahtjev Datum
+Material Request Detail No,Materijal Zahtjev Detalj Ne
+Material Request For Warehouse,Materijal Zahtjev za galeriju
+Material Request Item,Materijal Zahtjev artikla
+Material Request Items,Materijalni Zahtjev Proizvodi
+Material Request No,Materijal Zahtjev Ne
+Material Request Type,Materijal Zahtjev Tip
 Material Transfer,Materijal transfera
 Materials,Materijali
 Materials Required (Exploded),Materijali Obavezno (eksplodirala)
@@ -1598,6 +1623,7 @@ Materials Requirement Planning (MRP),Materijali Zahtjev za planiranje (MRP)
 Max Attachments,Max Privitci
 Max Days Leave Allowed,Max Dani Ostavite dopuštenih
 Max Discount (%),Maks Popust (%)
+Max. Limit,Maks. Ograničiti
 "Meaning of Submit, Cancel, Amend","Značenje Podnijeti, Odustani, Izmijeniti"
 Medium,Srednji
 Merge,Spojiti
@@ -1676,14 +1702,15 @@ New Communications,Novi komunikacije
 New Delivery Notes,Novi otpremnice
 New Enquiries,Novi Upiti
 New Leads,Nova vodi
+New Leave Application,Novi dopust Primjena
 New Leaves Allocated,Novi Leaves Dodijeljeni
 New Leaves Allocated (In Days),Novi Lišće alociran (u danima)
+New Material Requests,Novi materijal Zahtjevi
 New Name,Novo ime
 New Password,Novi Lozinka
 New Projects,Novi projekti
 New Purchase Orders,Novi narudžbenice
 New Purchase Receipts,Novi Kupnja Primici
-New Purchase Requests,Novi Kupnja Upiti
 New Quotations,Novi Citati
 New Record,Novi rekord
 New Sales Orders,Nove narudžbe
@@ -1863,6 +1890,7 @@ Parent Territory,Roditelj Regija
 Parenttype,Parenttype
 Partially Completed,Djelomično Završeni
 Participants,Sudionici
+Particulars,Pojedinosti
 Partly Billed,Djelomično Naplaćeno
 Partly Delivered,Djelomično Isporučeno
 Partner,Partner
@@ -1953,6 +1981,7 @@ Prevdoc DocType,Prevdoc DOCTYPE
 Prevdoc Doctype,Prevdoc DOCTYPE
 Preview,Prikaz
 Previous Work Experience,Radnog iskustva
+Price,Cijena
 Price List,Cjenik
 Price List Currency,Cjenik valuta
 Price List Currency Conversion Rate,Cjenik valuta pretvorbe Stopa
@@ -2067,14 +2096,6 @@ Purchase Receipt Items,Kupnja primitka artikle
 Purchase Receipt Message,Kupnja Potvrda poruku
 Purchase Receipt No,Račun kupnje Ne
 Purchase Receipt Required,Kupnja Potvrda Obvezno
-Purchase Request,Zahtjev za kupnju
-Purchase Request Date,Zahtjev za kupnju Datum
-Purchase Request Detail No,Zahtjev za kupnju detaljno Ne
-Purchase Request For Warehouse,Kupnja Zahtjev za galeriju
-Purchase Request Item,Zahtjev za kupnju predmeta
-Purchase Request No,Kupnja Zahtjev Ne
-Purchase Requisition Details,Kupnja rekvizicije Detalji
-Purchase Requisition No,Kupnja rekvizicije Ne
 Purchase Return,Kupnja Povratak
 Purchase Returned,Kupnja Vraćeno
 Purchase Returns,Kupnja Povratak
@@ -2122,9 +2143,9 @@ Quotation To,Ponuda za
 Quotation no against which this Sales Order is made ,Ponuda ne protiv koje ovaj prodajnog naloga se vrši
 Quotes to Leads or Customers.,Citati na vodi ili kupaca.
 Raise Exception,Podignite Iznimka
+Raise Material Request,Podignite Materijal Zahtjev
+Raise Material Request when stock reaches re-order level,Podignite Materijal Zahtjev kad dionica dosegne ponovno poredak razinu
 Raise Production Order,Podignite proizvodnom nalogu
-Raise Purchase Request,Podignite zahtjev za kupnju
-Raise Purchase Request when stock reaches re-order level,Podignite zahtjev za kupnju dionica kada dosegne ponovno poredak razinu
 Raised By,Povišena Do
 Raised By (Email),Povišena Do (e)
 Random,Slučajan
@@ -2145,6 +2166,9 @@ Raw Materials Supplied Cost,Sirovine Isporuka Troškovi
 Re-Calculate Values,Ponovno izračunati vrijednosti
 Re-Order Level,Re-Order Razina
 Re-Order Qty,Re-Order Kol
+Re-order,Ponovno bi
+Re-order Level,Ponovno bi Razina
+Re-order Qty,Ponovno bi Kol
 Read,Čitati
 Read Only,Read Only
 Reading 1,Čitanje 1
@@ -2261,6 +2285,8 @@ Right,Desno
 Role,Uloga
 Role Name,Uloga Ime
 Roles,Uloge
+Roles Assigned,Uloge Dodijeljeni
+Roles Assigned To User,Uloge dodijeljena Korisniku
 Roles HTML,Uloge HTML
 Rounded Total,Zaobljeni Ukupno
 Rounded Total (Export),Zaobljeni Ukupno (izvoz)
@@ -2407,10 +2433,11 @@ Select Items from Delivery Note,Odaberite artikle iz otpremnici
 Select Items from Purchase Order,Odaberite artikle iz narudžbenice
 Select Items from Purchase Receipt,Odaberite artikle iz kupnje primitka
 Select Items from Sales Order,Odaberite artikle iz prodajnog naloga
+Select Material Request,Odaberite Materijal Zahtjev
 Select PR,Odaberite PR
+Select Price List for the web. Leave blank to hide price.,Odaberite cjenik za webu. Ostavite prazno za skrivanje cijenu.
 Select Print Format,Odaberite Print Format
 Select Print Heading,Odaberite Ispis Naslov
-Select Purchase Request,Odaberite zahtjev za kupnju
 Select Report Name,Odaberite Naziv izvješća
 Select Role,Odaberite Uloga
 Select Sales Orders,Odaberite narudžbe
@@ -2423,7 +2450,10 @@ Select Type,Odaberite Vid
 Select User or Property to start.,Odaberite korisnika ili imovina za početak.
 Select account head of the bank where cheque was deposited.,Odaberite račun šefa banke gdje je ček bio pohranjen.
 Select company name first.,Odaberite naziv tvrtke prvi.
+Select dates to create a new ,Odaberite datume za stvaranje nove
 Select name of Customer to whom project belongs,Odaberite ime kupca kojem projekt pripada
+Select or drag across dates to create a new event.,Odaberite ili povucite preko datuma stvoriti novi događaj.
+"Select shipping warehouse to show ""In Stock"" or ""Out of Stock"". To hide, leave blank","Odaberite brodska skladišta pokazati &quot;na lageru&quot; ili &quot;out of stock&quot;. Za skrivanje, ostavite prazno"
 Select template from which you want to get the Goals,Odaberite predložak s kojeg želite dobiti ciljeva
 Select the Employee for whom you are creating the Appraisal.,Odaberite zaposlenika za koga se stvara procjene.
 Select the currency in which price list is maintained,Odaberite valutu u kojoj cjenik održava
@@ -2445,10 +2475,12 @@ Send,Poslati
 Send Autoreply,Pošalji Automatski
 Send Email,Pošaljite e-poštu
 Send From,Pošalji Iz
+Send Invite Email,Pošalji pozivnicu e
 Send Me A Copy,Pošaljite mi kopiju
 "Send Newsletters to your contacts, leads.","Pošaljite newslettere svojim kontaktima, vodi."
 Send SMS,Pošalji SMS
 Send To,Pošalji
+Send To Type,Pošalji Upišite
 "Send an email to users of role ""Material Manager"" and ""Purchase Manager"" when re-order level is crossed.","Pošaljite e-mail za korisnike ulogu &quot;Material Manager&quot; i &quot;Kupnja Manager&quot;, kada ponovno bi se razina prešli."
 Send automatic emails to Contacts on Submitting transactions.,Pošalji automatske poruke u Kontakte o podnošenju transakcije.
 "Send bulk SMS to leads, customers, contacts","Pošalji bulk SMS vodi, klijentima, kontaktima"
@@ -2515,6 +2547,7 @@ Ship To,Brod za
 Shipping Address,Dostava Adresa
 Shipping Address Name,Dostava Adresa Ime
 Shipping Details,Dostava Detalji
+Short Description,Kratak opis
 Short biography for website and other publications.,Kratka biografija za web stranice i drugih publikacija.
 Shortcut,Prečac
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Show &quot;na lageru&quot; ili &quot;Nije u skladištu&quot; temelji se na skladištu dostupna u tom skladištu.
@@ -2563,6 +2596,7 @@ Standard Rate,Standardna stopa
 Start Date,Datum početka
 Start Report For,Početak izvješće za
 Start date of current invoice's period,Početak datum tekućeg razdoblja dostavnice
+Starts on,Počinje na
 Startup,Stavljanje u pogon
 State,Država
 State Name,Država Ime
@@ -2712,6 +2746,7 @@ Test Data,Test podataka
 Test Date,Test Datum
 Test Email Id,Test E-mail ID
 Test Link,Test linkova
+Test Runner,Test Runner
 Test Select,Test Odaberite
 Test Text,Test Tekst
 Test the Newsletter,Test Newsletter
@@ -2732,10 +2767,8 @@ The gross weight of the package. Usually net weight + packaging material weight.
 The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,Naziv tvrtke / web stranice kao što želite da se pojavi na naslovnoj traci preglednika. Sve stranice će imati to kao prefiks na naslov.
 The net weight of this package. (calculated automatically as sum of net weight of items),Neto težina tog paketa. (Automatski izračunava kao zbroj neto težini predmeta)
 The new BOM after replacement,Novi BOM nakon zamjene
-The quantity for the Purchase Request when the stock goes below re-order level.,Količina za zahtjev za kupnju kad dionica ide ispod ponovno bi razina.
 The rate at which Bill Currency is converted into company's base currency,Stopa po kojoj Bill valuta pretvara u tvrtke bazne valute
 "The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions","Sustav pruža unaprijed definiranim ulogama, ali možete <a href='#List/Role'>dodati nove uloge</a> postaviti finije dozvole"
-"The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type ""Stores"" or ""Reserved Warehouse"".",Sustav će generirati zahtjev Kupnja automatski kada dioničko količina ide ispod ponovno bi razina u skladištu tipa &quot;prodavaonice&quot; ili &quot;Reserved skladištu&quot;.
 The unique id for tracking all recurring invoices. It is generated on submit.,Jedinstveni ID za praćenje svih ponavljajući fakture. To je generiran na podnijeti.
 Theme,Tema
 Then By (optional),Zatim Do (opcionalno)
@@ -2756,6 +2789,7 @@ This is the number of the last created transaction with this prefix,To je broj z
 This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Ovaj alat pomaže vam da ažurirate ili popraviti količinu i vrednovanja zaliha u sustavu. To se obično koristi za sinkronizaciju sustava vrijednosti i što zapravo postoji u svojim skladištima.
 This will be used for setting rule in HR module,To će se koristiti za postavljanje pravilu u HR modula
 Thread HTML,Temu HTML
+Thumbnail Image,Thumbnail slika
 Thursday,Četvrtak
 Time,Vrijeme
 Time Zone,Time Zone
@@ -2777,6 +2811,7 @@ To,Na
 To Date,Za datum
 To Discuss,Za Raspravljajte
 To Do,Da li
+To Do List,Da li popis
 To DocType,Za DOCTYPE
 To Field,Za Field
 To PR Date,Za PR Datum
@@ -2799,7 +2834,7 @@ To restrict a User of a particular Role to documents that are explicitly assigne
 To restrict a User of a particular Role to documents that are only self-created.,Da biste ograničili korisnik određenu ulogu dokumentima koji su samo self-kreirana.
 "To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.","Da biste postavili korisničke uloge, samo idite na <a href='#List/Profile'>Postavke&gt; Korisnici</a> i kliknite na korisnika dodijeliti uloge."
 To track any installation or commissioning related work after sales,Za praćenje bilo koju instalaciju ili puštanje vezane raditi nakon prodaje
-"To track brand name in the following documents<br>Delivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Za praćenje branda u sljedećim dokumentima <br> Otpremnica, Enuiry, zahtjev za kupnju, točka, Narudžbenica, Otkup bon, Kupac Potvrda, citat, prodaja Račun, prodaja BOM, prodajnog naloga, Serijski br"
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Za praćenje branda u sljedećim dokumentima <br> Otpremnica, Enuiry, Materijal zahtjev, točka, Narudžbenica, Otkup bon, Kupac Potvrda, citat, prodaja Račun, prodaja BOM, prodajnog naloga, Serijski br"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Za praćenje stavke u prodaji i kupnji dokumenata na temelju njihovih serijskih br. To je također može koristiti za praćenje jamstvene podatke o proizvodu.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,Za praćenje stavke u prodaji i kupnji dokumenata s batch br <br> <b>Prošle Industrija: Kemikalije itd</b>
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Za praćenje stavki pomoću barkod. Vi ćete biti u mogućnosti da unesete stavke u otpremnici i prodaje Računa skeniranjem barkod stavke.
@@ -2850,6 +2885,7 @@ Track this Sales Invoice against any Project,Prati ovu Sales fakture protiv bilo
 Track this Sales Order against any Project,Prati ovu prodajni nalog protiv bilo Projekta
 Transaction,Transakcija
 Transaction Date,Transakcija Datum
+Transfer,Prijenos
 Transfer stock from one warehouse to another.,Prijenos dionica iz jednog skladišta na drugo.
 Transition Rules,Prijelazna pravila
 Transporter Info,Transporter Info
@@ -2882,6 +2918,7 @@ URL,URL
 Unable to complete request: ,Nije moguće ispuniti zahtjev:
 Under AMC,Pod AMC
 Under Graduate,Pod diplomski
+Under Section,Pod Odjela
 Under Warranty,Pod jamstvo
 Unit of Measure,Jedinica mjere
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Jedinica za mjerenje ove točke (npr. kg, Jedinica Ne, Par)."
@@ -2966,6 +3003,7 @@ Warehouse Type,Skladište Tip
 Warehouse User,Skladište Upute
 Warehouse Users,Skladište Korisnika
 Warehouse where you are maintaining stock of rejected items,Skladište gdje ste održavanju zaliha odbijenih stavki
+Warehouse-wise Item Reorder,Warehouse-mudar Stavka redoslijeda
 Warn,Upozoriti
 Warning,Upozorenje
 Warranty / AMC Details,Jamstveni / AMC Brodu
@@ -3053,12 +3091,11 @@ You can create more earning and deduction type from Setup --> HR,Možete stvorit
 You can enter any date manually,Možete unijeti bilo koji datum ručno
 You can enter the minimum quantity of this item to be ordered.,Možete unijeti minimalnu količinu ove točke biti naređeno.
 You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.,"Možete napraviti bilješku isporuke iz više prodajnih naloga. Odaberite narudžbe, jednu po jednu i kliknite na gumb ispod."
-You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.,Možete napraviti redoslijed kupnje iz više Kupiti zahtjeva. Odaberite kupnje Zahtjevi jednu po jednu i kliknite na gumb ispod.
+You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.,Možete napraviti redoslijed kupnje od više materijala zahtjeva. Odaberite materijalni zahtijevi jedan po jedan i kliknite na gumb ispod.
 You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.,Možete napraviti redoslijed kupnje iz više dobavljačima Citati. Odaberite dobavljač Citati jedan po jedan i kliknite na gumb ispod.
 You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.,"Možete napraviti kupnju potvrdu iz više narudžbenice. Odaberite narudžbe, jednu po jednu i kliknite na gumb ispod."
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,Možete postaviti različite &#39;Properties&#39; za korisnike postaviti zadane vrijednosti i primjenjivati ​​pravila dozvola na temelju vrijednosti tih svojstava u različitim oblicima.
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,Možete koristiti <a href='#Form/Customize Form'>Prilagodite obrazac</a> za postavljanje razine na poljima.
-You cannot apply for a leave on the following date because it is blocked,"Ne možete podnijeti zahtjev za dopust na sljedeći dan, jer je blokirana"
 Your Customer's TAX registration numbers (if applicable) or any general information,Vaš klijent je poreznoj registraciji brojevi (ako je primjenjivo) ili bilo opće informacije
 "Your download is being built, this may take a few moments...","Vaš preuzimanje se gradi, to može potrajati nekoliko trenutaka ..."
 Your letter head content in HTML.,Vaše pismo glava sadržaj u HTML.
@@ -3231,6 +3268,7 @@ tag,privjesak
 tags,oznake
 "target = ""_blank""",target = &quot;_blank&quot;
 tasks,zadaci
+test,test
 text-height,tekst-visina
 text-width,tekst širine
 th,og

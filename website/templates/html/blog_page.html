@@ -9,51 +9,45 @@
 {% endblock %}
 
 {% block content %}
-	<div class="layout-wrapper layout-wrapper-background">
-		<div class="web-content" id="blog-{{ name }}">
+<div class="span12">
+	<h2>{{ title }}</h2>
 
-			<div class="layout-main">
-				
-				<h2>{{ title }}</h2>
+	<!-- begin blog content -->
+	<div class="help">By {{ full_name }} on {{ updated }}</div>
+	<br>
+	{{ content_html }}
+	<!-- end blog content -->
 
-				<!-- begin blog content -->
-				<div class="help">By {{ full_name }} on {{ updated }}</div>
-				<br>
-				{{ content_html }}
-				<!-- end blog content -->
-
-				<hr>
-				<h3>Comments</h3><br>
-				<div class="blog-comments">
-					
-					{% if not comment_list %}
-					<div class="alert no-comment">
-						<p>Be the first one to comment</p>
-					</div>
-					{% endif %}
-					
-					{% include 'html/comment.html' %}
-				</div>
-				<div><button class="btn add-comment">Add Comment</button></div>
-				<div style="display: none; margin-top: 10px;" 
-					id="comment-form" class="well">
-					<div class="alert" style="display:none;"></div>
-					<form>
-						<p>
-							<input name="comment_by_fullname" placeholder="Your Name" />
-						</p>
-						<p>
-							<input name="comment_by" placeholder="Your Email Id" />
-						</p>
-						<p>
-							<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
-							</textarea>
-						</p>
-						<p>
-							<button class="btn btn-info" id="submit-comment">Submit</button>
-					</form>
-				</div>
-			</div>
+	<hr>
+	<h3>Comments</h3><br>
+	<div class="blog-comments">
+		
+		{% if not comment_list %}
+		<div class="alert no-comment">
+			<p>Be the first one to comment</p>
 		</div>
+		{% endif %}
+		
+		{% include 'html/comment.html' %}
 	</div>
+	<div><button class="btn add-comment">Add Comment</button></div>
+	<div style="display: none; margin-top: 10px;" 
+		id="comment-form" class="well">
+		<div class="alert" style="display:none;"></div>
+		<form>
+			<p>
+				<input name="comment_by_fullname" placeholder="Your Name" />
+			</p>
+			<p>
+				<input name="comment_by" placeholder="Your Email Id" />
+			</p>
+			<p>
+				<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
+				</textarea>
+			</p>
+			<p>
+				<button class="btn btn-info" id="submit-comment">Submit</button>
+		</form>
+	</div>
+</div>
 {% endblock %}

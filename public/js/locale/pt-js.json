@@ -120,6 +120,7 @@
  "Item Group": "Grupo Item", 
  "Item Price": "Item Pre\u00e7o", 
  "Item Quality Inspection Parameter": "Item Par\u00e2metro de Inspe\u00e7\u00e3o de Qualidade", 
+ "Item Reorder": "Item Reordenar", 
  "Item Supplier": "Fornecedor item", 
  "Item Tax": "Imposto item", 
  "Item Website Specification": "Especifica\u00e7\u00e3o Site item", 
@@ -135,6 +136,9 @@
  "Lead": "Conduzir", 
  "Leave Allocation": "Deixe Aloca\u00e7\u00e3o", 
  "Leave Application": "Deixe Aplica\u00e7\u00e3o", 
+ "Leave Block List": "Deixe Lista de Bloqueios", 
+ "Leave Block List Allow": "Deixe Lista de Bloqueios Permitir", 
+ "Leave Block List Date": "Deixe Data Lista de Bloqueios", 
  "Leave Control Panel": "Deixe Painel de Controle", 
  "Leave Type": "Deixar Tipo", 
  "Letter Head": "Cabe\u00e7a letra", 
@@ -147,6 +151,8 @@
  "Maintenance Visit Purpose": "Finalidade visita de manuten\u00e7\u00e3o", 
  "Manufacturing": "Fabrico", 
  "Market Segment": "Segmento de mercado", 
+ "Material Request": "Pedido de material", 
+ "Material Request Item": "Item de solicita\u00e7\u00e3o de material", 
  "Messages": "Mensagens", 
  "Mode of Payment": "Modo de Pagamento", 
  "Module Def": "M\u00f3dulo Def", 
@@ -311,5 +317,6 @@
  "Workflow Rule Detail": "Detalhe regra de fluxo de trabalho", 
  "Workflow State": "Estado de fluxo de trabalho", 
  "Workflow Transition": "Transi\u00e7\u00e3o de fluxo de trabalho", 
- "Workstation": "Esta\u00e7\u00e3o de trabalho"
+ "Workstation": "Esta\u00e7\u00e3o de trabalho", 
+ "test": "teste"
 }

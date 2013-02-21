@@ -115,7 +115,7 @@ class TestStockReconciliation(unittest.TestCase):
 			self.setUp()
 			
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
-		return webnotes.model_wrapper([{
+		return webnotes.bean([{
 			"doctype": "Stock Reconciliation",
 			"name": "RECO-001",
 			"__islocal": 1,

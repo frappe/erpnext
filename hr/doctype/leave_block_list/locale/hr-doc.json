@@ -1,0 +1,16 @@
+{
+ "Allow Users": "Omogu\u0107iti korisnicima", 
+ "Allow the following users to make Leave Applications for block days.": "Dopusti sljede\u0107i korisnicima da ostavite Prijave za blok dana.", 
+ "Applies to Company": "Odnosi se na Dru\u0161tvo", 
+ "Block Days": "Blok Dani", 
+ "Block Holidays on important days.": "Blok Odmor o va\u017enim dana.", 
+ "Company": "Dru\u0161tvo", 
+ "HR": "HR", 
+ "If not checked, the list will have to be added to each Department where it has to be applied.": "Ako nije ozna\u010deno, popis \u0107e biti dodan u svakom odjela gdje se mora primjenjivati.", 
+ "Leave Block List": "Ostavite Block List", 
+ "Leave Block List Allowed": "Ostavite Block List dopu\u0161tenih", 
+ "Leave Block List Dates": "Ostavite datumi lista blokiranih", 
+ "Leave Block List Name": "Ostavite popis imena Block", 
+ "Stop users from making Leave Applications on following days.": "Prestani korisnike od izrade ostaviti aplikacija na sljede\u0107im danima.", 
+ "Year": "Godina"
+}

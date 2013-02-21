@@ -46,6 +46,7 @@
  "Re-Calculate Values": "Re-calculer les valeurs", 
  "Rounded Total": "Totale arrondie", 
  "SQTN": "SQTN", 
+ "Select Material Request": "S\u00e9lectionnez Demande de Mat\u00e9riel", 
  "Select Print Heading": "S\u00e9lectionnez Imprimer Cap", 
  "Select Purchase Request": "S\u00e9lectionnez la demande d&#39;achat", 
  "Select Terms and Conditions": "S\u00e9lectionnez Termes et Conditions", 
@@ -74,5 +75,6 @@
  "Total Tax*": "* Total de la taxe", 
  "Totals": "Totaux", 
  "Yes": "Oui", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.": "Vous pouvez faire un bon de commande de mat\u00e9riel demandes multiples. S\u00e9lectionnez demandes de mat\u00e9riel, un par un et cliquez sur le bouton ci-dessous.", 
  "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.": "Vous pouvez faire une commande \u00e0 partir de demandes d&#39;achat multiples. S\u00e9lectionnez Demande d&#39;Achat un par un et cliquez sur le bouton ci-dessous."
 }

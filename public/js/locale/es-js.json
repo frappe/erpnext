@@ -120,6 +120,7 @@
  "Item Group": "Grupo de art\u00edculos", 
  "Item Price": "Art\u00edculo Precio", 
  "Item Quality Inspection Parameter": "Calidad Inspecci\u00f3n Tema Par\u00e1metro", 
+ "Item Reorder": "Art\u00edculo reorden", 
  "Item Supplier": "Art\u00edculo Proveedor", 
  "Item Tax": "Art\u00edculo Tributaria", 
  "Item Website Specification": "Elemento Especificaci\u00f3n web", 
@@ -135,6 +136,9 @@
  "Lead": "Conducir", 
  "Leave Allocation": "Deja Asignaci\u00f3n", 
  "Leave Application": "Deja aplicaci\u00f3n", 
+ "Leave Block List": "Deja lista de bloqueo", 
+ "Leave Block List Allow": "Deja Lista de bloqueo Permitir", 
+ "Leave Block List Date": "Deje Fecha Lista de bloqueo", 
  "Leave Control Panel": "Deja Panel de control", 
  "Leave Type": "Deja Tipo", 
  "Letter Head": "Carta Head", 
@@ -147,6 +151,8 @@
  "Maintenance Visit Purpose": "Mantenimiento Prop\u00f3sito Visita", 
  "Manufacturing": "Fabricaci\u00f3n", 
  "Market Segment": "Sector de mercado", 
+ "Material Request": "Material de Solicitud", 
+ "Material Request Item": "Art\u00edculo Material Request", 
  "Messages": "Mensajes", 
  "Mode of Payment": "Forma de Pago", 
  "Module Def": "M\u00f3dulo Def", 
@@ -311,5 +317,6 @@
  "Workflow Rule Detail": "Detalle de la regla de flujo de trabajo", 
  "Workflow State": "Estado de flujo de trabajo", 
  "Workflow Transition": "La transici\u00f3n de flujo de trabajo", 
- "Workstation": "Puesto de trabajo"
+ "Workstation": "Puesto de trabajo", 
+ "test": "prueba"
 }
