@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:32", 
+  "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:16:45", 
+  "modified": "2013-02-21 16:54:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -48,6 +48,13 @@
   "fieldname": "published", 
   "fieldtype": "Check", 
   "label": "Published"
+ }, 
+ {
+  "description": "Description for listing page, in plain text, only a couple of lines.", 
+  "doctype": "DocField", 
+  "fieldname": "blog_intro", 
+  "fieldtype": "Small Text", 
+  "label": "Blog Intro"
  }, 
  {
   "doctype": "DocField", 

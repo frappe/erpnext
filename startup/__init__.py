@@ -31,10 +31,11 @@ lang_names = {
 	"српски":"sr",
 	"தமிழ்": "ta",
 	"Hrvatski": "hr",
+	"ไทย": "th"
 	"العربية":"ar"
 }
 
-lang_list = ["ar", "en", "hi", "es", "fr", "pt", "nl", "hr"]
+lang_list = ["ar", "en", "hi", "es", "fr", "pt", "nl", "hr", "th"]
 
 product_name = "ERPNext"
 profile_defaults = {

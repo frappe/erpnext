@@ -1,70 +1,79 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2012-12-27 19:04:50", 
   "docstatus": 0, 
-  "creation": "2012-12-27 17:43:10", 
+  "modified": "2013-02-21 16:49:33", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 17:57:55"
+  "owner": "Administrator"
  }, 
  {
-  "issingle": 1, 
   "description": "Settings for Contact Us Page", 
   "doctype": "DocType", 
+  "issingle": 1, 
   "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Contact Us Settings", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Contact Us Settings", 
-  "read": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Contact Us Settings", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "Website Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 0, 
+  "role": "Website Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Contact Us Settings", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Contact Us Settings"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Help", 
   "fieldname": "help", 
   "fieldtype": "HTML", 
+  "label": "Help", 
   "options": "<div class=\"alert\">Link for Contact Page is \"contact.html\"</div>"
  }, 
  {
   "description": "Address to be displayed on the Contact Page", 
   "doctype": "DocField", 
-  "label": "Address", 
   "fieldname": "address", 
   "fieldtype": "Link", 
+  "label": "Address", 
   "options": "Address"
  }, 
  {
-  "description": "Contact options, like \"Sales Query, Support Query\" etc each on a new line or separated by commas.", 
+  "description": "Default: \"Contact Us\"", 
   "doctype": "DocField", 
-  "label": "Query Options", 
-  "fieldname": "query_options", 
-  "fieldtype": "Small Text"
+  "fieldname": "heading", 
+  "fieldtype": "Data", 
+  "label": "Heading"
  }, 
  {
   "description": "Introductory information for the Contact Us Page", 
   "doctype": "DocField", 
-  "label": "Introduction", 
   "fieldname": "introduction", 
-  "fieldtype": "Text Editor"
+  "fieldtype": "Text Editor", 
+  "label": "Introduction"
+ }, 
+ {
+  "description": "Contact options, like \"Sales Query, Support Query\" etc each on a new line or separated by commas.", 
+  "doctype": "DocField", 
+  "fieldname": "query_options", 
+  "fieldtype": "Small Text", 
+  "label": "Query Options"
  }, 
  {
   "doctype": "DocPerm"

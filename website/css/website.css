@@ -78,8 +78,48 @@ p, li {
 	margin: 0px;
 }
 
-.clear {
-	clear: both;
+.avatar {
+	display: inline-block; 
+	vertical-align: middle;
+	overflow: hidden;
+	background-color: #ddd;
+	border: 1px solid #eee;
+}
+
+.avatar-small {
+	margin-right: 5px;
+	width: 30px;
+	height: 30px;
+	border-radius: 30px;
+	-moz-border-radius: 30px;
+	-webkit-border-radius: 30px;
+}
+.avatar-small img {
+	width: 30px; 
+}
+
+.avatar-large {
+	margin-right: 10px;
+	width: 72px;
+	height: 72px;
+	border-radius: 72px;
+	-moz-border-radius: 72px;
+	-webkit-border-radius: 72px;
+}
+.avatar-large img {
+	width: 72px; 
+}
+
+.avatar-x-large {
+	margin-right: 10px;
+	width: 100px;
+	height: 100px;
+	border-radius: 100px;
+	-moz-border-radius: 100px;
+	-webkit-border-radius: 100px;
+}
+.avatar-x-large img {
+	width: 100px; 
 }
 
 /* */

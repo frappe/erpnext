@@ -20,12 +20,15 @@
 	{% endif %}
 	{% if obj.doclist.get({"doctype":"Employee"}) %}
 	<h3>{{ obj.doc.team_members_heading or "Team Members" }}</h3>
-	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
+	<table class="table" style="width: 100%; table-layout: fixed">
 		<tbody>
 			{% for d in obj.doclist.get({"doctype":"Employee"}) %}
 			<tr itemscope itemtype="http://schema.org/Person">
-				<td style="text-align:right; width: 30%;">
-					<img src="{{ d.image }}" style="" itemprop="image"></td>
+				<td style="text-align:right; width: 20%;">
+					<div class="avatar avatar-x-large">
+						<img class="avatar" src="{{ d.image }}" style="" itemprop="image">
+					</div>
+				</td>
 				<td><h4 itemprop="name">{{ d.employee_name }}</h4>
 					<div itemprop="description">{{ d.bio }}</div></td>
 			</tr>

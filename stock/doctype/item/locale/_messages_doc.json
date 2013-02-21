@@ -57,6 +57,7 @@
  "website page link", 
  "Max Discount (%)", 
  "Image", 
+ "Auto-raise Material Request if quantity goes below re-order level in a warehouse", 
  "Is Asset Item", 
  "Sales Details", 
  "Standard Rate", 
