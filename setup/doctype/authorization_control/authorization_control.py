@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, has_common, make_esc
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes import session, msgprint
 from setup.utils import get_company_currency
 

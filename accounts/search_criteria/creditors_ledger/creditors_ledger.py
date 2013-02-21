@@ -16,7 +16,9 @@
 
 #get company
 from __future__ import unicode_literals
-company = filter_values.get('company') or get_defaults()['company']
+
+import webnotes.defaults
+company = filter_values.get('company') or webnotes.defaults.get_user_default('company')
 
 #get company letter head
 l_head = sql("select letter_head from `tabCompany` where name='%s'" % company)

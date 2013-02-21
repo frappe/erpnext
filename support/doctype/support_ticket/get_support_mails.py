@@ -38,12 +38,12 @@ class SupportMailbox(POP3Mailbox):
 		ticket = None
 
 		if thread_id and webnotes.conn.exists("Support Ticket", thread_id):
-			ticket = webnotes.model_wrapper("Support Ticket", thread_id)
+			ticket = webnotes.bean("Support Ticket", thread_id)
 			ticket.doc.status = 'Open'
 			ticket.doc.save()
 				
 		else:
-			ticket = webnotes.model_wrapper([{
+			ticket = webnotes.bean([{
 				"doctype":"Support Ticket",
 				"description": mail.content,
 				"subject": mail.mail["Subject"],

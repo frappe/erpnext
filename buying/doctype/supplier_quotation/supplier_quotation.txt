@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 17:54:11", 
+  "creation": "2013-01-29 19:25:54", 
   "docstatus": 0, 
-  "modified": "2013-01-29 18:11:12", 
+  "modified": "2013-02-18 13:40:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,9 +31,7 @@
   "parent": "Supplier Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -167,16 +165,16 @@
   "options": "Simple"
  }, 
  {
-  "description": "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.", 
+  "description": "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
   "doctype": "DocField", 
   "fieldname": "indent_no", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Select Purchase Request", 
+  "label": "Select Material Request", 
   "no_copy": 1, 
   "oldfieldname": "indent_no", 
   "oldfieldtype": "Link", 
-  "options": "Purchase Request", 
+  "options": "Material Request", 
   "print_hide": 1
  }, 
  {
@@ -679,6 +677,8 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Manufacturing Manager", 
   "submit": 1, 
   "write": 1
@@ -688,6 +688,8 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -697,6 +699,8 @@
   "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Purchase User", 
   "submit": 0, 
   "write": 1
@@ -706,6 +710,8 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Material User", 
   "submit": 0, 
   "write": 0
@@ -715,7 +721,20 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Supplier", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "All", 
   "submit": 0, 
   "write": 0
  }

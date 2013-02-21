@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 """Global Defaults"""
 import webnotes
+import webnotes.defaults
 from webnotes.utils import cint
 
 keydict = {
@@ -40,7 +41,8 @@ keydict = {
 	'account_url':'account_url',
 	'allow_negative_stock' : 'allow_negative_stock',
 	'maintain_same_rate' : 'maintain_same_rate',
-	'session_expiry': 'session_expiry'
+	'session_expiry': 'session_expiry',
+	'disable_rounded_total': 'disable_rounded_total',
 }
 
 class DocType:
@@ -82,4 +84,4 @@ class DocType:
 				
 	
 	def get_defaults(self):
-		return webnotes.conn.get_defaults()
+		return webnotes.defaults.get_defaults()

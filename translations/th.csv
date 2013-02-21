@@ -1,0 +1,1313 @@
+,
+ (Half Day),(ครึ่งวัน)
+ against same operation,กับการดำเนินงานเดียวกัน
+ by Role ,โดยบทบาท
+ cannot be 0,ไม่สามารถเป็น 0
+ does not belong to the company: ,ไม่ได้อยู่ใน บริษัท :
+ has been freezed. \				Only Accounts Manager can do transaction against this account,ได้รับการ freezed \ เฉพาะผู้จัดการบัญชีผู้ใช้สามารถทำธุรกรรมกับบัญชีนี้
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item",มีค่าน้อยกว่าเท่ากับศูนย์ในระบบอัตรามูลค่า \ มีผลบังคับใช้สำหรับรายการนี​​้
+ is mandatory,มีผลบังคับใช้
+ is mandatory for GL Entry,มีผลบังคับใช้สำหรับรายการ GL
+ is not a ledger,ไม่ได้เป็นบัญ​​ชีแยกประเภท
+ is not active,ไม่ได้ใช้งาน
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,คือตอนนี้เริ่มต้นปีงบประมาณ \ โปรดรีเฟรชเบราว์เซอร์ของคุณสำหรับการเปลี่ยนแปลงที่จะมีผล
+ or the BOM is cancelled or inactive,หรือ BOM ถูกยกเลิกหรือไม่ได้ใช้งาน
+ should be same as that in ,ควรจะเช่นเดียวกับที่ใน
+ will become ,จะกลายเป็น
+"""Company History""",&quot;ประวัติ บริษัท &quot;
+"""Team Members"" or ""Management""",&quot;สมาชิกทีม&quot; หรือ &quot;จัดการ&quot;
+# ###.##,# # # #. # #
+"#,###",# # # #
+"#,###.##",# # # #. # #
+"#,###.###",# # # #. # # #
+"#,##,###.##",# # # # # #. # #
+#.###,#. # # #
+"#.###,##",#. # # # # #
+%  Delivered,ส่ง%
+% Amount Billed,จำนวนเงิน% จำนวน
+% Billed,จำนวน%
+% Installed,% Installed
+% Ordered,สั่ง%
+% Received,ได้รับ%
+% of materials billed against this Delivery Note,% ของวัสดุที่เรียกเก็บเงินกับการจัดส่งสินค้าหมายเหตุนี้
+% of materials billed against this Purchase Order.,% ของวัสดุที่เรียกเก็บเงินกับการสั่งซื้อนี้
+% of materials billed against this Purchase Receipt,% ของวัสดุที่เรียกเก็บเงินกับใบเสร็จรับเงินซื้อนี้
+% of materials billed against this Sales Order,% ของวัสดุที่เรียกเก็บเงินกับการสั่งซื้อนี้ขาย
+% of materials delivered against this Delivery Note,% ของวัสดุที่ส่งกับส่งหมายเหตุนี้
+% of materials delivered against this Sales Order,% ของวัสดุที่ส่งต่อนี้สั่งซื้อขาย
+% of materials ordered against this Purchase Requisition,% ของวัสดุสั่งซื้อกับใบเบิกนี้
+% of materials received against this Purchase Order,% ของวัสดุที่ได้รับกับการสั่งซื้อนี้
+"' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.",&#39;ไม่สามารถจัดการได้โดยใช้การกระทบยอดสต็อก. \ คุณสามารถเพิ่ม / ลบอนุกรมไม่มีโดยตรง \ การปรับเปลี่ยนหุ้นของรายการนี​​้
+' does not exists in ,&#39;ไม่ได้อยู่ใน
+* Will be calculated in the transaction.,* จะได้รับการคำนวณในการทำธุรกรรม
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",การแพร่กระจายงบประมาณ ** ** ช่วยให้คุณกระจายงบประมาณของคุณทั่วเดือนถ้าคุณมีฤดูกาลใน business.To กระจายงบประมาณของคุณโดยใช้การกระจายนี้ชุดนี้กระจายงบประมาณ ** ** ** ในศูนย์ต้นทุน **
+**Currency** Master,สกุลเงิน ** ** โท
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,** ** ปีงบประมาณแสดงรอบปีบัญชี ทุกรายการบัญชีและการทำธุรกรรมที่สำคัญอื่น ๆ จะมีการติดตามกับปีงบประมาณ ** **
+0,0
+01,01
+02,02
+03,03
+04,04
+05,05
+06,06
+07,07
+08,08
+09,09
+1,1
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 สกุลเงิน = [?] FractionFor เช่น 1 USD = 100 Cent
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 เพื่อรักษารหัสรายการลูกค้าที่ฉลาดและจะทำให้พวกเขาค้นหาตามรหัสของพวกเขาใช้ตัวเลือกนี้
+10,10
+100,100
+11,11
+12,12
+12px,12px
+13px,13px
+14px,14px
+15,15
+15px,15px
+16px,16px
+2,2
+2 days ago,2 วันที่ผ่านมา
+20,20
+25,25
+3,3
+30,30
+35,35
+4,4
+40,40
+45,45
+5,5
+50,50
+55,55
+6,6
+60,60
+65,65
+70,70
+75,75
+80,80
+85,85
+90,90
+95,95
+: It is linked to other active BOM(s),: มันจะเชื่อมโยงกับ BOM ใช้งานอื่น ๆ (s)
+: Mandatory for a Recurring Invoice.,: บังคับสำหรับใบแจ้งหนี้ที่เกิดขึ้นประจำ
+<,&lt;
+<=,&lt;=
+"<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Sales Browser/Customer Group"">ในการจัดการกลุ่มลูกค้าคลิกที่นี่</a>"
+"<a href=""#!Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#!Sales Browser/Item Group"">จัดการกลุ่มสินค้า</a>"
+"<a href=""#!Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#!Sales Browser/Territory"">การจัดการดินแดนคลิกที่นี่</a>"
+"<a href=""#Sales Browser/Customer Group"">To manage Territory, click here</a>","<a href=""#Sales Browser/Customer Group"">การจัดการดินแดนคลิกที่นี่</a>"
+"<a href=""#Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#Sales Browser/Territory"">การจัดการดินแดนคลิกที่นี่</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">ตัวเลือกการตั้งชื่อ</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>ช่วยให้คุณสามารถยกเลิกการเปลี่ยนแปลงเอกสารที่ยื่นโดยการยกเลิกพวกเขาและพวกเขาแก้</b>
+"<span class=""sys_manager"">To setup, please go to Setup > Naming Series</span>","<span class=""sys_manager"">ในการติดตั้งโปรดไปที่การตั้งค่า&gt; ตั้งชื่อซีรีส์</span>"
+=,=
+>,&gt;
+>=,&gt; =
+A,A
+A Customer exists with same name,ลูกค้าที่มีอยู่ที่มีชื่อเดียวกัน
+A Lead with this email id should exist,ตะกั่วที่มี id อีเมลนี้ควรมีอยู่
+A Product is shown on the website and is linked to an item.,สินค้าที่แสดงบนเว็บไซต์และมีการเชื่อมโยงไปยังรายการ
+"A Product or a Service that is bought, sold or kept in stock.",สินค้าหรือบริการที่มีการซื้อขายหรือเก็บไว้ในสต็อก
+A Supplier exists with same name,ผู้ผลิตที่มีอยู่ที่มีชื่อเดียวกัน
+A logical Warehouse against which stock entries are made.,คลังสินค้าตรรกะกับที่รายการสต็อกจะทำ
+A new popup will open that will ask you to select further conditions.,ป๊อปอัพใหม่จะเปิดที่จะขอให้คุณเลือกเงื่อนไขเพิ่มเติม
+A symbol for this currency. For e.g. $,สัญลักษณ์สกุลเงินนี้ สำหรับเช่น $
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,ตัวแทนจำหน่ายของบุคคลที่สามตัวแทนจำหน่าย / / คณะกรรมการพันธมิตร / / ผู้ค้าปลีกที่ขายผลิตภัณฑ์ของ บริษัท ให้คณะกรรมาธิการ
+A user can have multiple values for a property.,ผู้ใช้สามารถมีค่าหลายค่าสำหรับสถานที่ให้บริการ
+A+,+
+A-,-
+AB+,AB +
+AB-,AB-
+AMC Expiry Date,วันที่หมดอายุ AMC
+ATT,ATT
+Abbr,abbr
+About,เกี่ยวกับ
+About Us Settings,เกี่ยวกับการตั้งค่าเรา
+About Us Team Member,เกี่ยวกับสมาชิกในทีมเรา
+Above Value,สูงกว่าค่า
+Absent,ไม่อยู่
+Acceptance Criteria,เกณฑ์การยอมรับ
+Accepted,ได้รับการยอมรับ
+Accepted Quantity,จำนวนที่ยอมรับ
+Accepted Warehouse,คลังสินค้าได้รับการยอมรับ
+Account,บัญชี
+Account Balance,ยอดเงินในบัญชี
+Account Details,รายละเอียดบัญชี
+Account Head,หัวหน้าบัญชี
+Account Id,หมายเลขบัญชีที่
+Account Info,ข้อมูลเกี่ยวกับบัญชี
+Account Name,ชื่อบัญชี
+Account Type,ประเภทบัญชี
+Account: ,บัญชี:
+"Accounting entry frozen up to this date, nobody can do / modify entry except authorized person",รายการบัญชีแช่แข็งถึงวันนี้ไม่มีใครสามารถทำ / แก้ไขรายการยกเว้นผู้มีอำนาจ
+Accounting journal entries.,รายการบัญชีวารสาร
+Accounts,บัญชี
+Accounts Browser,เบราว์เซอร์บัญชี
+Accounts Frozen Upto,บัญชี Frozen เกิน
+Accounts Home,หน้าแรกบัญชี
+Accounts Payable,บัญชีเจ้าหนี้
+Accounts Receivable,ลูกหนี้
+Action,การกระทำ
+Action Detail,รายละเอียดการดำเนินการ
+Action html,html ที่กระทำ
+Active,คล่องแคล่ว
+Active: Will extract emails from ,ใช้งานล่าสุด: จะดึงอีเมลจาก
+Activity,กิจกรรม
+Activity Log,เข้าสู่ระบบกิจกรรม
+Activity Name,ชื่อกิจกรรม
+Activity Type,ประเภทกิจกรรม
+Actual,ตามความเป็นจริง
+Actual Amount,จำนวนเงินที่แท้จริง
+Actual Budget,งบประมาณที่เกิดขึ้นจริง
+Actual Completion Date,วันที่เสร็จสมบูรณ์จริง
+Actual Date,วันที่เกิดขึ้นจริง
+Actual End Date,วันที่สิ้นสุดจริง
+Actual End Time,เวลาสิ้นสุดจริง
+Actual Qty,จำนวนที่เกิดขึ้นจริง
+Actual Qty (at source/target),จำนวนที่เกิดขึ้นจริง (ที่มา / เป้าหมาย)
+Actual Qty After Transaction,จำนวนที่เกิดขึ้นจริงหลังทำรายการ
+Actual Quantity,จำนวนที่เกิดขึ้นจริง
+Actual Start Date,วันที่เริ่มต้นจริง
+Actual Start Time,เวลาเริ่มต้นจริง
+Add,เพิ่ม
+Add / Edit Taxes and Charges,เพิ่ม / แก้ไขภาษีและค่าธรรมเนียม
+Add A New Rule,เพิ่มกฎใหม่
+Add A Property,เพิ่มสถานที่ให้บริการ
+Add Attachments,เพิ่มสิ่งที่แนบ
+Add Bookmark,เพิ่มบุ๊คมาร์ค
+Add CSS,เพิ่ม CSS
+Add Column,เพิ่มคอลัมน์
+Add Message,เพิ่มข้อความ
+Add New Permission Rule,เพิ่มกฎการอนุญาตใหม่
+Add Reply,เพิ่มตอบ
+Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.,เพิ่มข้อตกลงและเงื่อนไขในการรับซื้อ นอกจากนี้คุณยังสามารถเตรียมความพร้อมข้อกำหนดเงื่อนไขและปริญญาโทและใช้แม่แบบ
+Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template,เพิ่มข้อตกลงและเงื่อนไขในการเบิกซื้อ นอกจากนี้คุณยังสามารถเตรียมความพร้อมข้อกำหนดเงื่อนไขและปริญญาโทและใช้แม่แบบ
+"Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template",เพิ่มข้อตกลงและเงื่อนไขในการขอใบเสนอราคาเช่นเงื่อนไขการชำระเงินถูกต้องของข้อเสนอที่คุณ ฯลฯ นอกจากนี้ยังสามารถเตรียมความพร้อมข้อกำหนดเงื่อนไขและปริญญาโทและใช้แม่แบบ
+Add code as &lt;script&gt;,เพิ่มรหัสเป็น &lt;script&gt;
+Add custom code to forms,เพิ่มรหัสที่กำหนดเองในรูปแบบที่
+Add fields to forms,เพิ่มเขตข้อมูลแบบฟอร์ม
+Add headers for standard print formats,เพิ่มหัวสำหรับรูปแบบการพิมพ์มาตรฐาน
+Add or Deduct,เพิ่มหรือหัก
+Add rows to set annual budgets on Accounts.,เพิ่มแถวตั้งงบประมาณประจำปีเกี่ยวกับบัญชี
+Add to To Do,เพิ่มสิ่งที่ต้องทำ
+Add to To Do List of,เพิ่มไป To Do List ของ
+Add/Remove Recipients,Add / Remove ผู้รับ
+"Add/remove users, set roles, passwords etc",เพิ่ม / ลบผู้ใช้บทบาทชุดรหัสผ่าน ฯลฯ
+Additional Columns,คอลัมน์เพิ่มเติม
+Additional Conditions,เงื่อนไขเพิ่มเติม
+Additional Info,ข้อมูลเพิ่มเติม
+Additional Tables,ตารางเพิ่มเติม
+Address,ที่อยู่
+Address & Contacts,ที่อยู่ติดต่อ &amp;
+Address Desc,ที่อยู่รายละเอียด
+Address Details,รายละเอียดที่อยู่
+Address HTML,ที่อยู่ HTML
+Address Line 1,ที่อยู่บรรทัดที่ 1
+Address Line 2,ที่อยู่บรรทัดที่ 2
+Address Line1,Line1 ที่อยู่
+Address Line2,Line2 ที่อยู่
+Address Title,หัวข้อที่อยู่
+Address Type,ประเภทของที่อยู่
+Address and other legal information you may want to put in the footer.,ที่อยู่และข้อมูลทางกฎหมายอื่น ๆ ที่คุณอาจต้องการที่จะนำในส่วนท้าย
+Address to be displayed on the Contact Page,ที่อยู่ที่จะปรากฏบนหน้าติดต่อ
+Adds a custom field to a DocType,เพิ่มเขตข้อมูลที่กำหนดเองเพื่อ DocType
+Adds a custom script (client or server) to a DocType,เพิ่มสคริปต์ที่กำหนดเอง (ไคลเอ็นต์หรือเซิร์ฟเวอร์) เพื่อ DocType
+Advance Amount,จำนวนล่วงหน้า
+Advance amount,จำนวนเงิน
+Advanced Scripting,การเขียนสคริปต์ขั้นสูง
+Advanced Settings,ตั้งค่าขั้นสูง
+Advances,ความก้าวหน้า
+Advertisement,การโฆษณา
+After Sale Installations,หลังจากการติดตั้งขาย
+"After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field",หลังจากที่ยกเลิกการเบิกซื้อกล่องโต้ตอบจะขอให้คุณเหตุผลสำหรับการยกเลิกซึ่งจะสะท้อนให้เห็นในด้านนี้
+Against,กับ
+Against Account,กับบัญชี
+Against Docname,กับ Docname
+Against Doctype,กับ Doctype
+Against Document Date,กับวันที่เอกสาร
+Against Document Detail No,กับรายละเอียดเอกสารไม่มี
+Against Document No,กับเอกสารไม่มี
+Against Expense Account,กับบัญชีค่าใช้จ่าย
+Against Income Account,กับบัญชีรายได้
+Against Journal Voucher,กับบัตรกำนัลวารสาร
+Against Purchase Invoice,กับใบกำกับซื้อ
+Against Sales Invoice,กับขายใบแจ้งหนี้
+Against Voucher,กับบัตรกำนัล
+Against Voucher Type,กับประเภทบัตร
+Agent,ตัวแทน
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials",กลุ่มรวมของรายการ ** ** เข้าไปอีกรายการ ** ** นี้จะเป็นประโยชน์ถ้าคุณกำลัง bundling รายการ ** ** บางเป็นแพคเกจและคุณรักษาสต็อกของบรรจุรายการ ** ** และไม่รวมรายการ ** ** แพคเกจสินค้า ** ** จะมี &quot;รายการสินค้า&quot; ขณะที่ &quot;ไม่มี&quot; และ &quot;รายการขาย&quot; เป็น &quot;ใช่&quot; ตัวอย่าง:. ถ้าคุณกำลังขายแล็ปท็อปและเป้สะพายหลังแยกและมีราคาพิเศษหากลูกค้าซื้อทั้ง แล้วแล็ปท็อปกระเป๋าเป้สะพายหลัง + จะขายใหม่ BOM Item.Note: BOM บิลของวัสดุ =
+Aging Date,Aging วันที่
+All Addresses.,ที่อยู่ทั้งหมด
+All Contact,ติดต่อทั้งหมด
+All Contacts.,ติดต่อทั้งหมด
+All Customer Contact,ติดต่อลูกค้าทั้งหมด
+All Day,วันทั้งหมด
+All Employee (Active),พนักงาน (Active) ทั้งหมด
+All Lead (Open),ตะกั่ว (เปิด) ทั้งหมด
+All Products or Services.,ผลิตภัณฑ์หรือบริการ
+All Sales Partner Contact,ทั้งหมดติดต่อพันธมิตรการขาย
+All Sales Person,คนขายทั้งหมด
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,ทั้งหมดธุรกรรมการขายสามารถติดแท็กกับหลายคน ** ขาย ** เพื่อให้คุณสามารถตั้งค่าและตรวจสอบเป้าหมาย
+All Supplier Contact,ติดต่อผู้ผลิตทั้งหมด
+All attendance dates inbetween selected Attendance From Date and Attendance To Date will come in the template with employees list.,เข้าร่วมทั้งหมดวัน inbetween ผู้เข้าร่วมเลือกจากวันที่และวันที่เข้าร่วมประชุมเพื่อจะมาในแม่แบบที่มีรายชื่อพนักงาน
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","สาขาที่เกี่ยวข้องทั้งหมดเช่นการส่งออกสกุลเงินอัตราการแปลงรวมการส่งออก ฯลฯ การส่งออกรวมทั้งสิ้นที่มีอยู่ใน <br> หมายเหตุจัดส่งสินค้า, POS, ใบเสนอราคา, ใบแจ้งหนี้การขาย, การสั่งซื้อการขาย ฯลฯ"
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","สาขาที่เกี่ยวข้องทั้งหมดนำเข้าเช่นสกุลเงินอัตราการแปลงรวมการนำเข้าและอื่น ๆ นำเข้าแกรนด์รวมที่มีอยู่ใน <br> รับซื้อ, ใบเสนอราคาผู้ผลิต, ใบกำกับซื้อ, ซื้อสั่งซื้อ ฯลฯ"
+All items have already been transferred \				for this Production Order.,รายการทั้งหมดได้รับการโอนแล้ว \ สำหรับการสั่งซื้อการผลิตนี้
+"All possible Workflow States and roles of the workflow. <br>Docstatus Options: 0 is""Saved"", 1 is ""Submitted"" and 2 is ""Cancelled""","ทุกประเทศที่เป็นไปได้เวิร์กโฟลว์และบทบาทของเวิร์กโฟลว์ <br> Docstatus ตัวเลือก: 0 ถูก &quot;บันทึก&quot;, 1 คือ &quot;Submitted&quot; และ 2 คือ &quot;ยกเลิก&quot;"
+Allocate,จัดสรร
+Allocate leaves for the year.,จัดสรรใบสำหรับปี
+Allocated (%),การจัดสรร (%)
+Allocated Amount,จำนวนที่จัดสรร
+Allocated Budget,งบประมาณที่จัดสรร
+Allocated amount,จำนวนที่จัดสรร
+Allow Attach,อนุญาตให้แนบ
+Allow Bill of Materials,อนุญาตให้ Bill of Materials
+Allow Import,อนุญาตให้นำเข้า
+Allow Import via Data Import Tool,อนุญาตให้นำเข้าได้ดูผ่านเครื่องมือนำเข้าข้อมูล
+Allow Negative Balance,อนุญาตให้ยอดคงเหลือติดลบ
+Allow Negative Stock,อนุญาตให้สต็อกเชิงลบ
+Allow Production Order,อนุญาตให้สั่งซื้อการผลิต
+Allow Rename,อนุญาตให้เปลี่ยนชื่อ
+Allow Samples,อนุญาตให้ตัวอย่าง
+Allow User,อนุญาตให้ผู้ใช้
+Allow Users,อนุญาตให้ผู้ใช้งาน
+Allow on Submit,อนุญาตให้ส่ง
+Allow the following users to approve Leave Applications for block days.,อนุญาตให้ผู้ใช้ต่อไปเพื่อขออนุมัติการใช้งานออกวันบล็อก
+Allow the following users to make Leave Applications for block days.,อนุญาตให้ผู้ใช้ต่อไปที่จะทำให้การใช้งานออกวันบล็อก
+Allow this price in purchase related forms,อนุญาตให้ราคาในรูปแบบที่เกี่ยวข้องการซื้อนี้
+Allow this price in sales related forms,อนุญาตให้ราคาในรูปแบบที่เกี่ยวข้องการขายนี้
+Allow user to login only after this hour (0-24),อนุญาตให้ผู้ใช้เข้าสู่ระบบเท่านั้นหลังจากชั่วโมงนี้ (0-24)
+Allow user to login only before this hour (0-24),อนุญาตให้ผู้ใช้เข้าสู่ระบบก่อนที่จะชั่วโมงนี้ (0-24)
+Allowance Percent,ร้อยละค่าเผื่อ
+Allowed,อนุญาต
+Amend,แก้ไข
+Amended From,แก้ไขเพิ่มเติม
+Amendment Date,วันที่แก้ไข
+Amount,จำนวน
+Amount <=,จำนวนเงินที่ &lt;=
+Amount >=,จำนวนเงินที่&gt; =
+Amount*,* จำนวนเงิน
+"An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a>]","file icon มี. ขยาย ICO ควรจะขนาด 16 x 16 px สร้างขึ้นโดยใช้เครื่องกำเนิดไฟฟ้า favicon [ <a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a> ]"
+Analytics,Analytics
+Answer,ตอบ
+"Any other comments, noteworthy effort that should go in the records.",ความเห็นอื่น ๆ ความพยายามที่น่าสังเกตว่าควรจะไปในบันทึก
+Applicable Holiday List,รายการวันหยุดที่ใช้บังคับ
+Applicable To (Designation),ที่ใช้บังคับกับ (จุด)
+Applicable To (Employee),ที่ใช้บังคับกับ (พนักงาน)
+Applicable To (Role),ที่ใช้บังคับกับ (Role)
+Applicable To (User),ที่ใช้บังคับกับ (User)
+Applicable only if valuation method is moving average,สามารถนำไปใช้ได้เฉพาะในกรณีที่วิธีการประเมินเป็นค่าเฉลี่ยเคลื่อนที่
+Applicant Name,ชื่อผู้ยื่นคำขอ
+Applicant for a Job,ขอรับงาน
+Applicant for a Job (extracted from jobs email).,ผู้ขอรับการทำงาน (สกัดจากอีเมลงาน)
+Applications for leave.,โปรแกรมประยุกต์สำหรับการลา
+Applies to Company,นำไปใช้กับ บริษัท
+Apply / Approve Leaves,ใช้ / อนุมัติใบ
+Appraisal,การตีราคา
+Appraisal Goal,เป้าหมายการประเมิน
+Appraisal Goals,เป้าหมายการประเมิน
+Appraisal Template,แม่แบบการประเมิน
+Appraisal Template Goal,เป้าหมายเทมเพลทประเมิน
+Appraisal Template Title,หัวข้อแม่แบบประเมิน
+Approval Status,สถานะการอนุมัติ
+Approved,ได้รับการอนุมัติ
+Approver,อนุมัติ
+Approving Role,อนุมัติบทบาท
+Approving User,อนุมัติผู้ใช้
+Are you sure you want to delete the attachment?,คุณแน่ใจหรือว่าต้องการลบสิ่งที่แนบมา?
+Arial,Arial
+Arrear Amount,จำนวน Arrear
+"As a best practice, do not assign the same set of permission rule to different Roles instead set multiple Roles to the User",เป็นวิธีที่ดีที่สุดไม่ได้กำหนดชุดเดียวกันของกฎอนุญาตให้บทบาทที่แตกต่างกันแทนที่จะตั้งหลายบทบาทให้กับผู้ใช้
+As existing qty for item: ,เป็นจำนวนที่มีอยู่สำหรับรายการ:
+As per Stock UOM,เป็นต่อสต็อก UOM
+Ascending,Ascending
+Assign To,กำหนดให้
+Assigned By,ได้รับมอบหมายจาก
+Associate a DocType to the Print Format,เชื่อมโยง DocType รูปแบบการพิมพ์
+Atleast one warehouse is mandatory,อย่างน้อยหนึ่งคลังสินค้ามีผลบังคับใช้
+Attach,แนบ
+Attach Document Print,แนบเอกสารพิมพ์
+Attachments,สิ่งที่แนบมา
+Attempted to Contact,พยายามที่จะติดต่อ
+Attendance,การดูแลรักษา
+Attendance Control Panel,แผงควบคุมการเข้าร่วมประชุม
+Attendance Date,วันที่เข้าร่วม
+Attendance Details,รายละเอียดการเข้าร่วมประชุม
+Attendance From Date,ผู้เข้าร่วมจากวันที่
+Attendance To Date,วันที่เข้าร่วมประชุมเพื่อ
+Attendance record.,บันทึกการเข้าร่วมประชุม
+Attributions,เหตุผล
+Authorization Control,ควบคุมการอนุมัติ
+Authorization Rule,กฎการอนุญาต
+Authorized Role (Frozen Entry),บทบาทอำนาจ (Entry แช่แข็ง)
+Authourized Role (Frozen Entry),บทบาท Authourized (Entry แช่แข็ง)
+Auto Email Id,รหัสอีเมล์อัตโนมัติ
+Auto Name,ชื่ออัตโนมัติ
+Auto generated,ออโต้สร้าง
+Automatically updated via Stock Entry of type Manufacture/Repack,ปรับปรุงโดยอัตโนมัติผ่านทางรายการในสต็อกการผลิตประเภท / Repack
+Autoreply when a new mail is received,autoreply เมื่อมีอีเมลใหม่ได้รับ
+Available Qty at Warehouse,จำนวนที่คลังสินค้า
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","ที่มีจำหน่ายใน BOM, หมายเหตุจัดส่งใบแจ้งหนี้ซื้อสั่งซื้อการผลิตการสั่งซื้อ, รับซื้อ, ขายใบแจ้งหนี้, สั่งซื้อขายรายการสต็อก, Timesheet"
+Average Discount,ส่วนลดเฉลี่ย
+B,B
+B+,B +
+B-,B-
+BILL,BILL
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,รายละเอียด BOM ไม่มี
+BOM Explosion Item,รายการระเบิด BOM
+BOM Item,รายการ BOM
+BOM No,BOM ไม่มี
+BOM No. for a Finished Good Item,หมายเลข BOM สำหรับรายการที่ดีสำเร็จรูป
+BOM Operation,การดำเนินงาน BOM
+BOM Operations,การดำเนินงาน BOM
+BOM Replace Tool,เครื่องมือแทนที่ BOM
+BOM replaced,BOM แทนที่
+Background Color,สีพื้นหลัง
+Background Image,ภาพพื้นหลัง
+Background shade of the top menu bar,สีพื้นหลังของแถบเมนูด้านบน
+Bank,ธนาคาร
+Bank A/C No.,ธนาคาร / เลขที่ C
+Bank Account,บัญชีเงินฝาก
+Bank Account No.,เลขที่บัญชีธนาคาร
+Bank Balance,และหนี้สินธนาคารแห่ง
+Bank Name,ชื่อธนาคาร
+Bank Reconciliation,กระทบยอดธนาคาร
+Bank Reconciliation Detail,รายละเอียดการกระทบยอดธนาคาร
+Bank Voucher,บัตรกำนัลธนาคาร
+Bank or Cash,ธนาคารหรือเงินสด
+Banner,ธง
+Banner HTML,HTML แบนเนอร์
+Barcode,บาร์โค้ด
+Based On,ขึ้นอยู่กับ
+Based on,จาก
+Basic Info,ข้อมูลพื้นฐาน
+Basic Information,ข้อมูลพื้นฐาน
+Basic Rate,อัตราขั้นพื้นฐาน
+Basic Rate*,* อัตราขั้นพื้นฐาน
+Batch,ชุด
+Batch (lot) of an Item.,แบทช์ (มาก) ของรายการ
+Batch Finished Date,ชุดสำเร็จรูปวันที่
+Batch ID,ID ชุด
+Batch No,ชุดไม่มี
+Batch Started Date,ชุดเริ่มวันที่
+Begin this page with a slideshow of images,เริ่มต้นหน้านี้ให้กับสไลด์โชว์จากภาพ
+Better Prospects,อนาคตที่ดีกว่า
+Bill Date,วันที่บิล
+Bill No,ไม่มีบิล
+Bill of Material to be considered for manufacturing,บิลของวัสดุที่จะต้องพิจารณาสำหรับการผลิต
+Bill of Materials,บิลของวัสดุ
+Bill of Materials (BOM),บิลวัสดุ (BOM)
+Billed,เรียกเก็บเงิน
+Billed Amt,จำนวนจำนวนมากที่สุด
+Billed Quantity,จำนวนเงินที่เรียกเก็บ
+Billing Status,สถานะการเรียกเก็บเงิน
+Bills raised by Suppliers.,ตั๋วเงินยกโดยซัพพลายเออร์
+Bills raised to Customers.,ตั๋วเงินยกให้กับลูกค้า
+Bin,ถัง
+Bio,ไบโอ
+Birth Date,วันเกิด
+Black,สีดำ
+Blob,หยด
+Block Date,บล็อกวันที่
+Block Days,วันที่ถูกบล็อก
+Block Holidays on important days.,ปิดกั้นหยุดในวันสำคัญ
+Block leave applications by department.,ปิดกั้นการใช้งานออกโดยกรม
+Blog,บล็อก
+Blog Subscriber,สมาชิกบล็อก
+Blog entry.,รายการบล็อก
+Blood Group,กรุ๊ปเลือด
+Bookmarks,ที่คั่นหน้า
+Branch,สาขา
+Brand,ยี่ห้อ
+Brand HTML,HTML ยี่ห้อ
+Brand Name,ชื่อยี่ห้อ
+"Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px",ยี่ห้อเป็นสิ่งที่ปรากฏบนด้านขวาบนของแถบเครื่องมือ ถ้ามันเป็นภาพให้แน่ใจว่า ithas พื้นหลังโปร่งใสและใช้ &lt;img /&gt; แท็ก ให้ขนาดเป็น 200px x 30px
+Brand master.,ต้นแบบแบรนด์
+Branding and Printing,การสร้างตราสินค้าและการพิมพ์
+Brands,แบรนด์
+Breakdown,การเสีย
+Budget,งบ
+Budget Allocated,งบประมาณที่จัดสรร
+Budget Control,ควบคุมงบประมาณ
+Budget Detail,รายละเอียดงบประมาณ
+Budget Details,รายละเอียดงบประมาณ
+Budget Distribution,การแพร่กระจายงบประมาณ
+Budget Distribution Detail,รายละเอียดการจัดจำหน่ายงบประมาณ
+Budget Distribution Details,รายละเอียดการจัดจำหน่ายงบประมาณ
+Bulk Email,อีเมล์ขยะ
+Bulk Email records.,บันทึกอีเมล์ขยะ
+Bundle items at time of sale.,กำรายการในเวลาของการขาย
+Button,ปุ่ม
+Buyer of Goods and Services.,ผู้ซื้อสินค้าและบริการ
+Buying,การซื้อ
+Buying Cost,ซื้อค่าใช้จ่าย
+Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.,ค่าใช้จ่ายการซื้อจะได้รับการปรับปรุงจากคำสั่งซื้อและรายรับซื้อ <br> ค่าใช้จ่ายการซื้อจะคำนวณโดยวิธีถัวเฉลี่ยเคลื่อนที่
+Buying Home,ซื้อบ้าน
+By,โดย
+C,C
+C-FORM/,C-form /
+C-Form,C-Form
+C-Form Applicable,C-Form สามารถนำไปใช้ได้
+C-Form Invoice Detail,C-Form รายละเอียดใบแจ้งหนี้
+C-Form No,C-Form ไม่มี
+CGHelp,CGHelp
+CI/2010-2011/,CI/2010-2011 /
+COMM-,COMM-
+CSS,CSS
+CTC,CTC
+CUST,cust
+CUSTMUM,CUSTMUM
+Calculate Charges,คำนวณค่าใช้บริการ
+Calculate Tax,คำนวณภาษี
+Calculate Taxes and Charges,คำนวณภาษีและค่าบริการ
+Calculate Total Score,คำนวณคะแนนรวม
+Calendar,ปฏิทิน
+Calendar Events,ปฏิทินเหตุการณ์
+Call,โทรศัพท์
+Campaign,รณรงค์
+Campaign Name,ชื่อแคมเปญ
+Can only be exported by users with role 'Report Manager',สามารถส่งออกโดยผู้ใช้ที่มี &#39;จัดการรายงานบทบาท
+Cancel,ยกเลิก
+Cancel Reason,ยกเลิกเหตุผล
+Cancel permission also allows the user to delete a document (if it is not linked to any other document).,ได้รับอนุญาตยกเลิกยังช่วยให้ผู้ใช้สามารถลบเอกสาร (ถ้ายังไม่ได้เชื่อมโยงกับเอกสารอื่น)
+Cancelled,ยกเลิก
+Cannot ,ไม่ได้
+Capacity,ความจุ
+Capacity Units,หน่วยความจุ
+Career History,ประวัติการทำงาน
+Carry Forward,Carry Forward
+Carry Forwarded Leaves,Carry ใบ Forwarded
+Cash,เงินสด
+Cash Voucher,บัตรกำนัลเงินสด
+Cash/Bank Account,เงินสด / บัญชีธนาคาร
+Category,หมวดหมู่
+Category of customer as entered in Customer master,หมวดหมู่ของลูกค้าที่ป้อนไว้ในหลักของลูกค้า
+Cell Number,จำนวนเซลล์
+Center,ศูนย์
+"Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.",เอกสารบางอย่างไม่ควรจะมีการเปลี่ยนแปลงครั้งสุดท้ายเช่นใบแจ้งหนี้สำหรับตัวอย่าง รัฐสุดท้ายสำหรับเอกสารดังกล่าวเรียกว่า <b>Submitted</b> คุณสามารถ จำกัด การซึ่งสามารถส่งบทบาท
+Certificate,ใบรับรอง
+Challan Date,วันที่ Challan
+Challan No,Challan ไม่มี
+Change UOM for an Item.,เปลี่ยน UOM สำหรับรายการ
+Change background fonts etc,เปลี่ยนพื้นหลัง ฯลฯ แบบอักษร
+"Change entry properties (hide fields, make mandatory etc)",เปลี่ยนคุณสมบัติรายการ (ช่องซ่อนให้ ฯลฯ บังคับ)
+Change the starting / current sequence number of an existing series.,เปลี่ยนหมายเลขลำดับเริ่มต้น / ปัจจุบันของชุดที่มีอยู่
+Channel Partner,พันธมิตรช่องทาง
+Charge,รับผิดชอบ
+Chargeable,รับผิดชอบ
+Chart of Accounts,ผังบัญชี
+Chart of Cost Centers,แผนภูมิของศูนย์ต้นทุน
+Chat,พูดคุย
+Cheating FieldPlease do not delete ,โกง FieldPlease ไม่ลบ
+Check,ตรวจสอบ
+Check / Uncheck roles assigned to the Profile. Click on the Role to find out what permissions that Role has.,ตรวจสอบ / บทบาทที่กำหนดให้ยกเลิกการเลือกรายละเอียด คลิกที่บทบาทเพื่อหาสิ่งที่สิทธิ์บทบาทที่ได้
+Check all the items below that you want to send in this digest.,ตรวจสอบรายการทั้งหมดที่ด้านล่างที่คุณต้องการส่งย่อยนี้
+Check how the newsletter looks in an email by sending it to your email.,ตรวจสอบว่ามีลักษณะจดหมายในอีเมลโดยส่งอีเมลของคุณ
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date",ตรวจสอบว่าใบแจ้งหนี้ที่เกิดขึ้นให้ยกเลิกการหยุดที่เกิดขึ้นหรือใส่วันที่สิ้นสุดที่เหมาะสม
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",ตรวจสอบว่าใบแจ้งหนี้ที่คุณต้องเกิดขึ้นโดยอัตโนมัติ หลังจากส่งใบแจ้งหนี้ใด ๆ ขายส่วนกิจวัตรจะสามารถมองเห็น
+Check if you want to send salary slip in mail to each employee while submitting salary slip,ตรวจสอบว่าคุณต้องการที่จะส่งสลิปเงินเดือนใน mail ให้พนักงานแต่ละคนในขณะที่ส่งสลิปเงินเดือน
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,ตรวจสอบเรื่องนี้ถ้าคุณต้องการบังคับให้ผู้ใช้เลือกชุดก่อนที่จะบันทึก จะมีค่าเริ่มต้นไม่ถ้าคุณตรวจสอบนี้
+Check this if you want to show in website,ตรวจสอบนี้ถ้าคุณต้องการที่จะแสดงในเว็บไซต์
+Check this to make this the default letter head in all prints,ตรวจสอบนี้จะทำให้เรื่องนี้หัวจดหมายเริ่มต้นในการพิมพ์ทั้งหมด
+Check this to pull emails from your mailbox,ตรวจสอบนี้จะดึงอีเมลจากกล่องจดหมายของคุณ
+Check to activate,ตรวจสอบเพื่อเปิดใช้งาน
+Check to make Shipping Address,ตรวจสอบเพื่อให้การจัดส่งสินค้าที่อยู่
+Check to make primary address,ตรวจสอบเพื่อให้อยู่หลัก
+Checked,ถูกตรวจสอบ
+"Checking Operator (To Fld, Operator, From Fld)","ตรวจสอบผู้ประกอบการ (เพื่อ Fld, Operator, จาก Fld)"
+Cheque,เช็ค
+Cheque Date,วันที่เช็ค
+Cheque Number,จำนวนเช็ค
+Child Tables are shown as a Grid in other DocTypes.,ตารางเด็กจะปรากฏเป็นเส้นตารางใน doctypes อื่น ๆ
+City,เมือง
+City/Town,เมือง / จังหวัด
+Claim Amount,จำนวนการเรียกร้อง
+Claims for expenses made on behalf of the organization.,การเรียกร้องค่าใช้จ่ายที่ทำในนามขององค์กร
+Class / Percentage,ระดับ / ร้อยละ
+Classification of Customers by region,การจำแนกประเภทของลูกค้าตามภูมิภาค
+Clear Cache & Refresh,ล้างแคช &amp; รีเฟรช
+Clear Pending,ล้าง Pending
+Clear Table,ตารางที่ชัดเจน
+Clearance Date,วันที่กวาดล้าง
+Click on button in the 'Condition' column and select the option 'User is the creator of the document',คลิกที่ปุ่มใน &#39;สภาพ&#39; คอลัมน์และเลือกตัวเลือก &#39;ผู้ใช้เป็นผู้สร้างเอกสาร&#39;
+Click on edit button to start a new report.,คลิกที่ปุ่มแก้ไขเพื่อเริ่มต้นการรายงานใหม่
+Click to Expand / Collapse,คลิกที่นี่เพื่อขยาย / ยุบ
+Client,ลูกค้า
+Client Script,สคริปต์ลูกค้า
+Closed,ปิด
+Closing Account Head,ปิดหัวบัญชี
+Closing Date,ปิดวันที่
+Closing Fiscal Year,ปิดปีงบประมาณ
+CoA Help,ช่วยเหลือ CoA
+Code,รหัส
+Cold Calling,โทรเย็น
+Collections,คอลเลกชัน
+Color,สี
+Column Break,ตัวแบ่งคอลัมน์
+Columns,คอลัมน์
+Comma separated list of email addresses,รายการที่คั่นด้วยจุลภาคของที่อยู่อีเมล
+Comment,ความเห็น
+Comment By,ความคิดเห็นที่
+Comment By Fullname,ความคิดเห็นที่ Fullname
+Comment Date,ความคิดเห็นวันที่
+Comment Docname,ความคิดเห็น Docname
+Comment Doctype,ความคิดเห็น DOCTYPE
+Comment Time,ความคิดเห็นเวลา
+Comments,ความเห็น
+Commission Rate,อัตราค่าคอมมิชชั่น
+Commission Rate (%),อัตราค่าคอมมิชชั่น (%)
+Commission partners and targets,พันธมิตรคณะกรรมการและเป้าหมาย
+Communication,การสื่อสาร
+Communication HTML,HTML การสื่อสาร
+Communication History,สื่อสาร
+Communication Log,เข้าสู่ระบบการสื่อสาร
+Communication Medium,กลางการสื่อสาร
+Communication by,การสื่อสารโดย
+Communication log.,บันทึกการสื่อสาร
+Communication type,ประเภทการสื่อสาร
+Company,บริษัท
+Company Control,การควบคุมของ บริษัท
+Company Details,รายละเอียด บริษัท
+Company History,ประวัติ บริษัท
+Company History Heading,ประวัติ บริษัท หัวเรื่อง
+Company Info,ข้อมูล บริษัท
+Company Introduction,แนะนำ บริษัท
+Company Name,ชื่อ บริษัท
+Company branches.,บริษัท สาขา
+Company departments.,แผนกต่างๆใน บริษัท
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,เลขทะเบียน บริษัท สำหรับการอ้างอิงของคุณ ตัวอย่าง: หมายเลขทะเบียนภาษีมูลค่าเพิ่มเป็นต้น
+Company registration numbers for your reference. Tax numbers etc.,เลขทะเบียน บริษัท สำหรับการอ้างอิงของคุณ ตัวเลขภาษี ฯลฯ
+Complaint,การร้องเรียน
+Complete By,เสร็จสมบูรณ์โดย
+Completed,เสร็จ
+Completion Date,วันที่เสร็จสมบูรณ์
+Completion Status,สถานะเสร็จ
+Confirmed orders from Customers.,คำสั่งซื้อได้รับการยืนยันจากลูกค้า
+Consider Tax or Charge for,พิจารณาภาษีหรือคิดค่าบริการสำหรับ
+"Consider this Price List for fetching rate. (only which have ""For Buying"" as checked)",พิจารณารายการราคานี้สำหรับการเรียกอัตรา (เฉพาะที่มี &quot;สำหรับการซื้อ&quot; การตรวจสอบเป็น)
+Consultant,ผู้ให้คำปรึกษา
+Consumed Qty,จำนวนการบริโภค
+Contact,ติดต่อ
+Contact Control,ติดต่อควบคุม
+Contact Desc,Desc ติดต่อ
+Contact Details,รายละเอียดการติดต่อ
+Contact Email,ติดต่ออีเมล์
+Contact HTML,HTML ติดต่อ
+Contact Info,ข้อมูลการติดต่อ
+Contact Mobile No,เบอร์มือถือไม่มี
+Contact Name,ชื่อผู้ติดต่อ
+Contact No,ติดต่อไม่มี
+Contact No.,ติดต่อหมายเลข
+Contact Person,Contact Person
+Contact Type,ประเภทที่ติดต่อ
+Contact Us Settings,ติดต่อเราตั้งค่า
+Contact in Future,ติดต่อในอนาคต
+"Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.",ตัวเลือกการติดต่อเช่น &quot;แบบสอบถามขายการสนับสนุนแบบสอบถาม&quot; ฯลฯ แต่ละบรรทัดใหม่หรือคั่นด้วยเครื่องหมายจุลภาค
+Contacted,ติดต่อ
+Content,เนื้อหา
+Content Type,ประเภทเนื้อหา
+Content in markdown format that appears on the main side of your page,เนื้อหาในรูปแบบ markdown ซึ่งปรากฏบนด้านหลักของหน้าเว็บของคุณ
+Content web page.,หน้าเว็บเนื้อหา
+Contra Voucher,บัตรกำนัลต้าน
+Contract End Date,วันที่สิ้นสุดสัญญา
+Control Panel,แผงควบคุม
+Conversion Factor,ปัจจัยการเปลี่ยนแปลง
+Conversion Rate,อัตราการแปลง
+Convert into Recurring Invoice,แปลงเป็นใบแจ้งหนี้ที่เกิดขึ้นประจำ
+Converted,แปลง
+Copyright,ลิขสิทธิ์
+Core,แกน
+Cost Center,ศูนย์ต้นทุน
+Cost Center Details,ค่าใช้จ่ายรายละเอียดศูนย์
+Cost Center Name,ค่าใช้จ่ายชื่อศูนย์
+Cost Center must be specified for PL Account: ,ศูนย์ต้นทุนต้องระบุสำหรับบัญชี PL:
+Cost to Company,เสียค่าใช้จ่ายให้กับ บริษัท
+Costing,ต้นทุน
+Country,ประเทศ
+Country Name,ชื่อประเทศ
+Create,สร้าง
+Create Bank Voucher for the total salary paid for the above selected criteria,สร้างบัตรกำนัลธนาคารเพื่อการรวมเงินเดือนที่จ่ายสำหรับเกณฑ์ที่เลือกข้างต้น
+Create Production Orders,สร้างคำสั่งซื้อการผลิต
+Create Receiver List,สร้างรายการรับ
+Create Salary Slip,สร้างสลิปเงินเดือน
+"Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.","สร้างรายการราคาจากต้นแบบรายการราคาและป้อนอัตราอ้างอิงมาตรฐานกับแต่ละของพวกเขา เกี่ยวกับการเลือกรายการราคาในใบเสนอราคา, สั่งซื้อการขายหรือการจัดส่งสินค้าหมายเหตุอัตราอ้างอิงที่สอดคล้องกันจะถูกเรียกสำหรับรายการนี​​้"
+Create and Send Newsletters,การสร้างและส่งจดหมายข่าว
+Created Account Head: ,หัวหน้าบัญชีที่สร้างไว้:
+Created Customer Issue,ปัญหาของลูกค้าที่สร้างไว้
+Created Group ,กลุ่มที่สร้างไว้
+Created Opportunity,สร้างโอกาส
+Created Support Ticket,ตั๋วสนับสนุนสร้าง
+Creates salary slip for above mentioned criteria.,สร้างสลิปเงินเดือนสำหรับเกณฑ์ดังกล่าวข้างต้น
+Credit,เครดิต
+Credit Amt,จำนวนเครดิต
+Credit Card Voucher,บัตรกำนัลชำระด้วยบัตรเครดิต
+Credit Controller,ควบคุมเครดิต
+Credit Days,วันเครดิต
+Credit Limit,วงเงินสินเชื่อ
+Credit Note,หมายเหตุเครดิต
+Credit To,เครดิต
+Criteria Name,ชื่อเกณฑ์
+Cross List Item Group,ข้ามกลุ่มรายการ
+Cross Listing of Item in multiple groups,ข้ามรายการของรายการในหลายกลุ่ม
+Currency,เงินตรา
+Currency & Price List,สกุลเงินและรายการราคา
+Currency Format,รูปแบบสกุลเงิน
+Currency Name,ชื่อสกุล
+Current Accommodation Type,ประเภทของที่พักปัจจุบัน
+Current Address,ที่อยู่ปัจจุบัน
+Current BOM,BOM ปัจจุบัน
+Current Fiscal Year,ปีงบประมาณปัจจุบัน
+Current Stock,สต็อกปัจจุบัน
+Current Stock UOM,UOM ต็อกสินค้าปัจจุบัน
+Current Value,ค่าปัจจุบัน
+Current status,สถานะปัจจุบัน
+Cust/Supp Address,ที่อยู่ cust / Supp
+Cust/Supp Name,ชื่อ cust / Supp
+Custom,ประเพณี
+Custom Autoreply Message,ข้อความตอบกลับอัตโนมัติที่กำหนดเอง
+Custom CSS,CSS ที่กำหนดเอง
+Custom Field,ฟิลด์ที่กำหนดเอง
+Custom Message,ข้อความที่กำหนดเอง
+Custom Query,แบบสอบถามแบบกำหนดเอง
+Custom Reports,รายงานที่กำหนดเอง
+Custom Script,สคริปต์ที่กำหนดเอง
+Custom Startup Code,รหัสเริ่มต้นที่กำหนดเอง
+Custom?,กำหนดเองได้อย่างไร
+Customer,ลูกค้า
+Customer / Item Name,ชื่อลูกค้า / รายการ
+Customer Account,บัญชีลูกค้า
+Customer Address,ที่อยู่ของลูกค้า
+Customer Addresses And Contacts,ที่อยู่ของลูกค้าและการติดต่อ
+Customer Code,รหัสลูกค้า
+Customer Codes,รหัสลูกค้า
+Customer Details,รายละเอียดลูกค้า
+Customer Feedback,คำติชมของลูกค้า
+Customer Group,กลุ่มลูกค้า
+Customer Group Name,ชื่อกลุ่มลูกค้า
+Customer Intro,แนะนำลูกค้า
+Customer Issue,ปัญหาของลูกค้า
+Customer Issue No,ปัญหาของลูกค้าไม่มี
+Customer Issue against a Serial No (warranty).,ปัญหาของลูกค้ากับหมายเลขเครื่อง (รับประกัน)
+Customer Master created by ,หลักของลูกค้าที่สร้างขึ้นโดย
+Customer Name,ชื่อลูกค้า
+Customer Type,ประเภทลูกค้า
+Customer classification tree.,ต้นไม้จำแนกลูกค้า
+Customer database.,ฐานข้อมูลลูกค้า
+Customer's Currency,สกุลเงินของลูกค้า
+Customer's Item Code,รหัสสินค้าของลูกค้า
+Customer's Vendor,ผู้ขายของลูกค้า
+Customer's currency,สกุลเงินของลูกค้า
+"Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.",สกุลเงินของลูกค้า - หากคุณต้องการเลือกสกุลเงินที่ไม่ได้เป็นสกุลเงินเริ่มต้นแล้วคุณจะต้องระบุอัตราการแปลงสกุลเงิน
+Customer/Supplier,ลูกค้า / ผู้ผลิต
+Customerwise Discount,ส่วนลด Customerwise
+Customize,ปรับแต่ง
+Customize Form,ปรับแต่งรูปแบบ
+Customize Form Field,กำหนดเขตข้อมูลฟอร์ม
+"Customize Label, Print Hide, Default etc.","กำหนด Label, ซ่อนพิมพ์ ฯลฯ เริ่มต้น"
+Customize the Notification,กำหนดประกาศ
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,ปรับแต่งข้อความเกริ่นนำที่จะไปเป็นส่วนหนึ่งของอีเมลที่ แต่ละรายการมีข้อความเกริ่นนำแยก
+DN,DN
+DN Detail,รายละเอียด DN
+Daily,ประจำวัน
+"Daily, weekly, monthly email Digests",รายวันรายสัปดาห์รายเดือนอีเมล์สำคัญ
+Danger,อันตราย
+Data,ข้อมูล
+Data Import,การนำเข้าข้อมูล
+Data Import Tool,เครื่องมือการนำเข้าข้อมูล
+Database,ฐานข้อมูล
+Database of potential customers.,ฐานข้อมูลของลูกค้าที่มีศักยภาพ
+Date,วันที่
+Date Format,รูปแบบวันที่
+Date Of Retirement,วันที่ของการเกษียณอายุ
+Date is repeated,วันที่ซ้ำแล้วซ้ำอีก
+Date of Birth,วันเกิด
+Date of Issue,วันที่ออก
+Date of Joining,วันที่ของการเข้าร่วม
+Date on which lorry started from supplier warehouse,วันที่เริ่มต้นจากรถบรรทุกคลังสินค้าผู้จัดจำหน่าย
+Date on which lorry started from your warehouse,วันที่เริ่มต้นจากรถบรรทุกคลังสินค้าของคุณ
+Date on which the lead was last contacted,วันที่นำได้รับการติดต่อล่าสุด
+Dates,วันที่
+Datetime,datetime
+Days for which Holidays are blocked for this department.,วันที่วันหยุดจะถูกบล็อกสำหรับแผนกนี้
+Dealer,เจ้ามือ
+Dear,น่ารัก
+Debit,หักบัญชี
+Debit Amt,จำนวนบัตรเดบิต
+Debit Note,หมายเหตุเดบิต
+Debit To,เดบิตเพื่อ
+Debit or Credit,เดบิตหรือบัตรเครดิต
+Deduct,หัก
+Deduction,การหัก
+Deduction Type,ประเภทหัก
+Deduction1,Deduction1
+Deductions,การหักเงิน
+Default,ผิดนัด
+Default Account,บัญชีเริ่มต้น
+Default BOM,BOM เริ่มต้น
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,เริ่มต้นบัญชีธนาคาร / เงินสดจะถูกปรับปรุงโดยอัตโนมัติในใบแจ้งหนี้ POS เมื่อโหมดนี้ถูกเลือก
+Default Bank Account,บัญชีธนาคารเริ่มต้น
+Default Commission Rate,อัตราค่าคอมมิชชั่นเริ่มต้น
+Default Company,บริษัท เริ่มต้น
+Default Cost Center,ศูนย์ต้นทุนเริ่มต้น
+Default Cost Center for tracking expense for this item.,ศูนย์ต้นทุนค่าใช้จ่ายเริ่มต้นสำหรับการติดตามสำหรับรายการนี​​้
+Default Currency,สกุลเงินเริ่มต้น
+Default Customer Group,กลุ่มลูกค้าเริ่มต้น
+Default Expense Account,บัญชีค่าใช้จ่ายเริ่มต้น
+Default Home Page,หน้าแรกเริ่มต้น
+Default Home Pages,หน้าแรกเริ่มต้น
+Default Income Account,บัญชีรายได้เริ่มต้น
+Default Item Group,กลุ่มสินค้าเริ่มต้น
+Default Price List,รายการราคาเริ่มต้น
+Default Price List Currency,เริ่มต้นสกุลเงินรายการราคา
+Default Print Format,รูปแบบการพิมพ์เริ่มต้น
+Default Product Category,ประเภทสินค้าเริ่มต้น
+Default Purchase Account in which cost of the item will be debited.,บัญชีซื้อเริ่มต้นที่ค่าใช้จ่ายของรายการที่จะถูกหัก
+Default Reserved Warehouse,เริ่มต้นคลังสินค้าสงวน
+Default Sales Partner,เริ่มต้นขายพันธมิตร
+Default Settings,ตั้งค่าเริ่มต้น
+Default Source Warehouse,คลังสินค้าที่มาเริ่มต้น
+Default Stock UOM,เริ่มต้น UOM สต็อก
+Default Supplier Type,ซัพพลายเออร์ชนิดเริ่มต้น
+Default Target Warehouse,คลังสินค้าเป้าหมายเริ่มต้น
+Default Territory,ดินแดนเริ่มต้น
+Default Unit of Measure,หน่วยเริ่มต้นของวัด
+Default Valuation Method,วิธีการประเมินค่าเริ่มต้น
+Default Value,ค่าเริ่มต้น
+Default Warehouse Type,ประเภทคลังสินค้าเริ่มต้น
+Default values are set across the role and can be over-ridden by user permissions.,ค่าเริ่มต้นจะกำหนดทั่วบทบาทและสามารถเกินขี่สิทธิ์ของผู้ใช้
+"Default: ""Product Search""",เริ่มต้น: &quot;ค้นหาผลิตภัณฑ์&quot;
+DefaultValue,เริ่มต้น
+Defaults,เริ่มต้น
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","กำหนดงบประมาณสำหรับศูนย์ต้นทุนนี้ เพื่อตั้งกระทำงบประมาณเห็น <a href=""#!List/Company"">บริษัท มาสเตอร์</a>"
+Define Rule,กำหนดกฎ
+Defines actions on states and the next step and allowed roles.,กำหนดดำเนินการกับรัฐและขั้นตอนต่อไปและบทบาทอนุญาต
+Defines workflow states and rules for a document.,กำหนดรัฐเวิร์กโฟลว์และกฎระเบียบสำหรับเอกสาร
+Delete,ลบ
+Delivered,ส่ง
+Delivered Items To Be Billed,รายการที่ส่งจะเรียกเก็บเงิน
+Delivered Qty,จำนวนส่ง
+Delivery (shipment) to customers.,การจัดส่ง (ขนส่ง) ให้กับลูกค้า
+Delivery Address,ที่อยู่จัดส่งสินค้า
+Delivery Date,วันที่ส่ง
+Delivery Details,รายละเอียดการจัดส่งสินค้า
+Delivery Document No,เอกสารจัดส่งสินค้าไม่มี
+Delivery Document Type,ประเภทเอกสารการจัดส่งสินค้า
+Delivery Note,หมายเหตุจัดส่งสินค้า
+Delivery Note Item,รายการจัดส่งสินค้าหมายเหตุ
+Delivery Note Items,รายการจัดส่งสินค้าหมายเหตุ
+Delivery Note Message,ข้อความหมายเหตุจัดส่งสินค้า
+Delivery Note No,หมายเหตุจัดส่งสินค้าไม่มี
+Delivery Note Packing Item,จัดส่งสินค้าบรรจุหมายเหตุ
+Delivery Note Required,หมายเหตุจัดส่งสินค้าที่จำเป็น
+Delivery Status,สถานะการจัดส่งสินค้า
+Delivery Time,เวลาจัดส่งสินค้า
+Department,แผนก
+Depend on LWP,ขึ้นอยู่กับ LWP
+Depends On,ขึ้นอยู่กับ
+Depends on LWP,ขึ้นอยู่กับ LWP
+Descending,น้อย
+Description,ลักษณะ
+Description HTML,HTML รายละเอียด
+Description of a Job Opening,คำอธิบายของการเปิดงาน
+Desert,ทะเลทราย
+Designation,การแต่งตั้ง
+Desktop,สก์ท็อป
+Detail Name,ชื่อรายละเอียด
+Detailed Breakup of the totals,กระจัดกระจายรายละเอียดของผลรวม
+Details,รายละเอียด
+Did not add.,ไม่ได้เพิ่ม
+Did not cancel,ไม่ได้ยกเลิก
+Did not save,ไม่ได้บันทึก
+Difference,ข้อแตกต่าง
+"Different ""States"" this document can exist in. Like ""Open"", ""Pending Approval"" etc.","ที่แตกต่างกัน &quot;รัฐ&quot; เอกสารนี้สามารถอยู่มาชอบ &quot;เปิด&quot;, &quot;รอการอนุมัติ&quot; ฯลฯ"
+Disabled,พิการ
+Disabled Filters,กรองพิการ
+Discount  %,ส่วนลด%
+Discount %,ส่วนลด%
+Discount (%),ส่วนลด (%)
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","ทุ่งส่วนลดจะสามารถใช้ได้ในใบสั่งซื้อรับซื้อ, ใบกำกับซื้อ"
+Discount(%),ส่วนลด (%)
+Display,แสดง
+Display Settings,แสดงการตั้งค่า
+Display all the individual items delivered with the main items,แสดงรายการทั้งหมดของแต่ละบุคคลมาพร้อมกับรายการหลัก
+Distinct unit of an Item,หน่วยที่แตกต่างของรายการ
+Distribute transport overhead across items.,แจกจ่ายค่าใช้จ่ายการขนส่งข้ามรายการ
+Distribution Id,รหัสกระจาย
+Distribution Name,ชื่อการแจกจ่าย
+Distributor,ผู้จัดจำหน่าย
+Divorced,หย่าร้าง
+Do not show any symbol like $ etc next to currencies.,ไม่แสดงสัญลักษณ์ใด ๆ เช่น ฯลฯ $ ต่อไปกับเงินสกุล
+Doc Name,ชื่อหมอ
+Doc Status,สถานะ Doc
+Doc Type,ประเภท Doc
+DocField,DocField
+DocPerm,DocPerm
+DocType,DOCTYPE
+DocType Details,รายละเอียด DocType
+DocType Label,ป้าย DocType
+DocType Mapper,Mapper DocType
+DocType is a Table / Form in the application.,DocType เป็นตาราง / แบบฟอร์มในใบสมัคร
+DocType on which this Workflow is applicable.,DOCTYPE ที่เวิร์กโฟลว์นี้ใช้ได้
+DocType or Field,DocType หรือสาขา
+Document,เอกสาร
+Document Description,คำอธิบายเอกสาร
+Document Status transition from ,เปลี่ยนสถานะเอกสารจาก
+Document Type,ประเภทเอกสาร
+Document is only editable by users of role,เอกสารเป็นเพียงแก้ไขได้โดยผู้ใช้ของบทบาท
+Document to rename,เอกสารการเปลี่ยนชื่อ
+Documentation,เอกสาร
+Documents,เอกสาร
+Domain List,รายชื่อโดเมน
+Download Backup,ดาวน์โหลดสำรอง
+Download Materials Required,ดาวน์โหลดวัสดุที่จำเป็น
+Download Template,ดาวน์โหลดแม่แบบ
+Download a report containing all raw materials with their latest inventory status,ดาวน์โหลดรายงานที่มีวัตถุดิบทั้งหมดที่มีสถานะสินค้าคงคลังของพวกเขาล่าสุด
+Draft,ร่าง
+Drafts,ร่าง
+Drag to sort columns,ลากเพื่อเรียงลำดับคอลัมน์
+Due Date,วันที่ครบกำหนด
+Duration,ระยะเวลา
+EMP/,EMP /
+ESIC CARD No,CARD ESIC ไม่มี
+ESIC No.,หมายเลข ESIC
+Earning,รายได้
+Earning & Deduction,รายได้และการหัก
+Earning Type,รายได้ประเภท
+Earning1,Earning1
+Edit,แก้ไข
+Editable,ที่สามารถแก้ไขได้
+Educational Qualification,วุฒิการศึกษา
+Educational Qualification Details,รายละเอียดคุ​​ณสมบัติการศึกษา
+Eg. smsgateway.com/api/send_sms.cgi,เช่น smsgateway.com / API / send_sms.cgi
+Eligible Amount,จำนวนสิทธิ์
+Email,อีเมล์
+Email (By company),อีเมล์ (โดย บริษัท )
+Email Digest,ข่าวสารทางอีเมล
+Email Digest Settings,การตั้งค่าอีเมลเด่น
+Email Host,โฮสต์อีเมล์
+Email Id,Email รหัส
+"Email Id must be unique, already exists for: ",Email รหัสต้องไม่ซ้ำกันอยู่แล้วสำหรับ:
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",Email รหัสที่ผู้สมัครงานจะส่งอีเมลถึง &quot;jobs@example.com&quot; เช่น
+Email Login,เข้าสู่ระบบอีเมล์
+Email Password,รหัสผ่าน Email
+Email Sent,อีเมลที่ส่ง
+Email Sent?,อีเมลที่ส่ง?
+Email Settings,การตั้งค่าอีเมล
+Email Settings for Outgoing and Incoming Emails.,การตั้งค่าอีเมลสำหรับอีเมลขาออกและขาเข้า
+Email Signature,ลายเซ็นอีเมล
+Email Use SSL,ส่งอีเมลใช้ SSL
+"Email addresses, separted by commas","ที่อยู่อีเมล, separted ด้วยเครื่องหมายจุลภาค"
+"Email settings for jobs email id ""jobs@example.com""",การตั้งค่าอีเมลสำหรับอีเมล ID งาน &quot;jobs@example.com&quot;
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",การตั้งค่าอีเมลที่จะดึงนำมาจากอีเมล์ ID เช่นยอดขาย &quot;sales@example.com&quot;
+Embed image slideshows in website pages.,ฝังภาพสไลด์ภาพในหน้าเว็บไซต์
+Emergency Contact Details,รายละเอียดการติดต่อในกรณีฉุกเฉิน
+Emergency Phone Number,หมายเลขโทรศัพท์ฉุกเฉิน
+Employee,ลูกจ้าง
+Employee Designation.,ได้รับการแต่งตั้งพนักงาน
+Employee Details,รายละเอียดของพนักงาน
+Employee Education,การศึกษาการทำงานของพนักงาน
+Employee External Work History,ประวัติการทำงานของพนักงานภายนอก
+Employee Internal Work History,ประวัติการทำงานของพนักงานภายใน
+Employee Internal Work Historys,Historys การทำงานของพนักงานภายใน
+Employee Name,ชื่อของพนักงาน
+Employee Number,จำนวนพนักงาน
+Employee Records to be created by ,ระเบียนพนักงานที่จะถูกสร้างขึ้นโดย
+Employee Setup,การติดตั้งการทำงานของพนักงาน
+Employee Training,การฝึกอบรมพนักงาน
+Employee Type,ประเภทพนักงาน
+Employee grades,เกรดของพนักงาน
+Employee record is created using selected field. ,ระเบียนพนักงานที่ถูกสร้างขึ้นโดยใช้เขตข้อมูลที่เลือก
+Employee records.,ระเบียนพนักงาน
+Employees Email Id,Email รหัสพนักงาน
+Employment Details,รายละเอียดการจ้างงาน
+Employment Type,ประเภทการจ้างงาน
+Enable / disable currencies.,เปิด / ปิดสกุลเงิน
+Enabled,เปิดการใช้งาน
+Enables <b>More Info.</b> in all documents,<b>ช่วยให้ข้อมูลเพิ่มเติม.</b> ในเอกสารทั้งหมด
+Encashment Date,วันที่การได้เป็นเงินสด
+End Date,วันที่สิ้นสุด
+End date of current invoice's period,วันที่สิ้นสุดของรอบระยะเวลาใบแจ้งหนี้ปัจจุบัน
+End of Life,ในตอนท้ายของชีวิต
+Ends on,สิ้นสุด
+Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,ป้อนรหัสที่จะได้รับอีเมล์รายงานข้อผิดพลาดที่ส่งมาจาก users.Eg: support@iwebnotes.com
+Enter Form Type,ป้อนประเภทแบบฟอร์ม
+Enter Row,ใส่แถว
+Enter campaign name if the source of lead is campaign.,ป้อนชื่อแคมเปญหากแหล่งที่มาของสารตะกั่วเป็นแคมเปญ
+"Enter default value fields (keys) and values. If you add multiple values for a field, the first one will be picked. These defaults are also used to set ""match"" permission rules. To see list of fields, go to <a href=""#Form/Customize Form/Customize Form"">Customize Form</a>.","ใส่เขตข้อมูลค่าเริ่มต้น (คีย์) และค่า ถ้าคุณเพิ่มค่าหลายค่าสำหรับเขตที่คนแรกที่จะถูกเลือก เริ่มต้นเหล่านี้ยังใช้ในการตั้งค่า &quot;การแข่งขัน&quot; กฎอนุญาต เพื่อดูรายชื่อของเขตข้อมูลไป <a href=""#Form/Customize Form/Customize Form"">กำหนดรูปแบบ</a> ."
+Enter department to which this Contact belongs,ใส่แผนกที่ติดต่อนี้เป็นของ
+Enter designation of this Contact,ใส่ชื่อของเราได้ที่นี่
+"Enter domain names associated to this website, each on a new line",ใส่ชื่อโดเมนที่เกี่ยวข้องกับเว็บไซต์นี้แต่ละบรรทัดใหม่
+"Enter email id separated by commas, invoice will be mailed automatically on particular date",ใส่หมายเลขอีเมลคั่นด้วยเครื่องหมายจุลภาคใบแจ้งหนี้จะถูกส่งโดยอัตโนมัติในวันที่เจาะจง
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,ป้อนรายการและจำนวนที่วางแผนไว้สำหรับที่คุณต้องการที่จะยกระดับการสั่งผลิตหรือดาวน์โหลดวัตถุดิบสำหรับการวิเคราะห์
+Enter message,ป้อนข้อความ
+Enter name of campaign if source of enquiry is campaign,ป้อนชื่อของแคมเปญหากแหล่งที่มาของการรณรงค์สอบถามรายละเอียดเพิ่มเติม
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)",ป้อนพารามิเตอร์คงที่ URL ที่นี่ (เช่นผู้ส่ง = ERPNext ชื่อผู้ใช้ = ERPNext รหัสผ่าน = 1234 ฯลฯ )
+Enter the company name under which Account Head will be created for this Supplier,ป้อนชื่อ บริษัท ภายใต้ซึ่งหัวหน้าบัญชีจะถูกสร้างขึ้นสำหรับผู้ผลิตนี้
+Enter the date by which payments from customer is expected against this invoice.,ป้อนวันที่โดยที่การชำระเงินจากลูกค้าที่คาดว่าจะต่อต้านใบแจ้งหนี้นี้
+Enter url parameter for message,ป้อนพารามิเตอร์ URL สำหรับข้อความ
+Enter url parameter for receiver nos,ป้อนพารามิเตอร์ URL สำหรับ Nos รับ
+Entries,คอมเมนต์
+Entries are not allowed against this Fiscal Year if the year is closed.,คอมเมนต์ไม่ได้รับอนุญาตกับปีงบประมาณนี้หากที่ปิดปี
+Error,ความผิดพลาด
+Estimated Material Cost,ต้นทุนวัสดุประมาณ
+Event,เหตุการณ์
+Event Individuals,บุคคลเหตุการณ์
+Event Role,บทบาทเหตุการณ์
+Event Roles,บทบาทเหตุการณ์
+Event Type,ชนิดเหตุการณ์
+Event Updates,ปรับปรุงเหตุการณ์
+Event User,ผู้ใช้งาน
+Exchange Rate,อัตราแลกเปลี่ยน
+Excise Page Number,หมายเลขหน้าสรรพสามิต
+Excise Voucher,บัตรกำนัลสรรพสามิต
+Execute,ปฏิบัติ
+Exemption Limit,วงเงินข้อยกเว้น
+Exhibition,งานมหกรรม
+Existing Customer,ลูกค้าที่มีอยู่
+Exit,ทางออก
+Exit Interview Details,ออกจากรายละเอียดการสัมภาษณ์
+Expected,ที่คาดหวัง
+Expected Delivery Date,คาดว่าวันที่ส่ง
+Expected End Date,คาดว่าวันที่สิ้นสุด
+Expected Start Date,วันที่เริ่มต้นคาดว่า
+Expense Account,บัญชีค่าใช้จ่าย
+Expense Claim,เรียกร้องค่าใช้จ่าย
+Expense Claim Approved,เรียกร้องค่าใช้จ่ายที่ได้รับอนุมัติ
+Expense Claim Approved Message,เรียกร้องค่าใช้จ่ายที่ได้รับอนุมัติข้อความ
+Expense Claim Detail,รายละเอียดค่าใช้จ่ายสินไหม
+Expense Claim Details,รายละเอียดค่าใช้จ่ายสินไหม
+Expense Claim Rejected,เรียกร้องค่าใช้จ่ายที่ถูกปฏิเสธ
+Expense Claim Rejected Message,เรียกร้องค่าใช้จ่ายที่ถูกปฏิเสธข้อความ
+Expense Claim Type,เรียกร้องประเภทค่าใช้จ่าย
+Expense Date,วันที่ค่าใช้จ่าย
+Expense Details,รายละเอียดค่าใช้จ่าย
+Expense Head,หัวหน้าค่าใช้จ่าย
+Expenses Booked,ค่าใช้จ่ายใน Booked
+Expiry Date,วันหมดอายุ
+Export,ส่งออก
+Exports,การส่งออก
+External,ภายนอก
+Extra Condition,เงื่อนไขพิเศษ
+Extract Emails,สารสกัดจากอีเมล
+Extract Job Applicant from jobs email id e.g. jobs@example.com,สารสกัดจากใบงานจากงานอีเมล์รหัสเช่น jobs@example.com
+Extract Leads from sales email id e.g. sales@example.com,สารสกัดนำมาจากยอดขายอีเมล์ ID เช่น sales@example.com
+FCFS Rate,อัตรา FCFS
+FIFO,FIFO
+Family Background,ภูมิหลังของครอบครัว
+FavIcon,favicon
+Fax,แฟกซ์
+Featured Item,รายการเด่น
+Featured Item in Item Group,รายการที่โดดเด่นในกลุ่มสินค้า
+Features Setup,การติดตั้งสิ่งอำนวยความสะดวก
+Feed,กิน
+Feed Type,ฟีดประเภท
+Feedback,ข้อเสนอแนะ
+Female,หญิง
+Fetch lead which will be converted into customer.,เรียกตะกั่วซึ่งจะถูกแปลงเป็นลูกค้า
+Field,สนาม
+Field Description,ฟิลด์คำอธิบาย
+Field Mapper Detail,รายละเอียดสนามแมปเปอร์
+Field Mapper Details,รายละเอียดสนามแมปเปอร์
+Field Name,ชื่อเขต
+Field Type,ฟิลด์ชนิด
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","สนามที่มีอยู่ในหมายเหตุส่งใบเสนอราคา, ใบแจ้งหนี้การขาย, การสั่งซื้อการขาย"
+Field from other forms,เขตข้อมูลจากรูปแบบอื่น ๆ
+"Field that represents the Workflow State of the transaction (if field is not present, a new hidden Custom Field will be created)",สนามที่แสดงถึงรัฐเวิร์กโฟลว์ของการทำธุรกรรม (ถ้าเขตข้อมูลไม่ใช่ปัจจุบันฟิลด์ที่กำหนดเองใหม่ซ่อนจะถูกสร้างขึ้น)
+Fieldname,fieldname
+Fields,สาขา
+"Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box","เขตคั่นด้วยเครื่องหมายจุลภาค (,) จะรวมอยู่ใน <br /> <b>ค้นหาตามรายชื่อของกล่องโต้ตอบค้นหา</b>"
+File Data,แฟ้มข้อมูล
+File LIst,รายชื่อไฟล์
+File List,รายชื่อไฟล์
+File Name,ชื่อไฟล์
+File URL,ไฟล์ URL
+File Uploaded Sucessfully.,ไฟล์ที่อัปโหลดสำเร็จ
+Filing in Additional Information about the Opportunity will help you analyze your data better.,ยื่นข้อมูลเพิ่มเติมเกี่ยวกับโอกาสที่จะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณดีขึ้น
+Filing in Additional Information about the Purchase Receipt will help you analyze your data better.,ยื่นข้อมูลเพิ่มเติมเกี่ยวกับรับซื้อจะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณดีขึ้น
+Filing in Additional Information about the Purchase Requisition will help you analyze your data better.,ยื่นข้อมูลเพิ่มเติมเกี่ยวกับใบขอซื้อจะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณดีขึ้น
+Filling in Additional Information about the Delivery Note will help you analyze your data better.,กรอกข้อมูลเพิ่มเติมเกี่ยวกับการจัดส่งสินค้าหมายเหตุจะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณได้ดียิ่งขึ้น
+Filling in additional information about the Quotation will help you analyze your data better.,กรอกข้อมูลเพิ่มเติมเกี่ยวกับใบเสนอราคาจะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณดีขึ้น
+Filling in additional information about the Sales Order will help you analyze your data better.,กรอกข้อมูลเพิ่มเติมเกี่ยวกับการสั่งซื้อการขายจะช่วยให้คุณสามารถวิเคราะห์ข้อมูลของคุณดีขึ้น
+Filter By Amount,กรองตามจํานวนเงิน
+Filter By Date,กรองตามวันที่
+Filter based on customer,กรองขึ้นอยู่กับลูกค้า
+Filter based on item,กรองขึ้นอยู่กับสินค้า
+Filters,ตัวกรอง
+Final Confirmation Date,วันที่ยืนยันครั้งสุดท้าย
+Financial Analytics,Analytics การเงิน
+Financial Statements,งบการเงิน
+Financial Years for books of accounts,ปีการเงินสำหรับหนังสือของบัญชี
+First Name,ชื่อแรก
+First Responded On,ครั้งแรกเมื่อวันที่ง่วง
+Fiscal Year,ปีงบประมาณ
+Fiscal Year Details,รายละเอียดปีงบประมาณ
+Fixed Asset Account,บัญชีสินทรัพย์ถาวร
+Float,ลอย
+Float Precision,พรีซิชั่ลอย
+Floral,ดอกไม้
+Follow via Email,ผ่านทางอีเมล์ตาม
+Following dates are blocked for Leave,วันต่อไปนี้จะถูกบล็อกสำหรับออก
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",ตารางต่อไปนี้จะแสดงค่าหากรายการย่อย - สัญญา ค่าเหล่านี้จะถูกเรียกจากต้นแบบของ &quot;Bill of Materials&quot; ย่อย - รายการสัญญา
+Font,ตัวอักษร
+Font Size,ขนาดตัวอักษร
+Footer,ส่วนท้าย
+Footer Items,รายการส่วนท้าย
+For All Users,สำหรับผู้ใช้ทั้งหมด
+For Buying,สำหรับการซื้อ
+For Company,สำหรับ บริษัท
+For Employee,สำหรับพนักงาน
+For Employee Name,สำหรับชื่อของพนักงาน
+For Item ,สำหรับรายการ
+"For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma",สำหรับการเชื่อมโยงเข้าสู่ DocType เป็น rangeFor เลือกใส่รายการของตัวเลือกที่คั่นด้วยจุลภาค
+"For Links, use define linked",สำหรับการเชื่อมโยงการเชื่อมโยงใช้กำหนด
+For Production,สำหรับการผลิต
+For Reference Only.,สำหรับการอ้างอิงเท่านั้น
+For Selling,สำหรับการขาย
+For Warehouse,สำหรับโกดัง
+"For comparative filters, start with",สำหรับตัวกรองเปรียบเทียบเริ่มต้นด้วย
+"For e.g. 2012, 2012-13","สำหรับเช่น 2012, 2012-13"
+For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,ตัวอย่างเช่นถ้าคุณยกเลิกและแก้ไข &#39;INV004&#39; มันจะกลายเป็นเอกสารใหม่ &#39;INV004-1&#39; นี้จะช่วยให้คุณสามารถติดตามการแก้ไขแต่ละ
+For example: You want to restrict users to transactions marked with a certain property called 'Territory',ตัวอย่างเช่นคุณต้องการ จำกัด ผู้ใช้กับการทำธุรกรรมที่มีเครื่องหมายคุณสมบัติบางอย่างที่เรียกว่า &#39;พื้นที่&#39;
+For opening balance entry account can not be a PL account,เปิดบัญชีรายการสมดุลไม่สามารถบัญชี PL
+"For opening invoice entry, this date will reflect in the period-wise aging report.",สำหรับการเปิดรายการใบแจ้งหนี้วันนี้จะสะท้อนให้เห็นถึงในรายงาน aging ระยะเวลาที่ชาญฉลาด
+For ranges,สำหรับช่วง
+For reference,สำหรับการอ้างอิง
+For reference only.,สำหรับการอ้างอิงเท่านั้น
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",เพื่อความสะดวกของลูกค้ารหัสเหล่านี้สามารถนำมาใช้ในรูปแบบที่พิมพ์เช่นใบแจ้งหนี้และนำส่งสินค้า
+Form,ฟอร์ม
+Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,รูปแบบ: hh: mm สำหรับตัวอย่างหนึ่งชั่วโมงหมดอายุตั้งเช่น 01:00 แม็กซ์จะหมดอายุ 72 ชั่วโมง ค่าเริ่มต้นคือ 24 ชั่วโมง
+Forum,ฟอรั่ม
+Fraction,เศษ
+Fraction Units,หน่วยเศษ
+Friday,วันศุกร์
+From Company,จาก บริษัท
+From Customer,จากลูกค้า
+From Date,จากวันที่
+From Date must be before To Date,นับ แต่วันที่ต้องอยู่ก่อนวันที่ต้องการ
+From DocType,จาก DocType
+From Employee,จากพนักงาน
+From Field,จากสนาม
+From PR Date,จากวันที่ PR
+From Package No.,จากเลขที่แพคเกจ
+From Table,จากตารางที่
+Frozen,แช่แข็ง
+Full Name,ชื่อเต็ม
+Fully Billed,จำนวนมากที่สุดอย่างเต็มที่
+Fully Completed,เสร็จสมบูรณ์
+GL Control,ควบคุม GL
+GL Entry,รายการ GL
+GL Entry: Debit or Credit amount is mandatory for ,รายการ GL: จำนวนเดบิตหรือบัตรเครดิตที่จำเป็นสำหรับ
+GL Mapper,Mapper GL
+GL Mapper Detail,รายละเอียด Mapper GL
+GRN,GRN
+Gantt Chart,แผนภูมิแกนต์
+Gantt chart of all tasks.,แผนภูมิ Gantt ของงานทั้งหมด
+Gender,เพศ
+General,ทั่วไป
+General Ledger,บัญชีแยกประเภททั่วไป
+Generate Description HTML,สร้างคำอธิบาย HTML
+Generate Purchase Requests (MRP) and Production Orders.,สร้างคำขอซื้อ (MRP) และคำสั่งการผลิต
+Generate Salary Slips,สร้าง Slips เงินเดือน
+Generate Schedule,สร้างตาราง
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",สร้างบรรจุภัณฑ์แพคเกจที่จะส่งมอบ ใช้สำหรับการแจ้งจำนวนแพ็กเกจที่บรรจุและน้ำหนักของมัน
+Generates HTML to include selected image in the description,สร้าง HTM​​L ที่จะรวมภาพที่เลือกไว้ในคำอธิบาย
+Georgia,จอร์เจีย
+Get Advances Paid,รับเงินทดรองจ่าย
+Get Advances Received,รับเงินรับล่วงหน้า
+Get Current Stock,รับสินค้าปัจจุบัน
+Get Items,รับสินค้า
+Get Last Purchase Rate,รับซื้อให้ล่าสุด
+Get Non Reconciled Entries,รับคอมเมนต์คืนดีไม่
+Get Open Sales Order,รับการสั่งซื้อการขายเปิด
+Get Outstanding Invoices,รับใบแจ้งหนี้ค้าง
+Get Purchase Receipt,รับใบเสร็จรับเงินซื้อ
+Get Sales Orders,รับการสั่งซื้อการขาย
+Get Specification Details,ดูรายละเอียดสเปค
+Get Stock and Rate,รับสินค้าและอัตรา
+Get Tax Detail,รับรายละเอียดภาษี
+Get Taxes and Charges,รับภาษีและค่าธรรมเนียม
+Get Template,รับแม่แบบ
+Get Terms and Conditions,รับข้อตกลงและเงื่อนไข
+Get Weekly Off Dates,รับวันปิดสัปดาห์
+Get the template of the Attendance for which you want to import in CSV (Comma seperated values) format.Fill data in the template. Save the template in CSV format.All attendance dates inbetween 'Attendance From Date' and 'Attendance To Date' will come in the template with employees list.,รับแม่แบบของผู้เข้าร่วมที่คุณต้องการที่จะนำเข้าในรูปแบบ CSV (ค่าแยกจุลภาค) ข้อมูล format.Fill ในแม่แบบ บันทึกแม่แบบในการเข้าร่วมประชุม CSV format.All วัน &#39;ผู้เข้าร่วมจากวันที่&#39; inbetween และ &#39;ผู้เข้าร่วมนัด&#39; จะมาในแม่แบบที่มีรายชื่อพนักงาน
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.",ได้รับอัตรามูลค่าและสต็อกที่คลังสินค้าแหล่งที่มา / เป้าหมายดังกล่าวโพสต์วันที่เวลา ถ้าต่อเนื่องรายการโปรดกดปุ่มนี้หลังจากที่เข้ามา Nos อนุกรม
+Global Defaults,เริ่มต้นทั่วโลก
+Go back to home,กลับไปที่บ้าน
+Go to Setup > <a href='#user-properties'>User Properties</a> to set \			'territory' for diffent Users.,ไปที่ Setup&gt; <a href='#user-properties'>คุณสมบัติของผู้ใช้</a> ในการตั้งค่า \ &#39;ดินแดน&#39; สำหรับผู้ใช้ diffent
+Goal,เป้าหมาย
+Goals,เป้าหมาย
+Goods received from Suppliers.,สินค้าที่ได้รับจากผู้จำหน่าย
+Grade,เกรด
+Graduate,จบการศึกษา
+Grand Total,รวมทั้งสิ้น
+Grand Total (Export),แกรนด์รวม (ส่งออก)
+Grand Total (Import),แกรนด์รวม (นำเข้า)
+Grand Total*,* แกรนด์รวม
+Gratuity LIC ID,ID LIC บำเหน็จ
+Gross Margin %,อัตรากำไรขั้นต้น%
+Gross Margin Value,ค่าอัตรากำไรขั้นต้น
+Gross Pay,จ่ายขั้นต้น
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,จ่ายขั้นต้น + จำนวน Arrear + จำนวนการได้เป็นเงินสด - หักรวม
+Gross Profit,กำไรขั้นต้น
+Gross Profit (%),กำไรขั้นต้น (%)
+Gross Weight,น้ำหนักรวม
+Gross Weight UOM,UOM น้ำหนักรวม
+Group,กลุ่ม
+Group By,กลุ่มตาม
+Group or Ledger,กลุ่มหรือบัญชีแยกประเภท
+Groups,กลุ่ม
+HR,ทรัพยากรบุคคล
+HTML,HTML
+HTML / Banner that will show on the top of product list.,HTML / แบนเนอร์ที่จะแสดงอยู่ด้านบนของรายการสินค้า
+"HTML print formats for quotes, invoices etc",พิมพ์รูปแบบที่ HTML สำหรับคำพูด ฯลฯ ใบแจ้งหนี้
+Half Day,ครึ่งวัน
+Half Yearly,ประจำปีครึ่ง
+Half-yearly,รายหกเดือน
+Has Batch No,ชุดมีไม่มี
+Has Child Node,มีโหนดลูก
+Has Serial No,มีซีเรียลไม่มี
+Header,ส่วนหัว
+Heading,หัวเรื่อง
+Heading Font,หัวเรื่อง Font
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,หัว (หรือกลุ่ม) กับที่คอมเมนต์จะทำบัญชีและยอดคงเหลือจะรักษา
+Health Concerns,ความกังวลเรื่องสุขภาพ
+Health Details,รายละเอียดสุขภาพ
+Held On,จัดขึ้นเมื่อวันที่
+Help,ช่วย
+Help HTML,วิธีใช้ HTML
+Helper for managing return of goods (sales or purchase),ผู้ช่วยในการบริหารจัดการการกลับมาของสินค้า (ขายหรือซื้อ)
+Helvetica Neue,Neue Helvetica
+"Hence, maximum allowed Manufacturing Quantity",ดังนั้นจำนวนการผลิตสูงสุดที่อนุญาต
+"Here you can maintain family details like name and occupation of parent, spouse and children",ที่นี่คุณสามารถรักษารายละเอียดเช่นชื่อครอบครัวและอาชีพของผู้ปกครองคู่สมรสและเด็ก
+"Here you can maintain height, weight, allergies, medical concerns etc","ที่นี่คุณสามารถรักษาความสูงน้ำหนัก, ภูมิแพ้, ฯลฯ ปัญหาด้านการแพทย์"
+Hey there! You need to put at least one item in \				the item table.,Hey there! คุณจะต้องใส่อย่างน้อยหนึ่งรายการใน \ ตารางรายการ
+Hey! You seem to be using the wrong template. \				Click on 'Download Template' button to get the correct template.,Hey! คุณดูเหมือนจะใช้แม่แบบที่ไม่ถูกต้อง \ คลิกที่ปุ่ม &#39;ดาวน์โหลดแม่แบบ&#39; เพื่อแม่ที่ถูกต้อง
+Hidden,ซ่อน
+Hide Actions,ซ่อนการดำเนินการ
+Hide Copy,ซ่อนคัดลอก
+Hide Currency Symbol,ซ่อนสัญลักษณ์สกุลเงิน
+Hide Email,ซ่อนอีเมล์
+Hide Heading,ซ่อนหัวเรื่อง
+Hide Print,ซ่อนพิมพ์
+Hide Toolbar,ซ่อนแถบเครื่องมือ
+High,สูง
+Highlight,เน้น
+History In Company,ประวัติใน บริษัท
+Hold,ถือ
+Holiday,วันหยุด
+Holiday Block List,รายการบล็อกวันหยุด
+Holiday Block List Allow,รายการบล็อก Holiday อนุญาตให้
+Holiday Block List Allowed,รายการบล็อก Holiday อนุญาตให้นำ
+Holiday Block List Date,วันหยุดวันที่รายการบล็อก
+Holiday Block List Dates,วันหยุดวันรายการบล็อก
+Holiday Block List Name,วันหยุดชื่อรายการบล็อก
+Holiday List,รายการวันหยุด
+Holiday List Name,ชื่อรายการวันหยุด
+Holidays,วันหยุด
+Home,บ้าน
+Home Control,ควบคุมหน้าแรก
+Home Page,หน้าแรก
+Home Page is Products,หน้าแรกคือผลิตภัณฑ์
+Home Pages,หน้าแรก
+Host,เจ้าภาพ
+"Host, Email and Password required if emails are to be pulled","โฮสต์, Email และรหัสผ่านที่จำเป็นหากอีเมลที่จะดึง"
+Hour Rate,อัตราชั่วโมง
+Hour Rate Consumable,วัสดุสิ้นเปลืองค่าชั่วโมง
+Hour Rate Electricity,การไฟฟ้าอัตราชั่วโมง
+Hour Rate Labour,แรงงานอัตราชั่วโมง
+Hour Rate Rent,ราคาเช่าชั่วโมง
+Hours,ชั่วโมง
+How frequently?,วิธีบ่อย?
+"How should this currency be formatted? If not set, will use system defaults",วิธีการที่ควรสกุลเงินนี้จะจัดรูปแบบ? ถ้าไม่ตั้งจะใช้เริ่มต้นของระบบ
+How to upload,วิธีการอัปโหลด
+Hrvatski,Hrvatski
+Human Resources,ทรัพยากรมนุษย์
+Human Resources Home,ทรัพยากรมนุษย์หน้าแรก
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,! Hurray วันที่ (s) ที่คุณกำลังใช้สำหรับออก \ ตรงกับวันหยุด (s) คุณไม่จำเป็นต้องใช้สำหรับการออก
+I,ผม
+ID (name) of the entity whose property is to be set,ID (ชื่อ) ของกิจการที่มีสถานที่ให้บริการจะถูกกำหนด
+IDT,IDT
+IGHelp,IGHelp
+II,ครั้งที่สอง
+III,III
+IN,ใน
+INV,INV
+INV/10-11/,INV/10-11 /
+IV,IV
+Icon,ไอคอน
+Icon will appear on the button,ไอคอนจะปรากฏบนปุ่ม
+Id of the profile will be the email.,id ของโปรไฟล์จะเป็นอีเมล
+Identification of the package for the delivery (for print),บัตรประจำตัวของแพคเกจสำหรับการส่งมอบ (สำหรับพิมพ์)
+If Monthly Budget Exceeded,หากงบประมาณรายเดือนที่เกิน
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order",ถ้า BOM ขายถูกกำหนด BOM ที่แท้จริงของแพ็คจะปรากฏเป็น table.Available ในหมายเหตุจัดส่งสินค้าและการสั่งซื้อการขาย
+"If Supplier Part Number exists for given Item, it gets stored here",หากหมายเลขผู้ผลิตที่มีอยู่สำหรับรายการที่กำหนดจะได้รับการเก็บไว้ที่นี่
+If Yearly Budget Exceeded,ถ้างบประมาณประจำปีเกิน
+"If a User does not have access at Level 0, then higher levels are meaningless","หากผู้ใช้ไม่สามารถเข้าถึงที่ระดับ 0, ระดับที่สูงขึ้นแล้วมีความหมาย"
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.",หากการตรวจสอบรายการวัสดุสำหรับรายการย่อยประกอบจะได้รับการพิจารณาสำหรับการใช้วัตถุดิบ มิฉะนั้นทุกรายการย่อยประกอบจะได้รับการปฏิบัติเป็นวัตถุดิบ
+"If checked, all other workflows become inactive.",หากตร​​วจสอบทุกขั้นตอนการทำงานอื่น ๆ เป็นที่รอ
+"If checked, the Home page will be the default Item Group for the website.",หากการตรวจสอบหน้าแรกจะเริ่มต้นกลุ่มสินค้าสำหรับเว็บไซต์
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",หากการตรวจสอบจำนวนเงินภาษีจะถือว่าเป็นรวมอยู่ในอัตราพิมพ์ / จำนวนพิมพ์
+"If image is selected, color will be ignored (attach first)",หากภาพถูกเลือกสีจะถูกละเว้น (แนบแรก)
+If more than one package of the same type (for print),หากมีมากกว่าหนึ่งแพคเกจประเภทเดียวกัน (พิมพ์)
+If non standard port (e.g. 587),ถ้าพอร์ตมาตรฐานไม่ (เช่น 587)
+If not applicable please enter: NA,ถ้าไม่สามารถใช้ได้โปรดป้อน: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.",ถ้าไม่ได้ตรวจสอบรายชื่อจะต้องมีการเพิ่มแต่ละแผนกที่มันจะต้องมีการใช้
+"If not, create a",ถ้าไม่สร้าง
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.",หากตั้งการป้อนข้อมูลที่ได้รับอนุญาตเฉพาะสำหรับผู้ใช้ที่ระบุ อื่นรายการที่ได้รับอนุญาตสำหรับผู้ใช้ทั้งหมดที่มีสิทธิ์ที่จำเป็น
+"If specified, send the newsletter using this email address",ถ้าระบุส่งจดหมายโดยใช้ที่อยู่อีเมลนี้
+"If the 'territory' Link Field exists, it will give you an option to select it",ถ้าฟิลด์ &#39;ดินแดน&#39; แล้วก็จะให้คุณเลือกที่จะเลือก
+"If the account is frozen, entries are allowed for the ""Account Manager"" only.",หากบัญชีถูกแช่แข็งรายการที่ได้รับอนุญาตให้ &quot;Account Manager&quot; เท่านั้น
+"If this Account represents a Customer, Supplier or Employee, set it here.",หากบัญชีนี้เป็นลูกค้าของผู้ผลิตหรือพนักงานกำหนดได้ที่นี่
+If you follow Quality Inspection<br>Enables item QA Required and QA No in Purchase Receipt,ถ้าคุณทำตามการตรวจสอบคุณภาพ <br> ช่วยให้รายการที่ไม่จำเป็นต้องและ QA QA ในใบเสร็จรับเงินซื้อ
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,หากคุณมีการขายและทีมหุ้นส่วนขาย (ตัวแทนจำหน่าย) พวกเขาสามารถติดแท็กและรักษาผลงานของพวกเขาในกิจกรรมการขาย
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.",ถ้าคุณได้สร้างแม่แบบมาตรฐานในภาษีซื้อและปริญญาโทค่าเลือกหนึ่งและคลิกที่ปุ่มด้านล่าง
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.",ถ้าคุณได้สร้างแม่แบบมาตรฐานในภาษีขายและปริญญาโทค่าเลือกหนึ่งและคลิกที่ปุ่มด้านล่าง
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page",หากคุณมีความยาวพิมพ์รูปแบบคุณลักษณะนี้สามารถใช้ในการแยกหน้าเว็บที่จะพิมพ์บนหน้าเว็บหลายหน้ากับส่วนหัวและท้ายกระดาษทั้งหมดในแต่ละหน้า
+If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,หากคุณมีส่วนร่วมในกิจกรรมการผลิต <br> <b>ช่วยให้รายการที่ผลิต</b>
+Ignore,ไม่สนใจ
+Image,ภาพ
+Image View,ดูภาพ
+Implementation Partner,พันธมิตรการดำเนินงาน
+Import,นำเข้า
+Import Date Format ,รูปแบบวันที่นำเข้า
+Import Log,นำเข้าสู่ระบบ
+Import Log1,นำเข้า Log1
+Import data from spreadsheet (csv) files,นำเข้าข้อมูลจากไฟล์สเปรดชีต (CSV)
+Important dates and commitments in your project life cycle,วันที่มีความสำคัญและมีความมุ่งมั่นในวงจรชีวิตของโครงการ
+Imports,การนำเข้า
+In Dialog,ในกล่องโต้ตอบ
+In Filter,กรอง
+In List View,ในมุมมองรายการ
+In Process,ในกระบวนการ
+In Report Filter,ในรายงานกรอง
+In Store,ในร้านค้า
+In Words,ในคำพูดของ
+In Words (Export),ในคำพูดของ (ส่งออก)
+In Words (Export) will be visible once you save the Delivery Note.,ในคำพูดของ (ส่งออก) จะปรากฏเมื่อคุณบันทึกหมายเหตุจัดส่งสินค้า
+In Words (Import),ในคำพูดของ (นำเข้า)
+In Words will be visible once you save the Delivery Note.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกหมายเหตุจัดส่งสินค้า
+In Words will be visible once you save the Purchase Invoice.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกใบกำกับซื้อ
+In Words will be visible once you save the Purchase Order.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกใบสั่งซื้อ
+In Words will be visible once you save the Purchase Receipt.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกรับซื้อ
+In Words will be visible once you save the Quotation.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกใบเสนอราคา
+In Words will be visible once you save the Sales Invoice.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกใบแจ้งหนี้การขาย
+In Words will be visible once you save the Sales Order.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกการสั่งซื้อการขาย
+In Words(Import),ในคำพูดของ (นำเข้า)
+In response to,ในการตอบสนองต่อ
+"In the Permission Manager, click on the button in the 'Condition' column for the Role you want to restrict.",ในตัวจัดการการอนุญาตให้คลิกที่ปุ่มใน &#39;สภาพ&#39; คอลัมน์บทบาทที่คุณต้องการ จำกัด
+Inactive,เฉื่อยชา
+Incentives,แรงจูงใจ
+Incharge Name,incharge ชื่อ
+Income,เงินได้
+Income Account,บัญชีรายได้
+Income Year to Date,ปีรายได้ให้กับวันที่
+Incoming,ขาเข้า
+Incoming Mail Setting,การตั้งค่าอีเมลขาเข้า
+Incoming Rate,อัตราเข้า
+Incoming Time,เวลาที่เข้ามา
+Incoming quality inspection.,การตรวจสอบคุณภาพที่เข้ามา
+Indent,ย่อหน้า
+Index,ดัชนี
+Indicates that the package is a part of this delivery,แสดงให้เห็นว่าแพคเกจเป็นส่วนหนึ่งของการจัดส่งนี้

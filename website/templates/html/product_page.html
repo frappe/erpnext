@@ -8,14 +8,6 @@
 	{% include "css/product_page.css" %}
 {% endblock %}
 
-{% block title %}
-	{% if item_name != name %}
-		{{ item_name }} [{{ name }}]
-	{% else %}
-		{{ item_name or name }}
-	{% endif %}
-{% endblock %}
-
 {% block content %}
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-product-{{ name }}">

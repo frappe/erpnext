@@ -13,7 +13,7 @@
 			style="margin-bottom: 0px;">
 			<div class="navbar-inner">
 			<div class="container">
-				<a class="brand" href="index.html">{{ brand_html }}</a>
+				<a class="brand" href="/">{{ brand_html }}</a>
 				<ul class="nav">
 					{% for page in top_bar_items %}
 						{% if not page.parent_label %}
@@ -54,7 +54,7 @@
 				</ul>
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>
 				<ul class="nav pull-right">
-					<li id="login-topbar-item"><a href="login.html">Login</a></li>
+					<li id="login-topbar-item"><a href="login">Login</a></li>
 				</ul>
 			</div>
 			</div>
@@ -67,6 +67,29 @@
 		</div>
 	</div>
 	<footer><div class="web-footer">
+		{% if facebook_share or google_plus_one or twitter_share or linked_in_share %}
+		<div class="social-icons" style="">
+			<span style="font-size: 11px;">{{ share_text or "Share this page on: "}}</span>
+			{% if google_plus_one %}
+				<a href="https://plus.google.com/share?url={{ url }}"
+				 	target="_blank"><i class="icon-google-plus"></i></a>
+			{% endif %}
+			{% if twitter_share %}
+				<a href="https://twitter.com/intent/tweet?url={{ url }}&text={{ encoded_title }}"
+					target="_blank" ><i class="icon-twitter"></i></a>
+			{% endif %}
+			{% if facebook_share %}
+				<a href="https://www.facebook.com/sharer.php?u={{ url }}&t={{ encoded_title }}&via={{ twitter_share_via }}"
+					target="_blank"><i class="icon-facebook"></i></a>
+			{% endif %}
+			{% if linked_in_share %}
+				<a href="http://www.linkedin.com/shareArticle?mini=true&url={{ url }}&title={{ encoded_title }}"
+					target="_blank"><i class="icon-linkedin"></i></a>
+			{% endif %}
+		</div>
+		{% endif %}
+		<p style="float: right; clear: right;">
+			<a style="font-size: 90%; color: #888;" href="attributions">ERPNext Powered</a></p>
 		<div class="web-footer-menu"><ul>
 		{% for item in footer_items %}
 			<li><a href="{{ item.url }}" {{ item.target }}
@@ -79,7 +102,6 @@
 		{% if address %}
 		{{ address }}
 		{% endif %}
-		<p><a style="font-size: 90%;" href="attributions.html">ERPNext Powered</a></p>
 		</div>
 	</footer>
 

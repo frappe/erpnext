@@ -41,7 +41,7 @@ class TestSerialNo(unittest.TestCase):
 			["2012-01-01", "02:00", "10006", 1200, 800],
 			["2012-01-01", "06:00", "10007", 1500, 900]]
 		for d in data:
-			webnotes.model_wrapper([{
+			webnotes.bean([{
 				"doctype": "Serial No",
 				"item_code": "Nebula 8",
 				"warehouse": "Default Warehouse", 

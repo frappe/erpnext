@@ -17,9 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults
+from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -30,7 +30,6 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.defaults = get_defaults()
 		self.tname = 'Purchase Receipt Item'
 		self.fname = 'purchase_receipt_details'
 		self.count = 0
@@ -297,7 +296,7 @@ class DocType(BuyingController):
 		# 4.Update Bin
 		self.update_stock(is_submit = 0)
 
-		# 5.Update Purchase Requests Pending Qty and accordingly it's Status
+		# 5.Update Material Requests Pending Qty and accordingly it's Status
 		pc_obj.update_prevdoc_detail(self, is_submit = 0)
 
 		# 6. Update last purchase rate

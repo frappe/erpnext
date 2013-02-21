@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 17:54:10", 
+  "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2013-01-29 18:16:48", 
+  "modified": "2013-02-18 13:37:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,9 +31,7 @@
   "parent": "Purchase Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -181,16 +179,16 @@
   "fieldtype": "Section Break"
  }, 
  {
-  "description": "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.", 
+  "description": "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
   "doctype": "DocField", 
   "fieldname": "indent_no", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Select Purchase Request", 
+  "label": "Select Material Request", 
   "no_copy": 1, 
   "oldfieldname": "indent_no", 
   "oldfieldtype": "Link", 
-  "options": "Purchase Request", 
+  "options": "Material Request", 
   "print_hide": 1
  }, 
  {
@@ -815,25 +813,57 @@
   "print_hide": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Material User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Material User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Purchase Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Purchase User", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "match": "supplier", 
-  "role": "Supplier"
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Purchase Manager", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Purchase User", 
   "submit": 1, 
   "write": 1
  }, 
@@ -842,8 +872,15 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
+  "permlevel": 1, 
+  "role": "All", 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "supplier", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Supplier"
  }
 ]

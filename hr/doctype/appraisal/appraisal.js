@@ -26,7 +26,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
-	if(doc.__islocal && doc.employee==user_defaults.employee) {
+	if(doc.__islocal && doc.employee==wn.defaults.get_user_default("employee")) {
 		cur_frm.set_value("employee", "");
 		cur_frm.set_value("employee_name", "")
 	}

@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import add_days, cstr, flt, nowdate, cint
 from webnotes.model.doc import Document
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, msgprint
 from stock.utils import get_valid_serial_nos
@@ -221,7 +221,7 @@ class DocType:
 		if args.get("warehouse"):
 			args["warehouse_type"] = webnotes.conn.get_value('Warehouse' , args["warehouse"],
 				'warehouse_type')
-		sle = webnotes.model_wrapper([args])
+		sle = webnotes.bean([args])
 		sle.ignore_permissions = 1
 		sle.insert()
 		return sle.doc.name

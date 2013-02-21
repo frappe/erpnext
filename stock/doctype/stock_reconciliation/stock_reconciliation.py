@@ -248,7 +248,7 @@ class DocType(DocListController):
 		}
 		args.update(opts)
 		# create stock ledger entry
-		sle_wrapper = webnotes.model_wrapper([args])
+		sle_wrapper = webnotes.bean([args])
 		sle_wrapper.ignore_permissions = 1
 		sle_wrapper.insert()
 		

@@ -31,14 +31,14 @@ class JobsMailbox(POP3Mailbox):
 		name = webnotes.conn.get_value("Job Applicant", {"email_id": mail.from_email}, 
 			"name")
 		if name:
-			applicant = webnotes.model_wrapper("Job Applicant", name)
+			applicant = webnotes.bean("Job Applicant", name)
 			if applicant.doc.status!="Rejected":
 				applicant.doc.status = "Open"
 			applicant.doc.save()
 		else:
 			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
 				+ mail.from_email
-			applicant = webnotes.model_wrapper({
+			applicant = webnotes.bean({
 				"creation": mail.date,
 				"doctype":"Job Applicant",
 				"applicant_name": name,

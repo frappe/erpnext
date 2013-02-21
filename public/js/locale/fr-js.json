@@ -120,6 +120,7 @@
  "Item Group": "Groupe d&#39;\u00e9l\u00e9ments", 
  "Item Price": "Prix \u200b\u200bde l&#39;article", 
  "Item Quality Inspection Parameter": "Param\u00e8tre d&#39;inspection Article de qualit\u00e9", 
+ "Item Reorder": "R\u00e9organiser article", 
  "Item Supplier": "Fournisseur d&#39;article", 
  "Item Tax": "Point d&#39;imp\u00f4t", 
  "Item Website Specification": "Sp\u00e9cification Site \u00e9l\u00e9ment", 
@@ -135,6 +136,9 @@
  "Lead": "Conduire", 
  "Leave Allocation": "Laisser Allocation", 
  "Leave Application": "Demande de cong\u00e9s", 
+ "Leave Block List": "Laisser Block List", 
+ "Leave Block List Allow": "Laisser Block List Autoriser", 
+ "Leave Block List Date": "Laisser Date de Block List", 
  "Leave Control Panel": "Laisser le Panneau de configuration", 
  "Leave Type": "Laisser Type d&#39;", 
  "Letter Head": "A en-t\u00eate", 
@@ -147,6 +151,8 @@
  "Maintenance Visit Purpose": "But Visite d&#39;entretien", 
  "Manufacturing": "Fabrication", 
  "Market Segment": "Segment de march\u00e9", 
+ "Material Request": "Demande de mat\u00e9riel", 
+ "Material Request Item": "Article demande de mat\u00e9riel", 
  "Messages": "Messages", 
  "Mode of Payment": "Mode de paiement", 
  "Module Def": "Module Def", 
@@ -311,5 +317,6 @@
  "Workflow Rule Detail": "D\u00e9tail r\u00e8gle de workflow", 
  "Workflow State": "\u00c9tat de workflow", 
  "Workflow Transition": "Transition de workflow", 
- "Workstation": "Workstation"
+ "Workstation": "Workstation", 
+ "test": "test"
 }

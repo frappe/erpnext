@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist
+from webnotes.model.bean import getlist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
@@ -217,6 +217,8 @@ class DocType:
 		from website.helpers.product import get_parent_item_groups, url_for_website
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.website_image = url_for_website(self.doc.website_image)
+		self.doc.title = self.doc.item_name == self.doc.name and self.doc.item_name or \
+			(self.doc.item_name + " [" + self.doc.name + "]")
 
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow

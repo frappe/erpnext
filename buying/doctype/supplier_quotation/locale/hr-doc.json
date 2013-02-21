@@ -46,6 +46,7 @@
  "Re-Calculate Values": "Ponovno izra\u010dunati vrijednosti", 
  "Rounded Total": "Zaobljeni Ukupno", 
  "SQTN": "SQTN", 
+ "Select Material Request": "Odaberite Materijal Zahtjev", 
  "Select Print Heading": "Odaberite Ispis Naslov", 
  "Select Purchase Request": "Odaberite zahtjev za kupnju", 
  "Select Terms and Conditions": "Odaberite Uvjeti i pravila", 
@@ -74,5 +75,6 @@
  "Total Tax*": "Ukupno poreza *", 
  "Totals": "Ukupan rezultat", 
  "Yes": "Da", 
+ "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.": "Mo\u017eete napraviti redoslijed kupnje od vi\u0161e materijala zahtjeva. Odaberite materijalni zahtijevi jedan po jedan i kliknite na gumb ispod.", 
  "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.": "Mo\u017eete napraviti redoslijed kupnje iz vi\u0161e Kupiti zahtjeva. Odaberite kupnje Zahtjevi jednu po jednu i kliknite na gumb ispod."
 }

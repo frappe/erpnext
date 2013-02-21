@@ -155,14 +155,14 @@ def prepare_args(page_name):
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
-			args.obj = webnotes.model_wrapper(page_settings_map[page_name]).obj
+			args.obj = webnotes.bean(page_settings_map[page_name]).obj
 	else:
 		args = get_doc_fields(page_name)
 	
 	if not args:
 		return False
 	
-	args.update(get_outer_env())
+	get_outer_env(page_name, args)
 	
 	return args	
 
@@ -203,7 +203,10 @@ def get_source_doc(page_name):
 
 	return None, None
 	
-def get_outer_env():
+def get_outer_env(page_name, args):
+	from webnotes.utils import get_request_site_address
+	from urllib import quote
+	
 	all_top_items = webnotes.conn.sql("""\
 		select * from `tabTop Bar Item`
 		where parent='Website Settings' and parentfield='top_bar_items'
@@ -242,16 +245,23 @@ def get_outer_env():
 		'int':int
 	})
 	
+	args.update(ret)
+	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["brand_html", "copyright", "address", "top_bar_background", "favicon"]:
+	for k in ["brand_html", "copyright", "address", "top_bar_background", "favicon", 
+		"facebook_share", "google_plus_one", "twitter_share", "linked_in_share", "twitter_share_via"]:
 		if k in settings.fields:
-			ret[k] = settings.fields[k]
+			args[k] = settings.fields.get(k)
 
-	if not ret.brand_html:
-		ret.brand_html = "ERPNext"
-	if not ret.top_bar_background:
-		ret.top_bar_background = "Black"
-	return ret
+	if not args.brand_html:
+		args.brand_html = "ERPNext"
+	if not args.top_bar_background:
+		args.top_bar_background = "Black"
+	
+	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
+	args.encoded_title = quote(str(args.title or ""), str(""))
+	
+	return args
 
 def get_home_page():
 	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')

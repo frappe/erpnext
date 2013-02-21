@@ -13,5 +13,5 @@ class DocType:
 		clear_cache()
 		
 		if self.doc.default_product_category:
-			webnotes.model_wrapper("Item Group", 
+			webnotes.bean("Item Group", 
 				self.doc.default_product_category).save()

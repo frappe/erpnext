@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.model import db_exists
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import form, msgprint
 

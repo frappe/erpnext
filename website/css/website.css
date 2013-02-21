@@ -5,10 +5,16 @@
 div#body_div {
 	padding: 0px;
 	min-height: 400px;
-	margin: 40px auto;
+	margin: 40px auto 10px auto;
 	box-shadow: 1px 1px 3px 3px #bbb;
 	border-radius: 5px;
 	overflow: hidden;
+}
+
+footer {
+	text-align: left;
+	width: 720px;
+	margin: auto;
 }
 
 .navbar-inner {
@@ -33,9 +39,21 @@ p, li {
 	padding: 30px;
 }
 
-.web-footer-menu {
-	margin-bottom: 7px;
+.social-icons {
+	font-size: 120%;
+	float: right;
+	text-align: right;
 }
+.social-icons a:hover {
+	text-decoration: none;
+}
+.social-icons a i:hover {
+	text-decoration: none;
+}
+.social-icons i {
+	margin-left: 5px;
+}
+
 
 .web-footer-menu ul {
 	list-style: none;
@@ -45,16 +63,8 @@ p, li {
 
 .web-footer-menu ul li {
 	display: inline;
-	padding: 2px 15px;
-	border-right: 1px solid #999;
-}
-
-.web-footer-menu ul li:first-child {
-	padding-left: 0px;
-}
-
-.web-footer-menu ul li:last-child {
-	border-right: 0px solid #777 !important;
+	padding: 2px 14px 2px 0px;
+	margin: 0px;
 }
 
 .two-column {

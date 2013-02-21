@@ -56,7 +56,7 @@ pscript.feature_dict = {
 	},
 	'fs_brands': {
 		'Delivery Note': {'delivery_note_details':['brand']},
-		'Purchase Request': {'indent_details':['brand']},
+		'Material Request': {'indent_details':['brand']},
 		'Item': {'fields':['brand']},
 		'Purchase Order': {'po_details':['brand']},
 		'Purchase Invoice': {'entries':['brand']},
@@ -101,7 +101,7 @@ pscript.feature_dict = {
 	'fs_item_group_in_details': {
 		'Delivery Note': {'delivery_note_details':['item_group']},
 		'Opportunity': {'enquiry_details':['item_group']},
-		'Purchase Request': {'indent_details':['item_group']},
+		'Material Request': {'indent_details':['item_group']},
 		'Item': {'fields':['item_group']},
 		'Global Defaults': {'fields':['default_item_group']},
 		'Purchase Order': {'po_details':['item_group']},
@@ -118,7 +118,7 @@ pscript.feature_dict = {
 	},
 	'fs_page_break': {
 		'Delivery Note': {'delivery_note_details':['page_break'],'packing_details':['page_break']},
-		'Purchase Request': {'indent_details':['page_break']},
+		'Material Request': {'indent_details':['page_break']},
 		'Purchase Order': {'po_details':['page_break']},
 		'Purchase Receipt': {'purchase_receipt_details':['page_break']},
 		'Purchase Voucher': {'entries':['page_break']},
@@ -174,7 +174,7 @@ pscript.feature_dict = {
 	'fs_more_info': {
 		'Delivery Note': {'fields':['More Info']},
 		'Opportunity': {'fields':['More Info']},
-		'Purchase Request': {'fields':['More Info']},
+		'Material Request': {'fields':['More Info']},
 		'Lead': {'fields':['More Info']},
 		'Purchase Invoice': {'fields':['More Info']},
 		'Purchase Order': {'fields':['More Info']},

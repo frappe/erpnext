@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import get_defaults
+import webnotes.defaults
+
 from accounts.utils import get_balance_on
 
 @webnotes.whitelist()
@@ -16,8 +17,8 @@ def get_companies():
 		if r["role"] in roles and r["match"]=="company"))
 	
 	# if match == company is specified and companies are specified in user defaults
-	if match and webnotes.user.get_defaults().get("company"):
-		return webnotes.user.get_defaults().get("company")
+	if match:
+		return webnotes.defaults.get_user_default_as_list("company")
 	else:
 		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
 			where docstatus!=2""")]
