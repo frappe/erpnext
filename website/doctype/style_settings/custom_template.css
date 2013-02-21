@@ -4,6 +4,8 @@ body {
 {% elif doc.background_color %}
 	background-color: #{{ doc.background_color }};
 	background-image: none;
+{% else %}
+	background-color: #edede7;
 {% endif %}	
 {% if doc.font %}
 	font-family: '{{ doc.font }}', Verdana, Sans !important;

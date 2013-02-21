@@ -1,9 +1,7 @@
 	<style>
-		.product-page-content {
-			margin-left: -20px;
-		}
 		.item-main-image {
-			max-width: 100%;
+			max-width: 400px;
+			margin: auto;
 		}
 		.web-long-description {
 			font-size: 18px;

@@ -1,14 +1,11 @@
-<tr>
-	<td style="width: 30%;">
+<div class="span3">
+	<div style="height: 120px; overflow: hidden;">
 		{% if website_image %}
-		<img class="product-image" style="width: 80%;" src="{{ website_image }}">
+		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image }}">
 		{% else %}
 		{% include 'html/product_missing_image.html' %}
 		{% endif %}
-	</td>
-	<td>
-		<h4><a href="{{ page_name }}">{{ item_name }}</a></h4>
-		<p class="help">Item Code: {{ name }}</p>
-		<p>{{ website_description }}</p>
-	</td>
-</tr>
+	</div>
+	<h4><a href="{{ page_name }}">{{ item_name }}</a></h4>
+	<p class="help">Item Code: {{ name }}</p>
+</div>
