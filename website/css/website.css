@@ -11,12 +11,13 @@ div.outer {
 }
 
 .outer .navbar {
-	margin: -20px -20px 0 -20px;
+	margin: -20px -20px 10px -20px;
 }
 
 footer {
 	text-align: left;
 	margin: auto;
+	margin-bottom: 20px;
 }
 
 .navbar-inner {
