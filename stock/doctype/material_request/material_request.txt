@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 13:25:31", 
   "docstatus": 0, 
-  "modified": "2013-02-20 14:10:23", 
+  "modified": "2013-02-21 10:59:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -96,7 +96,7 @@
   "width": "50%"
  }, 
  {
-  "description": "One or multiple Sales Order no which generated this Purchase Requisition", 
+  "description": "One or multiple Sales Order no which generated this Material Request", 
   "doctype": "DocField", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
@@ -124,7 +124,7 @@
  }, 
  {
   "default": "Give additional details about the indent.", 
-  "description": "Filing in Additional Information about the Purchase Requisition will help you analyze your data better.", 
+  "description": "Filing in Additional Information about the Material Request will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -186,7 +186,7 @@
   "width": "150px"
  }, 
  {
-  "description": "Name of the entity who has requested for the Purchase Requisition", 
+  "description": "Name of the entity who has requested for the Material Request", 
   "doctype": "DocField", 
   "fieldname": "requested_by", 
   "fieldtype": "Data", 
@@ -197,18 +197,6 @@
   "oldfieldtype": "Data", 
   "print_width": "100px", 
   "width": "100px"
- }, 
- {
-  "description": "After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -248,7 +236,7 @@
   "width": "100px"
  }, 
  {
-  "description": "% of materials ordered against this Purchase Requisition", 
+  "description": "% of materials ordered against this Material Request", 
   "doctype": "DocField", 
   "fieldname": "per_ordered", 
   "fieldtype": "Percent", 
@@ -300,7 +288,7 @@
   "width": "150px"
  }, 
  {
-  "description": "Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template", 
+  "description": "Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template", 
   "doctype": "DocField", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 

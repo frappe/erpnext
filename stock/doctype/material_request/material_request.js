@@ -42,7 +42,12 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button('Unstop Material Request', cur_frm.cscript['Unstop Material Request'])
+			cur_frm.add_custom_button('Unstop Material Request', cur_frm.cscript['Unstop Material Request']);
+		
+		if(doc.material_request_type === "Transfer") {
+			cur_frm.toggle_display("sales_order_no", false);
+			cur_frm.fields_dict.indent_details.grid.set_column_disp("sales_order_no", false);
+		}
 	}
 });
 
@@ -52,48 +57,40 @@ var new_cscript = new erpnext.buying.MaterialRequestController({frm: cur_frm});
 $.extend(cur_frm.cscript, new_cscript);
 
 	
-//========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date())
+	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
 	if (!doc.status) doc.status = 'Draft';
 
 	// defined in purchase_common.js
 	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
-}
+};
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	// second call
 	if(doc.__islocal){ 
 		cur_frm.cscript.get_item_defaults(doc);
 	}	
-}
+};
 
 cur_frm.cscript.get_item_defaults = function(doc) {
 		var ch = getchildren( 'Material Request Item', doc.name, 'indent_details');
 		if (flt(ch.length) > 0){
 			$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_defaults', '', function(r, rt) {refresh_field('indent_details'); });
 		}
-}
+};
 
-//======================= transaction date =============================
 cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
 	if(doc.__islocal){ 
 		cur_frm.cscript.get_default_schedule_date(doc);
 	}
-}
+};
 
-//=================== Quantity ===================================================================
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))
 		alert("Warning: Material Requested Qty is less than Minimum Order Qty");
-}
+};
 
-// On Button Click Functions
-// ------------------------------------------------------------------------------
-
-// Stop INDENT
-// ==================================================================================================
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to STOP this Material Request?");
@@ -103,12 +100,10 @@ cur_frm.cscript['Stop Material Request'] = function() {
 			cur_frm.refresh();
 		});
 	}
-}
+};
 
-// Un Stop INDENT
-//====================================================================================================
 cur_frm.cscript['Unstop Material Request'] = function(){
-	var doc = cur_frm.doc
+	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to UNSTOP this Material Request?");
 	
 	if (check) {
@@ -117,16 +112,16 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 			
 		});
 	}
-}
+};
 
 cur_frm.cscript['Make Purchase Order'] = function() {
 	cur_frm.map([["Material Request", "Purchase Order"], ["Material Request Item", "Purchase Order Item"]]);
-}
+};
 
 cur_frm.cscript.make_supplier_quotation = function() {
 	cur_frm.map([["Material Request", "Supplier Quotation"], ["Material Request Item", "Supplier Quotation Item"]]);
-}
+};
 
 cur_frm.cscript.make_stock_entry = function() {
 	cur_frm.map([["Material Request", "Stock Entry"], ["Material Request Item", "Stock Entry Detail"]]);
-}
+};
