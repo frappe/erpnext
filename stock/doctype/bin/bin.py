@@ -152,6 +152,7 @@ class DocType:
 		}])
 		
 		mr.insert()
+		mr.submit()
 
 		msgprint("""Item: %s is to be re-ordered. Material Request %s raised. 
 			It was generated from %s: %s""" % 
