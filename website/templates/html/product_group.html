@@ -1,44 +1,40 @@
 {% extends "html/page.html" %}
 
 {% block content %}
-
-<div class="layout-wrapper layout-wrapper-background">
-	<div class="web-content" id="content-product_group">
-		<div class="layout-main" style="padding: 30px;">
-			{% include 'html/product_search_box.html' %}
-			{% include 'html/product_breadcrumbs.html' %}
-			{% if slideshow %}<!-- slideshow -->
-			{% include "html/slideshow.html" %}
-			{% endif %}
-			{% if description %}<!-- description -->
-			<div>{{ description or ""}}</div>
-			{% else %}
-			<h3>{{ name }}</h3>
-			{% endif %}
-			{% if sub_groups %}
-			<div class="well well-small">
-				<div class="container-fluid" style="padding-left: 0px; margin-left:-10px; line-height: 2em;">
-				{% for d in sub_groups %}
-					<div class="span4">
-						<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
-					</div>
-				{% endfor %}
-				</div>
-			</div>
-			{% endif %}
-			{% if items %}
-			<div id="search-list">
-				<table class="table">
-					{% for item in items %}
-						{{ item }}
-					{% endfor %}
-				</table>
-			</div>
-			{% else %}
-				<div class="alert">No items listed.</div>
-			{% endif %}
+{% include 'html/product_search_box.html' %}
+{% include 'html/product_breadcrumbs.html' %}
+<div class="span12">
+	{% if slideshow %}<!-- slideshow -->
+	{% include "html/slideshow.html" %}
+	{% endif %}
+	{% if description %}<!-- description -->
+	<div>{{ description or ""}}</div>
+	{% else %}
+	<h3>{{ name }}</h3>
+	{% endif %}
+	{% if sub_groups %}
+	<hr />
+	<div class="row">
+	{% for d in sub_groups %}
+		<div class="span4">
+			<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
 		</div>
+	{% endfor %}
 	</div>
+	<hr />
+	{% endif %}
+	{% if items %}
+	<div id="search-list" class="row">
+		{% for item in items %}
+			{{ item }}
+		{% endfor %}
+	</div>
+		{% if len(items)==20 %}
+			<div class="alert info">Showing top 20</div>
+		{% endif %}
+	{% else %}
+		<div class="alert">No items listed.</div>
+	{% endif %}
 </div>
 
 {% endblock %}

@@ -1,8 +1,12 @@
 {% if obj.parent_groups and len(obj.parent_groups) > 1 %}
-<ul class="breadcrumb">
-	{% for ig in obj.parent_groups[:-1] %}
-	<li><a href="{{ ig.page_name }}.html">{{ ig.name }}</a> <span class="divider">/</span></li>
-	{% endfor %}
-	<li class="active">{{ obj.parent_groups[-1].name }}</li>
-</ul>
+<div class="span12">
+	<div class="clearfix">
+		<ul class="breadcrumb">
+			{% for ig in obj.parent_groups[:-1] %}
+			<li><a href="{{ ig.page_name }}.html">{{ ig.name }}</a> <span class="divider">/</span></li>
+			{% endfor %}
+			<li class="active">{{ obj.parent_groups[-1].name }}</li>
+		</ul>
+	</div>
+</div>
 {% endif %}
