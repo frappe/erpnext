@@ -117,8 +117,7 @@ data_map = {
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"material_request_type = 'Purchase'", "ifnull(warehouse, '')!=''", 
-			"ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

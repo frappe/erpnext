@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cstr, flt
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -119,23 +119,22 @@ class DocType(BuyingController):
 	
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
-		if self.doc.material_request_type == "Purchase":
-			for d in getlist(self.doclist, 'indent_details'):
-				if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-					if not d.warehouse:
-						msgprint("Please Enter Warehouse for Item %s as it is stock item" 
-							% cstr(d.item_code), raise_exception=1)
-						
-					qty =flt(d.qty)
-					if is_stopped:
-						qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0
-				
-					args = {
-						"item_code": d.item_code,
-						"indented_qty": (is_submit and 1 or -1) * flt(qty),
-						"posting_date": self.doc.transaction_date
-					}
-					get_obj('Warehouse', d.warehouse).update_bin(args)		
+		for d in getlist(self.doclist, 'indent_details'):
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
+				if not d.warehouse:
+					msgprint("Please Enter Warehouse for Item %s as it is stock item" 
+						% cstr(d.item_code), raise_exception=1)
+					
+				qty =flt(d.qty)
+				if is_stopped:
+					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0
+			
+				args = {
+					"item_code": d.item_code,
+					"indented_qty": (is_submit and 1 or -1) * flt(qty),
+					"posting_date": self.doc.transaction_date
+				}
+				get_obj('Warehouse', d.warehouse).update_bin(args)		
 		
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
@@ -196,7 +195,7 @@ class DocType(BuyingController):
 					and material_request_item = %s and docstatus = 1""", 
 					(self.doc.name, d.name))[0][0])
 				webnotes.conn.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
-
+				
 			# note: if qty is 0, its row is still counted in len(item_doclist)
 			# hence adding 1 to per_ordered
 			if (d.ordered_qty > d.qty) or not d.qty:
@@ -204,11 +203,9 @@ class DocType(BuyingController):
 			elif d.qty > 0:
 				per_ordered += flt(d.ordered_qty / flt(d.qty))
 		
-		if per_ordered:
-			self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
-			webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
-
-
+		self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
+		webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
+			
 def update_completed_qty(controller, caller_method):
 	if controller.doc.doctype == "Stock Entry":
 		material_request_map = {}
@@ -218,7 +215,18 @@ def update_completed_qty(controller, caller_method):
 				if d.material_request not in material_request_map:
 					material_request_map[d.material_request] = []
 				material_request_map[d.material_request].append(d.material_request_item)
-
+				webnotes.get_obj("Warehouse", d.t_warehouse).update_bin({
+					"item_code": d.item_code,
+					"indented_qty": (d.docstatus==2 and 1 or -1) * d.transfer_qty,
+					"posting_date": controller.doc.posting_date,
+				})
+			
 		for mr_name, mr_items in material_request_map.items():
-			webnotes.get_obj("Material Request", mr_name, with_children=1).update_completed_qty(mr_items)
-	
+			mr_obj = webnotes.get_obj("Material Request", mr_name, with_children=1)
+			mr_doctype = webnotes.get_doctype("Material Request")
+			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
+				msgprint(_("Material Request") + ": %s, " % mr_obj.doc.name 
+					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
+					+ _("Cannot continue."), raise_exception=True)
+				
+			mr_obj.update_completed_qty(mr_items)
