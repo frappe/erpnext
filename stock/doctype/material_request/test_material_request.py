@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes, unittest
+from webnotes.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
 	def _test_expected(self, doclist, expected_values):
@@ -11,10 +12,10 @@ class TestMaterialRequest(unittest.TestCase):
 				self.assertEquals(val, doclist[i].fields.get(fieldname))
 				
 	def _test_requested_qty(self, qty1, qty2):
-		self.assertEqual(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
-			"warehouse": "_Test Warehouse"}, "indented_qty"), qty1)
-		self.assertEqual(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
-			"warehouse": "_Test Warehouse"}, "indented_qty"), qty2)
+		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
+			"warehouse": "_Test Warehouse"}, "indented_qty")), qty1)
+		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
+			"warehouse": "_Test Warehouse"}, "indented_qty")), qty2)
 				
 	def test_completed_qty_for_purchase(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
@@ -123,6 +124,95 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.load_from_db()
 		self._test_expected(mr.doclist, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
 		self._test_requested_qty(54.0, 3.0)
+		
+	def test_completed_qty_for_over_transfer(self):
+		webnotes.conn.sql("""delete from `tabBin`""")
+		
+		# submit material request of type Purchase
+		mr = webnotes.bean(copy=test_records[0])
+		mr.doc.material_request_type = "Transfer"
+		mr.insert()
+		mr.submit()
+
+		# check if per complete is None
+		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		
+		self._test_requested_qty(54.0, 3.0)
+		
+		# map a stock entry
+		se_doclist = webnotes.map_doclist([["Material Request", "Stock Entry"], 
+			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
+		se_doclist[0].fields.update({
+			"posting_date": "2013-03-01",
+			"posting_time": "00:00"
+		})
+		se_doclist[1].fields.update({
+			"qty": 60.0,
+			"transfer_qty": 60.0,
+			"s_warehouse": "_Test Warehouse 1",
+			"incoming_rate": 1.0
+		})
+		se_doclist[2].fields.update({
+			"qty": 3.0,
+			"transfer_qty": 3.0,
+			"s_warehouse": "_Test Warehouse 1",
+			"incoming_rate": 1.0
+		})
+		
+		# check for stopped status of Material Request
+		se = webnotes.bean(copy=se_doclist)
+		se.insert()
+		mr.obj.update_status('Stopped')
+		self.assertRaises(webnotes.ValidationError, se.submit)
+		self.assertRaises(webnotes.ValidationError, se.cancel)
+		
+		mr.obj.update_status('Submitted')
+		se = webnotes.bean(copy=se_doclist)
+		se.insert()
+		se.submit()
+		
+		# check if per complete is as expected
+		mr.load_from_db()
+		self._test_expected(mr.doclist, [{"per_ordered": 100}, {"ordered_qty": 60.0}, {"ordered_qty": 3.0}])
+		self._test_requested_qty(0.0, 0.0)
+		
+		# check if per complete is as expected for Stock Entry cancelled
+		se.cancel()
+		mr.load_from_db()
+		self._test_expected(mr.doclist, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self._test_requested_qty(54.0, 3.0)
+		
+	def test_incorrect_mapping_of_stock_entry(self):
+		# submit material request of type Purchase
+		mr = webnotes.bean(copy=test_records[0])
+		mr.doc.material_request_type = "Transfer"
+		mr.insert()
+		mr.submit()
+
+		# map a stock entry
+		se_doclist = webnotes.map_doclist([["Material Request", "Stock Entry"], 
+			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
+		se_doclist[0].fields.update({
+			"posting_date": "2013-03-01",
+			"posting_time": "00:00"
+		})
+		se_doclist[1].fields.update({
+			"qty": 60.0,
+			"transfer_qty": 60.0,
+			"s_warehouse": "_Test Warehouse",
+			"t_warehouse": "_Test Warehouse 1",
+			"incoming_rate": 1.0
+		})
+		se_doclist[2].fields.update({
+			"qty": 3.0,
+			"transfer_qty": 3.0,
+			"s_warehouse": "_Test Warehouse 1",
+			"incoming_rate": 1.0
+		})
+		
+		# check for stopped status of Material Request
+		se = webnotes.bean(copy=se_doclist)
+		self.assertRaises(webnotes.MappingMismatchError, se.insert)
 		
 test_records = [
 	[

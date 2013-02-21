@@ -205,7 +205,7 @@ class DocType(BuyingController):
 		
 		self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
 		webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
-			
+		
 def update_completed_qty(controller, caller_method):
 	if controller.doc.doctype == "Stock Entry":
 		material_request_map = {}
@@ -215,18 +215,43 @@ def update_completed_qty(controller, caller_method):
 				if d.material_request not in material_request_map:
 					material_request_map[d.material_request] = []
 				material_request_map[d.material_request].append(d.material_request_item)
-				webnotes.get_obj("Warehouse", d.t_warehouse).update_bin({
-					"item_code": d.item_code,
-					"indented_qty": (d.docstatus==2 and 1 or -1) * d.transfer_qty,
-					"posting_date": controller.doc.posting_date,
-				})
 			
 		for mr_name, mr_items in material_request_map.items():
 			mr_obj = webnotes.get_obj("Material Request", mr_name, with_children=1)
 			mr_doctype = webnotes.get_doctype("Material Request")
+			
 			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
 				msgprint(_("Material Request") + ": %s, " % mr_obj.doc.name 
 					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
-					+ _("Cannot continue."), raise_exception=True)
+					+ _("Cannot continue."), raise_exception=webnotes.InvalidStatusError)
 				
+			_update_requested_qty(controller, mr_obj, mr_items)
+			
+			# update ordered percentage and qty
 			mr_obj.update_completed_qty(mr_items)
+			
+def _update_requested_qty(controller, mr_obj, mr_items):
+	"""update requested qty (before ordered_qty is updated)"""
+	for mr_item_name in mr_items:
+		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
+		se_detail = controller.doclist.getone({"parentfield": "mtn_details",
+			"material_request": mr_obj.doc.name, "material_request_item": mr_item_name})
+	
+		mr_item.ordered_qty = flt(mr_item.ordered_qty)
+		mr_item.qty = flt(mr_item.qty)
+		se_detail.transfer_qty = flt(se_detail.transfer_qty)
+	
+		if se_detail.docstatus == 2 and mr_item.ordered_qty > mr_item.qty \
+				and se_detail.transfer_qty == mr_item.ordered_qty:
+			add_indented_qty = mr_item.qty
+		elif se_detail.docstatus == 1 and \
+				mr_item.ordered_qty + se_detail.transfer_qty > mr_item.qty:
+			add_indented_qty = mr_item.qty - mr_item.ordered_qty
+		else:
+			add_indented_qty = se_detail.transfer_qty
+	
+		webnotes.get_obj("Warehouse", se_detail.t_warehouse).update_bin({
+			"item_code": se_detail.item_code,
+			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
+			"posting_date": controller.doc.posting_date,
+		})
