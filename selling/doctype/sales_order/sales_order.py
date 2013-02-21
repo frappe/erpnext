@@ -261,9 +261,7 @@ class DocType(SellingController):
 	def on_submit(self):
 		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
-		# update customer's last sales order no.
-		sql("""update `tabCustomer` set last_sales_order = '%s', modified = '%s' 
-			where name = '%s'""" % (self.doc.name, self.doc.modified, self.doc.customer))
+
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
 		
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
