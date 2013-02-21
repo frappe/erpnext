@@ -338,7 +338,7 @@ class DocType(SellingController):
 				if not d['reserved_warehouse']:
 					msgprint("""Please enter Reserved Warehouse for item %s 
 						as it is stock Item""" % d['item_code'], raise_exception=1)
-						
+					
 				args = {
 					"item_code": d['item_code'],
 					"reserved_qty": flt(update_stock) * flt(d['qty']),
