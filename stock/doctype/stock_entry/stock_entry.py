@@ -63,7 +63,7 @@ class DocType(TransactionBase):
 		self.update_stock_ledger(1)
 		# update Production Order
 		self.update_production_order(0)
-
+		
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", 
 			"Manufacture/Repack", "Subcontract", "Sales Return", "Purchase Return"]
