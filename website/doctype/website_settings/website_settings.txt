@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:10", 
   "docstatus": 0, 
-  "modified": "2013-02-20 14:31:02", 
+  "modified": "2013-02-21 10:05:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -166,6 +166,13 @@
   "fieldname": "twitter_share", 
   "fieldtype": "Check", 
   "label": "Twitter Share"
+ }, 
+ {
+  "description": "Tweet will be shared via your user account (if specified)", 
+  "doctype": "DocField", 
+  "fieldname": "twitter_share_via", 
+  "fieldtype": "Data", 
+  "label": "Twitter Share via"
  }, 
  {
   "doctype": "DocField", 

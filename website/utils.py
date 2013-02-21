@@ -162,7 +162,7 @@ def prepare_args(page_name):
 	if not args:
 		return False
 	
-	args.update(get_outer_env(page_name))
+	get_outer_env(page_name, args)
 	
 	return args	
 
@@ -203,7 +203,7 @@ def get_source_doc(page_name):
 
 	return None, None
 	
-def get_outer_env(page_name):
+def get_outer_env(page_name, args):
 	from webnotes.utils import get_request_site_address
 	from urllib import quote
 	
@@ -245,20 +245,23 @@ def get_outer_env(page_name):
 		'int':int
 	})
 	
+	args.update(ret)
+	
 	settings = webnotes.doc("Website Settings", "Website Settings")
 	for k in ["brand_html", "copyright", "address", "top_bar_background", "favicon", 
-		"facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
+		"facebook_share", "google_plus_one", "twitter_share", "linked_in_share", "twitter_share_via"]:
 		if k in settings.fields:
-			ret[k] = settings.fields.get(k)
+			args[k] = settings.fields.get(k)
 
-	if not ret.brand_html:
-		ret.brand_html = "ERPNext"
-	if not ret.top_bar_background:
-		ret.top_bar_background = "Black"
+	if not args.brand_html:
+		args.brand_html = "ERPNext"
+	if not args.top_bar_background:
+		args.top_bar_background = "Black"
 	
-	ret.url = quote(get_request_site_address(full_address=True), "")
+	args.url = quote(get_request_site_address(full_address=True), "")
+	args.encoded_title = quote(args.title or "", "")
 	
-	return ret
+	return args
 
 def get_home_page():
 	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
