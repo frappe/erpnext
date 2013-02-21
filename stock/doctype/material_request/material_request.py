@@ -195,7 +195,7 @@ class DocType(BuyingController):
 					from `tabStock Entry Detail` where material_request = %s 
 					and material_request_item = %s and docstatus = 1""", 
 					(self.doc.name, d.name))[0][0])
-				d.save()
+				webnotes.conn.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
 			# note: if qty is 0, its row is still counted in len(item_doclist)
 			# hence adding 1 to per_ordered
@@ -206,7 +206,7 @@ class DocType(BuyingController):
 		
 		if per_ordered:
 			self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
-			self.doc.save()
+			webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
 
 
 def update_completed_qty(controller, caller_method):
