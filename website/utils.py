@@ -258,8 +258,8 @@ def get_outer_env(page_name, args):
 	if not args.top_bar_background:
 		args.top_bar_background = "Black"
 	
-	args.url = quote(get_request_site_address(full_address=True), "")
-	args.encoded_title = quote(args.title or "", "")
+	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
+	args.encoded_title = quote(str(args.title or ""), str(""))
 	
 	return args
 
