@@ -106,23 +106,3 @@ def check_if_expired():
 	
 	webnotes.response['message'] = 'Account Expired'
 	raise webnotes.AuthenticationError
-
-#### website
-
-def get_web_script():
-	"""returns web startup script"""
-	return webnotes.conn.get_value('Website Script', None, 'javascript') or ''
-
-def get_web_style():
-	"""returns web css"""
-	return webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
-
-def get_web_header(page_name):
-	"""get website header"""
-	from website.utils import get_header
-	return get_header(page_name)
-
-def get_web_footer(page_name):
-	"""get website footer"""
-	from website.utils import get_footer
-	return get_footer(page_name)

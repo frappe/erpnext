@@ -28,6 +28,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 // ONLOAD
 // ===================================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
+	cur_frm.cscript.manage_rounded_total();
 	if(!doc.quotation_to) hide_field(['customer','customer_address','contact_person','customer_name','lead', 'lead_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	if(!doc.price_list_name) set_multiple(cdt,cdn,{price_list_name:sys_defaults.price_list_name});
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});

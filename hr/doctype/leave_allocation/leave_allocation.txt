@@ -1,12 +1,13 @@
 [
  {
-  "creation": "2013-01-10 16:34:14", 
+  "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:04", 
+  "modified": "2013-02-20 19:11:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "LAL/.#####", 
   "doctype": "DocType", 
   "is_submittable": 1, 

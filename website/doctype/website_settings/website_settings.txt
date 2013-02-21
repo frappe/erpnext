@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:33", 
+  "creation": "2013-01-25 11:35:10", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:59:43", 
+  "modified": "2013-02-21 10:05:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,17 +24,14 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Website Settings", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 0, 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -130,6 +127,55 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "integrations", 
+  "fieldtype": "Section Break", 
+  "label": "Integrations"
+ }, 
+ {
+  "description": "Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.", 
+  "doctype": "DocField", 
+  "fieldname": "google_analytics_id", 
+  "fieldtype": "Data", 
+  "label": "Google Analytics ID"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_17", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "google_plus_one", 
+  "fieldtype": "Check", 
+  "label": "Google Plus One"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "facebook_share", 
+  "fieldtype": "Check", 
+  "label": "Facebook Share"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "linked_in_share", 
+  "fieldtype": "Check", 
+  "label": "Linked In Share"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "twitter_share", 
+  "fieldtype": "Check", 
+  "label": "Twitter Share"
+ }, 
+ {
+  "description": "Tweet will be shared via your user account (if specified)", 
+  "doctype": "DocField", 
+  "fieldname": "twitter_share_via", 
+  "fieldtype": "Data", 
+  "label": "Twitter Share via"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "misc_section", 
   "fieldtype": "Section Break", 
   "label": "Misc"
@@ -170,11 +216,25 @@
   "print_hide": 1
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "write": 1
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Website Manager"
+  "permlevel": 0, 
+  "role": "Website Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All"
  }
 ]

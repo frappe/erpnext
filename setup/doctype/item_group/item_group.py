@@ -64,6 +64,7 @@ class DocType(DocTypeNestedSet):
 			
 		self.doc.items = get_product_list_for_group(product_group = self.doc.name, limit=20)
 		self.parent_groups = get_parent_item_groups(self.doc.name)
+		self.doc.title = self.doc.name
 
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow

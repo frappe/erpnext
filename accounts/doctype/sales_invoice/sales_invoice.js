@@ -29,6 +29,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 // On Load
 // -------
 cur_frm.cscript.onload = function(doc,dt,dn) {
+	cur_frm.cscript.manage_rounded_total();
 	if(!doc.customer && doc.debit_to) wn.meta.get_docfield(dt, 'debit_to', dn).print_hide = 0;
 	if (doc.__islocal) {
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});

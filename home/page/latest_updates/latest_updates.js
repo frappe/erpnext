@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["20th February, 2013", [
+		"Disable Rounded Total: If disable in 'Global Defaults', Rounding related fields \
+			in sales cycle transactions and in corresponding print formats will not be visible"
+	]],
 	["15th February, 2013", [
 		"Calendar: Added new FullCalendar, and Calendar Views",
 		"Leave Application: Added email notifications on Leave Application",
@@ -7,29 +11,66 @@ erpnext.updates = [
 		"Employee: If Employee is linked to a Profile, copy Full Name, Date of Birth, \
 			Image and Gender to Profile",
 		"Leave Application: Select Leave Approver by their Full Name",
+		"Fixes in C-Form",
 	]],
+	["12th February, 2013", ["Fixes in Payment Reconciliation "]],
 	["6th February, 2013", [
 		"Bookmarks: Add bookmarks via toolbar by clicking on the <i class='icon-star'></i> sign.",
+		"Fixes in Voucher Import Tool",
 	]],
 	["5th February, 2013", [
+		"Block Negative Account Balance: If enabled, system will not allow to post entry \
+			if balance goes into negative",
 		"Leave Block List: Block users from taking leave on certain days.",
+		"Added project column in 'To Be Delivered/Billed' report ",
+	]],
+	["4th February, 2013", [
+		"Make gl entry only if amount is there",
+		"Fixes in Stock Ledger Report"
 	]],
 	["2nd February, 2013", [
 		"Warehouse: Added table Warehouse User to restrict Warehouse Entry per user.",
+		"Fixes in Gl Entry for Purchase Invoice",
+	]],
+	["1st February, 2013", [
+		"Removed sales order pending items report",
+		"Fixes in Salary Register Report, Sales Invoice and Budget Control",
+	]],
+	["31st January, 2013", [
+		"New Report:  Purchase order items pending to be received",
+		"GL Mapper deprecated",
 	]],
 	["28st January, 2013", [
 		"List Views are now configurable: To set list views, check 'In List View' in Setup > Customize Form View in the fields table.",
+		"Fixes in Financial Statements and Features Setup",
 	]],
-	["24st January, 2013", [
+	["25th January, 2013", [
+		"Fixes for currency in all Modern/Classic/Spartan print formats",
+		"Stock Ageing Report: Added show zero values option"
+	]],
+	["24th January, 2013", [
+		"Sales Analytics based on Sales Order/Delivery Note/Sales Invoice",
 		"Integrated Languages in Profile and via browser settings. To set your language, click on your name in the toolbar then 'My Settings...'",
+		"Fixes in Recurring Invoice",
+		"Fixes for Territory link to Sales Browser ",
+		"Check item/item group with same name while creating item group/item",
+	]],
+	["22nd January, 2013", [
+		"Valuation Rate mandatory for opening Stock Reconciliation",
+		"Show analytics value based on valuation method defined in item master",
 	]],
 	["21st January, 2013", [
 		"Number Formatting: Added Number Format to Global Defaults & Currency",
 	]],
+	["20th January, 2013", [
+		"In payment matching tool only show outstanding invoices"
+	]],
 	["18th January, 2013", [
 		"Buying: Added Price List to purchase cycle",
+		"C-Form now submittable",
 	]],
 	["16th January, 2013", [
+		"Incoming rate for sales return as per delivery note outgoing rate",
 		"Job Applicant: Track Job Applicants and extract them from a mailbox like 'jobs@example.com'. See <a href='#Form/Jobs Email Settings'>Jobs Email Settings</a>.",
 		"Extract leads: Extract Leads from a mailbox like 'sales@example.com'. See <a href='#Form/Sales Email Settings'>Sales Email Settings</a>.",
 	]],
