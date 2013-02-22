@@ -320,28 +320,28 @@ class DocType(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = -1,clear = 1)
+		self.update_stock_ledger(update_stock = -1,is_stopped = 1)
 		webnotes.conn.set(self.doc, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
 			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = 1,clear = 1)
+		self.update_stock_ledger(update_stock = 1,is_stopped = 1)
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
 
 
-	def update_stock_ledger(self, update_stock, clear = 0):
-		for d in self.get_item_list(clear):
+	def update_stock_ledger(self, update_stock, is_stopped = 0):
+		for d in self.get_item_list(is_stopped):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['reserved_warehouse']:
 					msgprint("""Please enter Reserved Warehouse for item %s 
 						as it is stock Item""" % d['item_code'], raise_exception=1)
-					
+				
 				args = {
 					"item_code": d['item_code'],
-					"reserved_qty": flt(update_stock) * flt(d['qty']),
+					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
 					"voucher_no": self.doc.name,
@@ -350,8 +350,8 @@ class DocType(SellingController):
 				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
 				
 				
-	def get_item_list(self, clear):
-		return get_obj('Sales Common').get_item_list( self, clear)
+	def get_item_list(self, is_stopped):
+		return get_obj('Sales Common').get_item_list( self, is_stopped)
 
 	def on_update(self):
 		pass
