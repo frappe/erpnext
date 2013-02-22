@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-02-22 15:29:34", 
+  "docstatus": 0, 
+  "modified": "2013-02-22 15:53:01", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Employee", 
+  "report_name": "Employee Leave Balance", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Employee Leave Balance"
+ }
+]
