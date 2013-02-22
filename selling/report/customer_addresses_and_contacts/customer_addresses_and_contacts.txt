@@ -1,20 +1,22 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2012-10-04 18:45:27", 
   "docstatus": 0, 
-  "creation": "2012-10-04 17:36:36", 
+  "modified": "2013-02-22 15:53:01", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 18:24:07"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "ref_doctype": "Customer", 
   "doctype": "Report", 
   "is_standard": "Yes", 
-  "query": "SELECT\n\t`tabCustomer`.name as customer_id,\n\t`tabCustomer`.customer_name,\n\t`tabCustomer`.customer_group,\n\t`tabAddress`.address_line1,\n\t`tabAddress`.address_line2,\n\t`tabAddress`.city,\n\t`tabAddress`.state,\n\t`tabAddress`.pincode,\n\t`tabAddress`.country,\n\t`tabAddress`.is_primary_address, \n\t`tabContact`.first_name,\n\t`tabContact`.last_name,\n\t`tabContact`.phone,\n\t`tabContact`.mobile_no,\n\t`tabContact`.email_id,\n\t`tabContact`.is_primary_contact\nFROM\n\t`tabCustomer`\n\tleft join `tabAddress` on (\n\t\t`tabAddress`.customer=`tabCustomer`.name\n\t)\n\tleft join `tabContact` on (\n\t\t`tabContact`.customer=`tabCustomer`.name\n\t)\nWHERE\n\t`tabCustomer`.docstatus<2\nORDER BY\n\t`tabCustomer`.name asc"
+  "name": "__common__", 
+  "query": "SELECT\n\t`tabCustomer`.name as customer_id,\n\t`tabCustomer`.customer_name,\n\t`tabCustomer`.customer_group,\n\t`tabAddress`.address_line1,\n\t`tabAddress`.address_line2,\n\t`tabAddress`.city,\n\t`tabAddress`.state,\n\t`tabAddress`.pincode,\n\t`tabAddress`.country,\n\t`tabAddress`.is_primary_address, \n\t`tabContact`.first_name,\n\t`tabContact`.last_name,\n\t`tabContact`.phone,\n\t`tabContact`.mobile_no,\n\t`tabContact`.email_id,\n\t`tabContact`.is_primary_contact\nFROM\n\t`tabCustomer`\n\tleft join `tabAddress` on (\n\t\t`tabAddress`.customer=`tabCustomer`.name\n\t)\n\tleft join `tabContact` on (\n\t\t`tabContact`.customer=`tabCustomer`.name\n\t)\nWHERE\n\t`tabCustomer`.docstatus<2\nORDER BY\n\t`tabCustomer`.name asc", 
+  "ref_doctype": "Customer", 
+  "report_name": "Customer Addresses And Contacts", 
+  "report_type": "Query Report"
  }, 
  {
-  "name": "Customer Addresses and Contacts", 
-  "doctype": "Report"
+  "doctype": "Report", 
+  "name": "Customer Addresses And Contacts"
  }
 ]
