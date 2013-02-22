@@ -189,5 +189,6 @@ patch_list = [
 	"patches.february_2013.p07_clear_web_cache",
 	"execute:webnotes.delete_doc('Page', 'Query Report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employeewise_balance_leave_report')",
-	"execute:webnotes.delete_doc('Search Criteria', 'employee_leave_balance_report')"
+	"execute:webnotes.delete_doc('Search Criteria', 'employee_leave_balance_report')",
+	"patches.february_2013.repost_reserved_qty",
 ]
