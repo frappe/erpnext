@@ -165,7 +165,6 @@ class DocType(DocListController):
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": employee.user_id,
-			
 			"subject": _get_message(),
 		})
 		
@@ -208,7 +207,7 @@ def get_leave_balance(employee, leave_type, fiscal_year):
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
 		where employee = %s and leave_type = %s and fiscal_year = %s
-		and docstatus = 1""", (employee, leave_type, fiscal_year))
+		and status="Approved" and docstatus = 1""", (employee, leave_type, fiscal_year))
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
 	
 	ret = {'leave_balance': leave_all - leave_app}
@@ -234,7 +233,7 @@ def get_events(start, end):
 	company = webnotes.conn.get_default("company", webnotes.session.user)
 	
 	from webnotes.widgets.reportview import build_match_conditions
-	match_conditions = build_match_conditions({"doctype": "Leave Application"})
+	match_conditions = build_match_conditions("Leave Application")
 	
 	# show department leaves for employee
 	show_department_leaves = match_conditions and \
