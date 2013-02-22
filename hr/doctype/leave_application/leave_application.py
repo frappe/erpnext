@@ -36,6 +36,7 @@ class DocType(DocListController):
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
+		self.show_block_day_warning()
 		self.validate_block_days()
 		
 	def on_update(self):
@@ -60,6 +61,17 @@ class DocType(DocListController):
 		# notify leave applier about cancellation
 		self.notify_employee("cancelled")
 
+	def show_block_day_warning(self):
+		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates		
+
+		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
+			self.doc.employee, self.doc.company, all_lists=True)
+			
+		if block_dates:
+			webnotes.msgprint(_("Warning: Leave application contains following block dates") + ":")
+			for d in block_dates:
+				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
+
 	def validate_block_days(self):
 		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
@@ -67,11 +79,8 @@ class DocType(DocListController):
 			self.doc.employee, self.doc.company)
 			
 		if block_dates:
-			webnotes.msgprint(_("Following dates are blocked for Leave") + ":")
-			for d in block_dates:
-				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
-				
 			if self.doc.status == "Approved":
+				webnotes.msgprint(_("Cannot approve leave as you are not authorized to approve leaves on Block Dates."))
 				raise LeaveDayBlockedError
 			
 	def get_holidays(self):
