@@ -64,7 +64,7 @@ class SalesMailbox(POP3Mailbox):
 		if mail.from_email == self.settings.email_id:
 			return
 		
-		add_sales_communication(mail.mail.get("subject", "[No Subject]"), mail.content, mail.form_email, 
+		add_sales_communication(mail.mail.get("subject", "[No Subject]"), mail.content, mail.from_email, 
 			mail.from_real_name, mail=mail, date=mail.date)
 
 def get_leads():
