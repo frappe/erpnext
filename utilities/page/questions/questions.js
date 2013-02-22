@@ -25,19 +25,17 @@ pscript.onload_questions = function(wrapper) {
 	// kb
 	var kb = new KnowledgeBase(body);
 	
-	// sidebar
-	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.questions-tags').get(0), {
-		sections: [
-			{
-				title: 'Top Tags',
-				render: function(body) {
-					new wn.widgets.TagCloud(body, 'Question', function(tag) 
-						{ kb.set_tag_filter(tag) });
-				}				
+	wn.model.with_doctype("Question", function() {
+		this.sidebar_stats = new wn.views.SidebarStats({
+			doctype: "Question",
+			stats: ["_user_tags"],
+			parent: $(wrapper).find('.questions-tags'),
+			set_filter: function(fieldname, label) {
+				kb.set_filter(fieldname, label);
+				//me.set_filter(fieldname, label);
 			}
-		]
-	});
-	set_title('Knowledge Base');
+		});	
+	})
 }
 
 // knowledge base object
@@ -137,6 +135,9 @@ function KnowledgeBase(w) {
 
 	}
 
+	this.set_filter = function(fieldname, label) {
+		this.set_tag_filter({label:label});
+	}
 	// add a tag filter to the search in the
 	// main page
 	this.set_tag_filter = function(tag) {
