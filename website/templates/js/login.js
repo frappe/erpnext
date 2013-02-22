@@ -62,7 +62,8 @@ login.show_forgot_password = function(){
 		url: "server.py",
 		data: {
 			cmd: "reset_password",
-			user: login_id
+			user: login_id,
+			_type: "POST"
 		},
 		success: function(data) {
 			login.set_message("A new password has been sent to your email id.", "GREEN");

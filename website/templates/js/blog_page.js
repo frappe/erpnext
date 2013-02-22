@@ -38,7 +38,8 @@ $(document).ready(function() {
 			cmd: "website.helpers.blog.add_comment",
 			comment_doctype: "Blog",
 			comment_docname: "{{ name }}",
-			page_name: "{{ page_name }}"
+			page_name: "{{ page_name }}",
+			_type: "POST"
 		}
 		
 		$("#comment-form .alert").toggle(false);
