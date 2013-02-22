@@ -108,6 +108,7 @@ EditableText = function(args) {
 	this.set_display(me.text);
 	
 	if(me.height) me.$w.find('.ed-text-input').css('height', me.height);
+	if(me.width) me.$w.find('.ed-text-input').css('width', me.width);
 	
 	// edit
 	me.$w.find('.ed-text-edit').click(function() {

@@ -90,6 +90,7 @@ KBQuestionView = function(w, qid, qtext) {
 		$(w.add_answer_area, '<h3>Add your Answer</h3>\
 			<div class="help">In markdown format</div>');
 		this.input = $a(w.add_answer_area, 'textarea');
+		$(this.input).css({width: "90%", height: "200px"});
 		//wn.tinymce.add_simple(this.input);
 		
 		this.btn = $btn($a(w.add_answer_area, 'div'), 'Post', function() {
@@ -174,7 +175,8 @@ KBAnswer = function(body, data, ans_list) {
 		text: data.answer,
 		inp_class: 'qv-ans-input',
 		disp_class: 'qv-ans-text',
-		height: '300px'
+		height: '300px',
+		width: '90%'
 	});	
 	
 	$(edtxt.wrapper).addClass('well');
