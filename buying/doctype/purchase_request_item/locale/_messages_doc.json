@@ -1,4 +1,5 @@
 [
+ "Item Group", 
  "Item Name", 
  "Description", 
  "Required Date", 
@@ -7,7 +8,6 @@
  "Ordered Qty", 
  "Page Break", 
  "Stock UOM", 
- "Item Group", 
  "Min Order Qty", 
  "Purchase Request Item", 
  "Warehouse", 

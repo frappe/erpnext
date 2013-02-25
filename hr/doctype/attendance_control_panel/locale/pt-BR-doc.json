@@ -1,0 +1,22 @@
+{
+ "All attendance dates inbetween selected Attendance From Date and Attendance To Date will come in the template with employees list.": "Todas as datas de comparecimento selecionadas entre a Data Inicial de Comparecimento e a Data Final de Comparecimento vir\u00e3o no modelo com a lista de funcion\u00e1rios.", 
+ "Attendance Control Panel": "Painel de Controle de Comparecimento", 
+ "Attendance From Date": "Data Inicial de Comparecimento", 
+ "Attendance To Date": "Data Final de Comparecimento", 
+ "Download Template": "Baixar o Modelo", 
+ "File List": "Lista de Arquivos", 
+ "Get Template": "Obter Modelo", 
+ "HR": "RH", 
+ "Import": "Importar", 
+ "Import Date Format ": "Formato de importa\u00e7\u00e3o de data", 
+ "Import Log": "Importar Log", 
+ "Import Log1": "Importar Log1", 
+ "Overwrite": "Sobrescrever", 
+ "Selected Attendance date will comes in the attendance template.": "Data de comparecimento selecionada vir\u00e1 no modelo de comparecimento.", 
+ "Upload Attendance Data": "Carregar dados de comparecimento", 
+ "dd-mm-yyyy": "dd-mm-aaaa", 
+ "dd/mm/yyyy": "dd/mm/aaaa", 
+ "mm/dd/yy": "mm/dd/aa", 
+ "mm/dd/yyyy": "mm/dd/aaaa", 
+ "yyyy-mm-dd": "aaaa-mm-dd"
+}

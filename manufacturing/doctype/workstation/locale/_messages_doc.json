@@ -1,5 +1,4 @@
 [
- "Hour Rate Rent", 
  "Workstation", 
  "Units/Shifts", 
  "Capacity", 
@@ -10,10 +9,11 @@
  "Capacity Units", 
  "Units/Hour", 
  "Over Heads", 
- "Overhead", 
  "Hour Rate Electricity", 
  "Warehouse", 
+ "Overhead", 
  "Manufacturing", 
+ "Hour Rate Rent", 
  "Workstation Name", 
  "Hour Rate Labour"
 ]

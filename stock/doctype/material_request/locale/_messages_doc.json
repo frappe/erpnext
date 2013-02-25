@@ -2,10 +2,9 @@
  "% of materials ordered against this Material Request", 
  "Select Terms and Conditions", 
  "Material Request Items", 
- "Transfer", 
+ "Material Request Type", 
  "IDT", 
  "Material Request", 
- "Draft", 
  "Select Print Heading", 
  "Stock", 
  "Status", 
@@ -16,7 +15,7 @@
  "Amended From", 
  "File List", 
  "Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template", 
- "Material Request Type", 
+ "Transfer", 
  "Remarks", 
  "Sales Order No", 
  "Filing in Additional Information about the Material Request will help you analyze your data better.", 
@@ -40,6 +39,7 @@
  "The date at which current entry is corrected in the system.", 
  "More Info", 
  "MREQ-", 
+ "Draft", 
  "Terms and Conditions Content", 
  "Print Heading"
 ]

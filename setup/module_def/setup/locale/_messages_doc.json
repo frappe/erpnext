@@ -1,20 +1,20 @@
 [
  "Item Classification", 
- "Webforms", 
- "Modules Setup", 
+ "Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.", 
+ "Setup", 
  "Email Settings for Outgoing and Incoming Emails.", 
- "Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.", 
+ "Modules Setup", 
  "Price List Master", 
  "**Currency** Master", 
  "Send automatic emails to Contacts on Submitting transactions.", 
- "Setup", 
  "Send regular summary reports via Email.", 
  "Email settings for jobs email id \"jobs@example.com\"", 
  "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
- "Classification of Customers by region", 
  "Set prefix for numbering series on your transactions", 
  "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.", 
  "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
  "Permission Engine", 
- "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization."
+ "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
+ "Webforms", 
+ "Classification of Customers by region"
 ]

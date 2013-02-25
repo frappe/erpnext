@@ -1,0 +1,23 @@
+{
+ "Actual Qty (at source/target)": "Qtde Real (na origem / destino)", 
+ "Amount": "Quantidade", 
+ "BOM No": "N\u00ba da LDM", 
+ "BOM No. for a Finished Good Item": "N\u00ba da LDM para um Item Bom Acabado", 
+ "Batch No": "N\u00ba do Lote", 
+ "Conversion Factor": "Fator de Convers\u00e3o", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Item Code": "C\u00f3digo do Item", 
+ "Material Request": "Pedido de material", 
+ "Material Request Item": "Item de solicita\u00e7\u00e3o de material", 
+ "Material Request used to make this Stock Entry": "Pedido de material usado para fazer essa entrada de material", 
+ "Qty": "Qtde.", 
+ "Qty as per Stock UOM": "Qtde. como por UDM de estoque", 
+ "Serial No": "N\u00ba de S\u00e9rie", 
+ "Source Warehouse": "Almoxarifado de origem", 
+ "Stock": "Estoque", 
+ "Stock Entry Detail": "Detalhe do lan\u00e7amento no Estoque", 
+ "Stock UOM": "UDM do Estoque", 
+ "Target Warehouse": "Almoxarifado de destino", 
+ "UOM": "UDM", 
+ "Valuation Rate": "Taxa de Avalia\u00e7\u00e3o"
+}

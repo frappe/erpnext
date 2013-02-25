@@ -6,7 +6,6 @@
  "New Material Requests", 
  "Send regular summary reports via Email.", 
  "Select Digest Content", 
- "Collections", 
  "Expenses Booked", 
  "Income", 
  "Stock", 
@@ -44,6 +43,7 @@
  "Open Tickets", 
  "Accounts", 
  "Projects", 
+ "Collections", 
  "Email Digest", 
  "Weekly"
 ]

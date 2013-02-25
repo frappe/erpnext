@@ -1,0 +1,7 @@
+{
+ "As existing qty for item: ": "Como qtde. existente para o item:", 
+ "Row # ": "Linha #", 
+ "Serialized Item: '": "Item serializado: &#39;", 
+ "Sorry! We can only allow upto 100 rows for Stock Reconciliation.": "Desculpe! N\u00f3s s\u00f3 podemos permitir no m\u00e1ximo 100 linhas para Reconcilia\u00e7\u00e3o de Estoque.", 
+ "Stock Reconciliation file not uploaded": "Arquivo da Reconcilia\u00e7\u00e3o de Estoque n\u00e3o carregado"
+}

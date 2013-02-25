@@ -2,11 +2,18 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.widgets.reportview import execute as runreport
 
-def execute():
+def execute(filters={}):	
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"])
 	leave_types = webnotes.conn.sql_list("select name from `tabLeave Type`")
-	fiscal_years = webnotes.conn.sql_list("select name from `tabFiscal Year` order by name desc")
+	
+	if filters.get("fiscal_year"):
+		fiscal_years = [filters["fiscal_year"]]
+	else:
+		fiscal_years = webnotes.conn.sql_list("select name from `tabFiscal Year` order by name desc")
+
 	employee_in = '", "'.join([e.name for e in employees])
+	
+		
 	
 	allocations = webnotes.conn.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
 	 	from `tabLeave Allocation` 

@@ -1,0 +1,16 @@
+{
+ "Customer Group": "Grupo de Clientes", 
+ "Customer Group Name": "Nome do grupo de Clientes", 
+ "Default Price List": "Lista de Pre\u00e7os padr\u00e3o", 
+ "Has Child Node": "Tem n\u00f3 filho", 
+ "No": "N\u00e3o", 
+ "Only leaf nodes are allowed in transaction": "Somente n\u00f3s-folha s\u00e3o permitidos em transa\u00e7\u00f5es", 
+ "Parent Customer Group": "Grupo de Clientes pai", 
+ "Setup": "Configura\u00e7\u00e3o", 
+ "This Price List will be selected as default for all Customers under this Group.": "Esta lista de pre\u00e7os ser\u00e1 selecionado como padr\u00e3o para todos os clientes sob este grupo.", 
+ "Trash Reason": "Raz\u00e3o de p\u00f4r no lixo", 
+ "Yes": "Sim", 
+ "lft": "esq.", 
+ "old_parent": "old_parent", 
+ "rgt": "dir."
+}

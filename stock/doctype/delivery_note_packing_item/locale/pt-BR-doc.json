@@ -1,0 +1,18 @@
+{
+ "Actual Qty": "Qtde Real", 
+ "Batch No": "N\u00ba do Lote", 
+ "Delivery Note Packing Item": "Item do Pacote da Guia de Remessa", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Item Code": "C\u00f3digo do Item", 
+ "Item Name": "Nome do Item", 
+ "Page Break": "Quebra de p\u00e1gina", 
+ "Parent Detail docname": "Docname do Detalhe pai", 
+ "Parent Item": "Item Pai", 
+ "Prevdoc DocType": "Prevdoc DocType", 
+ "Projected Qty": "Qtde. Projetada", 
+ "Qty": "Qtde.", 
+ "Serial No": "N\u00ba de S\u00e9rie", 
+ "Stock": "Estoque", 
+ "UOM": "UDM", 
+ "Warehouse": "Almoxarifado"
+}
