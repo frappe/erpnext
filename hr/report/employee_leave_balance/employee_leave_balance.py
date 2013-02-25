@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.widgets.reportview import execute as runreport
 
-def execute(filters={}):	
+def execute(filters=None):
+	if not filters: filters = {}
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"])
 	leave_types = webnotes.conn.sql_list("select name from `tabLeave Type`")
 	

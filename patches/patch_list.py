@@ -193,5 +193,6 @@ patch_list = [
 	"patches.february_2013.repost_reserved_qty",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report') # 2013-02-25",
 	"execute:webnotes.conn.sql(\"update `tabReport` set report_type=if(ifnull(query, '')='', 'Report Builder', 'Query Report') where is_standard='No'\")",
-	"execute:webnotes.conn.sql(\"update `tabReport` set report_name=name where ifnull(report_name,'')='' and is_standard='No'\")"
+	"execute:webnotes.conn.sql(\"update `tabReport` set report_name=name where ifnull(report_name,'')='' and is_standard='No'\")",
+	"patches.february_2013.p08_todo_query_report",
 ]
