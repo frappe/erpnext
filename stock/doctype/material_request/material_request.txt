@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-20 13:25:31", 
+  "creation": "2013-02-21 14:15:25", 
   "docstatus": 0, 
-  "modified": "2013-02-21 10:59:09", 
+  "modified": "2013-02-25 15:38:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -326,7 +326,7 @@
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Select Print Heading", 
   "options": "Print Heading", 
   "print_hide": 1
