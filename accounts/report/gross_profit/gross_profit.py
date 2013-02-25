@@ -56,12 +56,9 @@ def _get_buying_amount(voucher_no, item_row, item_code, warehouse, qty):
 		if sle.voucher_type == "Delivery Note" and sle.voucher_no == voucher_no:
 			if (sle.voucher_detail_no == item_row) or \
 				(sle.item_code == item_code and sle.warehouse == warehouse and \
-				abs(sle.qty) == qty):
+				abs(flt(sle.qty)) == qty):
 					buying_amount = flt(stock_ledger_entries[i+1].stock_value) - flt(sle.stock_value)
-					if buying_amount < 0:
-						webnotes.errprint([voucher_no, item_row, item_code, warehouse, qty])
-						webnotes.errprint(["previous", stock_ledger_entries[i+1]])
-						webnotes.errprint(["current", sle])
+
 					return buying_amount
 					
 	return 0.0
@@ -78,7 +75,8 @@ def get_stock_ledger_entries(filters):
 	global stock_ledger_entries
 	
 	query = """select item_code, voucher_type, voucher_no,
-		voucher_detail_no, posting_date, posting_time, stock_value
+		voucher_detail_no, posting_date, posting_time, stock_value,
+		warehouse, actual_qty as qty
 		from `tabStock Ledger Entry` where ifnull(`is_cancelled`, "No") = "No" """
 	
 	if filters.get("company"):
@@ -86,4 +84,4 @@ def get_stock_ledger_entries(filters):
 	
 	query += " order by item_code desc, warehouse desc, posting_date desc, posting_time desc, name desc"
 
-	stock_ledger_entries = webnotes.conn.sql(query, filters, as_dict=True, debug=1)
+	stock_ledger_entries = webnotes.conn.sql(query, filters, as_dict=True)
