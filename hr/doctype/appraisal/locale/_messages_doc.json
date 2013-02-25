@@ -1,7 +1,6 @@
 [
  "HR", 
  "Comments", 
- "Draft", 
  "Status", 
  "Appraisal Template", 
  "Completed", 
@@ -16,13 +15,14 @@
  "Select template from which you want to get the Goals", 
  "Submitted", 
  "Employee Details", 
+ "Other Details", 
  "Cancelled", 
  "Appraisal", 
  "For Employee Name", 
  "Calculate Total Score", 
  "Fiscal Year", 
  "Select the Employee for whom you are creating the Appraisal.", 
- "Other Details", 
+ "Draft", 
  "Start Date", 
  "Company"
 ]

@@ -1,5 +1,4 @@
 [
- "Master Name", 
  "Group or Ledger", 
  "No", 
  "Parent Account", 
@@ -22,6 +21,7 @@
  "Rgt", 
  "Frozen", 
  "Income Account", 
+ "Master Name", 
  "Customer", 
  "Account", 
  "Debit or Credit", 

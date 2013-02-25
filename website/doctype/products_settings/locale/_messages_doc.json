@@ -1,7 +1,6 @@
 [
  "Website", 
- "", 
- "Products Settings", 
  "Product Groups that are listed on the website. The first product group from this list will be listed by default on the \"Products Page\"", 
- "Groups"
+ "Groups", 
+ "Products Settings"
 ]

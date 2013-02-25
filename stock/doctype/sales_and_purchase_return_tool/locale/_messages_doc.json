@@ -1,5 +1,6 @@
 [
  "Make Credit Note", 
+ "Make Stock Entry", 
  "Make Excise Invoice", 
  "Sales Return", 
  "Get Items", 
@@ -10,7 +11,6 @@
  "Make Debit Note", 
  "Cust/Supp Address", 
  "Sales Invoice No", 
- "Make Stock Entry", 
  "Purchase Receipt No", 
  "Purchase Return", 
  "Sales and Purchase Return Items", 

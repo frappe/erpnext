@@ -8,8 +8,8 @@
  "Setup", 
  "Email settings for jobs email id \"jobs@example.com\"", 
  "Host", 
- "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"", 
  "POP3 server e.g. (pop.gmail.com)", 
+ "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"", 
  "Check to activate", 
  "Extract Emails", 
  "Email Id"

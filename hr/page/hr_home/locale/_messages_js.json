@@ -1,6 +1,7 @@
 [
  "Leave Setup", 
  "Documents", 
+ "Employee Leave Balance", 
  "Attendance record.", 
  "Employee records.", 
  "Leave Block List", 
@@ -33,6 +34,7 @@
  "Designation", 
  "Generate Salary Slips", 
  "Employee Designation.", 
+ "Reports", 
  "Deduction Type", 
  "Holiday List", 
  "Monthly salary template.", 

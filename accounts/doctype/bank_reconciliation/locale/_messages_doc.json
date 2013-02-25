@@ -1,12 +1,12 @@
 [
  "Select account head of the bank where cheque was deposited.", 
+ "Entries", 
  "Update Clearance Date", 
  "Company", 
  "Bank Account", 
  "To Date", 
  "Accounts", 
  "From Date", 
- "Entries", 
  "Get Non Reconciled Entries", 
  "Bank Reconciliation", 
  "Total Amount"

@@ -1,10 +1,10 @@
 [
  "Stock Reconciliation file not uploaded", 
- "Row # ", 
+ " is less than equals to zero in the system, \\\n\t\t\t\t\t\tvaluation rate is mandatory for this item", 
  "Sorry! We can only allow upto 100 rows for Stock Reconciliation.", 
  "As existing qty for item: ", 
+ "' can not be managed using Stock Reconciliation.\\\n\t\t\t\t\tYou can add/delete Serial No directly, \\\n\t\t\t\t\tto modify stock of this item.", 
  "Serialized Item: '", 
- "' can not be managed using Stock Reconciliation.\\\t\t\t\t\tYou can add/delete Serial No directly, \\\t\t\t\t\tto modify stock of this item.", 
- "Hey! You seem to be using the wrong template. \\\t\t\t\tClick on 'Download Template' button to get the correct template.", 
- " is less than equals to zero in the system, \\\t\t\t\t\t\tvaluation rate is mandatory for this item"
+ "Row # ", 
+ "Hey! You seem to be using the wrong template. \\\n\t\t\t\tClick on 'Download Template' button to get the correct template."
 ]

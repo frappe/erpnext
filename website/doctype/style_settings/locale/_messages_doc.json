@@ -3,7 +3,6 @@
  "12px", 
  "13px", 
  "Verdana", 
- "Solid background color (default light gray)", 
  "Set your background color, font and image (tiled)", 
  "Custom CSS", 
  "Lato", 
@@ -26,6 +25,7 @@
  "If image is selected, color will be ignored (attach first)", 
  "Background Image", 
  "Tahoma", 
+ "Solid background color (default light gray)", 
  "Font", 
  "Heading Font"
 ]

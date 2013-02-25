@@ -2,11 +2,13 @@
  "Website", 
  "Settings for Contact Us Page", 
  "Help", 
- "Introductory information for the Contact Us Page", 
  "Introduction", 
  "Query Options", 
  "Contact Us Settings", 
  "Address to be displayed on the Contact Page", 
  "Address", 
- "Contact options, like \"Sales Query, Support Query\" etc each on a new line or separated by commas."
+ "Default: \"Contact Us\"", 
+ "Contact options, like \"Sales Query, Support Query\" etc each on a new line or separated by commas.", 
+ "Heading", 
+ "Introductory information for the Contact Us Page"
 ]
