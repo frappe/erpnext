@@ -191,7 +191,7 @@ patch_list = [
 	"execute:webnotes.delete_doc('Search Criteria', 'employeewise_balance_leave_report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employee_leave_balance_report')",
 	"patches.february_2013.repost_reserved_qty",
-	"execute:reload_doc('core', 'doctype', 'report') # 2013-02-25",
+	"execute:webnotes.reload_doc('core', 'doctype', 'report') # 2013-02-25",
 	"execute:webnotes.conn.sql(\"update `tabReport` set report_type=if(ifnull(query, '')='', 'Report Builder', 'Query Report') where is_standard='No'\")",
 	"execute:webnotes.conn.sql(\"update `tabReport` set report_name=name where ifnull(report_name,'')='' and is_standard='No'\")"
 ]
