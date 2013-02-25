@@ -30,8 +30,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 
-	# validate receiver numbers
-	# =========================================================
 	def validate_receiver_nos(self,receiver_list):
 		validated_receiver_list = []
 		for d in receiver_list:
@@ -39,38 +37,21 @@ class DocType:
 			invalid_char_list = [' ', '+', '-', '(', ')']
 			for x in invalid_char_list:
 				d = d.replace(x, '')
-
-			# mobile no validation for erpnext gateway
-			if webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
-				mob_no = d
-			else:
-				if not d.startswith("0") and len(d) == 10:
-					mob_no = "91" + d
-				elif d.startswith("0") and len(d) == 11:
-					mob_no = "91" + d[1:]
-				elif len(d) == 12:
-					mob_no = d
-				else:
-					msgprint("Invalid mobile no : " + cstr(d))
-					raise Exception
-
-				if not mob_no.isdigit():
-					msgprint("Invalid mobile no : " + cstr(mob_no))
-					raise Exception
-
-			validated_receiver_list.append(mob_no)
+				
+			validated_receiver_list.append(d)
 
 		if not validated_receiver_list:
-			msgprint("Please enter valid mobile nos")
-			raise Exception
+			msgprint("Please enter valid mobile nos", raise_exception=1)
 
 		return validated_receiver_list
 
 
 	def get_sender_name(self):
 		"returns name as SMS sender"
-		sender_name = webnotes.conn.get_value('Global Defaults', None, 'sms_sender_name') or 'ERPNXT'
-		if len(sender_name) > 6:
+		sender_name = webnotes.conn.get_value('Global Defaults', None, 'sms_sender_name') or \
+			'ERPNXT'
+		if len(sender_name) > 6 and \
+				webnotes.conn.get_value("Control Panel", None, "country") == "India":
 			msgprint("""
 				As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
@@ -82,8 +63,8 @@ class DocType:
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"
 		args = load_json(arg)
-		number = sql('select mobile_no, phone from tabContact where name=%s and %s=%s' % ('%s', args['key'], '%s'),\
-			(args['contact_name'], args['value']))
+		number = sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
+			('%s', args['key'], '%s'), (args['contact_name'], args['value']))
 		return number and (number[0][0] or number[0][1]) or ''
 	
 	def send_form_sms(self, arg):
@@ -91,9 +72,6 @@ class DocType:
 		args = load_json(arg)
 		self.send_sms([str(args['number'])], str(args['message']))
 
- 
-	# Send SMS
-	# =========================================================
 	def send_sms(self, receiver_list, msg, sender_name = ''):
 		receiver_list = self.validate_receiver_nos(receiver_list)
 
@@ -103,15 +81,11 @@ class DocType:
 				'sender_name'	: sender_name or self.get_sender_name()
 			}
 
-		# personalized or erpnext gateway
 		if webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
-			ret = self.send_via_personalized_gateway(arg)
+			ret = self.send_via_gateway(arg)
 			msgprint(ret)
 
-
-	# Send sms via personalized gateway
-	# ==========================================================
-	def send_via_personalized_gateway(self, arg):
+	def send_via_gateway(self, arg):
 		ss = get_obj('SMS Settings', 'SMS Settings', with_children=1)
 		args = {ss.doc.message_parameter : arg.get('message')}
 		for d in getlist(ss.doclist, 'static_parameter_details'):
