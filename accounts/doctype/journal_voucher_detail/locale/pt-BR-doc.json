@@ -1,0 +1,16 @@
+{
+ "Account": "Conta", 
+ "Account Balance": "Saldo em Conta", 
+ "Accounts": "Contas", 
+ "Against Account": "Contra Conta", 
+ "Against Journal Voucher": "Contra Comprovante do livro Di\u00e1rio", 
+ "Against Purchase Invoice": "Contra a Nota Fiscal de Compra", 
+ "Against Sales Invoice": "Contra a Nota Fiscal de Venda", 
+ "Cost Center": "Centro de Custos", 
+ "Credit": "Cr\u00e9dito", 
+ "Debit": "D\u00e9bito", 
+ "Is Advance": "\u00c9 antecipado", 
+ "Journal Voucher Detail": "Detalhe do Comprovante do livro Di\u00e1rio", 
+ "No": "N\u00e3o", 
+ "Yes": "Sim"
+}

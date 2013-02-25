@@ -1,0 +1,15 @@
+{
+ "Check to activate": "Marque para ativar", 
+ "Email Id": "Endere\u00e7o de e-mail", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "Endere\u00e7o do e-mail onde um candidato a emprego vai enviar e-mail, por exemplo: &quot;empregos@exemplo.com&quot;", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"": "Configura\u00e7\u00f5es de e-mail para extrair Prospectos do e-mail de vendas, por exemplo &quot;vendas@exemplo.com&quot;", 
+ "Extract Emails": "Extrair e-mails", 
+ "Host": "Host", 
+ "POP3 Mail Settings": "Configura\u00e7\u00f5es de e-mail pop3", 
+ "POP3 server e.g. (pop.gmail.com)": "Servidor de e-mail POP3 (por exemplo, pop.gmail.com)", 
+ "Password": "Senha", 
+ "Sales Email Settings": "Configura\u00e7\u00f5es do Email de Vendas", 
+ "Setup": "Configura\u00e7\u00e3o", 
+ "Use SSL": "Use SSL", 
+ "Username": "Nome do Usu\u00e1rio"
+}

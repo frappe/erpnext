@@ -1,0 +1,22 @@
+{
+ "Account Head": "Conta", 
+ "Accounts": "Contas", 
+ "Actual": "Real", 
+ "Amount": "Quantidade", 
+ "Cost Center": "Centro de Custos", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Enter Row": "Digite a Linha", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Se marcado, o valor do imposto ser\u00e1 considerado como j\u00e1 inclu\u00eddo na Impress\u00e3o de Taxa / Impress\u00e3o do Valor", 
+ "Is this Tax included in Basic Rate?": "Este imposto est\u00e1 inclu\u00eddo no Valor Base?", 
+ "Item Wise Tax Detail ": "Detalhe Imposto relativo ao Item", 
+ "On Net Total": "No Total L\u00edquido", 
+ "On Previous Row Amount": "No Valor na linha anterior", 
+ "On Previous Row Total": "No Total na linha anterior", 
+ "Parenttype": "Parenttype", 
+ "Rate": "Taxa", 
+ "Sales Taxes and Charges": "Impostos e Taxas sobre Vendas", 
+ "Total": "Total", 
+ "Total Amount": "Valor Total", 
+ "Total Tax Amount": "Valor Total do Imposto", 
+ "Type": "Tipo"
+}

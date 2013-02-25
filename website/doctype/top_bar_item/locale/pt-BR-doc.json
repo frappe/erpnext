@@ -1,0 +1,9 @@
+{
+ "Label": "Etiqueta", 
+ "Parent Label": "Etiqueta pai", 
+ "Target": "Meta", 
+ "Top Bar Item": "Item da barra superior", 
+ "URL": "URL", 
+ "Website": "Site", 
+ "target = \"_blank\"": "target = &quot;_blank&quot;"
+}

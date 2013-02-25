@@ -1,0 +1,21 @@
+{
+ "All Contact": "Todo Contato", 
+ "All Customer Contact": "Todo Contato do Cliente", 
+ "All Employee (Active)": "Todos os Empregados (Ativos)", 
+ "All Lead (Open)": "Todos Prospectos (Abertos)", 
+ "All Sales Partner Contact": "Todo Contato de Parceiros de Vendas", 
+ "All Sales Person": "Todos os Vendedores", 
+ "All Supplier Contact": "Todo Contato de Fornecedor", 
+ "Branch": "Ramo", 
+ "Create Receiver List": "Criar Lista de Receptor", 
+ "Customer": "Cliente", 
+ "Department": "Departamento", 
+ "Message": "Mensagem", 
+ "Message greater than 160 character will be splitted into multiple mesage": "Mensagens maiores do que 160 caracteres v\u00e3o ser divididos em m\u00faltiplas mensagens", 
+ "Receiver List": "Lista de recebedores", 
+ "SMS Center": "Centro de SMS", 
+ "Selling": "Vendas", 
+ "Send SMS": "Envie SMS", 
+ "Send To": "Enviar para", 
+ "Supplier": "Fornecedor"
+}

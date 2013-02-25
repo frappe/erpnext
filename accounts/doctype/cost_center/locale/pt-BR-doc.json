@@ -1,0 +1,22 @@
+{
+ "Accounts": "Contas", 
+ "Add rows to set annual budgets on Accounts.": "Adicionar linhas para definir or\u00e7amentos anuais nas Contas.", 
+ "Budget": "Or\u00e7amento", 
+ "Budget Details": "Detalhes do Or\u00e7amento", 
+ "Company": "Empresa", 
+ "Cost Center": "Centro de Custos", 
+ "Cost Center Details": "Detalhes do Centro de Custo", 
+ "Cost Center Name": "Nome do Centro de Custo", 
+ "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>": "Definir Or\u00e7amento para este Centro de Custo. Para definir a\u00e7\u00e3o do or\u00e7amento, consulte <a href=\"#!List/Company\">Cadastro de Empresa</a>", 
+ "Distribution Id": "Id da distribui\u00e7\u00e3o", 
+ "Group": "Grupo", 
+ "Group or Ledger": "Grupo ou Raz\u00e3o", 
+ "Ledger": "Raz\u00e3o", 
+ "Parent Cost Center": "Centro de Custo pai", 
+ "Select Budget Distribution, if you want to track based on seasonality.": "Selecione distribui\u00e7\u00e3o do or\u00e7amento, se voc\u00ea quiser acompanhar baseado em sazonalidade.", 
+ "Track separate Income and Expense for product verticals or divisions.": "Acompanhar Receitas e Gastos separados para produtos verticais ou divis\u00f5es.", 
+ "Trash Reason": "Raz\u00e3o de p\u00f4r no lixo", 
+ "lft": "esq.", 
+ "old_parent": "old_parent", 
+ "rgt": "dir."
+}
