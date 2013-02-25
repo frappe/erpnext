@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-18 13:36:19", 
+  "creation": "2013-02-21 14:15:31", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:43:50", 
+  "modified": "2013-02-25 13:08:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -109,7 +109,7 @@
   "doctype": "DocField", 
   "fieldname": "accounts_module", 
   "fieldtype": "Column Break", 
-  "label": "Accounts"
+  "label": "Income / Expense"
  }, 
  {
   "doctype": "DocField", 
@@ -118,46 +118,66 @@
   "label": "Income Year to Date"
  }, 
  {
+  "description": "Balances of Accounts of type \"Bank or Cash\"", 
   "doctype": "DocField", 
   "fieldname": "bank_balance", 
   "fieldtype": "Check", 
-  "label": "Bank Balance"
+  "label": "Bank/Cash Balance"
  }, 
  {
+  "description": "Income booked for the digest period", 
   "doctype": "DocField", 
   "fieldname": "income", 
   "fieldtype": "Check", 
-  "label": "Income"
+  "label": "Income Booked"
  }, 
  {
+  "description": "Expenses booked for the digest period", 
   "doctype": "DocField", 
   "fieldname": "expenses_booked", 
   "fieldtype": "Check", 
   "label": "Expenses Booked"
  }, 
  {
+  "description": "Receivable / Payable account will be identified based on the field Master Type", 
+  "doctype": "DocField", 
+  "fieldname": "column_break_16", 
+  "fieldtype": "Column Break", 
+  "label": "Receivables / Payables"
+ }, 
+ {
+  "description": "Payments received during the digest period", 
   "doctype": "DocField", 
   "fieldname": "collections", 
   "fieldtype": "Check", 
-  "label": "Collections"
+  "label": "Payments Received"
  }, 
  {
+  "description": "Payments made during the digest period", 
   "doctype": "DocField", 
   "fieldname": "payments", 
   "fieldtype": "Check", 
-  "label": "Payments"
+  "label": "Payments Made"
  }, 
  {
+  "description": "Total amount of invoices sent to the customer during the digest period", 
   "doctype": "DocField", 
   "fieldname": "invoiced_amount", 
   "fieldtype": "Check", 
   "label": "Receivables"
  }, 
  {
+  "description": "Total amount of invoices received from suppliers during the digest period", 
   "doctype": "DocField", 
   "fieldname": "payables", 
   "fieldtype": "Check", 
   "label": "Payables"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_20", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
   "doctype": "DocField", 
@@ -215,12 +235,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "section_break_34", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "stock_module", 
   "fieldtype": "Column Break", 
   "label": "Stock"
@@ -242,6 +256,12 @@
   "fieldname": "new_stock_entries", 
   "fieldtype": "Check", 
   "label": "New Stock Entries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_34", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
   "doctype": "DocField", 
@@ -278,12 +298,6 @@
   "fieldname": "new_projects", 
   "fieldtype": "Check", 
   "label": "New Projects"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_41", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
  }, 
  {
   "doctype": "DocField", 
