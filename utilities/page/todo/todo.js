@@ -193,6 +193,12 @@ wn.pages.todo.onload = function(wrapper) {
 			date:get_today(), priority:'Medium', checked:0, description:''});
 	}, 'icon-plus');
 	wrapper.appframe.add_ripped_paper_effect(wrapper);
+	
+	// show report button for System Manager
+	if(wn.boot.profile.roles.indexOf("System Manager") !== -1) {
+		wrapper.appframe.add_button("Report", function() { wn.set_route("query-report", "todo"); },
+			"icon-table");
+	}
 
 	// load todos
 	erpnext.todo.refresh();
