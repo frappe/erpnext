@@ -1,0 +1,20 @@
+{
+ "Allocate": "Alocar", 
+ "Branch": "Ramo", 
+ "Carry Forward": "Encaminhar", 
+ "Department": "Departamento", 
+ "Designation": "Designa\u00e7\u00e3o", 
+ "Employee Type": "Tipo de empregado", 
+ "Fiscal Year": "Exerc\u00edcio fiscal", 
+ "Grade": "Grau", 
+ "HR": "RH", 
+ "Leave Control Panel": "Painel de Controle de Licen\u00e7as", 
+ "Leave Type": "Tipo de Licen\u00e7as", 
+ "Leave blank if considered for all branches": "Deixe em branco se considerado para todos os ramos", 
+ "Leave blank if considered for all departments": "Deixe em branco se considerado para todos os departamentos", 
+ "Leave blank if considered for all designations": "Deixe em branco se considerado para todas as designa\u00e7\u00f5es", 
+ "Leave blank if considered for all employee types": "Deixe em branco se considerado para todos os tipos de empregados", 
+ "Leave blank if considered for all grades": "Deixe em branco se considerado para todos os graus", 
+ "New Leaves Allocated (In Days)": "Novas Licen\u00e7as alocadas (em dias)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "Por favor selecione Encaminhar se voc\u00ea tamb\u00e9m quer incluir o saldo de licen\u00e7as do ano fiscal anterior neste ano fiscal"
+}

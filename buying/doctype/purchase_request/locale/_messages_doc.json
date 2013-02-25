@@ -3,7 +3,6 @@
  "Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template", 
  "IDT", 
  "Select Terms and Conditions", 
- "Draft", 
  "Name of the entity who has requested for the Purchase Requisition", 
  "Status", 
  "Purchase Request", 
@@ -36,6 +35,7 @@
  "Purchase Requisition Details", 
  "More Info", 
  "One or multiple Sales Order no which generated this Purchase Requisition", 
+ "Draft", 
  "Terms and Conditions Content", 
  "% of materials ordered against this Purchase Requisition"
 ]

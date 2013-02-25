@@ -29,7 +29,7 @@
  "Ref Rate*", 
  "Quantity", 
  "UOM Conversion Factor", 
- "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges", 
+ "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges", 
  "Supplier Quotation", 
  "Purchase Order Item", 
  "Page Break", 

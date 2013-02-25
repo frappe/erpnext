@@ -1,7 +1,6 @@
 [
  "Installation Note Item", 
  "Customer Address", 
- "Draft", 
  "Cancel Reason", 
  "Territory", 
  "Installation Note", 
@@ -15,9 +14,9 @@
  "Remarks", 
  "Delivery Note No", 
  "Customer", 
- "Series", 
  "Name", 
  "The date at which current entry is corrected in the system.", 
+ "Customer Group", 
  "Submitted", 
  "Fiscal Year", 
  "Contact", 
@@ -30,5 +29,6 @@
  "Installation Date", 
  "Contact Email", 
  "Item Details", 
- "Customer Group"
+ "Series", 
+ "Draft"
 ]

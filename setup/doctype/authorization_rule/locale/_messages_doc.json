@@ -19,12 +19,12 @@
  "Purchase Receipt", 
  "Grand Total", 
  "Appraisal", 
+ "Applicable To (Employee)", 
  "Applicable To (User)", 
- "Applicable To (Role)", 
  "Delivery Note", 
  "Sales Invoice", 
  "Average Discount", 
  "Sales Order", 
  "Approving User", 
- "Applicable To (Employee)"
+ "Applicable To (Role)"
 ]

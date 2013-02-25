@@ -1,0 +1,18 @@
+{
+ "Change the starting / current sequence number of an existing series.": "Alterar o n\u00famero sequencial de in\u00edcio/atual de uma s\u00e9rie existente.", 
+ "Check this if you want to force the user to select a series before saving. There will be no default if you check this.": "Marque esta op\u00e7\u00e3o se voc\u00ea deseja for\u00e7ar o usu\u00e1rio a selecionar uma s\u00e9rie antes de salvar. N\u00e3o haver\u00e1 nenhum padr\u00e3o se voc\u00ea marcar isso.", 
+ "Current Value": "Valor Atual", 
+ "Help HTML": "Ajuda HTML", 
+ "Naming Series": "S\u00e9ries nomeadas", 
+ "Prefix": "Prefixo", 
+ "Select Transaction": "Selecione a Transa\u00e7\u00e3o", 
+ "Series List for this Transaction": "Lista de s\u00e9ries para esta transa\u00e7\u00e3o", 
+ "Set prefix for numbering series on your transactions": "Definir prefixo para s\u00e9ries de numera\u00e7\u00e3o em suas transa\u00e7\u00f5es", 
+ "Setup": "Configura\u00e7\u00e3o", 
+ "Setup Series": "Configura\u00e7\u00e3o de S\u00e9ries", 
+ "This is the number of the last created transaction with this prefix": "Este \u00e9 o n\u00famero da \u00faltima transa\u00e7\u00e3o criada com este prefixo", 
+ "Update": "Atualizar", 
+ "Update Series": "Atualizar S\u00e9ries", 
+ "Update Series Number": "Atualizar N\u00fameros de S\u00e9ries", 
+ "User must always select": "O Usu\u00e1rio deve sempre selecionar"
+}

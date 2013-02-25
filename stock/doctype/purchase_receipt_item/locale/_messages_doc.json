@@ -30,7 +30,7 @@
  "Ref Rate*", 
  "PO No", 
  "Rejected Quantity", 
- "Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges", 
+ "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges", 
  "Discount  %", 
  "QA No", 
  "Serial No", 

@@ -12,7 +12,6 @@
  "File List", 
  "Page Name", 
  "Page content", 
- "Page to show on the website", 
  "Center", 
  "Content in markdown format that appears on the main side of your page", 
  "Title / headline of your page", 
@@ -22,6 +21,7 @@
  "Left", 
  "Right", 
  "Page url name (auto-generated) (add \".html\")", 
+ "Page to show on the website\n", 
  "Link to other pages in the side bar and next section", 
  "Main Section", 
  "Web Page"

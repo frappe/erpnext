@@ -1,0 +1,19 @@
+{
+ "**Currency** Master": "Cadastro de **Moeda**", 
+ "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.": "Um distribuidor terceirizado / negociante / agente comissionado / revendedor que vende os produtos da empresas por uma comiss\u00e3o.", 
+ "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.": "Todas as Transa\u00e7\u00f5es de Vendas podem ser marcadas contra diversos **Vendedores** de modo que voc\u00ea possa definir e monitorar metas.", 
+ "Classification of Customers by region": "Classifica\u00e7\u00e3o de Clientes por regi\u00e3o", 
+ "Email Settings for Outgoing and Incoming Emails.": "Configura\u00e7\u00f5es de e-mail para e-mails enviados e recebidos.", 
+ "Email settings for jobs email id \"jobs@example.com\"": "Configura\u00e7\u00f5es de e-mail para e-mail de empregos &quot;empregos@exemplo.com&quot;", 
+ "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"": "Configura\u00e7\u00f5es de e-mail para extrair Prospectos do e-mail de vendas, por exemplo &quot;vendas@exemplo.com&quot;", 
+ "Item Classification": "Classifica\u00e7\u00e3o do Item", 
+ "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.": "Pessoa Jur\u00eddica / Subsidi\u00e1ria, com um plano de Contas separado, pertencentes \u00e0 Organiza\u00e7\u00e3o.", 
+ "Modules Setup": "Configura\u00e7\u00e3o dos M\u00f3dulos", 
+ "Permission Engine": "Mecanismo de Permiss\u00e3o", 
+ "Price List Master": "Cadastro de Lista de Pre\u00e7os", 
+ "Send automatic emails to Contacts on Submitting transactions.": "Enviar e-mails autom\u00e1ticos para os Contatos ao Submeter transa\u00e7\u00f5es.", 
+ "Send regular summary reports via Email.": "Enviar relat\u00f3rios resumidos regularmente via e-mail.", 
+ "Set prefix for numbering series on your transactions": "Definir prefixo para s\u00e9ries de numera\u00e7\u00e3o em suas transa\u00e7\u00f5es", 
+ "Setup": "Configura\u00e7\u00e3o", 
+ "Webforms": "Formul\u00e1rios Web"
+}

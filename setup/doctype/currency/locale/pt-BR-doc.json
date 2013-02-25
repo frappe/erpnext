@@ -1,0 +1,14 @@
+{
+ "**Currency** Master": "Cadastro de **Moeda**", 
+ "A symbol for this currency. For e.g. $": "Um s\u00edmbolo para esta moeda. Por exemplo: $", 
+ "Currency": "Moeda", 
+ "Currency Name": "Nome da Moeda", 
+ "Enabled": "Habilitado", 
+ "Fraction": "Fra\u00e7\u00e3o", 
+ "Fraction Units": "Unidades fracionadas", 
+ "How should this currency be formatted? If not set, will use system defaults": "Como essa moeda deve ser formatada? Se n\u00e3o for definido, ser\u00e3o usados os padr\u00f5es do sistema", 
+ "Number Format": "Formato de n\u00famero", 
+ "Setup": "Configura\u00e7\u00e3o", 
+ "Sub-currency. For e.g. \"Cent\"": "Sub-moeda. Por exemplo &quot;Centavo&quot;", 
+ "Symbol": "S\u00edmbolo"
+}

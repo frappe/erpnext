@@ -1,6 +1,5 @@
 [
  "Customer", 
- "Profile", 
  "Account", 
  "Document to rename", 
  "Item", 
@@ -10,8 +9,9 @@
  "Warehouse", 
  "Serial No", 
  "Employee", 
- "New Name", 
+ "Profile", 
  "Supplier", 
  "Rename Tool", 
- "Rename"
+ "Rename", 
+ "New Name"
 ]
