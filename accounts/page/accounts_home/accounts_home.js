@@ -151,6 +151,11 @@ wn.module_page["Accounts"] = [
 				route: "Report/Profile/Trend Analyzer",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Gross Profit"),
+				route: "query-report/Gross Profit",
+				doctype: "Sales Invoice"
+			},
 		]
 	},
 	{

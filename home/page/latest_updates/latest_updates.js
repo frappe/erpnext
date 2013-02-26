@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["26th February", [
+		"Gross Profit: The report has been rewritten and now it is under Accounts module"
+	]
+	],
 	["21st February, 2013", [
 		"Item: Warehouse-wise Re-order Level and Quantity",
 		"Buying: Purchase Request renamed to Material Request"
