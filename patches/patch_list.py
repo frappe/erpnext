@@ -195,4 +195,5 @@ patch_list = [
 	"execute:webnotes.conn.sql(\"update `tabReport` set report_type=if(ifnull(query, '')='', 'Report Builder', 'Query Report') where is_standard='No'\")",
 	"execute:webnotes.conn.sql(\"update `tabReport` set report_name=name where ifnull(report_name,'')='' and is_standard='No'\")",
 	"patches.february_2013.p08_todo_query_report",
+	"execute:webnotes.delete_doc('Search Criteria', 'gross_profit') # 2013-02-26"
 ]
