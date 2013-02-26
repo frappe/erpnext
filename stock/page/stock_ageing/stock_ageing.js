@@ -48,6 +48,11 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: '"Item"'
 				}},
+			{id: "item_name", name: "Item Name", field: "item_name", 
+				width: 100, formatter: this.text_formatter},
+			{id: "description", name: "Description", field: "description", 
+				width: 200, formatter: this.text_formatter},
+			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "average_age", name: "Average Age", field: "average_age",
 				formatter: this.currency_formatter},
 			{id: "earliest", name: "Earliest", field: "earliest",
@@ -55,11 +60,6 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			{id: "latest", name: "Latest", field: "latest",
 				formatter: this.currency_formatter},
 			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "item_name", name: "Item Name", field: "item_name", 
-				width: 100, formatter: this.text_formatter},
-			{id: "description", name: "Description", field: "description", 
-				width: 200, formatter: this.text_formatter},
 		];
 	},
 	filters: [

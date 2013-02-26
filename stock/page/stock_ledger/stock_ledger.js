@@ -52,9 +52,12 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: '"Item"',
 				}},
+			{id: "description", name: "Description", field: "description", width: 200,
+				formatter: this.text_formatter},
 			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
 			{id: "brand", name: "Brand", field: "brand", width: 100},
+			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "qty", name: "Qty", field: "qty", width: 100,
 				formatter: this.currency_formatter},
 			{id: "balance", name: "Balance Qty", field: "balance", width: 100,
@@ -69,8 +72,6 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: "dataContext.voucher_type"
 				}},
-			{id: "description", name: "Description", field: "description", width: 200,
-				formatter: this.text_formatter},
 		];
 		
 	},
