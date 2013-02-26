@@ -92,3 +92,4 @@ class DocType:
 	
 	def on_cancel(self):
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+			

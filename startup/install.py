@@ -30,7 +30,7 @@ def make_roles():
 		"HR Manager", "HR User", "Leave Approver", "Maintenance Manager",
 		"Maintenance User", "Manufacturing Manager", "Manufacturing User",
 		"Material Manager", "Material Master Manager", "Material User",
-		"Partner", "Projects User", "Purchase Manager", "Purchase Master Manager",
+		"Partner", "Projects User", "Projects Manager", "Purchase Manager", "Purchase Master Manager",
 		"Purchase User", "Quality Manager", "Sales Manager",
 		"Sales Master Manager", "Sales User", "Supplier", "Support Manager",
 		"Support Team", "Website Manager"]
