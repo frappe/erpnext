@@ -174,7 +174,12 @@ class DocType(SellingController):
 
 	def validate_reference_value(self):
 		"""Validate values with reference document with previous document"""
-		get_obj('DocType Mapper', 'Sales Order-Delivery Note', with_children = 1).validate_reference_value(self, self.doc.name)
+		validate_ref = any([d.prevdoc_docname for d in self.doclist.get({"parentfield": self.fname})
+			if d.prevdoc_doctype == "Sales Order"])
+		
+		if validate_ref:
+			get_obj('DocType Mapper', 'Sales Order-Delivery Note', 
+				with_children = 1).validate_reference_value(self, self.doc.name)
 
 
 	def validate_for_items(self):

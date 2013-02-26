@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 16:50:36", 
+  "creation": "2013-02-22 01:27:54", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:51:54", 
+  "modified": "2013-02-26 10:57:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -51,12 +51,13 @@
   "oldfieldtype": "Section Break"
  }, 
  {
+  "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
   "doctype": "DocField", 
-  "fieldname": "company_name", 
+  "fieldname": "abbr", 
   "fieldtype": "Data", 
-  "label": "Company", 
+  "label": "Abbr", 
   "no_copy": 0, 
-  "oldfieldname": "company_name", 
+  "oldfieldname": "abbr", 
   "oldfieldtype": "Data", 
   "reqd": 1
  }, 
@@ -66,13 +67,12 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
   "doctype": "DocField", 
-  "fieldname": "abbr", 
+  "fieldname": "company_name", 
   "fieldtype": "Data", 
-  "label": "Abbr", 
+  "label": "Company", 
   "no_copy": 0, 
-  "oldfieldname": "abbr", 
+  "oldfieldname": "company_name", 
   "oldfieldtype": "Data", 
   "reqd": 1
  }, 
@@ -123,6 +123,17 @@
   "oldfieldname": "payables_group", 
   "oldfieldtype": "Link", 
   "options": "Account"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "This account will be used to maintain value of available stock", 
+  "doctype": "DocField", 
+  "fieldname": "stock_in_hand_account", 
+  "fieldtype": "Link", 
+  "label": "Stock In Hand Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 

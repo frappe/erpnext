@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2013-01-29 14:36:53", 
+  "modified": "2013-02-26 13:44:35", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -23,19 +23,12 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Timesheet", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "submit": 1, 
-  "write": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -46,6 +39,23 @@
   "fieldname": "timesheet_details_section_break", 
   "fieldtype": "Section Break", 
   "label": "Timesheet Details"
+ }, 
+ {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "timesheet_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Timesheet Date", 
+  "oldfieldname": "timesheet_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "default": "Draft", 
@@ -63,16 +73,31 @@
   "search_index": 1
  }, 
  {
-  "default": "Today", 
   "doctype": "DocField", 
-  "fieldname": "timesheet_date", 
-  "fieldtype": "Date", 
-  "in_filter": 1, 
-  "label": "Timesheet Date", 
-  "oldfieldname": "timesheet_date", 
-  "oldfieldtype": "Date", 
-  "reqd": 1, 
-  "search_index": 1
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "timesheet_details", 
+  "fieldtype": "Table", 
+  "label": "Timesheet Details", 
+  "oldfieldname": "timesheet_details", 
+  "oldfieldtype": "Table", 
+  "options": "Timesheet Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_7", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "notes", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "label": "Notes"
  }, 
  {
   "doctype": "DocField", 
@@ -109,38 +134,47 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "notes", 
-  "fieldtype": "Text", 
-  "in_list_view": 1, 
-  "label": "Notes"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "timesheet_details", 
-  "fieldtype": "Table", 
-  "label": "Timesheet Details", 
-  "oldfieldname": "timesheet_details", 
-  "oldfieldtype": "Table", 
-  "options": "Timesheet Detail"
- }, 
- {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Projects User"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Projects User", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Projects User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 0
  }
 ]
