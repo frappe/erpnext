@@ -385,7 +385,7 @@ class DocType(BuyingController):
 		gl_entries = []
 		valuation_tax = 0
 		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
-		 	"automatic_inventory_accounting")
+		 	"auto_inventory_accounting")
 		abbr = self.get_company_abbr()
 		
 		# parent's gl entry

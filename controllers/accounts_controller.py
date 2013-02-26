@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import flt
 from utilities.transaction_base import TransactionBase
 
@@ -37,15 +38,7 @@ class AccountsController(TransactionBase):
 		}
 		gl_dict.update(args)
 		return gl_dict
-		
-	def get_stock_in_hand_account(self):
-		stock_in_hand = webnotes.conn.get_value("Company", self.doc.company, "stock_in_hand")	
-		if not stock_in_hand:
-			webnotes.msgprint("""Please specify "Stock In Hand" account 
-				for company: %s""" % (self.doc.company,), raise_exception=1)
-		
-		return stock_in_hand
-		
+				
 	def clear_unallocated_advances(self, childtype, parentfield):
 		self.doclist.remove_items({"parentfield": parentfield, "allocated_amount": ["in", [0, None, ""]]})
 			
@@ -74,3 +67,23 @@ class AccountsController(TransactionBase):
 				"advance_amount": flt(d.amount),
 				"allocate_amount": 0
 			})
+			
+	def get_stock_in_hand_account(self):
+		stock_in_hand_account = webnotes.conn.get_value("Company", self.doc.company, "stock_in_hand_account")
+		
+		if not stock_in_hand_account:
+			msgprint(_("Missing") + ": " 
+				+ _(webnotes.get_doctype("company").get_label("stock_in_hand_account")
+				+ " " + _("for Company") + " " + self.doc.company), raise_exception=True)
+		
+		return stock_in_hand_account
+		
+	@property
+	def stock_items(self):
+		if not hasattr(self, "_stock_items"):
+			item_codes = list(set(item.item_code for item in self.doclist.get({"parentfield": self.fname})))
+			self._stock_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._stock_items
