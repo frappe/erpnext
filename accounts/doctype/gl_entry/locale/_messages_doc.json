@@ -8,7 +8,7 @@
  "Aging Date", 
  "Journal Voucher", 
  "Remarks", 
- "Accounts", 
+ "Sales Invoice", 
  "Purchase Invoice", 
  "GL Entry", 
  "Posting Date", 
@@ -23,7 +23,7 @@
  "The date at which current entry is made in system.", 
  "Transaction Date", 
  "The date at which current entry will get or has actually executed.", 
- "Sales Invoice", 
+ "Accounts", 
  "Yes", 
  "Company"
 ]

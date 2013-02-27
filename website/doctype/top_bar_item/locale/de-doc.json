@@ -1,0 +1,9 @@
+{
+ "Label": "Etikett", 
+ "Parent Label": "Eltern Etikett", 
+ "Target": "Ziel", 
+ "Top Bar Item": "Top Bar Artikel", 
+ "URL": "URL", 
+ "Website": "Webseite", 
+ "target = \"_blank\"": "target = \"_blank\""
+}

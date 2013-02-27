@@ -1,0 +1,18 @@
+{
+ "Actual Quantity": "Tats\u00e4chliche Menge", 
+ "Bin": "Kasten", 
+ "FCFS Rate": "FCFS Rate", 
+ "Item Code": "Item Code", 
+ "Moving Average Rate": "Moving Average Rate", 
+ "Ordered Quantity": "Bestellte Menge", 
+ "Planned Qty": "Geplante Menge", 
+ "Projected Qty": "Prognostizierte Anzahl", 
+ "Quantity Requested for Purchase": "Beantragten Menge f\u00fcr Kauf", 
+ "Reserved Quantity": "Reserviert Menge", 
+ "Stock": "Lager", 
+ "Stock Value": "Bestandswert", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Valuation bewerten", 
+ "Warehouse": "Lager", 
+ "Warehouse Type": "Warehouse Typ"
+}

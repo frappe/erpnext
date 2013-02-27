@@ -6,8 +6,8 @@
  "Query Options", 
  "Contact Us Settings", 
  "Address to be displayed on the Contact Page", 
- "Address", 
  "Default: \"Contact Us\"", 
+ "Address", 
  "Contact options, like \"Sales Query, Support Query\" etc each on a new line or separated by commas.", 
  "Heading", 
  "Introductory information for the Contact Us Page"

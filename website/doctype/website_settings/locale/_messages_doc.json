@@ -2,6 +2,7 @@
  "Copyright", 
  "Misc", 
  "Background shade of the top menu bar", 
+ "Black", 
  "Website Settings", 
  "Google Analytics ID", 
  "White", 
@@ -13,7 +14,6 @@
  "Top Bar Items", 
  "File List", 
  "Address", 
- "Google Plus One", 
  "Sub-domain provided by erpnext.com", 
  "Enter domain names associated to this website, each on a new line", 
  "Domain List", 
@@ -23,8 +23,8 @@
  "Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.", 
  "Footer Items", 
  "FavIcon", 
+ "Google Plus One", 
  "Twitter Share", 
- "Twitter Share via", 
  "An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=\"http://favicon-generator.org/\" target=\"_blank\">favicon-generator.org</a>]", 
  "Home Page", 
  "Facebook Share", 
@@ -36,6 +36,6 @@
  "Tweet will be shared via your user account (if specified)", 
  "If checked, the Home page will be the default Item Group for the website.", 
  "Brand HTML", 
- "Black", 
+ "Twitter Share via", 
  "Title Prefix"
 ]

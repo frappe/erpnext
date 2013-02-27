@@ -1,0 +1,13 @@
+{
+ "Customer": "Kunde", 
+ "Customer Address": "Kundenadresse", 
+ "Customer Name": "Name des Kunden", 
+ "Is Primary Address": "Ist Primary Address", 
+ "No": "Auf", 
+ "Selling": "Verkauf", 
+ "Ship To": "Ship To", 
+ "Shipping Address": "Versandadresse", 
+ "Shipping Details": "Versandkosten Details", 
+ "Trash Reason": "Trash Reason", 
+ "Yes": "Ja"
+}
