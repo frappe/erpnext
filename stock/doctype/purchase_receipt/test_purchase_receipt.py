@@ -18,178 +18,115 @@
 from __future__ import unicode_literals
 import unittest
 import webnotes
-import webnotes.model
-from webnotes.model.doclist import DocList
-from webnotes.utils import nowdate
-
-company = webnotes.conn.get_default("company")
-abbr = webnotes.conn.get_value("Company", company, "abbr")
-
-def load_data():
-	insert_accounts()
-	
-	# create default warehouse
-	if not webnotes.conn.exists("Warehouse", "Default Warehouse"):
-		webnotes.insert({"doctype": "Warehouse", 
-			"warehouse_name": "Default Warehouse",
-			"warehouse_type": "Stores"})
-	
-	# create UOM: Nos.
-	if not webnotes.conn.exists("UOM", "Nos"):
-		webnotes.insert({"doctype": "UOM", "uom_name": "Nos"})
-	
-	from webnotes.tests import insert_test_data
-	# create item groups and items
-	insert_test_data("Item Group", 
-		sort_fn=lambda ig: (ig[0].get('parent_item_group'), ig[0].get('name')))
-	insert_test_data("Item")
-
-	# create supplier type
-	webnotes.insert({"doctype": "Supplier Type", "supplier_type": "Manufacturing"})
-	
-	# create supplier
-	webnotes.insert({"doctype": "Supplier", "supplier_name": "East Wind Inc.",
-		"supplier_type": "Manufacturing", "company": company})
-		
-	# create default cost center if not exists
-	if not webnotes.conn.exists("Cost Center", "Default Cost Center - %s" % abbr):
-		webnotes.insert({"doctype": "Cost Center", "group_or_ledger": "Ledger",
-			"cost_center_name": "Default Cost Center", 
-			"parent_cost_center": "Root - %s" % abbr,
-			"company_name": company})
-		
-	# create account heads for taxes
-	
-	webnotes.insert({"doctype": "Account", "account_name": "Shipping Charges",
-		"parent_account": "Stock Expenses - %s" % abbr, "company": company,
-		"group_or_ledger": "Ledger"})
-		
-	webnotes.insert({"doctype": "Account", "account_name": "Customs Duty",
-		"parent_account": "Stock Expenses - %s" % abbr, "company": company,
-		"group_or_ledger": "Ledger"})
-	webnotes.insert({"doctype": "Account", "account_name": "_Test Tax Assets",
-		"parent_account": "Current Assets - %s" % abbr, "company": company,
-		"group_or_ledger": "Group"})
-	webnotes.insert({"doctype": "Account", "account_name": "VAT - Test",
-		"parent_account": "_Test Tax Assets - %s" % abbr, "company": company,
-		"group_or_ledger": "Ledger"})
-		
-	# create BOM
-	# webnotes.insert(DocList([
-	# 	{"doctype": "BOM", "item": "Nebula 7", "quantity": 1,
-	# 		"is_active": "Yes", "is_default": 1, "uom": "Nos"},
-	# 	{"doctype": "BOM Operation", "operation_no": 1, "parentfield": "bom_operations",
-	# 		"opn_description": "Development"}, 
-	# 	{"doctype": "BOM Item", "item_code": "Android Jack D", "operation_no": 1, "qty": 5, 
-	# 		"rate": 20, "amount": 100, "stock_uom": "Nos", "parentfield": "bom_materials"}
-	# ]))
-
-
-base_purchase_receipt = [
-	{
-		"doctype": "Purchase Receipt", "supplier": "East Wind Inc.",
-		"naming_series": "PR", "posting_date": nowdate(), "posting_time": "12:05",
-		"company": company, "fiscal_year": webnotes.conn.get_default("fiscal_year"), 
-		"currency": webnotes.conn.get_default("currency"), "conversion_rate": 1
-	},
-	{
-		"doctype": "Purchase Receipt Item", 
-		"item_code": "Home Desktop 100",
-		"qty": 10, "received_qty": 10, "rejected_qty": 0, "purchase_rate": 50, 
-		"amount": 500, "warehouse": "Default Warehouse",
-		"parentfield": "purchase_receipt_details",
-		"conversion_factor": 1, "uom": "Nos", "stock_uom": "Nos"
-	},
-	{
-		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "Shipping Charges - %s" % abbr, "rate": 100, "tax_amount": 100,
-		"category": "Valuation and Total", "parentfield": "purchase_tax_details",
-		"cost_center": "Default Cost Center - %s" % abbr
-	}, 
-	{
-		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "VAT - Test - %s" % abbr, "rate": 120, "tax_amount": 120,
-		"category": "Total", "parentfield": "purchase_tax_details"
-	},
-	{
-		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "Customs Duty - %s" % abbr, "rate": 150, "tax_amount": 150,
-		"category": "Valuation", "parentfield": "purchase_tax_details",
-		"cost_center": "Default Cost Center - %s" % abbr
-	}
-]
-
-def insert_accounts():
-	for d in webnotes.conn.sql("""select name, abbr from tabCompany""", as_dict=1):
-		acc_list = [
-			make_account_dict('Stock Assets', 'Current Assets', d, 'Group'),
-				make_account_dict('Stock In Hand', 'Stock Assets', d, 'Ledger'),
-				make_account_dict('Stock Delivered But Not Billed', 'Stock Assets', 
-					d, 'Ledger'),
-			make_account_dict('Stock Liabilities', 'Current Liabilities', d, 'Group'),
-				make_account_dict('Stock Received But Not Billed', 'Stock Liabilities',
-				 	d, 'Ledger'),
-			make_account_dict('Stock Expenses', 'Direct Expenses', d, 'Group'),
-				make_account_dict('Stock Variance', 'Stock Expenses', d, 'Ledger'),
-				make_account_dict('Expenses Included In Valuation', 'Stock Expenses', 
-					d, 'Ledger'),
-		]
-		for acc in acc_list:
-			acc_name = "%s - %s" % (acc['account_name'], d['abbr'])
-			if not webnotes.conn.exists('Account', acc_name):
-				webnotes.insert(acc)
-						
-def make_account_dict(account, parent, company_detail, group_or_ledger):
-	return {
-		"doctype": "Account",
-		"account_name": account,
-		"parent_account": "%s - %s" % (parent, company_detail['abbr']),
-		"company": company_detail['name'],
-		"group_or_ledger": group_or_ledger
-	}
-
+import webnotes.defaults
+from webnotes.utils import cint
 
 class TestPurchaseReceipt(unittest.TestCase):
-	def setUp(self):
-		webnotes.conn.begin()
-		load_data()
-		webnotes.conn.set_value("Global Defaults", None, "automatic_inventory_accounting", 1)
+	def test_purchase_receipt_no_gl_entry(self):
+		pr = webnotes.bean(copy=test_records[0])
+		pr.run_method("calculate_taxes_and_totals")
+		pr.insert()
+		pr.submit()
 		
-	def test_purchase_receipt(self):
-		# warehouse does not have stock in hand specified
-		self.run_purchase_receipt_test(base_purchase_receipt,
-			"Stock In Hand - %s" % (abbr,), 
-			"Stock Received But Not Billed - %s" % (abbr,), 750.0)
-	
-	def run_purchase_receipt_test(self, purchase_receipt, debit_account, 
-			credit_account, stock_value):
-		dl = webnotes.insert(DocList(purchase_receipt))
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
+			order by account desc""", pr.doc.name, as_dict=1)
+			
+		self.assertTrue(not gl_entries)
 		
-		from controllers.tax_controller import TaxController
-		tax_controller = TaxController(dl.doc, dl.doclist)
-		tax_controller.item_table_field = "purchase_receipt_details"
-		tax_controller.calculate_taxes_and_totals()
-		dl.doc = tax_controller.doc
-		dl.doclist = tax_controller.doclist
+	def test_purchase_receipt_gl_entry(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
-		dl.submit()
-		dl.load_from_db()
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
 		
-		gle = webnotes.conn.sql("""select account, ifnull(debit, 0), ifnull(credit, 0)
-			from `tabGL Entry` where voucher_no = %s""", dl.doclist[0].name)
+		pr = webnotes.bean(copy=test_records[0])
+		pr.run_method("calculate_taxes_and_totals")
+		pr.insert()
+		pr.submit()
 		
-		gle_map = dict(((entry[0], entry) for entry in gle))
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
+			order by account desc""", pr.doc.name, as_dict=1)
+			
+		self.assertTrue(gl_entries)
 		
-		self.assertEquals(gle_map[debit_account], (debit_account, stock_value, 0.0))
-		self.assertEquals(gle_map[credit_account], (credit_account, 0.0, stock_value))
+		stock_in_hand_account = webnotes.conn.get_value("Company", pr.doc.company, 
+			"stock_in_hand_account")
 		
-	def atest_subcontracting(self):
-		pr = base_purchase_receipt.copy()
-		pr[1].update({"item_code": "Nebula 7"})
+		expected_values = [
+			[stock_in_hand_account, 750.0, 0.0],
+			["Stock Received But Not Billed - _TC", 0.0, 750.0]
+		]
 		
-		self.run_purchase_receipt_test(pr, 
-			"Stock In Hand - %s" % (abbr,), 
-			"Stock Received But Not Billed - %s" % (abbr,), 1750.0)
-		
-	def tearDown(self):
-		webnotes.conn.rollback()
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+			
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+
+test_records = [
+	[
+		{
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"doctype": "Purchase Receipt", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"posting_date": "2013-02-12", 
+			"posting_time": "15:33:30", 
+			"supplier": "_Test Supplier",
+			"net_total": 500.0, 
+			"grand_total": 720.0,
+		}, 
+		{
+			"conversion_factor": 1.0, 
+			"description": "_Test Item", 
+			"doctype": "Purchase Receipt Item", 
+			"item_code": "_Test Item", 
+			"item_name": "_Test Item", 
+			"parentfield": "purchase_receipt_details", 
+			"received_qty": 10.0,
+			"qty": 10.0,
+			"rejected_qty": 0.0,
+			"import_rate": 50.0,
+			"amount": 500.0,
+			"warehouse": "_Test Warehouse", 
+			"stock_uom": "Nos", 
+			"uom": "_Test UOM",
+		},
+		{
+			"account_head": "_Test Account Shipping Charges - _TC", 
+			"add_deduct_tax": "Add", 
+			"category": "Valuation and Total", 
+			"charge_type": "Actual", 
+			"description": "Shipping Charges", 
+			"doctype": "Purchase Taxes and Charges", 
+			"parentfield": "purchase_tax_details",
+			"rate": 100.0,
+			"tax_amount": 100.0,
+		},
+		{
+			"account_head": "_Test Account VAT - _TC", 
+			"add_deduct_tax": "Add", 
+			"category": "Total", 
+			"charge_type": "Actual", 
+			"description": "VAT", 
+			"doctype": "Purchase Taxes and Charges", 
+			"parentfield": "purchase_tax_details",
+			"rate": 120.0,
+			"tax_amount": 120.0,
+		},
+		{
+			"account_head": "_Test Account Customs Duty - _TC", 
+			"add_deduct_tax": "Add", 
+			"category": "Valuation", 
+			"charge_type": "Actual", 
+			"description": "Customs Duty", 
+			"doctype": "Purchase Taxes and Charges", 
+			"parentfield": "purchase_tax_details",
+			"rate": 150.0,
+			"tax_amount": 150.0,
+		},
+	],
+]

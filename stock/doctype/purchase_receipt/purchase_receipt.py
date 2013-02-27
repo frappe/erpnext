@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt
+from webnotes.utils import cstr, flt, cint
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -92,11 +92,12 @@ class DocType(BuyingController):
 
 	# update valuation rate
 	def update_valuation_rate(self):
-		total_b_cost = flt(self.doc.buying_cost_transport) + flt(self.doc.buying_cost_taxes) + flt(self.doc.buying_cost_other)
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if flt(self.doc.net_total) and flt(d.qty):
-				#d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty))) / flt(d.conversion_factor)
-				d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if d.qty:
+				d.valuation_rate = (flt(d.purchase_rate) + flt(d.item_tax_amount)/flt(d.qty)
+					+ flt(d.rm_supp_cost) / flt(d.qty)) / flt(d.conversion_factor)
+			else:
+				d.valuation_rate = 0.0
 
 	#check in manage account if purchase order required or not.
 	# ====================================================================================
@@ -263,11 +264,9 @@ class DocType(BuyingController):
 
 		# Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, 1)
+		
+		self.make_gl_entries()
 
-
-
-	#On Cancel
-	#----------------------------------------------------------------------------------------------------
 	def check_next_docstatus(self):
 		submit_rv = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
@@ -301,10 +300,10 @@ class DocType(BuyingController):
 
 		# 6. Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, 0)
+		
+		self.make_gl_entries()
 
 
-#----------- code for Sub-contracted Items -------------------
-	#--------check for sub-contracted items and accordingly update PR raw material detail table--------
 	def update_rw_material_detail(self):
 
 		for d in getlist(self.doclist,'purchase_receipt_details'):
@@ -431,3 +430,44 @@ class DocType(BuyingController):
 	
 	def get_purchase_tax_details(self):
 		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
+		
+	def make_gl_entries(self):
+		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+			return
+		
+		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+		stock_received_account = "Stock Received But Not Billed - %s" % (abbr,)
+		stock_in_hand_account = self.get_stock_in_hand_account()
+		
+		total_valuation_amount = self.get_total_valuation_amount()
+		
+		if total_valuation_amount:
+			gl_entries = [
+				# debit stock in hand account
+				self.get_gl_dict({
+					"account": stock_in_hand_account,
+					"against": stock_received_account,
+					"debit": total_valuation_amount,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+			
+				# credit stock received but not billed account
+				self.get_gl_dict({
+					"account": stock_received_account,
+					"against": stock_in_hand_account,
+					"credit": total_valuation_amount,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+			]
+			from accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+		
+	def get_total_valuation_amount(self):
+		total_valuation_amount = 0.0
+		
+		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if item.item_code in self.stock_items:
+				total_valuation_amount += flt(item.valuation_rate) * \
+					flt(item.qty) * flt(item.conversion_factor)
+
+		return total_valuation_amount
