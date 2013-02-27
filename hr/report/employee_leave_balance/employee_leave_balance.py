@@ -4,17 +4,19 @@ from webnotes.widgets.reportview import execute as runreport
 
 def execute(filters=None):
 	if not filters: filters = {}
-	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"])
+	
+	employee_filters = filters.get("company") and \
+		[["Employee", "company", "=", filters.get("company")]] or None
+	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
+		filters=employee_filters)
 	leave_types = webnotes.conn.sql_list("select name from `tabLeave Type`")
 	
 	if filters.get("fiscal_year"):
 		fiscal_years = [filters["fiscal_year"]]
 	else:
 		fiscal_years = webnotes.conn.sql_list("select name from `tabFiscal Year` order by name desc")
-
-	employee_in = '", "'.join([e.name for e in employees])
-	
 		
+	employee_in = '", "'.join([e.name for e in employees])
 	
 	allocations = webnotes.conn.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
 	 	from `tabLeave Allocation` 
