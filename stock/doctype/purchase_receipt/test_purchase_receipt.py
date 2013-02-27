@@ -36,7 +36,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 	def test_purchase_receipt_gl_entry(self):
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
 		
 		pr = webnotes.bean(copy=test_records[0])
@@ -47,7 +46,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
 			order by account desc""", pr.doc.name, as_dict=1)
-			
 		self.assertTrue(gl_entries)
 		
 		stock_in_hand_account = webnotes.conn.get_value("Company", pr.doc.company, 
@@ -64,6 +62,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEquals(expected_values[i][2], gle.credit)
 			
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		
+	def test_subcontracting(self):
+		pr = webnotes.bean(copy=test_records[1])
+		pr.run_method("calculate_taxes_and_totals")
+		pr.insert()
+		
+		self.assertEquals(pr.doclist[1].rm_supp_cost, 70000.0)
+		self.assertEquals(len(pr.doclist.get({"parentfield": "pr_raw_material_details"})), 2)
+
+
+test_dependencies = ["BOM"]
 
 test_records = [
 	[
@@ -128,5 +137,37 @@ test_records = [
 			"rate": 150.0,
 			"tax_amount": 150.0,
 		},
+	],
+	[
+		{
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"doctype": "Purchase Receipt", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"posting_date": "2013-02-12", 
+			"posting_time": "15:33:30", 
+			"is_subcontracted": "Yes",
+			"supplier_warehouse": "_Test Warehouse", 
+			"supplier": "_Test Supplier",
+			"net_total": 5000.0, 
+			"grand_total": 5000.0,
+		}, 
+		{
+			"conversion_factor": 1.0, 
+			"description": "_Test FG Item", 
+			"doctype": "Purchase Receipt Item", 
+			"item_code": "_Test FG Item", 
+			"item_name": "_Test FG Item", 
+			"parentfield": "purchase_receipt_details", 
+			"received_qty": 10.0,
+			"qty": 10.0,
+			"rejected_qty": 0.0,
+			"import_rate": 500.0,
+			"amount": 5000.0,
+			"warehouse": "_Test Warehouse", 
+			"stock_uom": "Nos", 
+			"uom": "_Test UOM",
+		}
 	],
 ]

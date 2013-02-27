@@ -87,3 +87,10 @@ class AccountsController(TransactionBase):
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._stock_items
+		
+	@property
+	def company_abbr(self):
+		if not hasattr(self, "_abbr"):
+			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+			
+		return self._abbr

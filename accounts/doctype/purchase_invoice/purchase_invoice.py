@@ -35,7 +35,7 @@ class DocType(BuyingController):
 		self.fname = 'entries'
 
 	def get_credit_to(self):
-		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.get_company_abbr(),self.doc.supplier))		
+		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.company_abbr,self.doc.supplier))		
 
 		ret = {}
 		if acc_head and acc_head[0][0]:
@@ -54,20 +54,32 @@ class DocType(BuyingController):
 			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
 			
 		return ret
-
-	def get_default_values(self,args):
-		import json
-		args = json.loads(args)
-		ret = {}
-		if sql("select name from `tabItem` where name = '%s'" % args['item_code']):
-			if not args['expense_head'] or args['expense_head'] == 'undefined':
-				expense_head = sql("select name from `tabAccount` where account_name in (select purchase_account from `tabItem` where name = '%s')" % args['item_code'])
-				ret['expense_head'] = expense_head and expense_head[0][0] or ''
-			if not args['cost_center'] or args['cost_center'] == 'undefined':
-				cost_center = sql("select cost_center from `tabItem` where name = '%s'" % args['item_code'])
-				ret['cost_center'] = cost_center and cost_center[0][0] or ''
-		return ret
-		 
+		
+	def get_default_values(self, args):
+		if isinstance(args, basestring):
+			import json
+			args = json.loads(args)
+		
+		out = webnotes._dict()
+		
+		item = webnotes.conn.sql("""select name, purchase_account, cost_center,
+			is_stock_item from `tabItem` where name=%s""", args.get("item_code"), as_dict=1)
+		
+		if item and item[0]:
+			item = item[0]
+			
+			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) and \
+				item.is_stock_item == "Yes":
+					# unset expense head for stock item and auto inventory accounting
+					out.expense_head = out.cost_center = None
+			else:
+				if not args.get("expense_head"):
+					out.expense_head = item.purchase_account
+				if not args.get("cost_center"):
+					out.cost_center = item.cost_center
+		
+		return out
+			
 	def pull_details(self):
 		if self.doc.purchase_receipt_main:
 			self.validate_duplicate_docname('purchase_receipt')
@@ -86,9 +98,7 @@ class DocType(BuyingController):
 	def get_expense_account(self, doctype):
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
-				item = webnotes.conn.sql("select purchase_account, cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-				d.expense_head = item and item[0]['purchase_account'] or ''
-				d.cost_center = item and item[0]['cost_center'] or ''
+				d.fields.update(self.get_default_values(d.fields))
 
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.credit_to, 
@@ -109,9 +119,6 @@ class DocType(BuyingController):
 		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
-
-	def get_company_abbr(self):
-		return sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 
 	def validate_duplicate_docname(self,doctype):
 		for d in getlist(self.doclist, 'entries'): 
@@ -186,7 +193,7 @@ class DocType(BuyingController):
 		if self.doc.supplier and self.doc.credit_to:
 			acc_head = sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.get_company_abbr())):
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
 				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
 				
 	# Check for Stopped PO
@@ -256,11 +263,25 @@ class DocType(BuyingController):
 			raise Exception
 			
 	def set_against_expense_account(self):
-		against_acc = []
-		for d in getlist(self.doclist, 'entries'):
-			if d.expense_account not in against_acc:
-				against_acc.append(d.expense_account)
-		self.doc.against_expense_account = ','.join(against_acc)
+		auto_inventory_accounting = \
+			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
+		stock_not_billed_account = "Stock Received But Not Billed - %s" % self.company_abbr
+		
+		against_accounts = []
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if auto_inventory_accounting and item.item_code in self.stock_items:
+				# in case of auto inventory accounting, against expense account is always
+				# Stock Received But Not Billed for a stock item
+				item.expense_head = item.cost_center = None
+				
+				if stock_not_billed_account not in against_accounts:
+					against_accounts.append(stock_not_billed_account)
+			
+			elif item.expense_head not in against_accounts:
+				# if no auto_inventory_accounting or not a stock item
+				against_accounts.append(item.expense_head)
+				
+		self.doc.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
 		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'po_required'")
@@ -320,6 +341,8 @@ class DocType(BuyingController):
 		 	self.doc.posting_date,'Posting Date')
 		
 		self.validate_write_off_account()
+		self.update_raw_material_cost()
+		self.update_valuation_rate("entries")
 
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
@@ -382,11 +405,10 @@ class DocType(BuyingController):
 
 	def make_gl_entries(self, is_cancel = 0):
 		from accounts.general_ledger import make_gl_entries
+		auto_inventory_accounting = \
+			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
+		
 		gl_entries = []
-		valuation_tax = 0
-		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
-		 	"auto_inventory_accounting")
-		abbr = self.get_company_abbr()
 		
 		# parent's gl entry
 		if self.doc.grand_total:
@@ -402,11 +424,9 @@ class DocType(BuyingController):
 			)
 	
 		# tax table gl entries
-		for tax in getlist(self.doclist, "purchase_tax_details"):
+		valuation_tax = 0
+		for tax in self.doclist.get({"parentfield": "purchase_tax_details"}):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
-				valuation_tax += tax.add_deduct_tax == "Add" \
-					and flt(tax.tax_amount) or -1 * flt(tax.tax_amount)
-				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
@@ -417,25 +437,31 @@ class DocType(BuyingController):
 						"cost_center": tax.cost_center
 					}, is_cancel)
 				)
+			
+			# accumulate valuation tax
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				valuation_tax += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
-		stock_item_and_auto_accounting = False
+		stock_item_and_auto_inventory_accounting = False
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_inventory_accounting and flt(item.valuation_rate) and \
-					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
-				# if auto inventory accounting enabled and stock item, 
-				# then do stock related gl entries, expense will be booked in sales invoice
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": "Stock Received But Not Billed - %s" % (abbr,),
-						"against": self.doc.credit_to,
-						"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
-							*  item.qty,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock"
-					}, is_cancel)
-				)
-			
-				stock_item_and_auto_accounting = True
+			if auto_inventory_accounting and item.item_code in self.stock_items:
+				if flt(item.valuation_rate):
+					# if auto inventory accounting enabled and stock item, 
+					# then do stock related gl entries
+					# expense will be booked in sales invoice
+					
+					stock_item_and_auto_inventory_accounting = True
+					
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": "Stock Received But Not Billed - %s" % (self.company_abbr,),
+							"against": self.doc.credit_to,
+							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
+								*  flt(item.qty),
+							"remarks": self.doc.remarks or "Accounting Entry for Stock"
+						}, is_cancel)
+					)
 			
 			elif flt(item.amount):
 				# if not a stock item or auto inventory accounting disabled, book the expense
@@ -449,13 +475,13 @@ class DocType(BuyingController):
 					}, is_cancel)
 				)
 				
-		if stock_item_and_auto_accounting and valuation_tax:
+		if stock_item_and_auto_inventory_accounting and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": "Expenses Included In Valuation - %s" % (abbr,),
-					"cost_center": "ERP - %s" % abbr, # to-do
+					"account": "Expenses Included In Valuation - %s" % (self.company_abbr,),
+					"cost_center": "Auto Inventory Accounting - %s" % self.company_abbr,
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock"
@@ -464,12 +490,12 @@ class DocType(BuyingController):
 		
 		# writeoff account includes petty difference in the invoice amount 
 		# and the amount that is paid
-		if self.doc.write_off_account and self.doc.write_off_amount:
+		if self.doc.write_off_account and flt(self.doc.write_off_amount):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.doc.write_off_account,
 					"against": self.doc.credit_to,
-					"credit": self.doc.write_off_amount,
+					"credit": flt(self.doc.write_off_amount),
 					"remarks": self.doc.remarks,
 					"cost_center": self.doc.write_off_cost_center
 				}, is_cancel)
@@ -477,7 +503,6 @@ class DocType(BuyingController):
 		
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=is_cancel)
-
 
 	def check_next_docstatus(self):
 		submit_jv = sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_voucher = '%s' and t1.docstatus = 1" % (self.doc.name))
@@ -493,4 +518,16 @@ class DocType(BuyingController):
 
 	def on_update(self):
 		pass
-
+	def update_raw_material_cost(self):
+		if self.sub_contracted_items:
+			for d in self.doclist.get({"parentfield": "entries"}):
+				rm_cost = webnotes.conn.sql(""" select raw_material_cost / quantity 
+					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
+					and is_active = 1 """, (d.item_code,))
+				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
+			
+				d.conversion_factor = d.conversion_factor or webnotes.conn.get_value(
+					"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
+					"conversion_factor") or 1
+			
+				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)

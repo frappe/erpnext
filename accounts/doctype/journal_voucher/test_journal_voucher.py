@@ -26,7 +26,6 @@ test_records = [[
 		"fiscal_year": "_Test Fiscal Year 2013", 
 		"naming_series": "_T-Journal Voucher-",
 		"posting_date": "2013-02-14", 
-		"tds_applicable": "No",
 		"user_remark": "test",
 		"voucher_type": "Bank Voucher",
 		"cheque_no": "33",

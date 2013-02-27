@@ -21,6 +21,11 @@ wn.module_page["Projects"] = [
 				description: wn._("Timesheet for tasks."),
 				doctype:"Timesheet"
 			},
+			{
+				label: wn._("Time Log"),
+				description: wn._("Time Log for tasks."),
+				doctype:"Time Log"
+			},
 		]
 	},
 	{

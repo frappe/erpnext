@@ -1,8 +1,14 @@
 erpnext.updates = [
+	["27th February", [
+		"Time Log: Created Time Log System, with Calendar View."
+	]],
 	["26th February", [
 		"Gross Profit: The report has been rewritten and now it is under Accounts module"
-	]
-	],
+	]],
+	["25th February", [
+		"Employee Leave Balance: New Report",
+		"Scripted Reports: Ability to create reports via Script",
+	]],
 	["21st February, 2013", [
 		"Item: Warehouse-wise Re-order Level and Quantity",
 		"Buying: Purchase Request renamed to Material Request"

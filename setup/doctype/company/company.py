@@ -211,6 +211,12 @@ class DocType:
 				'company_name':self.doc.name,
 				'group_or_ledger':'Ledger',
 				'parent_cost_center':'Root - ' + self.doc.abbr
+			},
+			{
+				'cost_center_name': 'Auto Inventory Accounting', 
+				'company_name': self.doc.name,
+				'group_or_ledger': 'Ledger',
+				'parent_cost_center': 'Root - ' + self.doc.abbr
 			}
 		]
 		for cc in cc_list:

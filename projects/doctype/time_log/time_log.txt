@@ -1,0 +1,121 @@
+[
+ {
+  "creation": "2013-02-26 14:58:28", 
+  "docstatus": 0, 
+  "modified": "2013-02-26 16:09:53", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "TL-.######", 
+  "description": "Log of Activities performed by users against Tasks that can be used for tracking time, billing.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Time Log", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Time Log", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Time Log"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_time", 
+  "fieldtype": "Datetime", 
+  "label": "From Time", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_time", 
+  "fieldtype": "Datetime", 
+  "label": "To Time", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "activity_type", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Activity Type", 
+  "options": "Activity Type", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "task", 
+  "fieldtype": "Link", 
+  "label": "Task", 
+  "options": "Task"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "billable", 
+  "fieldtype": "Check", 
+  "label": "Billable"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_7", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "note", 
+  "fieldtype": "Text Editor", 
+  "label": "Note"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_9", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Project", 
+  "options": "Project"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_invoice", 
+  "fieldtype": "Link", 
+  "label": "Sales Invoice", 
+  "options": "Sales Invoice"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "match": "owner", 
+  "role": "Projects User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Projects Manager"
+ }
+]

@@ -232,7 +232,7 @@ class BuyingController(AccountsController):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total,
 				self.precision.main.grand_total)
-			self.doc.grand_total_print = flt(
+			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
 				self.precision.main.grand_total_import)
 
@@ -250,7 +250,9 @@ class BuyingController(AccountsController):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus == 0:
 			self.doc.total_advance = flt(self.doc.total_advance,
 				self.precision.main.total_advance)
-			self.doc.outstanding_amount = flt(self.doc.grand_total - self.doc.total_advance,
+			self.doc.total_amount_to_pay = flt(self.doc.grand_total - flt(self.doc.write_off_amount,
+				self.precision.main.write_off_amount), self.precision.main.total_amount_to_pay)
+			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
 				self.precision.main.outstanding_amount)
 			
 	def _cleanup(self):
@@ -325,6 +327,16 @@ class BuyingController(AccountsController):
 				item.item_code in self.stock_items:
 			item.item_tax_amount += flt(current_tax_amount,
 				self.precision.item.item_tax_amount)
+				
+	# update valuation rate
+	def update_valuation_rate(self, parentfield):
+		for d in self.doclist.get({"parentfield": parentfield}):
+			if d.qty:
+				d.valuation_rate = (flt(d.purchase_rate or d.rate)
+					+ (flt(d.item_tax_amount) + flt(d.rm_supp_cost)) / flt(d.qty)
+					) / flt(d.conversion_factor)
+			else:
+				d.valuation_rate = 0.0
 	
 	@property
 	def precision(self):
@@ -336,3 +348,25 @@ class BuyingController(AccountsController):
 				self._precision.tax = self.meta.get_precision_map(parentfield = \
 					"purchase_tax_details")
 		return self._precision
+
+	@property
+	def sub_contracted_items(self):
+		if not hasattr(self, "_sub_contracted_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._sub_contracted_items
+		
+	@property
+	def purchase_items(self):
+		if not hasattr(self, "_purchase_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._purchase_items
