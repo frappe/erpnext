@@ -1,0 +1,23 @@
+{
+ "Action Detail": "Aktion Details", 
+ "Action html": "Aktion html", 
+ "Active": "Aktiv", 
+ "Define Rule": "Definieren Rule", 
+ "Enter message": "Geben Sie eine Nachricht", 
+ "Extra Condition": "Zus\u00e4tzliche Zustand", 
+ "Inactive": "Inaktiv", 
+ "Intro HTML": "Intro HTML", 
+ "No": "Auf", 
+ "Raise Exception": "Raise Exception", 
+ "Reject HTML": "Ablehnen HTML", 
+ "Rule Definition": "Rule Definition", 
+ "Rule Name": "Name der Regel", 
+ "Rule Priority": "Priority Rule", 
+ "Rule Status": "Rule-Status", 
+ "Select Form": "W\u00e4hlen Sie Formular", 
+ "Setup": "Setup", 
+ "Workflow Action Details": "Workflow Action Details", 
+ "Workflow Rule": "Workflow-Regel", 
+ "Workflow Rule Details": "Workflow Regeldetails", 
+ "Yes": "Ja"
+}

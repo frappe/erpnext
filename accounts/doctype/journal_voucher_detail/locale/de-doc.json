@@ -1,0 +1,16 @@
+{
+ "Account": "Konto", 
+ "Account Balance": "Kontostand", 
+ "Accounts": "Konten", 
+ "Against Account": "Vor Konto", 
+ "Against Journal Voucher": "Vor Journal Gutschein", 
+ "Against Purchase Invoice": "Vor Kaufrechnung", 
+ "Against Sales Invoice": "Vor Sales Invoice", 
+ "Cost Center": "Kostenstellenrechnung", 
+ "Credit": "Kredit", 
+ "Debit": "Soll", 
+ "Is Advance": "Ist Advance", 
+ "Journal Voucher Detail": "Journal Voucher Detail", 
+ "No": "Auf", 
+ "Yes": "Ja"
+}

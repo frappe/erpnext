@@ -1,0 +1,10 @@
+{
+ "BOM Replace Tool": "BOM Replace Tool", 
+ "Current BOM": "Aktuelle St\u00fcckliste", 
+ "Manufacturing": "Herstellung", 
+ "New BOM": "New BOM", 
+ "Replace": "Ersetzen", 
+ "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Ersetzen Sie die insbesondere gut in allen anderen St\u00fccklisten, wo sie verwendet wird. Es wird die alte BOM Link zu ersetzen, aktualisieren kosten und regenerieren \"Explosion St\u00fccklistenposition\" Tabelle pro neuen GOOD", 
+ "The BOM which will be replaced": "Die St\u00fcckliste, die ersetzt werden", 
+ "The new BOM after replacement": "Der neue BOM nach dem Austausch"
+}

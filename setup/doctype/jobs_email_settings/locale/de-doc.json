@@ -1,0 +1,16 @@
+{
+ "Check to activate": "\u00dcberpr\u00fcfen Sie aktivieren", 
+ "Email Id": "Email Id", 
+ "Email Id where a job applicant will email e.g. \"jobs@example.com\"": "Email Id, wo ein Bewerber beispielsweise per E-Mail wird \"Jobs@example.com\"", 
+ "Email settings for jobs email id \"jobs@example.com\"": "E-Mail-Einstellungen f\u00fcr Jobs email id \"jobs@example.com\"", 
+ "Extract Emails": "Auszug Emails", 
+ "Host": "Gastgeber", 
+ "Jobs Email Settings": "Jobs per E-Mail Einstellungen", 
+ "POP3 Mail Settings": "POP3-Mail-Einstellungen", 
+ "POP3 server e.g. (pop.gmail.com)": "POP3-Server beispielsweise (pop.gmail.com)", 
+ "Password": "Kennwort", 
+ "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"": "Einstellungen f\u00fcr Bewerber aus einer Mailbox zB \"jobs@example.com\" extrahieren", 
+ "Setup": "Setup", 
+ "Use SSL": "Verwenden Sie SSL", 
+ "Username": "Benutzername"
+}

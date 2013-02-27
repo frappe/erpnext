@@ -1,0 +1,21 @@
+{
+ "Account Head": "Konto Leiter", 
+ "Accounts": "Konten", 
+ "Actual": "Tats\u00e4chlich", 
+ "Amount": "Menge", 
+ "Cost Center": "Kostenstellenrechnung", 
+ "Description": "Beschreibung", 
+ "Enter Row": "Geben Row", 
+ "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount": "Wenn aktiviert, wird der Steuerbetrag als bereits in der Print Rate / Print Menge aufgenommen werden", 
+ "Is this Tax included in Basic Rate?": "Wird diese Steuer in Basic Rate inbegriffen?", 
+ "On Net Total": "On Net Total", 
+ "On Previous Row Amount": "Auf Previous Row Betrag", 
+ "On Previous Row Total": "Auf Previous Row insgesamt", 
+ "Parenttype": "ParentType", 
+ "Rate": "Rate", 
+ "Sales Taxes and Charges": "Vertrieb Steuern und Abgaben", 
+ "Total": "Gesamt", 
+ "Total Amount": "Gesamtbetrag", 
+ "Total Tax Amount": "Total Tax Amount", 
+ "Type": "Typ"
+}

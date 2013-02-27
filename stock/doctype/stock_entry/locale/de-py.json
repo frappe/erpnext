@@ -1,0 +1,14 @@
+{
+ "Atleast one warehouse is mandatory": "Mindestens eines Lagers ist obligatorisch", 
+ "Hence, maximum allowed Manufacturing Quantity": "Daher maximal erlaubte Menge Fertigung", 
+ "Item": "Artikel", 
+ "Item: '": "Item: \"", 
+ "Manufacturing Quantity": "Fertigung Menge", 
+ "Material Request": "Material anfordern", 
+ "Production Order": "Fertigungsauftrag", 
+ "Quantity already manufactured": "Bereits Menge hergestellt", 
+ "Row #": "Zeile #", 
+ "Source Warehouse": "Quelle Warehouse", 
+ "Source and Target Warehouse cannot be same": "Quelle und Ziel Warehouse kann nicht gleichzeitig", 
+ "Target Warehouse": "Ziel Warehouse"
+}

@@ -1,6 +1,7 @@
 [
  "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
  "Qty To Manufacture", 
+ "Draft", 
  "Use Multi-Level BOM", 
  "Status", 
  "Project Name", 
@@ -24,7 +25,6 @@
  "Manufactured quantity will be updated in this warehouse", 
  "Item To Manufacture", 
  "Manufacture against Sales Order", 
- "Draft", 
  "Sales Order", 
  "Completed"
 ]

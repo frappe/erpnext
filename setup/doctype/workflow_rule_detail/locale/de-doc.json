@@ -1,0 +1,18 @@
+{
+ "Field": "Feld", 
+ "Field from other forms": "Feld von anderen Formen", 
+ "Message when Cond. False": "Nachricht Wenn Cond. Falsch", 
+ "No": "Auf", 
+ "Operator": "Operator", 
+ "Raise Exception": "Raise Exception", 
+ "Setup": "Setup", 
+ "Value": "Wert", 
+ "Workflow Rule Detail": "Workflow Rule Details", 
+ "Yes": "Ja", 
+ "equal": "gleich", 
+ "greater than": "gr\u00f6\u00dfer als", 
+ "greater than equal": "gr\u00f6\u00dfer gleich", 
+ "less than": "weniger als", 
+ "less than equal": "weniger als gleich", 
+ "not equal": "ungleich"
+}

@@ -1,0 +1,18 @@
+{
+ "Brand": "Marke", 
+ "Description": "Beschreibung", 
+ "Item Code": "Item Code", 
+ "Item Group": "Artikel-Gruppe", 
+ "Item Name": "Item Name", 
+ "Lead Time Date": "Lead Time Datum", 
+ "Material Request Item": "Material anfordern Artikel", 
+ "Min Order Qty": "Mindestbestellmenge", 
+ "Page Break": "Seitenwechsel", 
+ "Projected Qty": "Prognostizierte Anzahl", 
+ "Quantity": "Menge", 
+ "Required Date": "Erforderlich Datum", 
+ "Sales Order No": "In Sales Order", 
+ "Stock": "Lager", 
+ "Stock UOM": "Lager UOM", 
+ "Warehouse": "Lager"
+}

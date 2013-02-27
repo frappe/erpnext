@@ -1,0 +1,16 @@
+{
+ "Amount": "Menge", 
+ "BOM Detail No": "BOM Detailaufnahme", 
+ "Buying": "Kauf", 
+ "Consumed Qty": "Verbrauchte Menge", 
+ "Conversion Factor": "Umrechnungsfaktor", 
+ "Current Stock": "Aktuelle Stock", 
+ "Description": "Beschreibung", 
+ "Item Code": "Item Code", 
+ "Purchase Receipt Item Supplied": "Kaufbeleg Liefergegenstand", 
+ "Rate": "Rate", 
+ "Raw Material Item Code": "Artikel Raw Material Code", 
+ "Reference Name": "Reference Name", 
+ "Required Qty": "Erw\u00fcnschte St\u00fcckzahl", 
+ "Stock Uom": "Lager ME"
+}

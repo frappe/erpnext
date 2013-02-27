@@ -1,0 +1,11 @@
+{
+ "Batch": "Stapel", 
+ "Batch Finished Date": "Batch Beendet Datum", 
+ "Batch ID": "Batch ID", 
+ "Batch Started Date": "Batch gestartet Datum", 
+ "Description": "Beschreibung", 
+ "Expiry Date": "Verfallsdatum", 
+ "Item": "Artikel", 
+ "Stock": "Lager", 
+ "Trash Reason": "Trash Reason"
+}

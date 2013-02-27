@@ -1,0 +1,18 @@
+{
+ "Actual Qty": "Tats\u00e4chliche Menge", 
+ "Batch No": "Batch No", 
+ "Delivery Note Packing Item": "Lieferschein Verpackung Artikel", 
+ "Description": "Beschreibung", 
+ "Item Code": "Item Code", 
+ "Item Name": "Item Name", 
+ "Page Break": "Seitenwechsel", 
+ "Parent Detail docname": "Eltern Detailansicht docname", 
+ "Parent Item": "\u00dcbergeordneter Artikel", 
+ "Prevdoc DocType": "Prevdoc DocType", 
+ "Projected Qty": "Prognostizierte Anzahl", 
+ "Qty": "Menge", 
+ "Serial No": "Serial In", 
+ "Stock": "Lager", 
+ "UOM": "UOM", 
+ "Warehouse": "Lager"
+}
