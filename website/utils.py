@@ -253,6 +253,9 @@ def get_outer_env(page_name, args):
 		if k in settings.fields:
 			args[k] = settings.fields.get(k)
 
+	for k in ["facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
+		args[k] = int(args.get(k) or 0)
+		
 	if not args.brand_html:
 		args.brand_html = "ERPNext"
 	if not args.top_bar_background:
