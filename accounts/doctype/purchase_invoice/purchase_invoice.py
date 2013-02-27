@@ -320,6 +320,7 @@ class DocType(BuyingController):
 		 	self.doc.posting_date,'Posting Date')
 		
 		self.validate_write_off_account()
+		self.update_raw_material_cost()
 
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
@@ -494,3 +495,16 @@ class DocType(BuyingController):
 	def on_update(self):
 		pass
 
+	def update_raw_material_cost(self):
+		if self.sub_contracted_items:
+			for d in self.doclist.get({"parentfield": "entries"}):
+				rm_cost = webnotes.conn.sql(""" select raw_material_cost / quantity 
+					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
+					and is_active = 1 """, (d.item_code,))
+				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
+			
+				d.conversion_factor = d.conversion_factor or webnotes.conn.get_value(
+					"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
+					"conversion_factor") or 1
+			
+				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)

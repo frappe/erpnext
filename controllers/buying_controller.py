@@ -232,7 +232,7 @@ class BuyingController(AccountsController):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total,
 				self.precision.main.grand_total)
-			self.doc.grand_total_print = flt(
+			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
 				self.precision.main.grand_total_import)
 
@@ -336,3 +336,25 @@ class BuyingController(AccountsController):
 				self._precision.tax = self.meta.get_precision_map(parentfield = \
 					"purchase_tax_details")
 		return self._precision
+
+	@property
+	def sub_contracted_items(self):
+		if not hasattr(self, "_sub_contracted_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._sub_contracted_items
+		
+	@property
+	def purchase_items(self):
+		if not hasattr(self, "_purchase_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._purchase_items
