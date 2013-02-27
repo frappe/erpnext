@@ -20,11 +20,16 @@ import unittest
 import webnotes
 import webnotes.model
 import json	
+from webnotes.utils import cint
+import webnotes.defaults
 
 test_dependencies = ["Item", "Cost Center"]
 
 class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_without_auto_inventory_accounting(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		self.assertTrue(not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")))
+		
 		wrapper = webnotes.bean(copy=test_records[0])
 		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
@@ -49,7 +54,36 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
 	def test_gl_entries_with_auto_inventory_accounting(self):
+		print "Testing with auto inventory"
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		
 		pi = webnotes.bean(copy=test_records[1])
+		pi.run_method("calculate_taxes_and_totals")
+		pi.insert()
+		pi.submit()
+		
+		print "auto inventory submitted"
+		
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
+			order by account desc""", pi.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
+		
+		expected_values = [
+			["_Test Supplier - _TC", 0, 720],
+			["Stock Received But Not Billed - _TC", 750.0, 0],
+			["_Test Account Shipping Charges - _TC", 100.0, 0],
+			["_Test Account VAT - _TC", 120.0, 0],
+			["Expenses Included In Valuation - _TC", 0, 250.0]
+		].sort()
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+		
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 			
 	def test_purchase_invoice_calculation(self):
 		wrapper = webnotes.bean(copy=test_records[0])
@@ -115,7 +149,8 @@ test_records = [
 			"uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
 			"expense_head": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC"
+			"cost_center": "_Test Cost Center - _TC",
+			"conversion_factor": 1.0,
 		
 		},
 		{
@@ -130,7 +165,8 @@ test_records = [
 			"amount": 750,
 			"uom": "_Test UOM",
 			"expense_head": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC"
+			"cost_center": "_Test Cost Center - _TC",
+			"conversion_factor": 1.0,
 		},
 		# taxes
 		{
@@ -237,7 +273,8 @@ test_records = [
 			"fiscal_year": "_Test Fiscal Year 2013",
 			"company": "_Test Company",
 			"currency": "INR",
-			"conversion_rate": 1,
+			"conversion_rate": 1.0,
+			"grand_total_import": 0 # for feed
 		},
 		# items
 		{
@@ -245,12 +282,46 @@ test_records = [
 			"parentfield": "entries",
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
-			"qty": 10,
-			"import_rate": 50,
+			"qty": 10.0,
+			"import_rate": 50.0,
 			"uom": "_Test UOM",
 			"expense_head": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		
+			"cost_center": "_Test Cost Center - _TC",
+			"conversion_factor": 1.0,
+		},
+		# taxes
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "Actual",
+			"account_head": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Shipping Charges",
+			"category": "Valuation and Total",
+			"add_deduct_tax": "Add",
+			"rate": 100.0
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "Actual",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 120.0
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "Actual",
+			"account_head": "_Test Account Customs Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Customs Duty",
+			"category": "Valuation",
+			"add_deduct_tax": "Add",
+			"rate": 150.0
 		},
 	]
 ]

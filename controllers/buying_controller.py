@@ -232,7 +232,7 @@ class BuyingController(AccountsController):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total,
 				self.precision.main.grand_total)
-			self.doc.grand_total_print = flt(
+			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
 				self.precision.main.grand_total_import)
 
@@ -327,6 +327,16 @@ class BuyingController(AccountsController):
 				item.item_code in self.stock_items:
 			item.item_tax_amount += flt(current_tax_amount,
 				self.precision.item.item_tax_amount)
+				
+	# update valuation rate
+	def update_valuation_rate(self, parentfield):
+		for d in self.doclist.get({"parentfield": parentfield}):
+			if d.qty:
+				d.valuation_rate = (flt(d.purchase_rate or d.rate)
+					+ (flt(d.item_tax_amount) + flt(d.rm_supp_cost)) / flt(d.qty)
+					) / flt(d.conversion_factor)
+			else:
+				d.valuation_rate = 0.0
 	
 	@property
 	def precision(self):

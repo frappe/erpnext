@@ -89,16 +89,6 @@ class DocType(BuyingController):
 				webnotes.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
 			Please enter a valid Challan No.", raise_exception=1)
 
-
-	# update valuation rate
-	def update_valuation_rate(self):
-		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			if d.qty:
-				d.valuation_rate = (flt(d.purchase_rate) + flt(d.item_tax_amount)/flt(d.qty)
-					+ flt(d.rm_supp_cost) / flt(d.qty)) / flt(d.conversion_factor)
-			else:
-				d.valuation_rate = 0.0
-
 	#check in manage account if purchase order required or not.
 	# ====================================================================================
 	def po_required(self):
@@ -134,8 +124,7 @@ class DocType(BuyingController):
 		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)
 
-		# update valuation rate
-		self.update_valuation_rate()
+		self.update_valuation_rate("purchase_receipt_details")
 
 
 	# On Update

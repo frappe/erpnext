@@ -36,7 +36,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 	def test_purchase_receipt_gl_entry(self):
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
 		
 		pr = webnotes.bean(copy=test_records[0])
@@ -47,7 +46,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
 			order by account desc""", pr.doc.name, as_dict=1)
-			
 		self.assertTrue(gl_entries)
 		
 		stock_in_hand_account = webnotes.conn.get_value("Company", pr.doc.company, 
