@@ -250,7 +250,9 @@ class BuyingController(AccountsController):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus == 0:
 			self.doc.total_advance = flt(self.doc.total_advance,
 				self.precision.main.total_advance)
-			self.doc.outstanding_amount = flt(self.doc.grand_total - self.doc.total_advance,
+			self.doc.total_amount_to_pay = flt(self.doc.grand_total - flt(self.doc.write_off_amount,
+				self.precision.main.write_off_amount), self.precision.main.total_amount_to_pay)
+			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
 				self.precision.main.outstanding_amount)
 			
 	def _cleanup(self):

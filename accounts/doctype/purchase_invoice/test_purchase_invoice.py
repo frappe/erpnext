@@ -24,14 +24,9 @@ import json
 test_dependencies = ["Item", "Cost Center"]
 
 class TestPurchaseInvoice(unittest.TestCase):
-	def test_gl_entries(self):
-		wrapper = webnotes.bean(self.get_test_doclist())
-		
-		# circumvent the disabled calculation call
-		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)
-		obj.calculate_taxes_and_totals()
-		wrapper.set_doclist(obj.doclist)
-		
+	def test_gl_entries_without_auto_inventory_accounting(self):
+		wrapper = webnotes.bean(copy=test_records[0])
+		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -53,14 +48,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
+	def test_gl_entries_with_auto_inventory_accounting(self):
+		pi = webnotes.bean(copy=test_records[1])
+			
 	def test_purchase_invoice_calculation(self):
-		wrapper = webnotes.bean(self.get_test_doclist())
-		
-		# circumvent the disabled calculation call
-		obj = webnotes.get_obj(doc=wrapper.doc, doclist=wrapper.doclist)
-		obj.calculate_taxes_and_totals()
-		wrapper.set_doclist(obj.doclist)
-
+		wrapper = webnotes.bean(copy=test_records[0])
+		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -91,145 +84,173 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
 			self.assertEqual(item.item_code, expected_values[i][0])
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
-			
-	def get_test_doclist(self):
-		return [
-			# parent
-			{
-				"doctype": "Purchase Invoice",
-				"naming_series": "BILL",
-				"supplier_name": "_Test Supplier",
-				"credit_to": "_Test Supplier - _TC",
-				"bill_no": "NA",
-				"posting_date": "2013-02-03",
-				"fiscal_year": "_Test Fiscal Year 2013",
-				"company": "_Test Company",
-				"currency": "INR",
-				"conversion_rate": 1,
-				"grand_total_import": 0 # for feed
-			},
-			# items
-			{
-				"doctype": "Purchase Invoice Item",
-				"parentfield": "entries",
-				"item_code": "_Test Item Home Desktop 100",
-				"item_name": "_Test Item Home Desktop 100",
-				"qty": 10,
-				"import_rate": 50,
-				"import_amount": 500,
-				"rate": 50,
-				"amount": 500,
-				"uom": "_Test UOM",
-				"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
-				"expense_head": "_Test Account Cost for Goods Sold - _TC",
-				"cost_center": "_Test Cost Center - _TC"
-				
-			},
-			{
-				"doctype": "Purchase Invoice Item",
-				"parentfield": "entries",
-				"item_code": "_Test Item Home Desktop 200",
-				"item_name": "_Test Item Home Desktop 200",
-				"qty": 5,
-				"import_rate": 150,
-				"import_amount": 750,
-				"rate": 150,
-				"amount": 750,
-				"uom": "_Test UOM",
-				"expense_head": "_Test Account Cost for Goods Sold - _TC",
-				"cost_center": "_Test Cost Center - _TC"
-			},
-			# taxes
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "Actual",
-				"account_head": "_Test Account Shipping Charges - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Shipping Charges",
-				"category": "Valuation and Total",
-				"add_deduct_tax": "Add",
-				"rate": 100
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account Customs Duty - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Customs Duty",
-				"category": "Valuation",
-				"add_deduct_tax": "Add",
-				"rate": 10
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account Excise Duty - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Excise Duty",
-				"category": "Total",
-				"add_deduct_tax": "Add",
-				"rate": 12
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Previous Row Amount",
-				"account_head": "_Test Account Education Cess - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Education Cess",
-				"category": "Total",
-				"add_deduct_tax": "Add",
-				"rate": 2,
-				"row_id": 3
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Previous Row Amount",
-				"account_head": "_Test Account S&H Education Cess - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "S&H Education Cess",
-				"category": "Total",
-				"add_deduct_tax": "Add",
-				"rate": 1,
-				"row_id": 3
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Previous Row Total",
-				"account_head": "_Test Account CST - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "CST",
-				"category": "Total",
-				"add_deduct_tax": "Add",
-				"rate": 2,
-				"row_id": 5
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account VAT - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "VAT",
-				"category": "Total",
-				"add_deduct_tax": "Add",
-				"rate": 12.5
-			},
-			{
-				"doctype": "Purchase Taxes and Charges",
-				"parentfield": "purchase_tax_details",
-				"charge_type": "On Previous Row Total",
-				"account_head": "_Test Account Discount - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Discount",
-				"category": "Total",
-				"add_deduct_tax": "Deduct",
-				"rate": 10,
-				"row_id": 7
-			},
-		]
+	
+test_records = [
+	[
+		# parent
+		{
+			"doctype": "Purchase Invoice",
+			"naming_series": "BILL",
+			"supplier_name": "_Test Supplier",
+			"credit_to": "_Test Supplier - _TC",
+			"bill_no": "NA",
+			"posting_date": "2013-02-03",
+			"fiscal_year": "_Test Fiscal Year 2013",
+			"company": "_Test Company",
+			"currency": "INR",
+			"conversion_rate": 1,
+			"grand_total_import": 0 # for feed
+		},
+		# items
+		{
+			"doctype": "Purchase Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 100",
+			"item_name": "_Test Item Home Desktop 100",
+			"qty": 10,
+			"import_rate": 50,
+			"import_amount": 500,
+			"rate": 50,
+			"amount": 500,
+			"uom": "_Test UOM",
+			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
+			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		
+		},
+		{
+			"doctype": "Purchase Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 200",
+			"item_name": "_Test Item Home Desktop 200",
+			"qty": 5,
+			"import_rate": 150,
+			"import_amount": 750,
+			"rate": 150,
+			"amount": 750,
+			"uom": "_Test UOM",
+			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		},
+		# taxes
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "Actual",
+			"account_head": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Shipping Charges",
+			"category": "Valuation and Total",
+			"add_deduct_tax": "Add",
+			"rate": 100
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Customs Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Customs Duty",
+			"category": "Valuation",
+			"add_deduct_tax": "Add",
+			"rate": 10
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Excise Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 12
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Education Cess",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 2,
+			"row_id": 3
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account S&H Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "S&H Education Cess",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 1,
+			"row_id": 3
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account CST - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "CST",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 2,
+			"row_id": 5
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"category": "Total",
+			"add_deduct_tax": "Add",
+			"rate": 12.5
+		},
+		{
+			"doctype": "Purchase Taxes and Charges",
+			"parentfield": "purchase_tax_details",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account Discount - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Discount",
+			"category": "Total",
+			"add_deduct_tax": "Deduct",
+			"rate": 10,
+			"row_id": 7
+		},
+	],
+	[
+		# parent
+		{
+			"doctype": "Purchase Invoice",
+			"supplier_name": "_Test Supplier",
+			"credit_to": "_Test Supplier - _TC",
+			"bill_no": "NA",
+			"posting_date": "2013-02-03",
+			"fiscal_year": "_Test Fiscal Year 2013",
+			"company": "_Test Company",
+			"currency": "INR",
+			"conversion_rate": 1,
+		},
+		# items
+		{
+			"doctype": "Purchase Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item",
+			"item_name": "_Test Item",
+			"qty": 10,
+			"import_rate": 50,
+			"uom": "_Test UOM",
+			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		
+		},
+	]
+]

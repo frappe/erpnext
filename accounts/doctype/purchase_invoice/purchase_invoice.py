@@ -493,4 +493,4 @@ class DocType(BuyingController):
 
 	def on_update(self):
 		pass
-
+	
