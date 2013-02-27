@@ -236,14 +236,11 @@ def get_events(start, end):
 	match_conditions = build_match_conditions("Leave Application")
 	
 	# show department leaves for employee
-	show_department_leaves = match_conditions and \
-		len(match_conditions.split("or"))==1 and "employee" in match_conditions
-	
-	if show_department_leaves:
+	if "Employee" in webnotes.get_roles():
 		add_department_leaves(events, start, end, employee, company)
-	else:
-		add_leaves(events, start, end, employee, company, match_conditions)
-		
+
+	add_leaves(events, start, end, employee, company, match_conditions)
+	
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
 	
@@ -273,7 +270,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 		query += " and " + match_conditions
 	
 	for d in webnotes.conn.sql(query, (start, end, start, end), as_dict=True):
-		events.append({
+		e = {
 			"name": d.name,
 			"doctype": "Leave Application",
 			"from_date": d.from_date,
@@ -282,7 +279,9 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 			"title": _("Leave by") + " " +  cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 			"docstatus": d.docstatus
-		})
+		}
+		if e not in events:
+			events.append(e)
 
 def add_block_dates(events, start, end, employee, company):
 	# block days
