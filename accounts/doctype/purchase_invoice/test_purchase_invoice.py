@@ -54,7 +54,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
 	def test_gl_entries_with_auto_inventory_accounting(self):
-		print "Testing with auto inventory"
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
 		
@@ -63,20 +62,18 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.insert()
 		pi.submit()
 		
-		print "auto inventory submitted"
-		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
-			order by account desc""", pi.doc.name, as_dict=1)
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
-		expected_values = [
+		expected_values = sorted([
 			["_Test Supplier - _TC", 0, 720],
 			["Stock Received But Not Billed - _TC", 750.0, 0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
 			["Expenses Included In Valuation - _TC", 0, 250.0]
-		].sort()
+		])
 		
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals(expected_values[i][0], gle.account)
