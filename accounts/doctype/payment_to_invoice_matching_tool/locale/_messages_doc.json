@@ -7,7 +7,7 @@
  "Journal Voucher", 
  "Payment to Invoice Matching Tool", 
  "Filter By Date", 
- "Accounts", 
+ "Sales Invoice", 
  "Purchase Invoice", 
  "Amount >=", 
  "Account", 
@@ -19,7 +19,7 @@
  "Help HTML", 
  "Voucher No", 
  "Filter By Amount", 
- "Sales Invoice", 
+ "Accounts", 
  "Total Amount", 
  "Allocate"
 ]

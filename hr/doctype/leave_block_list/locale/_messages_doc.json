@@ -6,10 +6,10 @@
  "Allow the following users to approve Leave Applications for block days.", 
  "Company", 
  "Leave Block List", 
- "Stop users from making Leave Applications on following days.", 
- "Year", 
  "If not checked, the list will have to be added to each Department where it has to be applied.", 
+ "Stop users from making Leave Applications on following days.", 
  "Applies to Company", 
+ "Year", 
  "Leave Block List Name", 
  "Leave Block List Allowed", 
  "Leave Block List Dates"

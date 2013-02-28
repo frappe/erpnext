@@ -1,4 +1,5 @@
 [
+ "Time Log", 
  "Masters", 
  "Task", 
  "Project master.", 
@@ -7,6 +8,7 @@
  "Gantt Chart", 
  "Timesheet", 
  "Project", 
+ "Time Log for tasks.", 
  "Project activity / task.", 
  "Documents", 
  "Timesheet for tasks.", 

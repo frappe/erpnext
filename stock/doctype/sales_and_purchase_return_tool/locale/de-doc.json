@@ -1,0 +1,21 @@
+{
+ "Company": "Firma", 
+ "Cust/Supp Address": "Cust / Supp Adresse", 
+ "Cust/Supp Name": "Cust / Supp Namen", 
+ "Customer/Supplier": "Kunde / Lieferant", 
+ "Delivery Note No": "Lieferschein Nein", 
+ "Get Items": "Holen Artikel", 
+ "Make Credit Note": "Machen Gutschrift", 
+ "Make Debit Note": "Machen Lastschrift", 
+ "Make Excise Invoice": "Machen Excise Rechnung", 
+ "Make Stock Entry": "Machen Eintrag Stock", 
+ "Purchase Receipt No": "Kaufbeleg", 
+ "Purchase Return": "Kauf zur\u00fcckgeben", 
+ "Return Date": "Zur\u00fcck Datum", 
+ "Return Type": "R\u00fcckgabetyp", 
+ "Sales Invoice No": "Sales Invoice In", 
+ "Sales Return": "Umsatzrendite", 
+ "Sales and Purchase Return Items": "Verkauf und Kauf zur\u00fccksenden Artikel", 
+ "Sales and Purchase Return Tool": "Sales and Purchase Return-Tool", 
+ "Stock": "Lager"
+}

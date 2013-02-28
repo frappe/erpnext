@@ -1,0 +1,14 @@
+{
+ "Amount": "Menge", 
+ "BOM Item": "St\u00fccklistenposition", 
+ "BOM No": "BOM Nein", 
+ "Item Code": "Item Code", 
+ "Item Description": "Artikelbeschreibung", 
+ "Manufacturing": "Herstellung", 
+ "Operation No": "In Betrieb", 
+ "Qty": "Menge", 
+ "Qty Consumed Per Unit": "Menge pro verbrauchter", 
+ "Rate": "Rate", 
+ "Scrap %": "Scrap%", 
+ "Stock UOM": "Lager UOM"
+}

@@ -1,0 +1,13 @@
+{
+ "Accounts": "Konten", 
+ "Bank Account": "Bankkonto", 
+ "Bank Reconciliation": "Kontenabstimmung", 
+ "Company": "Firma", 
+ "Entries": "Eintr\u00e4ge", 
+ "From Date": "Von Datum", 
+ "Get Non Reconciled Entries": "Holen Non vers\u00f6hnt Eintr\u00e4ge", 
+ "Select account head of the bank where cheque was deposited.": "W\u00e4hlen Sie den Kopf des Bankkontos, wo Kontrolle abgelagert wurde.", 
+ "To Date": "To Date", 
+ "Total Amount": "Gesamtbetrag", 
+ "Update Clearance Date": "Aktualisieren Restposten Datum"
+}

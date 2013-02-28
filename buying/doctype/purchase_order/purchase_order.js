@@ -40,12 +40,22 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			
 	},
 	
-	onload_post_render: function(doc, dt, dn) {
-		var callback = function(doc, dt, dn) {
-			if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
+	onload_post_render: function(doc, dt, dn) {	
+		var me = this;	
+		var callback1 = function(doc, dt, dn) {
+			var callback2 = function(doc, dt, dn) {
+				if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);				
+			}
+			me.update_item_details(doc, dt, dn, callback2);
 		}
-		this.update_item_details(doc, dt, dn, callback);
+		
+		// TODO: improve this
+		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
+				&& this.frm.doc.price_list_name) {
+			this.price_list_name(callback1);
+		}
 	}
+	
 });
 
 var new_cscript = new erpnext.buying.PurchaseOrderController({frm: cur_frm});
@@ -53,7 +63,7 @@ var new_cscript = new erpnext.buying.PurchaseOrderController({frm: cur_frm});
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new_cscript);
 
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
+cur_frm.cscript.onload = function(doc, cdt, cdn) {	
 	// set missing values in parent doc
 	set_missing_values(doc, {
 		fiscal_year: sys_defaults.fiscal_year,
