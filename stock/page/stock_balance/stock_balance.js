@@ -102,8 +102,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
-			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
-			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
+			var sl_posting_date = dateutil.str_to_obj(sl.posting_date);
 			
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
@@ -115,10 +114,10 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				var qty_diff = sl.qty;
 				var value_diff = me.get_value_diff(wh, sl, is_fifo);
 
-				if(posting_datetime < from_date) {
+				if(sl_posting_date < from_date) {
 					item.opening_qty += qty_diff;
 					item.opening_value += value_diff;
-				} else if(posting_datetime <= to_date) {
+				} else if(sl_posting_date <= to_date) {
 					var ignore_inflow_outflow = this.is_default("warehouse")
 						&& sl.voucher_type=="Stock Entry" 
 						&& this.stock_entry_map[sl.voucher_no].purpose=="Material Transfer";
