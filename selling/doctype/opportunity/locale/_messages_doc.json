@@ -11,6 +11,7 @@
  "Sales", 
  "Date on which the lead was last contacted", 
  "Source", 
+ "Draft", 
  "Exhibition", 
  "Maintenance", 
  "Territory", 
@@ -62,6 +63,5 @@
  "Opportunity Date", 
  "Contact Email", 
  "Existing Customer", 
- "Draft", 
  "Campaign"
 ]

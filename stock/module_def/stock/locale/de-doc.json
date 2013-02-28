@@ -1,0 +1,22 @@
+{
+ "A Product or a Service that is bought, sold or kept in stock.": "Ein Produkt oder eine Dienstleistung, die gekauft, verkauft oder gehalten auf Lager.", 
+ "A logical Warehouse against which stock entries are made.": "Eine logische Warehouse gegen die Lager-Eintr\u00e4ge vorgenommen werden.", 
+ "Distinct unit of an Item": "Separate Einheit eines Elements", 
+ "Featured Item in Item Group": "Feature-Produkt bei Posten Gruppe", 
+ "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes": "F\u00fcr die Bequemlichkeit der Kunden, k\u00f6nnen diese Codes in Druckformate wie Rechnungen und Lieferscheine werden", 
+ "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.": "Generieren Packzettel f\u00fcr Pakete geliefert werden. Verwendet, um Paket-Nummer, der Lieferumfang und sein Gewicht zu benachrichtigen.", 
+ "Item-Wise Price List": "Item-Wise Preisliste", 
+ "Ordered Items To Be Delivered": "Bestellte Artikel geliefert werden", 
+ "Purchase Order Items To Be Received": "Bestellpositionen empfangen werden", 
+ "Serial No Service Contract Expiry": "Serial No Service Contract Verfall", 
+ "Serial No Status": "Serielle In-Status", 
+ "Serial No Warranty Expiry": "Serial No Scheckheftgepflegt", 
+ "Stock Ageing": "Lager Ageing", 
+ "Stock Analytics": "Lager Analytics", 
+ "Stock Balance": "Bestandsliste", 
+ "Stock Home": "Lager Home", 
+ "Stock Ledger": "Lager Ledger", 
+ "Stock Level": "Stock Level", 
+ "Table for Item that will be shown in Web Site": "Tabelle f\u00fcr Artikel, die in Web-Site angezeigt werden", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Dieses Tool hilft Ihnen zu aktualisieren oder zu beheben die Menge und die Bewertung der Aktie im System. Es wird normalerweise verwendet, um das System abzugleichen und was tats\u00e4chlich existiert in Ihrem Lager."
+}

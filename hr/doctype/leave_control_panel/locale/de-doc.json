@@ -1,0 +1,20 @@
+{
+ "Allocate": "Zuweisen", 
+ "Branch": "Zweig", 
+ "Carry Forward": "Vortragen", 
+ "Department": "Abteilung", 
+ "Designation": "Bezeichnung", 
+ "Employee Type": "Arbeitnehmertyp", 
+ "Fiscal Year": "Gesch\u00e4ftsjahr", 
+ "Grade": "Klasse", 
+ "HR": "HR", 
+ "Leave Control Panel": "Lassen Sie Control Panel", 
+ "Leave Type": "Lassen Typ", 
+ "Leave blank if considered for all branches": "Freilassen, wenn f\u00fcr alle Branchen betrachtet", 
+ "Leave blank if considered for all departments": "Freilassen, wenn f\u00fcr alle Abteilungen betrachtet", 
+ "Leave blank if considered for all designations": "Freilassen, wenn f\u00fcr alle Bezeichnungen betrachtet", 
+ "Leave blank if considered for all employee types": "Freilassen, wenn f\u00fcr alle Mitarbeiter Typen betrachtet", 
+ "Leave blank if considered for all grades": "Freilassen, wenn f\u00fcr alle Typen gilt als", 
+ "New Leaves Allocated (In Days)": "New Leaves Allocated (in Tagen)", 
+ "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year": "Bitte w\u00e4hlen Sie Carry Forward Auch wenn Sie zum vorherigen Gesch\u00e4ftsjahr die Bl\u00e4tter aufnehmen m\u00f6chten zum Ausgleich in diesem Gesch\u00e4ftsjahr"
+}

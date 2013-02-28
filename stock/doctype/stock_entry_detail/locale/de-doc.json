@@ -1,0 +1,22 @@
+{
+ "Actual Qty (at source/target)": "Tats\u00e4chliche Menge (an der Quelle / Ziel)", 
+ "Amount": "Menge", 
+ "BOM No": "BOM Nein", 
+ "BOM No. for a Finished Good Item": "BOM-Nr f\u00fcr Finished Gute Artikel", 
+ "Batch No": "Batch No", 
+ "Conversion Factor": "Umrechnungsfaktor", 
+ "Description": "Beschreibung", 
+ "Item Code": "Item Code", 
+ "Material Request": "Material anfordern", 
+ "Material Request Item": "Material anfordern Artikel", 
+ "Qty": "Menge", 
+ "Qty as per Stock UOM": "Menge pro dem Stock UOM", 
+ "Serial No": "Serial In", 
+ "Source Warehouse": "Quelle Warehouse", 
+ "Stock": "Lager", 
+ "Stock Entry Detail": "Lager Eintrag Details", 
+ "Stock UOM": "Lager UOM", 
+ "Target Warehouse": "Ziel Warehouse", 
+ "UOM": "UOM", 
+ "Valuation Rate": "Valuation bewerten"
+}

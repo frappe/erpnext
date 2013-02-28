@@ -10,11 +10,11 @@
  "Send regular summary reports via Email.", 
  "Email settings for jobs email id \"jobs@example.com\"", 
  "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
+ "Classification of Customers by region", 
  "Set prefix for numbering series on your transactions", 
  "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.", 
  "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
  "Permission Engine", 
  "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
- "Webforms", 
- "Classification of Customers by region"
+ "Webforms"
 ]
