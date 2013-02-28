@@ -293,7 +293,7 @@ class DocType(BuyingController):
 			webnotes.msgprint(_("""Please enter whether Purchase Recipt is made for subcontracting 
 				or purchasing, in 'Is Subcontracted' field"""), raise_exception=1)
 			
-		if self.doc.is_subcontracted and not self.doc.supplier_warehouse:
+		if self.doc.is_subcontracted=="Yes" and not self.doc.supplier_warehouse:
 			webnotes.msgprint(_("Please Enter Supplier Warehouse for subcontracted Items"), 
 				raise_exception=1)
 				
