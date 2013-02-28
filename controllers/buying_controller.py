@@ -331,7 +331,9 @@ class BuyingController(AccountsController):
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
 		for d in self.doclist.get({"parentfield": parentfield}):
-			if d.qty:
+			if d.item_code and d.qty:
+				# if no item code, which is sometimes the case in purchase invoice, 
+				# then it is not possible to track valuation against it
 				d.valuation_rate = (flt(d.purchase_rate or d.rate)
 					+ (flt(d.item_tax_amount) + flt(d.rm_supp_cost)) / flt(d.qty)
 					) / flt(d.conversion_factor)
