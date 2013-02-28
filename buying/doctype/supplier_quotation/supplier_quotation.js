@@ -27,12 +27,25 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	refresh: function() {
 		this._super();
 		
-		cur_frm.cscript.load_taxes(this.frm.doc);
 
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
 		}
+	},
+	
+	onload_post_render: function(doc, dt, dn) {	
+		var me = this;
+		var callback = function(doc, dt, dn) {
+			cur_frm.cscript.load_taxes(me.frm.doc);
+		}
+		
+		// TODO: improve this
+		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
+				&& this.frm.doc.price_list_name) {
+			this.price_list_name(callback);
+		}
 	}
+	
 });
 
 var new_cscript = new erpnext.buying.SupplierQuotationController({frm: cur_frm});

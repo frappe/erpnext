@@ -51,15 +51,9 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 		
 		if(this.frm.fields_dict.currency)
 			this.set_dynamic_labels();
-		
-		// TODO: improve this
-		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
-				&& this.frm.doc.price_list_name && this.frm.doc.price_list_currency) {
-			this.price_list_name();
-		}
 	},
 	
-	price_list_name: function() {
+	price_list_name: function(callback_fn) {
 		this.frm.toggle_reqd(["price_list_currency", "plc_conversion_rate"],
 			!!(this.frm.doc.price_list_name));
 		
@@ -77,6 +71,8 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							me.price_list_currency();
+							if (callback_fn) callback_fn(me.frm.doc, me.frm.doc.doctype, 
+									me.frm.doc.name);
 						}
 					}
 				});
@@ -89,6 +85,7 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = locals[cdt][cdn];
+		
 		if(item.item_code) {
 			this.frm.call({
 				method: "buying.utils.get_item_details",
@@ -141,11 +138,11 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	
 	price_list_currency: function() {
 		this.set_dynamic_labels();
-		
+				
 		if(this.frm.doc.price_list_currency === this.get_company_currency())
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		else if(this.frm.doc.price_list_currency === this.frm.doc.currency)
-			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate || 1.0);
+			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate || 1.0);		
 	},
 	
 	set_dynamic_labels: function(doc, dt, dn) {

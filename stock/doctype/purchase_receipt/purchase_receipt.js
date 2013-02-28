@@ -37,6 +37,18 @@ erpnext.buying.PurchaseReceiptController = erpnext.buying.BuyingController.exten
 		if(wn.boot.control_panel.country == 'India') {
 			unhide_field(['challan_no', 'challan_date']);
 		}
+	}, 
+	onload_post_render: function(doc, dt, dn) {	
+		var me = this;
+		var callback = function(doc, dt, dn) {
+			me.update_item_details(doc, dt, dn, function(r,rt) { });
+		}
+		
+		// TODO: improve this
+		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
+				&& this.frm.doc.price_list_name) {
+			this.price_list_name(callback);
+		}
 	}
 });
 
@@ -45,7 +57,6 @@ var new_cscript = new erpnext.buying.PurchaseReceiptController({frm: cur_frm});
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new_cscript);
 
-//========================== On Load ================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.fiscal_year && doc.__islocal){ wn.model.set_default_values(doc);}
 	if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
@@ -53,15 +64,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if (!doc.status) doc.status = 'Draft';
 }
 
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback = function(doc, dt, dn) {
-		// defined in purchase_common.js
-		cur_frm.cscript.update_item_details(doc, dt, dn, function(r,rt) { });	
-	}
-	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
-}
-
-//Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	if (doc.supplier) {
 		get_server_fields('get_default_supplier_address',
