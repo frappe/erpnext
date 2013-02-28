@@ -11,7 +11,8 @@ erpnext.updates = [
 	]],
 	["21st February, 2013", [
 		"Item: Warehouse-wise Re-order Level and Quantity",
-		"Buying: Purchase Request renamed to Material Request"
+		"Buying: Purchase Request renamed to Material Request",
+		"Website: Dynamic (mobile friendly) layouts using Bootstrap Responsive layouts"
 	]],
 	["20th February, 2013", [
 		"Disable Rounded Total: If disable in 'Global Defaults', Rounding related fields \

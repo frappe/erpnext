@@ -1,0 +1,88 @@
+[
+ {
+  "creation": "2013-02-28 17:57:33", 
+  "docstatus": 0, 
+  "modified": "2013-02-28 18:36:28", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "description": "Batch Time Logs for Billing.", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "is_submittable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Time Log Batch", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Time Log Batch", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Projects User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Time Log Batch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Naming Series", 
+  "options": "TLB-", 
+  "reqd": 1
+ }, 
+ {
+  "description": "For Sales Invoice", 
+  "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Currency", 
+  "label": "Rate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_log_batch_details", 
+  "fieldtype": "Table", 
+  "label": "Time Log Batch Details", 
+  "options": "Time Log Batch Detail"
+ }, 
+ {
+  "description": "In Hours", 
+  "doctype": "DocField", 
+  "fieldname": "total_time", 
+  "fieldtype": "Float", 
+  "label": "Total Time", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Time Log Batch", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

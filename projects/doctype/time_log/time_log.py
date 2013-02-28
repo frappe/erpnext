@@ -11,8 +11,19 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
+		self.set_status()
 		self.validate_overlap()
-		
+
+	def set_status(self):
+		if self.doc.docstatus==0:
+			self.doc.status = "Draft"
+		elif self.doc.docstatus==1:
+			self.doc.status = "Submitted"
+		elif self.doc.docstatus==2:
+			self.doc.status = "Cancelled"
+			
+		# billed will be set directly
+				
 	def validate_overlap(self):
 		existing = webnotes.conn.sql_list("""select name from `tabTime Log` where owner=%s and
 			((from_time between %s and %s) or (to_time between %s and %s)) and name!=%s""", 
@@ -22,6 +33,7 @@ class DocType:
 		if existing:
 			webnotes.msgprint(_("This Time Log conflicts with") + ":" + ', '.join(existing),
 				raise_exception=True)
+				
 		
 @webnotes.whitelist()
 def get_events(start, end):

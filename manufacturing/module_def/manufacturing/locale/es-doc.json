@@ -1,4 +1,0 @@
-{
- "Manufacturing Home": "Fabricaci\u00f3n Inicio", 
- "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Reemplazar un BOM particular en todas las listas de materiales de otros en los que se utiliza. Se sustituir\u00e1 el enlace BOM viejo, actualizar el costo y regenerar &quot;Explosi\u00f3n lista de materiales Item&quot; tabla seg\u00fan nueva lista de materiales"
-}

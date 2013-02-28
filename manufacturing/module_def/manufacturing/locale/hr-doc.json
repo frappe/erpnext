@@ -1,4 +1,0 @@
-{
- "Manufacturing Home": "Proizvodnja Po\u010detna", 
- "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Zamijenite odre\u0111eni BOM u svim drugim sastavnicama gdje se koriste. To \u0107e zamijeniti staru vezu BOM, a\u017eurirati tro\u0161kove i regenerirati &quot;BOM eksploziju predmeta&quot; stol kao i po novom BOM"
-}

@@ -51,6 +51,8 @@ class DocType:
 		return time.strptime(timestr, format)
 	
 	def validate(self):
+		msgprint("Please create a new Time Log", raise_exception=True)
+		
 		if getdate(self.doc.timesheet_date) > getdate(nowdate()):
 			msgprint("You can not prepare timesheet for future date")
 			raise Exception
