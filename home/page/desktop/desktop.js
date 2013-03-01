@@ -23,9 +23,10 @@ erpnext.desktop.render = function() {
 		module.name = m;
 		module.label = wn._(module.label);
 		module.gradient_css = wn.get_gradient_css(module.color, 45);
+		module._link = module.link.toLowerCase().replace("/", "-");
 		
 		$module_icon = $(repl('\
-			<div id="module-icon-%(link)s" class="case-wrapper" \
+			<div id="module-icon-%(_link)s" class="case-wrapper" \
 				data-name="%(name)s" data-link="%(link)s">\
 				<div class="case-border" style="%(gradient_css)s">\
 					<i class="%(icon)s"></i>\
@@ -84,7 +85,7 @@ erpnext.desktop.show_pending_notifications = function() {
 	add_circle('module-icon-messages', 'unread_messages', 'Unread Messages');
 	add_circle('module-icon-support-home', 'open_support_tickets', 'Open Support Tickets');
 	add_circle('module-icon-todo', 'things_todo', 'Things To Do');
-	add_circle('module-icon-calendar', 'todays_events', 'Todays Events');
+	add_circle('module-icon-calendar-event', 'todays_events', 'Todays Events');
 	add_circle('module-icon-projects-home', 'open_tasks', 'Open Tasks');
 	add_circle('module-icon-questions', 'unanswered_questions', 'Unanswered Questions');
 	add_circle('module-icon-selling-home', 'open_leads', 'Open Leads');

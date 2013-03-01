@@ -214,7 +214,8 @@ class DocType(BuyingController):
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = sql("select inspection_required from `tabItem` where name = %s", (d.item_code), as_dict = 1)
+			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
+				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
 				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create Quality Inspection")
