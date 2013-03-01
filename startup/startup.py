@@ -55,7 +55,7 @@ def get_todays_events():
 		SELECT COUNT(*) FROM `tabEvent`
 		WHERE owner = %s
 		AND event_type != 'Cancel'
-		AND event_date = %s""", (
+		AND %s between date(starts_on) and date(ends_on)""", (
 		webnotes.session.user, nowdate()))
 	return todays_events[0][0]
 
