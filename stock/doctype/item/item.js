@@ -22,13 +22,11 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
 		var callback = function(r, rt) {
-			var enabled = (r.message == 'exists') ? false : true;				
+			var enabled = (r.message == 'exists') ? false : true;
 			cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'], enabled);
 		}
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
 	}
-	
-	cur_frm.cscript.hide_website_fields(doc);
 }
 
 cur_frm.cscript.item_code = function(doc) {

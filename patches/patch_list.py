@@ -201,4 +201,5 @@ patch_list = [
 	'execute:webnotes.reload_doc("accounts", "Print Format", "Sales Invoice Spartan") # 2013-02-26',
 	"execute:(not webnotes.conn.exists('Role', 'Projects Manager')) and webnotes.doc({'doctype':'Role', 'role_name':'Projects Manager'}).insert()",
 	"patches.february_2013.p09_remove_cancelled_warehouses",
+	"patches.march_2013.update_po_prevdoc_doctype",
 ]

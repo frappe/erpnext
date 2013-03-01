@@ -53,7 +53,7 @@ def get_item_details(args):
 		"qty": 0,
 		"stock_uom": item.stock_uom,
 		"uom": item.stock_uom,
-		"conversion_factor": 1,
+		"conversion_factor": 1.0,
 		"warehouse": args.warehouse or item.default_warehouse,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
 			item_wrapper.doclist.get({"parentfield": "item_tax"})))),

@@ -54,9 +54,6 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	},
 	
 	price_list_name: function(callback_fn) {
-		this.frm.toggle_reqd(["price_list_currency", "plc_conversion_rate"],
-			!!(this.frm.doc.price_list_name));
-		
 		var me = this;
 		
 		if(this.frm.doc.price_list_name) {
@@ -137,6 +134,9 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	},
 	
 	price_list_currency: function() {
+		this.frm.toggle_reqd("plc_conversion_rate",
+			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
+		
 		this.set_dynamic_labels();
 				
 		if(this.frm.doc.price_list_currency === this.get_company_currency())

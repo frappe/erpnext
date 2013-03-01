@@ -1,15 +1,17 @@
 [
  {
-  "creation": "2013-01-10 16:34:25", 
+  "creation": "2013-03-01 08:21:54", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:40:32", 
+  "modified": "2013-03-01 08:22:16", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
+  "allow_attach": 1, 
   "autoname": "field:batch_id", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "max_attachments": 5, 
   "module": "Stock", 
   "name": "__common__"
  }, 
@@ -104,6 +106,15 @@
   "oldfieldname": "trash_reason", 
   "oldfieldtype": "Small Text", 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"
