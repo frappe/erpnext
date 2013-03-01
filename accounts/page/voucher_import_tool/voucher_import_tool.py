@@ -160,6 +160,12 @@ def import_vouchers(common_values, data, start_idx, import_type):
 					raise Exception
 					
 				doclist = Bean([jv]+details)
+				
+				# validate datatype
+				from core.page.data_import_tool.data_import_tool import check_record
+				for d in doclist:
+					check_record(d.fields, d.parenttype)
+				
 				doclist.submit()
 			
 				messages.append("""<p style='color: green'>[row #%s] 
