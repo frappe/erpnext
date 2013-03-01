@@ -289,7 +289,7 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def validate_for_subcontracting(self):
-		if self.sub_contracted_items and self.purchase_items and not self.doc.is_subcontracted:
+		if not self.doc.is_subcontracted and self.sub_contracted_items:
 			webnotes.msgprint(_("""Please enter whether Purchase Recipt is made for subcontracting 
 				or purchasing, in 'Is Subcontracted' field"""), raise_exception=1)
 			
@@ -299,7 +299,7 @@ class DocType(BuyingController):
 				
 	def update_raw_materials_supplied(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'pr_raw_material_details')
-		if self.sub_contracted_items:
+		if self.doc.is_subcontracted=="Yes":
 			for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
 				if item.item_code in self.sub_contracted_items:
 					self.add_bom_items(item)
