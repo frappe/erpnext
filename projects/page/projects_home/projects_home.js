@@ -56,7 +56,18 @@ wn.module_page["Projects"] = [
 			},
 		]
 	},
-]
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Time Log Summary"),
+				route: "Report2/Time Log/Time Log Summary",
+				doctype: "Time Log"
+			},
+		]
+	}]
 
 pscript['onload_projects-home'] = function(wrapper) {
 	wn.views.moduleview.make(wrapper, "Projects");

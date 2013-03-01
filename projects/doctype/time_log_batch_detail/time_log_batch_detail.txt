@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-28 17:56:12", 
   "docstatus": 0, 
-  "modified": "2013-02-28 17:56:12", 
+  "modified": "2013-03-01 15:20:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -47,5 +47,11 @@
   "fieldtype": "Data", 
   "label": "Activity Type", 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hours", 
+  "fieldtype": "Float", 
+  "label": "Hours"
  }
 ]

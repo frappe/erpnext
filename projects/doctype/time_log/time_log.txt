@@ -2,13 +2,13 @@
  {
   "creation": "2013-02-26 14:58:28", 
   "docstatus": 0, 
-  "modified": "2013-02-28 18:41:40", 
+  "modified": "2013-03-01 17:48:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
-  "autoname": "TL-.######", 
+  "autoname": "naming_series:", 
   "description": "Log of Activities performed by users against Tasks that can be used for tracking time, billing.", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -40,14 +40,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "status", 
+  "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "in_list_view": 1, 
-  "label": "Status", 
-  "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
+  "label": "Naming Series", 
+  "options": "TL-", 
   "permlevel": 0, 
-  "read_only": 1, 
-  "reqd": 0
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -69,9 +67,28 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "hours", 
+  "fieldtype": "Float", 
+  "label": "Hours", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "column_break_3", 
   "fieldtype": "Column Break", 
   "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
+  "permlevel": 0, 
+  "read_only": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -128,6 +145,26 @@
   "permlevel": 0
  }, 
  {
+  "description": "Will be updated when batched.", 
+  "doctype": "DocField", 
+  "fieldname": "time_log_batch", 
+  "fieldtype": "Link", 
+  "label": "Time Log Batch", 
+  "options": "Time Log Batch", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "description": "Will be updated when billed.", 
+  "doctype": "DocField", 
+  "fieldname": "sales_invoice", 
+  "fieldtype": "Link", 
+  "label": "Sales Invoice", 
+  "options": "Sales Invoice", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
@@ -143,7 +180,7 @@
   "fieldtype": "Link", 
   "label": "Amended From", 
   "no_copy": 1, 
-  "options": "Sales Invoice", 
+  "options": "Time Log", 
   "permlevel": 1, 
   "print_hide": 1
  }, 

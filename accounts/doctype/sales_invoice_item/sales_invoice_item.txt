@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:09", 
+  "creation": "2013-01-29 19:25:49", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:51", 
+  "modified": "2013-03-01 13:41:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -319,6 +319,13 @@
   "print_hide": 1, 
   "read_only": 1, 
   "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_log_batch", 
+  "fieldtype": "Link", 
+  "label": "Time Log Batch", 
+  "options": "Time Log Batch"
  }, 
  {
   "doctype": "DocField", 

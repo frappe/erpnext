@@ -200,4 +200,5 @@ patch_list = [
 	'execute:webnotes.reload_doc("accounts", "Print Format", "Sales Invoice Modern") # 2013-02-26',
 	'execute:webnotes.reload_doc("accounts", "Print Format", "Sales Invoice Spartan") # 2013-02-26',
 	"execute:(not webnotes.conn.exists('Role', 'Projects Manager')) and webnotes.doc({'doctype':'Role', 'role_name':'Projects Manager'}).insert()",
+	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
 ]

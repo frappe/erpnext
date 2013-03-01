@@ -28,6 +28,31 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.cancel()
 		self.assertEquals(webnotes.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
 			561.8)
+			
+	def test_time_log_batch(self):
+		tlb = webnotes.bean("Time Log Batch", "_T-Time Log Batch-00001")
+		tlb.submit()
+		
+		w = webnotes.bean(webnotes.copy_doclist(test_records[0]))
+		w.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
+		w.insert()
+		w.submit()
+		
+		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
+			"Billed")
+
+		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+			"Billed")
+
+		w.cancel()
+
+		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
+			"Submitted")
+
+		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+			"Batched for Billing")
+			
+		
 		
 test_dependencies = ["Journal Voucher"]
 

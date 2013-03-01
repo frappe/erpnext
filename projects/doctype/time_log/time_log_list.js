@@ -1,5 +1,6 @@
 // render
 wn.listview_settings['Time Log'] = {
+	add_fields: ["`tabTime Log`.`status`", "`tabTime Log`.`billable`", "`tabTime Log`.`activity_type`"],
 	selectable: true,
 	onload: function(me) {
 		me.appframe.add_button(wn._("Make Time Log Batch"), function() {
@@ -16,12 +17,28 @@ wn.listview_settings['Time Log'] = {
 					msgprint(wn._("Time Log is not billable") + ": " + d.name);
 					return;
 				}
-				if(d.sales_invoice) {
-					msgprint(wn._("Time Log has been Invoiced") + ": " + d.name);
+				if(d.status!="Submitted") {
+					msgprint(wn._("Time Log Status must be Submitted."));
 				}
 			}
 			
-			//
+			// make batch
+			wn.model.with_doctype("Time Log Batch", function() {
+				var tlb = wn.model.get_new_doc("Time Log Batch");
+				$.each(selected, function(i, d) {
+					var detail = wn.model.get_new_doc("Time Log Batch Detail");
+					$.extend(detail, {
+						"parenttype": "Time Log Batch",
+						"parentfield": "time_log_batch_details",
+						"parent": tlb.name,
+						"time_log": d.name,
+						"activity_type": d.activity_type,
+						"created_by": d.owner,
+						"idx": i+1
+					});
+				})
+				wn.set_route("Form", "Time Log Batch", tlb.name);
+			})
 			
 		}, "icon-file-alt");
 	}
