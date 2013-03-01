@@ -342,6 +342,67 @@ class BuyingController(AccountsController):
 					) / flt(d.conversion_factor)
 			else:
 				d.valuation_rate = 0.0
+				
+	def validate_for_subcontracting(self):
+		if not self.doc.is_subcontracted and self.sub_contracted_items:
+			webnotes.msgprint(_("""Please enter whether %s is made for subcontracting or purchasing,
+			 	in 'Is Subcontracted' field""" % self.doc.doctype), raise_exception=1)
+			
+		if self.doc.doctype == "Purchase Receipt" and self.doc.is_subcontracted=="Yes" \
+			and not self.doc.supplier_warehouse:
+				webnotes.msgprint(_("Supplier Warehouse mandatory subcontracted purchase receipt"), 
+					raise_exception=1)
+										
+	def update_raw_materials_supplied(self, raw_material_table):
+		self.doclist = self.doc.clear_table(self.doclist, raw_material_table)
+		if self.doc.is_subcontracted=="Yes":
+			for item in self.doclist.get({"parentfield": self.fname}):
+				if item.item_code in self.sub_contracted_items:
+					self.add_bom_items(item, raw_material_table)
+
+	def add_bom_items(self, d, raw_material_table):
+		bom_items = self.get_items_from_default_bom(d.item_code)
+		raw_materials_cost = 0
+		for item in bom_items:
+			required_qty = flt(item.qty_consumed_per_unit) * flt(d.qty) * flt(d.conversion_factor)
+			rm_doclist = {
+				"parentfield": raw_material_table,
+				"doctype": self.doc.doctype + " Item Supplied",
+				"reference_name": d.name,
+				"bom_detail_no": item.name,
+				"main_item_code": d.item_code,
+				"rm_item_code": item.item_code,
+				"stock_uom": item.stock_uom,
+				"required_qty": required_qty,
+				"conversion_factor": d.conversion_factor,
+				"rate": item.rate,
+				"amount": required_qty * flt(item.rate)
+			}
+			if self.doc.doctype == "Purchase Receipt":
+				rm_doclist.update({
+					"consumed_qty": required_qty,
+					"description": item.description,
+				})
+				
+			self.doclist.append(rm_doclist)
+			
+			raw_materials_cost += required_qty * flt(item.rate)
+			
+		if self.doc.doctype == "Purchase Receipt":
+			d.rm_supp_cost = raw_materials_cost
+
+	def get_items_from_default_bom(self, item_code):
+		# print webnotes.conn.sql("""select name from `tabBOM` where item = '_Test FG Item'""")
+		bom_items = webnotes.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
+			t2.rate, t2.stock_uom, t2.name, t2.description 
+			from `tabBOM` t1, `tabBOM Item` t2 
+			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1 
+			and t1.docstatus = 1 and t1.is_active = 1""", item_code, as_dict=1)
+		if not bom_items:
+			msgprint(_("No default BOM exists for item: ") + item_code, raise_exception=1)
+		
+		return bom_items
+
 	
 	@property
 	def precision(self):

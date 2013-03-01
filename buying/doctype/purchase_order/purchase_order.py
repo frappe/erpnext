@@ -18,12 +18,10 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt
-from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 from buying.utils import get_last_purchase_details
-from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
@@ -35,7 +33,6 @@ class DocType(BuyingController):
 		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
 		
-		# Validate
 	def validate(self):
 		super(DocType, self).validate()
 		
@@ -64,6 +61,10 @@ class DocType(BuyingController):
 		# Check for stopped status
 		self.check_for_stopped_status(pc_obj)
 		
+		# sub-contracting
+		self.validate_for_subcontracting()
+		self.update_raw_materials_supplied("po_raw_material_details")
+		
 
 	def get_default_schedule_date(self):
 		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
@@ -79,7 +80,6 @@ class DocType(BuyingController):
 	def get_indent_details(self):
 		if self.doc.indent_no:
 			get_obj('DocType Mapper','Material Request-Purchase Order').dt_map('Material Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Material Request','Purchase Order'],['Material Request Item', 'Purchase Order Item']]")
-			pcomm = get_obj('Purchase Common')
 			for d in getlist(self.doclist, 'po_details'):
 				if d.item_code and not d.purchase_rate:
 					last_purchase_details = get_last_purchase_details(d.item_code, self.doc.name)
@@ -173,8 +173,6 @@ class DocType(BuyingController):
 			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
 			raise Exception
 
-	# On Close
-	#-------------------------------------------------------------------------------------------------
 	def update_status(self, status):
 		self.check_modified_date()
 		# step 1:=> Set Status
@@ -186,8 +184,6 @@ class DocType(BuyingController):
 		# step 3:=> Acknowledge user
 		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
 
-
-	# On Submit
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
 		purchase_controller.is_item_table_empty(self)
@@ -207,118 +203,31 @@ class DocType(BuyingController):
 		# Step 6 :=> Set Status
 		webnotes.conn.set(self.doc,'status','Submitted')
 	 
-	# On Cancel
-	# -------------------------------------------------------------------------------------------------------
 	def on_cancel(self):
 		pc_obj = get_obj(dt = 'Purchase Common')
 		
-		# 1.Check if PO status is stopped
+		# Check if PO status is stopped
 		pc_obj.check_for_stopped_status(cstr(self.doc.doctype), cstr(self.doc.name))
 		
 		self.check_for_stopped_status(pc_obj)
 		
-		# 2.Check if Purchase Receipt has been submitted against current Purchase Order
+		# Check if Purchase Receipt has been submitted against current Purchase Order
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Item')
 
-		# 3.Check if Purchase Invoice has been submitted against current Purchase Order
-		#pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
-		
+		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_order = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
-		# 4.Set Status as Cancelled
 		webnotes.conn.set(self.doc,'status','Cancelled')
-
-		# 5.Update Material Requests Pending Qty and accordingly it's Status 
 		pc_obj.update_prevdoc_detail(self,is_submit = 0)
-		
-		# 6.Update Bin	
 		self.update_bin( is_submit = 0, is_stopped = 0)
-		
-		# Step 7 :=> Update last purchase rate 
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
-		
-#----------- code for Sub-contracted Items -------------------
-	#--------check for sub-contracted items and accordingly update PO raw material detail table--------
-	def update_rw_material_detail(self):
-		for d in getlist(self.doclist,'po_details'):
-			item_det = sql("select is_sub_contracted_item, is_purchase_item from `tabItem` where name = '%s'"%(d.item_code))
-			
-			if item_det[0][0] == 'Yes':
-				if item_det[0][1] == 'Yes':
-					if not self.doc.is_subcontracted:
-						msgprint("Please enter whether purchase order to be made for subcontracting or for purchasing in 'Is Subcontracted' field .")
-						raise Exception
-					if self.doc.is_subcontracted == 'Yes':
-						self.add_bom(d)
-					else:
-						self.doclist = self.doc.clear_table(self.doclist,'po_raw_material_details',1)
-						self.doc.save()
-				elif item_det[0][1] == 'No':
-					self.add_bom(d)
 				
-			self.delete_irrelevant_raw_material()
-			#---------------calculate amt in	Purchase Order Item Supplied-------------
-			
-	def add_bom(self, d):
-		#----- fetching default bom from Bill of Materials instead of Item Master --
-		bom_det = sql("""select t1.item, t2.item_code, t2.qty_consumed_per_unit, 
-			t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.parent 
-			from `tabBOM` t1, `tabBOM Item` t2 
-			where t2.parent = t1.name and t1.item = %s 
-				and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1""", (d.item_code,))
-		
-		if not bom_det:
-			msgprint("No default BOM exists for item: %s" % d.item_code)
-			raise Exception
-		else:
-			#-------------- add child function--------------------
-			chgd_rqd_qty = []
-			for i in bom_det:
-				if i and not sql("select name from `tabPurchase Order Item Supplied` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
-
-					rm_child = addchild(self.doc, 'po_raw_material_details', 'Purchase Order Item Supplied', self.doclist)
-
-					rm_child.reference_name = d.name
-					rm_child.bom_detail_no = i and i[6] or ''
-					rm_child.main_item_code = i and i[0] or ''
-					rm_child.rm_item_code = i and i[1] or ''
-					rm_child.stock_uom = i and i[5] or ''
-					rm_child.rate = i and flt(i[3]) or flt(i[4])
-					rm_child.conversion_factor = d.conversion_factor
-					rm_child.required_qty = flt(i	and flt(i[2]) or 0) * flt(d.qty) * flt(d.conversion_factor)
-					rm_child.amount = flt(flt(rm_child.consumed_qty)*flt(rm_child.rate))
-					rm_child.save()
-					chgd_rqd_qty.append(cstr(i[1]))
-				else:
-					act_qty = flt(i	and flt(i[2]) or 0) * flt(d.qty) * flt(d.conversion_factor)
-					for po_rmd in getlist(self.doclist, 'po_raw_material_details'):
-						if i and i[6] == po_rmd.bom_detail_no and (flt(act_qty) != flt(po_rmd.required_qty) or i[1] != po_rmd.rm_item_code):
-							chgd_rqd_qty.append(cstr(i[1]))
-							po_rmd.main_item_code = i[0]
-							po_rmd.rm_item_code = i[1]
-							po_rmd.stock_uom = i[5]
-							po_rmd.required_qty = flt(act_qty)
-							po_rmd.rate = i and flt(i[3]) or flt(i[4])
-							po_rmd.amount = flt(flt(po_rmd.consumed_qty)*flt(po_rmd.rate))
-							
-
-	# Delete irrelevant raw material from PR Raw material details
-	#--------------------------------------------------------------	
-	def delete_irrelevant_raw_material(self):
-		for d in getlist(self.doclist,'po_raw_material_details'):
-			if not sql("select name from `tabPurchase Order Item` where name = '%s' and parent = '%s'and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
-				d.parent = 'old_par:'+self.doc.name
-				d.save()
-		
-	# On Update
-	# ----------------------------------------------------------------------------------------------------		
 	def on_update(self):
-		self.update_rw_material_detail()
+		pass
 		
-
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)	
 	
