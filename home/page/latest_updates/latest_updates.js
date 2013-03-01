@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["1st March", [
+		"Time Log, Time Log Batch: Created feature to batch Time Logs so that they can be tracked for billing."
+	]],
 	["27th February", [
 		"Time Log: Created Time Log System, with Calendar View."
 	]],
