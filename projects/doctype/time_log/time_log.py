@@ -23,10 +23,10 @@ class DocType:
 
 	def set_status(self):
 		self.doc.status = {
-			"0": "Draft",
-			"1": "Submitted",
-			"2": "Cancelled"
-		}[str(self.doc.docstatus or 0)]
+			0: "Draft",
+			1: "Submitted",
+			2: "Cancelled"
+		}[self.doc.docstatus or 0]
 		
 		if self.doc.time_log_batch:
 			self.doc.status="Batched for Billing"

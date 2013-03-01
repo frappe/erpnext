@@ -214,7 +214,8 @@ class DocType(BuyingController):
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = sql("select inspection_required from `tabItem` where name = %s", (d.item_code), as_dict = 1)
+			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
+				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
 				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create Quality Inspection")
@@ -289,17 +290,17 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def validate_for_subcontracting(self):
-		if self.sub_contracted_items and self.purchase_items and not self.doc.is_subcontracted:
+		if not self.doc.is_subcontracted and self.sub_contracted_items:
 			webnotes.msgprint(_("""Please enter whether Purchase Recipt is made for subcontracting 
 				or purchasing, in 'Is Subcontracted' field"""), raise_exception=1)
 			
-		if self.doc.is_subcontracted and not self.doc.supplier_warehouse:
+		if self.doc.is_subcontracted=="Yes" and not self.doc.supplier_warehouse:
 			webnotes.msgprint(_("Please Enter Supplier Warehouse for subcontracted Items"), 
 				raise_exception=1)
 				
 	def update_raw_materials_supplied(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'pr_raw_material_details')
-		if self.sub_contracted_items:
+		if self.doc.is_subcontracted=="Yes":
 			for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
 				if item.item_code in self.sub_contracted_items:
 					self.add_bom_items(item)

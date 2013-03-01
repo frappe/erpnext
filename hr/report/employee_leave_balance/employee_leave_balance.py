@@ -33,6 +33,7 @@ def execute(filters=None):
 	for leave_type in leave_types:
 		columns.append(leave_type + " Allocated:Float")
 		columns.append(leave_type + " Taken:Float")
+		columns.append(leave_type + " Balance:Float")
 
 	data = {}
 	for d in allocations:
@@ -52,5 +53,6 @@ def execute(filters=None):
 				tmp = data.get((fiscal_year, employee.name, leave_type), webnotes._dict())
 				row.append(tmp.allocation or 0)
 				row.append(tmp.leaves or 0)
+				row.append((tmp.allocation or 0) - (tmp.leaves or 0))
 
 	return columns, result

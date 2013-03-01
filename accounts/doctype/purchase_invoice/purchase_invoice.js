@@ -33,6 +33,21 @@ erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.exten
 		}
 		
 		cur_frm.cscript.is_opening(doc);
+	},
+	onload_post_render: function(doc, dt, dn) {	
+		var me = this;	
+		var callback1 = function(doc, dt, dn) {
+			var callback2 = function(doc, dt, dn) {
+				if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc, dt, dn);			
+			}
+			me.update_item_details(doc, dt, dn, callback2);
+		}
+		
+		// TODO: improve this
+		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
+				&& this.frm.doc.price_list_name) {
+			this.price_list_name(callback1);
+		}
 	}
 });
 
@@ -44,16 +59,6 @@ $.extend(cur_frm.cscript, new_cscript);
 
 cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-}
-
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback = function(doc, dt, dn) {
-		if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
-	}
-
-	// defined in purchase_common.js
-	cur_frm.cscript.update_item_details(doc, dt, dn, callback);
-	
 }
 
 cur_frm.cscript.supplier = function(doc,dt,dn) {
