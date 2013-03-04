@@ -10,7 +10,7 @@ def execute():
 			if not webnotes.conn.exists("Task", tsd.task_id):
 				tsd.task_id = None
 				
-			tl = webnotes.doc({
+			tl = webnotes.bean({
 				"doctype": "Time Log",
 				"status": "Draft",
 				"from_time": ts.doc.timesheet_date + " " + tsd.act_start_time,
@@ -22,4 +22,7 @@ def execute():
 				"file_list": ts.doc.file_list,
 				"_user_tags": ts.doc._user_tags
 			})
-			tl.insert()
+			tl.make_obj()
+			tl.controller.set_status()
+			tl.controller.calculate_total_hours()
+			tl.doc.insert()
