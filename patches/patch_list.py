@@ -203,4 +203,5 @@ patch_list = [
 	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
 	"patches.february_2013.p09_remove_cancelled_warehouses",
 	"patches.march_2013.update_po_prevdoc_doctype",
+	"patches.february_2013.p09_timesheets",
 ]

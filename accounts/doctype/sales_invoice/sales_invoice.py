@@ -108,6 +108,8 @@ class DocType(SellingController):
 		self.update_time_log_batch(self.doc.name)
 		self.convert_to_recurring()
 
+	def before_cancel(self):
+		self.update_time_log_batch(None)
 
 	def on_cancel(self):
 		if cint(self.doc.is_pos) == 1:
@@ -122,8 +124,7 @@ class DocType(SellingController):
 		sales_com_obj.check_stop_sales_order(self)
 		self.check_next_docstatus()
 		sales_com_obj.update_prevdoc_detail(0, self)
-
-		self.update_time_log_batch(None)
+		
 		self.make_gl_entries(is_cancel=1)
 
 	def on_update_after_submit(self):

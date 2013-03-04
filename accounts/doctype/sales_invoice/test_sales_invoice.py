@@ -33,10 +33,10 @@ class TestSalesInvoice(unittest.TestCase):
 		tlb = webnotes.bean("Time Log Batch", "_T-Time Log Batch-00001")
 		tlb.submit()
 		
-		w = webnotes.bean(webnotes.copy_doclist(test_records[0]))
-		w.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
-		w.insert()
-		w.submit()
+		si = webnotes.bean(webnotes.copy_doclist(test_records[0]))
+		si.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
+		si.insert()
+		si.submit()
 		
 		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
 			"Billed")
@@ -44,7 +44,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Billed")
 
-		w.cancel()
+		si.cancel()
 
 		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
 			"Submitted")
