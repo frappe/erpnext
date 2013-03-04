@@ -12,7 +12,11 @@ def execute():
 		custom_field.doctype = "Custom Field"
 		custom_field.dt = "Time Log"
 		custom_field.insert_after = None
-		cf = webnotes.bean(custom_field).insert()
+		try:
+			cf = webnotes.bean(custom_field).insert()
+		except Exception, e:
+			# duplicate custom field
+			pass
 	
 	for name in webnotes.conn.sql_list("""select name from tabTimesheet"""):
 		ts = webnotes.bean("Timesheet", name)
