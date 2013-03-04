@@ -103,8 +103,10 @@ class DocType:
 	def get_carry_forwarded_leaves(self):
 		if self.doc.carry_forward:
 			self.allow_carry_forward()
-		prev_fiscal_year = sql("""select name from `tabFiscal Year`
-			where name < %s order by name desc limit 1""", self.doc.fiscal_year)
+		prev_fiscal_year = webnotes.conn.sql("""select name from `tabFiscal Year` 
+			where year_start_date = (select date_add(year_start_date, interval -1 year) 
+				from `tabFiscal Year` where name=%s) 
+			order by name desc limit 1""", self.doc.fiscal_year)
 		prev_fiscal_year = prev_fiscal_year and prev_fiscal_year[0][0] or ''
 		prev_bal = 0
 		if prev_fiscal_year and cint(self.doc.carry_forward) == 1:

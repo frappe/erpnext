@@ -17,14 +17,16 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
-from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, get_url_to_form
+from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
+	get_url_to_form, get_fullname
 from webnotes.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 content_sequence = [
-	["Accounts", ["income_year_to_date", "bank_balance",
-		"income", "expenses_booked", "collections", "payments",
+	["Income / Expenses", ["income_year_to_date", "bank_balance",
+		"income", "expenses_booked"]],
+	["Receivables / Payables", ["collections", "payments",
 		"invoiced_amount", "payables"]],
 	["Buying", ["new_purchase_requests", "new_supplier_quotations", "new_purchase_orders"]],
 	["Selling", ["new_leads", "new_enquiries", "new_quotations", "new_sales_orders"]], 
@@ -53,7 +55,8 @@ row_template = """<p style="%(style)s">
 	<span style="color: grey">%(currency)s</span>%(value)s
 </span></p>"""
 
-class DocType:
+from webnotes.model.controller import DocListController
+class DocType(DocListController):
 	def __init__(self, doc, doclist=[]):
 		self.doc, self.doclist = doc, doclist
 		self.from_date, self.to_date = self.get_from_to_date()
@@ -156,7 +159,7 @@ class DocType:
 	
 	def get_income_year_to_date(self):
 		return self.get_income(webnotes.conn.get_defaults("year_start_date"), 
-			"Income Year To Date")
+			self.meta.get_label("income_year_to_date"))
 			
 	def get_bank_balance(self):
 		# account is of type "Bank or Cash"
@@ -186,7 +189,8 @@ class DocType:
 			if gle["account"] in accounts:
 				income += gle["credit"] - gle["debit"]
 		
-		return income, self.get_html(label or "Income", self.currency, fmt_money(income))
+		return income, self.get_html(label or self.meta.get_label("income"), self.currency,
+			fmt_money(income))
 		
 	def get_expenses_booked(self):
 		# account is PL Account and Debit type account
@@ -198,13 +202,14 @@ class DocType:
 			if gle["account"] in accounts:
 				expense += gle["debit"] - gle["credit"]
 		
-		return expense, self.get_html("Expenses", self.currency, fmt_money(expense))
+		return expense, self.get_html(self.meta.get_label("expenses_booked"), self.currency,
+			fmt_money(expense))
 	
 	def get_collections(self):
-		return self.get_party_total("Customer", "credit", "Collections")
+		return self.get_party_total("Customer", "credit", self.meta.get_label("collections"))
 	
 	def get_payments(self):
-		return self.get_party_total("Supplier", "debit", "Payments")
+		return self.get_party_total("Supplier", "debit", self.meta.get_label("payments"))
 		
 	def get_party_total(self, party_type, gle_field, label):
 		import re
@@ -222,16 +227,17 @@ class DocType:
 			# check that its made against a bank or cash account
 			if gle["account"] in accounts and gle["against"] and \
 					bc_regex.findall(gle["against"]):
-				total += gle[gle_field]
-
+				val = gle["debit"] - gle["credit"]
+				total += (gle_field=="debit" and 1 or -1) * val
+				
 		return total, self.get_html(label, self.currency, fmt_money(total))
 		
 	def get_invoiced_amount(self):
 		# aka receivables
-		return self.get_booked_total("Customer", "debit", "Receivables")
+		return self.get_booked_total("Customer", "debit", self.meta.get_label("invoiced_amount"))
 
 	def get_payables(self):
-		return self.get_booked_total("Supplier", "credit", "Payables")
+		return self.get_booked_total("Supplier", "credit", self.meta.get_label("payables"))
 		
 	def get_booked_total(self, party_type, gle_field, label):
 		# account is of master_type Customer or Supplier
@@ -246,45 +252,46 @@ class DocType:
 		return total, self.get_html(label, self.currency, fmt_money(total))
 		
 	def get_new_leads(self):
-		return self.get_new_count("Lead", "New Leads")
+		return self.get_new_count("Lead", self.meta.get_label("new_leads"))
 		
 	def get_new_enquiries(self):
-		return self.get_new_count("Opportunity", "New Opportunities")
+		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"))
 	
 	def get_new_quotations(self):
-		return self.get_new_sum("Quotation", "New Quotations", "grand_total")
+		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total")
 		
 	def get_new_sales_orders(self):
-		return self.get_new_sum("Sales Order", "New Sales Orders", "grand_total")
+		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total")
 		
 	def get_new_delivery_notes(self):
-		return self.get_new_sum("Delivery Note", "New Delivery Notes", "grand_total")
+		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total")
 		
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Material Request", "New Material Requests")
+		return self.get_new_count("Material Request", self.meta.get_label("new_purchase_requests"))
 		
 	def get_new_supplier_quotations(self):
-		return self.get_new_sum("Supplier Quotation", "New Supplier Quotations",
+		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
 			"grand_total")
 	
 	def get_new_purchase_orders(self):
-		return self.get_new_sum("Purchase Order", "New Purchase Orders", "grand_total")
+		return self.get_new_sum("Purchase Order", self.meta.get_label("new_purchase_orders"),
+			"grand_total")
 	
 	def get_new_purchase_receipts(self):
-		return self.get_new_sum("Purchase Receipt", "New Purchase Receipts",
+		return self.get_new_sum("Purchase Receipt", self.meta.get_label("new_purchase_receipts"),
 			"grand_total")
 	
 	def get_new_stock_entries(self):
-		return self.get_new_sum("Stock Entry", "New Stock Entries", "total_amount")
+		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount")
 		
 	def get_new_support_tickets(self):
-		return self.get_new_count("Support Ticket", "New Support Tickets", False)
+		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"), False)
 		
 	def get_new_communications(self):
-		return self.get_new_count("Communication", "New Communications", False)
+		return self.get_new_count("Communication", self.meta.get_label("new_communications"), False)
 		
 	def get_new_projects(self):
-		return self.get_new_count("Project", "New Projects", False)
+		return self.get_new_count("Project", self.meta.get_label("new_projects"), False)
 		
 	def get_calendar_events(self, user_id):
 		from core.doctype.event.event import get_events
@@ -302,7 +309,10 @@ class DocType:
 					html += "<li style='line-height: 200%%'>%s [%s - %s]</li>" % \
 						(e.subject, datetime_in_user_format(e.starts_on), datetime_in_user_format(e.ends_on))
 		
-		return html and 1 or 0, "<h4>Upcoming Calendar Events (max 10):</h4><ul>" + html + "</ul><hr>"
+		if html:
+			return 1, "<h4>Upcoming Calendar Events (max 10):</h4><ul>" + html + "</ul><hr>"
+		else:
+			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
 		from utilities.page.todo.todo import get
@@ -313,11 +323,17 @@ class DocType:
 			for i, todo in enumerate([todo for todo in todo_list if not todo.checked]):
 				if i>= 10:
 					break
-				html += "<li style='line-height: 200%%'>%s [%s]</li>" % (todo.description or \
-					get_url_to_form(todo.reference_type, todo.reference_name), todo.priority)
+				if not todo.description and todo.reference_type:
+					todo.description = "%s: %s - %s %s" % \
+					(todo.reference_type, get_url_to_form(todo.reference_type, todo.reference_name),
+					_("assigned by"), get_fullname(todo.assigned_by))
+					
+				html += "<li style='line-height: 200%%'>%s [%s]</li>" % (todo.description, todo.priority)
 				
-			
-		return html and 1 or 0, "<h4>To Do (max 10):</h4><ul>" + html + "</ul><hr>"
+		if html:
+			return 1, "<h4>To Do (max 10):</h4><ul>" + html + "</ul><hr>"
+		else:
+			return 0, "<p>To Do</p>"
 	
 	def get_new_count(self, doctype, label, filter_by_company=True):
 		if filter_by_company:
@@ -376,7 +392,7 @@ class DocType:
 			self.accounts = webnotes.conn.sql("""select name, is_pl_account,
 				debit_or_credit, account_type, account_name, master_type
 				from `tabAccount` where company=%s and docstatus < 2
-				order by lft""",
+				and group_or_ledger = "Ledger" order by lft""",
 				(self.doc.company,), as_dict=1)
 		return self.accounts
 		
@@ -449,7 +465,7 @@ class DocType:
 	
 	def onload(self):
 		self.get_next_sending()
-
+	
 def send():
 	from webnotes.model.code import get_obj
 	from webnotes.utils import getdate

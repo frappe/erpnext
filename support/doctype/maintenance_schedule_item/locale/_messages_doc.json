@@ -10,11 +10,11 @@
  "Support", 
  "Random", 
  "Serial No", 
+ "Quarterly", 
  "Against Docname", 
  "Half Yearly", 
  "Incharge Name", 
- "Quarterly", 
  "Start Date", 
- "Item Code", 
- "Weekly"
+ "Weekly", 
+ "Item Code"
 ]

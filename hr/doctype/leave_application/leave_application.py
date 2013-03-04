@@ -22,6 +22,7 @@ from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_
 from webnotes import msgprint
 
 class LeaveDayBlockedError(Exception): pass
+class OverlapError(Exception): pass
 	
 from webnotes.model.controller import DocListController
 class DocType(DocListController):
@@ -36,6 +37,7 @@ class DocType(DocListController):
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
+		self.show_block_day_warning()
 		self.validate_block_days()
 		
 	def on_update(self):
@@ -60,6 +62,17 @@ class DocType(DocListController):
 		# notify leave applier about cancellation
 		self.notify_employee("cancelled")
 
+	def show_block_day_warning(self):
+		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates		
+
+		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
+			self.doc.employee, self.doc.company, all_lists=True)
+			
+		if block_dates:
+			webnotes.msgprint(_("Warning: Leave application contains following block dates") + ":")
+			for d in block_dates:
+				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
+
 	def validate_block_days(self):
 		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
@@ -67,11 +80,8 @@ class DocType(DocListController):
 			self.doc.employee, self.doc.company)
 			
 		if block_dates:
-			webnotes.msgprint(_("Following dates are blocked for Leave") + ":")
-			for d in block_dates:
-				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
-				
 			if self.doc.status == "Approved":
+				webnotes.msgprint(_("Cannot approve leave as you are not authorized to approve leaves on Block Dates."))
 				raise LeaveDayBlockedError
 			
 	def get_holidays(self):
@@ -120,17 +130,22 @@ class DocType(DocListController):
 						(self.doc.leave_type,), raise_exception=1)
 
 	def validate_leave_overlap(self):
+		if not self.doc.name:
+			self.doc.name = "New Leave Application"
+			
 		for d in webnotes.conn.sql("""select name, leave_type, posting_date, 
 			from_date, to_date 
 			from `tabLeave Application` 
 			where 
-			(from_date <= %(to_date)s and to_date >= %(from_date)s)
-			and employee = %(employee)s
+			employee = %(employee)s
 			and docstatus < 2
 			and status in ("Open", "Approved")
+			and (from_date between %(from_date)s and %(to_date)s 
+				or to_date between %(from_date)s and %(to_date)s
+				or %(from_date)s between from_date and to_date)
 			and name != %(name)s""", self.doc.fields, as_dict = 1):
  
-			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = 1)
+			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 
 	def validate_max_days(self):
 		max_days = webnotes.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
@@ -156,7 +171,6 @@ class DocType(DocListController):
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": employee.user_id,
-			
 			"subject": _get_message(),
 		})
 		
@@ -199,7 +213,7 @@ def get_leave_balance(employee, leave_type, fiscal_year):
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
 		where employee = %s and leave_type = %s and fiscal_year = %s
-		and docstatus = 1""", (employee, leave_type, fiscal_year))
+		and status="Approved" and docstatus = 1""", (employee, leave_type, fiscal_year))
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
 	
 	ret = {'leave_balance': leave_all - leave_app}
@@ -225,17 +239,14 @@ def get_events(start, end):
 	company = webnotes.conn.get_default("company", webnotes.session.user)
 	
 	from webnotes.widgets.reportview import build_match_conditions
-	match_conditions = build_match_conditions({"doctype": "Leave Application"})
+	match_conditions = build_match_conditions("Leave Application")
 	
 	# show department leaves for employee
-	show_department_leaves = match_conditions and \
-		len(match_conditions.split("or"))==1 and "employee" in match_conditions
-	
-	if show_department_leaves:
+	if "Employee" in webnotes.get_roles():
 		add_department_leaves(events, start, end, employee, company)
-	else:
-		add_leaves(events, start, end, employee, company, match_conditions)
-		
+
+	add_leaves(events, start, end, employee, company, match_conditions)
+	
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
 	
@@ -265,7 +276,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 		query += " and " + match_conditions
 	
 	for d in webnotes.conn.sql(query, (start, end, start, end), as_dict=True):
-		events.append({
+		e = {
 			"name": d.name,
 			"doctype": "Leave Application",
 			"from_date": d.from_date,
@@ -274,7 +285,9 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 			"title": _("Leave by") + " " +  cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 			"docstatus": d.docstatus
-		})
+		}
+		if e not in events:
+			events.append(e)
 
 def add_block_dates(events, start, end, employee, company):
 	# block days

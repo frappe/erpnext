@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:01:19", 
+  "modified": "2013-02-22 11:06:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,20 +25,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Project", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "role": "Projects User", 
-  "submit": 0, 
-  "write": 1
+  "role": "Projects User"
  }, 
  {
   "doctype": "DocType", 
@@ -291,88 +284,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "customer_name", 
-  "fieldtype": "Data", 
-  "in_filter": 1, 
-  "label": "Customer Name", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_address", 
-  "fieldtype": "Small Text", 
-  "label": "Customer Address", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_address", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_person", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Contact Person", 
-  "no_copy": 0, 
-  "oldfieldname": "contact_person", 
-  "oldfieldtype": "Link", 
-  "options": "Contact", 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Territory", 
-  "oldfieldname": "territory", 
-  "oldfieldtype": "Link", 
-  "options": "Territory", 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_no", 
-  "fieldtype": "Data", 
-  "label": "Contact No", 
-  "no_copy": 0, 
-  "oldfieldname": "contact_no", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "email_id", 
-  "fieldtype": "Data", 
-  "label": "Email Id", 
-  "no_copy": 0, 
-  "oldfieldname": "email_id", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_group", 
-  "fieldtype": "Link", 
-  "label": "Customer Group", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_group", 
-  "oldfieldtype": "Link", 
-  "options": "Customer Group", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
@@ -394,6 +305,16 @@
   "search_index": 0
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]

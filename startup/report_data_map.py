@@ -87,7 +87,7 @@ data_map = {
 	},
 	"Stock Ledger Entry": {
 		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
-			"voucher_type", "voucher_no", "ifnull(incoming_rate,0) as incoming_rate"],
+			"voucher_type", "voucher_no", "ifnull(incoming_rate,0) as incoming_rate", "stock_uom"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
@@ -117,8 +117,7 @@ data_map = {
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"material_request_type = 'Purchase'", "ifnull(warehouse, '')!=''", 
-			"ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

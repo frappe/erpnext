@@ -207,3 +207,4 @@ class DocType:
 				exists for this warehouse.""", raise_exception=1)
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
+

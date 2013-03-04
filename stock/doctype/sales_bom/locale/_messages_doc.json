@@ -1,7 +1,7 @@
 [
  "Package Items", 
  "Sales BOM Items", 
- "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials", 
+ "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
  "List items that form the package.", 
  "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"", 
  "Sales BOM Item", 

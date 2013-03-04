@@ -1,4 +1,0 @@
-{
- "Manufacturing Home": "Accueil Fabrication", 
- "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM": "Remplacer une nomenclature particuli\u00e8re dans toutes les nomenclatures d&#39;autres o\u00f9 il est utilis\u00e9. Il remplacera le lien de nomenclature ancienne, mettre \u00e0 jour les co\u00fbts et r\u00e9g\u00e9n\u00e9rer &quot;Explosion de nomenclature article&quot; la table comme pour une nouvelle nomenclature"
-}

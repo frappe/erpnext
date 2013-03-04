@@ -1,14 +1,14 @@
 [
  "Status", 
- "Amendment Date", 
  "Timesheet By", 
  "Notes", 
  "Timesheet", 
- "Submitted", 
- "Draft", 
  "Timesheet Date", 
- "Timesheet Details", 
+ "Amendment Date", 
  "Cancelled", 
+ "Draft", 
+ "Submitted", 
+ "Timesheet Details", 
  "Amended From", 
  "Projects"
 ]

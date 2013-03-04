@@ -1,0 +1,23 @@
+{
+ "Check this if you want to show in website": "Aktivieren Sie diese Option, wenn Sie in der Website zeigen wollen", 
+ "Description": "Beschreibung", 
+ "File List": "Dateiliste", 
+ "HTML / Banner that will show on the top of product list.": "HTML / Banner, die auf der Oberseite des Produkt-Liste zeigen.", 
+ "Has Child Node": "Hat Child Node", 
+ "Item Classification": "Artikel Klassifizierung", 
+ "Item Group": "Artikel-Gruppe", 
+ "Item Group Name": "Artikel Group Name", 
+ "No": "Auf", 
+ "Only leaf nodes are allowed in transaction": "Nur Blattknoten in Transaktion zul\u00e4ssig", 
+ "Page Name": "Page Name", 
+ "Parent Item Group": "\u00dcbergeordneter Artikel Gruppe", 
+ "Setup": "Setup", 
+ "Show in Website": "Zeigen Sie im Website", 
+ "Show this slideshow at the top of the page": "Zeige diese Slideshow an der Spitze der Seite", 
+ "Slideshow": "Slideshow", 
+ "Website Settings": "Website-Einstellungen", 
+ "Yes": "Ja", 
+ "lft": "lft", 
+ "old_parent": "old_parent", 
+ "rgt": "rgt"
+}

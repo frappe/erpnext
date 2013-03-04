@@ -113,6 +113,14 @@ class BuyingController(AccountsController):
 
 		for item in self.item_doclist:
 			round_floats_in_doc(item, self.precision.item)
+			
+			# hack! - cleaned up in _cleanup()
+			if self.doc.doctype != "Purchase Invoice":
+				item.rate = item.purchase_rate
+				self.precision.item.rate = self.precision.item.purchase_rate
+				
+				item.discount = item.discount_rate
+				self.precision.item.discount = self.precision.item.discount_rate
 
 			if item.discount == 100:
 				if not item.import_ref_rate:
@@ -128,10 +136,10 @@ class BuyingController(AccountsController):
 					item.import_ref_rate = flt(item.import_rate / 
 						(1.0 - (item.discount_rate / 100.0)),
 						self.precision.item.import_ref_rate)
-
+						
 			item.import_amount = flt(item.import_rate * item.qty,
 				self.precision.item.import_amount)
-
+				
 			_set_base(item, "import_ref_rate", "purchase_ref_rate")
 			_set_base(item, "import_rate", "rate")
 			_set_base(item, "import_amount", "amount")
@@ -224,7 +232,7 @@ class BuyingController(AccountsController):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total,
 				self.precision.main.grand_total)
-			self.doc.grand_total_print = flt(
+			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
 				self.precision.main.grand_total_import)
 
@@ -242,7 +250,9 @@ class BuyingController(AccountsController):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus == 0:
 			self.doc.total_advance = flt(self.doc.total_advance,
 				self.precision.main.total_advance)
-			self.doc.outstanding_amount = flt(self.doc.grand_total - self.doc.total_advance,
+			self.doc.total_amount_to_pay = flt(self.doc.grand_total - flt(self.doc.write_off_amount,
+				self.precision.main.write_off_amount), self.precision.main.total_amount_to_pay)
+			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
 				self.precision.main.outstanding_amount)
 			
 	def _cleanup(self):
@@ -256,6 +266,9 @@ class BuyingController(AccountsController):
 			for item in self.item_doclist:
 				item.purchase_rate = item.rate
 				del item.fields["rate"]
+				
+				item.discount_rate = item.discount
+				del item.fields["discount"]
 		
 	def validate_on_previous_row(self, tax):
 		"""
@@ -314,17 +327,83 @@ class BuyingController(AccountsController):
 				item.item_code in self.stock_items:
 			item.item_tax_amount += flt(current_tax_amount,
 				self.precision.item.item_tax_amount)
-	
-	@property
-	def stock_items(self):
-		if not hasattr(self, "_stock_items"):
-			item_codes = list(set(item.item_code for item in self.item_doclist))
-			self._stock_items = [r[0] for r in webnotes.conn.sql("""select name
-				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
-				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+				
+	# update valuation rate
+	def update_valuation_rate(self, parentfield):
+		for d in self.doclist.get({"parentfield": parentfield}):
+			d.conversion_factor = d.conversion_factor or webnotes.conn.get_value(
+				"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
+				"conversion_factor") or 1
+			if d.item_code and d.qty:
+				# if no item code, which is sometimes the case in purchase invoice, 
+				# then it is not possible to track valuation against it
+				d.valuation_rate = (flt(d.purchase_rate or d.rate)
+					+ (flt(d.item_tax_amount) + flt(d.rm_supp_cost)) / flt(d.qty)
+					) / flt(d.conversion_factor)
+			else:
+				d.valuation_rate = 0.0
+				
+	def validate_for_subcontracting(self):
+		if not self.doc.is_subcontracted and self.sub_contracted_items:
+			webnotes.msgprint(_("""Please enter whether %s is made for subcontracting or purchasing,
+			 	in 'Is Subcontracted' field""" % self.doc.doctype), raise_exception=1)
+			
+		if self.doc.doctype == "Purchase Receipt" and self.doc.is_subcontracted=="Yes" \
+			and not self.doc.supplier_warehouse:
+				webnotes.msgprint(_("Supplier Warehouse mandatory subcontracted purchase receipt"), 
+					raise_exception=1)
+										
+	def update_raw_materials_supplied(self, raw_material_table):
+		self.doclist = self.doc.clear_table(self.doclist, raw_material_table)
+		if self.doc.is_subcontracted=="Yes":
+			for item in self.doclist.get({"parentfield": self.fname}):
+				if item.item_code in self.sub_contracted_items:
+					self.add_bom_items(item, raw_material_table)
 
-		return self._stock_items
+	def add_bom_items(self, d, raw_material_table):
+		bom_items = self.get_items_from_default_bom(d.item_code)
+		raw_materials_cost = 0
+		for item in bom_items:
+			required_qty = flt(item.qty_consumed_per_unit) * flt(d.qty) * flt(d.conversion_factor)
+			rm_doclist = {
+				"parentfield": raw_material_table,
+				"doctype": self.doc.doctype + " Item Supplied",
+				"reference_name": d.name,
+				"bom_detail_no": item.name,
+				"main_item_code": d.item_code,
+				"rm_item_code": item.item_code,
+				"stock_uom": item.stock_uom,
+				"required_qty": required_qty,
+				"conversion_factor": d.conversion_factor,
+				"rate": item.rate,
+				"amount": required_qty * flt(item.rate)
+			}
+			if self.doc.doctype == "Purchase Receipt":
+				rm_doclist.update({
+					"consumed_qty": required_qty,
+					"description": item.description,
+				})
+				
+			self.doclist.append(rm_doclist)
+			
+			raw_materials_cost += required_qty * flt(item.rate)
+			
+		if self.doc.doctype == "Purchase Receipt":
+			d.rm_supp_cost = raw_materials_cost
+
+	def get_items_from_default_bom(self, item_code):
+		# print webnotes.conn.sql("""select name from `tabBOM` where item = '_Test FG Item'""")
+		bom_items = webnotes.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
+			t2.rate, t2.stock_uom, t2.name, t2.description 
+			from `tabBOM` t1, `tabBOM Item` t2 
+			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1 
+			and t1.docstatus = 1 and t1.is_active = 1""", item_code, as_dict=1)
+		if not bom_items:
+			msgprint(_("No default BOM exists for item: ") + item_code, raise_exception=1)
 		
+		return bom_items
+
+	
 	@property
 	def precision(self):
 		if not hasattr(self, "_precision"):
@@ -335,3 +414,25 @@ class BuyingController(AccountsController):
 				self._precision.tax = self.meta.get_precision_map(parentfield = \
 					"purchase_tax_details")
 		return self._precision
+
+	@property
+	def sub_contracted_items(self):
+		if not hasattr(self, "_sub_contracted_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._sub_contracted_items
+		
+	@property
+	def purchase_items(self):
+		if not hasattr(self, "_purchase_items"):
+			item_codes = list(set(item.item_code for item in 
+				self.doclist.get({"parentfield": self.fname})))
+			self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return self._purchase_items

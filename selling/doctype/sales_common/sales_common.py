@@ -384,36 +384,38 @@ class DocType(TransactionBase):
 	def get_item_list(self, obj, is_stopped=0):
 		"""get item list"""
 		il = []
-		for d in getlist(obj.doclist,obj.fname):
-			reserved_wh, reserved_qty = '', 0		# used for delivery note
-			qty = flt(d.qty)
-			if is_stopped:
-				qty = flt(d.qty) > flt(d.delivered_qty) and flt(flt(d.qty) - flt(d.delivered_qty)) or 0
+		for d in getlist(obj.doclist, obj.fname):
+			reserved_warehouse = ""
+			reserved_qty_for_main_item = 0
+			
+			if obj.doc.doctype == "Sales Order":
+				reserved_warehouse = d.reserved_warehouse
+				if flt(d.qty) > flt(d.delivered_qty):
+					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
-			if d.prevdoc_doctype == 'Sales Order':
-				# used in delivery note to reduce reserved_qty 
-				# Eg.: if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
-				# But in this case reserved qty should only be reduced by 10 and not 12.
+			if obj.doc.doctype == "Delivery Note" and d.prevdoc_doctype == 'Sales Order':
+				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
+				# But in this case reserved qty should only be reduced by 10 and not 12
+				
+				already_delivered_qty = self.get_already_delivered_qty(obj.doc.name, 
+					d.prevdoc_docname, d.prevdoc_detail_docname)
+				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
+				
+				if already_delivered_qty + d.qty > so_qty:
+					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
+				else:
+					reserved_qty_for_main_item = -flt(d.qty)
 
-				tot_qty, max_qty, tot_amt, max_amt, reserved_wh = self.get_curr_and_ref_doc_details(d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, obj.doc.name, obj.doc.doctype)
-				if((flt(tot_qty) + flt(qty) > flt(max_qty))):
-					reserved_qty = -(flt(max_qty)-flt(tot_qty))
-				else:	
-					reserved_qty = - flt(qty)
-					
-			if obj.doc.doctype == 'Sales Order':
-				reserved_wh = d.reserved_warehouse
-						
 			if self.has_sales_bom(d.item_code):
 				for p in getlist(obj.doclist, 'packing_details'):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append({
 							'warehouse': p.warehouse,
-							'reserved_warehouse': reserved_wh,
+							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
-							'reserved_qty': (flt(p.qty)/qty)*(reserved_qty),
+							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
@@ -422,10 +424,10 @@ class DocType(TransactionBase):
 			else:
 				il.append({
 					'warehouse': d.warehouse,
-					'reserved_warehouse': reserved_wh,
+					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
-					'qty': qty,
-					'reserved_qty': reserved_qty,
+					'qty': d.qty,
+					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
 					'batch_no': cstr(d.batch_no).strip(),
 					'serial_no': cstr(d.serial_no).strip(),
@@ -433,27 +435,20 @@ class DocType(TransactionBase):
 				})
 		return il
 
+	def get_already_delivered_qty(self, dn, so, so_detail):
+		qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Item` 
+			where prevdoc_detail_docname = %s and docstatus = 1 
+			and prevdoc_doctype = 'Sales Order' and prevdoc_docname = %s 
+			and parent != %s""", (so_detail, so, dn))
+		return qty and flt(qty[0][0]) or 0.0
 
-	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name, curr_parent_doctype):
-		""" Get qty, amount already billed or delivered against curr line item for current doctype
-			For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
-		"""
-		#Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
-		if curr_parent_doctype == 'Installation Note':
-			curr_det = webnotes.conn.sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
-		else:
-			curr_det = webnotes.conn.sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
+	def get_so_qty_and_warehouse(self, so_detail):
+		so_item = webnotes.conn.sql("""select qty, reserved_warehouse from `tabSales Order Item`
+			where name = %s and docstatus = 1""", so_detail, as_dict=1)
+		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
+		so_warehouse = so_item and so_item[0]["reserved_warehouse"] or ""
+		return so_qty, so_warehouse
 
-		# get total qty of ref doctype
-		so_det = webnotes.conn.sql("select qty, amount, reserved_warehouse from `tabSales Order Item` where name = '%s' and docstatus = 1"% ref_tab_dn)
-		max_qty, max_amt, res_wh = so_det and flt(so_det[0][0]) or 0, so_det and flt(so_det[0][1]) or 0, so_det and cstr(so_det[0][2]) or ''
-		return qty, max_qty, amt, max_amt, res_wh
-
-
-	# Make Packing List from Sales BOM
-	# =======================================================================
 	def has_sales_bom(self, item_code):
 		return webnotes.conn.sql("select name from `tabSales BOM` where new_item_code=%s and docstatus != 2", item_code)
 	

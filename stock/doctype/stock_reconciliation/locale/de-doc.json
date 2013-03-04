@@ -1,0 +1,12 @@
+{
+ "Amended From": "Ge\u00e4ndert von", 
+ "Posting Date": "Buchungsdatum", 
+ "Posting Time": "Posting Zeit", 
+ "Reconciliation Data": "Datenabgleich", 
+ "Reconciliation HTML": "HTML Vers\u00f6hnung", 
+ "Reconciliation JSON": "\u00dcberleitung JSON", 
+ "Stock": "Lager", 
+ "Stock Reconciliation": "Lager Vers\u00f6hnung", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Dieses Tool hilft Ihnen zu aktualisieren oder zu beheben die Menge und die Bewertung der Aktie im System. Es wird normalerweise verwendet, um das System abzugleichen und was tats\u00e4chlich existiert in Ihrem Lager.", 
+ "Upload HTML": "Hochladen HTML"
+}

@@ -1,0 +1,12 @@
+{
+ "Amended From": "Corrigido De", 
+ "Posting Date": "Data da Postagem", 
+ "Posting Time": "Hor\u00e1rio da Postagem", 
+ "Reconciliation Data": "Dados de reconcilia\u00e7\u00e3o", 
+ "Reconciliation HTML": "Reconcilia\u00e7\u00e3o HTML", 
+ "Reconciliation JSON": "Reconcilia\u00e7\u00e3o JSON", 
+ "Stock": "Estoque", 
+ "Stock Reconciliation": "Reconcilia\u00e7\u00e3o de Estoque", 
+ "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.": "Esta ferramenta ajuda a atualizar ou corrigir a quantidade e a valoriza\u00e7\u00e3o do estoque no sistema. Ela \u00e9 geralmente usada para sincronizar os valores do sistema e o que realmente existe em seus almoxarifados.", 
+ "Upload HTML": "Carregar HTML"
+}

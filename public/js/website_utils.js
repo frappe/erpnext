@@ -15,6 +15,7 @@ erpnext.send_message = function(opts) {
 			subject: opts.subject,
 			sender: opts.sender,
 			status: opts.status,
+			_type: "POST",
 			message: typeof opts.message == "string"
 				? opts.message
 				: JSON.stringify(opts.message)

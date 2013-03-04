@@ -3,7 +3,7 @@
  "From Date", 
  "Account Type", 
  "Pull Payment Entries", 
- "Total Amount", 
+ "Company", 
  "Journal Voucher", 
  "Payment to Invoice Matching Tool", 
  "Filter By Date", 
@@ -20,6 +20,6 @@
  "Voucher No", 
  "Filter By Amount", 
  "Accounts", 
- "Company", 
+ "Total Amount", 
  "Allocate"
 ]

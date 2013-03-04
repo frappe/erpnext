@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 20:53:00", 
+  "creation": "2013-02-11 10:54:51", 
   "docstatus": 0, 
-  "modified": "2013-02-08 14:06:17", 
+  "modified": "2013-02-27 18:10:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -281,6 +281,35 @@
   "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "valuation_rate", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Valuation Rate", 
+  "no_copy": 1, 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "label": "Conversion Factor", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rm_supp_cost", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Raw Materials Supplied Cost", 
+  "no_copy": 1, 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "allow_on_submit": 1, 

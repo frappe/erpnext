@@ -1,0 +1,14 @@
+{
+ "**Currency** Master": "** W\u00e4hrung ** Meister", 
+ "A symbol for this currency. For e.g. $": "Ein Symbol f\u00fcr diese W\u00e4hrung. F\u00fcr z.B. $", 
+ "Currency": "W\u00e4hrung", 
+ "Currency Name": "W\u00e4hrung Name", 
+ "Enabled": "Aktiviert", 
+ "Fraction": "Bruchteil", 
+ "Fraction Units": "Fraction Units", 
+ "How should this currency be formatted? If not set, will use system defaults": "Wie soll diese W\u00e4hrung formatiert werden? Wenn nicht gesetzt, verwenden Standardeinstellungen des Systems", 
+ "Number Format": "Number Format", 
+ "Setup": "Setup", 
+ "Sub-currency. For e.g. \"Cent\"": "Sub-W\u00e4hrung. F\u00fcr z.B. \"Cent\"", 
+ "Symbol": "Symbol"
+}

@@ -1,0 +1,14 @@
+{
+ "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.": "** Gesch\u00e4ftsjahr ** ein Gesch\u00e4ftsjahr. Alle Buchungen und anderen wichtigen Transaktionen gegen ** Gesch\u00e4ftsjahr ** verfolgt.", 
+ "Accounts": "Konten", 
+ "Entries are not allowed against this Fiscal Year if the year is closed.": "Die Eintr\u00e4ge sind nicht gegen diese Gesch\u00e4ftsjahr zul\u00e4ssig, wenn die Jahre geschlossen ist.", 
+ "Fiscal Year": "Gesch\u00e4ftsjahr", 
+ "Fiscal Year Details": "Gesch\u00e4ftsjahr Einzelheiten", 
+ "For e.g. 2012, 2012-13": "F\u00fcr z.B. 2012, 2012-13", 
+ "No": "Auf", 
+ "Trash Reason": "Trash Reason", 
+ "Year Closed": "Jahr geschlossen", 
+ "Year Name": "Jahr Name", 
+ "Year Start Date": "Jahr Startdatum", 
+ "Yes": "Ja"
+}

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-20 13:26:14", 
+  "creation": "2013-02-21 14:54:43", 
   "docstatus": 0, 
-  "modified": "2013-02-20 18:14:06", 
+  "modified": "2013-02-28 10:43:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,13 +28,14 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Item", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -596,7 +597,6 @@
   "label": "Price Lists and Rates"
  }, 
  {
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
   "doctype": "DocField", 
   "fieldname": "ref_rate_details", 
@@ -813,75 +813,26 @@
   "label": "Website Description"
  }, 
  {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material Master Manager", 
   "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Master Manager", 
+  "role": "Material Manager", 
   "write": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "System Manager", 
+  "role": "Material User", 
   "write": 0
  }
 ]

@@ -159,6 +159,17 @@ wn.module_page["HR"] = [
 				doctype: "Grade"
 			},
 		]
+	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Employee Leave Balance"),
+				route: "query-report/Employee Leave Balance"
+			},
+		]
 	}
 ];
 

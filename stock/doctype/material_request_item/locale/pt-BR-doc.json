@@ -1,0 +1,19 @@
+{
+ "Brand": "Marca", 
+ "Completed Qty": "Qtde conclu\u00edda", 
+ "Description": "Descri\u00e7\u00e3o", 
+ "Item Code": "C\u00f3digo do Item", 
+ "Item Group": "Grupo de Itens", 
+ "Item Name": "Nome do Item", 
+ "Lead Time Date": "Prazo de entrega", 
+ "Material Request Item": "Item de solicita\u00e7\u00e3o de material", 
+ "Min Order Qty": "Pedido M\u00ednimo", 
+ "Page Break": "Quebra de p\u00e1gina", 
+ "Projected Qty": "Qtde. Projetada", 
+ "Quantity": "Quantidade", 
+ "Required Date": "Data Obrigat\u00f3ria", 
+ "Sales Order No": "N\u00ba da Ordem de Venda", 
+ "Stock": "Estoque", 
+ "Stock UOM": "UDM do Estoque", 
+ "Warehouse": "Almoxarifado"
+}

@@ -1,0 +1,13 @@
+{
+ "Accounts": "Contas", 
+ "Bank Account": "Conta Banc\u00e1ria", 
+ "Bank Reconciliation": "Reconcilia\u00e7\u00e3o Banc\u00e1ria", 
+ "Company": "Empresa", 
+ "Entries": "Lan\u00e7amentos", 
+ "From Date": "A partir da data", 
+ "Get Non Reconciled Entries": "Obter lan\u00e7amentos n\u00e3o Reconciliados", 
+ "Select account head of the bank where cheque was deposited.": "Selecione a Conta do banco onde o cheque foi depositado.", 
+ "To Date": "At\u00e9 a Data", 
+ "Total Amount": "Valor Total", 
+ "Update Clearance Date": "Atualizar Data Liquida\u00e7\u00e3o"
+}

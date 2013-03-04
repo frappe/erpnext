@@ -1,17 +1,16 @@
 [
  "Customer", 
- "Profile", 
  "Account", 
  "Document to rename", 
  "Item", 
  "Company", 
  "Select DocType", 
  "Utilities", 
- "Warehouse", 
- "Serial No", 
  "Employee", 
- "New Name", 
+ "Warehouse", 
  "Supplier", 
+ "Profile", 
  "Rename Tool", 
- "Rename"
+ "Rename", 
+ "New Name"
 ]

@@ -12,13 +12,13 @@
  "Amended From", 
  "Get Items", 
  "Address", 
- "Remarks", 
  "Delivery Note No", 
  "Customer", 
- "Series", 
  "Name", 
  "The date at which current entry is corrected in the system.", 
+ "Customer Group", 
  "Submitted", 
+ "Remarks", 
  "Fiscal Year", 
  "Contact", 
  "Mobile No", 
@@ -30,5 +30,5 @@
  "Installation Date", 
  "Contact Email", 
  "Item Details", 
- "Customer Group"
+ "Series"
 ]

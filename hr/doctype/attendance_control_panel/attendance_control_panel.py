@@ -16,12 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-import webnotes.default
-
-from webnotes.utils import cint, cstr, date_diff, formatdate, getdate, now
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes import form, msgprint
+from webnotes.utils import cint, cstr, formatdate, getdate
+from webnotes import msgprint
 
 sql = webnotes.conn.sql
 	
@@ -49,13 +45,8 @@ class DocType:
 	# get date list inbetween from date and to date
 	def date_diff_list(self):
 		import datetime
-		#get from date 
-		att_fr_date = self.doc.att_fr_date and self.doc.att_fr_date or ''
-		
-		#get to date
-		att_to_date = self.doc.att_to_date and self.doc.att_to_date or ''
 
-		if att_to_date:
+		if self.doc.att_to_date:
 			r = (getdate(self.doc.att_to_date)+datetime.timedelta(days=1)-getdate(self.doc.att_fr_date)).days
 		else:
 			r = 1
@@ -65,6 +56,7 @@ class DocType:
 		return dt
 
 	def get_att_data(self):
+		import webnotes.defaults
 		fy = webnotes.defaults.get_global_default('fiscal_year')
 		comp = webnotes.defaults.get_user_default('company')
 		

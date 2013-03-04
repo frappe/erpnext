@@ -1,11 +1,12 @@
 [
  "New Leave Application", 
- "Following dates are blocked for Leave", 
- "Hurray! The day(s) on which you are applying for leave \\\t\t\t\t\tcoincide with holiday(s). You need not apply for leave.", 
+ "Hurray! The day(s) on which you are applying for leave \\\n\t\t\t\t\tcoincide with holiday(s). You need not apply for leave.", 
  "Leave by", 
+ "Cannot approve leave as you are not authorized to approve leaves on Block Dates.", 
  "Employee", 
  "Leave Blocked", 
  "Holiday", 
+ "Warning: Leave application contains following block dates", 
  " (Half Day)", 
  "Leave Application"
 ]

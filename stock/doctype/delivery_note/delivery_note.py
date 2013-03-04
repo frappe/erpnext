@@ -174,7 +174,12 @@ class DocType(SellingController):
 
 	def validate_reference_value(self):
 		"""Validate values with reference document with previous document"""
-		get_obj('DocType Mapper', 'Sales Order-Delivery Note', with_children = 1).validate_reference_value(self, self.doc.name)
+		validate_ref = any([d.prevdoc_docname for d in self.doclist.get({"parentfield": self.fname})
+			if d.prevdoc_doctype == "Sales Order"])
+		
+		if validate_ref:
+			get_obj('DocType Mapper', 'Sales Order-Delivery Note', 
+				with_children = 1).validate_reference_value(self, self.doc.name)
 
 
 	def validate_for_items(self):
@@ -319,9 +324,9 @@ class DocType(SellingController):
 			webnotes.msgprint("%s Packing Slip(s) Cancelled" % res[0][1])
 
 
-	def update_stock_ledger(self, update_stock, is_stopped = 0):
+	def update_stock_ledger(self, update_stock):
 		self.values = []
-		for d in self.get_item_list(is_stopped):
+		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
@@ -344,8 +349,8 @@ class DocType(SellingController):
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 
 
-	def get_item_list(self, is_stopped):
-	 return get_obj('Sales Common').get_item_list(self, is_stopped)
+	def get_item_list(self):
+	 return get_obj('Sales Common').get_item_list(self)
 
 
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
