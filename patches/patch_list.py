@@ -200,8 +200,8 @@ patch_list = [
 	'execute:webnotes.reload_doc("accounts", "Print Format", "Sales Invoice Modern") # 2013-02-26',
 	'execute:webnotes.reload_doc("accounts", "Print Format", "Sales Invoice Spartan") # 2013-02-26',
 	"execute:(not webnotes.conn.exists('Role', 'Projects Manager')) and webnotes.doc({'doctype':'Role', 'role_name':'Projects Manager'}).insert()",
-	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
 	"patches.february_2013.p09_remove_cancelled_warehouses",
 	"patches.march_2013.update_po_prevdoc_doctype",
 	"patches.february_2013.p09_timesheets",
+	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
 ]

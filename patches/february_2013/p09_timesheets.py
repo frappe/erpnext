@@ -5,7 +5,12 @@ def execute():
 	for name in webnotes.conn.sql_list("""select name from tabTimesheet"""):
 		ts = webnotes.bean("Timesheet", name)
 		for tsd in ts.doclist.get({"doctype":"Timesheet Detail"}):
-			tl = webnotes.bean({
+			if not webnotes.conn.exists("Project", tsd.project_name):
+				tsd.project_name = None
+			if not webnotes.conn.exists("Task", tsd.task_id):
+				tsd.task_id = None
+				
+			tl = webnotes.doc({
 				"doctype": "Time Log",
 				"status": "Draft",
 				"from_time": ts.doc.timesheet_date + " " + tsd.act_start_time,
