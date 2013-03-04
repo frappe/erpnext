@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-26 14:58:28", 
+  "creation": "2013-03-04 02:39:45", 
   "docstatus": 0, 
-  "modified": "2013-03-01 17:48:09", 
+  "modified": "2013-03-04 02:48:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,6 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "write": 1
  }, 
  {
@@ -166,6 +165,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_16", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
@@ -185,18 +190,13 @@
   "print_hide": 1
  }, 
  {
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "match": "owner", 
-  "role": "Projects User", 
-  "submit": 1
+  "role": "Projects User"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
   "doctype": "DocPerm", 
-  "role": "Projects Manager", 
-  "submit": 0
+  "role": "Projects Manager"
  }
 ]

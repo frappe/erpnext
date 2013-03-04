@@ -68,7 +68,7 @@ def get_events(start, end):
 		}, as_dict=True, update={"allDay": 0})
 		
 	for d in data:
-		d.title = d.name + ": " + d.activity_type
+		d.title = d.name + ": " + (d.activity_type or "[Activity Type not set]")
 		if d.task:
 			d.title += " for Task: " + d.task
 		if d.project:
