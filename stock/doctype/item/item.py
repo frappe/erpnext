@@ -39,9 +39,8 @@ class DocType:
 	def on_update(self):
 		self.validate_name_with_item_group()
 		
-		if self.doc.show_in_website:
-			# webpage updates
-			self.update_website()
+		# webpage updates
+		self.update_website()
 			
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
 		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
@@ -81,19 +80,33 @@ class DocType:
 				self.doc.name, raise_exception=1)
 
 	def update_website(self):
-		from website.utils import update_page_name
-		if self.doc.name==self.doc.item_name:
-			page_name_from = self.doc.name
-		else:
-			page_name_from = self.doc.name + " " + self.doc.item_name
+		def _invalidate_cache():
+			from website.helpers.product import invalidate_cache_for
+			
+			invalidate_cache_for(self.doc.item_group)
 
-		update_page_name(self.doc, page_name_from)
+			[invalidate_cache_for(d.item_group) for d in \
+				self.doclist.get({"doctype":"Website Item Group"})]
 		
-		from website.helpers.product import invalidate_cache_for
-		invalidate_cache_for(self.doc.item_group)
+		if self.doc.show_in_website:
+			from website.utils import update_page_name
+			if self.doc.name==self.doc.item_name:
+				page_name_from = self.doc.name
+			else:
+				page_name_from = self.doc.name + " " + self.doc.item_name
 
-		[invalidate_cache_for(d.item_group) for d in \
-			self.doclist.get({"doctype":"Website Item Group"})]
+			update_page_name(self.doc, page_name_from)
+			
+			_invalidate_cache()
+		
+		elif self.doc.page_name:
+			# if unchecked show in website
+			from website.utils import delete_page_cache
+			delete_page_cache(self.doc.page_name)
+			
+			_invalidate_cache()
+			
+			webnotes.conn.set(self.doc, "page_name", None)
 
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):
