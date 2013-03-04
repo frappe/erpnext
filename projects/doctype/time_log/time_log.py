@@ -6,23 +6,55 @@ from webnotes import _
 
 from webnotes.widgets.reportview import build_match_conditions
 
+class OverlapError(webnotes.ValidationError): pass
+
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
+		self.set_status()
 		self.validate_overlap()
+		self.calculate_total_hours()
 		
-	def validate_overlap(self):
+	def calculate_total_hours(self):
+		from webnotes.utils import time_diff_in_hours
+		self.doc.hours = time_diff_in_hours(self.doc.to_time, self.doc.from_time)
+
+	def set_status(self):
+		self.doc.status = {
+			0: "Draft",
+			1: "Submitted",
+			2: "Cancelled"
+		}[self.doc.docstatus or 0]
+		
+		if self.doc.time_log_batch:
+			self.doc.status="Batched for Billing"
+			
+		if self.doc.sales_invoice:
+			self.doc.status="Billed"
+			
+	def validate_overlap(self):		
 		existing = webnotes.conn.sql_list("""select name from `tabTime Log` where owner=%s and
-			((from_time between %s and %s) or (to_time between %s and %s)) and name!=%s""", 
+			(
+				(from_time between %s and %s) or 
+				(to_time between %s and %s) or 
+				(%s between from_time and to_time)) 
+			and name!=%s
+			and docstatus < 2""", 
 			(self.doc.owner, self.doc.from_time, self.doc.to_time, self.doc.from_time, 
-				self.doc.to_time, self.doc.name))
+				self.doc.to_time, self.doc.from_time, self.doc.name or "No Name"))
 
 		if existing:
 			webnotes.msgprint(_("This Time Log conflicts with") + ":" + ', '.join(existing),
-				raise_exception=True)
-		
+				raise_exception=OverlapError)
+	
+	def before_cancel(self):
+		self.set_status()
+	
+	def before_update_after_submit(self):
+		self.set_status()
+				
 @webnotes.whitelist()
 def get_events(start, end):
 	match = build_match_conditions("Time Log")

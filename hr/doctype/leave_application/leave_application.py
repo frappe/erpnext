@@ -22,6 +22,7 @@ from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_
 from webnotes import msgprint
 
 class LeaveDayBlockedError(Exception): pass
+class OverlapError(Exception): pass
 	
 from webnotes.model.controller import DocListController
 class DocType(DocListController):
@@ -129,17 +130,22 @@ class DocType(DocListController):
 						(self.doc.leave_type,), raise_exception=1)
 
 	def validate_leave_overlap(self):
+		if not self.doc.name:
+			self.doc.name = "New Leave Application"
+			
 		for d in webnotes.conn.sql("""select name, leave_type, posting_date, 
 			from_date, to_date 
 			from `tabLeave Application` 
 			where 
-			(from_date <= %(to_date)s and to_date >= %(from_date)s)
-			and employee = %(employee)s
+			employee = %(employee)s
 			and docstatus < 2
 			and status in ("Open", "Approved")
+			and (from_date between %(from_date)s and %(to_date)s 
+				or to_date between %(from_date)s and %(to_date)s
+				or %(from_date)s between from_date and to_date)
 			and name != %(name)s""", self.doc.fields, as_dict = 1):
  
-			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = 1)
+			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 
 	def validate_max_days(self):
 		max_days = webnotes.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))

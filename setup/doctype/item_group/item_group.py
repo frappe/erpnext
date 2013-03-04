@@ -31,9 +31,12 @@ class DocType(DocTypeNestedSet):
 		
 		self.validate_name_with_item()
 		
+		from website.helpers.product import invalidate_cache_for
+		
+		
 		if self.doc.show_in_website:
-			# webpage updates
 			from website.utils import update_page_name
+			# webpage updates
 			page_name = self.doc.name
 			if webnotes.conn.get_value("Product Settings", None, 
 				"default_product_category")==self.doc.name:
@@ -43,8 +46,17 @@ class DocType(DocTypeNestedSet):
 				
 			update_page_name(self.doc, page_name)
 			
-			from website.helpers.product import invalidate_cache_for
 			invalidate_cache_for(self.doc.name)
+
+		elif self.doc.page_name:
+			# if unchecked show in website
+			
+			from website.utils import delete_page_cache
+			delete_page_cache(self.doc.page_name)
+			
+			invalidate_cache_for(self.doc.name)
+			
+			webnotes.conn.set(self.doc, "page_name", None)
 		
 	def validate_name_with_item(self):
 		if webnotes.conn.exists("Item", self.doc.name):

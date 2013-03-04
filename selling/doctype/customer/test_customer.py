@@ -1,3 +1,4 @@
+
 test_records = [
 	[{
 		"doctype": "Customer",

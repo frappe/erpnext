@@ -17,15 +17,21 @@ wn.module_page["Projects"] = [
 				doctype:"Project"
 			},
 			{
-				label: wn._("Timesheet"),
-				description: wn._("Timesheet for tasks."),
-				doctype:"Timesheet"
-			},
-			{
 				label: wn._("Time Log"),
 				description: wn._("Time Log for tasks."),
 				doctype:"Time Log"
 			},
+			{
+				label: wn._("Time Log Batch"),
+				description: wn._("Batch Time Logs for billing."),
+				doctype:"Time Log Batch"
+			},
+			{
+				label: wn._("Timesheet"),
+				description: wn._("[DEPRECATED] Timesheet for tasks."),
+				doctype:"Timesheet"
+			},
+
 		]
 	},
 	{
@@ -50,7 +56,18 @@ wn.module_page["Projects"] = [
 			},
 		]
 	},
-]
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Time Log Summary"),
+				route: "Report2/Time Log/Time Log Summary",
+				doctype: "Time Log"
+			},
+		]
+	}]
 
 pscript['onload_projects-home'] = function(wrapper) {
 	wn.views.moduleview.make(wrapper, "Projects");

@@ -21,7 +21,10 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
   if(!doc.timesheet_date) set_multiple(cdt,cdn,{timesheet_date:get_today()});
 }
 
-cur_frm.cscript.refresh = function(doc,cdt,cdn){}
+cur_frm.cscript.refresh = function(doc,cdt,cdn){
+	cur_frm.set_intro("Timesheets will soon be removed. Please create a new Time Log. To create \
+	 a new Time Log, to to Projects > Time Log > New Time Log. This will be removed in a few days.")
+}
 
 
 cur_frm.fields_dict['timesheet_details'].grid.get_field("project_name").get_query = function(doc,cdt,cdn){

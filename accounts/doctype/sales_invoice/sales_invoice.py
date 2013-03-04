@@ -75,6 +75,7 @@ class DocType(SellingController):
 		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
+		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
 		
 	def on_submit(self):
@@ -104,7 +105,7 @@ class DocType(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_c_form()
-		
+		self.update_time_log_batch(self.doc.name)
 		self.convert_to_recurring()
 
 
@@ -122,11 +123,27 @@ class DocType(SellingController):
 		self.check_next_docstatus()
 		sales_com_obj.update_prevdoc_detail(0, self)
 
+		self.update_time_log_batch(None)
 		self.make_gl_entries(is_cancel=1)
 
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
+
+	def update_time_log_batch(self, sales_invoice):
+		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+			if d.time_log_batch:
+				tlb = webnotes.bean("Time Log Batch", d.time_log_batch)
+				tlb.doc.sales_invoice = sales_invoice
+				tlb.update_after_submit()
+
+	def validate_time_logs_are_submitted(self):
+		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+			if d.time_log_batch:
+				status = webnotes.conn.get_value("Time Log Batch", d.time_log_batch, "status")
+				if status!="Submitted":
+					webnotes.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
+						raise_exception=True)
 
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""

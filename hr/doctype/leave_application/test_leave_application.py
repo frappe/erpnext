@@ -1,7 +1,7 @@
 import webnotes
 import unittest
 
-from hr.doctype.leave_application.leave_application import LeaveDayBlockedError
+from hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 
 class TestLeaveApplication(unittest.TestCase):
 	def get_application(self, doclist):
@@ -23,13 +23,22 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		from webnotes.profile import add_role
 		add_role("test1@example.com", "HR User")
+
+		# clear other applications
+		webnotes.conn.sql("delete from `tabLeave Application`")
 		
 		application = self.get_application(test_records[1])
 		self.assertTrue(application.insert())
+
+	def test_overlap(self):
+		application = self.get_application(test_records[1])
+		self.assertRaises(OverlapError, application.insert)
 		
 	def test_global_block_list(self):
+		
 		application = self.get_application(test_records[3])
 		application.doc.leave_approver = "test@example.com"
+		
 		webnotes.conn.set_value("Leave Block List", "_Test Leave Block List", 
 			"applies_to_all_departments", 1)
 		webnotes.conn.set_value("Employee", "_T-Employee-0002", "department", 
