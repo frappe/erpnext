@@ -124,10 +124,13 @@ class DocType(DocListController):
 			if not is_lwp(self.doc.leave_type):
 				self.doc.leave_balance = get_leave_balance(self.doc.employee,
 					self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
-			
+				# Allowing user to add leavs which will result in negative balance. This is needed for Sick Leave and other common exceptional cases. 
+				#System will check and warn but continue with saving the application. 
+				#This may needs to be changed if other ERPNext customer may not want this behaviour.
 				if self.doc.leave_balance - self.doc.total_leave_days < 0:
 					msgprint("There is not enough leave balance for Leave Type: %s" % \
-						(self.doc.leave_type,), raise_exception=1)
+						(self.doc.leave_type,))
+						# , raise_exception=1)
 
 	def validate_leave_overlap(self):
 		if not self.doc.name:
