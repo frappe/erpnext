@@ -1,82 +1,80 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:54", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:54", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:54"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "HR", 
+  "name": "__common__", 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
-  "version": 5, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 5
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Employee Education", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Employee Education", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Employee Education"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "school_univ", 
+  "fieldtype": "Small Text", 
   "label": "School/University", 
   "oldfieldname": "school_univ", 
-  "fieldname": "school_univ", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "qualification", 
+  "fieldtype": "Data", 
   "label": "Qualification", 
   "oldfieldname": "qualification", 
-  "width": "100px", 
-  "fieldname": "qualification", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Level", 
-  "oldfieldname": "level", 
   "fieldname": "level", 
   "fieldtype": "Select", 
+  "label": "Level", 
+  "oldfieldname": "level", 
+  "oldfieldtype": "Select", 
   "options": "Graduate\nPost Graduate\nUnder Graduate"
  }, 
  {
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
+  "fieldname": "year_of_passing", 
+  "fieldtype": "Int", 
   "label": "Year of Passing", 
   "oldfieldname": "year_of_passing", 
-  "fieldname": "year_of_passing", 
-  "fieldtype": "Int"
+  "oldfieldtype": "Int"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "class_per", 
+  "fieldtype": "Data", 
   "label": "Class / Percentage", 
   "oldfieldname": "class_per", 
-  "fieldname": "class_per", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "maj_opt_subj", 
+  "fieldtype": "Text", 
   "label": "Major/Optional Subjects", 
   "oldfieldname": "maj_opt_subj", 
-  "fieldname": "maj_opt_subj", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text"
  }
 ]

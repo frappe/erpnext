@@ -1,75 +1,73 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-04-13 11:56:40", 
+  "docstatus": 0, 
+  "modified": "2012-04-23 12:27:38", 
   "modified_by": "Administrator", 
-  "modified": "2012-04-23 12:27:38"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Utilities", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
-  "autoname": "field:doc_type", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "_last_update": "1305006361", 
+  "autoname": "field:doc_type", 
+  "doctype": "DocType", 
+  "module": "Utilities", 
+  "name": "__common__", 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
   "version": 1
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "GL Mapper", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "GL Mapper", 
-  "read": 1, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "GL Mapper", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1
  }, 
  {
-  "name": "GL Mapper", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "GL Mapper"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Accounts User", 
-  "cancel": 0
+  "submit": 0, 
+  "write": 0
  }, 
  {
-  "write": 1, 
+  "doctype": "DocPerm", 
   "role": "System Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Doc Type", 
-  "oldfieldname": "doc_type", 
   "fieldname": "doc_type", 
   "fieldtype": "Data", 
+  "label": "Doc Type", 
+  "oldfieldname": "doc_type", 
+  "oldfieldtype": "Link", 
   "reqd": 1
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Fields", 
-  "oldfieldname": "fields", 
   "fieldname": "fields", 
   "fieldtype": "Table", 
+  "label": "Fields", 
+  "oldfieldname": "fields", 
+  "oldfieldtype": "Table", 
   "options": "GL Mapper Detail"
  }
 ]

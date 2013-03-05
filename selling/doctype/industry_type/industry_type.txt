@@ -1,65 +1,63 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:09", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:09", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:09"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
   "autoname": "field:industry", 
-  "colour": "White:FFF", 
-  "module": "Selling", 
-  "server_code_error": " ", 
-  "version": 4, 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "version": 4
  }, 
  {
-  "parent": "Industry Type", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "oldfieldname": "industry", 
-  "reqd": 1, 
-  "name": "__common__", 
-  "label": "Industry", 
-  "parenttype": "DocType", 
   "fieldname": "industry", 
   "fieldtype": "Data", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
+  "label": "Industry", 
   "name": "__common__", 
+  "oldfieldname": "industry", 
+  "oldfieldtype": "Data", 
   "parent": "Industry Type", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "report": 1, 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "reqd": 1
  }, 
  {
-  "name": "Industry Type", 
-  "doctype": "DocType"
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Industry Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
-  "write": 1, 
+  "doctype": "DocType", 
+  "name": "Industry Type"
+ }, 
+ {
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "Sales Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "role": "Sales User", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Sales User"
  }, 
  {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
   "doctype": "DocField"

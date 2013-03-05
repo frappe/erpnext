@@ -1,48 +1,47 @@
 [
  {
-  "owner": "swarnalata@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:26", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:26"
+  "owner": "swarnalata@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 5, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 5
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Workflow Action Detail", 
-  "doctype": "DocField", 
-  "width": "200px", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "width": "200px"
  }, 
  {
-  "name": "Workflow Action Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Workflow Action Detail"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
+  "fieldname": "action_field", 
+  "fieldtype": "Select", 
   "label": "Field", 
   "oldfieldname": "action_field", 
-  "fieldname": "action_field", 
-  "fieldtype": "Select"
+  "oldfieldtype": "Select"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "action_value", 
+  "fieldtype": "Data", 
   "label": "Value", 
   "oldfieldname": "action_value", 
-  "fieldname": "action_value", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }
 ]

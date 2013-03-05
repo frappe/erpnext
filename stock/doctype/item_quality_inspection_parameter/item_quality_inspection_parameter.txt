@@ -1,51 +1,49 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:33", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:33", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:33"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "IISD/.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Stock", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "IISD/.#####", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
   "version": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Item Quality Inspection Parameter", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
   "fieldtype": "Data", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "name": "__common__", 
+  "oldfieldtype": "Data", 
+  "parent": "Item Quality Inspection Parameter", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
  }, 
  {
-  "name": "Item Quality Inspection Parameter", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item Quality Inspection Parameter"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
+  "fieldname": "specification", 
+  "in_filter": 0, 
   "label": "Parameter", 
   "oldfieldname": "specification", 
-  "width": "200px", 
-  "fieldname": "specification", 
   "reqd": 1, 
-  "in_filter": 0
+  "search_index": 0, 
+  "width": "200px"
  }, 
  {
-  "oldfieldname": "value", 
-  "fieldname": "value", 
   "doctype": "DocField", 
-  "label": "Acceptance Criteria"
+  "fieldname": "value", 
+  "label": "Acceptance Criteria", 
+  "oldfieldname": "value"
  }
 ]

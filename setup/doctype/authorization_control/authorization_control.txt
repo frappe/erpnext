@@ -1,23 +1,21 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:18", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:18"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tabbed", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 216, 
-  "server_code_error": " ", 
-  "issingle": 1
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Tabbed", 
+  "version": 216
  }, 
  {
-  "name": "Authorization Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Authorization Control"
  }
 ]

@@ -1,25 +1,23 @@
 [
  {
-  "owner": "saumil@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:49", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:49", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:49"
+  "owner": "saumil@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "module": "Accounts", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
+  "in_create": 1, 
   "issingle": 1, 
-  "read_only": 1, 
+  "module": "Accounts", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "read_only": 1, 
+  "section_style": "Simple", 
   "version": 11
  }, 
  {
-  "name": "Trend Analyzer Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Trend Analyzer Control"
  }
 ]
