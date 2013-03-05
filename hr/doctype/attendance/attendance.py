@@ -64,13 +64,8 @@ class DocType:
 	
 				 
 	def validate_fiscal_year(self):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'" % \
-			self.doc.fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(self.doc.att_date) < str(ysd) or str(self.doc.att_date) > str(yed):
-			msgprint("'%s' Not Within The Fiscal Year selected"%(self.doc.att_date))
-			raise Exception
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.att_date, self.doc.fiscal_year)
 	
 	def validate_att_date(self):
 		import datetime

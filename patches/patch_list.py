@@ -204,5 +204,7 @@ patch_list = [
 	"patches.march_2013.update_po_prevdoc_doctype",
 	"patches.february_2013.p09_timesheets",
 	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
-	"patches.march_2013.p01_c_form"
+	"patches.march_2013.p01_c_form",
+	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
+	"execute:webnotes.reload_doc('hr', 'doctype', 'upload_attendance')",
 ]
