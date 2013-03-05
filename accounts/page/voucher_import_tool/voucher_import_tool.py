@@ -234,7 +234,7 @@ def get_data(rows, company_abbr):
 				start_row = i+2
 				
 				# check for empty columns
-				empty_columns = [i+1 for i, c in enumerate(rows[i+1]) if not c]
+				empty_columns = [j+1 for j, c in enumerate(rows[i+1]) if not c]
 				if empty_columns:
 					raise Exception, """Column No(s). %s %s empty. \
 						Please remove them and try again.""" % (comma_and(empty_columns),
