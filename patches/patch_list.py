@@ -207,5 +207,4 @@ patch_list = [
 	"patches.march_2013.p01_c_form",
 	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')",
 	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
-	"execute:webnotes.reload_doc('hr', 'doctype', 'upload_attendance')",
 ]
