@@ -162,7 +162,6 @@ def import_defaults():
 		
 		# UOM
 		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit'}, 
-		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Hour'}, 
 		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box'}, 
 		{'uom_name': 'Ft', 'doctype': 'UOM', 'name': 'Ft'}, 
 		{'uom_name': 'Kg', 'doctype': 'UOM', 'name': 'Kg'}, 

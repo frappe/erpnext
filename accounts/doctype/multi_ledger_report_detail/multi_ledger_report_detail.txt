@@ -1,38 +1,37 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:44", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:44", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:44"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Accounts", 
   "doctype": "DocType", 
-  "version": 3, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 3
  }, 
  {
-  "parent": "Multi Ledger Report Detail", 
-  "reqd": 1, 
-  "name": "__common__", 
   "doctype": "DocField", 
-  "label": "Account", 
-  "width": "300px", 
-  "parenttype": "DocType", 
-  "options": "Account", 
   "fieldname": "account", 
   "fieldtype": "Link", 
+  "label": "Account", 
+  "name": "__common__", 
+  "options": "Account", 
+  "parent": "Multi Ledger Report Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "reqd": 1, 
+  "width": "300px"
  }, 
  {
-  "name": "Multi Ledger Report Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Multi Ledger Report Detail"
  }, 
  {
   "doctype": "DocField"

@@ -1,80 +1,78 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:25", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:25"
+  "owner": "Administrator"
  }, 
  {
-  "show_in_menu": 0, 
-  "section_style": "Simple", 
+  "autoname": "field:state_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
   "in_create": 0, 
   "module": "Setup", 
-  "autoname": "field:state_name", 
-  "document_type": "Master", 
-  "read_only": 0, 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
+  "read_only": 0, 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
   "version": 14
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "State", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "reqd": 1, 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "reqd": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "State", 
-  "read": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
+  "name": "__common__", 
+  "parent": "State", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "write": 1
  }, 
  {
-  "name": "State", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "State"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
   "amend": 0, 
   "cancel": 0, 
-  "role": "Sales Master Manager", 
   "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
   "submit": 0
  }, 
  {
-  "role": "Purchase Master Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "state_name", 
+  "fieldtype": "Data", 
   "label": "State Name", 
   "oldfieldname": "state_name", 
-  "fieldname": "state_name", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Country", 
-  "oldfieldname": "country", 
   "fieldname": "country", 
   "fieldtype": "Select", 
+  "label": "Country", 
+  "oldfieldname": "country", 
+  "oldfieldtype": "Select", 
   "options": "link:Country"
  }
 ]

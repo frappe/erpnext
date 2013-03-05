@@ -1,69 +1,67 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:01", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:01", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:01"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "module": "Utilities", 
+  "allow_attach": 0, 
   "allow_trash": 1, 
   "autoname": "_ANS.#######", 
-  "show_in_menu": 0, 
-  "allow_attach": 0, 
-  "read_only": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
+  "in_create": 1, 
+  "module": "Utilities", 
+  "name": "__common__", 
+  "read_only": 1, 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
   "version": 3
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Answer", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Answer", 
-  "read": 1, 
-  "report": 1, 
   "cancel": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Answer", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "All", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "All", 
+  "write": 1
  }, 
  {
-  "name": "Answer", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Answer"
  }, 
  {
   "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Question", 
   "fieldname": "question", 
   "fieldtype": "Link", 
+  "label": "Question", 
   "options": "Question"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "answer", 
+  "fieldtype": "Text", 
   "label": "Answer", 
   "oldfieldname": "question", 
-  "fieldname": "answer", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text"
  }, 
  {
   "doctype": "DocField", 
@@ -72,11 +70,11 @@
   "label": "Points"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Users Voted", 
   "fieldname": "_users_voted", 
   "fieldtype": "Text", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Users Voted", 
+  "print_hide": 1
  }
 ]

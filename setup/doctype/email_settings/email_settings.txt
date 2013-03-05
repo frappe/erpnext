@@ -1,50 +1,48 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-07-03 13:30:55", 
+  "docstatus": 0, 
+  "modified": "2012-07-12 16:16:27", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 16:16:27"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "Email Settings for Outgoing and Incoming Emails.", 
+  "_last_update": "1325570647", 
+  "allow_copy": 1, 
+  "allow_email": 1, 
   "allow_print": 1, 
-  "module": "Setup", 
+  "description": "Email Settings for Outgoing and Incoming Emails.", 
   "doctype": "DocType", 
   "in_create": 1, 
-  "allow_email": 1, 
   "issingle": 1, 
+  "module": "Setup", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1325570647", 
-  "server_code_error": " ", 
-  "version": 1, 
-  "allow_copy": 1
+  "section_style": "Simple", 
+  "version": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Email Settings", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Email Settings", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Email Settings", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
  }, 
  {
-  "name": "Email Settings", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Email Settings"
  }, 
  {
   "doctype": "DocPerm"
@@ -54,19 +52,17 @@
  }, 
  {
   "description": "Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Outgoing Mails", 
   "fieldname": "outgoing_mails", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Outgoing Mails"
  }, 
  {
   "description": "SMTP Server (e.g. smtp.gmail.com)", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Outgoing Mail Server", 
   "fieldname": "outgoing_mail_server", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Outgoing Mail Server"
  }, 
  {
   "doctype": "DocField", 
@@ -76,24 +72,22 @@
  }, 
  {
   "description": "If non standard port (e.g. 587)", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Mail Port", 
   "fieldname": "mail_port", 
-  "fieldtype": "Int"
+  "fieldtype": "Int", 
+  "label": "Mail Port"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Set Login and Password if authentication is required.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Login Id", 
   "fieldname": "mail_login", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Login Id"
  }, 
  {
   "doctype": "DocField", 
@@ -103,50 +97,45 @@
  }, 
  {
   "description": "System generated mails will be sent from this email id.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Auto Email Id", 
   "fieldname": "auto_email_id", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Auto Email Id"
  }, 
  {
   "description": "Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets", 
   "doctype": "DocField", 
-  "label": "Support Ticket Mail Settings", 
   "fieldname": "support_ticket_mail_settings", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Support Ticket Mail Settings"
  }, 
  {
   "description": "To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Incoming Mail Setting", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Incoming Mail Setting"
  }, 
  {
   "description": "Check this to pull emails from your mailbox", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Sync Support Mails", 
   "fieldname": "sync_support_mails", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Sync Support Mails"
  }, 
  {
   "description": "Your support email id - must be a valid email - this is where your emails will come!", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Support Email", 
   "fieldname": "support_email", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Support Email"
  }, 
  {
   "description": "POP3 mail server (e.g. pop.gmail.com)", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "POP3 Mail Server", 
   "fieldname": "support_host", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "POP3 Mail Server"
  }, 
  {
   "doctype": "DocField", 
@@ -167,32 +156,29 @@
   "label": "Support Password"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "cb1", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Signature to be appended at the end of every email", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Signature", 
   "fieldname": "support_signature", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Signature"
  }, 
  {
   "default": "1", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Send Autoreply", 
   "fieldname": "send_autoreply", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Send Autoreply"
  }, 
  {
   "description": "Autoreply when a new mail is received", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Custom Autoreply Message", 
   "fieldname": "support_autoreply", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Custom Autoreply Message"
  }
 ]

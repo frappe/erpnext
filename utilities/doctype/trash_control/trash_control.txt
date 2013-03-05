@@ -1,25 +1,23 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:47", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:47"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "module": "Utilities", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
+  "in_create": 1, 
   "issingle": 1, 
-  "read_only": 1, 
+  "module": "Utilities", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "read_only": 1, 
+  "section_style": "Simple", 
   "version": 35
  }, 
  {
-  "name": "Trash Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Trash Control"
  }
 ]
