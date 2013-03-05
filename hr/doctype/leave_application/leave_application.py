@@ -126,14 +126,11 @@ class DocType(DocListController):
 					self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
 
 				if self.doc.leave_balance - self.doc.total_leave_days < 0:
-				
-					# check if this leave type allow the remaining balance to be in negative. If yes then warn the user and continue to save else warn the user and don't save.
-					if webnotes.conn.get_value("Leave Type", self.doc.leave_type,"allow_negative"):
-						msgprint("There is not enough leave balance for Leave Type - new: %s" %(self.doc.leave_type,))
-					# warn the user but don't save the form.	
-					else:
-						msgprint("There is not enough leave balance for Leave Type - new: %s" %(self.doc.leave_type,), raise_exception=1)
-
+					#check if this leave type allow the remaining balance to be in negative. If yes then warn the user and continue to save else warn the user and don't save.
+					msgprint("There is not enough leave balance for Leave Type: %s" % \
+						(self.doc.leave_type,), 
+						raise_exception=not(webnotes.conn.get_value("Leave Type", self.doc.leave_type,"allow_negative") or None))
+					
 	def validate_leave_overlap(self):
 		if not self.doc.name:
 			self.doc.name = "New Leave Application"
