@@ -1,51 +1,49 @@
 [
  {
-  "owner": "wasim@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:34", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:34"
+  "owner": "wasim@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Stock", 
+  "name": "__common__", 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
-  "version": 5, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 5
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Landed Cost Purchase Receipt", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Landed Cost Purchase Receipt", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Landed Cost Purchase Receipt"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Purchase Receipt", 
-  "oldfieldname": "purchase_receipt_no", 
-  "width": "220px", 
   "fieldname": "purchase_receipt", 
   "fieldtype": "Link", 
-  "options": "Purchase Receipt"
+  "label": "Purchase Receipt", 
+  "oldfieldname": "purchase_receipt_no", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Receipt", 
+  "width": "220px"
  }, 
  {
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
+  "fieldname": "select_pr", 
+  "fieldtype": "Check", 
   "label": "Select PR", 
   "oldfieldname": "include_in_landed_cost", 
-  "width": "120px", 
-  "fieldname": "select_pr", 
-  "fieldtype": "Check"
+  "oldfieldtype": "Check", 
+  "width": "120px"
  }
 ]

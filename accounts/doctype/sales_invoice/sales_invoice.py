@@ -17,7 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, sendmail
+from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate
+from webnotes.utils.email_lib import sendmail
 from webnotes.utils import comma_and
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist

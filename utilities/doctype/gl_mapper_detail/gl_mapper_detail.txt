@@ -1,162 +1,160 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:46", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:46"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "autoname": "GLMDetail.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Utilities", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "GLMDetail.#####", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "section_style": "Tray", 
   "show_in_menu": 0, 
   "version": 4
  }, 
  {
-  "name": "__common__", 
-  "parent": "GL Mapper Detail", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
   "fieldtype": "Data", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "name": "__common__", 
+  "oldfieldtype": "Data", 
+  "parent": "GL Mapper Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
  }, 
  {
-  "name": "GL Mapper Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "GL Mapper Detail"
  }, 
  {
-  "oldfieldname": "table_field", 
+  "doctype": "DocField", 
   "fieldname": "table_field", 
-  "doctype": "DocField", 
-  "label": "Table Field"
+  "label": "Table Field", 
+  "oldfieldname": "table_field"
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "account", 
   "label": "Account", 
   "oldfieldname": "account", 
-  "fieldname": "account", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "debit", 
   "label": "Debit", 
   "oldfieldname": "debit", 
-  "fieldname": "debit", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "credit", 
   "label": "Credit", 
   "oldfieldname": "credit", 
-  "fieldname": "credit", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "cost_center", 
   "label": "Cost Center", 
   "oldfieldname": "cost_center", 
-  "fieldname": "cost_center", 
   "reqd": 0
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "against", 
   "label": "Against", 
   "oldfieldname": "against", 
-  "fieldname": "against", 
   "reqd": 1
  }, 
  {
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "oldfieldname": "remarks", 
   "fieldname": "remarks", 
+  "label": "Remarks", 
+  "no_copy": 1, 
+  "oldfieldname": "remarks", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "voucher_type", 
   "label": "Voucher Type", 
   "oldfieldname": "voucher_type", 
-  "fieldname": "voucher_type", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "voucher_no", 
   "label": "Voucher No", 
   "oldfieldname": "voucher_no", 
-  "fieldname": "voucher_no", 
   "reqd": 1
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
+  "fieldname": "posting_date", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
-  "fieldname": "posting_date", 
   "reqd": 1
  }, 
  {
   "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
+  "fieldname": "transaction_date", 
   "label": "Transaction Date", 
   "oldfieldname": "transaction_date", 
-  "fieldname": "transaction_date", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "aging_date", 
   "label": "Aging Date", 
   "oldfieldname": "aging_date", 
-  "fieldname": "aging_date", 
   "reqd": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "in_filter": 1, 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "fieldname": "fiscal_year", 
   "reqd": 1, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldname": "against_voucher", 
+  "doctype": "DocField", 
   "fieldname": "against_voucher", 
-  "doctype": "DocField", 
-  "label": "Against Voucher"
+  "label": "Against Voucher", 
+  "oldfieldname": "against_voucher"
  }, 
  {
-  "oldfieldname": "against_voucher_type", 
+  "doctype": "DocField", 
   "fieldname": "against_voucher_type", 
-  "doctype": "DocField", 
-  "label": "Against Voucher Type"
+  "label": "Against Voucher Type", 
+  "oldfieldname": "against_voucher_type"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
+  "fieldname": "company", 
+  "in_filter": 1, 
   "label": "Company", 
   "oldfieldname": "company", 
-  "fieldname": "company", 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldname": "is_opening", 
+  "doctype": "DocField", 
   "fieldname": "is_opening", 
-  "doctype": "DocField", 
-  "label": "Is Opening"
+  "label": "Is Opening", 
+  "oldfieldname": "is_opening"
  }, 
  {
-  "oldfieldname": "is_advance", 
-  "fieldname": "is_advance", 
   "doctype": "DocField", 
-  "label": "Is Advance"
+  "fieldname": "is_advance", 
+  "label": "Is Advance", 
+  "oldfieldname": "is_advance"
  }
 ]

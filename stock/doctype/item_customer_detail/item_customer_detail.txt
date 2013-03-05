@@ -1,58 +1,56 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:33", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:33", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:33"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
-  "istable": 1, 
-  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
-  "module": "Stock", 
-  "server_code_error": " ", 
-  "in_create": 1, 
-  "read_only": 0, 
   "autoname": "ITEMCUST/.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
   "doctype": "DocType", 
+  "in_create": 1, 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only": 0, 
+  "section_style": "Tray", 
   "show_in_menu": 0, 
   "version": 7
  }, 
  {
+  "doctype": "DocField", 
+  "in_filter": 1, 
   "name": "__common__", 
   "parent": "Item Customer Detail", 
-  "search_index": 1, 
-  "doctype": "DocField", 
-  "reqd": 1, 
-  "parenttype": "DocType", 
   "parentfield": "fields", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "name": "Item Customer Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item Customer Detail"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Customer Name", 
-  "oldfieldname": "price_list_name", 
-  "width": "180px", 
   "fieldname": "customer_name", 
   "fieldtype": "Link", 
-  "options": "Customer"
+  "label": "Customer Name", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
+  "options": "Customer", 
+  "width": "180px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "ref_code", 
+  "fieldtype": "Data", 
   "label": "Ref Code", 
   "oldfieldname": "ref_rate", 
-  "width": "120px", 
-  "fieldname": "ref_code", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Currency", 
+  "width": "120px"
  }
 ]

@@ -1,24 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:49", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:49", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:49"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Accounts", 
-  "show_in_menu": 0, 
-  "version": 120, 
-  "server_code_error": " ", 
   "doctype": "DocType", 
-  "issingle": 1
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 120
  }, 
  {
-  "name": "MIS Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "MIS Control"
  }
 ]

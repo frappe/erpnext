@@ -1,58 +1,56 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:06", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:06"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Projects", 
   "doctype": "DocType", 
-  "version": 4, 
-  "server_code_error": " "
+  "istable": 1, 
+  "module": "Projects", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "version": 4
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Project Milestone", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Project Milestone", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Project Milestone"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
+  "fieldname": "milestone_date", 
+  "fieldtype": "Date", 
   "label": "Milestone Date", 
   "oldfieldname": "milestone_date", 
-  "fieldname": "milestone_date", 
-  "fieldtype": "Date"
+  "oldfieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "milestone", 
+  "fieldtype": "Text", 
   "label": "Milestone", 
   "oldfieldname": "milestone", 
-  "width": "300px", 
-  "fieldname": "milestone", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text", 
+  "width": "300px"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
   "fieldname": "status", 
   "fieldtype": "Select", 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
   "options": "Pending\nCompleted"
  }
 ]

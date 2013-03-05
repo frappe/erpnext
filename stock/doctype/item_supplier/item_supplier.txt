@@ -1,45 +1,44 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:33", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:33", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:33"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Stock", 
   "doctype": "DocType", 
-  "version": 3, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 3
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Item Supplier", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Item Supplier", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item Supplier"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Supplier", 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
+  "label": "Supplier", 
   "options": "Supplier"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Supplier Part Number", 
-  "width": "200px", 
   "fieldname": "supplier_part_no", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Supplier Part Number", 
+  "width": "200px"
  }
 ]
