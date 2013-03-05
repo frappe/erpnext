@@ -16,6 +16,43 @@ class TestMaterialRequest(unittest.TestCase):
 			"warehouse": "_Test Warehouse"}, "indented_qty")), qty1)
 		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
 			"warehouse": "_Test Warehouse"}, "indented_qty")), qty2)
+			
+	def _insert_stock_entry(self, qty1, qty2):
+		se = webnotes.bean([
+			{
+				"company": "_Test Company", 
+				"doctype": "Stock Entry", 
+				"posting_date": "2013-03-01", 
+				"posting_time": "00:00:00", 
+				"purpose": "Material Receipt"
+			}, 
+			{
+				"conversion_factor": 1.0, 
+				"doctype": "Stock Entry Detail", 
+				"item_code": "_Test Item Home Desktop 100",
+				"parentfield": "mtn_details", 
+				"incoming_rate": 100,
+				"qty": qty1, 
+				"stock_uom": "_Test UOM", 
+				"transfer_qty": qty1, 
+				"uom": "_Test UOM",
+				"t_warehouse": "_Test Warehouse 1",
+			},
+			{
+				"conversion_factor": 1.0, 
+				"doctype": "Stock Entry Detail", 
+				"item_code": "_Test Item Home Desktop 200",
+				"parentfield": "mtn_details", 
+				"incoming_rate": 100,
+				"qty": qty2, 
+				"stock_uom": "_Test UOM", 
+				"transfer_qty": qty2, 
+				"uom": "_Test UOM",
+				"t_warehouse": "_Test Warehouse 1",
+			},
+		])
+		se.insert()
+		se.submit()
 				
 	def test_completed_qty_for_purchase(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
@@ -70,6 +107,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 	def test_completed_qty_for_transfer(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
 		mr = webnotes.bean(copy=test_records[0])
@@ -87,7 +125,7 @@ class TestMaterialRequest(unittest.TestCase):
 			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
 		se_doclist[0].fields.update({
 			"posting_date": "2013-03-01",
-			"posting_time": "00:00"
+			"posting_time": "01:00"
 		})
 		se_doclist[1].fields.update({
 			"qty": 27.0,
@@ -101,6 +139,9 @@ class TestMaterialRequest(unittest.TestCase):
 			"s_warehouse": "_Test Warehouse 1",
 			"incoming_rate": 1.0
 		})
+		
+		# make available the qty in _Test Warehouse 1 before transfer
+		self._insert_stock_entry(27.0, 1.5)
 		
 		# check for stopped status of Material Request
 		se = webnotes.bean(copy=se_doclist)
@@ -127,6 +168,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 	def test_completed_qty_for_over_transfer(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
 		mr = webnotes.bean(copy=test_records[0])
@@ -158,6 +200,9 @@ class TestMaterialRequest(unittest.TestCase):
 			"s_warehouse": "_Test Warehouse 1",
 			"incoming_rate": 1.0
 		})
+
+		# make available the qty in _Test Warehouse 1 before transfer
+		self._insert_stock_entry(60.0, 3.0)
 		
 		# check for stopped status of Material Request
 		se = webnotes.bean(copy=se_doclist)
@@ -245,5 +290,5 @@ test_records = [
 			"uom": "_Test UOM",
 			"warehouse": "_Test Warehouse"
 		}
-	]
+	],
 ]
