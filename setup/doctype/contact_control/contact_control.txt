@@ -1,65 +1,63 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:19", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:19", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:19"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
+  "in_create": 1, 
   "issingle": 1, 
-  "read_only": 1, 
+  "module": "Setup", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "read_only": 1, 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
   "version": 25
  }, 
  {
+  "doctype": "DocField", 
+  "fieldtype": "Text", 
   "name": "__common__", 
   "parent": "Contact Control", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "fieldtype": "Text", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Contact Control", 
-  "read": 1, 
-  "name": "__common__", 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Contact Control", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
  }, 
  {
-  "name": "Contact Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Contact Control"
  }, 
  {
   "doctype": "DocPerm"
  }, 
  {
-  "fieldname": "header", 
   "doctype": "DocField", 
+  "fieldname": "header", 
   "label": "Header"
  }, 
  {
-  "fieldname": "customer_intro", 
   "doctype": "DocField", 
+  "fieldname": "customer_intro", 
   "label": "Customer Intro"
  }, 
  {
-  "fieldname": "supplier_intro", 
   "doctype": "DocField", 
+  "fieldname": "supplier_intro", 
   "label": "Supplier Intro"
  }
 ]

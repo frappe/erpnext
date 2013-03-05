@@ -1,24 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:47", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:47"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Utilities", 
-  "show_in_menu": 0, 
-  "version": 12, 
-  "server_code_error": " ", 
   "doctype": "DocType", 
-  "issingle": 1
+  "issingle": 1, 
+  "module": "Utilities", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 12
  }, 
  {
-  "name": "Profile Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Profile Control"
  }
 ]

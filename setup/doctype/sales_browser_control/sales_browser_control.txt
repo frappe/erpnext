@@ -1,23 +1,21 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:23", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:23"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 159, 
-  "server_code_error": " ", 
-  "issingle": 1
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "version": 159
  }, 
  {
-  "name": "Sales Browser Control", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Sales Browser Control"
  }
 ]

@@ -1,43 +1,42 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-07-03 13:29:42", 
+  "docstatus": 0, 
+  "modified": "2012-10-15 15:23:02", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-15 15:23:02"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
   "autoname": "_FEED.#####", 
-  "colour": "White:FFF", 
-  "module": "Home", 
   "doctype": "DocType", 
-  "version": 1, 
-  "show_in_menu": 0
+  "module": "Home", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Feed", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "parent": "Feed", 
-  "read": 1, 
   "name": "__common__", 
-  "doctype": "DocPerm", 
-  "report": 1, 
+  "parent": "Feed", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
-  "permlevel": 0, 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Feed", 
-  "doctype": "DocType"
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Feed", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Feed"
  }, 
  {
   "doctype": "DocField", 

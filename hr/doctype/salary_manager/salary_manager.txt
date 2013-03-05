@@ -1,202 +1,194 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:59", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:59"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "_last_update": "1314253977", 
+  "allow_copy": 1, 
+  "allow_email": 1, 
   "allow_print": 1, 
-  "module": "HR", 
   "doctype": "DocType", 
   "document_type": "Other", 
-  "allow_email": 1, 
   "issingle": 1, 
+  "module": "HR", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1314253977", 
+  "section_style": "Simple", 
   "show_in_menu": 1, 
-  "version": 30, 
-  "allow_copy": 1
+  "version": 30
  }, 
  {
-  "name": "__common__", 
-  "parent": "Salary Manager", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Salary Manager", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Salary Manager", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "write": 1
  }, 
  {
-  "name": "Salary Manager", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Salary Manager"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
-  "role": "HR User", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR User"
  }, 
  {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Document Description", 
   "fieldname": "document_description", 
   "fieldtype": "HTML", 
+  "label": "Document Description", 
   "options": "<div class=\"field_description\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "doctype": "DocField"
+  "fieldtype": "Section Break"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Company"
+  "label": "Company", 
+  "options": "link:Company", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Branch", 
   "fieldname": "branch", 
   "fieldtype": "Link", 
+  "label": "Branch", 
   "options": "Branch"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Department", 
   "fieldname": "department", 
   "fieldtype": "Link", 
+  "label": "Department", 
   "options": "Department"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Designation", 
   "fieldname": "designation", 
   "fieldtype": "Link", 
+  "label": "Designation", 
   "options": "Designation"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Grade", 
   "fieldname": "grade", 
   "fieldtype": "Select", 
+  "label": "Grade", 
   "options": "link:Grade"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Fiscal Year"
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Month", 
   "fieldname": "month", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12"
+  "label": "Month", 
+  "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12", 
+  "reqd": 1
  }, 
  {
   "description": "Check if you want to send salary slip in mail to each employee while submitting salary slip", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Send Email", 
   "fieldname": "send_email", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "label": "Send Email"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "section_break1", 
-  "fieldtype": "Section Break", 
-  "doctype": "DocField"
+  "fieldtype": "Section Break"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "description": "Creates salary slip for above mentioned criteria.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Create Salary Slip", 
-  "trigger": "Client", 
   "fieldname": "create_salary_slip", 
-  "fieldtype": "Button"
+  "fieldtype": "Button", 
+  "label": "Create Salary Slip", 
+  "trigger": "Client"
  }, 
  {
-  "width": "25%", 
+  "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "25%"
  }, 
  {
   "description": "Submit all salary slips for the above selected criteria", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Submit Salary Slip", 
-  "trigger": "Client", 
   "fieldname": "submit_salary_slip", 
-  "fieldtype": "Button"
+  "fieldtype": "Button", 
+  "label": "Submit Salary Slip", 
+  "trigger": "Client"
  }, 
  {
-  "width": "25%", 
+  "doctype": "DocField", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "25%"
  }, 
  {
   "description": "Create Bank Voucher for the total salary paid for the above selected criteria", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Make Bank Voucher", 
-  "trigger": "Client", 
   "fieldname": "make_bank_voucher", 
-  "fieldtype": "Button"
+  "fieldtype": "Button", 
+  "label": "Make Bank Voucher", 
+  "trigger": "Client"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "section_break2", 
-  "fieldtype": "Section Break", 
-  "doctype": "DocField"
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 

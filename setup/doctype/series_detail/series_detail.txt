@@ -1,48 +1,47 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:25", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:25"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 3, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Tray", 
+  "show_in_menu": 0, 
+  "version": 3
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Series Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Series Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Series Detail"
  }, 
  {
-  "oldfieldtype": "Read Only", 
   "doctype": "DocField", 
+  "fieldname": "series", 
+  "fieldtype": "Read Only", 
   "label": "Series", 
   "oldfieldname": "series", 
-  "fieldname": "series", 
-  "fieldtype": "Read Only"
+  "oldfieldtype": "Read Only"
  }, 
  {
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
+  "fieldname": "remove", 
+  "fieldtype": "Check", 
   "label": "Remove", 
   "oldfieldname": "remove", 
-  "trigger": "Client", 
-  "fieldname": "remove", 
-  "fieldtype": "Check"
+  "oldfieldtype": "Check", 
+  "trigger": "Client"
  }
 ]

@@ -1,76 +1,74 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:59", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:59"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "HR", 
+  "name": "__common__", 
+  "section_style": "Simple", 
   "show_in_menu": 0, 
-  "version": 5, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 5
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Employee Training", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Employee Training", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Employee Training"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Institute / Conducted By", 
-  "oldfieldname": "institute", 
   "fieldname": "institute", 
   "fieldtype": "Small Text", 
+  "label": "Institute / Conducted By", 
+  "oldfieldname": "institute", 
+  "oldfieldtype": "Small Text", 
   "reqd": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Program / Seminar Title", 
-  "oldfieldname": "nature_of_training", 
   "fieldname": "nature_of_training", 
   "fieldtype": "Small Text", 
+  "label": "Program / Seminar Title", 
+  "oldfieldname": "nature_of_training", 
+  "oldfieldtype": "Small Text", 
   "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Duration", 
-  "oldfieldname": "duration", 
   "fieldname": "duration", 
   "fieldtype": "Data", 
+  "label": "Duration", 
+  "oldfieldname": "duration", 
+  "oldfieldtype": "Data", 
   "reqd": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Location", 
-  "oldfieldname": "loc", 
   "fieldname": "loc", 
   "fieldtype": "Data", 
+  "label": "Location", 
+  "oldfieldname": "loc", 
+  "oldfieldtype": "Data", 
   "reqd": 0
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "certificate", 
+  "fieldtype": "Small Text", 
   "label": "Certificate", 
   "oldfieldname": "certificate", 
-  "fieldname": "certificate", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text"
  }
 ]
