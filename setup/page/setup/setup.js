@@ -186,6 +186,19 @@ wn.module_page["Setup"] = [
 			},
 		]
 	},
+	// {
+	// 	title: wn._("Backups"),
+	// 	icon: "icon-cloud-upload",
+	// 	right: true,
+	// 	items: [
+	// 		{
+	// 			"route":"Form/Backup Manager",
+	// 			doctype:"Backup Manager",
+	// 			label: wn._("Backup Manager"),
+	// 			"description":wn._("Sync backups with remote tools like Dropbox etc.")
+	// 		},
+	// 	]
+	// },
 ]
 
 pscript['onload_Setup'] = function(wrapper) {

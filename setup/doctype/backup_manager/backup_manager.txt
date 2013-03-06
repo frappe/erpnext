@@ -1,0 +1,83 @@
+[
+ {
+  "creation": "2013-03-05 16:35:50", 
+  "docstatus": 0, 
+  "modified": "2013-03-05 18:05:05", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "System for managing Backups", 
+  "doctype": "DocType", 
+  "document_type": "System", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Backup Manager", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Backup Manager", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Backup Manager"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sync_with_dropbox", 
+  "fieldtype": "Section Break", 
+  "label": "Sync with Dropbox"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_backups_to_dropbox", 
+  "fieldtype": "Check", 
+  "label": "Upload Backups to Dropbox"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_key", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Dropbox Access Key"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_secret", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Dropbox Access Secret"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_allowed", 
+  "fieldtype": "Check", 
+  "label": "Dropbox Access Allowed", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_dropbox_access", 
+  "fieldtype": "Button", 
+  "label": "Allow Dropbox Access"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]
