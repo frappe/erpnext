@@ -75,11 +75,11 @@ class DocType:
 	def send_sms(self, receiver_list, msg, sender_name = ''):
 		receiver_list = self.validate_receiver_nos(receiver_list)
 
-		arg = { 'account_name'	: webnotes.conn.get_value('Control Panel',None,'account_id'),
-				'receiver_list' : receiver_list,
-				'message'		: msg,
-				'sender_name'	: sender_name or self.get_sender_name()
-			}
+		arg = {
+			'receiver_list' : receiver_list,
+			'message'		: msg,
+			'sender_name'	: sender_name or self.get_sender_name()
+		}
 
 		if webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
 			ret = self.send_via_gateway(arg)
