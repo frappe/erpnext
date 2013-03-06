@@ -54,10 +54,10 @@ wn.module_page["HR"] = [
 		icon: "icon-cog",
 		items: [
 			{
-				"route":"Form/Attendance Control Panel/Attendance Control Panel",
-				"label":wn._("Upload attendance"),
+				"route":"Form/Upload Attendance/Upload Attendance",
+				"label":wn._("Upload Attendance"),
 				"description":wn._("Upload attendance from a .csv file"),
-				doctype: "Attendance Control Panel"
+				doctype: "Upload Attendance"
 			},
 			{
 				"route":"Form/Leave Control Panel/Leave Control Panel",

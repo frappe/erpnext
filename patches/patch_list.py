@@ -205,5 +205,6 @@ patch_list = [
 	"patches.february_2013.p09_timesheets",
 	"execute:(not webnotes.conn.exists('UOM', 'Hour')) and webnotes.doc({'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'}).insert()",
 	"patches.march_2013.p01_c_form",
-	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')"
+	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')",
+	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
 ]
