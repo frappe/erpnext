@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 from webnotes.utils import flt, comma_and
+import webnotes.defaults
 
 @webnotes.whitelist()
 def get_template():
@@ -35,7 +36,7 @@ def get_template():
 %(columns)s
 ''' % {
 		"template_type": template_type,
-		"user_fmt": webnotes.conn.get_value('Control Panel', None, 'date_format'),
+		"user_fmt": webnotes.defaults.get_global_default('date_format'),
 		"default_company": webnotes.conn.get_default("company"),
 		"naming_options": naming_options.replace("\n", ", "),
 		"voucher_type": voucher_type.replace("\n", ", "),
