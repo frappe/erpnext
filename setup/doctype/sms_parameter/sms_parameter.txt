@@ -1,44 +1,43 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:25", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:25"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 4, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 4
  }, 
  {
+  "doctype": "DocField", 
+  "fieldtype": "Data", 
   "name": "__common__", 
   "parent": "SMS Parameter", 
-  "width": "150px", 
-  "doctype": "DocField", 
-  "reqd": 1, 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "fieldtype": "Data", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "reqd": 1, 
+  "width": "150px"
  }, 
  {
-  "name": "SMS Parameter", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "SMS Parameter"
  }, 
  {
-  "fieldname": "parameter", 
   "doctype": "DocField", 
+  "fieldname": "parameter", 
   "label": "Parameter"
  }, 
  {
-  "fieldname": "value", 
   "doctype": "DocField", 
+  "fieldname": "value", 
   "label": "Value"
  }
 ]

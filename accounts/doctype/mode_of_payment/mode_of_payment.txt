@@ -59,7 +59,6 @@
  }, 
  {
   "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Default Account", 
   "fieldname": "default_account", 

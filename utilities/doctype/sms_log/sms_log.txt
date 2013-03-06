@@ -1,54 +1,53 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:47", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:47"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
   "autoname": "SMSLOG/.########", 
-  "colour": "White:FFF", 
-  "module": "Utilities", 
   "doctype": "DocType", 
-  "version": 3, 
-  "show_in_menu": 0
+  "module": "Utilities", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 3
  }, 
  {
-  "name": "__common__", 
-  "parent": "SMS Log", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "SMS Log", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "SMS Log", 
-  "read": 1, 
-  "report": 1, 
-  "name": "__common__", 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
+  "name": "__common__", 
+  "parent": "SMS Log", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "write": 0
  }, 
  {
-  "name": "SMS Log", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "SMS Log"
  }, 
  {
   "doctype": "DocPerm"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
@@ -69,10 +68,10 @@
   "label": "Receiver List"
  }, 
  {
-  "width": "50%", 
+  "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 

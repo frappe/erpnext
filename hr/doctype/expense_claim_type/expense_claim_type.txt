@@ -1,76 +1,74 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:35:55", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:35:55", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:55"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
   "autoname": "field:expense_type", 
-  "colour": "White:FFF", 
-  "module": "HR", 
-  "server_code_error": " ", 
-  "version": 5, 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "module": "HR", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "version": 5
  }, 
  {
-  "name": "__common__", 
-  "parent": "Expense Claim Type", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Expense Claim Type", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
+  "name": "__common__", 
+  "parent": "Expense Claim Type", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "write": 1
  }, 
  {
-  "name": "Expense Claim Type", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Expense Claim Type"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Expense Claim Type", 
-  "oldfieldname": "expense_type", 
   "fieldname": "expense_type", 
   "fieldtype": "Data", 
+  "in_filter": 0, 
+  "label": "Expense Claim Type", 
+  "oldfieldname": "expense_type", 
   "oldfieldtype": "Data", 
   "reqd": 1, 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
  }
 ]

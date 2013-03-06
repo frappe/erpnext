@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:15", 
+  "creation": "2013-02-21 09:55:58", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:02", 
+  "modified": "2013-03-05 08:06:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -90,6 +90,12 @@
   "fieldname": "is_lwp", 
   "fieldtype": "Check", 
   "label": "Is LWP"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_negative", 
+  "fieldtype": "Check", 
+  "label": "Allow Negative Balance"
  }, 
  {
   "doctype": "DocPerm", 

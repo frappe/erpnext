@@ -1,0 +1,11 @@
+{% extends "html/outer.html" %}
+
+{% set title="{{ webnotes.message_title or 'Message' }}" %}
+
+{% block content %}
+<div class="content">
+	<div class="layout-wrapper layout-main">
+		{{ webnotes.message }}
+	</div>
+</div>
+{% endblock %}

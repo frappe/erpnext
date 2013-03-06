@@ -1,85 +1,84 @@
 [
  {
-  "owner": "swarnalata@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-03-27 14:36:26", 
+  "docstatus": 0, 
+  "modified": "2012-03-27 14:36:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:26"
+  "owner": "swarnalata@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "version": 9, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "section_style": "Simple", 
+  "show_in_menu": 0, 
+  "version": 9
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Workflow Rule Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Workflow Rule Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Workflow Rule Detail"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Field", 
-  "oldfieldname": "rule_field", 
-  "width": "200px", 
   "fieldname": "rule_field", 
   "fieldtype": "Select", 
-  "options": "[]"
+  "label": "Field", 
+  "oldfieldname": "rule_field", 
+  "oldfieldtype": "Select", 
+  "options": "[]", 
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Operator", 
-  "oldfieldname": "operator", 
   "fieldname": "operator", 
   "fieldtype": "Select", 
+  "label": "Operator", 
+  "oldfieldname": "operator", 
+  "oldfieldtype": "Select", 
   "options": "\nequal\nnot equal\ngreater than\ngreater than equal\nless than\nless than equal"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "value", 
+  "fieldtype": "Data", 
   "label": "Value", 
   "oldfieldname": "value", 
-  "width": "100px", 
-  "fieldname": "value", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
+  "fieldname": "comparing_field", 
+  "fieldtype": "Select", 
   "label": "Field from other forms", 
   "oldfieldname": "comparing_field", 
-  "fieldname": "comparing_field", 
-  "fieldtype": "Select"
+  "oldfieldtype": "Select"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "message", 
+  "fieldtype": "Data", 
   "label": "Message when Cond. False", 
   "oldfieldname": "message", 
-  "width": "200px", 
-  "fieldname": "message", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Raise Exception", 
-  "oldfieldname": "exception", 
   "fieldname": "exception", 
   "fieldtype": "Select", 
+  "label": "Raise Exception", 
+  "oldfieldname": "exception", 
+  "oldfieldtype": "Select", 
   "options": "\nYes\nNo"
  }
 ]

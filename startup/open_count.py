@@ -27,4 +27,6 @@ queries = {
 	"Production Order": {"docstatus":0},
 	"BOM": {"docstatus":0},
 	"Timesheet": {"docstatus":0},
+	"Time Log": {"status":"Draft"},
+	"Time Log Batch": {"status":"Draft"},
 }

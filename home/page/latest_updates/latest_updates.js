@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["1st March", [
+		"Time Log, Time Log Batch: Created feature to batch Time Logs so that they can be tracked for billing."
+	]],
 	["27th February", [
 		"Time Log: Created Time Log System, with Calendar View."
 	]],
@@ -11,7 +14,8 @@ erpnext.updates = [
 	]],
 	["21st February, 2013", [
 		"Item: Warehouse-wise Re-order Level and Quantity",
-		"Buying: Purchase Request renamed to Material Request"
+		"Buying: Purchase Request renamed to Material Request",
+		"Website: Dynamic (mobile friendly) layouts using Bootstrap Responsive layouts"
 	]],
 	["20th February, 2013", [
 		"Disable Rounded Total: If disable in 'Global Defaults', Rounding related fields \

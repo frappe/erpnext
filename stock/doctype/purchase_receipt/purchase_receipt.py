@@ -122,7 +122,7 @@ class DocType(BuyingController):
 
 		# sub-contracting
 		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied()
+		self.update_raw_materials_supplied("pr_raw_material_details")
 		
 		self.update_valuation_rate("purchase_receipt_details")
 
@@ -214,7 +214,8 @@ class DocType(BuyingController):
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = sql("select inspection_required from `tabItem` where name = %s", (d.item_code), as_dict = 1)
+			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
+				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
 				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create Quality Inspection")
@@ -287,59 +288,6 @@ class DocType(BuyingController):
 		pc_obj.update_last_purchase_rate(self, 0)
 		
 		self.make_gl_entries()
-
-	def validate_for_subcontracting(self):
-		if self.sub_contracted_items and self.purchase_items and not self.doc.is_subcontracted:
-			webnotes.msgprint(_("""Please enter whether Purchase Recipt is made for subcontracting 
-				or purchasing, in 'Is Subcontracted' field"""), raise_exception=1)
-			
-		if self.doc.is_subcontracted=="Yes" and not self.doc.supplier_warehouse:
-			webnotes.msgprint(_("Please Enter Supplier Warehouse for subcontracted Items"), 
-				raise_exception=1)
-				
-	def update_raw_materials_supplied(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'pr_raw_material_details')
-		if self.sub_contracted_items:
-			for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-				if item.item_code in self.sub_contracted_items:
-					self.add_bom_items(item)
-
-	def add_bom_items(self, d):
-		bom_items = self.get_items_from_default_bom(d.item_code)
-		raw_materials_cost = 0
-		for item in bom_items:
-			required_qty = flt(item.qty_consumed_per_unit) * flt(d.qty) * flt(d.conversion_factor)
-			self.doclist.append({
-				"parentfield": "pr_raw_material_details",
-				"doctype": "Purchase Receipt Item Supplied",
-				"reference_name": d.name,
-				"bom_detail_no": item.name,
-				"main_item_code": d.item_code,
-				"rm_item_code": item.item_code,
-				"description": item.description,
-				"stock_uom": item.stock_uom,
-				"required_qty": required_qty,
-				"consumed_qty": required_qty,
-				"conversion_factor": d.conversion_factor,
-				"rate": item.rate,
-				"amount": required_qty * flt(item.rate)
-			})
-			
-			raw_materials_cost += required_qty * flt(item.rate)
-			
-		d.rm_supp_cost = raw_materials_cost
-
-	def get_items_from_default_bom(self, item_code):
-		# print webnotes.conn.sql("""select name from `tabBOM` where item = '_Test FG Item'""")
-		bom_items = sql("""select t2.item_code, t2.qty_consumed_per_unit, 
-			t2.rate, t2.stock_uom, t2.name, t2.description 
-			from `tabBOM` t1, `tabBOM Item` t2 
-			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1 
-			and t1.docstatus = 1 and t1.is_active = 1""", item_code, as_dict=1)
-		if not bom_items:
-			msgprint(_("No default BOM exists for item: ") + item_code, raise_exception=1)
-		
-		return bom_items
 
 	def bk_flush_supp_wh(self, is_submit):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):

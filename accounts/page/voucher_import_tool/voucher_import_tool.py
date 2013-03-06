@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt
+from webnotes import _
+from webnotes.utils import flt, comma_and
 
 @webnotes.whitelist()
 def get_template():
@@ -231,12 +232,23 @@ def get_data(rows, company_abbr):
 
 			if r[0]=="--------Data----------":
 				start_row = i+2
+				
+				# check for empty columns
+				empty_columns = [j+1 for j, c in enumerate(rows[i+1]) if not c]
+				if empty_columns:
+					raise Exception, """Column No(s). %s %s empty. \
+						Please remove them and try again.""" % (comma_and(empty_columns),
+						len(empty_columns)==1 and "is" or "are")
+				
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1] 
 					if not c.endswith(" - " + company_abbr)]
 				accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
 				
 				if accounts and (len(columns) != rows[i+1].index(accounts[0])):
-					raise Exception, """All account columns should be after standard columns and \
-						on the right. Please rectify it in the file and try again."""
+					raise Exception, _("""All account columns should be after \
+						standard columns and on the right.
+						If you entered it properly, next probable reason \
+						could be wrong account name.
+						Please rectify it in the file and try again.""")
 				
 	return data, start_row_idx

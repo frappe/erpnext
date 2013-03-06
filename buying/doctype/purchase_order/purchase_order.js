@@ -50,9 +50,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 		
 		// TODO: improve this
-		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
-				&& this.frm.doc.price_list_name) {
-			this.price_list_name(callback1);
+		if(this.frm.doc.__islocal) {
+			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) {
+				this.price_list_name(callback1);
+			} else {
+				callback1(doc, dt, dn);
+			}
 		}
 	}
 	

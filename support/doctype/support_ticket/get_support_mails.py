@@ -36,6 +36,7 @@ class SupportMailbox(POP3Mailbox):
 			return
 		thread_id = mail.get_thread_id()
 		ticket = None
+		new_ticket = False
 
 		if thread_id and webnotes.conn.exists("Support Ticket", thread_id):
 			ticket = webnotes.bean("Support Ticket", thread_id)
@@ -52,16 +53,17 @@ class SupportMailbox(POP3Mailbox):
 				"status": "Open"
 			}])
 			ticket.insert()
-
-			if cint(self.email_settings.send_autoreply):
-				if "mailer-daemon" not in mail.from_email.lower():
-					self.send_auto_reply(ticket.doc)
+			new_ticket = True
 
 		mail.save_attachments_in_doc(ticket.doc)
 				
 		make(content=mail.content, sender=mail.from_email, subject = ticket.doc.subject,
 			doctype="Support Ticket", name=ticket.doc.name, 
 			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
+			
+		if new_ticket and cint(self.email_settings.send_autoreply) and \
+			"mailer-daemon" not in mail.from_email.lower():
+				self.send_auto_reply(ticket.doc)
 
 	def send_auto_reply(self, d):
 		signature = self.email_settings.fields.get('support_signature') or ''

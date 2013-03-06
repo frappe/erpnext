@@ -242,7 +242,8 @@ def get_outer_env(page_name, args):
 			where parent='Website Settings' and parentfield='footer_items'
 			order by idx asc""", as_dict=1),
 			
-		'int':int
+		'int':int,
+		"webnotes": webnotes
 	})
 	
 	args.update(ret)

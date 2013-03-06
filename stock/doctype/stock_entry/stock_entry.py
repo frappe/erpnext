@@ -207,9 +207,8 @@ class DocType(TransactionBase):
 		
 	def validate_incoming_rate(self):
 		for d in getlist(self.doclist, 'mtn_details'):
-			if not flt(d.incoming_rate) and d.t_warehouse:
-				msgprint("Rate is mandatory for Item: %s at row %s" % (d.item_code, d.idx),
-					raise_exception=1)
+			if d.t_warehouse:
+				self.validate_value("incoming_rate", ">", 0, d)
 					
 	def validate_bom(self):
 		for d in getlist(self.doclist, 'mtn_details'):
