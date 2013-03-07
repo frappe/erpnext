@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:33", 
+  "creation": "2013-02-22 01:28:01", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:33", 
+  "modified": "2013-03-07 07:03:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,10 +11,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Stock", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -36,6 +33,7 @@
   "in_filter": 0, 
   "label": "Parameter", 
   "oldfieldname": "specification", 
+  "print_width": "200px", 
   "reqd": 1, 
   "search_index": 0, 
   "width": "200px"

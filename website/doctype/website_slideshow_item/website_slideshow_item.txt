@@ -1,59 +1,61 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:09", 
   "docstatus": 0, 
-  "creation": "2012-12-25 16:48:49", 
+  "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-25 16:55:40"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "allow_attach": 0, 
   "doctype": "DocType", 
-  "module": "Website", 
+  "istable": 1, 
   "max_attachments": 10, 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Website Slideshow Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Website Slideshow Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Website Slideshow Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Image", 
   "fieldname": "image", 
   "fieldtype": "Select", 
+  "label": "Image", 
   "options": "attach_files:"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Heading", 
-  "width": "200px", 
   "fieldname": "heading", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Heading", 
+  "print_width": "200px", 
+  "width": "200px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Description", 
-  "width": "200px", 
   "fieldname": "description", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "print_width": "200px", 
+  "width": "200px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }
 ]

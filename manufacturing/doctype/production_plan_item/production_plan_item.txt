@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-19 10:23:34", 
+  "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:00:34", 
+  "modified": "2013-03-07 07:03:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,6 +33,7 @@
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
   "options": "Item", 
+  "print_width": "150px", 
   "reqd": 1, 
   "width": "150px"
  }, 
@@ -44,6 +45,7 @@
   "oldfieldname": "bom_no", 
   "oldfieldtype": "Link", 
   "options": "BOM", 
+  "print_width": "100px", 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -55,6 +57,7 @@
   "label": "Planned Qty", 
   "oldfieldname": "planned_qty", 
   "oldfieldtype": "Currency", 
+  "print_width": "100px", 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -76,6 +79,7 @@
   "label": "SO Pending Qty", 
   "oldfieldname": "prevdoc_reqd_qty", 
   "oldfieldtype": "Currency", 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
@@ -87,6 +91,7 @@
   "label": "UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
+  "print_width": "80px", 
   "read_only": 1, 
   "reqd": 1, 
   "width": "80px"
@@ -98,6 +103,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "200px", 
   "read_only": 1, 
   "width": "200px"
  }

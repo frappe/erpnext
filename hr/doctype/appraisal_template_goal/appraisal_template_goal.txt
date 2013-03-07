@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-02-22 01:27:44", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:35:58", 
+  "modified": "2013-03-07 07:03:18", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -34,6 +34,7 @@
   "label": "KRA", 
   "oldfieldname": "kra", 
   "oldfieldtype": "Small Text", 
+  "print_width": "200px", 
   "width": "200px"
  }, 
  {
@@ -43,6 +44,7 @@
   "label": "Weightage (%)", 
   "oldfieldname": "per_weightage", 
   "oldfieldtype": "Currency", 
+  "print_width": "100px", 
   "width": "100px"
  }
 ]

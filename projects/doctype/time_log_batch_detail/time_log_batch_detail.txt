@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-28 17:56:12", 
+  "creation": "2013-03-05 09:11:06", 
   "docstatus": 0, 
-  "modified": "2013-03-01 15:20:17", 
+  "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "fieldtype": "Link", 
   "label": "Time Log", 
   "options": "Time Log", 
+  "print_width": "200px", 
   "reqd": 1, 
   "width": "200px"
  }, 

@@ -1,40 +1,41 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:08", 
   "docstatus": 0, 
-  "creation": "2012-12-27 14:25:38", 
+  "modified": "2013-03-07 07:03:19", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 14:25:38"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Website"
+  "istable": 1, 
+  "module": "Website", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Company History", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Company History", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Company History"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Year", 
   "fieldname": "year", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Year"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Highlight", 
-  "width": "300px", 
   "fieldname": "highlight", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Highlight", 
+  "print_width": "300px", 
+  "width": "300px"
  }
 ]

@@ -1,33 +1,34 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:07", 
   "docstatus": 0, 
-  "creation": "2012-12-27 14:28:45", 
+  "modified": "2013-03-07 07:03:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 14:49:44"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Website"
+  "istable": 1, 
+  "module": "Website", 
+  "name": "__common__"
  }, 
  {
-  "parent": "About Us Team Member", 
   "doctype": "DocField", 
-  "name": "__common__", 
-  "label": "Employee", 
-  "width": "300px", 
-  "parenttype": "DocType", 
-  "options": "Employee", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
+  "label": "Employee", 
+  "name": "__common__", 
+  "options": "Employee", 
+  "parent": "About Us Team Member", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "print_width": "300px", 
+  "width": "300px"
  }, 
  {
-  "name": "About Us Team Member", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "About Us Team Member"
  }, 
  {
   "doctype": "DocField"

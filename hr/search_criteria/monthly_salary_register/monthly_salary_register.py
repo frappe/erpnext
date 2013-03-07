@@ -38,8 +38,8 @@ for d in li:
 
 for r in res:
   
-  total_lwp += r[col_idx['Leave Without Pay']]
-  total_arr += r[col_idx['Arrear Amount']]
+  total_lwp += flt(r[col_idx['Leave Without Pay']])
+  total_arr += flt(r[col_idx['Arrear Amount']])
   
   for d1 in li:
     d2 = '%s'%d1

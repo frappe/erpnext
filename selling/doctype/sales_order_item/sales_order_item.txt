@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:21", 
+  "creation": "2013-02-22 01:27:52", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:54", 
+  "modified": "2013-03-07 07:03:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,6 +34,7 @@
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
   "options": "Item", 
+  "print_width": "150px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -55,6 +56,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "print_width": "150", 
   "reqd": 1, 
   "width": "150"
  }, 
@@ -66,6 +68,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "300px"
@@ -78,6 +81,7 @@
   "label": "Quantity", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
+  "print_width": "100px", 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -89,6 +93,7 @@
   "label": "UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
+  "print_width": "70px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "70px"
@@ -103,6 +108,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 1, 
+  "print_width": "70px", 
   "reqd": 0, 
   "width": "70px"
  }, 
@@ -115,6 +121,7 @@
   "oldfieldname": "adj_rate", 
   "oldfieldtype": "Float", 
   "print_hide": 1, 
+  "print_width": "70px", 
   "width": "70px"
  }, 
  {
@@ -126,6 +133,7 @@
   "oldfieldname": "export_rate", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
+  "print_width": "100px", 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -139,6 +147,7 @@
   "oldfieldname": "export_amount", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
@@ -152,6 +161,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 
@@ -165,6 +175,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -179,6 +190,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
@@ -193,6 +205,7 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "reqd": 0, 
   "width": "150px"
  }, 
@@ -207,6 +220,7 @@
   "oldfieldname": "projected_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "print_width": "70px", 
   "read_only": 1, 
   "width": "70px"
  }, 
@@ -218,6 +232,7 @@
   "label": "Actual Qty", 
   "no_copy": 1, 
   "print_hide": 1, 
+  "print_width": "70px", 
   "read_only": 1, 
   "width": "70px"
  }, 
@@ -233,6 +248,7 @@
   "oldfieldname": "delivered_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "read_only": 1, 
   "search_index": 0, 
   "width": "100px"
@@ -258,6 +274,7 @@
   "oldfieldname": "planned_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "print_width": "50px", 
   "read_only": 1, 
   "report_hide": 1, 
   "width": "50px"
@@ -272,6 +289,7 @@
   "oldfieldname": "produced_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "print_width": "50px", 
   "read_only": 1, 
   "report_hide": 1, 
   "width": "50px"

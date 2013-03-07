@@ -75,6 +75,8 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 				});
 			} else {
 				me.price_list_currency();
+				if (callback_fn) callback_fn(me.frm.doc, me.frm.doc.doctype, 
+						me.frm.doc.name);
 			}
 		} 
 	},

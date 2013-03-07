@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:47", 
+  "creation": "2013-02-22 01:28:07", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:47", 
+  "modified": "2013-03-07 07:03:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,9 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Utilities", 
-  "name": "__common__", 
-  "section_style": "Tray", 
-  "version": 2
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -39,6 +37,7 @@
   "fieldname": "receiver_name", 
   "label": "Receiver Name", 
   "oldfieldname": "receiver_name", 
+  "print_width": "350px", 
   "width": "350px"
  }, 
  {
@@ -46,6 +45,7 @@
   "fieldname": "mobile_no", 
   "label": "Mobile No", 
   "oldfieldname": "mobile_no", 
+  "print_width": "200px", 
   "reqd": 1, 
   "width": "200px"
  }

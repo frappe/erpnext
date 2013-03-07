@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:31", 
+  "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:03", 
+  "modified": "2013-03-07 07:03:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,6 +53,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Data", 
+  "print_width": "300px", 
   "read_only": 1, 
   "width": "300px"
  }, 
@@ -126,6 +127,7 @@
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "read_only": 1, 
   "search_index": 1, 
   "width": "150px"

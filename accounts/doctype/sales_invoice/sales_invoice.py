@@ -929,7 +929,7 @@ def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
 	subject = "Invoice : " + new_rv.doc.name
 
-	com = new_rv.doc.company   # webnotes.conn.get_value('Control Panel', '', 'letter_head')
+	com = new_rv.doc.company
 
 	hd = '''<div><h2>%s</h2></div>
 			<div><h3>Invoice: %s</h3></div>

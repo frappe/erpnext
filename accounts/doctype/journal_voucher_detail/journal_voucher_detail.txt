@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:06", 
+  "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:50", 
+  "modified": "2013-03-07 07:03:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,6 +34,7 @@
   "oldfieldname": "account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "print_width": "250px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "250px"
@@ -65,6 +66,7 @@
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 
+  "print_width": "180px", 
   "search_index": 0, 
   "width": "180px"
  }, 

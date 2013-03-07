@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:34", 
+  "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:34", 
+  "modified": "2013-03-07 07:03:23", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -10,10 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Stock", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 5
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -35,6 +32,7 @@
   "oldfieldname": "purchase_receipt_no", 
   "oldfieldtype": "Link", 
   "options": "Purchase Receipt", 
+  "print_width": "220px", 
   "width": "220px"
  }, 
  {
@@ -44,6 +42,7 @@
   "label": "Select PR", 
   "oldfieldname": "include_in_landed_cost", 
   "oldfieldtype": "Check", 
+  "print_width": "120px", 
   "width": "120px"
  }
 ]
