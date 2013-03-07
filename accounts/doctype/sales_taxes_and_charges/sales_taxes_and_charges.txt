@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 15:56:19", 
+  "creation": "2013-02-22 01:27:41", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:04", 
+  "modified": "2013-03-07 07:03:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -63,6 +63,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -163,6 +164,7 @@
   "label": "Is this Tax included in Basic Rate?", 
   "no_copy": 0, 
   "print_hide": 1, 
+  "print_width": "150px", 
   "report_hide": 1, 
   "width": "150px"
  }

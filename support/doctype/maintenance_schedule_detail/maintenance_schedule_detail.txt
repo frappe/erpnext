@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:31", 
+  "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-02-04 10:30:18", 
+  "modified": "2013-03-07 07:03:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -94,6 +94,7 @@
   "no_copy": 0, 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Small Text", 
+  "print_width": "160px", 
   "read_only": 1, 
   "search_index": 0, 
   "width": "160px"

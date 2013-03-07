@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:22", 
+  "creation": "2013-02-22 01:27:53", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:56", 
+  "modified": "2013-03-07 07:03:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,6 +33,7 @@
   "oldfieldname": "sales_person", 
   "oldfieldtype": "Link", 
   "options": "Sales Person", 
+  "print_width": "200px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "200px"
@@ -44,6 +45,7 @@
   "label": "Designation", 
   "oldfieldname": "sales_designation", 
   "oldfieldtype": "Data", 
+  "print_width": "100px", 
   "width": "100px"
  }, 
  {
@@ -54,6 +56,7 @@
   "label": "Contact No.", 
   "oldfieldname": "contact_no", 
   "oldfieldtype": "Data", 
+  "print_width": "100px", 
   "width": "100px"
  }, 
  {
@@ -63,6 +66,7 @@
   "label": "Allocated (%)", 
   "oldfieldname": "allocated_percentage", 
   "oldfieldtype": "Currency", 
+  "print_width": "100px", 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -74,6 +78,7 @@
   "oldfieldname": "allocated_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_width": "120px", 
   "reqd": 0, 
   "width": "120px"
  }, 

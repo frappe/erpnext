@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 19:25:49", 
+  "creation": "2013-03-05 09:11:04", 
   "docstatus": 0, 
-  "modified": "2013-03-01 13:41:51", 
+  "modified": "2013-03-07 07:03:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -73,6 +73,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "200px", 
   "reqd": 1, 
   "width": "200px"
  }, 
@@ -190,6 +191,7 @@
   "oldfieldtype": "Link", 
   "options": "Account", 
   "print_hide": 1, 
+  "print_width": "120px", 
   "reqd": 1, 
   "width": "120px"
  }, 
@@ -203,6 +205,7 @@
   "oldfieldtype": "Link", 
   "options": "Cost Center", 
   "print_hide": 1, 
+  "print_width": "120px", 
   "reqd": 0, 
   "width": "120px"
  }, 

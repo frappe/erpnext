@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:26", 
+  "creation": "2013-02-22 01:27:59", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:26", 
+  "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
   "owner": "swarnalata@webnotestech.com"
  }, 
@@ -10,10 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Setup", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 9
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -35,6 +32,7 @@
   "oldfieldname": "rule_field", 
   "oldfieldtype": "Select", 
   "options": "[]", 
+  "print_width": "200px", 
   "width": "200px"
  }, 
  {
@@ -53,6 +51,7 @@
   "label": "Value", 
   "oldfieldname": "value", 
   "oldfieldtype": "Data", 
+  "print_width": "100px", 
   "width": "100px"
  }, 
  {
@@ -70,6 +69,7 @@
   "label": "Message when Cond. False", 
   "oldfieldname": "message", 
   "oldfieldtype": "Data", 
+  "print_width": "200px", 
   "width": "200px"
  }, 
  {

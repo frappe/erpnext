@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:52", 
+  "modified": "2013-03-07 07:03:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,6 +46,7 @@
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Data", 
   "options": "Sales Order", 
+  "print_width": "150px", 
   "width": "150px"
  }, 
  {
@@ -55,6 +56,7 @@
   "label": "SO Date", 
   "oldfieldname": "document_date", 
   "oldfieldtype": "Date", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }, 
@@ -64,6 +66,7 @@
   "fieldtype": "Link", 
   "label": "Customer", 
   "options": "Customer", 
+  "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
  }, 
@@ -73,6 +76,7 @@
   "fieldtype": "Currency", 
   "label": "Grand Total", 
   "options": "Company:company:default_currency", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }, 

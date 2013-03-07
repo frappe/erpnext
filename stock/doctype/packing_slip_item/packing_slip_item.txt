@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:28", 
+  "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:04", 
+  "modified": "2013-03-07 07:03:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "fieldtype": "Link", 
   "label": "Item Code", 
   "options": "Item", 
+  "print_width": "100px", 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -39,6 +40,7 @@
   "fieldname": "item_name", 
   "fieldtype": "Data", 
   "label": "Item Name", 
+  "print_width": "200px", 
   "read_only": 1, 
   "width": "200px"
  }, 
@@ -47,6 +49,7 @@
   "fieldname": "qty", 
   "fieldtype": "Float", 
   "label": "Quantity", 
+  "print_width": "100px", 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -55,6 +58,7 @@
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
   "label": "UOM", 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 
@@ -63,6 +67,7 @@
   "fieldname": "net_weight", 
   "fieldtype": "Float", 
   "label": "Net Weight", 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 
@@ -72,6 +77,7 @@
   "fieldtype": "Link", 
   "label": "Weight UOM", 
   "options": "UOM", 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 

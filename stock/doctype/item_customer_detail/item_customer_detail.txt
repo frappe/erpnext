@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:33", 
+  "creation": "2013-02-22 01:28:01", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:33", 
+  "modified": "2013-03-07 07:03:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,10 +14,7 @@
   "istable": 1, 
   "module": "Stock", 
   "name": "__common__", 
-  "read_only": 0, 
-  "section_style": "Tray", 
-  "show_in_menu": 0, 
-  "version": 7
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -42,6 +39,7 @@
   "oldfieldname": "price_list_name", 
   "oldfieldtype": "Select", 
   "options": "Customer", 
+  "print_width": "180px", 
   "width": "180px"
  }, 
  {
@@ -51,6 +49,7 @@
   "label": "Ref Code", 
   "oldfieldname": "ref_rate", 
   "oldfieldtype": "Currency", 
+  "print_width": "120px", 
   "width": "120px"
  }
 ]

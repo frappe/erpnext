@@ -1,43 +1,43 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:09", 
   "docstatus": 0, 
-  "creation": "2012-12-20 14:21:35", 
+  "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-20 15:00:25"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "description": "Product Category for website", 
   "doctype": "DocType", 
-  "module": "Website", 
   "document_type": "Transaction", 
+  "istable": 1, 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Website Product Category", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Website Product Category", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Website Product Category"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
+  "label": "Item Group", 
   "options": "Item Group"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Indent", 
   "fieldname": "indent", 
   "fieldtype": "Select", 
+  "label": "Indent", 
   "options": "0\n1\n2\n3\n4\n5"
  }
 ]
