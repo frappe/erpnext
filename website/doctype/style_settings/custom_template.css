@@ -1,3 +1,7 @@
+{% if doc.at_import %}
+{{ doc.at_import }}
+{% endif %}
+
 body {
 {% if doc.background_image %}
 	background: url("../files/{{ doc.background_image }}") repeat;
@@ -7,8 +11,8 @@ body {
 {% else %}
 	background-color: #edede7;
 {% endif %}	
-{% if doc.font %}
-	font-family: '{{ doc.font }}', Verdana, Sans !important;
+{% if doc.font or doc.google_web_font_for_text %}
+	font-family: '{{ doc.google_web_font_for_text or doc.font }}', Verdana, Sans !important;
 {% endif %}
 {% if doc.font_size %}
 	font-size: {{ doc.font_size }} !important;
@@ -21,14 +25,32 @@ body {
 }
 {% endif %}
 
-{% if doc.heading_font %}
+div.outer {
+	background-color: #{{ doc.page_background or "fff" }};
+}
+
+{% if doc.google_web_font_for_heading or doc.heading_font %}
 h1, h2, h3, h4, h5 {
-	font-family: '{{ doc.heading_font}}', Arial, 'Helvetica Neue' !important;
+	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', Arial, 'Helvetica Neue' !important;
 }	
 {% endif %}
 
-/* Bootstrap Navbar */
+{% if doc.page_border %}
+/* Page Border*/
+div.outer {
+	-moz-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	-webkit-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
+	border-radius: 5px;
+}
+{% else %}
+div.web-footer {
+	border-top: 1px solid #eee;
+	padding-top: 10px;
+}
+{% endif %}
 
+/* Bootstrap Navbar */
 .navbar-inverse .navbar-inner {
     background-color: #{{ doc.top_bar_background or "444"}};
     background-repeat: repeat-x;

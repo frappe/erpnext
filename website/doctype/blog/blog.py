@@ -27,6 +27,9 @@ class DocType:
 		from website.utils import page_name
 		self.doc.name = page_name(self.doc.title)
 
+	def validate(self):
+		self.doc.blog_intro = self.doc.blog_intro[:140]
+
 	def on_update(self):
 		from website.utils import update_page_name
 		update_page_name(self.doc, self.doc.title)
@@ -66,6 +69,10 @@ class DocType:
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.creation)
 		self.doc.content_html = self.doc.content
+		if self.doc.blogger:
+			self.doc.blogger_info = webnotes.doc("blogger", self.doc.blogger).fields
+			if self.doc.blogger_info.avatar and not "/" in self.doc.blogger_info.avatar:
+				self.doc.blogger_info.avatar = "files/" + self.doc.blogger_info.avatar
 
 		comment_list = webnotes.conn.sql("""\
 			select comment, comment_by_fullname, creation

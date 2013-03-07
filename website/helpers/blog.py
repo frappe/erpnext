@@ -6,39 +6,39 @@ import webnotes
 import website.utils
 
 @webnotes.whitelist(allow_guest=True)
-def get_blog_list(args=None):
-	"""
-		args = {
-			'start': 0,
-		}
-	"""
+def get_blog_list(start=0, by=None):
 	import webnotes
-	
-	if not args: args = webnotes.form_dict
-	
+	condition = ""
+	if by:
+		condition = " and t1.blogger='%s'" % by.replace("'", "\'")
 	query = """\
 		select
-			name, page_name, content, owner, creation as creation,
-			title, (select count(name) from `tabComment` where
-				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
-		from `tabBlog`
-		where ifnull(published,0)=1
+			t1.title, t1.name, t1.page_name, t1.creation as creation, 
+				ifnull(t1.blog_intro, t1.content) as content, 
+				t2.full_name, t2.avatar, t1.blogger,
+				(select count(name) from `tabComment` where
+					comment_doctype='Blog' and comment_docname=t1.name) as comments
+		from `tabBlog` t1, `tabBlogger` t2
+		where ifnull(t1.published,0)=1
+		and t1.blogger = t2.name
+		%(condition)s
 		order by creation desc, name asc
-		limit %s, 5""" % args.start
+		limit %(start)s, 5""" % {"start": start, "condition": condition}
 		
-	result = webnotes.conn.sql(query, args, as_dict=1)
+	result = webnotes.conn.sql(query, as_dict=1)
 
 	# strip html tags from content
 	import webnotes.utils
 	
 	for res in result:
 		from webnotes.utils import global_date_format, get_fullname
-		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
 			res['content'] = website.utils.get_html(res['page_name'])
-		res['content'] = split_blog_content(res['content'])
-
+		res['content'] = res['content'][:140]
+		if res.avatar and not "/" in res.avatar:
+			res.avatar = "files/" + res.avatar
+		
 	return result
 
 @webnotes.whitelist(allow_guest=True)
@@ -116,9 +116,3 @@ def get_blog_content(blog_page_name):
 	content = webnotes.utils.escape_html(content)
 	return content
 	
-def split_blog_content(content):
-	content = content.split("<!-- begin blog content -->")
-	content = len(content) > 1 and content[1] or content[0]
-	content = content.split("<!-- end blog content -->")
-	content = content[0]
-	return content

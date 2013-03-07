@@ -21,6 +21,11 @@ wn.module_page["Website"] = [
 				description: wn._("Embed image slideshows in website pages."),
 				doctype:"Website Slideshow"
 			},
+			{
+				label: wn._("Blogger"),
+				description: wn._("Profile of a blog writer."),
+				doctype:"Blogger"
+			},
 		]
 	},
 	{

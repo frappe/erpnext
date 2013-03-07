@@ -13,17 +13,33 @@
 	<h2>{{ title }}</h2>
 
 	<!-- begin blog content -->
-	<div class="help">By {{ full_name }} on {{ updated }}</div>
+	<div class="help" style="color: #aaa">
+		{{ blogger_info and blogger_info.full_name or full_name }} wrote this on {{ updated }}</div>
 	<br>
 	{{ content_html }}
 	<!-- end blog content -->
-
+	{% if blogger_info %}
+	<hr />
+	<div class="row">
+		<div class="span2">
+			<div class="avatar avatar-large">
+				<img src="{{ blogger_info.avatar }}" />
+			</div>
+		</div>
+		<div class="span10">
+			<h4>{{ blogger_info.full_name }}</h4>
+			<p>{{ blogger_info.bio }}</p>
+			<p><a href="blog?by={{ blogger_info.name }}&by_name={{ blogger_info.full_name }}">
+				All posts by {{ blogger_info.full_name }}</a></p>
+		</div>
+	</div>
+	{% endif %}
 	<hr>
 	<h3>Comments</h3><br>
 	<div class="blog-comments">
 		
 		{% if not comment_list %}
-		<div class="alert no-comment">
+		<div class="no-comment">
 			<p>Be the first one to comment</p>
 		</div>
 		{% endif %}
@@ -32,22 +48,19 @@
 	</div>
 	<div><button class="btn add-comment">Add Comment</button></div>
 	<div style="display: none; margin-top: 10px;" 
-		id="comment-form" class="well">
+		id="comment-form">
 		<div class="alert" style="display:none;"></div>
 		<form>
-			<p>
-				<input name="comment_by_fullname" placeholder="Your Name" />
-			</p>
-			<p>
-				<input name="comment_by" placeholder="Your Email Id" />
-			</p>
-			<p>
+			<fieldset>
+				<input name="comment_by_fullname" placeholder="Your Name" type="text"/><br>
+				<input name="comment_by" placeholder="Your Email Id" type="text"/><br>
 				<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
-				</textarea>
-			</p>
-			<p>
+				</textarea><br>
 				<button class="btn btn-info" id="submit-comment">Submit</button>
+			</fieldset>
 		</form>
 	</div>
+	<hr>
+	<a href="blog">Show posts by everyone</p>
 </div>
 {% endblock %}

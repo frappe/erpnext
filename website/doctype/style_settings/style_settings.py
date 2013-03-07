@@ -29,10 +29,7 @@ class DocType:
 				'custom_template.css'), 'r') as f:
 			temp = Template(f.read())
 		
-		if not self.doc.font_size:
-			self.doc.font_size = '13px'
-			
-		self.doc.small_font_size = str(int(self.doc.font_size[:-2])-2) + 'px'
+		self.prepare()
 		
 		self.doc.custom_css = temp.render(doc = self.doc)
 		if self.doc.add_css:
@@ -41,7 +38,30 @@ class DocType:
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
 		
-		del self.doc.fields['small_font_size']
+		for f in ["small_font_size", "at_import"]:
+			if f in self.doc.fields:
+				del self.doc.fields[f]
+	
+	def prepare(self):
+		if not self.doc.font_size:
+			self.doc.font_size = '13px'
+			
+		self.doc.small_font_size = str(int(self.doc.font_size[:-2])-2) + 'px'
+		self.doc.page_border = int(self.doc.page_border)
+		
+		fonts = []
+		if self.doc.google_web_font_for_heading:
+			fonts.append(self.doc.google_web_font_for_heading)
+		if self.doc.google_web_font_for_text:
+			fonts.append(self.doc.google_web_font_for_text)
+			
+		fonts = list(set(fonts))
+		
+		self.doc.at_import = ""
+		for f in fonts:
+			self.doc.at_import += "\n@import url(http://fonts.googleapis.com/css?family=%s);" % f.replace(" ", "+")
+			
+
 	
 	def on_update(self):
 		"""rebuild pages"""
