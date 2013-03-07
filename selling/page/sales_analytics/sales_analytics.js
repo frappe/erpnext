@@ -122,18 +122,8 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 	setup_filters: function() {
 		var me = this;
 		this._super();
-
-		this.filter_inputs.value_or_qty.change(function() {
-			me.filter_inputs.refresh.click();
-		});
-
-		this.filter_inputs.tree_type.change(function() {
-			me.filter_inputs.refresh.click();
-		});
 		
-		this.filter_inputs.based_on.change(function() {
-			me.filter_inputs.refresh.click();
-		});
+		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on"]);
 
 		this.show_zero_check()		
 		this.setup_plot_check();
