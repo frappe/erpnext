@@ -1,33 +1,33 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:00", 
   "docstatus": 0, 
-  "creation": "2012-12-07 14:28:33", 
+  "modified": "2013-03-07 07:03:21", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-07 14:28:33"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "description": "Featured Item in Item Group", 
   "doctype": "DocType", 
+  "istable": 1, 
   "module": "Stock", 
   "name": "__common__"
  }, 
  {
-  "parent": "Featured Item", 
   "doctype": "DocField", 
-  "name": "__common__", 
-  "label": "Item", 
-  "parenttype": "DocType", 
-  "options": "Item", 
   "fieldname": "item", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "label": "Item", 
+  "name": "__common__", 
+  "options": "Item", 
+  "parent": "Featured Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
  }, 
  {
-  "name": "Featured Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Featured Item"
  }, 
  {
   "doctype": "DocField"

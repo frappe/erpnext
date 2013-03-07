@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-02-22 01:27:48", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:52", 
+  "modified": "2013-03-07 07:03:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,6 +34,7 @@
   "oldfieldname": "e_type", 
   "oldfieldtype": "Data", 
   "options": "Earning Type", 
+  "print_width": "200px", 
   "reqd": 1, 
   "width": "200px"
  }, 

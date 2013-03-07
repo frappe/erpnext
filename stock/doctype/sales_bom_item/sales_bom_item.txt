@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:29", 
+  "creation": "2013-02-22 01:28:03", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:56:21", 
+  "modified": "2013-03-07 07:03:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,6 +50,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {

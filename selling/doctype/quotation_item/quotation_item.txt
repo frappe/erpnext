@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:19", 
+  "creation": "2013-02-22 01:27:52", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:54", 
+  "modified": "2013-03-07 07:03:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -36,6 +36,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_hide": 0, 
+  "print_width": "150px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -58,6 +59,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -70,6 +72,7 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
   "print_hide": 0, 
+  "print_width": "300px", 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -83,6 +86,7 @@
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 0, 
+  "print_width": "100px", 
   "reqd": 1, 
   "search_index": 0, 
   "width": "100px"
@@ -95,6 +99,7 @@
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
   "print_hide": 0, 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
@@ -109,6 +114,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -121,6 +127,7 @@
   "oldfieldname": "adj_rate", 
   "oldfieldtype": "Float", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "width": "100px"
  }, 
  {
@@ -134,6 +141,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 0, 
+  "print_width": "100px", 
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
@@ -149,6 +157,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 0, 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "search_index": 0, 
@@ -163,6 +172,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 
@@ -177,6 +187,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
@@ -192,6 +203,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "print_width": "100px", 
   "read_only": 1, 
   "reqd": 0, 
   "search_index": 0, 
@@ -222,6 +234,7 @@
   "oldfieldtype": "Link", 
   "options": "Brand", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "read_only": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -247,6 +260,7 @@
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "read_only": 1, 
   "report_hide": 0, 
   "width": "150px"
@@ -261,6 +275,7 @@
   "oldfieldname": "prevdoc_doctype", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "print_width": "150px", 
   "read_only": 1, 
   "report_hide": 0, 
   "width": "150px"

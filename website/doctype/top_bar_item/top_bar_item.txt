@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-04-02 16:02:43", 
+  "creation": "2013-02-22 01:28:08", 
   "docstatus": 0, 
-  "modified": "2012-05-07 15:21:00", 
+  "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,10 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Website", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -32,6 +29,7 @@
   "fieldname": "label", 
   "fieldtype": "Data", 
   "label": "Label", 
+  "print_width": "120px", 
   "width": "120px"
  }, 
  {
@@ -39,6 +37,7 @@
   "fieldname": "url", 
   "fieldtype": "Data", 
   "label": "URL", 
+  "print_width": "200px", 
   "width": "200px"
  }, 
  {

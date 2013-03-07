@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, getdate
+from webnotes.utils import cstr, flt, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
@@ -251,6 +251,8 @@ class DocType(SellingController):
 		self.update_stock_ledger(update_stock = 1)
 
 		self.credit_limit()
+		
+		self.make_gl_entries()
 
 		# set DN status
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
@@ -293,6 +295,8 @@ class DocType(SellingController):
 		self.update_stock_ledger(update_stock = -1)
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
+		
+		self.make_gl_entries()
 
 
 	def check_next_docstatus(self):
@@ -390,3 +394,70 @@ class DocType(SellingController):
 		sl = get_obj('Stock Ledger')
 		sl.scrub_serial_nos(self)
 		sl.scrub_serial_nos(self, 'packing_details')
+		
+	def make_gl_entries(self):
+		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+			return
+		
+		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+		stock_delivered_account = "Stock Delivered But Not Billed - %s" % (abbr,)
+		stock_in_hand_account = self.get_stock_in_hand_account()
+		
+		total_buying_amount = self.get_total_buying_amount()
+		if total_buying_amount:
+			gl_entries = [
+				# credit stock in hand account
+				self.get_gl_dict({
+					"account": stock_in_hand_account,
+					"against": stock_delivered_account,
+					"credit": total_buying_amount,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+				
+				# debit stock received but not billed account
+				self.get_gl_dict({
+					"account": stock_delivered_account,
+					"against": stock_in_hand_account,
+					"debit": total_buying_amount,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+			]
+			from accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+			
+	def get_total_buying_amount(self):
+		from stock.utils import get_buying_amount, get_sales_bom
+		stock_ledger_entries = self.get_stock_ledger_entries()
+		item_sales_bom = get_sales_bom()
+		total_buying_amount = 0
+		
+		if stock_ledger_entries:
+			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
+				buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+					self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+				total_buying_amount += buying_amount
+			
+		return total_buying_amount
+		
+	def get_stock_ledger_entries(self):
+		item_list, warehouse_list = self.get_distinct_item_warehouse()
+		if item_list and warehouse_list:
+			return webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
+				voucher_detail_no, posting_date, posting_time, stock_value,
+				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
+				where ifnull(`is_cancelled`, "No") = "No" and company = %s 
+				and item_code in (%s) and warehouse in (%s)
+				order by item_code desc, warehouse desc, posting_date desc, 
+				posting_time desc, name desc""" % 
+				('%s', ', '.join(['%s']*len(item_list)), ', '.join(['%s']*len(warehouse_list))), 
+				tuple([self.doc.company] + item_list + warehouse_list), as_dict=1)
+
+	def get_distinct_item_warehouse(self):
+		item_list = []
+		warehouse_list = []
+		for item in self.doclist.get({"parentfield": "delivery_note_details"}) \
+				+ self.doclist.get({"parentfield": "packing_details"}):
+			item_list.append(item.item_code)
+			warehouse_list.append(item.warehouse)
+			
+		return list(set(item_list)), list(set(warehouse_list))

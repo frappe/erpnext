@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:25", 
+  "creation": "2013-02-22 01:27:57", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:25", 
+  "modified": "2013-03-07 07:03:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,10 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Setup", 
-  "name": "__common__", 
-  "section_style": "Tray", 
-  "show_in_menu": 0, 
-  "version": 3
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -41,7 +38,6 @@
   "fieldtype": "Check", 
   "label": "Remove", 
   "oldfieldname": "remove", 
-  "oldfieldtype": "Check", 
-  "trigger": "Client"
+  "oldfieldtype": "Check"
  }
 ]

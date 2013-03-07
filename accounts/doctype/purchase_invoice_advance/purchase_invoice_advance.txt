@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:08", 
+  "creation": "2013-02-22 01:27:40", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:50", 
+  "modified": "2013-03-07 07:03:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,6 +33,7 @@
   "oldfieldname": "journal_voucher", 
   "oldfieldtype": "Link", 
   "options": "Journal Voucher", 
+  "print_width": "180px", 
   "read_only": 1, 
   "width": "180px"
  }, 
@@ -45,6 +46,7 @@
   "oldfieldname": "jv_detail_no", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "print_width": "80px", 
   "read_only": 1, 
   "width": "80px"
  }, 
@@ -56,6 +58,7 @@
   "oldfieldname": "advance_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
  }, 
@@ -67,6 +70,7 @@
   "oldfieldname": "allocated_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_width": "100px", 
   "width": "100px"
  }, 
  {
@@ -76,6 +80,7 @@
   "label": "Remarks", 
   "oldfieldname": "remarks", 
   "oldfieldtype": "Small Text", 
+  "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
  }

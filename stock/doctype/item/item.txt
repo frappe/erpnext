@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-21 14:54:43", 
   "docstatus": 0, 
-  "modified": "2013-02-28 10:43:02", 
+  "modified": "2013-03-06 16:02:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -401,18 +401,6 @@
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center"
- }, 
- {
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "description": "Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.", 
-  "doctype": "DocField", 
-  "fieldname": "buying_cost", 
-  "fieldtype": "Float", 
-  "label": "Buying Cost", 
-  "no_copy": 1, 
-  "oldfieldname": "buying_cost", 
-  "oldfieldtype": "Currency", 
-  "read_only": 1
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 

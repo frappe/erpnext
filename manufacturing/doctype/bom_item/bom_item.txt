@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:43:11", 
+  "modified": "2013-03-07 07:03:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,6 +67,7 @@
   "oldfieldname": "bom_no", 
   "oldfieldtype": "Link", 
   "options": "BOM", 
+  "print_width": "150px", 
   "reqd": 0, 
   "search_index": 1, 
   "width": "150px"
@@ -103,6 +104,7 @@
   "label": "Amount", 
   "oldfieldname": "amount_as_per_mar", 
   "oldfieldtype": "Currency", 
+  "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
  }, 
@@ -122,6 +124,7 @@
   "label": "Item Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "250px", 
   "reqd": 0, 
   "width": "250px"
  }, 
