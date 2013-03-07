@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:32", 
+  "creation": "2013-01-25 11:35:10", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:25", 
+  "modified": "2013-03-07 14:46:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,18 +24,15 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Style Settings", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "Website Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -55,6 +52,20 @@
   "fieldname": "background_color", 
   "fieldtype": "Data", 
   "label": "Background Color"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "top_bar_background", 
+  "fieldtype": "Data", 
+  "label": "Top Bar Background"
+ }, 
+ {
+  "description": "000 is black, fff is white", 
+  "doctype": "DocField", 
+  "fieldname": "top_bar_foreground", 
+  "fieldtype": "Select", 
+  "label": "Top Bar Foreground", 
+  "options": "000\nFFF"
  }, 
  {
   "doctype": "DocField", 
@@ -115,6 +126,16 @@
   "print_hide": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]

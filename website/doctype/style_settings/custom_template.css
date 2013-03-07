@@ -26,3 +26,78 @@ h1, h2, h3, h4, h5 {
 	font-family: '{{ doc.heading_font}}', Arial, 'Helvetica Neue' !important;
 }	
 {% endif %}
+
+/* Bootstrap Navbar */
+
+.navbar-inverse .navbar-inner {
+    background-color: #{{ doc.top_bar_background or "444"}};
+    background-repeat: repeat-x;
+	border-color: transparent;
+	background-image: none;
+}
+
+.navbar-inverse .brand,
+.navbar-inverse .nav > li > a {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+  text-shadow: none;
+}
+
+.navbar-inverse .brand:hover,
+.navbar-inverse .nav > li > a:hover,
+.navbar-inverse .brand:focus,
+.navbar-inverse .nav > li > a:focus {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+}
+
+.navbar-inverse .brand {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+}
+
+.navbar-inverse .navbar-text {
+  color: #999999;
+}
+
+.navbar-inverse .nav > li > a:focus,
+.navbar-inverse .nav > li > a:hover {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+  background-color: transparent;
+}
+
+.navbar-inverse .nav .active > a,
+.navbar-inverse .nav .active > a:hover,
+.navbar-inverse .nav .active > a:focus {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+  background-color: transparent;
+}
+
+.navbar-inverse .navbar-link {
+  color: #999999;
+}
+
+.navbar-inverse .navbar-link:hover,
+.navbar-inverse .navbar-link:focus {
+  color: #{{ doc.top_bar_foreground or "fff"}};
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-static-top .navbar-inner {
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+        
+}
+.navbar .nav > .active > a,
+.navbar .nav > .active > a:hover,
+.navbar .nav > .active > a:focus {
+  color: #424242;
+  text-decoration: none;
+  background-color: transparent;
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+}
+
+.navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
+	border-top-color: #{{ doc.top_bar_foreground or "fff"}};
+	border-bottom-color: #{{ doc.top_bar_foreground or "fff"}};
+}
