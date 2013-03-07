@@ -52,11 +52,11 @@ def execute_daily():
 	run_fn(clear_outbox)
 
 	# daily backup
-	from setup.doctype.backup_manager.backup_manager
+	from setup.doctype.backup_manager.backup_manager import take_backups_daily
 	take_backups_daily()
 
 def execute_weekly():
-	from setup.doctype.backup_manager.backup_manager
+	from setup.doctype.backup_manager.backup_manager import take_backups_weekly
 	take_backups_weekly()
 
 def execute_monthly():
