@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 patch_list = [
+	"execute:webnotes.reload_doc('core', 'doctype', 'report') # 2013-03-07",
 	"patches.mar_2012.so_rv_mapper_fix", 
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 
