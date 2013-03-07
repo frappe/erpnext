@@ -38,72 +38,199 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
-			"Billed")
+		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001",
+		 	"status"), "Billed")
 
 		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Billed")
 
 		si.cancel()
 
-		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", "status"), 
-			"Submitted")
+		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", 
+			"status"), "Submitted")
 
 		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Batched for Billing")
 			
+	def test_sales_invoice_gl_entry_without_aii(self):
+		si = webnotes.bean(webnotes.copy_doclist(test_records[1]))
+		si.insert()
+		si.submit()
 		
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
+		expected_values = sorted([
+			[si.doc.debit_to, 630.0, 0.0],
+			[test_records[1][1]["income_account"], 0.0, 500.0],
+			[test_records[1][2]["account_head"], 0.0, 80.0],
+			[test_records[1][3]["account_head"], 0.0, 50.0],
+		])
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+		
+	def test_sales_invoice_gl_entry_with_aii(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		
+		self._insert_purchase_receipt()
+		dn = self._insert_delivery_note()
+		
+		si_against_dn = webnotes.copy_doclist(test_records[1])
+		si_against_dn[1]["delivery_note"] = dn.doc.name
+		si = webnotes.bean(si_against_dn)
+		si.insert()
+		si.submit()
+		
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
+		
+		expected_values = sorted([
+			[si.doc.debit_to, 630.0, 0.0],
+			[test_records[1][1]["income_account"], 0.0, 500.0],
+			[test_records[1][2]["account_head"], 0.0, 80.0],
+			[test_records[1][3]["account_head"], 0.0, 50.0],
+			["Stock Delivered But Not Billed - _TC", 0.0, 375.0],
+			[test_records[1][1]["expense_account"], 375.0, 0.0]
+		])
+		print expected_values
+		print gl_entries
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+			
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		
+		
+	def _insert_purchase_receipt(self):
+		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
+			as pr_test_records
+		pr = webnotes.bean(copy=pr_test_records[0])
+		pr.run_method("calculate_taxes_and_totals")
+		pr.insert()
+		pr.submit()
+		
+	def _insert_delivery_note(self):
+		from stock.doctype.delivery_note.test_delivery_note import test_records \
+			as dn_test_records
+		dn = webnotes.bean(copy=dn_test_records[0])
+		dn.insert()
+		dn.submit()
+		return dn
 		
 test_dependencies = ["Journal Voucher"]
 
-test_records = [[
-	{
-		"naming_series": "_T-Sales Invoice-",
-		"company": "_Test Company", 
-		"conversion_rate": 1.0, 
-		"currency": "INR", 
-		"debit_to": "_Test Customer - _TC",
-		"customer": "_Test Customer",
-		"customer_name": "_Test Customer",
-		"doctype": "Sales Invoice", 
-		"due_date": "2013-01-23", 
-		"fiscal_year": "_Test Fiscal Year 2013", 
-		"grand_total": 561.8, 
-		"grand_total_export": 561.8, 
-		"net_total": 500.0, 
-		"plc_conversion_rate": 1.0, 
-		"posting_date": "2013-01-23", 
-		"price_list_currency": "INR", 
-		"price_list_name": "_Test Price List", 
-		"territory": "_Test Territory"
-	}, 
-	{
-		"amount": 500.0, 
-		"basic_rate": 500.0, 
-		"description": "138-CMS Shoe", 
-		"doctype": "Sales Invoice Item", 
-		"export_amount": 500.0, 
-		"export_rate": 500.0, 
-		"income_account": "Sales - _TC",
-		"cost_center": "_Test Cost Center - _TC",
-		"item_name": "138-CMS Shoe", 
-		"parentfield": "entries",
-		"qty": 1.0
-	}, 
-	{
-		"account_head": "_Test Account VAT - _TC", 
-		"charge_type": "On Net Total", 
-		"description": "VAT", 
-		"doctype": "Sales Taxes and Charges", 
-		"parentfield": "other_charges",
-		"tax_amount": 30.0,
-	}, 
-	{
-		"account_head": "_Test Account Service Tax - _TC", 
-		"charge_type": "On Net Total", 
-		"description": "Service Tax", 
-		"doctype": "Sales Taxes and Charges", 
-		"parentfield": "other_charges",
-		"tax_amount": 31.8,
-	}
-]]
+test_records = [
+	[
+		{
+			"naming_series": "_T-Sales Invoice-",
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"debit_to": "_Test Customer - _TC",
+			"customer": "_Test Customer",
+			"customer_name": "_Test Customer",
+			"doctype": "Sales Invoice", 
+			"due_date": "2013-01-23", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"grand_total": 561.8, 
+			"grand_total_export": 561.8, 
+			"net_total": 500.0, 
+			"plc_conversion_rate": 1.0, 
+			"posting_date": "2013-01-23", 
+			"price_list_currency": "INR", 
+			"price_list_name": "_Test Price List", 
+			"territory": "_Test Territory"
+		}, 
+		{
+			"amount": 500.0, 
+			"basic_rate": 500.0, 
+			"description": "138-CMS Shoe", 
+			"doctype": "Sales Invoice Item", 
+			"export_amount": 500.0, 
+			"export_rate": 500.0, 
+			"income_account": "Sales - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"item_name": "138-CMS Shoe", 
+			"parentfield": "entries",
+			"qty": 1.0
+		}, 
+		{
+			"account_head": "_Test Account VAT - _TC", 
+			"charge_type": "On Net Total", 
+			"description": "VAT", 
+			"doctype": "Sales Taxes and Charges", 
+			"parentfield": "other_charges",
+			"tax_amount": 30.0,
+		}, 
+		{
+			"account_head": "_Test Account Service Tax - _TC", 
+			"charge_type": "On Net Total", 
+			"description": "Service Tax", 
+			"doctype": "Sales Taxes and Charges", 
+			"parentfield": "other_charges",
+			"tax_amount": 31.8,
+		}
+	],
+	[
+		{
+			"naming_series": "_T-Sales Invoice-",
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"debit_to": "_Test Customer - _TC",
+			"customer": "_Test Customer",
+			"customer_name": "_Test Customer",
+			"doctype": "Sales Invoice", 
+			"due_date": "2013-01-23", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"grand_total": 630.0, 
+			"grand_total_export": 630.0, 
+			"net_total": 500.0, 
+			"plc_conversion_rate": 1.0, 
+			"posting_date": "2013-03-07", 
+			"price_list_currency": "INR", 
+			"price_list_name": "_Test Price List", 
+			"territory": "_Test Territory"
+		}, 
+		{
+			"item_code": "_Test Item",
+			"item_name": "_Test Item", 
+			"description": "_Test Item", 
+			"doctype": "Sales Invoice Item", 
+			"parentfield": "entries",
+			"qty": 1.0,
+			"basic_rate": 500.0,
+			"amount": 500.0, 
+			"export_rate": 500.0, 
+			"export_amount": 500.0, 
+			"income_account": "Sales - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold",
+			"cost_center": "_Test Cost Center - _TC",
+		}, 
+		{
+			"account_head": "_Test Account VAT - _TC", 
+			"charge_type": "On Net Total", 
+			"description": "VAT", 
+			"doctype": "Sales Taxes and Charges", 
+			"parentfield": "other_charges",
+			"tax_amount": 80.0,
+		}, 
+		{
+			"account_head": "_Test Account Service Tax - _TC", 
+			"charge_type": "On Net Total", 
+			"description": "Service Tax", 
+			"doctype": "Sales Taxes and Charges", 
+			"parentfield": "other_charges",
+			"tax_amount": 50.0,
+		}
+	],
+]
