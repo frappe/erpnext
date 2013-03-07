@@ -3,51 +3,46 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
-from webnotes.utils import get_request_site_address
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
-@webnotes.whitelist()
-def get_dropbox_authorize_url():
-	from dropbox import session
+def take_backups_daily():
+	take_backups_if("Daily")
 
+def take_backups_weekly():
+	take_backups_if("Weekly")
+
+def take_backups_if(freq):
+	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
+		take_backups()
+
+@webnotes.whitelist()
+def take_backups():
 	try:
-		from conf import dropbox_access_key, dropbox_secret_key
-	except ImportError, e:
-		webnotes.msgprint(_("Please set Dropbox access keys in") + " conf.py", 
-		raise_exception=True)
-		
-	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
-	request_token = sess.obtain_request_token()
-	return_address = get_request_site_address(True) \
-		+ "?cmd=setup.doctype.backup_manager.backup_manager.dropbox_callback"
-	
-	url = sess.build_authorize_url(request_token, return_address)
-		
-	return {
-		"url": url,
-		"key": request_token.key,
-		"secret": request_token.secret,
-	}
-	
-@webnotes.whitelist(allow_guest=True)
-def dropbox_callback(oauth_token=None, not_approved=False):
-	if not not_approved:
-		if webnotes.conn.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
-			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", 1)
-			message = "Dropbox access allowed."
-		else:
-			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", 0)
-			message = "Illegal Access Token Please try again."
+		from setup.doctype.backup_manager.backup_dropbox import backup_to_dropbox
+		backup_to_dropbox()
+		send_email(True, "Dropbox")
+	except Exception, e:
+		send_email(False, "Dropbox", e)
+
+def send_email(success, service_name, error_status=None):
+	if success:
+		subject = "Backup Upload Successful"
+		message ="""<h3>Backup Uploaded Successfully</h3><p>Hi there, this is just to inform you 
+		that your backup was successfully uploaded to your %s account. So relax!</p>
+		""" % service_name
+
 	else:
-		webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", 0)
-		message = "Dropbox Access not approved."
+		subject = "[Warning] Backup Upload Failed"
+		message ="""<h3>Backup Upload Failed</h3><p>Oops, your automated backup to %s
+		failed.</p>
+		<p>Error message: %s</p>
+		<p>Please contact your system manager for more information.</p>
+		""" % (service_name, error_status)
 	
-	webnotes.message_title = "Dropbox Approval"
-	webnotes.message = "<h3>%s</h3><p>Please close this window.</p>" % message
-		
-	webnotes.conn.commit()
-	webnotes.response['type'] = 'page'
-	webnotes.response['page_name'] = 'message.html'
+	# email system managers
+	from webnotes.utils.email_lib import sendmail
+	sendmail(webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(","), 
+		subject=subject, msg=message)
