@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:06", 
+  "creation": "2013-02-22 01:27:38", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:50", 
+  "modified": "2013-03-07 07:03:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "fieldtype": "Link", 
   "label": "Invoice No", 
   "options": "Sales Invoice", 
+  "print_width": "160px", 
   "width": "160px"
  }, 
  {
@@ -37,6 +38,7 @@
   "fieldname": "invoice_date", 
   "fieldtype": "Date", 
   "label": "Invoice Date", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }, 
@@ -46,6 +48,7 @@
   "fieldtype": "Link", 
   "label": "Territory", 
   "options": "Territory", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }, 
@@ -55,6 +58,7 @@
   "fieldtype": "Currency", 
   "label": "Net Total", 
   "options": "Company:company:default_currency", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }, 
@@ -64,6 +68,7 @@
   "fieldtype": "Currency", 
   "label": "Grand Total", 
   "options": "Company:company:default_currency", 
+  "print_width": "120px", 
   "read_only": 1, 
   "width": "120px"
  }

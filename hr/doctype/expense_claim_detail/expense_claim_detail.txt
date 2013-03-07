@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:14", 
+  "creation": "2013-02-22 01:27:46", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:51", 
+  "modified": "2013-03-07 07:03:21", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -31,6 +31,7 @@
   "label": "Expense Date", 
   "oldfieldname": "expense_date", 
   "oldfieldtype": "Date", 
+  "print_width": "150px", 
   "reqd": 0, 
   "width": "150px"
  }, 
@@ -42,6 +43,7 @@
   "oldfieldname": "expense_type", 
   "oldfieldtype": "Link", 
   "options": "link:Expense Claim Type", 
+  "print_width": "150px", 
   "reqd": 1, 
   "width": "150px"
  }, 
@@ -52,6 +54,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {
@@ -62,6 +65,7 @@
   "oldfieldname": "claim_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_width": "150px", 
   "reqd": 1, 
   "width": "150px"
  }, 
@@ -75,6 +79,7 @@
   "oldfieldname": "sanctioned_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_width": "150px", 
   "width": "150px"
  }
 ]

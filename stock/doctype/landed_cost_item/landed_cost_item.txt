@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:27", 
+  "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:55:26", 
+  "modified": "2013-03-07 07:03:23", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -42,6 +42,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Data", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-03-27 14:36:06", 
+  "creation": "2013-02-22 01:27:50", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:06", 
+  "modified": "2013-03-07 07:03:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,9 +10,7 @@
   "doctype": "DocType", 
   "istable": 1, 
   "module": "Projects", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "version": 4
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -41,6 +39,7 @@
   "label": "Milestone", 
   "oldfieldname": "milestone", 
   "oldfieldtype": "Text", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-02-22 01:27:48", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:43:10", 
+  "modified": "2013-03-07 07:03:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,6 +44,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {
@@ -88,6 +89,7 @@
   "oldfieldname": "parent_bom", 
   "oldfieldtype": "Link", 
   "options": "BOM", 
+  "print_width": "250px", 
   "width": "250px"
  }, 
  {

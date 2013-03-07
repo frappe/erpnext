@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-02-22 01:27:44", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:16:18", 
+  "modified": "2013-03-07 07:03:18", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -33,6 +33,7 @@
   "label": "Goal", 
   "oldfieldname": "kra", 
   "oldfieldtype": "Small Text", 
+  "print_width": "240px", 
   "reqd": 1, 
   "width": "240px"
  }, 
@@ -43,6 +44,7 @@
   "label": "Weightage (%)", 
   "oldfieldname": "per_weightage", 
   "oldfieldtype": "Currency", 
+  "print_width": "70px", 
   "reqd": 1, 
   "width": "70px"
  }, 
@@ -56,6 +58,7 @@
   "oldfieldname": "score", 
   "oldfieldtype": "Select", 
   "options": "\n0\n1\n2\n3\n4\n5", 
+  "print_width": "70px", 
   "width": "70px"
  }, 
  {
@@ -66,6 +69,7 @@
   "no_copy": 1, 
   "oldfieldname": "score_earned", 
   "oldfieldtype": "Currency", 
+  "print_width": "70px", 
   "read_only": 1, 
   "width": "70px"
  }
