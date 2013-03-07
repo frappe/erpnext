@@ -51,8 +51,13 @@ def execute_daily():
 	from webnotes.utils.email_lib.bulk import clear_outbox
 	run_fn(clear_outbox)
 
+	# daily backup
+	from setup.doctype.backup_manager.backup_manager import take_backups_daily
+	take_backups_daily()
+
 def execute_weekly():
-	pass
+	from setup.doctype.backup_manager.backup_manager import take_backups_weekly
+	take_backups_weekly()
 
 def execute_monthly():
 	pass

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-05 16:35:50", 
   "docstatus": 0, 
-  "modified": "2013-03-05 18:05:05", 
+  "modified": "2013-03-07 12:18:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,27 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "setup", 
+  "fieldtype": "Section Break", 
+  "label": "Setup"
+ }, 
+ {
+  "description": "Email ids separated by commas.", 
+  "doctype": "DocField", 
+  "fieldname": "send_notifications_to", 
+  "fieldtype": "Data", 
+  "label": "Send Notifications To", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "backup_right_now", 
+  "fieldtype": "Button", 
+  "label": "Backup Right Now"
+ }, 
+ {
+  "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
+  "doctype": "DocField", 
   "fieldname": "sync_with_dropbox", 
   "fieldtype": "Section Break", 
   "label": "Sync with Dropbox"
@@ -47,27 +68,31 @@
  {
   "doctype": "DocField", 
   "fieldname": "upload_backups_to_dropbox", 
-  "fieldtype": "Check", 
-  "label": "Upload Backups to Dropbox"
+  "fieldtype": "Select", 
+  "label": "Upload Backups to Dropbox", 
+  "options": "Never\nWeekly\nDaily"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "dropbox_access_key", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "Dropbox Access Key"
+  "label": "Dropbox Access Key", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "dropbox_access_secret", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "Dropbox Access Secret"
+  "label": "Dropbox Access Secret", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "dropbox_access_allowed", 
   "fieldtype": "Check", 
+  "hidden": 1, 
   "label": "Dropbox Access Allowed", 
   "read_only": 1
  }, 
