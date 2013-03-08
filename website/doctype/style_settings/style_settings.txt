@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:10", 
   "docstatus": 0, 
-  "modified": "2013-03-07 16:06:22", 
+  "modified": "2013-03-08 09:58:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -118,6 +118,13 @@
   "fieldtype": "Select", 
   "label": "Font Size (Text)", 
   "options": "\n12px\n13px\n14px\n15px\n16px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "heading_text_as", 
+  "fieldtype": "Select", 
+  "label": "Heading Text As", 
+  "options": "\nUPPERCASE\nTitle Case\nlowercase"
  }, 
  {
   "doctype": "DocField", 

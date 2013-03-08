@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-03-07 16:32:13", 
+  "modified": "2013-03-08 09:41:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,13 @@
   "label": "Blogger", 
   "options": "Blogger", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "blog_category", 
+  "fieldtype": "Link", 
+  "label": "Blog Category", 
+  "options": "Blog Category"
  }, 
  {
   "doctype": "DocField", 

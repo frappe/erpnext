@@ -32,6 +32,11 @@ div.outer {
 {% if doc.google_web_font_for_heading or doc.heading_font %}
 h1, h2, h3, h4, h5 {
 	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', Arial, 'Helvetica Neue' !important;
+}
+{% endif %}
+{% if doc.heading_text_as %}
+h1, h2, h3, h4, h5 {
+	text-transform: {{ doc.heading_text_as }};
 }	
 {% endif %}
 

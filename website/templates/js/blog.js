@@ -26,8 +26,12 @@ $(document).ready(function() {
 	
 	if(get_url_arg("by_name")) {
 		$("#blog-title").html("Posts by " + get_url_arg("by_name"));
-		$("#blog-link").toggle(true);
 	}
+
+	if(get_url_arg("category")) {
+		$("#blog-title").html("Posts filed under " + get_url_arg("category"));
+	}
+
 });
 
 var blog = {
@@ -39,7 +43,8 @@ var blog = {
 			data: {
 				cmd: "website.helpers.blog.get_blog_list",
 				start: blog.start,
-				by: get_url_arg("by")
+				by: get_url_arg("by"),
+				category: get_url_arg("category")
 			},
 			dataType: "json",
 			success: function(data) {

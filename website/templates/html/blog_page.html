@@ -14,7 +14,7 @@
 
 	<!-- begin blog content -->
 	<div class="help" style="color: #aaa">
-		{{ blogger_info and blogger_info.full_name or full_name }} wrote this on {{ updated }}</div>
+		{{ blogger_info and blogger_info.full_name or full_name }} / {{ updated }}</div>
 	<br>
 	{{ content_html }}
 	<!-- end blog content -->
@@ -30,23 +30,23 @@
 			<h4>{{ blogger_info.full_name }}</h4>
 			<p>{{ blogger_info.bio }}</p>
 			<p><a href="blog?by={{ blogger_info.name }}&by_name={{ blogger_info.full_name }}">
-				All posts by {{ blogger_info.full_name }}</a></p>
+				{{ texts.all_posts_by }} {{ blogger_info.full_name }}</a></p>
 		</div>
 	</div>
 	{% endif %}
 	<hr>
-	<h3>Comments</h3><br>
+	<h3>{{ texts.comments }}</h3><br>
 	<div class="blog-comments">
 		
 		{% if not comment_list %}
 		<div class="no-comment">
-			<p>Be the first one to comment</p>
+			<p>{{ texts.first_comment }}</p>
 		</div>
 		{% endif %}
 		
 		{% include 'html/comment.html' %}
 	</div>
-	<div><button class="btn add-comment">Add Comment</button></div>
+	<div><button class="btn add-comment">{{ texts.add_comment }}</button></div>
 	<div style="display: none; margin-top: 10px;" 
 		id="comment-form">
 		<div class="alert" style="display:none;"></div>
@@ -56,11 +56,10 @@
 				<input name="comment_by" placeholder="Your Email Id" type="text"/><br>
 				<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
 				</textarea><br>
-				<button class="btn btn-info" id="submit-comment">Submit</button>
+				<button class="btn btn-info" id="submit-comment">{{ texts.submit }}</button>
 			</fieldset>
 		</form>
 	</div>
-	<hr>
-	<a href="blog">Show posts by everyone</p>
 </div>
+{% include 'html/blog_footer.html' %}
 {% endblock %}

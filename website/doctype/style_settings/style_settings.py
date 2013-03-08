@@ -57,10 +57,16 @@ class DocType:
 			
 		fonts = list(set(fonts))
 		
+		if self.doc.heading_text_as:
+			self.doc.heading_text_as = {
+				"UPPERCASE": "uppercase",
+				"Title Case":"capitalize",
+				"lowercase": "lowercase"
+			}[self.doc.heading_text_as]
+		
 		self.doc.at_import = ""
 		for f in fonts:
 			self.doc.at_import += "\n@import url(http://fonts.googleapis.com/css?family=%s);" % f.replace(" ", "+")
-			
 
 	
 	def on_update(self):

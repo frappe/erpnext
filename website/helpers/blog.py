@@ -6,11 +6,13 @@ import webnotes
 import website.utils
 
 @webnotes.whitelist(allow_guest=True)
-def get_blog_list(start=0, by=None):
+def get_blog_list(start=0, by=None, category=None):
 	import webnotes
 	condition = ""
 	if by:
 		condition = " and t1.blogger='%s'" % by.replace("'", "\'")
+	if category:
+		condition += " and t1.blog_category='%s'" % category.replace("'", "\'")
 	query = """\
 		select
 			t1.title, t1.name, t1.page_name, t1.creation as creation, 
@@ -115,4 +117,8 @@ def get_blog_content(blog_page_name):
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
 	return content
-	
+
+def get_blog_template_args():
+	return {
+		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
+	}

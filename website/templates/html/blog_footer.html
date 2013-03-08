@@ -1,0 +1,12 @@
+<div class="span12">
+	<hr />
+	<p><a href="blog">Show posts by everyone</a></p>
+	{% if categories %}
+	<h5>Explore posts by categories</h5>
+	<ul class="breadcrumb" style="background-color: transparent; padding-left: 0px;">
+	{% for category in categories %}
+		<li><a href="blog?category={{ category }}">{{ category }}</a> 
+		{% if not loop.last %}<span class="divider">/</span>{% endif %}</li>
+	{% endfor %}
+	{% endif %}
+</div>
