@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-02-21 16:54:04", 
+  "modified": "2013-03-08 09:41:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,18 +50,44 @@
   "label": "Published"
  }, 
  {
-  "description": "Description for listing page, in plain text, only a couple of lines.", 
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "blogger", 
+  "fieldtype": "Link", 
+  "label": "Blogger", 
+  "options": "Blogger", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "blog_category", 
+  "fieldtype": "Link", 
+  "label": "Blog Category", 
+  "options": "Blog Category"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_5", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Description for listing page, in plain text, only a couple of lines. (max 140 characters)", 
   "doctype": "DocField", 
   "fieldname": "blog_intro", 
   "fieldtype": "Small Text", 
-  "label": "Blog Intro"
+  "label": "Blog Intro", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "content", 
   "fieldtype": "Text Editor", 
   "label": "Content", 
-  "reqd": 0
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

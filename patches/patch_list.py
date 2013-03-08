@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 patch_list = [
-	"execute:webnotes.reload_doc('core', 'doctype', 'report') # 2013-03-07",
 	"patches.mar_2012.so_rv_mapper_fix", 
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 
@@ -209,4 +208,5 @@ patch_list = [
 	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')",
 	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
 	"patches.march_2013.p02_get_global_default",
+	"execute:webnotes.bean('Style Settings', 'Style Settings').save()"
 ]

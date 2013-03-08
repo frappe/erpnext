@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 
 import webnotes
 import website.utils
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
@@ -26,6 +27,9 @@ class DocType:
 	def autoname(self):
 		from website.utils import page_name
 		self.doc.name = page_name(self.doc.title)
+
+	def validate(self):
+		self.doc.blog_intro = self.doc.blog_intro[:140]
 
 	def on_update(self):
 		from website.utils import update_page_name
@@ -66,6 +70,20 @@ class DocType:
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.creation)
 		self.doc.content_html = self.doc.content
+		if self.doc.blogger:
+			self.doc.blogger_info = webnotes.doc("blogger", self.doc.blogger).fields
+			if self.doc.blogger_info.avatar and not "/" in self.doc.blogger_info.avatar:
+				self.doc.blogger_info.avatar = "files/" + self.doc.blogger_info.avatar
+		
+		self.doc.categories = webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
+		
+		self.doc.texts = {
+			"comments": _("Comments"),
+			"first_comment": _("Be the first one to comment"),
+			"add_comment": _("Add Comment"),
+			"submit": _("Submit"),
+			"all_posts_by": _("All posts by"),
+		}
 
 		comment_list = webnotes.conn.sql("""\
 			select comment, comment_by_fullname, creation

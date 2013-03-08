@@ -1,0 +1,95 @@
+[
+ {
+  "creation": "2013-03-07 16:28:19", 
+  "docstatus": 0, 
+  "modified": "2013-03-07 16:33:37", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "autoname": "field:short_name", 
+  "description": "Profile of a Blogger", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "max_attachments": 1, 
+  "module": "Website", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Blogger", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Blogger", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Blogger"
+ }, 
+ {
+  "description": "Will be used in url (usually first name).", 
+  "doctype": "DocField", 
+  "fieldname": "short_name", 
+  "fieldtype": "Data", 
+  "label": "Short Name", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "full_name", 
+  "fieldtype": "Data", 
+  "label": "Full Name", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "profile", 
+  "fieldtype": "Link", 
+  "label": "Profile", 
+  "options": "Profile"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bio", 
+  "fieldtype": "Small Text", 
+  "label": "Bio"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "avatar", 
+  "fieldtype": "Select", 
+  "label": "Avatar", 
+  "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Website Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "owner:profile", 
+  "role": "Blogger"
+ }
+]

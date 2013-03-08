@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="span12">
-	<h1>Blog</h1>
+	<h2 id="blog-title">Blog</h2>
 	<br>
 	<div id="blog-list">
 		<!-- blog list will be generated dynamically -->
@@ -22,4 +22,5 @@
 			style="display:none;">More...</button>
 	</div>
 </div>
+{% include 'html/blog_footer.html' %}
 {% endblock %}

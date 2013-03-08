@@ -1,0 +1,14 @@
+{% extends "html/page.html" %}
+
+{% set title="Blog Writers" %}
+
+{% block content %}
+<div class="span12">
+	<h2 id="blog-title">Blog Writers</h2>
+	<hr>
+	{% for blogger_info in bloggers %}
+	{% include "html/blogger.html" %}	
+	{% endfor %}
+</div>
+{% include 'html/blog_footer.html' %}
+{% endblock %}

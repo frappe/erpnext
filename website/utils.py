@@ -41,7 +41,9 @@ page_map = {
 
 page_settings_map = {
 	"about": "About Us Settings",
-	"contact": "Contact Us Settings"
+	"contact": "Contact Us Settings",
+	"blog": "website.helpers.blog.get_blog_template_args",
+	"writers": "website.helpers.blog.get_writers_args"
 }
 
 def render(page_name):
@@ -155,7 +157,11 @@ def prepare_args(page_name):
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
-			args.obj = webnotes.bean(page_settings_map[page_name]).obj
+			target = page_settings_map[page_name]
+			if "." in target:
+				args.update(webnotes.get_method(target)())
+			else:
+				args.obj = webnotes.bean(page_settings_map[page_name]).obj
 	else:
 		args = get_doc_fields(page_name)
 	

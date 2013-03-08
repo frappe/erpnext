@@ -109,7 +109,7 @@ test_records = [
 			"description": "CPU", 
 			"doctype": "Delivery Note Item", 
 			"item_code": "_Test Item", 
-			"item_name": "CPU", 
+			"item_name": "_Test Item", 
 			"parentfield": "delivery_note_details", 
 			"qty": 5.0, 
 			"basic_rate": 100.0,

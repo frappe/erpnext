@@ -12,17 +12,34 @@ wn.module_page["Website"] = [
 				doctype:"Web Page"
 			},
 			{
-				label: wn._("Blog"),
-				description: wn._("Blog entry."),
-				doctype:"Blog"
-			},
-			{
 				label: wn._("Website Slideshow"),
 				description: wn._("Embed image slideshows in website pages."),
 				doctype:"Website Slideshow"
 			},
 		]
 	},
+	{
+		title: wn._("Blog"),
+		icon: "icon-edit",
+		items: [
+			{
+				label: wn._("Blog"),
+				description: wn._("Blog post."),
+				doctype:"Blog"
+			},
+			{
+				label: wn._("Blogger"),
+				description: wn._("Profile of a blog writer."),
+				doctype:"Blogger"
+			},
+			{
+				label: wn._("Blog Category"),
+				description: wn._("Categorize blog posts."),
+				doctype:"Blogger"
+			},
+		]
+	},
+
 	{
 		title: wn._("Website Overall Settings"),
 		icon: "icon-wrench",

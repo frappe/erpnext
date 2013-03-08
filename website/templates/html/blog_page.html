@@ -13,41 +13,41 @@
 	<h2>{{ title }}</h2>
 
 	<!-- begin blog content -->
-	<div class="help">By {{ full_name }} on {{ updated }}</div>
+	<div class="help" style="color: #aaa">
+		{{ blogger_info and blogger_info.full_name or full_name }} / {{ updated }}</div>
 	<br>
 	{{ content_html }}
 	<!-- end blog content -->
-
+	{% if blogger_info %}
+	<hr />
+	{% include "html/blogger.html" %}
+	{% endif %}
 	<hr>
-	<h3>Comments</h3><br>
+	<h3>{{ texts.comments }}</h3><br>
 	<div class="blog-comments">
 		
 		{% if not comment_list %}
-		<div class="alert no-comment">
-			<p>Be the first one to comment</p>
+		<div class="no-comment">
+			<p>{{ texts.first_comment }}</p>
 		</div>
 		{% endif %}
 		
 		{% include 'html/comment.html' %}
 	</div>
-	<div><button class="btn add-comment">Add Comment</button></div>
+	<div><button class="btn add-comment">{{ texts.add_comment }}</button></div>
 	<div style="display: none; margin-top: 10px;" 
-		id="comment-form" class="well">
+		id="comment-form">
 		<div class="alert" style="display:none;"></div>
 		<form>
-			<p>
-				<input name="comment_by_fullname" placeholder="Your Name" />
-			</p>
-			<p>
-				<input name="comment_by" placeholder="Your Email Id" />
-			</p>
-			<p>
+			<fieldset>
+				<input name="comment_by_fullname" placeholder="Your Name" type="text"/><br>
+				<input name="comment_by" placeholder="Your Email Id" type="text"/><br>
 				<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
-				</textarea>
-			</p>
-			<p>
-				<button class="btn btn-info" id="submit-comment">Submit</button>
+				</textarea><br>
+				<button class="btn btn-info" id="submit-comment">{{ texts.submit }}</button>
+			</fieldset>
 		</form>
 	</div>
 </div>
+{% include 'html/blog_footer.html' %}
 {% endblock %}
