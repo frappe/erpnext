@@ -124,8 +124,32 @@ div.web-footer {
           box-shadow: none;
 }
 
-.navbar-inverse .nav li.dropdown > .dropdown-toggle a .caret, 
-.navbar-inverse .nav li.dropdown > .dropdown-toggle a:hover .caret { {
+.navbar-inverse .nav li.dropdown > .dropdown-toggle .caret, 
+.navbar-inverse .nav li.dropdown > .dropdown-toggle:hover .caret {
 	border-top-color: #{{ doc.top_bar_foreground or "fff"}};
 	border-bottom-color: #{{ doc.top_bar_foreground or "fff"}};
+}
+
+.navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret,
+.navbar-inverse .nav li.dropdown.open > .dropdown-toggle:hover .caret {
+	border-top-color: #{{ doc.top_bar_background or "000"}};
+	border-bottom-color: #{{ doc.top_bar_background or "000"}};
+}
+
+.navbar-inverse .nav li.dropdown.open > .dropdown-toggle,
+  color: #{{ doc.top_bar_background or "000"}};
+  background-color: #{{ doc.top_bar_foreground or "fff"}};
+}
+
+@media (max-width: 800px) {
+  .navbar-inverse .nav-collapse .nav > li > a,
+  .navbar-inverse .nav-collapse .dropdown-menu a {
+    background-color: #{{ doc.top_bar_background or "000"}};
+    color: #{{ doc.top_bar_foreground or "fff"}};
+  }
+  .navbar-inverse .nav-collapse .nav > li > a:hover,
+  .navbar-inverse .nav-collapse .dropdown-menu a:hover {
+    background-color: #{{ doc.top_bar_foreground or "fff"}};
+    color: #{{ doc.top_bar_background or "000"}};
+  }
 }
