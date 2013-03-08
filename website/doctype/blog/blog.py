@@ -72,7 +72,7 @@ class DocType:
 		self.doc.updated = global_date_format(self.doc.creation)
 		self.doc.content_html = self.doc.content
 		if self.doc.blogger:
-			self.doc.blogger_info = webnotes.doc("blogger", self.doc.blogger).fields
+			self.doc.blogger_info = webnotes.doc("Blogger", self.doc.blogger).fields
 			if self.doc.blogger_info.avatar and not "/" in self.doc.blogger_info.avatar:
 				self.doc.blogger_info.avatar = "files/" + self.doc.blogger_info.avatar
 		

@@ -124,7 +124,8 @@ div.web-footer {
           box-shadow: none;
 }
 
-.navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
+.navbar-inverse .nav li.dropdown > .dropdown-toggle a .caret, 
+.navbar-inverse .nav li.dropdown > .dropdown-toggle a:hover .caret { {
 	border-top-color: #{{ doc.top_bar_foreground or "fff"}};
 	border-bottom-color: #{{ doc.top_bar_foreground or "fff"}};
 }
