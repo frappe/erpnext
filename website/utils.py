@@ -42,7 +42,8 @@ page_map = {
 page_settings_map = {
 	"about": "About Us Settings",
 	"contact": "Contact Us Settings",
-	"blog": "website.helpers.blog.get_blog_template_args"
+	"blog": "website.helpers.blog.get_blog_template_args",
+	"writers": "website.helpers.blog.get_writers_args"
 }
 
 def render(page_name):

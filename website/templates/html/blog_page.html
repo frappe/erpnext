@@ -20,19 +20,7 @@
 	<!-- end blog content -->
 	{% if blogger_info %}
 	<hr />
-	<div class="row">
-		<div class="span2">
-			<div class="avatar avatar-large">
-				<img src="{{ blogger_info.avatar }}" />
-			</div>
-		</div>
-		<div class="span10">
-			<h4>{{ blogger_info.full_name }}</h4>
-			<p>{{ blogger_info.bio }}</p>
-			<p><a href="blog?by={{ blogger_info.name }}&by_name={{ blogger_info.full_name }}">
-				{{ texts.all_posts_by }} {{ blogger_info.full_name }}</a></p>
-		</div>
-	</div>
+	{% include "html/blogger.html" %}
 	{% endif %}
 	<hr>
 	<h3>{{ texts.comments }}</h3><br>

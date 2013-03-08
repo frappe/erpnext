@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 import website.utils
+from webnotes import _
 
 @webnotes.whitelist(allow_guest=True)
 def get_blog_list(start=0, by=None, category=None):
@@ -120,5 +121,19 @@ def get_blog_content(blog_page_name):
 
 def get_blog_template_args():
 	return {
+		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
+	}
+	
+def get_writers_args():
+	bloggers = webnotes.conn.sql("select * from `tabBlogger` order by full_name", as_dict=1)
+	for blogger in bloggers:
+		if blogger.avatar and not "/" in blogger.avatar:
+			blogger.avatar = "files/" + blogger.avatar
+		
+	return {
+		"bloggers": bloggers,
+		"texts": {
+			"all_posts_by": _("All posts by")
+		},
 		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 	}
