@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
+from webnotes.utils import cint, cstr
+
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
@@ -46,8 +48,8 @@ class DocType:
 		if not self.doc.font_size:
 			self.doc.font_size = '13px'
 			
-		self.doc.small_font_size = str(int(self.doc.font_size[:-2])-2) + 'px'
-		self.doc.page_border = int(self.doc.page_border)
+		self.doc.small_font_size = cstr(cint(self.doc.font_size[:-2])-2) + 'px'
+		self.doc.page_border = cint(self.doc.page_border)
 		
 		fonts = []
 		if self.doc.google_web_font_for_heading:
