@@ -44,8 +44,9 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);
 		} else {
 			// outgoing
-					
-			if(is_fifo)	{
+			if(sl.serial_no) {
+				var value_diff = -1 * this.get_serialized_value_diff(sl);
+			} else if(is_fifo) {
 				var value_diff = this.get_fifo_value_diff(wh, sl);
 			} else {
 				// average rate for weighted average
@@ -101,5 +102,35 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		// reset the updated stack
 		wh.fifo_stack = fifo_stack.reverse();
 		return -fifo_value_diff;
+	},
+	
+	get_serialized_value_diff: function(sl) {
+		var me = this;
+		
+		var value_diff = 0.0;
+		
+		$.each(sl.serial_no.trim().split("\n"), function(i, serial_no) {
+			if(serial_no) {
+				value_diff += flt(me.serialized_buying_rates[serial_no]);
+			}
+		});
+		
+		return value_diff;
+	},
+	
+	get_serialized_buying_rates: function() {
+		var serialized_buying_rates = {};
+		
+		$.each(wn.report_dump.data["Stock Ledger Entry"], function(i, sle) {
+			if(sle.qty > 0 && sle.serial_no) {
+				$.each(sle.serial_no.trim().split("\n"), function(i, sr) {
+					if(sr && sle.incoming_rate !== undefined) {
+						serialized_buying_rates[sr] = flt(sle.incoming_rate);
+					}
+				});
+			}
+		});
+		
+		return serialized_buying_rates;
 	},
 });
