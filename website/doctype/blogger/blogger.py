@@ -13,6 +13,6 @@ class DocType:
 			for blog in webnotes.conn.sql_list("""select name from tabBlog where owner=%s 
 				and ifnull(blogger,'')=''""", self.doc.profile):
 				b = webnotes.bean("Blog", blog)
-				b.blogger = self.doc.name
+				b.doc.blogger = self.doc.name
 				b.save()
 				

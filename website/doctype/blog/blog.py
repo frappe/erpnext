@@ -29,7 +29,8 @@ class DocType:
 		self.doc.name = page_name(self.doc.title)
 
 	def validate(self):
-		self.doc.blog_intro = self.doc.blog_intro[:140]
+		if self.doc.blog_intro:
+			self.doc.blog_intro = self.doc.blog_intro[:140]
 
 	def on_update(self):
 		from website.utils import update_page_name
