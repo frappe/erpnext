@@ -40,7 +40,7 @@ class DocType:
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
 		
-		for f in ["small_font_size", "at_import"]:
+		for f in ["small_font_size", "at_import", "heading_text_style"]:
 			if f in self.doc.fields:
 				del self.doc.fields[f]
 	
@@ -60,7 +60,7 @@ class DocType:
 		fonts = list(set(fonts))
 		
 		if self.doc.heading_text_as:
-			self.doc.heading_text_as = {
+			self.doc.heading_text_style = {
 				"UPPERCASE": "uppercase",
 				"Title Case":"capitalize",
 				"lowercase": "lowercase"
@@ -68,7 +68,7 @@ class DocType:
 		
 		self.doc.at_import = ""
 		for f in fonts:
-			self.doc.at_import += "\n@import url(http://fonts.googleapis.com/css?family=%s);" % f.replace(" ", "+")
+			self.doc.at_import += "\n@import url(http://fonts.googleapis.com/css?family=%s:400,700);" % f.replace(" ", "+")
 
 	
 	def on_update(self):
