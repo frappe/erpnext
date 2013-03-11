@@ -48,6 +48,7 @@ var blog = {
 			},
 			dataType: "json",
 			success: function(data) {
+				$(".progress").toggle(false);
 				if(data.exc) console.log(data.exc);
 				blog.render(data.message);
 			}
@@ -81,10 +82,10 @@ var blog = {
 				</div><hr>', b)).appendTo($wrap);
 		});
 		blog.start += (data.length || 0);
-		if(!data.length) {
+		if(!data.length || data.length < 20) {
 			if(blog.start) {
 				$("#next-page").toggle(false)
-					.parent().append("<div class='alert'>Nothing more to show.</div>");	
+					.parent().append("<div class='alert alert-info'>Nothing more to show.</div>");	
 			} else {
 				$("#next-page").toggle(false)
 					.parent().append("<div class='alert'>No blogs written yet.</div>");	

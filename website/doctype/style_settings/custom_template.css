@@ -64,20 +64,16 @@ div.web-footer {
 }
 
 .navbar-inverse .brand,
+.navbar-inverse .brand:hover,
+.navbar-inverse .brand:focus,
 .navbar-inverse .nav > li > a {
   color: #{{ doc.top_bar_foreground or "fff"}};
   text-shadow: none;
 }
 
-.navbar-inverse .brand:hover,
 .navbar-inverse .nav > li > a:hover,
-.navbar-inverse .brand:focus,
 .navbar-inverse .nav > li > a:focus {
-  color: #{{ doc.top_bar_background or "aaa"}};
-}
-
-.navbar-inverse .brand {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_background or "000"}};
 }
 
 .navbar-inverse .navbar-text {
