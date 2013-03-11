@@ -6,6 +6,13 @@ import webnotes
 import website.utils
 from webnotes import _
 
+def clear_blog_cache():
+	for blog in webnotes.conn.sql_list("""select page_name from 
+		`tabBlog Post` where ifnull(published,0)=1"""):
+		website.utils.delete_page_cache(blog)
+	
+	website.utils.delete_page_cache("writers")
+
 @webnotes.whitelist(allow_guest=True)
 def get_blog_list(start=0, by=None, category=None):
 	import webnotes
@@ -16,17 +23,17 @@ def get_blog_list(start=0, by=None, category=None):
 		condition += " and t1.blog_category='%s'" % category.replace("'", "\'")
 	query = """\
 		select
-			t1.title, t1.name, t1.page_name, t1.creation as creation, 
+			t1.title, t1.name, t1.page_name, t1.published_on as creation, 
 				ifnull(t1.blog_intro, t1.content) as content, 
 				t2.full_name, t2.avatar, t1.blogger,
 				(select count(name) from `tabComment` where
-					comment_doctype='Blog' and comment_docname=t1.name) as comments
-		from `tabBlog` t1, `tabBlogger` t2
+					comment_doctype='Blog Post' and comment_docname=t1.name) as comments
+		from `tabBlog Post` t1, `tabBlogger` t2
 		where ifnull(t1.published,0)=1
 		and t1.blogger = t2.name
 		%(condition)s
-		order by creation desc, name asc
-		limit %(start)s, 5""" % {"start": start, "condition": condition}
+		order by published_on desc, name asc
+		limit %(start)s, 20""" % {"start": start, "condition": condition}
 		
 	result = webnotes.conn.sql(query, as_dict=1)
 
@@ -79,7 +86,7 @@ def add_comment(args=None):
 		comment_doctype='Blog' and comment_docname=%s and
 		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
 	
-	blog = webnotes.conn.sql("""select * from tabBlog where name=%s""", 
+	blog = webnotes.conn.sql("""select * from `tabBlog Post` where name=%s""", 
 		args.get('comment_docname'), as_dict=1)[0]
 	
 	from webnotes.utils.email_lib.bulk import send
@@ -125,7 +132,8 @@ def get_blog_template_args():
 	}
 	
 def get_writers_args():
-	bloggers = webnotes.conn.sql("select * from `tabBlogger` order by full_name", as_dict=1)
+	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
+	 	order by posts desc""", as_dict=1)
 	for blogger in bloggers:
 		if blogger.avatar and not "/" in blogger.avatar:
 			blogger.avatar = "files/" + blogger.avatar

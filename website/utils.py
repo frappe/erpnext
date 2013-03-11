@@ -25,7 +25,7 @@ page_map = {
 		"template": 'html/web_page.html',
 		"condition_field": "published"
 	}),
-	'Blog': webnotes._dict({
+	'Blog Post': webnotes._dict({
 		"template": 'html/blog_page.html',
 		"condition_field": "published",
 	}),
