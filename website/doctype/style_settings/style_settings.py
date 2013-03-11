@@ -39,6 +39,9 @@ class DocType:
 		
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
+
+		from website.utils import clear_cache
+		clear_cache()
 		
 		for f in ["small_font_size", "at_import", "heading_text_style"]:
 			if f in self.doc.fields:

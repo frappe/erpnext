@@ -25,11 +25,11 @@ $(document).ready(function() {
 	})
 	
 	if(get_url_arg("by_name")) {
-		$("#blog-title").html("Posts by " + get_url_arg("by_name"));
+		$("#blot-subtitle").html("Posts by " + get_url_arg("by_name")).toggle(true);
 	}
 
 	if(get_url_arg("category")) {
-		$("#blog-title").html("Posts filed under " + get_url_arg("category"));
+		$("#blot-subtitle").html("Posts filed under " + get_url_arg("category")).toggle(true);
 	}
 
 });

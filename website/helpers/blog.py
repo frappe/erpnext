@@ -127,9 +127,11 @@ def get_blog_content(blog_page_name):
 	return content
 
 def get_blog_template_args():
-	return {
+	args = {
 		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 	}
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args
 	
 def get_writers_args():
 	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
@@ -138,10 +140,13 @@ def get_writers_args():
 		if blogger.avatar and not "/" in blogger.avatar:
 			blogger.avatar = "files/" + blogger.avatar
 		
-	return {
+	args = {
 		"bloggers": bloggers,
 		"texts": {
 			"all_posts_by": _("All posts by")
 		},
 		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 	}
+	
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args
