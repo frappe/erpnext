@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate, validate_email_add
+from webnotes.utils import getdate, validate_email_add, cstr
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
@@ -104,7 +104,7 @@ class DocType:
 				fname, fid = file_args.split(",")
 				if self.doc.image == fname:
 					new_file_args = fname + "," + fid
-					file_list = profile_wrapper.doc.file_list.split("\n")
+					file_list = cstr(profile_wrapper.doc.file_list).split("\n")
 					if new_file_args not in file_list:
 						file_list += [new_file_args]
 					profile_wrapper.doc.file_list = "\n".join(file_list)

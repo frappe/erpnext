@@ -18,7 +18,7 @@ wn.provide("erpnext.projects");
 
 cur_frm.add_fetch("project", "company", "company");
 
-erpnext.projects.Task = erpnext.utils.Controller.extend({
+erpnext.projects.Task = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
 			return "select name from `tabProject` \

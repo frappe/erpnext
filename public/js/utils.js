@@ -24,10 +24,3 @@ erpnext.get_currency = function(company) {
 	else
 		return wn.boot.sysdefaults.currency;
 }
-
-// TODO
-erpnext.utils.Controller = wn.ui.form.Controller.extend({
-	refresh: function() {
-		erpnext.hide_naming_series();
-	}
-});

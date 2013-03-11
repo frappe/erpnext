@@ -29,9 +29,9 @@ import json
 
 sql = webnotes.conn.sql
 	
-from utilities.transaction_base import TransactionBase
+from controllers.accounts_controller import AccountsController
 
-class DocType(TransactionBase):
+class DocType(AccountsController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -44,12 +44,14 @@ class DocType(TransactionBase):
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
 
+		self.validate_item()
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order(pro_obj)
 		self.get_stock_and_rate()
 		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
+
 		self.validate_return_reference_doc()
 		
 		self.validate_with_material_request()
@@ -77,6 +79,12 @@ class DocType(TransactionBase):
 		sl_obj = get_obj("Stock Ledger")
 		sl_obj.scrub_serial_nos(self)
 		sl_obj.validate_serial_no(self, 'mtn_details')
+		
+	def validate_item(self):
+		for item in self.doclist.get({"parentfield": "mtn_details"}):
+			if item.item_code not in self.stock_items:
+				msgprint(_("""Only Stock Items are allowed for Stock Entry"""),
+					raise_exception=True)
 		
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""

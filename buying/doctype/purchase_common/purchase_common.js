@@ -21,7 +21,7 @@
 
 wn.provide("erpnext.buying");
 
-erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
+erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 	setup: function() {
 		var me = this;
 		
