@@ -29,7 +29,8 @@ erpnext.projects.Task = erpnext.utils.Controller.extend({
 
 	project: function() {
 		if(this.frm.doc.project) {
-			get_server_fields('get_project_details', '','', doc, cdt, cdn, 1);
+			get_server_fields('get_project_details', '','', this.frm.doc, this.frm.doc.doctype, 
+				this.frm.doc.name, 1);
 		}
 	},
 
