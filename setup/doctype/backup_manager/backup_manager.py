@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
+from webnotes.utils import getTraceback
 
 class DocType:
 	def __init__(self, d, dl):
@@ -25,6 +26,7 @@ def take_backups():
 		backup_to_dropbox()
 		send_email(True, "Dropbox")
 	except Exception, e:
+		webnotes.errprint(e)
 		send_email(False, "Dropbox", e)
 
 def send_email(success, service_name, error_status=None):
@@ -40,7 +42,8 @@ def send_email(success, service_name, error_status=None):
 		failed.</p>
 		<p>Error message: %s</p>
 		<p>Please contact your system manager for more information.</p>
-		""" % (service_name, error_status)
+		<p>Detailed Error Trace: %s</p>""" % \
+		(service_name, error_status, getTraceback().replace("\n", "<br>"))
 	
 	# email system managers
 	from webnotes.utils.email_lib import sendmail

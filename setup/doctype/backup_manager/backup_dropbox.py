@@ -1,6 +1,7 @@
 import os
 import webnotes
-from webnotes.utils import get_request_site_address
+from webnotes.utils import get_request_site_address, get_base_path
+from webnotes import _
 
 @webnotes.whitelist()
 def get_dropbox_authorize_url():
@@ -67,22 +68,23 @@ def backup_to_dropbox():
 	backup = new_backup()
 	filename = backup.backup_path_db
 	upload_file_to_dropbox(filename, "database", dropbox_client)
-
-	# upload files
-	response = dropbox_client.metadata("files")
-
+	path1 = os.path.join(get_base_path(), "public", "backups")
+	response = dropbox_client.metadata('/database')
 	
-	# add missing files
-	for filename in os.listdir(os.path.join("public", "files")):
+	#add missing files
+	found = False
+	for filename in os.listdir(path1):
 		found = False
+		pth=path1+'/'+filename
+		size=os.stat(pth).st_size
 		for file_metadata in response["contents"]:
  			if filename==os.path.basename(file_metadata["path"]):
-				if os.stat(os.path.join("public", "files", filename)).st_size==file_metadata["bytes"]:
+				if size==file_metadata["bytes"]:
 					found=True
-
 		if not found:
-			upload_file_to_dropbox(os.path.join("public", "files", filename), "files", dropbox_client)
-
+			upload_file_to_dropbox(pth, "database", dropbox_client)
+	if found:
+		webnotes.msgprint("no backup required everything is upto date")
 
 def get_dropbox_session():
 	from dropbox import session
@@ -96,20 +98,17 @@ def get_dropbox_session():
 	return sess
 
 def upload_file_to_dropbox(filename, folder, dropbox_client):
-	if __name__=="__main__":
-		print "Uploading " + filename
-	size = os.stat(filename).st_size
-	f = open(filename,'r')
-	
-	if size > 4194304:
-		uploader = dropbox_client.get_chunked_uploader(f, size)
-		while uploader.offset < size:
-			try:
-				uploader.upload_chunked()
-			except rest.ErrorResponse, e:
-				pass
-	else:
-		response = dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
+		size = os.stat(filename).st_size
+		f = open(filename,'r')
+		if size > 4194304:
+			uploader = dropbox_client.get_chunked_uploader(f, size)
+			while uploader.offset < size:
+				try:
+					uploader.upload_chunked()
+				except rest.ErrorResponse, e:
+					pass
+		else:
+			response = dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
 
 if __name__=="__main__":
-	backup_to_dropbox()
+	backup_to_dropbox() 
