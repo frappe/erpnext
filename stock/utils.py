@@ -164,23 +164,24 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 				wlist.append([w])
 	return wlist
 
-def get_buying_amount(item_code, warehouse, qty, voucher_no, voucher_detail_no, 
+def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, voucher_detail_no, 
 		stock_ledger_entries, item_sales_bom):
 	if item_sales_bom.get(item_code):
 		# sales bom item
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
-			buying_amount += _get_buying_amount(voucher_no, "[** No Item Row **]",
+			buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
 				item_code, warehouse, bom_item.qty * qty, stock_ledger_entries)
 		return buying_amount
 	else:
 		# doesn't have sales bom
-		return _get_buying_amount(voucher_no, voucher_detail_no, item_code, warehouse, qty, 
-			stock_ledger_entries)
+		return _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, 
+			item_code, warehouse, qty, stock_ledger_entries)
 		
-def _get_buying_amount(voucher_no, item_row, item_code, warehouse, qty, stock_ledger_entries):
+def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse, qty, 
+		stock_ledger_entries):
 	for i, sle in enumerate(stock_ledger_entries):
-		if sle.voucher_type == "Delivery Note" and sle.voucher_no == voucher_no:
+		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no:
 			if (sle.voucher_detail_no == item_row) or \
 				(sle.item_code == item_code and sle.warehouse == warehouse and \
 				abs(flt(sle.qty)) == qty):

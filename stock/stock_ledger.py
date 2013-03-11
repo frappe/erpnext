@@ -36,7 +36,6 @@ def update_entries_after(args, verbose=1):
 		}
 	"""
 	previous_sle = get_sle_before_datetime(args)
-	
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
 	valuation_rate = flt(previous_sle.get("valuation_rate"))
 	stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
@@ -214,7 +213,6 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
-
 	if not stock_queue:
 		stock_queue.append([0, 0])
 

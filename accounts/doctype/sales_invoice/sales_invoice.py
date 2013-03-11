@@ -25,6 +25,8 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
+from stock.utils import get_buying_amount, get_sales_bom
+
 session = webnotes.session
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
@@ -95,7 +97,8 @@ class DocType(SellingController):
 			if not self.doc.recurring_id:
 				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
 				 	self.doc.company, self.doc.grand_total, self)
-
+				
+		self.set_buying_amount()
 		self.check_prev_docstatus()
 		get_obj("Sales Common").update_prevdoc_detail(1,self)
 		
@@ -126,7 +129,7 @@ class DocType(SellingController):
 		self.check_next_docstatus()
 		sales_com_obj.update_prevdoc_detail(0, self)
 		
-		self.make_gl_entries(is_cancel=1)
+		self.make_gl_entries()
 
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
@@ -619,8 +622,7 @@ class DocType(SellingController):
 			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
 			'batch_no'						: cstr(d['batch_no']),
 			'serial_no'					 : d['serial_no']
-		})	
-			
+		})			
 
 	def update_stock_ledger(self, update_stock):
 		self.values = []
@@ -648,14 +650,29 @@ class DocType(SellingController):
 		return ret
 
 
-	def make_gl_entries(self, is_cancel=0):
-		from accounts.general_ledger import make_gl_entries
-		gl_entries = []
-		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
-		 	"automatic_inventory_accounting")
-		abbr = self.get_company_abbr()
+	def make_gl_entries(self):
+		from accounts.general_ledger import make_gl_entries, merge_similar_entries
 		
-		# parent's gl entry
+		gl_entries = []
+		
+		self.make_customer_gl_entry(gl_entries)
+	
+		self.make_tax_gl_entries(gl_entries)
+		
+		self.make_item_gl_entries(gl_entries)
+		
+		# merge gl entries before adding pos entries
+		gl_entries = merge_similar_entries(gl_entries)
+						
+		self.make_pos_gl_entries(gl_entries)
+		
+		update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account and 'No' or 'Yes'
+		
+		if gl_entries:
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
+				update_outstanding=update_outstanding, merge_entries=False)
+				
+	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
@@ -665,10 +682,10 @@ class DocType(SellingController):
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,
-				}, is_cancel)
+				})
 			)
-	
-		# tax table gl entries
+				
+	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
 			if flt(tax.tax_amount):
 				gl_entries.append(
@@ -678,11 +695,21 @@ class DocType(SellingController):
 						"credit": flt(tax.tax_amount),
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center_other_charges
-					}, is_cancel)
+					})
 				)
-		
+				
+	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
-		for item in getlist(self.doclist, 'entries'):
+		auto_inventory_accounting = \
+			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
+			
+		if auto_inventory_accounting:
+			if cint(self.doc.is_pos) and cint(self.doc.update_stock):
+				stock_account = self.get_stock_in_hand_account()
+			else:
+				stock_account = "Stock Delivered But Not Billed - %s" % (self.company_abbr,)
+		
+		for item in self.doclist.get({"parentfield": "entries"}):
 			# income account gl entries
 			if flt(item.amount):
 				gl_entries.append(
@@ -692,35 +719,31 @@ class DocType(SellingController):
 						"credit": item.amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
-					}, is_cancel)
+					})
 				)
-			# if auto inventory accounting enabled and stock item, 
-			# then do stock related gl entries
-			if auto_inventory_accounting and item.delivery_note and \
-					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
-				# to-do
-				purchase_rate = webnotes.conn.get_value("Delivery Note Item", 
-					item.dn_detail, "purchase_rate")
-				valuation_amount =  purchase_rate * item.qty
-				# expense account gl entries
-				if flt(valuation_amount):
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account,
-							"against": "Stock Delivered But Not Billed - %s" % (abbr,),
-							"debit": valuation_amount,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock"
-						}, is_cancel)
-					)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": "Stock Delivered But Not Billed - %s" % (abbr,),
-							"against": item.expense_account,
-							"credit": valuation_amount,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock"
-						}, is_cancel)
-					)
-		if self.doc.is_pos and self.doc.cash_bank_account and self.doc.paid_amount:
+				
+			# expense account gl entries
+			if auto_inventory_accounting and flt(item.buying_amount):
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.expense_account,
+						"against": stock_account,
+						"debit": item.buying_amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock",
+						"cost_center": item.cost_center
+					})
+				)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": stock_account,
+						"against": item.expense_account,
+						"credit": item.buying_amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					})
+				)
+	
+	def make_pos_gl_entries(self, gl_entries):
+		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -730,7 +753,7 @@ class DocType(SellingController):
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,
-				}, is_cancel)
+				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -738,7 +761,7 @@ class DocType(SellingController):
 					"against": self.doc.debit_to,
 					"debit": self.doc.paid_amount,
 					"remarks": self.doc.remarks,
-				}, is_cancel)
+				})
 			)
 			# write off entries, applicable if only pos
 			if self.doc.write_off_account and self.doc.write_off_amount:
@@ -750,7 +773,7 @@ class DocType(SellingController):
 						"remarks": self.doc.remarks,
 						"against_voucher": self.doc.name,
 						"against_voucher_type": self.doc.doctype,
-					}, is_cancel)
+					})
 				)
 				gl_entries.append(
 					self.get_gl_dict({
@@ -759,23 +782,45 @@ class DocType(SellingController):
 						"debit": self.doc.write_off_amount,
 						"remarks": self.doc.remarks,
 						"cost_center": self.doc.write_off_cost_center
-					}, is_cancel)
+					})
 				)
+	
+	def set_buying_amount(self):
+		if cint(self.doc.is_pos) and cint(self.doc.update_stock):
+			stock_ledger_entries = self.get_stock_ledger_entries()
+			item_sales_bom = get_sales_bom()
+		else:
+			stock_ledger_entries = item_sales_bom = None
+			
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if item.item_code in self.stock_items:
+				item.buying_amount = self.get_item_buying_amount(item, stock_ledger_entries, 
+					item_sales_bom)
+				webnotes.conn.set_value("Sales Invoice Item", item.name, 
+					"buying_amount", item.buying_amount)
+	
+	def get_item_buying_amount(self, item, stock_ledger_entries, item_sales_bom):
+		item_buying_amount = 0
+		if stock_ledger_entries:
+			# is pos and update stock
+			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+		elif item.delivery_note and item.dn_detail:
+			# against delivery note
+			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 
+				["buying_amount", "qty"], as_dict=1)
+			item_buying_rate = flt(dn_item.buying_amount) / flt(dn_item.qty)
+			item_buying_amount = item_buying_rate * flt(item.qty)
 		
-		
-		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
-		merge_entries=cint(self.doc.is_pos)!=1 and 1 or 0
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=is_cancel, 
-				update_outstanding=update_outstanding, merge_entries=merge_entries)
-
+		return item_buying_amount
+			
 	def update_c_form(self):
 		"""Update amended id in C-form"""
 		if self.doc.c_form_no and self.doc.amended_from:
 			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
-					invoice_date = %s, territory = %s, net_total = %s,
-					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
-
+				invoice_date = %s, territory = %s, net_total = %s,
+				grand_total = %s where invoice_no = %s and parent = %s""", 
+				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 
 	def check_next_docstatus(self):
 		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
