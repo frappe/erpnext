@@ -35,7 +35,7 @@ wn.module_page["Website"] = [
 			{
 				label: wn._("Blog Category"),
 				description: wn._("Categorize blog posts."),
-				doctype:"Blogger"
+				doctype:"Blog Category"
 			},
 		]
 	},
