@@ -2,12 +2,13 @@
  {
   "creation": "2013-03-08 11:36:50", 
   "docstatus": 0, 
-  "modified": "2013-03-11 14:26:24", 
+  "modified": "2013-03-11 15:23:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "doctype": "DocType", 
   "max_attachments": 5, 
   "module": "Website", 
