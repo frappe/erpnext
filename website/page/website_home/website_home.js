@@ -62,6 +62,7 @@ wn.module_page["Website"] = [
 	{
 		title: wn._("Special Page Settings"),
 		icon: "icon-wrench",
+		right: true,
 		items: [
 			{
 				"route":"Form/Product Settings",
