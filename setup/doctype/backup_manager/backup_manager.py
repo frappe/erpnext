@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
+from backup_dropbox import dropbox_callback, get_dropbox_session, get_dropbox_authorize_url
 
 class DocType:
 	def __init__(self, d, dl):
@@ -26,7 +27,6 @@ def take_backups():
 		send_email(True, "Dropbox")
 	except Exception, e:
 		send_email(False, "Dropbox", e)
-
 def send_email(success, service_name, error_status=None):
 	if success:
 		subject = "Backup Upload Successful"
@@ -44,5 +44,7 @@ def send_email(success, service_name, error_status=None):
 	
 	# email system managers
 	from webnotes.utils.email_lib import sendmail
-	sendmail(webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(","), 
-		subject=subject, msg=message)
+	sendmail(webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(","),
+	subject=subject, msg=message)
+
+get_dropbox_authorize_url()
