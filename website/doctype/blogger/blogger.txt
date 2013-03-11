@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 16:28:19", 
+  "creation": "2013-03-08 11:36:52", 
   "docstatus": 0, 
-  "modified": "2013-03-07 16:33:37", 
+  "modified": "2013-03-11 14:00:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -72,6 +72,13 @@
   "fieldtype": "Select", 
   "label": "Avatar", 
   "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posts", 
+  "fieldtype": "Int", 
+  "label": "Posts", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

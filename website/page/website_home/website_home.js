@@ -23,9 +23,9 @@ wn.module_page["Website"] = [
 		icon: "icon-edit",
 		items: [
 			{
-				label: wn._("Blog"),
-				description: wn._("Blog post."),
-				doctype:"Blog"
+				label: wn._("Blog Post"),
+				description: wn._("Single Post (article)."),
+				doctype:"Blog Post"
 			},
 			{
 				label: wn._("Blogger"),
