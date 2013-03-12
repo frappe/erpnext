@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-25 11:35:10", 
+  "creation": "2013-03-08 11:36:53", 
   "docstatus": 0, 
-  "modified": "2013-03-08 09:58:49", 
+  "modified": "2013-03-12 11:34:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,6 +67,24 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "page_headings", 
+  "fieldtype": "Data", 
+  "label": "Page Headings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "page_text", 
+  "fieldtype": "Data", 
+  "label": "Page Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "page_links", 
+  "fieldtype": "Data", 
+  "label": "Page Links"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "page_border", 
   "fieldtype": "Check", 
   "label": "Page Border"
@@ -88,9 +106,8 @@
   "description": "000 is black, fff is white", 
   "doctype": "DocField", 
   "fieldname": "top_bar_foreground", 
-  "fieldtype": "Select", 
-  "label": "Top Bar Foreground", 
-  "options": "000\nFFF"
+  "fieldtype": "Data", 
+  "label": "Top Bar Text"
  }, 
  {
   "doctype": "DocField", 

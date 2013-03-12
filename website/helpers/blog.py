@@ -99,10 +99,8 @@ def add_comment(args=None):
 	return comment_html
 
 @webnotes.whitelist(allow_guest=True)
-def add_subscriber():
+def add_subscriber(name, email_id):
 	"""add blog subscriber to lead"""
-	full_name = webnotes.form_dict.get('your_name')
-	email = webnotes.form_dict.get('your_email_address')
 	name = webnotes.conn.sql("""select name from tabLead where email_id=%s""", email)
 	
 	from webnotes.model.doc import Document
@@ -114,22 +112,23 @@ def add_subscriber():
 	if not lead.source: lead.source = 'Blog'
 	lead.unsubscribed = 0
 	lead.blog_subscriber = 1
-	lead.lead_name = full_name
+	lead.lead_name = name
 	lead.email_id = email
 	lead.save()
-		
+
 def get_blog_content(blog_page_name):
 	import website.utils
 	content = website.utils.get_html(blog_page_name)
-	content = split_blog_content(content)
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
 	return content
 
 def get_blog_template_args():
-	return {
+	args = {
 		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 	}
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args
 	
 def get_writers_args():
 	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
@@ -138,10 +137,13 @@ def get_writers_args():
 		if blogger.avatar and not "/" in blogger.avatar:
 			blogger.avatar = "files/" + blogger.avatar
 		
-	return {
+	args = {
 		"bloggers": bloggers,
 		"texts": {
 			"all_posts_by": _("All posts by")
 		},
 		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 	}
+	
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args

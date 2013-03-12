@@ -9,14 +9,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="span12">
-	<h2>{{ title }}</h2>
+<div class="span12" itemscope itemtype="http://schema.org/BlogPost">
+	<h2 itemprop="name headline">{{ title }}</h2>
 
 	<!-- begin blog content -->
 	<div class="help" style="color: #aaa">
-		{{ blogger_info and blogger_info.full_name or full_name }} / {{ updated }}</div>
+		<span itemprop="author">{{ blogger_info and blogger_info.full_name or full_name }}</span> / 
+		<span itemprop="dateCreated">{{ updated }}</span></div>
 	<br>
+	<div itemprop="articleBody">
 	{{ content_html }}
+	</div>
 	<!-- end blog content -->
 	{% if blogger_info %}
 	<hr />

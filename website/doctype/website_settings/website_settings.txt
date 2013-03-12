@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-25 11:35:10", 
+  "creation": "2013-03-07 11:55:11", 
   "docstatus": 0, 
-  "modified": "2013-02-21 10:05:09", 
+  "modified": "2013-03-12 11:17:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -72,24 +72,31 @@
   "label": "Home Page is Products"
  }, 
  {
+  "description": "Add a banner to the site. (small banners are usually good)", 
+  "doctype": "DocField", 
+  "fieldname": "banner", 
+  "fieldtype": "Section Break", 
+  "label": "Banner"
+ }, 
+ {
+  "description": "Banner is above the Top Menu Bar.", 
+  "doctype": "DocField", 
+  "fieldname": "banner_html", 
+  "fieldtype": "Small Text", 
+  "label": "Banner HTML"
+ }, 
+ {
+  "description": "Menu items in the Top Bar. For setting the color of the Top Bar, go to <a href=\"#Form/Style Settings\">Style Settings</a>", 
   "doctype": "DocField", 
   "fieldname": "top_bar", 
   "fieldtype": "Section Break", 
   "label": "Top Bar"
  }, 
  {
-  "description": "Background shade of the top menu bar", 
-  "doctype": "DocField", 
-  "fieldname": "top_bar_background", 
-  "fieldtype": "Select", 
-  "label": "Top Bar Background", 
-  "options": "Black\nWhite"
- }, 
- {
   "description": "Brand is what appears on the top-right of the toolbar. If it is an image, make sure it\nhas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px", 
   "doctype": "DocField", 
   "fieldname": "brand_html", 
-  "fieldtype": "Text", 
+  "fieldtype": "Small Text", 
   "label": "Brand HTML"
  }, 
  {

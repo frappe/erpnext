@@ -12,12 +12,15 @@ body {
 	background-color: #edede7;
 {% endif %}	
 {% if doc.font or doc.google_web_font_for_text %}
-	font-family: '{{ doc.google_web_font_for_text or doc.font }}', Verdana, Sans !important;
+	font-family: '{{ doc.google_web_font_for_text or doc.font }}', 'Helvetica Neue', Arial, Sans !important;
 {% endif %}
-{% if doc.font_size %}
-	font-size: {{ doc.font_size }} !important;
-{% endif %}
+	{% if doc.font_size %}font-size: {{ doc.font_size }} !important;{% endif %}
+	{% if doc.page_text %}color: #{{ doc.page_text }};{% endif %}
 }
+
+{% if doc.page_links %}a, a:hover {
+	color: #{{ doc.page_links }};
+}{% endif %}
 
 {% if doc.font_size %}
 .small {
@@ -29,16 +32,17 @@ div.outer {
 	background-color: #{{ doc.page_background or "fff" }};
 }
 
-{% if doc.google_web_font_for_heading or doc.heading_font %}
-h1, h2, h3, h4, h5 {
-	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', Arial, 'Helvetica Neue' !important;
-}
-{% endif %}
-{% if doc.heading_text_style %}
-h1, h2, h3, h4, h5 {
+{% if doc.google_web_font_for_heading or doc.heading_font %}h1, h2, h3, h4, h5 {
+	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', 'Helvetica Neue', Arial !important;
+}{% endif %}
+
+{% if doc.heading_text_style %}h1, h2, h3, h4, h5 {
 	text-transform: {{ doc.heading_text_style }};
-}	
-{% endif %}
+}{% endif %}
+
+{% if doc.page_headings %}h1, h2, h3, h4, h5 {
+	color: #{{ doc.page_headings }};
+}{% endif %}
 
 {% if doc.page_border %}
 /* Page Border*/
@@ -64,20 +68,16 @@ div.web-footer {
 }
 
 .navbar-inverse .brand,
+.navbar-inverse .brand:hover,
+.navbar-inverse .brand:focus,
 .navbar-inverse .nav > li > a {
   color: #{{ doc.top_bar_foreground or "fff"}};
   text-shadow: none;
 }
 
-.navbar-inverse .brand:hover,
 .navbar-inverse .nav > li > a:hover,
-.navbar-inverse .brand:focus,
 .navbar-inverse .nav > li > a:focus {
-  color: #{{ doc.top_bar_background or "aaa"}};
-}
-
-.navbar-inverse .brand {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_background or "000"}};
 }
 
 .navbar-inverse .navbar-text {
