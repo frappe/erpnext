@@ -5,10 +5,12 @@
 		{% for slide in obj.slides %}
 		<div class="{% if slide.idx==1 %}active {% endif %}item">
 			<img src="{{ slide.image }}" />
+			{% if slide.heading or slide.description %}
 			<div class="carousel-caption">
-				<h4>{{ slide.heading }}</h4>
-				<p>{{ slide.description }}</p>
+				{% if slide.heading %}<h4>{{ slide.heading }}</h4>{% endif %}
+				{% if slide.heading %}<p>{{ slide.description }}</p>{% endif %}
 			</div>
+			{% endif %}
 		</div>
 		{% endfor %}
 	</div>

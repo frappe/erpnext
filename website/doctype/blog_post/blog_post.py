@@ -74,12 +74,14 @@ class DocType:
 		# temp fields
 		from webnotes.utils import global_date_format, get_fullname
 		self.doc.full_name = get_fullname(self.doc.owner)
-		self.doc.updated = global_date_format(self.doc.creation)
+		self.doc.updated = global_date_format(self.doc.published_on)
 		self.doc.content_html = self.doc.content
 		if self.doc.blogger:
 			self.doc.blogger_info = webnotes.doc("Blogger", self.doc.blogger).fields
 			if self.doc.blogger_info.avatar and not "/" in self.doc.blogger_info.avatar:
 				self.doc.blogger_info.avatar = "files/" + self.doc.blogger_info.avatar
+		
+		self.doc.description = self.doc.blog_intro or self.doc.content[:140]
 		
 		self.doc.categories = webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 		

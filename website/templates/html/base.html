@@ -19,6 +19,9 @@
 	<link rel="icon" href="app/images/favicon.ico" type="image/x-icon">
 	{% endif %}
 	
+	{% if description %}
+	<meta name="description" content="{{ description }}">	
+	{% endif %}
 	
 	{% block header %}
 	{% endblock %}

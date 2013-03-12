@@ -37,6 +37,12 @@ wn.module_page["Website"] = [
 				description: wn._("Categorize blog posts."),
 				doctype:"Blog Category"
 			},
+			{
+				label: wn._("Blog Settings"),
+				description: wn._("Write titles and introductions to your blog."),
+				doctype:"Blog Settings",
+				route: "Form/Blog Settings"
+			},
 		]
 	},
 

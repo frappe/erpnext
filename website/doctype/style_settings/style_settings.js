@@ -17,8 +17,9 @@
 
 cur_frm.cscript.onload_post_render = function() {
 	wn.require('lib/public/js/lib/jscolor/jscolor.js');
-	cur_frm.fields_dict.background_color.input.className = 'color';
-	cur_frm.fields_dict.page_background.input.className = 'color';
-	cur_frm.fields_dict.top_bar_background.input.className = 'color';
+	$.each(["background_color", "page_background", "page_text", "page_links", 
+		"top_bar_background", "top_bar_foreground", "page_headings"], function(i, v) {
+		cur_frm.fields_dict[v].input.className = 'color';
+	})
 	jscolor.bind();
 }

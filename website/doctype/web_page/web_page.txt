@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-27 16:31:21", 
+  "creation": "2013-02-12 13:19:11", 
   "docstatus": 0, 
-  "modified": "2013-02-12 09:33:47", 
+  "modified": "2013-03-11 17:41:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,18 +24,16 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Web Page", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
   "role": "Website Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -84,6 +82,13 @@
   "fieldtype": "Link", 
   "label": "Slideshow", 
   "options": "Website Slideshow"
+ }, 
+ {
+  "description": "Description for page header.", 
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description"
  }, 
  {
   "description": "Content in markdown format that appears on the main side of your page", 
@@ -143,6 +148,17 @@
   "print_hide": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "write": 0
  }
 ]

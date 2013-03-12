@@ -59,7 +59,7 @@ def generate():
 	blog_list = webnotes.conn.sql("""\
 		select page_name as name, modified, creation, title from `tabBlog Post` 
 		where ifnull(published,0)=1
-		order by creation desc, modified desc, name asc limit 100""", as_dict=1)
+		order by creation desc, modified desc, name asc limit 20""", as_dict=1)
 
 	for blog in blog_list:
 		blog.link = host + '/' + blog.name + '.html'

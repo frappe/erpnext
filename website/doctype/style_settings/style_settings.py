@@ -15,7 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
+import webnotes
+
 from webnotes.utils import cint, cstr
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
@@ -25,6 +28,8 @@ class DocType:
 		"""make custom css"""
 		from jinja2 import Template
 		import os
+		
+		self.validate_colors()
 		
 		with open(os.path.join(
 				os.path.dirname(os.path.abspath(__file__)), 
@@ -39,10 +44,23 @@ class DocType:
 		
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
+
+		from website.utils import clear_cache
+		clear_cache()
 		
 		for f in ["small_font_size", "at_import", "heading_text_style"]:
 			if f in self.doc.fields:
 				del self.doc.fields[f]
+	
+	def validate_colors(self):
+		if self.doc.page_background==self.doc.page_text:
+			webnotes.msgprint(_("Page text and background is same color. Please change."),
+				raise_exception=1)
+
+		if self.doc.top_bar_background==self.doc.top_bar_foreground:
+			webnotes.msgprint(_("Top Bar text and background is same color. Please change."),
+				raise_exception=1)
+
 	
 	def prepare(self):
 		if not self.doc.font_size:
