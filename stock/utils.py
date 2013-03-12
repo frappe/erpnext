@@ -181,11 +181,13 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse, qty, 
 		stock_ledger_entries):
 	for i, sle in enumerate(stock_ledger_entries):
-		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no:
+		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
+				len(stock_ledger_entries) > i+1:
 			if (sle.voucher_detail_no == item_row) or \
 				(sle.item_code == item_code and sle.warehouse == warehouse and \
 				abs(flt(sle.qty)) == qty):
-					buying_amount = flt(stock_ledger_entries[i+1].stock_value) - flt(sle.stock_value)
+					buying_amount = flt(stock_ledger_entries[i+1].stock_value) - \
+						flt(sle.stock_value)
 
 					return buying_amount
 					
