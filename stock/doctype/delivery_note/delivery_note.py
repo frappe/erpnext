@@ -225,7 +225,12 @@ class DocType(SellingController):
 			bin = sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
-
+			
+	def on_update(self):
+		self.doclist = get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
+		sl = get_obj('Stock Ledger')
+		sl.scrub_serial_nos(self)
+		sl.scrub_serial_nos(self, 'packing_details')
 
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -252,6 +257,7 @@ class DocType(SellingController):
 
 		self.credit_limit()
 		
+		self.set_buying_amount()
 		self.make_gl_entries()
 
 		# set DN status
@@ -387,13 +393,19 @@ class DocType(SellingController):
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			get_obj('Sales Common').check_credit(self, total)
-
-
-	def on_update(self):
-		self.doclist = get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
-		sl = get_obj('Stock Ledger')
-		sl.scrub_serial_nos(self)
-		sl.scrub_serial_nos(self, 'packing_details')
+		
+	def set_buying_amount(self):
+		from stock.utils import get_buying_amount, get_sales_bom
+		stock_ledger_entries = self.get_stock_ledger_entries()
+		item_sales_bom = get_sales_bom()
+		
+		if stock_ledger_entries:
+			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
+				item.buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+					self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+					item_sales_bom)
+				webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
+					item.buying_amount)
 		
 		self.validate_warehouse()
 		
@@ -435,38 +447,6 @@ class DocType(SellingController):
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
 			
 	def get_total_buying_amount(self):
-		from stock.utils import get_buying_amount, get_sales_bom
-		stock_ledger_entries = self.get_stock_ledger_entries()
-		item_sales_bom = get_sales_bom()
-		total_buying_amount = 0
-		
-		if stock_ledger_entries:
-			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-				buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
-					self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
-				total_buying_amount += buying_amount
-			
+		total_buying_amount = sum([item.buying_amount for item in 
+			self.doclist.get({"parentfield": "delivery_note_details"})])
 		return total_buying_amount
-		
-	def get_stock_ledger_entries(self):
-		item_list, warehouse_list = self.get_distinct_item_warehouse()
-		if item_list and warehouse_list:
-			return webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
-				voucher_detail_no, posting_date, posting_time, stock_value,
-				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
-				where ifnull(`is_cancelled`, "No") = "No" and company = %s 
-				and item_code in (%s) and warehouse in (%s)
-				order by item_code desc, warehouse desc, posting_date desc, 
-				posting_time desc, name desc""" % 
-				('%s', ', '.join(['%s']*len(item_list)), ', '.join(['%s']*len(warehouse_list))), 
-				tuple([self.doc.company] + item_list + warehouse_list), as_dict=1)
-
-	def get_distinct_item_warehouse(self):
-		item_list = []
-		warehouse_list = []
-		for item in self.doclist.get({"parentfield": "delivery_note_details"}) \
-				+ self.doclist.get({"parentfield": "packing_details"}):
-			item_list.append(item.item_code)
-			warehouse_list.append(item.warehouse)
-			
-		return list(set(item_list)), list(set(warehouse_list))

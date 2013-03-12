@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:00", 
+  "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:20", 
+  "modified": "2013-03-07 15:46:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,8 @@
   "fieldname": "barcode", 
   "fieldtype": "Data", 
   "label": "Barcode", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -42,6 +43,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -64,6 +66,7 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "150px"
  }, 
@@ -75,6 +78,7 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -87,6 +91,7 @@
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -115,6 +120,7 @@
   "options": "currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -128,6 +134,7 @@
   "oldfieldtype": "Float", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -140,6 +147,7 @@
   "options": "currency", 
   "print_hide": 0, 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "150px"
  }, 
@@ -181,6 +189,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "150px"
  }, 
@@ -208,6 +217,7 @@
   "options": "Warehouse", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -219,7 +229,8 @@
   "no_copy": 1, 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Text", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -229,7 +240,8 @@
   "oldfieldname": "batch_no", 
   "oldfieldtype": "Link", 
   "options": "Batch", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -376,6 +388,17 @@
   "read_only": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "buying_amount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Buying Amount", 
+  "no_copy": 1, 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "page_break", 
@@ -383,6 +406,7 @@
   "label": "Page Break", 
   "oldfieldname": "page_break", 
   "oldfieldtype": "Check", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }
 ]

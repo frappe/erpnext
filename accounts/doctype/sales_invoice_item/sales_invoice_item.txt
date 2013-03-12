@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-05 09:11:04", 
+  "creation": "2013-03-07 11:42:55", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:30", 
+  "modified": "2013-03-11 14:58:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,8 @@
   "fieldname": "barcode", 
   "fieldtype": "Data", 
   "label": "Barcode", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -42,6 +43,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_hide": 0, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -63,6 +65,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -74,6 +77,7 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
   "print_width": "200px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "200px"
  }, 
@@ -84,6 +88,7 @@
   "label": "Qty", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -102,6 +107,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -111,7 +117,8 @@
   "label": "Discount (%)", 
   "oldfieldname": "adj_rate", 
   "oldfieldtype": "Float", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -121,6 +128,7 @@
   "oldfieldname": "export_rate", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -155,6 +163,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -179,7 +188,8 @@
   "oldfieldname": "warehouse", 
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -192,8 +202,19 @@
   "options": "Account", 
   "print_hide": 1, 
   "print_width": "120px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_account", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "Expense Account", 
+  "options": "Account", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -206,6 +227,7 @@
   "options": "Cost Center", 
   "print_hide": 1, 
   "print_width": "120px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "120px"
  }, 
@@ -217,7 +239,8 @@
   "label": "Serial No", 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Small Text", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -225,7 +248,8 @@
   "fieldtype": "Link", 
   "label": "Batch No", 
   "options": "Batch", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -249,7 +273,8 @@
   "label": "Brand Name", 
   "oldfieldname": "brand", 
   "oldfieldtype": "Data", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -328,7 +353,8 @@
   "fieldname": "time_log_batch", 
   "fieldtype": "Link", 
   "label": "Time Log Batch", 
-  "options": "Time Log Batch"
+  "options": "Time Log Batch", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -354,6 +380,17 @@
   "read_only": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "buying_amount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Buying Amount", 
+  "no_copy": 1, 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "page_break", 
@@ -361,6 +398,7 @@
   "label": "Page Break", 
   "no_copy": 1, 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }
 ]
