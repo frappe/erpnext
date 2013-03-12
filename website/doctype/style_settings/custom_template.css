@@ -12,7 +12,7 @@ body {
 	background-color: #edede7;
 {% endif %}	
 {% if doc.font or doc.google_web_font_for_text %}
-	font-family: '{{ doc.google_web_font_for_text or doc.font }}', Verdana, Sans !important;
+	font-family: '{{ doc.google_web_font_for_text or doc.font }}', 'Helvetica Neue', Arial, Sans !important;
 {% endif %}
 {% if doc.font_size %}
 	font-size: {{ doc.font_size }} !important;
@@ -31,7 +31,7 @@ div.outer {
 
 {% if doc.google_web_font_for_heading or doc.heading_font %}
 h1, h2, h3, h4, h5 {
-	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', Arial, 'Helvetica Neue' !important;
+	font-family: '{{ doc.google_web_font_for_heading or doc.heading_font }}', 'Helvetica Neue', Arial !important;
 }
 {% endif %}
 {% if doc.heading_text_style %}
