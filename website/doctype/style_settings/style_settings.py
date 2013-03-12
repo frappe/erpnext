@@ -53,13 +53,15 @@ class DocType:
 				del self.doc.fields[f]
 	
 	def validate_colors(self):
-		if self.doc.page_background==self.doc.page_text:
-			webnotes.msgprint(_("Page text and background is same color. Please change."),
-				raise_exception=1)
+		if (self.doc.page_background or self.doc.page_text) and \
+			self.doc.page_background==self.doc.page_text:
+				webnotes.msgprint(_("Page text and background is same color. Please change."),
+					raise_exception=1)
 
-		if self.doc.top_bar_background==self.doc.top_bar_foreground:
-			webnotes.msgprint(_("Top Bar text and background is same color. Please change."),
-				raise_exception=1)
+		if (self.doc.top_bar_background or self.doc.top_bar_foreground) and \
+			self.doc.top_bar_background==self.doc.top_bar_foreground:
+				webnotes.msgprint(_("Top Bar text and background is same color. Please change."),
+					raise_exception=1)
 
 	
 	def prepare(self):
