@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-08 11:36:53", 
   "docstatus": 0, 
-  "modified": "2013-03-12 11:34:32", 
+  "modified": "2013-03-12 13:35:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,6 +67,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "page_border", 
+  "fieldtype": "Check", 
+  "label": "Page Border"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "page_headings", 
   "fieldtype": "Data", 
   "label": "Page Headings"
@@ -85,14 +91,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "page_border", 
-  "fieldtype": "Check", 
-  "label": "Page Border"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "cb0", 
   "fieldtype": "Column Break", 
+  "label": "Top Bar", 
   "print_width": "50%", 
   "width": "50%"
  }, 

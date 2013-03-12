@@ -125,7 +125,7 @@ class DocType(BuyingController):
 		self.update_raw_materials_supplied("pr_raw_material_details")
 		
 		self.update_valuation_rate("purchase_receipt_details")
-
+		
 	def on_update(self):
 		if self.doc.rejected_warehouse:
 			for d in getlist(self.doclist,'purchase_receipt_details'):
@@ -146,6 +146,9 @@ class DocType(BuyingController):
 		self.values = []
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
+				if not d.warehouse:
+					continue
+				
 				ord_qty = 0
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 

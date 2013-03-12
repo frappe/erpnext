@@ -540,8 +540,7 @@ class DocType(SellingController):
 		if not w:
 			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
-				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.")
-				raise Exception
+				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
 			elif not ps[0][1]:
 				msgprint("Please enter warehouse in POS Setting")
 			else:

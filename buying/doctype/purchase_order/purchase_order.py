@@ -132,6 +132,10 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
+				# this happens when item is changed from non-stock to stock item
+				if not d.warehouse:
+					continue
+				
 				ind_qty, po_qty = 0, flt(d.qty) * flt(d.conversion_factor)
 				if is_stopped:
 					po_qty = flt(d.qty) > flt(d.received_qty) and \

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:07", 
+  "creation": "2013-03-07 11:55:11", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:18", 
+  "modified": "2013-03-12 13:51:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,23 +14,38 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "employee", 
-  "fieldtype": "Link", 
-  "label": "Employee", 
   "name": "__common__", 
-  "options": "Employee", 
   "parent": "About Us Team Member", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "print_width": "300px", 
-  "width": "300px"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocType", 
   "name": "About Us Team Member"
  }, 
  {
-  "doctype": "DocField"
+  "doctype": "DocField", 
+  "fieldname": "full_name", 
+  "fieldtype": "Data", 
+  "label": "Full Name", 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "image_link", 
+  "fieldtype": "Select", 
+  "label": "Image Link", 
+  "options": "attach_files:", 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bio", 
+  "fieldtype": "Small Text", 
+  "label": "Bio", 
+  "reqd": 1, 
+  "width": "200px"
  }
 ]

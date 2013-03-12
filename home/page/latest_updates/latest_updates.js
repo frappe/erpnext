@@ -1,5 +1,6 @@
 erpnext.updates = [
-	["5th March", ["Refactored Upload Attendace Tool"]],
+	["12th March", ["Updates to website module. Added more options in Style Settings and Website Settings."]],
+	["5th March", ["Refactored Upload Attendance Tool"]],
 	["4th March", ["Lead organization added in Quotation classic/spartan/modern print format"]],
 	["1st March", [
 		"Time Log, Time Log Batch: Created feature to batch Time Logs so that they can be tracked for billing.",

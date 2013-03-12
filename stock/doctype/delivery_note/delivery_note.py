@@ -156,7 +156,7 @@ class DocType(SellingController):
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
 
-
+		
 	def validate_mandatory(self):
 		if self.doc.amended_from and not self.doc.amendment_date:
 			msgprint("Please Enter Amendment Date")
@@ -338,10 +338,10 @@ class DocType(SellingController):
 		self.values = []
 		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				if not d['warehouse']:
-					msgprint("Please enter Warehouse for item %s as it is stock item"
-						% d['item_code'], raise_exception=1)
-						
+				# this happens when item is changed from non-stock to stock item
+				if not d["warehouse"]:
+					continue
+				
 				if d['reserved_qty'] < 0 :
 					# Reduce reserved qty from reserved warehouse mentioned in so
 					args = {
@@ -406,6 +406,15 @@ class DocType(SellingController):
 					item_sales_bom)
 				webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
 					item.buying_amount)
+		
+		self.validate_warehouse()
+		
+	def validate_warehouse(self):
+		for d in self.get_item_list():
+			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
+				if not d['warehouse']:
+					msgprint("Please enter Warehouse for item %s as it is stock item"
+						% d['item_code'], raise_exception=1)
 		
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
