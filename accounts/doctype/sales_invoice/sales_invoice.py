@@ -724,6 +724,8 @@ class DocType(SellingController):
 				
 			# expense account gl entries
 			if auto_inventory_accounting and flt(item.buying_amount):
+				self.check_expense_account(item)
+				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
@@ -813,6 +815,11 @@ class DocType(SellingController):
 			item_buying_amount = item_buying_rate * flt(item.qty)
 		
 		return item_buying_amount
+		
+	def check_expense_account(self, item):
+		if not item.expense_account:
+			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				raise_exception=1)
 			
 	def update_c_form(self):
 		"""Update amended id in C-form"""
