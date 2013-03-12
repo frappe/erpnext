@@ -19,7 +19,6 @@ wn.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	onload_post_render: function() {
-		this._super();
 		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
 			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
 				// if production order / bom is mentioned, get items
@@ -28,7 +27,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	refresh: function() {
-		this._super();
+		erpnext.hide_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		if (this.frm.doc.docstatus==1) {
