@@ -212,4 +212,5 @@ patch_list = [
 	"patches.march_2013.p02_get_global_default",
 	"execute:webnotes.bean('Style Settings', 'Style Settings').save()",
 	"patches.march_2013.p03_rename_blog_to_blog_post",
+	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
 ]
