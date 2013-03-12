@@ -6,4 +6,4 @@ def execute():
 	webnotes.reload_doc('website', 'doctype', 'blog_post')
 	webnotes.conn.sql('''update tabBlogger set posts=(select count(*) 
 		from `tabBlog Post` where ifnull(blogger,"")=tabBlogger.name)''')
-	webnotes.conn.sql("""update `tabBlog Post` set published_on=creation""")
+	webnotes.conn.sql("""update `tabBlog Post` set published_on=date(creation)""")

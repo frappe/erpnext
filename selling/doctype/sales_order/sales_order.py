@@ -156,9 +156,13 @@ class DocType(SellingController):
 			f = [d.item_code, d.description]
 
 			#check item is stock item
-			st_itm = sql("select is_stock_item from `tabItem` where name = '%s'"%d.item_code)
+			st_itm = sql("select is_stock_item from `tabItem` where name = %s", d.item_code)
 
 			if st_itm and st_itm[0][0] == 'Yes':
+				if not d.reserved_warehouse:
+					msgprint("""Please enter Reserved Warehouse for item %s 
+						as it is stock Item""" % d.item_code, raise_exception=1)
+				
 				if e in check_list:
 					msgprint("Item %s has been entered twice." % d.item_code)
 				else:
@@ -333,10 +337,6 @@ class DocType(SellingController):
 	def update_stock_ledger(self, update_stock, is_stopped = 0):
 		for d in self.get_item_list(is_stopped):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				if not d['reserved_warehouse']:
-					msgprint("""Please enter Reserved Warehouse for item %s 
-						as it is stock Item""" % d['item_code'], raise_exception=1)
-				
 				args = {
 					"item_code": d['item_code'],
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),

@@ -24,34 +24,3 @@ erpnext.get_currency = function(company) {
 	else
 		return wn.boot.sysdefaults.currency;
 }
-
-// TODO
-erpnext.utils.Controller = Class.extend({
-	init: function(opts) {
-		$.extend(this, opts);
-		this.setup && this.setup();
-	},
-	
-	onload_post_render: function() {
-		if(this.frm.doc.__islocal) {
-			this.setup_defaults();
-		}
-	},
-	
-	setup_defaults: function() {
-		var me = this;
-		
-		var defaults = {
-			posting_date: wn.datetime.get_today(),
-			posting_time: wn.datetime.now_time()
-		}
-		
-		$.each(defaults, function(k, v) {
-			if(!me.frm.doc[k]) me.frm.set_value(k, v);
-		});
-	},
-	
-	refresh: function() {
-		erpnext.hide_naming_series();
-	}
-});
