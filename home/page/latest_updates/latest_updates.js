@@ -1,6 +1,14 @@
 erpnext.updates = [
+	["5th March", ["Refactored Upload Attendace Tool"]],
+	["4th March", ["Lead organization added in Quotation classic/spartan/modern print format"]],
 	["1st March", [
-		"Time Log, Time Log Batch: Created feature to batch Time Logs so that they can be tracked for billing."
+		"Time Log, Time Log Batch: Created feature to batch Time Logs so that they can be tracked for billing.",
+		"Sub-contracting code refactored for PO",
+	]],
+	["28th February", [
+	"Datatype validation in Voucher Import Tool",
+	"Fixes for conversion factor in old invoices",
+	"Fixed asynchronus issue in purchase cycle"
 	]],
 	["27th February", [
 		"Time Log: Created Time Log System, with Calendar View."

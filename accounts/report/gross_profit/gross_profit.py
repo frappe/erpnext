@@ -25,7 +25,7 @@ def execute(filters=None):
 	for row in delivery_note_items:
 		selling_amount = flt(row.amount)
 		buying_amount = get_buying_amount(row.item_code, row.warehouse, 
-			row.qty, row.name, row.item_row, stock_ledger_entries, item_sales_bom)
+			row.qty, "Delivery Note", row.name, row.item_row, stock_ledger_entries, item_sales_bom)
 		if selling_amount:
 			gross_profit = selling_amount - buying_amount
 			gross_profit_percent = (gross_profit / selling_amount) * 100.0

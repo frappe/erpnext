@@ -20,16 +20,14 @@ import webnotes
 def delete_transactions():
 	print "Deleting transactions..."
 
-	trans = ['Timesheet','Task','Support Ticket','Stock Reconciliation', 'Stock Ledger Entry', \
-		'Stock Entry','Sales Order','Salary Slip','Sales Invoice','Quotation', 'Quality Inspection', \
-		'Purchase Receipt','Purchase Order','Production Order', 'POS Setting','Period Closing Voucher', \
-		'Purchase Invoice','Maintenance Visit','Maintenance Schedule','Leave Application', \
-		'Leave Allocation', 'Lead', 'Journal Voucher', 'Installation Note','Material Request', \
-		'GL Entry','Expense Claim','Opportunity','Delivery Note','Customer Issue','Bin', \
-		'Authorization Rule','Attendance', 'C-Form', 'Form 16A', 'Lease Agreement', \
-		'Lease Installment', 'TDS Payment', 'TDS Return Acknowledgement', 'Appraisal', \
-		'Installation Note', 'Communication'
-	]
+	trans = ['Timesheet', 'Task', 'Support Ticket', 'Stock Reconciliation', 'Stock Ledger Entry', 
+		'Stock Entry', 'Sales Order', 'Salary Slip','Sales Invoice', 'Quotation', 
+		'Quality Inspection', 'Purchase Receipt', 'Purchase Order', 'Production Order', 
+		'POS Setting', 'Period Closing Voucher', 'Purchase Invoice', 'Maintenance Visit', 
+		'Maintenance Schedule', 'Leave Application', 'Leave Allocation', 'Lead', 'Journal Voucher', 
+		'Installation Note', 'Material Request', 'GL Entry', 'Expense Claim', 'Opportunity', 
+		'Delivery Note', 'Customer Issue', 'Bin', 'Authorization Rule', 'Attendance', 'C-Form', 
+		'Appraisal', 'Installation Note', 'Communication']
 	for d in trans:
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
@@ -41,55 +39,55 @@ def delete_transactions():
 def delete_masters():
 	print "Deleting masters...."
 	masters = {
-		'Workstation':['Default Workstation'],
-		'Warehouse Type':['Default Warehouse Type', 'Fixed Asset', 'Rejected', 'Reserved', 
+		'Workstation': ['Default Workstation'],
+		'Warehouse Type': ['Default Warehouse Type', 'Fixed Asset', 'Rejected', 'Reserved', 
 			'Sample', 'Stores', 'WIP Warehouse'],
-		'Warehouse':['Default Warehouse'],
-		'UOM':['Kg', 'Mtr', 'Box', 'Ltr', 'Nos', 'Ft', 'Pair', 'Set'],
-		'Territory':['All Territories', 'Default Territory'],
-		'Terms and Conditions':'',
-		'Tag':'',
-		'Supplier Type':['Default Supplier Type'],
-		'Supplier':'',
-		'Serial No':'',
-		'Sales Person':['All Sales Persons'],
-		'Sales Partner':'',
-		'Sales BOM':'',
-		'Salary Structure':'',
-		'Purchase Taxes and Charges Master':'',
-		'Project':'',
-		'Print Heading':'',
-		'Price List':['Default Price List'],
-		'Sales Taxes and Charges Master':'',
-		'Letter Head':'',
-		'Leave Type':['Leave Without Pay', 'Privilege Leave', 'Casual Leave', 'PL', 'CL', 'LWP', 
+		'Warehouse': ['Default Warehouse'],
+		'UOM': ['Kg', 'Mtr', 'Box', 'Ltr', 'Nos', 'Ft', 'Pair', 'Set'],
+		'Territory': ['All Territories', 'Default Territory'],
+		'Terms and Conditions': '',
+		'Tag': '',
+		'Supplier Type': ['Default Supplier Type'],
+		'Supplier': '',
+		'Serial No': '',
+		'Sales Person': ['All Sales Persons'],
+		'Sales Partner': '',
+		'Sales BOM': '',
+		'Salary Structure': '',
+		'Purchase Taxes and Charges Master': '',
+		'Project': '',
+		'Print Heading': '',
+		'Price List': ['Default Price List'],
+		'Sales Taxes and Charges Master': '',
+		'Letter Head': '',
+		'Leave Type': ['Leave Without Pay', 'Privilege Leave', 'Casual Leave', 'PL', 'CL', 'LWP', 
 			'Compensatory Off', 'Sick Leave'],
-		'Appraisal Template':'',
-		'Item Group':['All Item Groups', 'Default'], 
-		'Item':'',
-		'Holiday List':'',
-		'Grade':'',
-		'Feed':'',
-		'Expense Claim Type':['Travel', 'Medical', 'Calls', 'Food', 'Others'],
-		'Event':'', 
-		'Employment Type':'', 
-		'Employee':'',
-		'Earning Type':['Basic', 'Conveyance', 'House Rent Allowance', 'Dearness Allowance', 
+		'Appraisal Template': '',
+		'Item Group': ['All Item Groups', 'Default'], 
+		'Item': '',
+		'Holiday List': '',
+		'Grade': '',
+		'Feed': '',
+		'Expense Claim Type': ['Travel', 'Medical', 'Calls', 'Food', 'Others'],
+		'Event': '', 
+		'Employment Type': '', 
+		'Employee': '',
+		'Earning Type': ['Basic', 'Conveyance', 'House Rent Allowance', 'Dearness Allowance', 
 			'Medical Allowance', 'Telephone'],
-		'Designation':'',
-		'Department':'',
-		'Deduction Type':['Income Tax', 'Professional Tax', 'Provident Fund', 'Leave Deduction'],
-		'Customer Group':['All Customer Groups', 'Default Customer Group'],
-		'Customer':'',
-		'Cost Center':'', 
-		'Contact':'',
-		'Campaign':'', 
-		'Budget Distribution':'', 
-		'Brand':'',
-		'Branch':'',
-		'Batch':'', 
-		'Appraisal':'', 
-		'Account':'', 
+		'Designation': '',
+		'Department': '',
+		'Deduction Type': ['Income Tax', 'Professional Tax', 'Provident Fund', 'Leave Deduction'],
+		'Customer Group': ['All Customer Groups', 'Default Customer Group'],
+		'Customer': '',
+		'Cost Center': '', 
+		'Contact': '',
+		'Campaign': '', 
+		'Budget Distribution': '', 
+		'Brand': '',
+		'Branch': '',
+		'Batch': '', 
+		'Appraisal': '', 
+		'Account': '', 
 		'BOM': ''
 	}
 	for d in masters.keys():
@@ -115,40 +113,40 @@ def reset_all_series():
 def reset_transaction_series():
 	webnotes.conn.sql("""update tabSeries set current = 0 where name in 
 		('JV', 'INV', 'BILL', 'SO', 'DN', 'PO', 'LEAD', 'ENQUIRY', 'ENQ', 'CI',
-		 'IN', 'PS', 'IDT', 'QAI', 'QTN', 'STE', 'SQTN', 'SUP', 'TDSP', 'SR', 
+		 'IN', 'PS', 'IDT', 'QAI', 'QTN', 'STE', 'SQTN', 'SUP', 'SR', 
 		'POS', 'LAP', 'LAL', 'EXP')""")
 	print "Series updated"
 
 
 def delete_main_masters():
-	main_masters = ['Fiscal Year','Company', 'DefaultValue']
+	main_masters = ['Fiscal Year', 'Company', 'DefaultValue']
 	for d in main_masters:
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
 		webnotes.conn.sql("delete from `tab%s`" % (d))
 		print "Deleted " + d
-	
-
 
 def reset_global_defaults():
 	flds = {
-		'default_company': '', 
-		'default_currency': '', 
-		'current_fiscal_year': '', 
+		'default_company': None, 
+		'default_currency': None, 
+		'current_fiscal_year': None, 
 		'date_format': 'dd-mm-yyyy', 
-		'sms_sender_name': '', 
+		'sms_sender_name': None, 
 		'default_item_group': 'Default', 
 		'default_stock_uom': 'Nos', 
 		'default_valuation_method': 'FIFO', 
 		'default_warehouse_type': 'Default Warehouse Type', 
-		'tolerance': '', 
-		'acc_frozen_upto': '', 
-		'bde_auth_role': '', 
-		'credit_controller': '', 
+		'tolerance': None, 
+		'acc_frozen_upto': None, 
+		'bde_auth_role': None, 
+		'credit_controller': None, 
 		'default_customer_group': 'Default Customer Group', 
 		'default_territory': 'Default', 
 		'default_price_list': 'Standard', 
-		'default_supplier_type': 'Default Supplier Type'
+		'default_supplier_type': 'Default Supplier Type',
+		'hide_currency_symbol': None,
+		'default_price_list_currency': None,
 	}
 
 	from webnotes.model.code import get_obj
