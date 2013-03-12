@@ -4,6 +4,9 @@
 	<header>
 	</header>
 	<div class="container">
+		{% if banner_html %}<div class="row" style="margin-top: 30px;">
+			<div class="span12">{{ banner_html }}</div>
+		</div>{% endif %}
 		<div class="outer">
 			{% include "html/navbar.html" %}
 			<div class="content row" id="page-{{ name }}" style="display: block;">
