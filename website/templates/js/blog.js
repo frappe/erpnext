@@ -64,7 +64,9 @@ var blog = {
 				b.comment_text = '1 comment.'
 			} else {
 				b.comment_text = b.comments + ' comments.'
-			} 
+			}
+			
+			b.page_name = encodeURIComponent(b.page_name);
 			
 			$(repl('<div class="row">\
 					<div class="span1">\
