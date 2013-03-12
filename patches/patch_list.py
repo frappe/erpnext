@@ -189,7 +189,6 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Service Order Detail')",
 	"execute:webnotes.delete_doc('DocType', 'Service Quotation Detail')",
 	"patches.february_2013.p06_material_request_mappers",
-	"patches.february_2013.p07_clear_web_cache",
 	"execute:webnotes.delete_doc('Page', 'Query Report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employeewise_balance_leave_report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employee_leave_balance_report')",
@@ -211,6 +210,7 @@ patch_list = [
 	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')",
 	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
 	"patches.march_2013.p02_get_global_default",
-	"execute:webnotes.bean('Style Settings', 'Style Settings').save()",
 	"patches.march_2013.p03_rename_blog_to_blog_post",
+	"execute:webnotes.bean('Style Settings', 'Style Settings').save()",
+	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
 ]
