@@ -1,13 +1,14 @@
 [
  {
-  "creation": "2013-01-25 11:35:09", 
+  "creation": "2013-03-08 11:36:50", 
   "docstatus": 0, 
-  "modified": "2013-03-08 09:41:37", 
+  "modified": "2013-03-11 15:23:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "doctype": "DocType", 
   "max_attachments": 5, 
   "module": "Website", 
@@ -16,7 +17,7 @@
  {
   "doctype": "DocField", 
   "name": "__common__", 
-  "parent": "Blog", 
+  "parent": "Blog Post", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0
@@ -24,7 +25,7 @@
  {
   "doctype": "DocPerm", 
   "name": "__common__", 
-  "parent": "Blog", 
+  "parent": "Blog Post", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -34,7 +35,7 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "Blog"
+  "name": "Blog Post"
  }, 
  {
   "doctype": "DocField", 
@@ -48,6 +49,12 @@
   "fieldname": "published", 
   "fieldtype": "Check", 
   "label": "Published"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "published_on", 
+  "fieldtype": "Date", 
+  "label": "Published On"
  }, 
  {
   "doctype": "DocField", 

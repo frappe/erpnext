@@ -32,9 +32,14 @@ class DocType:
 		if self.doc.blog_intro:
 			self.doc.blog_intro = self.doc.blog_intro[:140]
 
+		# update posts
+		webnotes.conn.sql("""update tabBlogger set posts=(select count(*) from `tabBlog Post` 
+			where ifnull(blogger,'')=tabBlogger.name)
+			where name=%s""", self.doc.blogger)
+
 	def on_update(self):
-		from website.utils import update_page_name
-		update_page_name(self.doc, self.doc.title)
+		website.utils.update_page_name(self.doc, self.doc.title)
+		website.utils.delete_page_cache("writers")
 
 	def send_emails(self):
 		"""send emails to subscribers"""
@@ -45,8 +50,8 @@ class DocType:
 		import webnotes.utils
 		
 		# get leads that are subscribed to the blog
-		recipients = [e[0] for e in webnotes.conn.sql("""select distinct email_id from tabLead where
-			ifnull(blog_subscriber,0)=1""")]
+		recipients = [e[0] for e in webnotes.conn.sql("""select distinct email_id from 
+			tabLead where ifnull(blog_subscriber,0)=1""")]
 
 		# make heading as link
 		content = '<h2><a href="%s/%s.html">%s</a></h2>\n\n%s' % (webnotes.utils.get_request_site_address(),
@@ -88,7 +93,7 @@ class DocType:
 
 		comment_list = webnotes.conn.sql("""\
 			select comment, comment_by_fullname, creation
-			from `tabComment` where comment_doctype="Blog"
+			from `tabComment` where comment_doctype="Blog Post"
 			and comment_docname=%s order by creation""", self.doc.name, as_dict=1)
 		
 		self.doc.comment_list = comment_list or []

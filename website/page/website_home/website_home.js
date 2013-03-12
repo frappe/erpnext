@@ -23,9 +23,9 @@ wn.module_page["Website"] = [
 		icon: "icon-edit",
 		items: [
 			{
-				label: wn._("Blog"),
-				description: wn._("Blog post."),
-				doctype:"Blog"
+				label: wn._("Blog Post"),
+				description: wn._("Single Post (article)."),
+				doctype:"Blog Post"
 			},
 			{
 				label: wn._("Blogger"),
@@ -35,7 +35,7 @@ wn.module_page["Website"] = [
 			{
 				label: wn._("Blog Category"),
 				description: wn._("Categorize blog posts."),
-				doctype:"Blogger"
+				doctype:"Blog Category"
 			},
 		]
 	},
@@ -62,6 +62,7 @@ wn.module_page["Website"] = [
 	{
 		title: wn._("Special Page Settings"),
 		icon: "icon-wrench",
+		right: true,
 		items: [
 			{
 				"route":"Form/Product Settings",
