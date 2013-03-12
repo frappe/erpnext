@@ -83,7 +83,7 @@ def add_comment(args=None):
 	
 	# notify commentors 
 	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
-		comment_doctype='Blog' and comment_docname=%s and
+		comment_doctype='Blog Post' and comment_docname=%s and
 		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
 	
 	blog = webnotes.conn.sql("""select * from `tabBlog Post` where name=%s""", 
