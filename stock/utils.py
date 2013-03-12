@@ -171,7 +171,7 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
 			buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
-				item_code, warehouse, bom_item.qty * qty, stock_ledger_entries)
+				bom_item.item_code, warehouse, bom_item.qty * qty, stock_ledger_entries)
 		return buying_amount
 	else:
 		# doesn't have sales bom
@@ -188,13 +188,13 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 				abs(flt(sle.qty)) == qty):
 					buying_amount = flt(stock_ledger_entries[i+1].stock_value) - \
 						flt(sle.stock_value)
-
 					return buying_amount
-					
 	return 0.0
 
 def get_sales_bom():
 	item_sales_bom = {}
+	# for r in webnotes.conn.sql("""select parent_item, item_code, qty, warehouse, voucher_detail_no
+	# 	from `tabDelivery Note Packing Item` where docstatus = 1""", as_dict=1):
 	for r in webnotes.conn.sql("""select parent, item_code, qty from `tabSales BOM Item`""",
 	 	as_dict=1):
 			item_sales_bom.setdefault(r.parent, []).append(r)
