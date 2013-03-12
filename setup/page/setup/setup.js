@@ -98,12 +98,6 @@ wn.module_page["Setup"] = [
 				label:wn._("Print Heading"),
 				"description":wn._("Add headers for standard print formats")
 			},
-			{
-				"route":"Form/Style Settings/Style Settings",
-				doctype:wn._("Style Settings"),
-				label:wn._("Style Settings"),
-				"description":wn._("Change background fonts etc")
-			}
 		]
 	},
 	{

@@ -1,12 +1,13 @@
 [
  {
-  "creation": "2013-01-10 16:34:32", 
+  "creation": "2013-03-07 15:53:15", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:12:16", 
+  "modified": "2013-03-12 13:51:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_attach": 1, 
   "description": "Settings for the About Us Page", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -31,7 +32,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "Website Manager", 
   "submit": 0, 
   "write": 1
@@ -100,6 +101,15 @@
   "fieldname": "footer", 
   "fieldtype": "Text Editor", 
   "label": "Footer"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

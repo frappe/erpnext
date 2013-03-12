@@ -7,34 +7,27 @@
 	{{ obj.doc.company_introduction or "<h2>About Us</h2><p>Some Introduction about your company that you would like your website visitor to know. More people than you think will read your About page. People always like to know who the are doing business with. Be authentic and avoid using jargon like 'value added services' etc. Be sure to update your company history and list of key team members in Website > About Us Settings</p>" }}
 	{% if obj.doclist.get({"doctype":"Company History"}) %}
 	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
-	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
-		<tbody>
-			{% for d in obj.doclist.get({"doctype":"Company History"}) %}
-			<tr>
-				<td style="width: 30%; text-align: right"><h4>{{ d.year }}</h4></td>
-				<td>{{ d.highlight }}</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+	{% for d in obj.doclist.get({"doctype":"Company History"}) %}
+	<div class="row">
+		<span class="span2" style="text-align: right"><h4 style="margin:0px;">{{ d.year }}</h4></span>
+		<span class="span10"><p>{{ d.highlight }}</p></span>
+	</div>
+	{% endfor %}
 	{% endif %}
-	{% if obj.doclist.get({"doctype":"Employee"}) %}
+	{% if obj.doclist.get({"doctype":"About Us Team Member"}) %}
 	<h3>{{ obj.doc.team_members_heading or "Team Members" }}</h3>
-	<table class="table" style="width: 100%; table-layout: fixed">
-		<tbody>
-			{% for d in obj.doclist.get({"doctype":"Employee"}) %}
-			<tr itemscope itemtype="http://schema.org/Person">
-				<td style="text-align:right; width: 20%;">
-					<div class="avatar avatar-x-large">
-						<img class="avatar" src="{{ d.image }}" style="" itemprop="image">
-					</div>
-				</td>
-				<td><h4 itemprop="name">{{ d.employee_name }}</h4>
-					<div itemprop="description">{{ d.bio }}</div></td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+	{% for d in obj.doclist.get({"doctype":"About Us Team Member"}) %}
+	<div class="row" itemscope itemtype="http://schema.org/Person">
+		<span class="span2">
+			<div class="avatar avatar-large">
+				<img class="avatar" src="{{ d.image }}" style="" itemprop="image">
+			</div>
+		</span>
+		<span class="span10"><h4 itemprop="name">{{ d.full_name }}</h4>
+			<div itemprop="description">{{ d.bio }}</div>
+		</span>
+	</div>
+	{% endfor %}
 	{% endif %}
 	{{ obj.doc.footer or "" }}
 </div>

@@ -40,7 +40,7 @@ page_map = {
 }
 
 page_settings_map = {
-	"about": "About Us Settings",
+	"about": "website.doctype.about_us_settings.about_us_settings.get_args",
 	"contact": "Contact Us Settings",
 	"blog": "website.helpers.blog.get_blog_template_args",
 	"writers": "website.helpers.blog.get_writers_args"
