@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 15:53:15", 
   "docstatus": 0, 
-  "modified": "2013-03-12 13:51:29", 
+  "modified": "2013-03-12 14:48:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,7 +46,7 @@
   "fieldname": "help", 
   "fieldtype": "HTML", 
   "label": "Help", 
-  "options": "<div class=\"alert\">Link for About Us Page is \"about.html\"</div>"
+  "options": "<div class=\"alert\">Link for About Us Page is \"/about\"</div>"
  }, 
  {
   "description": "Introduce your company to the website visitor.", 

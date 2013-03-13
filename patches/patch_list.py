@@ -132,7 +132,6 @@ patch_list = [
 	"patches.december_2012.fix_default_print_format", 
 	"patches.december_2012.file_list_rename", 
 	"patches.december_2012.replace_createlocal", 
-	"patches.december_2012.clear_web_cache", 
 	"patches.december_2012.remove_quotation_next_contact", 
 	"patches.december_2012.stock_entry_cleanup", 
 	"patches.december_2012.production_order_naming_series", 
