@@ -26,8 +26,9 @@ from stock.utils import get_incoming_rate
 from stock.stock_ledger import get_previous_sle
 import json
 
-
 sql = webnotes.conn.sql
+
+class NotUpdateStockError(webnotes.ValidationError): pass
 	
 from controllers.accounts_controller import AccountsController
 
@@ -38,6 +39,7 @@ class DocType(AccountsController):
 		self.fname = 'mtn_details' 
 		
 	def validate(self):
+		self.validate_posting_time()
 		self.validate_purpose()
 
 		self.validate_serial_nos()
@@ -237,26 +239,54 @@ class DocType(AccountsController):
 						or update the Quantity manually."), raise_exception=1)
 						
 	def validate_return_reference_doc(self):
-		""" validate item with reference doc"""
-		ref_doctype = ref_docname = ""
-		if self.doc.purpose == "Sales Return" and \
-				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
-			ref_doctype = self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"
-			ref_docname = self.doc.delivery_note_no or self.doc.sales_invoice_no
-		elif self.doc.purpose == "Purchase Return" and self.doc.purchase_receipt_no:
-			ref_doctype = "Purchase Receipt"
-			ref_docname = self.doc.purchase_receipt_no
+		"""validate item with reference doc"""
+		ref_doclist = parentfields = None
+		
+		# get ref_doclist
+		if self.doc.purpose in return_map:
+			for fieldname, val in return_map[self.doc.purpose].items():
+				if self.doc.fields.get(fieldname):
+					ref_doclist = webnotes.get_doclist(val[0], self.doc.fields[fieldname])
+					parentfields = val[1]
+		
+		if ref_doclist:
+			# validate docstatus
+			if ref_doclist[0].docstatus != 1:
+				webnotes.msgprint(_(ref_doclist[0].doctype) + ' "' + ref_doclist[0].name + '": ' 
+					+ _("Status should be Submitted"), raise_exception=webnotes.InvalidStatusError)
 			
-		if ref_doctype and ref_docname:
+			
+			# update stock check
+			if ref_doclist[0].doctype == "Sales Invoice" and (cint(ref_doclist[0].is_pos) != 1 \
+				or cint(ref_doclist[0].update_stock) != 1):
+					webnotes.msgprint(_(ref_doclist[0].doctype) + ' "' + ref_doclist[0].name + '": ' 
+						+ _("Is POS and Update Stock should be checked."), 
+						raise_exception=NotUpdateStockError)
+			
+			# posting date check
+			ref_posting_datetime = "%s %s" % (cstr(ref_doclist[0].posting_date), 
+				cstr(ref_doclist[0].posting_time))
+			this_posting_datetime = "%s %s" % (cstr(self.doc.posting_date), 
+				cstr(self.doc.posting_time))
+			if this_posting_datetime < ref_posting_datetime:
+				from webnotes.utils.dateutils import datetime_in_user_format
+				webnotes.msgprint(_("Posting Date Time cannot be before")
+					+ ": " + datetime_in_user_format(ref_posting_datetime),
+					raise_exception=True)
+			
+			stock_items = get_stock_items_for_return(ref_doclist, parentfields)
+			
 			for item in self.doclist.get({"parentfield": "mtn_details"}):
-				ref_exists = webnotes.conn.sql("""select name from `tab%s` 
-					where parent = %s and item_code = %s and docstatus=1""" % 
-					(ref_doctype + " Item", '%s', '%s'), (ref_docname, item.item_code))
-					
-				if not ref_exists:
-					msgprint(_("Item: '") + item.item_code + _("' does not exists in ") +
-						ref_doctype + ": " + ref_docname, raise_exception=1)
-			
+				# validate if item exists in the ref doclist and that it is a stock item
+				if item.item_code not in stock_items:
+					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
+						ref_doclist[0].doctype + ": " + ref_doclist[0].name, 
+						raise_exception=webnotes.DoesNotExistError)
+				
+				# validate quantity <= ref item's qty
+				ref_item = ref_doclist.getone({"item_code": item.item_code})
+				self.validate_value("transfer_qty", "<=", ref_item.qty, item)
+		
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
 		from stock.utils import get_valid_serial_nos
@@ -288,6 +318,7 @@ class DocType(AccountsController):
 				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
 			if cstr(d.t_warehouse):
 				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
+		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, 
 			self.doc.amended_from and 'Yes' or 'No')
 
@@ -608,3 +639,74 @@ def get_production_order_details(production_order):
 		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom
 		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 	return result and result[0] or {}
+	
+def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
+	conditions = ""
+	if doctype == "Sales Invoice":
+		conditions = "and is_pos=1 and update_stock=1"
+	
+	return webnotes.conn.sql("""select name, customer, customer_name
+		from `tab%s` where docstatus = 1
+		and (`%s` like %%(txt)s or `customer` like %%(txt)s) %s
+		order by name, customer, customer_name
+		limit %s""" % (doctype, searchfield, conditions, "%(start)s, %(page_len)s"),
+		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, as_list=True)
+	
+def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
+	return webnotes.conn.sql("""select name, supplier, supplier_name
+		from `tab%s` where docstatus = 1
+		and (`%s` like %%(txt)s or `supplier` like %%(txt)s)
+		order by name, supplier, supplier_name
+		limit %s""" % (doctype, searchfield, "%(start)s, %(page_len)s"),
+		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, as_list=True)
+		
+def query_return_item(doctype, txt, searchfield, start, page_len, filters):
+	txt = txt.replace("%", "")
+	
+	for fieldname, val in return_map[filters["purpose"]].items():
+		if filters.get(fieldname):
+			ref_doclist = webnotes.get_doclist(val[0], filters[fieldname])
+			parentfields = val[1]
+			
+	stock_items = get_stock_items_for_return(ref_doclist, parentfields)
+	
+	result = []
+	for item in ref_doclist.get({"parentfield": ["in", parentfields]}):
+		if item.item_code in stock_items:
+			item.item_name = cstr(item.item_name)
+			item.description = cstr(item.description)
+			if (txt in item.item_code) or (txt in item.item_name) or (txt in item.description):
+				val = [
+					item.item_code, 
+					(len(item.item_name) > 40) and (item.item_name[:40] + "...") or item.item_name, 
+					(len(item.description) > 40) and (item.description[:40] + "...") or \
+						item.description
+				]
+				if val not in result:
+					result.append(val)
+
+	return result[start:start+page_len]
+
+def get_stock_items_for_return(ref_doclist, parentfields):
+	"""return item codes filtered from doclist, which are stock items"""
+	if isinstance(parentfields, basestring):
+		parentfields = [parentfields]
+	
+	all_items = list(set([d.item_code for d in 
+		ref_doclist.get({"parentfield": ["in", parentfields]})]))
+	stock_items = webnotes.conn.sql_list("""select name from `tabItem`
+		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
+		tuple(all_items))
+
+	return stock_items
+	
+return_map = {
+	"Sales Return": {
+		# [Ref DocType, [Item tables' parentfields]]
+		"delivery_note_no": ["Delivery Note", ["delivery_note_details", "packing_details"]],
+		"sales_invoice_no": ["Sales Invoice", ["entries", "packing_details"]]
+	},
+	"Purchase Return": {
+		"purchase_receipt_no": ["Purchase Receipt", ["purchase_receipt_details"]]
+	}
+}

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-19 12:28:27", 
+  "creation": "2013-03-08 15:37:09", 
   "docstatus": 0, 
-  "modified": "2013-02-20 14:09:00", 
+  "modified": "2013-03-12 18:48:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -248,6 +248,13 @@
   "doctype": "DocField", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "If checked, then in POS Sales Invoice, Update Stock gets checked by default", 
+  "doctype": "DocField", 
+  "fieldname": "update_stock", 
+  "fieldtype": "Check", 
+  "label": "Update Stock when using POS Sales Invoice"
  }, 
  {
   "doctype": "DocField", 

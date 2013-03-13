@@ -18,6 +18,39 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
+	setup: function() {
+		var me = this;
+		
+		this.frm.fields_dict.delivery_note_no.get_query = function() {
+			return { query: "stock.doctype.stock_entry.stock_entry.query_sales_return_doc" };
+		};
+		
+		this.frm.fields_dict.sales_invoice_no.get_query = 
+			this.frm.fields_dict.delivery_note_no.get_query;
+		
+		this.frm.fields_dict.purchase_receipt_no.get_query = function() {
+			return { query: "stock.doctype.stock_entry.stock_entry.query_purchase_return_doc" };
+		};
+		
+		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
+			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) && 
+				me.get_doctype_docname()) {
+					return {
+						query: "stock.doctype.stock_entry.stock_entry.query_return_item",
+						filters: {
+							purpose: me.frm.doc.purpose,
+							delivery_note_no: me.frm.doc.delivery_note_no,
+							sales_invoice_no: me.frm.doc.sales_invoice_no,
+							purchase_receipt_no: me.frm.doc.purchase_receipt_no
+						}
+					};
+			} else {
+				return erpnext.queries.item({is_stock_item: "Yes"});
+			}
+		};
+		
+	},
+	
 	onload_post_render: function() {
 		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
 			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
@@ -80,6 +113,36 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	toggle_enable_bom: function() {
 		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
 	},
+	
+	get_doctype_docname: function() {
+		if(this.frm.doc.purpose === "Sales Return") {
+			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
+				// both specified
+				msgprint(wn._("You can not enter both Delivery Note No and Sales Invoice No. \
+					Please enter any one."));
+				
+			} else if(!(this.frm.doc.delivery_note_no || this.frm.doc.sales_invoice_no)) {
+				// none specified
+				msgprint(wn._("Please enter Delivery Note No or Sales Invoice No to proceed"));
+				
+			} else if(this.frm.doc.delivery_note_no) {
+				return {doctype: "Delivery Note", docname: this.frm.doc.delivery_note_no};
+				
+			} else if(this.frm.doc.sales_invoice_no) {
+				return {doctype: "Sales Invoice", docname: this.frm.doc.sales_invoice_no};
+				
+			}
+		} else if(this.frm.doc.purpose === "Purchase Return") {
+			if(this.frm.doc.purchase_receipt_no) {
+				return {doctype: "Purchase Receipt", docname: this.frm.doc.purchase_receipt_no};
+				
+			} else {
+				// not specified
+				msgprint(wn._("Please enter Purchase Receipt No to proceed"));
+				
+			}
+		}
+	},
 
 });
 
@@ -138,15 +201,6 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
-}
-
-// item code - only if quantity present in source warehosue
-var fld = cur_frm.fields_dict['mtn_details'].grid.get_field('item_code');
-fld.query_description = "If Source Warehouse is selected, items with existing stock \
-	for that warehouse will be selected";
-
-fld.get_query = function() {
-	return erpnext.queries.item({is_stock_item: "Yes"});
 }
 
 // copy over source and target warehouses

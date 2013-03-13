@@ -47,6 +47,7 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
+		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj('Sales Common')
@@ -636,10 +637,9 @@ class DocType(SellingController):
 
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-				
+		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-	
-
+		
 	def get_actual_qty(self,args):
 		args = eval(args)
 		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
