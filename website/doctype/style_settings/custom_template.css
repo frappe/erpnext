@@ -29,7 +29,7 @@ body {
 {% endif %}
 
 div.outer {
-	background-color: #{{ doc.page_background or "fff" }};
+	background-color: #{{ doc.page_background or "fffffff" }};
 }
 
 {% if doc.google_web_font_for_heading or doc.heading_font %}h1, h2, h3, h4, h5 {
@@ -54,14 +54,14 @@ div.outer {
 }
 {% else %}
 div.web-footer {
-	border-top: 1px solid #eee;
+	border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
 	padding-top: 10px;
 }
 {% endif %}
 
 /* Bootstrap Navbar */
 .navbar-inverse .navbar-inner {
-    background-color: #{{ doc.top_bar_background or "444"}};
+    background-color: #{{ doc.top_bar_background or "444444"}};
     background-repeat: repeat-x;
 	border-color: transparent;
 	background-image: none;
@@ -71,13 +71,13 @@ div.web-footer {
 .navbar-inverse .brand:hover,
 .navbar-inverse .brand:focus,
 .navbar-inverse .nav > li > a {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_foreground or "fffffff"}};
   text-shadow: none;
 }
 
 .navbar-inverse .nav > li > a:hover,
 .navbar-inverse .nav > li > a:focus {
-  color: #{{ doc.top_bar_background or "000"}};
+  color: #{{ doc.top_bar_background or "0000000"}};
 }
 
 .navbar-inverse .navbar-text {
@@ -86,14 +86,14 @@ div.web-footer {
 
 .navbar-inverse .nav > li > a:focus,
 .navbar-inverse .nav > li > a:hover {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_foreground or "fffffff"}};
   background-color: transparent;
 }
 
 .navbar-inverse .nav .active > a,
 .navbar-inverse .nav .active > a:hover,
 .navbar-inverse .nav .active > a:focus {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_foreground or "fffffff"}};
   background-color: transparent;
 }
 
@@ -103,7 +103,7 @@ div.web-footer {
 
 .navbar-inverse .navbar-link:hover,
 .navbar-inverse .navbar-link:focus {
-  color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_foreground or "fffffff"}};
 }
 
 .navbar-fixed-top .navbar-inner,
@@ -126,47 +126,90 @@ div.web-footer {
 
 .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret, 
 .navbar-inverse .nav li.dropdown > .dropdown-toggle:hover .caret {
-	border-top-color: #{{ doc.top_bar_foreground or "fff"}};
-	border-bottom-color: #{{ doc.top_bar_foreground or "fff"}};
+	border-top-color: #{{ doc.top_bar_foreground or "fffffff"}};
+	border-bottom-color: #{{ doc.top_bar_foreground or "fffffff"}};
 }
 
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret,
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle:hover .caret {
-	border-top-color: #{{ doc.top_bar_background or "000"}};
-	border-bottom-color: #{{ doc.top_bar_background or "000"}};
+	border-top-color: #{{ doc.top_bar_background or "0000000"}};
+	border-bottom-color: #{{ doc.top_bar_background or "0000000"}};
 }
 
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle {
-  color: #{{ doc.top_bar_background or "000"}};
-  background-color: #{{ doc.top_bar_foreground or "fff"}};
+  color: #{{ doc.top_bar_background or "0000000"}};
+  background-color: #{{ doc.top_bar_foreground or "fffffff"}};
 }
 
 @media (max-width: 800px) {
   .navbar-inverse .nav-collapse .nav > li > a,
   .navbar-inverse .nav-collapse .dropdown-menu a {
-    background-color: #{{ doc.top_bar_background or "000"}};
-    color: #{{ doc.top_bar_foreground or "fff"}};
+    background-color: #{{ doc.top_bar_background or "0000000"}};
+    color: #{{ doc.top_bar_foreground or "fffffff"}};
   }
   .navbar-inverse .nav-collapse .nav > li > a:hover, 
   .navbar-inverse .nav-collapse .dropdown-menu a:hover {
-    background-color: #{{ doc.top_bar_foreground or "fff"}};
-    color: #{{ doc.top_bar_background or "000"}};
+    background-color: #{{ doc.top_bar_foreground or "fffffff"}};
+    color: #{{ doc.top_bar_background or "0000000"}};
   }
 
   .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
-    border-top-color: #{{ doc.top_bar_foreground or "fff" }};
-    border-bottom-color: #{{ doc.top_bar_foreground or "fff" }};	
+    border-top-color: #{{ doc.top_bar_foreground or "fffffff" }};
+    border-bottom-color: #{{ doc.top_bar_foreground or "fffffff" }};	
   }
 
   .navbar-inverse .nav li.dropdown > .dropdown-toggle:hover .caret {
-    border-top-color: #{{ doc.top_bar_background or "000" }};
-    border-bottom-color: #{{ doc.top_bar_background or "000" }};
+    border-top-color: #{{ doc.top_bar_background or "0000000" }};
+    border-bottom-color: #{{ doc.top_bar_background or "0000000" }};
   }
 
   .navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret,
   .navbar-inverse .nav li.dropdown.open > .dropdown-toggle:hover .caret {
-    border-top-color: #{{ doc.top_bar_background or "000" }};
-    border-bottom-color: #{{ doc.top_bar_background or "000" }};	
+    border-top-color: #{{ doc.top_bar_background or "0000000" }};
+    border-bottom-color: #{{ doc.top_bar_background or "0000000" }};	
   }
 
+}
+
+.breadcrumb {
+	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};
+}
+
+.table-striped tbody > tr:nth-child(odd) > td,
+.table-striped tbody > tr:nth-child(odd) > th {
+	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};
+}
+
+.table-hover tbody tr:hover td,
+.table-hover tbody tr:hover th {
+	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 10) }};
+}
+
+.table-bordered {
+	border: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+}
+
+.table th,
+.table td {
+  border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+}
+
+.table-bordered th,
+.table-bordered td {
+	border-left: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+}
+
+
+
+.hero-unit {
+	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+}
+
+pre, code {
+	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};
+}
+
+hr {
+	border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	border-bottom: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};	
 }
