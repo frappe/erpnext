@@ -72,6 +72,7 @@ def get_html(page_name):
 		from_cache = True
 
 	if not html:
+		webnotes.connect()
 		html = load_into_cache(page_name)
 		from_cache = False
 	
