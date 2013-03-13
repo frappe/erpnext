@@ -39,7 +39,6 @@ class DocType(AccountsController):
 		
 	def validate(self):
 		self.validate_purpose()
-
 		self.validate_serial_nos()
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
@@ -51,22 +50,20 @@ class DocType(AccountsController):
 		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
-
 		self.validate_return_reference_doc()
-		
 		self.validate_with_material_request()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
 		self.update_stock_ledger(0)
-		# update Production Order
 		self.update_production_order(1)
+		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_serial_no(0)
 		self.update_stock_ledger(1)
-		# update Production Order
 		self.update_production_order(0)
+		self.make_gl_entries()
 		
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", 
@@ -166,6 +163,47 @@ class DocType(AccountsController):
 					raise_exception=1)
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
+			
+	def make_gl_entries(self):
+		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+			return
+		
+		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+		stock_in_hand_account = self.get_stock_in_hand_account()
+		total_valuation_amount = self.get_total_valuation_amount()
+
+		if total_valuation_amount:
+			gl_entries = [
+				# debit stock in hand account
+				self.get_gl_dict({
+					"account": stock_in_hand_account,
+					"against": "Stock Adjustment - %s" % abbr,
+					"debit": total_valuation_amount,
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+				
+				# debit stock received but not billed account
+				self.get_gl_dict({
+					"account": "Stock Adjustment - %s" % abbr,
+					"against": stock_in_hand_account,
+					"credit": total_valuation_amount,
+					"cost_center": "Auto Inventory Accounting - %s" % abbr, 
+					"remarks": self.doc.remarks or "Accounting Entry for Stock",
+				}, self.doc.docstatus == 2),
+			]
+			from accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+			
+	def get_total_valuation_amount(self):
+		total_valuation_amount = 0
+		for item in self.doclist.get({"parentfield": "mtn_details"}):
+			if item.t_warehouse and not item.s_warehouse:
+				total_valuation_amount += flt(item.incoming_rate) * flt(item.transfer_qty)
+				
+			if item.s_warehouse and not item.t_warehouse:
+				total_valuation_amount -= flt(item.incoming_rate) * flt(item.transfer_qty)
+						
+		return total_valuation_amount
 			
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
