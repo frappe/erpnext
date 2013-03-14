@@ -61,7 +61,7 @@ div.web-footer {
 {% endif %}
 
 div.web-footer, div.web-footer a {
-	color: #{{ get_hex_shade(doc.page_background or "ffffff", 70) }};
+	color: #{{ get_hex_shade(doc.background_color or "ffffff", 70) }};
 }
 
 /* Bootstrap Navbar */
