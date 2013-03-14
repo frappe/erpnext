@@ -327,7 +327,7 @@ def get_hex_shade(color, percent):
 	r, g, b = color[0:2], color[2:4], color[4:6]
 	
 	# switch dark and light shades		
-	if float(int(r, 16) + int(g, 16) + int(b, 16)) / 3 < 8:
+	if (float(int(r, 16) + int(g, 16) + int(b, 16)) / 3) > 128:
 		percent = -percent
 	
 	return p(r) + p(g) + p(b)
