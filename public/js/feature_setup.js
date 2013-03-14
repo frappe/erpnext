@@ -166,10 +166,10 @@ pscript.feature_dict = {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
-		'Delivery Note': {'fields':['sales_team','Packing List']},
+		'Delivery Note': {'fields':['sales_team','packing_list']},
 		'Item': {'fields':['item_customer_details']},
-		'Sales Invoice': {'fields':['sales_team']},
-		'Sales Order': {'fields':['sales_team','Packing List']}
+		'Sales Invoice': {'fields':['sales_team', 'packing_list']},
+		'Sales Order': {'fields':['sales_team','packing_list']}
 	},
 	'fs_more_info': {
 		"Customer Issue": {"fields": ["more_info"]},
