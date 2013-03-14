@@ -210,6 +210,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
 	"patches.march_2013.p02_get_global_default",
 	"patches.march_2013.p03_rename_blog_to_blog_post",
-	"execute:webnotes.bean('Style Settings', 'Style Settings').save()",
 	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
 ]
