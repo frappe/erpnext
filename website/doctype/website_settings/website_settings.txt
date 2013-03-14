@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:11", 
   "docstatus": 0, 
-  "modified": "2013-03-12 11:17:11", 
+  "modified": "2013-03-13 16:25:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -77,6 +77,20 @@
   "fieldname": "banner", 
   "fieldtype": "Section Break", 
   "label": "Banner"
+ }, 
+ {
+  "description": "Select an image of approx width 150px with a transparent background for best results.", 
+  "doctype": "DocField", 
+  "fieldname": "banner_image", 
+  "fieldtype": "Select", 
+  "label": "Banner Image", 
+  "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "set_banner_from_image", 
+  "fieldtype": "Button", 
+  "label": "Set Banner from Image"
  }, 
  {
   "description": "Banner is above the Top Menu Bar.", 

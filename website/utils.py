@@ -46,6 +46,8 @@ page_settings_map = {
 	"writers": "website.helpers.blog.get_writers_args"
 }
 
+no_cache = "message"
+
 def render(page_name):
 	"""render html page"""
 	try:
@@ -68,10 +70,12 @@ def get_html(page_name):
 	
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
-		html = webnotes.cache().get_value("page:" + page_name)
-		from_cache = True
+		if not page_name in no_cache:
+			html = webnotes.cache().get_value("page:" + page_name)
+			from_cache = True
 
 	if not html:
+		webnotes.connect()
 		html = load_into_cache(page_name)
 		from_cache = False
 	
