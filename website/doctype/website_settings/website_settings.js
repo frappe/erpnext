@@ -42,3 +42,13 @@ $.extend(cur_frm.cscript, {
 			});
 	}
 });
+
+cur_frm.cscript.set_banner_from_image = function(doc) {
+	if(!doc.banner_image) {
+		msgprint(wn._("Select a Banner Image first."));
+	}
+	var src = doc.banner_image;
+	if(src.indexOf("/")==-1) src = "files/" + src;
+	cur_frm.set_value("banner_html", "<a href='/'><img src='"+ src
+		+"'></a>");
+}

@@ -16,6 +16,9 @@
 
 from __future__ import unicode_literals
 patch_list = [
+	"execute:webnotes.reload_doc('core', 'doctype', 'docfield')",
+	"execute:webnotes.reload_doc('core', 'doctype', 'report')",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype')",
 	"patches.mar_2012.so_rv_mapper_fix", 
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 
@@ -129,7 +132,6 @@ patch_list = [
 	"patches.december_2012.fix_default_print_format", 
 	"patches.december_2012.file_list_rename", 
 	"patches.december_2012.replace_createlocal", 
-	"patches.december_2012.clear_web_cache", 
 	"patches.december_2012.remove_quotation_next_contact", 
 	"patches.december_2012.stock_entry_cleanup", 
 	"patches.december_2012.production_order_naming_series", 
@@ -186,7 +188,6 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Service Order Detail')",
 	"execute:webnotes.delete_doc('DocType', 'Service Quotation Detail')",
 	"patches.february_2013.p06_material_request_mappers",
-	"patches.february_2013.p07_clear_web_cache",
 	"execute:webnotes.delete_doc('Page', 'Query Report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employeewise_balance_leave_report')",
 	"execute:webnotes.delete_doc('Search Criteria', 'employee_leave_balance_report')",
@@ -208,4 +209,6 @@ patch_list = [
 	"execute:webnotes.conn.sql('update tabDocPerm set `submit`=1, `cancel`=1, `amend`=1 where parent=\"Time Log\"')",
 	"execute:webnotes.delete_doc('DocType', 'Attendance Control Panel')",
 	"patches.march_2013.p02_get_global_default",
+	"patches.march_2013.p03_rename_blog_to_blog_post",
+	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
 ]

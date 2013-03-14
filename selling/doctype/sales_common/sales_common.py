@@ -341,12 +341,10 @@ class DocType(TransactionBase):
 	# ========================================================================
 	# it indicates % contribution of sales person in sales
 	def get_allocated_sum(self,obj):
-		sum = 0
-		for d in getlist(obj.doclist,'sales_team'):
-			sum += flt(d.allocated_percentage)
-		if (flt(sum) != 100) and getlist(obj.doclist,'sales_team'):
-			msgprint("Total Allocated % of Sales Persons should be 100%")
-			raise Exception
+		sales_team_list = obj.doclist.get({"parentfield": "sales_team"})
+		total_allocation = sum([flt(d.allocated_percentage) for d in sales_team_list])
+		if sales_team_list and total_allocation != 100.0:
+			msgprint("Total Allocated %% of Sales Persons should be 100%", raise_exception=True)
 			
 	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
 	# ===========================================================================

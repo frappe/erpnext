@@ -18,7 +18,7 @@
 wn.require("public/app/js/utils.js");
 wn.provide("erpnext.hr");
 
-erpnext.hr.AttendanceControlPanel = erpnext.utils.Controller.extend({
+erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 	onload: function() {
 		this.frm.set_value("att_fr_date", get_today());
 		this.frm.set_value("att_to_date", get_today());

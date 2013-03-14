@@ -166,22 +166,24 @@ pscript.feature_dict = {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
-		'Delivery Note': {'fields':['sales_team','Packing List']},
+		'Delivery Note': {'fields':['sales_team','packing_list']},
 		'Item': {'fields':['item_customer_details']},
-		'Sales Invoice': {'fields':['sales_team']},
-		'Sales Order': {'fields':['sales_team','Packing List']}
+		'Sales Invoice': {'fields':['sales_team', 'packing_list']},
+		'Sales Order': {'fields':['sales_team','packing_list']}
 	},
 	'fs_more_info': {
-		'Delivery Note': {'fields':['More Info']},
-		'Opportunity': {'fields':['More Info']},
-		'Material Request': {'fields':['More Info']},
-		'Lead': {'fields':['More Info']},
-		'Purchase Invoice': {'fields':['More Info']},
-		'Purchase Order': {'fields':['More Info']},
-		'Purchase Receipt': {'fields':['More Info']},
-		'Quotation': {'fields':['More Info']},
-		'Sales Invoice': {'fields':['More Info']},
-		'Sales Order': {'fields':['More Info']},
+		"Customer Issue": {"fields": ["more_info"]},
+		'Material Request': {'fields':['more_info']},
+		'Lead': {'fields':['more_info']},
+		'Opportunity': {'fields':['more_info']},
+		'Purchase Invoice': {'fields':['more_info']},
+		'Purchase Order': {'fields':['more_info']},
+		'Purchase Receipt': {'fields':['more_info']},
+		'Supplier Quotation': {'fields':['more_info']},
+		'Quotation': {'fields':['more_info']},
+		'Sales Invoice': {'fields':['more_info']},
+		'Sales Order': {'fields':['more_info']},
+		'Delivery Note': {'fields':['more_info']},
 	},
 	'fs_quality': {
 		'Item': {'fields':['Item Inspection Criteria','inspection_required']},
@@ -199,25 +201,23 @@ pscript.feature_dict = {
 }
 
 $(document).bind('form_refresh', function() {
-	for(sys_feat in sys_defaults)
-	{
-		if(sys_defaults[sys_feat]=='0' && (sys_feat in pscript.feature_dict)) //"Features to hide" exists
-		{
-			if(cur_frm.doc.doctype in  pscript.feature_dict[sys_feat])
-			{
-				for(fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype])
-				{
-					if(fort=='fields')
+	for(sys_feat in sys_defaults) {
+		if(sys_defaults[sys_feat]=='0' 
+			&& (sys_feat in pscript.feature_dict)) { //"Features to hide" exists
+
+			if(cur_frm.doc.doctype in  pscript.feature_dict[sys_feat]) {
+				for(fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype]) {
+					if(fort=='fields') {
 						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
-					else if(cur_frm.fields_dict[fort])
-					{
+					} else if(cur_frm.fields_dict[fort]) {
 						for(grid_field in pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort])
 							cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort][grid_field], false);
-					}
-					else
+					} else {
 						msgprint('Grid "'+fort+'" does not exists');
+					}
 				}
 			}
+
 		}
 	}
 })

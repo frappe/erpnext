@@ -99,6 +99,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		var data = wn.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
 
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];

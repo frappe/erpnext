@@ -1,17 +1,12 @@
 div.outer {
-	-moz-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	-webkit-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	background-color: #fff;
-	border-radius: 5px;
-	padding: 20px;
-	margin: 30px -20px 10px -20px;
+	padding: 30px;
+	margin: 30px -30px 10px -30px;
 	min-height: 400px;
 	overflow: hidden;
 }
 
 .outer .navbar {
-	margin: -20px -20px 10px -20px;
+	margin: -30px -30px 10px -30px;
 }
 
 footer {
@@ -24,6 +19,8 @@ footer {
 	border: 0px;
 	border-bottom: 1px solid #ddd;
 	border-radius: 0px;
+	padding-right: 30px;
+	padding-left: 30px;
 }
 
 p, li {
@@ -98,6 +95,18 @@ p, li {
 	width: 30px; 
 }
 
+.avatar-medium {
+	margin-right: 5px;
+	width: 48px;
+	height: 48px;
+	border-radius: 48px;
+	-moz-border-radius: 48px;
+	-webkit-border-radius: 48px;
+}
+.avatar-medium img {
+	width: 48px; 
+}
+
 .avatar-large {
 	margin-right: 10px;
 	width: 72px;
@@ -121,5 +130,3 @@ p, li {
 .avatar-x-large img {
 	width: 100px; 
 }
-
-/* */

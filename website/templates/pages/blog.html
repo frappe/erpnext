@@ -12,8 +12,15 @@
 
 {% block content %}
 <div class="span12">
-	<h1>Blog</h1>
+	<h2 id="blog-title">{{ blog_title }}</h2>
+	{% if blog_introduction %}
+	<p>{{ blog_introduction }}</p>
+	{% endif %}
+	<h3 id="blot-subtitle" style="display:none;"></h3>
 	<br>
+	<div class="progress progress-striped active">
+		<div class="bar" style="width: 100%;"></div>
+	</div>
 	<div id="blog-list">
 		<!-- blog list will be generated dynamically -->
 	</div>
@@ -22,4 +29,5 @@
 			style="display:none;">More...</button>
 	</div>
 </div>
+{% include 'html/blog_footer.html' %}
 {% endblock %}

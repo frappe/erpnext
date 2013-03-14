@@ -65,7 +65,7 @@ class TestSalesOrder(unittest.TestCase):
 		# submit dn
 		dn = self.create_dn_against_so(so)
 		
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 6.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 5.0)
 		
 		# stop so
 		so.load_from_db()
@@ -75,7 +75,7 @@ class TestSalesOrder(unittest.TestCase):
 		# unstop so
 		so.load_from_db()
 		so.obj.unstop_sales_order()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 6.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 5.0)
 		
 		# cancel dn
 		dn.cancel()
@@ -151,9 +151,9 @@ class TestSalesOrder(unittest.TestCase):
 		dn = self.create_dn_against_so(so)
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 30.0)
+			so.doclist[1].reserved_warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 12.0)
+			so.doclist[1].reserved_warehouse, 10.0)
 				
 		# stop so
 		so.load_from_db()
@@ -168,9 +168,9 @@ class TestSalesOrder(unittest.TestCase):
 		so.load_from_db()
 		so.obj.unstop_sales_order()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 30.0)
+			so.doclist[1].reserved_warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 12.0)
+			so.doclist[1].reserved_warehouse, 10.0)
 		
 		# cancel dn
 		dn.cancel()
@@ -234,8 +234,8 @@ test_records = [
 			"price_list_name": "_Test Price List", 
 			"territory": "_Test Territory", 
 			"transaction_date": "2013-02-21",
-			"grand_total": 500.0, 
-			"grand_total_export": 500.0, 
+			"grand_total": 1000.0, 
+			"grand_total_export": 1000.0, 
 		}, 
 		{
 			"description": "CPU", 
@@ -244,9 +244,9 @@ test_records = [
 			"item_name": "CPU", 
 			"parentfield": "sales_order_details", 
 			"qty": 10.0,
-			"basic_rate": 50.0,
-			"export_rate": 50.0,
-			"amount": 500.0,
+			"basic_rate": 100.0,
+			"export_rate": 100.0,
+			"amount": 1000.0,
 			"reserved_warehouse": "_Test Warehouse",
 		}
 	],	

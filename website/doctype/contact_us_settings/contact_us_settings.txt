@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2012-12-27 19:04:50", 
+  "creation": "2013-02-21 20:12:42", 
   "docstatus": 0, 
-  "modified": "2013-02-21 16:49:33", 
+  "modified": "2013-03-12 14:49:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,7 +44,7 @@
   "fieldname": "help", 
   "fieldtype": "HTML", 
   "label": "Help", 
-  "options": "<div class=\"alert\">Link for Contact Page is \"contact.html\"</div>"
+  "options": "<div class=\"alert\">Link for Contact Page is \"/contact\"</div>"
  }, 
  {
   "description": "Address to be displayed on the Contact Page", 
