@@ -29,6 +29,7 @@ import json
 sql = webnotes.conn.sql
 
 class NotUpdateStockError(webnotes.ValidationError): pass
+class StockOverReturnError(webnotes.ValidationError): pass
 	
 from controllers.accounts_controller import AccountsController
 
@@ -278,32 +279,24 @@ class DocType(AccountsController):
 						
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
-		ref_doclist = parentfields = None
+		ref = get_return_reference_details(self.doc.fields)
 		
-		# get ref_doclist
-		if self.doc.purpose in return_map:
-			for fieldname, val in return_map[self.doc.purpose].items():
-				if self.doc.fields.get(fieldname):
-					ref_doclist = webnotes.get_doclist(val[0], self.doc.fields[fieldname])
-					parentfields = val[1]
-		
-		if ref_doclist:
+		if ref.doclist:
 			# validate docstatus
-			if ref_doclist[0].docstatus != 1:
-				webnotes.msgprint(_(ref_doclist[0].doctype) + ' "' + ref_doclist[0].name + '": ' 
+			if ref.doclist[0].docstatus != 1:
+				webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
 					+ _("Status should be Submitted"), raise_exception=webnotes.InvalidStatusError)
 			
-			
 			# update stock check
-			if ref_doclist[0].doctype == "Sales Invoice" and (cint(ref_doclist[0].is_pos) != 1 \
-				or cint(ref_doclist[0].update_stock) != 1):
-					webnotes.msgprint(_(ref_doclist[0].doctype) + ' "' + ref_doclist[0].name + '": ' 
+			if ref.doclist[0].doctype == "Sales Invoice" and (cint(ref.doclist[0].is_pos) != 1 \
+				or cint(ref.doclist[0].update_stock) != 1):
+					webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
 						+ _("Is POS and Update Stock should be checked."), 
 						raise_exception=NotUpdateStockError)
 			
 			# posting date check
-			ref_posting_datetime = "%s %s" % (cstr(ref_doclist[0].posting_date), 
-				cstr(ref_doclist[0].posting_time))
+			ref_posting_datetime = "%s %s" % (cstr(ref.doclist[0].posting_date), 
+				cstr(ref.doclist[0].posting_time))
 			this_posting_datetime = "%s %s" % (cstr(self.doc.posting_date), 
 				cstr(self.doc.posting_time))
 			if this_posting_datetime < ref_posting_datetime:
@@ -312,18 +305,27 @@ class DocType(AccountsController):
 					+ ": " + datetime_in_user_format(ref_posting_datetime),
 					raise_exception=True)
 			
-			stock_items = get_stock_items_for_return(ref_doclist, parentfields)
+			stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
+			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
 			
 			for item in self.doclist.get({"parentfield": "mtn_details"}):
 				# validate if item exists in the ref doclist and that it is a stock item
 				if item.item_code not in stock_items:
 					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
-						ref_doclist[0].doctype + ": " + ref_doclist[0].name, 
+						ref.doclist[0].doctype + ": " + ref.doclist[0].name, 
 						raise_exception=webnotes.DoesNotExistError)
 				
-				# validate quantity <= ref item's qty
-				ref_item = ref_doclist.getone({"item_code": item.item_code})
-				self.validate_value("transfer_qty", "<=", ref_item.qty, item)
+				# validate quantity <= ref item's qty - qty already returned
+				ref_item = ref.doclist.getone({"item_code": item.item_code})
+				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
+				self.validate_value("transfer_qty", "<=", returnable_qty, item,
+					raise_exception=StockOverReturnError)
+				
+	def get_already_returned_item_qty(self, ref_fieldname):
+		return dict(webnotes.conn.sql("""select item_code, sum(transfer_qty) as qty
+			from `tabStock Entry Detail` where parent in (
+				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
+			group by item_code""" % (ref_fieldname, "%s"), (self.doc.fields.get(ref_fieldname),)))
 		
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
@@ -670,7 +672,7 @@ class DocType(AccountsController):
 						+ " " + _("Row #") + (" %d %s " % (mreq_item.idx, _("of")))
 						+ _("Material Request") + (" - %s" % item.material_request), 
 						raise_exception=webnotes.MappingMismatchError)
-
+	
 @webnotes.whitelist()
 def get_production_order_details(production_order):
 	result = webnotes.conn.sql("""select bom_no, 
@@ -700,16 +702,13 @@ def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filter
 		
 def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 	txt = txt.replace("%", "")
-	
-	for fieldname, val in return_map[filters["purpose"]].items():
-		if filters.get(fieldname):
-			ref_doclist = webnotes.get_doclist(val[0], filters[fieldname])
-			parentfields = val[1]
+
+	ref = get_return_reference_details(filters)
 			
-	stock_items = get_stock_items_for_return(ref_doclist, parentfields)
+	stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
 	
 	result = []
-	for item in ref_doclist.get({"parentfield": ["in", parentfields]}):
+	for item in ref.doclist.get({"parentfield": ["in", ref.parentfields]}):
 		if item.item_code in stock_items:
 			item.item_name = cstr(item.item_name)
 			item.description = cstr(item.description)
@@ -738,6 +737,20 @@ def get_stock_items_for_return(ref_doclist, parentfields):
 
 	return stock_items
 	
+def get_return_reference_details(args):
+	ref = webnotes._dict()
+	
+	# get ref_doclist
+	if args["purpose"] in return_map:
+		for fieldname, val in return_map[args["purpose"]].items():
+			if args.get(fieldname):
+				ref.fieldname = fieldname
+				ref.doclist = webnotes.get_doclist(val[0], args[fieldname])
+				ref.parentfields = val[1]
+				break
+				
+	return ref
+	
 return_map = {
 	"Sales Return": {
 		# [Ref DocType, [Item tables' parentfields]]
@@ -748,3 +761,18 @@ return_map = {
 		"purchase_receipt_no": ["Purchase Receipt", ["purchase_receipt_details"]]
 	}
 }
+
+def make_return_jv(stock_entry):
+	jv = webnotes.bean({
+		"doctype": "Journal Voucher",
+		"__islocal": 1
+	})
+	
+	se = webnotes.bean("Stock Entry", stock_entry)
+	
+	if not webnotes.response.get("docs"):
+		webnotes.response["docs"] = []
+	
+	webnotes.response["docs"] = jv.doclist
+	
+	return jv.doc.name

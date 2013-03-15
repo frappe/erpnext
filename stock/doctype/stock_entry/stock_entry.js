@@ -66,6 +66,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if (this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
 		}
+		
+		if(this.frm.doc.docstatus === 1 && wn.boot.profile.can_create("Journal Voucher")) {
+			if(this.frm.doc.purpose === "Sales Return") {
+				this.frm.add_custom_button("Make Credit Note", this.make_return_jv);
+				this.add_excise_button();
+			} else if(this.frm.doc.purpose === "Purchase Return") {
+				this.frm.add_custom_button("Make Debit Note", this.make_return_jv);
+				this.add_excise_button();
+			}
+		}
+		
 	},
 	
 	on_submit: function() {
@@ -142,6 +153,29 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				
 			}
 		}
+	},
+	
+	add_excise_button: function() {
+		if(wn.boot.control_panel.country === "India")
+			this.frm.add_custom_button("Make Excise Invoice", function() {
+				var excise = wn.model.make_new_doc_and_get_name('Journal Voucher');
+				excise = locals['Journal Voucher'][excise];
+				excise.voucher_type = 'Excise Voucher';
+				loaddoc('Journal Voucher', excise.name);
+			});
+	},
+	
+	make_return_jv: function() {
+		this.frm.call({
+			method: "make_return_jv",
+			args: {
+				stock_entry: this.frm.doc.name
+			},
+			callback: function(r) {
+				console.log(r);
+				loaddoc("Journal Voucher", r.message);
+			}
+		});
 	},
 
 });

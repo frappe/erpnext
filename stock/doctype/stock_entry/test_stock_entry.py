@@ -312,6 +312,23 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
 		
+		return pr.doc.name
+		
+	def test_over_stock_return(self):
+		from stock.doctype.stock_entry.stock_entry import StockOverReturnError
+		
+		# out of 10, 5 gets returned
+		pr_docname = self.test_purchase_receipt_return()
+		
+		# submit purchase return - return another 6 qtys so that exception is raised
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Purchase Return"
+		se.doc.purchase_receipt_no = pr_docname
+		se.doc.posting_date = "2013-03-01"
+		se.doclist[1].qty = se.doclist[1].transfer_qty = 6
+		se.doclist[1].s_warehouse = "_Test Warehouse"
+		
+		self.assertRaises(StockOverReturnError, se.insert)
 
 test_records = [
 	[
