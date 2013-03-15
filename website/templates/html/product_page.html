@@ -11,46 +11,41 @@
 {% block content %}
 	{% include 'html/product_search_box.html' %}
 	{% include 'html/product_breadcrumbs.html' %}
-	<div class="span12">
-		<h3 itemprop="name">{{ item_name }}</h3>
-		<p class="help">Item Code: {{ name }}</p>
-	</div>
 	<div class="span12 product-page-content" itemscope itemtype="http://schema.org/Product">
-	{% if slideshow %}
-		{% include "html/slideshow.html" %}
-	{% else %}
-		{% if website_image %}
-		<image itemprop="image" class="item-main-image"
-			src="{{ website_image }}" />
-		{% else %}
-		<div class="img-area">
-			{% include 'html/product_missing_image.html' %}
-		</div>
-		{% endif %}
-	{% endif %}
-		<br><br>
 		<div class="row">
-			<div class="span9">
-				<h3>Product Description</h3>
+			<div class="span6">
+				{% if slideshow %}
+					{% include "html/slideshow.html" %}
+				{% else %}
+					{% if website_image %}
+					<image itemprop="image" class="item-main-image" src="{{ website_image }}" />
+					{% else %}
+					<div class="img-area">
+						{% include 'html/product_missing_image.html' %}
+					</div>
+					{% endif %}
+				{% endif %}
+			</div>
+			<div class="span6">
+				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
+				<p class="help">Item Code: {{ name }}</p>
+				<h4>Product Description</h4>
 				<div itemprop="description">
 				{{ web_long_description or web_short_description or 
 					"[No description given]" }}
 				</div>
-				<hr>
 				{% if obj.doclist.get({"doctype":"Item Website Specification"}) %}
-					<h3>Specifications</h3>
-					<table class="table table-bordered" style="width: 100%">
-					{% for d in obj.doclist.get(
-						{"doctype":"Item Website Specification"}) %}
-						<tr>
-							<td style="width: 30%;">{{ d.label }}</td>
-							<td>{{ d.description }}</td>
-						</tr>
-					{% endfor %}
-					</table>
+				<h4>Specifications</h4>
+				<table class="table table-bordered" style="width: 100%">
+				{% for d in obj.doclist.get(
+					{"doctype":"Item Website Specification"}) %}
+					<tr>
+						<td style="width: 30%;">{{ d.label }}</td>
+						<td>{{ d.description }}</td>
+					</tr>
+				{% endfor %}
+				</table>
 				{% endif %}
-			</div>
-			<div class="span3">
 				<div class="item-price hide">
 					<p>Price:</p>
 				</div>

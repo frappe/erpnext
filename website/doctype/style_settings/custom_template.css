@@ -47,10 +47,9 @@ div.outer {
 {% if doc.page_border %}
 /* Page Border*/
 div.outer {
-	-moz-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	-webkit-box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	box-shadow: 0px 0px 3px rgba(0,0,0,0.9);
-	border-radius: 5px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+	-webkibox-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 {% else %}
 {% if doc.background_color == doc.page_background %}
@@ -60,6 +59,11 @@ div.web-footer {
 }
 {% endif %}
 {% endif %}
+
+div.web-footer, div.web-footer a {
+	font-size: 90%;
+	color: #{{ get_hex_shade(doc.background_color or "ffffff", 70) }};
+}
 
 /* Bootstrap Navbar */
 .navbar-inverse .navbar-inner {
