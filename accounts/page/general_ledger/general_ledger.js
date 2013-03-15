@@ -108,7 +108,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		// filter accounts options by company
 		this.filter_inputs.company.change(function() {
 			me.setup_account_filter(this);
-			me.filter_inputs.refresh.click();
+			me.set_route()
 		});
 		
 		this.filter_inputs.account.change(function() {

@@ -48,6 +48,8 @@ class TestDeliveryNote(unittest.TestCase):
 		
 	def test_delivery_note_gl_entry(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
 		
@@ -109,7 +111,7 @@ test_records = [
 			"description": "CPU", 
 			"doctype": "Delivery Note Item", 
 			"item_code": "_Test Item", 
-			"item_name": "CPU", 
+			"item_name": "_Test Item", 
 			"parentfield": "delivery_note_details", 
 			"qty": 5.0, 
 			"basic_rate": 100.0,

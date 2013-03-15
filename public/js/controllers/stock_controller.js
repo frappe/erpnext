@@ -16,7 +16,7 @@
 
 wn.provide("erpnext.stock");
 
-erpnext.stock.StockController = erpnext.utils.Controller.extend({
+erpnext.stock.StockController = wn.ui.form.Controller.extend({
 	show_stock_ledger: function() {
 		var me = this;
 		this.frm.add_custom_button("Show Stock Ledger", function() {

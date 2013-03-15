@@ -25,7 +25,7 @@ page_map = {
 		"template": 'html/web_page.html',
 		"condition_field": "published"
 	}),
-	'Blog': webnotes._dict({
+	'Blog Post': webnotes._dict({
 		"template": 'html/blog_page.html',
 		"condition_field": "published",
 	}),
@@ -40,9 +40,13 @@ page_map = {
 }
 
 page_settings_map = {
-	"about": "About Us Settings",
-	"contact": "Contact Us Settings"
+	"about": "website.doctype.about_us_settings.about_us_settings.get_args",
+	"contact": "Contact Us Settings",
+	"blog": "website.helpers.blog.get_blog_template_args",
+	"writers": "website.helpers.blog.get_writers_args"
 }
+
+no_cache = "message"
 
 def render(page_name):
 	"""render html page"""
@@ -66,10 +70,12 @@ def get_html(page_name):
 	
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
-		html = webnotes.cache().get_value("page:" + page_name)
-		from_cache = True
+		if not page_name in no_cache:
+			html = webnotes.cache().get_value("page:" + page_name)
+			from_cache = True
 
 	if not html:
+		webnotes.connect()
 		html = load_into_cache(page_name)
 		from_cache = False
 	
@@ -155,7 +161,11 @@ def prepare_args(page_name):
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
-			args.obj = webnotes.bean(page_settings_map[page_name]).obj
+			target = page_settings_map[page_name]
+			if "." in target:
+				args.update(webnotes.get_method(target)())
+			else:
+				args.obj = webnotes.bean(page_settings_map[page_name]).obj
 	else:
 		args = get_doc_fields(page_name)
 	
@@ -249,18 +259,13 @@ def get_outer_env(page_name, args):
 	args.update(ret)
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["brand_html", "copyright", "address", "top_bar_background", "favicon", 
-		"facebook_share", "google_plus_one", "twitter_share", "linked_in_share", "twitter_share_via"]:
+	for k in ["banner_html", "brand_html", "copyright", "address", "twitter_share_via"
+		"favicon", "facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
 		if k in settings.fields:
 			args[k] = settings.fields.get(k)
 
 	for k in ["facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
 		args[k] = int(args.get(k) or 0)
-		
-	if not args.brand_html:
-		args.brand_html = "ERPNext"
-	if not args.top_bar_background:
-		args.top_bar_background = "Black"
 	
 	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
 	args.encoded_title = quote(str(args.title or ""), str(""))
@@ -302,3 +307,31 @@ def url_for_website(url):
 		return "files/" + url
 	else:
 		return url
+		
+def get_hex_shade(color, percent):
+	
+	def p(c):
+		v = int(c, 16) + int(int('ff', 16) * (float(percent)/100))
+		if v < 0: 
+			v=0
+		if v > 255: 
+			v=255
+		h = hex(v)[2:]
+		if len(h) < 2:
+			h = "0" + h
+		return h
+		
+	r, g, b = color[0:2], color[2:4], color[4:6]
+	
+	avg = (float(int(r, 16) + int(g, 16) + int(b, 16)) / 3)
+	# switch dark and light shades
+	if avg > 128:
+		percent = -percent
+
+	# stronger diff for darker shades
+	if percent < 25 and avg < 64:
+		percent = percent * 2
+	
+	return p(r) + p(g) + p(b)
+	
+	

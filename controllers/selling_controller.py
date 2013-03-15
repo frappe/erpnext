@@ -38,3 +38,26 @@ class SellingController(AccountsController):
 		if self.meta.get_field("in_words_export"):
 			self.doc.in_words_export = money_in_words(disable_rounded_total and 
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
+	
+	def get_stock_ledger_entries(self):
+		item_list, warehouse_list = self.get_distinct_item_warehouse()
+		if item_list and warehouse_list:
+			return webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
+				voucher_detail_no, posting_date, posting_time, stock_value,
+				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
+				where ifnull(`is_cancelled`, "No") = "No" and company = %s 
+				and item_code in (%s) and warehouse in (%s)
+				order by item_code desc, warehouse desc, posting_date desc, 
+				posting_time desc, name desc""" % 
+				('%s', ', '.join(['%s']*len(item_list)), ', '.join(['%s']*len(warehouse_list))), 
+				tuple([self.doc.company] + item_list + warehouse_list), as_dict=1)
+
+	def get_distinct_item_warehouse(self):
+		item_list = []
+		warehouse_list = []
+		for item in self.doclist.get({"parentfield": self.fname}) \
+				+ self.doclist.get({"parentfield": "packing_details"}):
+			item_list.append(item.item_code)
+			warehouse_list.append(item.warehouse)
+			
+		return list(set(item_list)), list(set(warehouse_list))

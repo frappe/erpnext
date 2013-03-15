@@ -21,8 +21,11 @@ from webnotes.utils import flt
 from utilities.transaction_base import TransactionBase
 
 class AccountsController(TransactionBase):
-	def get_gl_dict(self, args, cancel):
+	def get_gl_dict(self, args, cancel=None):
 		"""this method populates the common properties of a gl entry record"""
+		if cancel is None:
+			cancel = (self.doc.docstatus == 2)
+			
 		gl_dict = {
 			'company': self.doc.company, 
 			'posting_date': self.doc.posting_date,

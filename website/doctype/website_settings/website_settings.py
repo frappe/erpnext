@@ -31,9 +31,6 @@ class DocType:
 		from website.utils import clear_cache
 		clear_cache()
 
-		from webnotes.sessions import clear_cache
-		clear_cache('Guest')
-
 	def set_home_page(self):
 
 		import webnotes

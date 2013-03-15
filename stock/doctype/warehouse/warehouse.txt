@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:30", 
+  "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-02-04 11:35:53", 
+  "modified": "2013-03-11 17:58:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -21,7 +21,8 @@
   "name": "__common__", 
   "parent": "Warehouse", 
   "parentfield": "fields", 
-  "parenttype": "DocType"
+  "parenttype": "DocType", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocPerm", 
@@ -190,7 +191,7 @@
   "permlevel": 0
  }, 
  {
-  "description": "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.", 
+  "description": "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge Into\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.", 
   "doctype": "DocField", 
   "fieldname": "merge_warehouses_section", 
   "fieldtype": "Section Break", 
@@ -201,7 +202,7 @@
   "doctype": "DocField", 
   "fieldname": "merge_with", 
   "fieldtype": "Link", 
-  "label": "Merge With", 
+  "label": "Merge Into", 
   "options": "Warehouse", 
   "permlevel": 2
  }, 
@@ -222,24 +223,6 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -248,6 +231,26 @@
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2, 

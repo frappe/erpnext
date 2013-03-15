@@ -71,9 +71,11 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	setup_filters: function() {
 		var me = this;
 		this._super();
-		this.filter_inputs.pl_or_bs.change(function() {
-			me.filter_inputs.refresh.click();
-		}).add_options($.map(wn.report_dump.data["Cost Center"], function(v) {return v.name;}));
+		this.trigger_refresh_on_change(["pl_or_bs"]);
+		
+		this.filter_inputs.pl_or_bs
+			.add_options($.map(wn.report_dump.data["Cost Center"], function(v) {return v.name;}));
+
 		this.setup_plot_check();
 	},
 	init_filter_values: function() {

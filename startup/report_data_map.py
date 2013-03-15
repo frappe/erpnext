@@ -86,8 +86,9 @@ data_map = {
 		"order_by": "name"
 	},
 	"Stock Ledger Entry": {
-		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
-			"voucher_type", "voucher_no", "ifnull(incoming_rate,0) as incoming_rate", "stock_uom"],
+		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", 
+			"actual_qty as qty", "voucher_type", "voucher_no", 
+			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {

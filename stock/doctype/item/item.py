@@ -20,15 +20,12 @@ import webnotes
 from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-
+from webnotes.model.controller import DocListController
+class DocType(DocListController):
 	def get_tax_rate(self, tax_type):
 		rate = sql("select tax_rate from tabAccount where name = %s", tax_type)
 		ret = {
@@ -196,6 +193,8 @@ class DocType:
 
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
+			
+		self.validate_is_stock_item()
 					
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
@@ -215,6 +214,15 @@ class DocType:
 			'description'	:	file and file[0]['description'] or ''
 		}
 		return ret
+		
+	def validate_is_stock_item(self):
+		if not self.doc.fields.get("__islocal"):
+			if webnotes.conn.get_value("Item", self.doc.name, "is_stock_item")=="Yes" and \
+				((not self.doc.is_stock_item) or self.doc.is_stock_item == "No"):
+					if self.check_if_sle_exists() == "exists":
+						webnotes.msgprint(self.meta.get_label("is_stock_item") + ": " 
+							+ _("""Cannot change to Yes. Reason: Stock Ledger Entries exist for""")
+							+ """ "%s" """ % self.doc.name, raise_exception=True)
 
 	def check_if_sle_exists(self):
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
@@ -230,8 +238,7 @@ class DocType:
 		from website.helpers.product import get_parent_item_groups, url_for_website
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.website_image = url_for_website(self.doc.website_image)
-		self.doc.title = self.doc.item_name == self.doc.name and self.doc.item_name or \
-			(self.doc.item_name + " [" + self.doc.name + "]")
+		self.doc.title = self.doc.item_name
 
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow

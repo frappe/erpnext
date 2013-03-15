@@ -155,6 +155,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 		// initialize warehouse-item map
 		this.item_warehouse = {};
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
 		var from_datetime = dateutil.str_to_obj(me.from_date + " 00:00:00");
 		var to_datetime = dateutil.str_to_obj(me.to_date + " 23:59:59");
 		

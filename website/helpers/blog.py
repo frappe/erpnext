@@ -4,41 +4,51 @@
 from __future__ import unicode_literals
 import webnotes
 import website.utils
+from webnotes import _
+
+def clear_blog_cache():
+	for blog in webnotes.conn.sql_list("""select page_name from 
+		`tabBlog Post` where ifnull(published,0)=1"""):
+		website.utils.delete_page_cache(blog)
+	
+	website.utils.delete_page_cache("writers")
 
 @webnotes.whitelist(allow_guest=True)
-def get_blog_list(args=None):
-	"""
-		args = {
-			'start': 0,
-		}
-	"""
+def get_blog_list(start=0, by=None, category=None):
 	import webnotes
-	
-	if not args: args = webnotes.form_dict
-	
+	condition = ""
+	if by:
+		condition = " and t1.blogger='%s'" % by.replace("'", "\'")
+	if category:
+		condition += " and t1.blog_category='%s'" % category.replace("'", "\'")
 	query = """\
 		select
-			name, page_name, content, owner, creation as creation,
-			title, (select count(name) from `tabComment` where
-				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
-		from `tabBlog`
-		where ifnull(published,0)=1
-		order by creation desc, name asc
-		limit %s, 5""" % args.start
+			t1.title, t1.name, t1.page_name, t1.published_on as creation, 
+				ifnull(t1.blog_intro, t1.content) as content, 
+				t2.full_name, t2.avatar, t1.blogger,
+				(select count(name) from `tabComment` where
+					comment_doctype='Blog Post' and comment_docname=t1.name) as comments
+		from `tabBlog Post` t1, `tabBlogger` t2
+		where ifnull(t1.published,0)=1
+		and t1.blogger = t2.name
+		%(condition)s
+		order by published_on desc, name asc
+		limit %(start)s, 20""" % {"start": start, "condition": condition}
 		
-	result = webnotes.conn.sql(query, args, as_dict=1)
+	result = webnotes.conn.sql(query, as_dict=1)
 
 	# strip html tags from content
 	import webnotes.utils
 	
 	for res in result:
 		from webnotes.utils import global_date_format, get_fullname
-		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
 			res['content'] = website.utils.get_html(res['page_name'])
-		res['content'] = split_blog_content(res['content'])
-
+		res['content'] = res['content'][:140]
+		if res.avatar and not "/" in res.avatar:
+			res.avatar = "files/" + res.avatar
+		
 	return result
 
 @webnotes.whitelist(allow_guest=True)
@@ -73,10 +83,10 @@ def add_comment(args=None):
 	
 	# notify commentors 
 	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
-		comment_doctype='Blog' and comment_docname=%s and
+		comment_doctype='Blog Post' and comment_docname=%s and
 		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
 	
-	blog = webnotes.conn.sql("""select * from tabBlog where name=%s""", 
+	blog = webnotes.conn.sql("""select * from `tabBlog Post` where name=%s""", 
 		args.get('comment_docname'), as_dict=1)[0]
 	
 	from webnotes.utils.email_lib.bulk import send
@@ -89,10 +99,8 @@ def add_comment(args=None):
 	return comment_html
 
 @webnotes.whitelist(allow_guest=True)
-def add_subscriber():
+def add_subscriber(name, email_id):
 	"""add blog subscriber to lead"""
-	full_name = webnotes.form_dict.get('your_name')
-	email = webnotes.form_dict.get('your_email_address')
 	name = webnotes.conn.sql("""select name from tabLead where email_id=%s""", email)
 	
 	from webnotes.model.doc import Document
@@ -104,21 +112,38 @@ def add_subscriber():
 	if not lead.source: lead.source = 'Blog'
 	lead.unsubscribed = 0
 	lead.blog_subscriber = 1
-	lead.lead_name = full_name
+	lead.lead_name = name
 	lead.email_id = email
 	lead.save()
-		
+
 def get_blog_content(blog_page_name):
 	import website.utils
 	content = website.utils.get_html(blog_page_name)
-	content = split_blog_content(content)
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
 	return content
+
+def get_blog_template_args():
+	args = {
+		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
+	}
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args
 	
-def split_blog_content(content):
-	content = content.split("<!-- begin blog content -->")
-	content = len(content) > 1 and content[1] or content[0]
-	content = content.split("<!-- end blog content -->")
-	content = content[0]
-	return content
+def get_writers_args():
+	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
+	 	order by posts desc""", as_dict=1)
+	for blogger in bloggers:
+		if blogger.avatar and not "/" in blogger.avatar:
+			blogger.avatar = "files/" + blogger.avatar
+		
+	args = {
+		"bloggers": bloggers,
+		"texts": {
+			"all_posts_by": _("All posts by")
+		},
+		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
+	}
+	
+	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
+	return args
