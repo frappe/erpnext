@@ -769,6 +769,19 @@ def make_return_jv(stock_entry):
 	})
 	
 	se = webnotes.bean("Stock Entry", stock_entry)
+	ref = get_return_reference_details(se.doc.fields)
+	
+	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+		# find item in ref.doclist
+		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
+		
+		# add row for customer/supplier account
+		
+		# find income account and value and add corresponding rows
+		
+		# find tax account and value and add corresponding rows
+		
+		pass
 	
 	if not webnotes.response.get("docs"):
 		webnotes.response["docs"] = []
