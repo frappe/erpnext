@@ -6,7 +6,7 @@ def execute():
 	res = webnotes.conn.sql_list("""select distinct gl1.voucher_no
 		from `tabGL Entry` gl1, `tabGL Entry` gl2
 		where
-		(date(gl1.modified) between "2013-03-11" and "2013-03-15")
+		date(gl1.modified) >= "2013-03-11"
 		and date(gl1.modified) = date(gl2.modified)
 		and gl1.voucher_no = gl2.voucher_no
 		and gl1.voucher_type = "Journal Voucher"
