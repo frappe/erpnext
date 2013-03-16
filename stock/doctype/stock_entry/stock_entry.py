@@ -25,6 +25,7 @@ from webnotes import msgprint, _
 from stock.utils import get_incoming_rate
 from stock.stock_ledger import get_previous_sle
 import json
+from accounts.utils import get_balance_on
 
 sql = webnotes.conn.sql
 
@@ -762,26 +763,22 @@ return_map = {
 	}
 }
 
+@webnotes.whitelist()
 def make_return_jv(stock_entry):
-	jv = webnotes.bean({
-		"doctype": "Journal Voucher",
-		"__islocal": 1
-	})
-	
 	se = webnotes.bean("Stock Entry", stock_entry)
+	if not se.doc.purpose in ["Sales Return", "Purchase Return"]:
+		return
+	
 	ref = get_return_reference_details(se.doc.fields)
 	
-	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
-		# find item in ref.doclist
-		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
-		
-		# add row for customer/supplier account
-		
-		# find income account and value and add corresponding rows
-		
-		# find tax account and value and add corresponding rows
-		
-		pass
+	if ref.doclist[0].doctype == "Delivery Note":
+		result = make_return_jv_from_delivery_note(se, ref)
+	elif ref.doclist[0].doctype == "Sales Invoice":
+		result = make_return_jv_from_sales_invoice(se, ref)
+	elif ref.doclist[0].doctype == "Purchase Receipt":
+		result = make_return_jv_from_purchase_receipt(se, ref)
+	
+	# create jv doclist and fetch balance for each unique row item
 	
 	if not webnotes.response.get("docs"):
 		webnotes.response["docs"] = []
@@ -789,3 +786,114 @@ def make_return_jv(stock_entry):
 	webnotes.response["docs"] = jv.doclist
 	
 	return jv.doc.name
+	
+def make_return_jv_from_sales_invoice(se, ref):
+	# customer account entry
+	parent = {
+		"account": ref.doclist[0].debit_to,
+		"credit": 0.0,
+		"against_invoice": ref.doclist[0].name,
+	}
+	
+	# income account entries
+	children = {}
+	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+		# find item in ref.doclist
+		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
+		
+		account, debit = get_sales_account_and_amount_from_item(ref.doclist, ref_item,
+			se_item.transfer_qty)
+		
+		if account not in children:
+			children[account] = 0
+		children[account] += debit
+		parent["credit"] += debit
+			
+	# find tax account and value and add corresponding rows
+	
+	return [parent] + [{"account": account, "debit": debit} for account, debit in children.items()]
+	
+def get_sales_account_and_amount_from_item(doclist, ref_item, transfer_qty):
+	account = debit = None
+	if not ref_item.income_account:
+		if ref_item.parent_item:
+			parent_item = doclist.getone({"item_code": ref_item.parent_item})
+			packing_ratio = parent_item.qty / ref_item.qty
+
+			debit = parent_item.basic_rate * transfer_qty * packing_ratio
+			account = parent_item.income_account
+	else:
+		debit = ref_item.basic_rate * transfer_qty
+		account = ref_item.income_account
+	
+	return account, debit	
+	
+def make_return_jv_from_delivery_note(se, ref):
+	invoices_against_delivery = get_invoice_list("Sales Invoice Item", "delivery_note",
+		ref.doclist[0].name)
+	
+	if not invoices_against_delivery:
+		item_codes = [item.item_code for item in se.doclist.get({"parentfield": "mtn_details"})]
+		sales_orders_against_delivery = [d.prev_docname for d in 
+			ref.doclist.get({"prev_doctype": "Sales Order"}) 
+			if d.prev_docname and d.item_code in item_codes]
+
+		invoices_against_delivery = get_invoice_list("Sales Order Item", "sales_order",
+			sales_orders_against_delivery)
+	
+	against_invoice = {}
+	
+	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+		pending = se_item.transfer_qty
+		for sales_invoice in invoices_against_delivery:
+			si_doclist = webnotes.get_doclist("Sales Invoice", sales_invoice)
+			ref_item = si_doclist.get({"item_code": se_item.item_code})
+			if not ref_item:
+				continue
+			
+			ref_item = ref_item[0]
+			
+			if ref_item.qty < pending:
+				transfer_qty = ref_item.qty
+				pending -= ref_item.qty
+			else:
+				transfer_qty = pending
+				pending = 0
+			
+			account, debit = get_sales_account_and_amount_from_item(si_doclist, ref_item,
+				transfer_qty)
+				
+			if si_doclist[0].name not in against_invoice:
+				against_invoice[sales_invoice] = {
+					"parent": {"account": si_doclist[0].debit_to, "credit": 0},
+					"children": {}
+				}
+				
+			against_invoice[sales_invoice]["parent"]["credit"] += debit
+			
+			if account not in against_invoice[sales_invoice]["children"]:
+				against_invoice[sales_invoice]["children"][account] = 0
+			
+			against_invoice[sales_invoice]["children"][account] += debit
+			
+			# find tax account and value and add corresponding rows
+			
+			if pending <= 0:
+				break
+	
+	result = []
+	for sales_invoice, opts in against_invoice.items():
+		result += [opts["parent"]] + [{"account": account, "debit": debit} 
+			for account, debit in opts["children"].items()]
+	return result
+	
+def get_invoice_list(doctype, link_field, value):
+	if isinstance(value, basestring):
+		value = [value]
+		
+	return webnotes.conn.sql_list("""select distinct parent from `tab%s`
+		where docstatus = 1 and `%s` in (%s)""" % (doctype, link_field,
+			", ".join(["%s"]*len(value))), tuple(value))
+			
+def make_return_jv_from_purchase_receipt(se, ref):
+	pass
