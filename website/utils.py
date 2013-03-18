@@ -309,13 +309,6 @@ def url_for_website(url):
 		return url
 		
 def get_hex_shade(color, percent):
-	# switch dark and light shades
-	if int(color, 16) > int("808080", 16):
-		percent = -percent
-		
-	# stronger diff for darker shades
-	if int(color, 16) < int("333333", 16):
-		percent = percent * 2
 	
 	def p(c):
 		v = int(c, 16) + int(int('ff', 16) * (float(percent)/100))
@@ -329,4 +322,16 @@ def get_hex_shade(color, percent):
 		return h
 		
 	r, g, b = color[0:2], color[2:4], color[4:6]
+	
+	avg = (float(int(r, 16) + int(g, 16) + int(b, 16)) / 3)
+	# switch dark and light shades
+	if avg > 128:
+		percent = -percent
+
+	# stronger diff for darker shades
+	if percent < 25 and avg < 64:
+		percent = percent * 2
+	
 	return p(r) + p(g) + p(b)
+	
+	

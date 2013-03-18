@@ -44,7 +44,7 @@ rss_item = u"""
         <description>%(content)s</description>
         <link>%(link)s</link>
         <guid>%(name)s</guid>
-        <pubDate>%(creation)s</pubDate>
+        <pubDate>%(published_on)s</pubDate>
 </item>"""
 
 def generate():
@@ -57,13 +57,12 @@ def generate():
 	
 	items = ''
 	blog_list = webnotes.conn.sql("""\
-		select page_name as name, modified, creation, title from `tabBlog Post` 
+		select page_name as name, published_on, modified, title, content from `tabBlog Post` 
 		where ifnull(published,0)=1
-		order by creation desc, modified desc, name asc limit 20""", as_dict=1)
+		order by published_on desc limit 20""", as_dict=1)
 
 	for blog in blog_list:
 		blog.link = host + '/' + blog.name + '.html'
-		blog.content = get_blog_content(blog.name)
 		
 		items += rss_item % blog
 
