@@ -6,14 +6,13 @@ def execute():
 	res = webnotes.conn.sql_list("""select distinct gl1.voucher_no
 		from `tabGL Entry` gl1, `tabGL Entry` gl2
 		where
-		(date(gl1.modified) between "2013-03-11" and "2013-03-15")
+		date(gl1.modified) >= "2013-03-11"
 		and date(gl1.modified) = date(gl2.modified)
 		and gl1.voucher_no = gl2.voucher_no
 		and gl1.voucher_type = "Journal Voucher"
 		and gl1.voucher_type = gl2.voucher_type
 		and gl1.posting_date = gl2.posting_date
 		and gl1.account = gl2.account
-		and ifnull(gl1.cost_center, "") = ifnull(gl2.cost_center, "")
 		and ifnull(gl1.is_cancelled, 'No') = 'No' and ifnull(gl2.is_cancelled, 'No') = 'No' 
 		and ifnull(gl1.against_voucher, '') = ifnull(gl2.against_voucher, '')
 		and ifnull(gl1.against_voucher_type, '') = ifnull(gl2.against_voucher_type, '')
