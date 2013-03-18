@@ -47,7 +47,7 @@ cur_frm.cscript.allow_gdrive_access = function(doc) {
 	}
 }
 
-cur_frm.cscript.validate_gdrive_code = function(doc) {
+cur_frm.cscript.validate_gdrive = function(doc) {
 	wn.call({
 		method: "setup.doctype.backup_manager.backup_manager.gdrive_callback",
 		args: {
@@ -55,12 +55,11 @@ cur_frm.cscript.validate_gdrive_code = function(doc) {
 		},
 	});
 }
-// cur_frm.cscript.backup_to_gdrive = function(doc) {
-// 	msgprint("Backing up and uploading. This may take a few minutes.")
-// 	wn.call({
-// 		method: "setup.doctype.backup_manager.backup_manager.take_backups_gdrive",
-// 		callback: function(r) {
-// 			msgprint("Backups taken. Please check your email for the response.")
-// 		}
-// 	})
-// }
+
+cur_frm.cscript.upload_backups_to_dropbox = function(doc) {
+	cur_frm.save()
+}
+
+cur_frm.cscript.upload_backups_to_gdrive = function(doc) {
+	cur_frm.save()
+}

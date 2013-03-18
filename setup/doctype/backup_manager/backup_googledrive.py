@@ -1,3 +1,15 @@
+# SETUP:
+# install pip install --upgrade google-api-python-client
+#
+# In Google API
+# - create new API project
+# - create new oauth2 client (create installed app type as google \
+# 	does not support subdomains)
+#
+# in conf.py, set oauth2 settings
+# gdrive_client_id
+# gdrive_client_secret
+
 import httplib2
 import sys
 import os
@@ -11,33 +23,11 @@ from apiclient.http import MediaFileUpload
 
 @webnotes.whitelist()
 def get_gdrive_authorize_url():
-	from conf import client_id, client_secret, oauth_scope, redirect_url
 	flow = get_gdrive_flow()
 	authorize_url = flow.step1_get_authorize_url()
-	return_address = get_request_site_address(True) \
-		+ "?cmd=setup.doctype.backup_manager.backup_googledrive.gdrive_callback"
 	return {
 		"authorize_url": authorize_url,
 	}
-
-@webnotes.whitelist(allow_guest=True)
-def gdrive_callback(verification_code = None):
-	flow = get_gdrive_flow()
-	if verification_code:
-		credentials = flow.step2_exchange(verification_code)
-		allowed = 1
-	http = httplib2.Http()
-	http = credentials.authorize(http)
-	final_credentials = credentials.to_json()
-	drive_service = build('drive', 'v2', http=http)
-	erpnext_folder_id = create_erpnext_folder(drive_service)
-	database_folder_id = create_folder('database', drive_service, erpnext_folder_id)
-	files_folder_id = create_folder('files', drive_service, erpnext_folder_id)
-	webnotes.msgprint(_("Google Drive Access Approved."))
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
 
 @webnotes.whitelist()
 def upload_files(name, mimetype, service, folder_id):
@@ -74,11 +64,15 @@ def backup_to_gdrive():
 
 	# upload database
 	backup = new_backup()
-	filename = os.path.basename(backup.backup_path_db)
+	path = os.path.join(get_base_path(), "public", "backups")
+	filename = os.path.join(path, os.path.basename(backup.backup_path_db))
+	
 	# upload files to database folder
-	upload_files(filename, 'application/x-gzip', drive_service, webnotes.conn.get_value("Backup Manager", None, "database_folder_id"))
+	upload_files(filename, 'application/x-gzip', drive_service, 
+		webnotes.conn.get_value("Backup Manager", None, "database_folder_id"))
+
 	# upload files to files folder
-	path = os.path.join(get_base_path(),"public", "files")
+	path = os.path.join(get_base_path(), "public", "files")
 	for files in os.listdir(path):
 		filename = path + "/" + files
 		ext = filename.split('.')[-1]
@@ -89,7 +83,9 @@ def backup_to_gdrive():
 			mimetype = mimetypes.types_map["." + ext]
 		#Compare Local File with Server File
 		param = {}
-	  	children = drive_service.children().list(folderId=webnotes.conn.get_value("Backup Manager", None, "files_folder_id"), **param).execute()
+	  	children = drive_service.children().list(
+			folderId=webnotes.conn.get_value("Backup Manager", None, "files_folder_id"), 
+			**param).execute()
 	  	for child in children.get('items', []):
 			file = drive_service.files().get(fileId=child['id']).execute()
 			if files == file['title'] and size == int(file['fileSize']):
@@ -100,13 +96,44 @@ def backup_to_gdrive():
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
-	try:
-		from conf import client_id, client_secret, oauth_scope, redirect_url
-	except ImportError, e:
+	import conf
+	
+	if not hasattr(conf, "gdrive_client_id"):
 		webnotes.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
 		raise_exception=True)
-	flow = OAuth2WebServerFlow(client_id, client_secret, oauth_scope, redirect_url)
+
+	#callback_url = get_request_site_address(True) \
+	#	+ "?cmd=setup.doctype.backup_manager.backup_googledrive.googledrive_callback"
+	
+	# for installed apps since google does not support subdomains
+	redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
+	
+	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
+		"https://www.googleapis.com/auth/drive", redirect_uri)
 	return flow
+	
+@webnotes.whitelist()
+def gdrive_callback(verification_code = None):
+	flow = get_gdrive_flow()
+	if verification_code:
+		credentials = flow.step2_exchange(verification_code)
+		allowed = 1
+		
+	# make folders to save id
+	http = httplib2.Http()
+	http = credentials.authorize(http)
+	drive_service = build('drive', 'v2', http=http)
+	erpnext_folder_id = create_erpnext_folder(drive_service)
+	database_folder_id = create_folder('database', drive_service, erpnext_folder_id)
+	files_folder_id = create_folder('files', drive_service, erpnext_folder_id)
+
+	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
+	webnotes.conn.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
+	webnotes.conn.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
+	final_credentials = credentials.to_json()
+	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
+
+	webnotes.msgprint("Updated")
 
 def create_erpnext_folder(service):
 	if not webnotes.conn:

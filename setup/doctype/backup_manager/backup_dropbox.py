@@ -1,3 +1,13 @@
+# SETUP:
+# install pip install --upgrade dropbox
+#
+# Create new Dropbox App
+#
+# in conf.py, set oauth2 settings
+# dropbox_access_key
+# dropbox_access_secret
+
+
 import os
 import webnotes
 from webnotes.utils import get_request_site_address, get_base_path
@@ -66,13 +76,14 @@ def backup_to_dropbox():
 
 	# upload database
 	backup = new_backup()
-	filename = backup.backup_path_db
+	filename = os.path.join(get_base_path(), "public", "backups", 
+		os.path.basename(backup.backup_path_db))
 	upload_file_to_dropbox(filename, "database", dropbox_client)
 
 	response = dropbox_client.metadata("/files")
 
 	# upload files to files folder
-	filename = os.path.join(get_base_path(),"public", "files")
+	filename = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(filename):
 		found = False
 		for file_metadata in response["contents"]:

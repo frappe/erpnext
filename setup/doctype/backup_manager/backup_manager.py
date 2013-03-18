@@ -19,8 +19,10 @@ def take_backups_weekly():
 def take_backups_if(freq):
 	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
 		take_backups_dropbox()
+		
+	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
 		take_backups_gdrive()
-#backup to dropbox 
+	
 @webnotes.whitelist()
 def take_backups_dropbox():
 	try:
