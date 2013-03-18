@@ -95,12 +95,6 @@ wn.module_page["Stock"] = [
 				description: wn._("Change UOM for an Item."),
 				"doctype": "Stock UOM Replace Utility"
 			},
-			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label": wn._("Sales and Purchase Return Tool"),
-				doctype: "Sales and Purchase Return Tool",
-				description: wn._("Manage sales or purchase returns")
-			},
 		]
 	},
 	{

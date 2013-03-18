@@ -80,12 +80,6 @@ wn.module_page["Buying"] = [
 		title: wn._("Tools"),
 		icon: "icon-wrench",
 		items: [
-			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label":wn._("Purchase Returns"),
-				"description":wn._("Helper for managing return of goods (sales or purchase)"),
-				doctype: "Sales and Purchase Return Tool"
-			},
 		]
 	},
 	{

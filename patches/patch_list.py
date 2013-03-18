@@ -213,4 +213,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
 	"patches.march_2013.p04_pos_update_stock_check",
 	"patches.march_2013.p05_payment_reconciliation",
+	"patches.march_2013.p06_remove_sales_purchase_return_tool",
 ]
