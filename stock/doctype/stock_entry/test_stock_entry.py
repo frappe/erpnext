@@ -9,6 +9,9 @@ class TestStockEntry(unittest.TestCase):
 	def test_auto_material_request(self):
 		webnotes.conn.sql("""delete from `tabMaterial Request Item`""")
 		webnotes.conn.sql("""delete from `tabMaterial Request`""")
+		self._clear_stock()
+		
+		webnotes.conn.set_value("Global Defaults", None, "auto_indent", True)
 
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.insert()
@@ -166,9 +169,14 @@ class TestStockEntry(unittest.TestCase):
 	
 	def _insert_material_receipt(self):
 		self._clear_stock()
-		material_receipt = webnotes.bean(copy=test_records[0])
-		material_receipt.insert()
-		material_receipt.submit()
+		se1 = webnotes.bean(copy=test_records[0])
+		se1.insert()
+		se1.submit()
+		
+		se2 = webnotes.bean(copy=test_records[0])
+		se2.doclist[1].item_code = "_Test Item Home Desktop 100"
+		se2.insert()
+		se2.submit()
 		
 	def _get_actual_qty(self):
 		return flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
@@ -238,6 +246,8 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_2 = self._get_actual_qty()
 		
 		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
+		
+		return se
 	
 	def test_sales_invoice_return_of_non_packing_item(self):
 		self._test_sales_invoice_return("_Test Item", 5, 2)
@@ -248,11 +258,12 @@ class TestStockEntry(unittest.TestCase):
 	def _test_delivery_note_return(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
 		
-		actual_qty_0 = self._get_actual_qty()
-		
-		# insert and submit delivery note
 		from stock.doctype.delivery_note.test_delivery_note \
 			import test_records as delivery_note_test_records
+		
+		actual_qty_0 = self._get_actual_qty()
+		
+		# make a delivery note based on this invoice
 		dn = webnotes.bean(copy=delivery_note_test_records[0])
 		dn.doclist[1].item_code = item_code
 		dn.insert()
@@ -262,11 +273,26 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 		
+		si_doclist = webnotes.map_doclist([
+			["Delivery Note", "Sales Invoice"],
+			["Delivery Note Item", "Sales Invoice Item"],
+			["Sales Taxes and Charges", "Sales Taxes and Charges"],
+			["Sales Team", "Sales Team"]], dn.doc.name)
+			
+		si = webnotes.bean(si_doclist)
+		si.doc.posting_date = dn.doc.posting_date
+		si.doc.debit_to = "_Test Customer - _TC"
+		for d in si.doclist.get({"parentfield": "entries"}):
+			d.income_account = "Sales - _TC"
+			d.cost_center = "_Test Cost Center - _TC"
+		si.insert()
+		si.submit()
+		
 		# insert and submit stock entry for sales return
 		se = webnotes.bean(copy=test_records[0])
 		se.doc.purpose = "Sales Return"
 		se.doc.delivery_note_no = dn.doc.name
-		se.doc.posting_date = "2013-03-01"
+		se.doc.posting_date = "2013-03-10"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
 		
 		se.insert()
@@ -275,11 +301,114 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_2 = self._get_actual_qty()
 		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
 		
+		return se
+		
 	def test_delivery_note_return_of_non_packing_item(self):
 		self._test_delivery_note_return("_Test Item", 5, 2)
 		
 	def test_delivery_note_return_of_packing_item(self):
 		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
+		
+	def _test_sales_return_jv(self, se, returned_value):
+		from stock.doctype.stock_entry.stock_entry import make_return_jv
+		jv_list = make_return_jv(se.doc.name)
+		
+		self.assertEqual(len(jv_list), 3)
+		self.assertEqual(jv_list[0].get("voucher_type"), "Credit Note")
+		self.assertEqual(jv_list[0].get("posting_date"), se.doc.posting_date)
+		self.assertEqual(jv_list[1].get("account"), "_Test Customer - _TC")
+		self.assertEqual(jv_list[2].get("account"), "Sales - _TC")
+		self.assertTrue(jv_list[1].get("against_invoice"))
+		
+		# debit == credit
+		debit = sum([flt(d.get("debit")) for d in jv_list])
+		credit = sum([flt(d.get("credit")) for d in jv_list])
+		self.assertEqual(debit, credit)
+		
+		# validate value of debit
+		self.assertEqual(debit, returned_value)
+		
+	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
+		se = self._test_sales_invoice_return("_Test Item", 5, 2)
+		self._test_sales_return_jv(se, 1000)
+		
+	def test_make_return_jv_for_sales_invoice_packing_item(self):
+		se = self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
+		self._test_sales_return_jv(se, 2000)
+		
+	def test_make_return_jv_for_delivery_note_non_packing_item(self):
+		se = self._test_delivery_note_return("_Test Item", 5, 2)
+		self._test_sales_return_jv(se, 200)
+		
+		se = self._test_delivery_note_return_against_sales_order("_Test Item", 5, 2)
+		self._test_sales_return_jv(se, 200)
+		
+	def test_make_return_jv_for_delivery_note_packing_item(self):
+		se = self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
+		self._test_sales_return_jv(se, 400)
+		
+		se = self._test_delivery_note_return_against_sales_order("_Test Sales BOM Item", 25, 20)
+		self._test_sales_return_jv(se, 400)
+		
+	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
+		self._insert_material_receipt()
+
+		from selling.doctype.sales_order.test_sales_order \
+			import test_records as sales_order_test_records
+
+		actual_qty_0 = self._get_actual_qty()
+		
+		so = webnotes.bean(copy=sales_order_test_records[0])
+		so.doclist[1].item_code = item_code
+		so.doclist[1].qty = 5.0
+		so.insert()
+		so.submit()
+		
+		dn_doclist = webnotes.map_doclist([
+			["Sales Order", "Delivery Note"],
+			["Sales Order Item", "Delivery Note Item"],
+			["Sales Taxes and Charges", "Sales Taxes and Charges"],
+			["Sales Team", "Sales Team"]], so.doc.name)
+
+		dn = webnotes.bean(dn_doclist)
+		dn.doc.status = "Draft"
+		dn.doc.posting_date = so.doc.delivery_date
+		dn.insert()
+		dn.submit()
+		
+		actual_qty_1 = self._get_actual_qty()
+
+		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
+
+		si_doclist = webnotes.map_doclist([
+			["Sales Order", "Sales Invoice"],
+			["Sales Order Item", "Sales Invoice Item"],
+			["Sales Taxes and Charges", "Sales Taxes and Charges"],
+			["Sales Team", "Sales Team"]], so.doc.name)
+
+		si = webnotes.bean(si_doclist)
+		si.doc.posting_date = dn.doc.posting_date
+		si.doc.debit_to = "_Test Customer - _TC"
+		for d in si.doclist.get({"parentfield": "entries"}):
+			d.income_account = "Sales - _TC"
+			d.cost_center = "_Test Cost Center - _TC"
+		si.insert()
+		si.submit()
+
+		# insert and submit stock entry for sales return
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Sales Return"
+		se.doc.delivery_note_no = dn.doc.name
+		se.doc.posting_date = "2013-03-10"
+		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
+
+		se.insert()
+		se.submit()
+
+		actual_qty_2 = self._get_actual_qty()
+		self.assertEquals(actual_qty_1 + returned_qty, actual_qty_2)
+
+		return se
 		
 	def test_purchase_receipt_return(self):
 		self._clear_stock()
@@ -298,6 +427,24 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertEquals(actual_qty_0 + 10, actual_qty_1)
 		
+		pi_doclist = webnotes.map_doclist([
+			["Purchase Receipt", "Purchase Invoice"],
+			["Purchase Receipt Item", "Purchase Invoice Item"],
+			["Purchase Taxes and Charges", "Purchase Taxes and Charges"]], pr.doc.name)
+			
+		pi = webnotes.bean(pi_doclist)
+		pi.doc.posting_date = pr.doc.posting_date
+		pi.doc.credit_to = "_Test Supplier - _TC"
+		for d in pi.doclist.get({"parentfield": "entries"}):
+			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.cost_center = "_Test Cost Center - _TC"
+		for d in pi.doclist.get({"parentfield": "purchase_tax_details"}):
+			d.cost_center = "_Test Cost Center - _TC"
+		
+		pi.run_method("calculate_taxes_and_totals")
+		pi.insert()
+		pi.submit()
+		
 		# submit purchase return
 		se = webnotes.bean(copy=test_records[0])
 		se.doc.purpose = "Purchase Return"
@@ -312,13 +459,13 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
 		
-		return pr.doc.name
+		return se, pr.doc.name
 		
 	def test_over_stock_return(self):
 		from stock.doctype.stock_entry.stock_entry import StockOverReturnError
 		
 		# out of 10, 5 gets returned
-		pr_docname = self.test_purchase_receipt_return()
+		prev_se, pr_docname = self.test_purchase_receipt_return()
 		
 		# submit purchase return - return another 6 qtys so that exception is raised
 		se = webnotes.bean(copy=test_records[0])
@@ -329,7 +476,97 @@ class TestStockEntry(unittest.TestCase):
 		se.doclist[1].s_warehouse = "_Test Warehouse"
 		
 		self.assertRaises(StockOverReturnError, se.insert)
-
+		
+	def _test_purchase_return_jv(self, se, returned_value):
+		from stock.doctype.stock_entry.stock_entry import make_return_jv
+		jv_list = make_return_jv(se.doc.name)
+		
+		self.assertEqual(len(jv_list), 3)
+		self.assertEqual(jv_list[0].get("voucher_type"), "Debit Note")
+		self.assertEqual(jv_list[0].get("posting_date"), se.doc.posting_date)
+		self.assertEqual(jv_list[1].get("account"), "_Test Supplier - _TC")
+		self.assertEqual(jv_list[2].get("account"), "_Test Account Cost for Goods Sold - _TC")
+		self.assertTrue(jv_list[1].get("against_voucher"))
+		
+		# debit == credit
+		debit = sum([flt(d.get("debit")) for d in jv_list])
+		credit = sum([flt(d.get("credit")) for d in jv_list])
+		self.assertEqual(debit, credit)
+		
+		# validate value of credit
+		self.assertEqual(credit, returned_value)
+		
+	def test_make_return_jv_for_purchase_receipt(self):
+		se, pr_name = self.test_purchase_receipt_return()
+		self._test_purchase_return_jv(se, 250)
+		
+		se, pr_name = self._test_purchase_return_return_against_purchase_order()
+		self._test_purchase_return_jv(se, 250)
+		
+	def _test_purchase_return_return_against_purchase_order(self):
+		self._clear_stock()
+		
+		actual_qty_0 = self._get_actual_qty()
+		
+		from buying.doctype.purchase_order.test_purchase_order \
+			import test_records as purchase_order_test_records
+		
+		# submit purchase receipt
+		po = webnotes.bean(copy=purchase_order_test_records[0])
+		po.doc.is_subcontracted = None
+		po.doclist[1].item_code = "_Test Item"
+		po.doclist[1].import_rate = 50
+		po.insert()
+		po.submit()
+		
+		pr_doclist = webnotes.map_doclist([
+			["Purchase Order", "Purchase Receipt"],
+			["Purchase Order Item", "Purchase Receipt Item"],
+			["Purchase Taxes and Charges", "Purchase Taxes and Charges"]], po.doc.name)
+		
+		pr = webnotes.bean(pr_doclist)
+		pr.doc.posting_date = po.doc.transaction_date
+		pr.insert()
+		pr.submit()
+		
+		actual_qty_1 = self._get_actual_qty()
+		
+		self.assertEquals(actual_qty_0 + 10, actual_qty_1)
+		
+		pi_doclist = webnotes.map_doclist([
+			["Purchase Order", "Purchase Invoice"],
+			["Purchase Order Item", "Purchase Invoice Item"],
+			["Purchase Taxes and Charges", "Purchase Taxes and Charges"]], po.doc.name)
+			
+		pi = webnotes.bean(pi_doclist)
+		pi.doc.posting_date = pr.doc.posting_date
+		pi.doc.credit_to = "_Test Supplier - _TC"
+		for d in pi.doclist.get({"parentfield": "entries"}):
+			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.cost_center = "_Test Cost Center - _TC"
+		for d in pi.doclist.get({"parentfield": "purchase_tax_details"}):
+			d.cost_center = "_Test Cost Center - _TC"
+		
+		pi.run_method("calculate_taxes_and_totals")
+		pi.insert()
+		pi.submit()
+		
+		# submit purchase return
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Purchase Return"
+		se.doc.purchase_receipt_no = pr.doc.name
+		se.doc.posting_date = "2013-03-01"
+		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
+		se.doclist[1].s_warehouse = "_Test Warehouse"
+		se.insert()
+		se.submit()
+		
+		actual_qty_2 = self._get_actual_qty()
+		
+		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
+		
+		return se, pr.doc.name
+		
 test_records = [
 	[
 		{

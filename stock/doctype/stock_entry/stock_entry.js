@@ -60,6 +60,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	refresh: function() {
+		var me = this;
 		erpnext.hide_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
@@ -67,12 +68,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			this.show_stock_ledger();
 		}
 		
-		if(this.frm.doc.docstatus === 1 && wn.boot.profile.can_create("Journal Voucher")) {
+		if(this.frm.doc.docstatus === 1 && 
+				wn.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button("Make Credit Note", this.make_return_jv);
+				this.frm.add_custom_button("Make Credit Note", function() { me.make_return_jv(); });
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button("Make Debit Note", this.make_return_jv);
+				this.frm.add_custom_button("Make Debit Note", function() { me.make_return_jv(); });
 				this.add_excise_button();
 			}
 		}
@@ -172,8 +174,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				stock_entry: this.frm.doc.name
 			},
 			callback: function(r) {
-				console.log(r);
-				loaddoc("Journal Voucher", r.message);
+				if(!r.exc) {
+					var jv_name = wn.model.make_new_doc_and_get_name('Journal Voucher');
+					var jv = locals["Journal Voucher"][jv_name];
+					$.extend(jv, r.message[0]);
+					$.each(r.message.slice(1), function(i, jvd) {
+						var child = wn.model.add_child(jv, "Journal Voucher Detail", "entries");
+						$.extend(child, jvd);
+					});
+					loaddoc("Journal Voucher", jv_name);
+				}
+				
 			}
 		});
 	},
