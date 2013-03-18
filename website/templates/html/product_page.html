@@ -18,7 +18,8 @@
 					{% include "html/slideshow.html" %}
 				{% else %}
 					{% if website_image %}
-					<image itemprop="image" class="item-main-image" src="{{ website_image }}" />
+					<image itemprop="image" class="item-main-image"
+						src="{{ website_image }}" />
 					{% else %}
 					<div class="img-area">
 						{% include 'html/product_missing_image.html' %}
