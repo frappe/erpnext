@@ -318,7 +318,7 @@ class DocType(BuyingController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
-		against_stock_account = "Stock Received But Not Billed - %s" % (self.company_abbr,)
+		against_stock_account = self.get_default_account("stock_received_but_not_billed")
 		total_valuation_amount = self.get_total_valuation_amount()
 		
 		super(DocType, self).make_gl_entries(against_stock_account, total_valuation_amount)

@@ -214,6 +214,11 @@ class DocType:
 			"Stock Adjustment - " + self.doc.abbr):
 				webnotes.conn.set(self.doc, "stock_adjustment_account", "Stock Adjustment - " + 
 					self.doc.abbr)
+					
+		if not self.doc.expenses_included_in_valuation and webnotes.conn.exists("Account", 
+			"Expenses Included In Valuation - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "expenses_included_in_valuation", 
+					"Expenses Included In Valuation - " + self.doc.abbr)
 			
 	# Create default cost center
 	# ---------------------------------------------------

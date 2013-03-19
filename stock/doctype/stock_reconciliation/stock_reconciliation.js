@@ -18,9 +18,43 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
-	setup: function() {
-		this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+	onload: function() {
+		this.set_default_expense_account();
 	}, 
+	
+	set_default_expense_account: function() {
+		var me = this;
+		
+		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_account) {
+			this.frm.call({
+				method: "controllers.accounts_controller.get_default_account",
+				args: {
+					"account_for": "stock_adjustment_account", 
+					"company": this.frm.doc.company
+				},
+				callback: function(r) {
+					if (!r.exc) me.frm.set_value("expense_account", r.message);
+				}
+			});
+		}
+	},
+	
+	setup: function() {
+		var me = this;
+		
+		this.frm.add_fetch("company", "expense_account", "stock_adjustment_account");
+		
+		this.frm.fields_dict["expense_account"].get_query = function() {
+			return {
+				"query": "accounts.utils.get_account_list", 
+				"filters": {
+					"is_pl_account": "Yes",
+					"debit_or_credit": "Debit",
+					"company": me.frm.doc.company
+				}
+			}
+		}
+	},
 	
 	refresh: function() {
 		if(this.frm.doc.docstatus===0) {
@@ -127,14 +161,3 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
-
-cur_frm.fields_dict["expense_account"].get_query = function(doc) {
-	return {
-		"query": "accounts.utils.get_account_list", 
-		"filters": {
-			"is_pl_account": "Yes",
-			"debit_or_credit": "Debit",
-			"company": doc.company
-		}
-	}
-}

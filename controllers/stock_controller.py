@@ -20,7 +20,7 @@ from controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
 	def make_gl_entries(self, against_stock_account, amount, cost_center=None):
-		stock_in_hand_account = self.get_stock_in_hand_account()
+		stock_in_hand_account = self.get_default_account("stock_in_hand_account")
 		
 		if amount:
 			gl_entries = [

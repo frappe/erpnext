@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-27 09:38:05", 
   "docstatus": 0, 
-  "modified": "2013-03-18 16:34:04", 
+  "modified": "2013-03-19 12:52:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -192,6 +192,13 @@
   "fieldname": "stock_adjustment_account", 
   "fieldtype": "Link", 
   "label": "Stock Adjustment Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expenses_included_in_valuation", 
+  "fieldtype": "Link", 
+  "label": "Expenses Included In Valuation", 
   "options": "Account"
  }, 
  {

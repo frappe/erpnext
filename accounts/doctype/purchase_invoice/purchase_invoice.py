@@ -444,6 +444,9 @@ class DocType(BuyingController):
 					
 		# item gl entries
 		stock_item_and_auto_inventory_accounting = False
+		if auto_inventory_accounting:
+			stock_acocunt = self.get_default_account("stock_received_but_not_billed")
+			
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_inventory_accounting and item.item_code in self.stock_items:
 				if flt(item.valuation_rate):
@@ -455,7 +458,7 @@ class DocType(BuyingController):
 					
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": "Stock Received But Not Billed - %s" % (self.company_abbr,),
+							"account": stock_acocunt,
 							"against": self.doc.credit_to,
 							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
 								*  flt(item.qty),
@@ -480,7 +483,7 @@ class DocType(BuyingController):
 			# this will balance out valuation amount included in cost of goods sold
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": "Expenses Included In Valuation - %s" % (self.company_abbr,),
+					"account": self.get_default_account("expenses_included_in_valuation"),
 					"cost_center": "Auto Inventory Accounting - %s" % self.company_abbr,
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,

@@ -400,12 +400,14 @@ class DocType(SellingController):
 		
 		if stock_ledger_entries:
 			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-				buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
-					self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
-					item_sales_bom)
-				item.buying_amount = buying_amount > 0 and buying_amount or 0
-				webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
-					item.buying_amount)
+				if item.item_code in self.stock_items or \
+						(item_sales_bom and item_sales_bom.get(item.item_code)):
+					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
+						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+						item_sales_bom)
+					item.buying_amount = buying_amount > 0 and buying_amount or 0
+					webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
+						item.buying_amount)
 		
 		self.validate_warehouse()
 		
@@ -420,7 +422,7 @@ class DocType(SellingController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
-		against_stock_account = "Stock Delivered But Not Billed - %s" % (self.company_abbr,)
+		against_stock_account = self.get_default_account("stock_delivered_but_not_billed")
 		total_buying_amount = self.get_total_buying_amount()
 		
 		super(DocType, self).make_gl_entries(against_stock_account, -1*total_buying_amount)
