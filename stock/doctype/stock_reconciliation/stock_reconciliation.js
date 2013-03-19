@@ -18,6 +18,10 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
+	setup: function() {
+		this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+	}, 
+	
 	refresh: function() {
 		if(this.frm.doc.docstatus===0) {
 			this.show_download_template();
@@ -123,3 +127,14 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
+
+cur_frm.fields_dict["expense_account"].get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "Yes",
+			"debit_or_credit": "Debit",
+			"company": doc.company
+		}
+	}
+}

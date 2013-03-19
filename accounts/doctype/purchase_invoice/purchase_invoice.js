@@ -238,8 +238,11 @@ cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	refresh_field('entries');
 }
 
-cur_frm.fields_dict['entries'].grid.get_field("cost_center").get_query = function(doc) {
-	return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.docstatus != 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
+cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
+	return {
+		query: "accounts.utils.get_cost_center_list",
+		filters: { company_name: doc.company}
+	}
 }
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){

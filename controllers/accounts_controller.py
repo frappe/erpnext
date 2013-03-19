@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
 from webnotes.utils import flt
+
 from utilities.transaction_base import TransactionBase
 
 class AccountsController(TransactionBase):
@@ -70,7 +71,6 @@ class AccountsController(TransactionBase):
 			
 	def get_stock_in_hand_account(self):
 		stock_in_hand_account = webnotes.conn.get_value("Company", self.doc.company, "stock_in_hand_account")
-		
 		if not stock_in_hand_account:
 			msgprint(_("Missing") + ": " 
 				+ _(webnotes.get_doctype("company").get_label("stock_in_hand_account")

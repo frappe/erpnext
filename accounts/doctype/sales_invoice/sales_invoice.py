@@ -804,8 +804,9 @@ class DocType(SellingController):
 		item_buying_amount = 0
 		if stock_ledger_entries:
 			# is pos and update stock
-			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+			item.buying_amount = item_buying_amount > 0 and item_buying_amount or 0
 		elif item.delivery_note and item.dn_detail:
 			# against delivery note
 			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 

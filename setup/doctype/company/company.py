@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, set_default
+from webnotes.utils import cstr
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 import webnotes.defaults
@@ -49,6 +49,8 @@ class DocType:
 						['Earnest Money','Securities and Deposits','Ledger','No','','Debit',self.doc.name,''],
 					['Stock In Hand','Current Assets','Group','No','','Debit',self.doc.name,''],
 						['Stock','Stock In Hand','Ledger','No','','Debit',self.doc.name,''],
+						['Stock Delivered But Not Billed', 'Stock In Hand', 'Ledger', 
+							'No', '', 'Debit', self.doc.name, ''],
 					['Tax Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
 					['Stock Delivered But Not Billed','Current Assets','Ledger','No','','Debit',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','No','','Debit',self.doc.name,''],
@@ -62,9 +64,9 @@ class DocType:
 					['Temporary Account (Assets)','Temporary Accounts (Assets)','Ledger','No','','Debit',self.doc.name,''],
 			['Expenses','','Group','Yes','Expense Account','Debit',self.doc.name,''],
 				['Direct Expenses','Expenses','Group','Yes','Expense Account','Debit',self.doc.name,''],
-					['Cost of Goods Sold','Direct Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
-					['Expenses Included In Valuation','Direct Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
-					['Stock Adjustment','Direct Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
+					['Stock Expenses','Direct Expenses','Group','Yes','Expense Account','Debit',self.doc.name,''],
+						['Cost of Goods Sold','Stock Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
+						['Stock Adjustment','Stock Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
 				['Indirect Expenses','Expenses','Group','Yes','Expense Account','Debit',self.doc.name,''],
 					['Advertising and Publicity','Indirect Expenses','Ledger','Yes','Chargeable','Debit',self.doc.name,''],
 					['Bad Debts Written Off','Indirect Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
@@ -101,6 +103,9 @@ class DocType:
 					['Shareholders Funds','Capital Account','Group','No','','Credit',self.doc.name,''],
 				['Current Liabilities','Source of Funds (Liabilities)','Group','No','','Credit',self.doc.name,''],
 					['Accounts Payable','Current Liabilities','Group','No','','Credit',self.doc.name,''],
+					['Stock Liabilities','Current Liabilities','Group','No','','Credit',self.doc.name,''],
+						['Stock Received But Not Billed', 'Stock Liabilities', 'Ledger', 
+							'No', '', 'Credit', self.doc.name, ''],					
 					['Duties and Taxes','Current Liabilities','Group','No','','Credit',self.doc.name,''],
 					['Loans (Liabilities)','Current Liabilities','Group','No','','Credit',self.doc.name,''],
 						['Secured Loans','Loans (Liabilities)','Group','No','','Credit',self.doc.name,''],
@@ -186,14 +191,30 @@ class DocType:
 			 
 				self.doc.letter_head = header
 
-	# Set default AR and AP group
-	# ---------------------------------------------------
-	def set_default_groups(self):
-		if not self.doc.receivables_group:
-			webnotes.conn.set(self.doc, 'receivables_group', 'Accounts Receivable - '+self.doc.abbr)
-		if not self.doc.payables_group:
-			webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - '+self.doc.abbr)
+	def set_default_accounts(self):
+		if not self.doc.receivables_group and webnotes.conn.exists('Account', 
+			'Accounts Receivable - ' + self.doc.abbr):
+				webnotes.conn.set(self.doc, 'receivables_group', 'Accounts Receivable - ' + 
+					self.doc.abbr)
+					
+		if not self.doc.payables_group and webnotes.conn.exists('Account', 
+			'Accounts Payable - ' + self.doc.abbr):
+				webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - ' + self.doc.abbr)
 			
+		if not self.doc.stock_delivered_but_not_billed and webnotes.conn.exists("Account", 
+			"Stock Delivered But Not Billed - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "stock_delivered_but_not_billed", 
+					"Stock Delivered But Not Billed - " + self.doc.abbr)
+					
+		if not self.doc.stock_received_but_not_billed and webnotes.conn.exists("Account", 
+			"Stock Received But Not Billed - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "stock_received_but_not_billed", 
+					"Stock Received But Not Billed - " + self.doc.abbr)
+		
+		if not self.doc.stock_adjustment_account and webnotes.conn.exists("Account", 
+			"Stock Adjustment - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "stock_adjustment_account", "Stock Adjustment - " + 
+					self.doc.abbr)
 			
 	# Create default cost center
 	# ---------------------------------------------------
@@ -228,7 +249,7 @@ class DocType:
 			self.doc.name)
 		if not ac:
 			self.create_default_accounts()
-		self.set_default_groups()
+		self.set_default_accounts()
 		cc = sql("select name from `tabCost Center` where cost_center_name = 'Root' and company_name = '%s'"%(self.doc.name))
 		if not cc:
 			self.create_default_cost_center()
@@ -258,9 +279,6 @@ class DocType:
 			#update value as blank for tabSingles Global Defaults
 			sql("update `tabSingles` set value = '' where doctype='Global Defaults' and field = 'default_company' and value = %s", self.doc.name)
 
-		
-	# on rename
-	# ---------
 	def on_rename(self,newdn,olddn):
 		sql("update `tabCompany` set company_name = '%s' where name = '%s'" %(newdn,olddn))	
 		sql("update `tabSingles` set value = %s where doctype='Global Defaults' and field = 'default_company' and value = %s", (newdn, olddn))	
