@@ -19,25 +19,43 @@ $(document).ready(function(wrapper) {
 login.do_login = function(){
 
     var args = {};
-    args['usr']=$("#login_id").val();
-    args['pwd']=$("#password").val();
+	if(window.is_sign_up) {
+		args.cmd = "core.doctype.profile.profile.sign_up";
+		args.email = $("#login_id").val();
+	    args.full_name = $("#full_name").val();
 
-	if(!args.usr || !args.pwd) {
-		login.set_message("Both login and password required.");
+		if(!args.email || !valid_email(args.email) || !args.full_name) {
+			login.set_message("Valid email and name required.");
+			return false;
+		}
+
+	} else {
+		args.cmd = "login"
+	    args.usr = $("#login_id").val();
+	    args.pwd = $("#password").val();
+
+		if(!args.usr || !args.pwd) {
+			login.set_message("Both login and password required.");
+			return false;
+		}	
 	}
 
 	$('#login_btn').attr("disabled", "disabled");
+	$("#login-spinner").toggle(true);
 	$('#login_message').toggle(false);
 	
 	$.ajax({
 		type: "POST",
 		url: "server.py",
-		data: {cmd:"login", usr:args.usr, pwd: args.pwd},
+		data: args,
 		dataType: "json",
 		success: function(data) {
+			$("#login-spinner").toggle(false);
 			$('#login_btn').attr("disabled", false);
 			if(data.message=="Logged In") {
 				window.location.href = "app.html";
+			} else if(data.message=="No App") {
+				window.location.href = "index";
 			} else {
 				login.set_message(data.message);
 			}
@@ -45,6 +63,16 @@ login.do_login = function(){
 	})
 	
 	return false;
+}
+
+login.sign_up = function() {
+	$("#login_wrapper h3").html("Sign Up");
+	$("#login-label").html("Email Id");
+	$("#password-label").html("Full Name");
+	$("#password-row, #forgot-wrapper, #sign-up-wrapper, #login_message").toggle(false);
+	$("#full-name-row").toggle(true);
+	$("#login_btn").html("Register");
+	window.is_sign_up = true;
 }
 
 login.show_forgot_password = function(){

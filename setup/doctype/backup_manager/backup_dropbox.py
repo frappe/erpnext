@@ -105,6 +105,7 @@ def get_dropbox_session():
 	return sess
 
 def upload_file_to_dropbox(filename, folder, dropbox_client):
+	from dropbox import rest
 	size = os.stat(filename).st_size
 	f = open(filename,'r')
 	if size > 4194304:
