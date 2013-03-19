@@ -44,7 +44,7 @@ page_settings_map = {
 	"contact": "Contact Us Settings",
 	"blog": "website.helpers.blog.get_blog_template_args",
 	"writers": "website.helpers.blog.get_writers_args",
-	"print": "website.helpers.print.get_args"
+	"print": "core.doctype.print_format.print_format.get_args"
 }
 
 no_cache = ["message", "print"]
