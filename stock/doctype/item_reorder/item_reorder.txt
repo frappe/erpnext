@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:01", 
+  "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:22", 
+  "modified": "2013-03-19 12:22:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,7 +20,8 @@
   "parent": "Item Reorder", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocType", 
@@ -38,7 +39,8 @@
   "doctype": "DocField", 
   "fieldname": "warehouse_reorder_level", 
   "fieldtype": "Float", 
-  "label": "Re-order Level"
+  "label": "Re-order Level", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -51,6 +53,7 @@
   "fieldname": "material_request_type", 
   "fieldtype": "Select", 
   "label": "Material Request Type", 
-  "options": "Purchase\nTransfer"
+  "options": "Purchase\nTransfer", 
+  "reqd": 1
  }
 ]

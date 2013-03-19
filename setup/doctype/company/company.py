@@ -47,12 +47,11 @@ class DocType:
 					['Loans and Advances (Assets)','Current Assets','Group','No','','Debit',self.doc.name,''],
 					['Securities and Deposits','Current Assets','Group','No','','Debit',self.doc.name,''],
 						['Earnest Money','Securities and Deposits','Ledger','No','','Debit',self.doc.name,''],
-					['Stock In Hand','Current Assets','Group','No','','Debit',self.doc.name,''],
-						['Stock','Stock In Hand','Ledger','No','','Debit',self.doc.name,''],
-						['Stock Delivered But Not Billed', 'Stock In Hand', 'Ledger', 
+					['Stock Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
+						['Stock In Hand','Stock Assets','Ledger','No','','Debit',self.doc.name,''],
+						['Stock Delivered But Not Billed', 'Stock Assets', 'Ledger', 
 							'No', '', 'Debit', self.doc.name, ''],
 					['Tax Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
-					['Stock Delivered But Not Billed','Current Assets','Ledger','No','','Debit',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','No','','Debit',self.doc.name,''],
 					['Capital Equipments','Fixed Assets','Ledger','No','Fixed Asset Account','Debit',self.doc.name,''],
 					['Computers','Fixed Assets','Ledger','No','Fixed Asset Account','Debit',self.doc.name,''],
@@ -111,7 +110,6 @@ class DocType:
 						['Secured Loans','Loans (Liabilities)','Group','No','','Credit',self.doc.name,''],
 						['Unsecured Loans','Loans (Liabilities)','Group','No','','Credit',self.doc.name,''],
 						['Bank Overdraft Account','Loans (Liabilities)','Group','No','','Credit',self.doc.name,''],
-					['Stock Received But Not Billed','Current Liabilities','Ledger','No','','Credit',self.doc.name,''],
 				['Temporary Accounts (Liabilities)','Source of Funds (Liabilities)','Group','No','','Credit',self.doc.name,''],
 					['Temporary Account (Liabilities)','Temporary Accounts (Liabilities)','Ledger','No','','Credit',self.doc.name,'']
 		]
