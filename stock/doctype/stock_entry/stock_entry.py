@@ -840,8 +840,9 @@ def make_return_jv_from_delivery_note(se, ref):
 		sales_orders_against_delivery = [d.prevdoc_docname for d in 
 			ref.doclist.get({"prevdoc_doctype": "Sales Order"}) if d.prevdoc_docname]
 		
-		invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",
-			sales_orders_against_delivery)
+		if sales_orders_against_delivery:
+			invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",
+				sales_orders_against_delivery)
 			
 	if not invoices_against_delivery:
 		return []
@@ -893,8 +894,9 @@ def make_return_jv_from_purchase_receipt(se, ref):
 		purchase_orders_against_receipt = [d.prevdoc_docname for d in 
 			ref.doclist.get({"prevdoc_doctype": "Purchase Order"}) if d.prevdoc_docname]
 		
-		invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_order",
-			purchase_orders_against_receipt)
+		if purchase_orders_against_receipt:
+			invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_order",
+				purchase_orders_against_receipt)
 			
 	if not invoice_against_receipt:
 		return []
