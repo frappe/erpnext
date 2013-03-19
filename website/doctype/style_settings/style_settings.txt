@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-08 11:36:53", 
   "docstatus": 0, 
-  "modified": "2013-03-12 13:35:14", 
+  "modified": "2013-03-14 11:57:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -150,14 +150,14 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Add the name of Google Web Font e.g. \"Open Sans\"", 
+  "description": "Add the name of <a href=\"http://google.com/webfonts\" target=\"_blank\">Google Web Font</a> e.g. \"Open Sans\"", 
   "doctype": "DocField", 
   "fieldname": "google_web_font_for_heading", 
   "fieldtype": "Data", 
   "label": "Google Web Font (Heading)"
  }, 
  {
-  "description": "Add the name of Google Web Font e.g. \"Open Sans\"", 
+  "description": "Add the name of <a href=\"http://google.com/webfonts\" target=\"_blank\">Google Web Font</a> e.g. \"Open Sans\"", 
   "doctype": "DocField", 
   "fieldname": "google_web_font_for_text", 
   "fieldtype": "Data", 

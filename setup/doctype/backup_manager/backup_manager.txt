@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-05 16:35:50", 
+  "creation": "2013-03-15 11:06:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 12:18:07", 
+  "modified": "2013-03-15 17:27:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,7 +56,9 @@
   "doctype": "DocField", 
   "fieldname": "backup_right_now", 
   "fieldtype": "Button", 
-  "label": "Backup Right Now"
+  "hidden": 1, 
+  "label": "Backup Right Now", 
+  "read_only": 1
  }, 
  {
   "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
@@ -101,6 +103,70 @@
   "fieldname": "allow_dropbox_access", 
   "fieldtype": "Button", 
   "label": "Allow Dropbox Access"
+ }, 
+ {
+  "description": "Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.", 
+  "doctype": "DocField", 
+  "fieldname": "sync_with_gdrive", 
+  "fieldtype": "Section Break", 
+  "label": "Sync with Google Drive"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_backups_to_gdrive", 
+  "fieldtype": "Select", 
+  "label": "Upload Backups to Google Drive", 
+  "options": "Never\nDaily\nWeekly"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_gdrive_access", 
+  "fieldtype": "Button", 
+  "label": "Allow Google Drive Access"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "verification_code", 
+  "fieldtype": "Data", 
+  "label": "Enter Verification Code"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "validate_gdrive", 
+  "fieldtype": "Button", 
+  "label": "Validate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gdrive_access_allowed", 
+  "fieldtype": "Check", 
+  "hidden": 1, 
+  "label": "Google Drive Access Allowed", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gdrive_credentials", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Credentials", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "database_folder_id", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Database Folder ID", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "files_folder_id", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Files Folder ID", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocPerm"

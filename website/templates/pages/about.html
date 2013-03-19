@@ -9,7 +9,7 @@
 	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
 	{% for d in obj.doclist.get({"doctype":"Company History"}) %}
 	<div class="row">
-		<span class="span2" style="text-align: right"><h4 style="margin:0px;">{{ d.year }}</h4></span>
+		<span class="span2"><h4 style="margin:0px;">{{ d.year }}</h4></span>
 		<span class="span10"><p>{{ d.highlight }}</p></span>
 	</div>
 	{% endfor %}
@@ -20,11 +20,11 @@
 	<div class="row" itemscope itemtype="http://schema.org/Person">
 		<span class="span2">
 			<div class="avatar avatar-large">
-				<img class="avatar" src="{{ d.image }}" style="" itemprop="image">
+				<img class="avatar" src="{{ d.image_link }}" style="" itemprop="image">
 			</div>
 		</span>
 		<span class="span10"><h4 itemprop="name">{{ d.full_name }}</h4>
-			<div itemprop="description">{{ d.bio }}</div>
+			<p itemprop="description">{{ d.bio }}</p>
 		</span>
 	</div>
 	{% endfor %}

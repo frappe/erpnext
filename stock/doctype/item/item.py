@@ -238,8 +238,7 @@ class DocType(DocListController):
 		from website.helpers.product import get_parent_item_groups, url_for_website
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.website_image = url_for_website(self.doc.website_image)
-		self.doc.title = self.doc.item_name == self.doc.name and self.doc.item_name or \
-			(self.doc.item_name + " [" + self.doc.name + "]")
+		self.doc.title = self.doc.item_name
 
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow

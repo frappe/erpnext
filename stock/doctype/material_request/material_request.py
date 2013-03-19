@@ -105,6 +105,9 @@ class DocType(BuyingController):
 		import utilities
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
+		
+		# restrict material request type
+		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
 		# Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')

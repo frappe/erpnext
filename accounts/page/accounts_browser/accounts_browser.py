@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import webnotes
 import webnotes.defaults
-
+from webnotes.utils import flt
 from accounts.utils import get_balance_on
 
 @webnotes.whitelist()
@@ -53,6 +53,7 @@ def get_children():
 		currency = webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
 		for each in acc:
 			bal = get_balance_on(each.get("value"))
-			each['balance'] = currency + ' ' + str(bal or 0)
+			each["currency"] = currency
+			each["balance"] = flt(bal)
 		
 	return acc

@@ -27,6 +27,7 @@ class DocType:
 	def validate(self):
 		"""make custom css"""
 		from jinja2 import Template
+		from website.utils import get_hex_shade
 		import os
 		
 		self.validate_colors()
@@ -38,7 +39,7 @@ class DocType:
 		
 		self.prepare()
 		
-		self.doc.custom_css = temp.render(doc = self.doc)
+		self.doc.custom_css = temp.render(doc = self.doc, get_hex_shade=get_hex_shade)
 		if self.doc.add_css:
 			self.doc.custom_css += '\n\n/* User CSS */\n\n' + self.doc.add_css
 		

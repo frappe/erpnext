@@ -45,7 +45,7 @@ wn.module_page["Setup"] = [
 			},
 			{
 				"doctype":"Workflow",
-				label:wn._("Workfow"),
+				label:wn._("Workflow"),
 				"description":wn._("Set workflow rules.")
 			},
 			{
