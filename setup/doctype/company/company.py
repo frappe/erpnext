@@ -66,6 +66,7 @@ class DocType:
 					['Stock Expenses','Direct Expenses','Group','Yes','Expense Account','Debit',self.doc.name,''],
 						['Cost of Goods Sold','Stock Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
 						['Stock Adjustment','Stock Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
+						['Expenses Included In Valuation', "Stock Expenses", 'Ledger', 'Yes', 'Expense Account', 'Debit', self.doc.name, ''],
 				['Indirect Expenses','Expenses','Group','Yes','Expense Account','Debit',self.doc.name,''],
 					['Advertising and Publicity','Indirect Expenses','Ledger','Yes','Chargeable','Debit',self.doc.name,''],
 					['Bad Debts Written Off','Indirect Expenses','Ledger','Yes','Expense Account','Debit',self.doc.name,''],
