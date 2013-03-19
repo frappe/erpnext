@@ -789,6 +789,8 @@ def make_return_jv(stock_entry):
 	
 	from accounts.utils import get_balance_on
 	for r in result:
+		if not r.get("account"):
+			print result
 		jv_list.append({
 			"__islocal": 1,
 			"doctype": "Journal Voucher Detail",
@@ -846,6 +848,9 @@ def make_return_jv_from_delivery_note(se, ref):
 			
 	if not invoices_against_delivery:
 		return []
+		
+	packing_item_parent_map = dict([[d.item_code, d.parent_item] for d in ref.doclist.get(
+		{"parentfield": ref.parentfields[1]})])
 	
 	parent = {}
 	children = []
@@ -853,8 +858,11 @@ def make_return_jv_from_delivery_note(se, ref):
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
 		for sales_invoice in invoices_against_delivery:
 			si = webnotes.bean("Sales Invoice", sales_invoice)
-			si.run_method("make_packing_list")
-			ref_item = si.doclist.get({"item_code": se_item.item_code})
+			
+			if se_item.item_code in packing_item_parent_map:
+				ref_item = si.doclist.get({"item_code": packing_item_parent_map[se_item.item_code]})
+			else:
+				ref_item = si.doclist.get({"item_code": se_item.item_code})
 			
 			if not ref_item:
 				continue
