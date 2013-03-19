@@ -279,7 +279,7 @@ class DocType(AccountsController):
 						
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
-		ref = get_return_reference_details(self.doc.fields)
+		ref = get_return_doclist_and_details(self.doc.fields)
 		
 		if ref.doclist:
 			# validate docstatus
@@ -703,7 +703,7 @@ def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filter
 def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 	txt = txt.replace("%", "")
 
-	ref = get_return_reference_details(filters)
+	ref = get_return_doclist_and_details(filters)
 			
 	stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
 	
@@ -737,7 +737,7 @@ def get_stock_items_for_return(ref_doclist, parentfields):
 
 	return stock_items
 	
-def get_return_reference_details(args):
+def get_return_doclist_and_details(args):
 	ref = webnotes._dict()
 	
 	# get ref_doclist
@@ -768,7 +768,7 @@ def make_return_jv(stock_entry):
 	if not se.doc.purpose in ["Sales Return", "Purchase Return"]:
 		return
 	
-	ref = get_return_reference_details(se.doc.fields)
+	ref = get_return_doclist_and_details(se.doc.fields)
 	
 	if ref.doclist[0].doctype == "Delivery Note":
 		result = make_return_jv_from_delivery_note(se, ref)
@@ -794,8 +794,6 @@ def make_return_jv(stock_entry):
 			"doctype": "Journal Voucher Detail",
 			"parentfield": "entries",
 			"account": r.get("account"),
-			"debit": r.get("debit"),
-			"credit": r.get("credit"),
 			"against_invoice": r.get("against_invoice"),
 			"against_voucher": r.get("against_voucher"),
 			"balance": get_balance_on(r.get("account"), se.doc.posting_date)
@@ -807,42 +805,32 @@ def make_return_jv_from_sales_invoice(se, ref):
 	# customer account entry
 	parent = {
 		"account": ref.doclist[0].debit_to,
-		"credit": 0.0,
 		"against_invoice": ref.doclist[0].name,
 	}
 	
 	# income account entries
-	children = {}
+	children = []
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
 		# find item in ref.doclist
 		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
 		
-		account, debit = get_sales_account_and_amount_from_item(ref.doclist, ref_item,
-			se_item.transfer_qty)
+		account = get_sales_account_from_item(ref.doclist, ref_item)
 		
 		if account not in children:
-			children[account] = 0
-		children[account] += debit
-		parent["credit"] += debit
+			children.append(account)
 			
-	# find tax account and value and add corresponding rows
+	return [parent] + [{"account": account} for account in children]
 	
-	return [parent] + [{"account": account, "debit": debit} for account, debit in children.items()]
-	
-def get_sales_account_and_amount_from_item(doclist, ref_item, transfer_qty):
-	account = debit = None
+def get_sales_account_from_item(doclist, ref_item):
+	account = None
 	if not ref_item.income_account:
 		if ref_item.parent_item:
 			parent_item = doclist.getone({"item_code": ref_item.parent_item})
-			packing_ratio = parent_item.qty / ref_item.qty
-
-			debit = parent_item.basic_rate * transfer_qty * packing_ratio
 			account = parent_item.income_account
 	else:
-		debit = ref_item.basic_rate * transfer_qty
 		account = ref_item.income_account
 	
-	return account, debit	
+	return account
 	
 def make_return_jv_from_delivery_note(se, ref):
 	invoices_against_delivery = get_invoice_list("Sales Invoice Item", "delivery_note",
@@ -854,11 +842,14 @@ def make_return_jv_from_delivery_note(se, ref):
 		
 		invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",
 			sales_orders_against_delivery)
+			
+	if not invoices_against_delivery:
+		return []
 	
-	against_invoice = {}
+	parent = {}
+	children = []
 	
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
-		pending = se_item.transfer_qty
 		for sales_invoice in invoices_against_delivery:
 			si = webnotes.bean("Sales Invoice", sales_invoice)
 			si.run_method("make_packing_list")
@@ -866,44 +857,24 @@ def make_return_jv_from_delivery_note(se, ref):
 			
 			if not ref_item:
 				continue
-			
+				
 			ref_item = ref_item[0]
 			
-			if ref_item.qty < pending:
-				transfer_qty = ref_item.qty
-				pending -= ref_item.qty
-			else:
-				transfer_qty = pending
-				pending = 0
+			account = get_sales_account_from_item(si.doclist, ref_item)
 			
-			account, debit = get_sales_account_and_amount_from_item(si.doclist, ref_item,
-				transfer_qty)
-				
-			if si.doclist[0].name not in against_invoice:
-				against_invoice[sales_invoice] = {
-					"parent": {"account": si.doclist[0].debit_to, "credit": 0},
-					"children": {}
-				}
-				
-			against_invoice[sales_invoice]["parent"]["credit"] += debit
+			if account not in children:
+				children.append(account)
 			
-			if account not in against_invoice[sales_invoice]["children"]:
-				against_invoice[sales_invoice]["children"][account] = 0
+			if not parent:
+				parent = {"account": si.doc.debit_to}
+
+			break
 			
-			against_invoice[sales_invoice]["children"][account] += debit
-			
-			# find tax account and value and add corresponding rows
-			
-			if pending <= 0:
-				break
+	if len(invoices_against_delivery) == 1:
+		parent["against_invoice"] = invoices_against_delivery[0]
 	
-	result = []
-	for sales_invoice, opts in against_invoice.items():
-		parent = opts["parent"]
-		parent.update({"against_invoice": sales_invoice})
-		children = [{"account": account, "debit": debit} 
-			for account, debit in opts["children"].items()]
-		result += [parent] + children
+	result = [parent] + [{"account": account} for account in children]
+	
 	return result
 	
 def get_invoice_list(doctype, link_field, value):
@@ -925,53 +896,36 @@ def make_return_jv_from_purchase_receipt(se, ref):
 		invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_order",
 			purchase_orders_against_receipt)
 			
-	against_voucher = {}
+	if not invoice_against_receipt:
+		return []
+	
+	parent = {}
+	children = []
 	
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
-		pending = se_item.transfer_qty
 		for purchase_invoice in invoice_against_receipt:
 			pi = webnotes.bean("Purchase Invoice", purchase_invoice)
 			ref_item = pi.doclist.get({"item_code": se_item.item_code})
 			
 			if not ref_item:
 				continue
-			
+				
 			ref_item = ref_item[0]
 			
-			if ref_item.qty < pending:
-				transfer_qty = ref_item.qty
-				pending -= ref_item.qty
-			else:
-				transfer_qty = pending
-				pending = 0
-			
-			credit = ref_item.rate * transfer_qty
 			account = ref_item.expense_head
 			
-			if pi.doclist[0].name not in against_voucher:
-				against_voucher[purchase_invoice] = {
-					"parent": {"account": pi.doclist[0].credit_to, "debit": 0},
-					"children": {}
-				}
+			if account not in children:
+				children.append(account)
 			
-			against_voucher[purchase_invoice]["parent"]["debit"] += credit
+			if not parent:
+				parent = {"account": pi.doc.credit_to}
 
-			if account not in against_voucher[purchase_invoice]["children"]:
-				against_voucher[purchase_invoice]["children"][account] = 0
-				
-			against_voucher[purchase_invoice]["children"][account] += credit
+			break
 			
-			# find tax account and value and add corresponding rows
-			
-			if pending <= 0:
-				break
+	if len(invoice_against_receipt) == 1:
+		parent["against_voucher"] = invoice_against_receipt[0]
 	
-	result = []
-	for purchase_invoice, opts in against_voucher.items():
-		parent = opts["parent"]
-		parent.update({"against_voucher": purchase_invoice})
-		children = [{"account": account, "credit": credit} 
-			for account, credit in opts["children"].items()]
-		result += [parent] + children
+	result = [parent] + [{"account": account} for account in children]
+	
 	return result
 		

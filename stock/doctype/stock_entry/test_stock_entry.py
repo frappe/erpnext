@@ -309,7 +309,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_delivery_note_return_of_packing_item(self):
 		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
 		
-	def _test_sales_return_jv(self, se, returned_value):
+	def _test_sales_return_jv(self, se):
 		from stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv_list = make_return_jv(se.doc.name)
 		
@@ -320,35 +320,27 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(jv_list[2].get("account"), "Sales - _TC")
 		self.assertTrue(jv_list[1].get("against_invoice"))
 		
-		# debit == credit
-		debit = sum([flt(d.get("debit")) for d in jv_list])
-		credit = sum([flt(d.get("credit")) for d in jv_list])
-		self.assertEqual(debit, credit)
-		
-		# validate value of debit
-		self.assertEqual(debit, returned_value)
-		
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
 		se = self._test_sales_invoice_return("_Test Item", 5, 2)
-		self._test_sales_return_jv(se, 1000)
+		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_sales_invoice_packing_item(self):
 		se = self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se, 2000)
+		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_delivery_note_non_packing_item(self):
 		se = self._test_delivery_note_return("_Test Item", 5, 2)
-		self._test_sales_return_jv(se, 200)
+		self._test_sales_return_jv(se)
 		
 		se = self._test_delivery_note_return_against_sales_order("_Test Item", 5, 2)
-		self._test_sales_return_jv(se, 200)
+		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_delivery_note_packing_item(self):
 		se = self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se, 400)
+		self._test_sales_return_jv(se)
 		
 		se = self._test_delivery_note_return_against_sales_order("_Test Sales BOM Item", 25, 20)
-		self._test_sales_return_jv(se, 400)
+		self._test_sales_return_jv(se)
 		
 	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
@@ -477,7 +469,7 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertRaises(StockOverReturnError, se.insert)
 		
-	def _test_purchase_return_jv(self, se, returned_value):
+	def _test_purchase_return_jv(self, se):
 		from stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv_list = make_return_jv(se.doc.name)
 		
@@ -488,20 +480,12 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(jv_list[2].get("account"), "_Test Account Cost for Goods Sold - _TC")
 		self.assertTrue(jv_list[1].get("against_voucher"))
 		
-		# debit == credit
-		debit = sum([flt(d.get("debit")) for d in jv_list])
-		credit = sum([flt(d.get("credit")) for d in jv_list])
-		self.assertEqual(debit, credit)
-		
-		# validate value of credit
-		self.assertEqual(credit, returned_value)
-		
 	def test_make_return_jv_for_purchase_receipt(self):
 		se, pr_name = self.test_purchase_receipt_return()
-		self._test_purchase_return_jv(se, 250)
+		self._test_purchase_return_jv(se)
 		
 		se, pr_name = self._test_purchase_return_return_against_purchase_order()
-		self._test_purchase_return_jv(se, 250)
+		self._test_purchase_return_jv(se)
 		
 	def _test_purchase_return_return_against_purchase_order(self):
 		self._clear_stock()
