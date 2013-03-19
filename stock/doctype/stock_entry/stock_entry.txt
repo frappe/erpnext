@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-11 12:34:40", 
   "docstatus": 0, 
-  "modified": "2013-03-19 15:13:07", 
+  "modified": "2013-03-19 15:33:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -271,6 +271,7 @@
   "print_hide": 1
  }, 
  {
+  "depends_on": "eval:doc.purpose!==\"Sales Return\" || doc.purpose!===\"Purchase Return\"", 
   "doctype": "DocField", 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
