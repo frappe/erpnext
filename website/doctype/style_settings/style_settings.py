@@ -89,7 +89,7 @@ class DocType:
 		
 		self.doc.at_import = ""
 		for f in fonts:
-			self.doc.at_import += "\n@import url(http://fonts.googleapis.com/css?family=%s:400,700);" % f.replace(" ", "+")
+			self.doc.at_import += "\n@import url(https://fonts.googleapis.com/css?family=%s:400,700);" % f.replace(" ", "+")
 
 	
 	def on_update(self):

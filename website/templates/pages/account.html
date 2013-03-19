@@ -1,0 +1,65 @@
+{% extends "html/page.html" %}
+
+{% set title="My Account" %}
+
+{% block content %}
+<div class="span12">
+	<p class="pull-right"><a href="profile">Change my name, password</a></p>
+	<h3>My Orders</h3>
+	<div id="order-list">
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 100%;"></div>
+		</div>
+	</div>
+	<hr>
+	<h3>My Tickets</h3>
+	<div id="ticket-list">
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 100%;"></div>
+		</div>
+	</div>
+</div>
+<script>
+$(document).ready(function() {
+	var order_start = 0,
+		ticket_start = 0;
+		
+	wn.call({
+		method: "website.helpers.account.get_orders",
+		args: {
+			start: order_start
+		},
+		callback: function(r) {
+			$("#order-list .progress").remove();
+			var $list = $("#order-list");
+			
+			if(!(r.message && r.message.length)) {
+				$list.html("<div class='alert'>No Orders Yet</div>");
+				return;
+			}
+			
+			$.each(r.message, function(i, order) {
+				
+				// parent
+				var $order = $(repl('<div class="row">\
+					<div class="span4"><a href="order?id=%(name)s">%(name)s</a></span3>\
+				</div>', order)).appendTo($list);
+				
+				// items
+				$.each(order.items || [], function(i, item) {
+					var $item = $(repl('<div class="span8">\
+						<div class="row">\
+							<div class="span4">%(item_name)s</div>\
+							<div class="span2">%(export_rate)s</div>\
+							<div class="span2">%(status)s</div>\
+						</div>\
+					</div>', item)).appendTo($order);
+				});
+				
+				$("<hr>").appendTo($order);
+			});
+		}
+	})
+})
+</script>
+{% endblock %}
