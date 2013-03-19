@@ -37,7 +37,7 @@ erpnext.send_message = function(opts) {
 $(document).ready(function() {
 	// update login
 	var full_name = getCookie("full_name");
-	if(full_name.substr(0,1)=='"') {
+	if(full_name && full_name.substr(0,1)=='"') {
 		full_name = full_name.substr(1, full_name.length-2);
 	}
 	if(full_name) {

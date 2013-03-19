@@ -17,7 +17,6 @@ $(document).ready(function(wrapper) {
 
 // Login
 login.do_login = function(){
-
     var args = {};
 	if(window.is_sign_up) {
 		args.cmd = "core.doctype.profile.profile.sign_up";
@@ -26,6 +25,14 @@ login.do_login = function(){
 
 		if(!args.email || !valid_email(args.email) || !args.full_name) {
 			login.set_message("Valid email and name required.");
+			return false;
+		}
+	} else if(window.is_forgot) {
+		args.cmd = "reset_password";
+		args.user = $("#login_id").val();
+		
+		if(!args.user) {
+			login.set_message("Valid Login Id required.");
 			return false;
 		}
 
@@ -50,6 +57,7 @@ login.do_login = function(){
 		data: args,
 		dataType: "json",
 		success: function(data) {
+			$("input").val("");
 			$("#login-spinner").toggle(false);
 			$('#login_btn').attr("disabled", false);
 			if(data.message=="Logged In") {
@@ -68,35 +76,20 @@ login.do_login = function(){
 login.sign_up = function() {
 	$("#login_wrapper h3").html("Sign Up");
 	$("#login-label").html("Email Id");
-	$("#password-label").html("Full Name");
-	$("#password-row, #forgot-wrapper, #sign-up-wrapper, #login_message").toggle(false);
+	$("#password-row, #sign-up-wrapper, #login_message").toggle(false);
 	$("#full-name-row").toggle(true);
 	$("#login_btn").html("Register");
+	$("#forgot-wrapper").html("<a onclick='location.reload()' href='#'>Login</a>")
 	window.is_sign_up = true;
 }
 
-login.show_forgot_password = function(){
-    // create dialog
-	var login_id = $("#login_id").val();
-	if(!login_id || !valid_email(login_id)) {
-		login.set_message("Please set your login id (which is your email where the password will be sent);");
-		return;
-	}
-	login.set_message("Sending email with new password...");
-	$("#forgot-password").remove();
-
-	$.ajax({
-		method: "POST",
-		url: "server.py",
-		data: {
-			cmd: "reset_password",
-			user: login_id,
-			_type: "POST"
-		},
-		success: function(data) {
-			login.set_message("A new password has been sent to your email id.", "GREEN");
-		}
-	})
+login.show_forgot_password = function() {
+	$("#login_wrapper h3").html("Forgot");
+	$("#login-label").html("Email Id");
+	$("#password-row, #sign-up-wrapper, #login_message").toggle(false);
+	$("#login_btn").html("Send Password");
+	$("#forgot-wrapper").html("<a onclick='location.reload()' href='#'>Login</a>")
+	window.is_forgot = true;
 }
 
 login.set_message = function(message, color) {
