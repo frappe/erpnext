@@ -112,7 +112,7 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 		while uploader.offset < size:
 			try:
 				uploader.upload_chunked()
-				finish(folder + '/' + os.path.basename(filename), overwrite='True')
+				uploader.finish(folder + '/' + os.path.basename(filename), overwrite='True')
 			except rest.ErrorResponse, e:
 				pass
 	else:
