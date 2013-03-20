@@ -86,8 +86,6 @@ def backup_to_dropbox():
 	filename = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(filename):
 		found = False
-		pth=path1+'/'+filename
-		size=os.stat(pth).st_size
 		for file_metadata in response["contents"]:
  			if filename==os.path.basename(file_metadata["path"]):
 				if os.stat(filename).st_size==file_metadata["bytes"]:
@@ -121,4 +119,4 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 		response = dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
 
 if __name__=="__main__":
-	backup_to_dropbox() 
+	backup_to_dropbox()
