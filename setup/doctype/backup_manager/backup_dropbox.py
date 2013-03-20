@@ -64,7 +64,6 @@ def backup_to_dropbox():
 	from dropbox import client, session, rest
 	from conf import dropbox_access_key, dropbox_secret_key
 	from webnotes.utils.backups import new_backup
-	found = False
 	if not webnotes.conn:
 		webnotes.connect()
 
@@ -84,15 +83,15 @@ def backup_to_dropbox():
 	response = dropbox_client.metadata("/files")
 	# upload files to files folder
 	path = os.path.join(get_base_path(), "public", "files")
-	for files in os.listdir(path):
-		filename = path + "/" + files
+	for filename in os.listdir(path):
+		found = False
+		filepath = os.path.join(path, filename)
 		for file_metadata in response["contents"]:
- 			if os.path.basename(filename)==os.path.basename(file_metadata["path"]) and os.stat(filename).st_size==int(file_metadata["bytes"]):
-				found=True
+ 			if os.path.basename(filepath) == os.path.basename(file_metadata["path"]) and os.stat(filepath).st_size == int(file_metadata["bytes"]):
+				found = True
 				break
-		
 		if not found:
-			upload_file_to_dropbox(os.path.join(get_base_path(),"public", "files", filename), "files", dropbox_client)
+			upload_file_to_dropbox(filepath, "files", dropbox_client)
 
 def get_dropbox_session():
 	from dropbox import session
@@ -112,7 +111,7 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 		while uploader.offset < size:
 			try:
 				uploader.upload_chunked()
-				uploader.finish(folder + '/' + os.path.basename(filename), overwrite='True')
+				uploader.finish(os.path.join(folder, os.path.basename(filename)), overwrite='True')
 			except rest.ErrorResponse, e:
 				pass
 	else:
