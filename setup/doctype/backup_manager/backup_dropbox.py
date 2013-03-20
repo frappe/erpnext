@@ -115,7 +115,7 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 			except rest.ErrorResponse, e:
 				pass
 	else:
-		response = dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
+		response = dropbox_client.put_file(os.path.join(folder, os.path.basename(filename)), f, overwrite=True)
 
 if __name__=="__main__":
 	backup_to_dropbox()

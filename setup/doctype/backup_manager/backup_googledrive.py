@@ -74,7 +74,7 @@ def backup_to_gdrive():
 	for filename in os.listdir(path):
 		found = False
 		filepath = os.path.join(path, filename)
-		ext = filepath.split('.')[-1]
+		ext = filename.split('.')[-1]
 		size = os.path.getsize(filepath)
 		if ext == 'gz' or ext == 'gzip':
 			mimetype = 'application/x-gzip'
