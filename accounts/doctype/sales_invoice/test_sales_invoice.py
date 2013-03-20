@@ -332,7 +332,142 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s""", si.doc.name))
+			
+	def test_recurring_invoice(self):
+		from webnotes.utils import now_datetime, get_first_day, get_last_day, add_to_date
+		today = now_datetime().date()
 		
+		base_si = webnotes.bean(copy=test_records[0])
+		base_si.doc.fields.update({
+			"convert_into_recurring_invoice": 1,
+			"recurring_type": "Monthly",
+			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
+			"repeat_on_day_of_month": today.day,
+			"posting_date": today,
+			"invoice_period_from_date": get_first_day(today),
+			"invoice_period_to_date": get_last_day(today)
+		})
+		
+		# monthly
+		si1 = webnotes.bean(copy=base_si.doclist)
+		si1.insert()
+		si1.submit()
+		self._test_recurring_invoice(si1, True)
+		
+		# monthly without a first and last day period
+		si2 = webnotes.bean(copy=base_si.doclist)
+		si2.doc.fields.update({
+			"invoice_period_from_date": today,
+			"invoice_period_to_date": add_to_date(today, days=30)
+		})
+		si2.insert()
+		si2.submit()
+		self._test_recurring_invoice(si2, False)
+		
+		# quarterly
+		si3 = webnotes.bean(copy=base_si.doclist)
+		si3.doc.fields.update({
+			"recurring_type": "Quarterly",
+			"invoice_period_from_date": get_first_day(today),
+			"invoice_period_to_date": get_last_day(add_to_date(today, months=3))
+		})
+		si3.insert()
+		si3.submit()
+		self._test_recurring_invoice(si3, True)
+		
+		# quarterly without a first and last day period
+		si4 = webnotes.bean(copy=base_si.doclist)
+		si4.doc.fields.update({
+			"recurring_type": "Quarterly",
+			"invoice_period_from_date": today,
+			"invoice_period_to_date": add_to_date(today, months=3)
+		})
+		si4.insert()
+		si4.submit()
+		self._test_recurring_invoice(si4, False)
+		
+		# yearly
+		si5 = webnotes.bean(copy=base_si.doclist)
+		si5.doc.fields.update({
+			"recurring_type": "Yearly",
+			"invoice_period_from_date": get_first_day(today),
+			"invoice_period_to_date": get_last_day(add_to_date(today, years=1))
+		})
+		si5.insert()
+		si5.submit()
+		self._test_recurring_invoice(si5, True)
+		
+		# yearly without a first and last day period
+		si6 = webnotes.bean(copy=base_si.doclist)
+		si6.doc.fields.update({
+			"recurring_type": "Yearly",
+			"invoice_period_from_date": today,
+			"invoice_period_to_date": add_to_date(today, years=1)
+		})
+		si6.insert()
+		si6.submit()
+		self._test_recurring_invoice(si6, False)
+		
+		# change posting date but keep recuring day to be today
+		si7 = webnotes.bean(copy=base_si.doclist)
+		si7.doc.fields.update({
+			"posting_date": add_to_date(today, days=-3)
+		})
+		si7.insert()
+		si7.submit()
+		
+		# setting so that _test function works
+		si7.doc.posting_date = today
+		self._test_recurring_invoice(si7, True)
+			
+	def _test_recurring_invoice(self, base_si, first_and_last_day):
+		from webnotes.utils import add_months, get_last_day, getdate
+		from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
+		
+		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
+		
+		def _test(i):
+			self.assertEquals(i+1, webnotes.conn.sql("""select count(*) from `tabSales Invoice`
+				where recurring_id=%s and docstatus=1""", base_si.doc.recurring_id)[0][0])
+				
+			next_date = add_months(base_si.doc.posting_date, no_of_months)
+			
+			manage_recurring_invoices(next_date=next_date, commit=False)
+			
+			recurred_invoices = webnotes.conn.sql("""select name from `tabSales Invoice`
+				where recurring_id=%s and docstatus=1 order by name desc""", base_si.doc.recurring_id)
+			
+			self.assertEquals(i+2, len(recurred_invoices))
+			
+			new_si = webnotes.bean("Sales Invoice", recurred_invoices[0][0])
+			
+			for fieldname in ["convert_into_recurring_invoice", "recurring_type",
+				"repeat_on_day_of_month", "notification_email_address"]:
+					self.assertEquals(base_si.doc.fields.get(fieldname),
+						new_si.doc.fields.get(fieldname))
+
+			self.assertEquals(new_si.doc.posting_date, unicode(next_date))
+			
+			self.assertEquals(new_si.doc.invoice_period_from_date,
+				unicode(add_months(base_si.doc.invoice_period_from_date, no_of_months)))
+			
+			if first_and_last_day:
+				self.assertEquals(new_si.doc.invoice_period_to_date, 
+					unicode(get_last_day(add_months(base_si.doc.invoice_period_to_date,
+						no_of_months))))
+			else:
+				self.assertEquals(new_si.doc.invoice_period_to_date, 
+					unicode(add_months(base_si.doc.invoice_period_to_date, no_of_months)))
+					
+			self.assertEquals(getdate(new_si.doc.posting_date).day, 
+				base_si.doc.repeat_on_day_of_month)
+			
+			return new_si
+		
+		# if yearly, test 3 repetitions, else test 13 repetitions
+		count = no_of_months == 12 and 3 or 13
+		for i in xrange(count):
+			base_si = _test(i)
 		
 test_dependencies = ["Journal Voucher", "POS Setting"]
 
