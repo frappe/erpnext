@@ -209,12 +209,13 @@ class DocType:
 
 			if v.get("actual_qty"):
 				sle_id = self.make_entry(v)
-
+				
 			args = v.copy()
 			args.update({
 				"sle_id": sle_id,
 				"is_amended": is_amended
 			})
+			
 			get_obj('Warehouse', v["warehouse"]).update_bin(args)
 
 

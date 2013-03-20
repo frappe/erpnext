@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:20", 
+  "creation": "2013-03-11 12:34:40", 
   "docstatus": 0, 
-  "modified": "2013-01-28 17:59:20", 
+  "modified": "2013-03-19 17:48:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -98,6 +98,53 @@
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
+  "doctype": "DocField", 
+  "fieldname": "delivery_note_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "label": "Delivery Note No", 
+  "no_copy": 1, 
+  "oldfieldname": "delivery_note_no", 
+  "oldfieldtype": "Link", 
+  "options": "Delivery Note", 
+  "print_hide": 1, 
+  "report_hide": 0, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
+  "doctype": "DocField", 
+  "fieldname": "sales_invoice_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Sales Invoice No", 
+  "no_copy": 1, 
+  "options": "Sales Invoice", 
+  "print_hide": 1
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+  "doctype": "DocField", 
+  "fieldname": "purchase_receipt_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "label": "Purchase Receipt No", 
+  "no_copy": 1, 
+  "oldfieldname": "purchase_receipt_no", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Receipt", 
+  "print_hide": 1, 
+  "report_hide": 0, 
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
@@ -224,6 +271,7 @@
   "print_hide": 1
  }, 
  {
+  "depends_on": "eval:(doc.purpose!==\"Sales Return\" || doc.purpose!==\"Purchase Return\")", 
   "doctype": "DocField", 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
@@ -274,42 +322,6 @@
   "search_index": 0
  }, 
  {
-  "allow_on_submit": 0, 
-  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
-  "doctype": "DocField", 
-  "fieldname": "delivery_note_no", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 0, 
-  "label": "Delivery Note No", 
-  "no_copy": 1, 
-  "oldfieldname": "delivery_note_no", 
-  "oldfieldtype": "Link", 
-  "options": "Delivery Note", 
-  "print_hide": 1, 
-  "report_hide": 0, 
-  "reqd": 0, 
-  "search_index": 1
- }, 
- {
-  "allow_on_submit": 0, 
-  "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
-  "doctype": "DocField", 
-  "fieldname": "purchase_receipt_no", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 0, 
-  "label": "Purchase Receipt No", 
-  "no_copy": 1, 
-  "oldfieldname": "purchase_receipt_no", 
-  "oldfieldtype": "Link", 
-  "options": "Purchase Receipt", 
-  "print_hide": 1, 
-  "report_hide": 0, 
-  "reqd": 0, 
-  "search_index": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "cb1", 
   "fieldtype": "Column Break"
@@ -338,17 +350,6 @@
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
- }, 
- {
-  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
-  "doctype": "DocField", 
-  "fieldname": "sales_invoice_no", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "label": "Sales Invoice No", 
-  "no_copy": 1, 
-  "options": "Sales Invoice", 
-  "print_hide": 1
  }, 
  {
   "depends_on": "eval:(doc.purpose==\"Sales Return\" || doc.purpose==\"Purchase Return\")", 

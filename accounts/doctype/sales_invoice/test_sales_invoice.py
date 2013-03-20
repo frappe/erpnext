@@ -297,7 +297,7 @@ class TestSalesInvoice(unittest.TestCase):
 		])
 		ps.insert()
 		
-test_dependencies = ["Journal Voucher"]
+test_dependencies = ["Journal Voucher", "POS Setting"]
 
 test_records = [
 	[

@@ -70,7 +70,7 @@ class DocType:
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time")
 			})
-					
+			
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
 		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(args.get("actual_qty"))
@@ -83,11 +83,11 @@ class DocType:
 		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		
 		self.doc.save()
-				
+		
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
 			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
-			
+		
 	def get_first_sle(self):
 		sle = sql("""
 			select * from `tabStock Ledger Entry`

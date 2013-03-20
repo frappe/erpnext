@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import load_json, cstr, flt
+from webnotes.utils import load_json, cstr, flt, now_datetime
 from webnotes.model.doc import addchild
 
 from webnotes.model.controller import DocListController
@@ -247,3 +247,7 @@ class TransactionBase(DocListController):
 		
 		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
 			for d in comm_list]))
+			
+	def validate_posting_time(self):
+		if not self.doc.posting_time:
+			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')

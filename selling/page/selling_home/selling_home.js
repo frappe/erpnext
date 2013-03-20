@@ -121,12 +121,6 @@ wn.module_page["Selling"] = [
 		icon: "icon-wrench",
 		items: [
 			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label":wn._("Sales Returns"),
-				"description":wn._("Helper for managing return of goods (sales or purchase)"),
-				doctype: "Sales and Purchase Return Tool"
-			},
-			{
 				"route":"Form/SMS Center/SMS Center",
 				"label":wn._("SMS Center"),
 				"description":wn._("Send mass SMS to your contacts"),

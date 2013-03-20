@@ -133,7 +133,7 @@ class DocType(SellingController):
 		super(DocType, self).validate()
 		
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "submitted", "Cancelled"])
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
 
 		self.so_required()
 		self.validate_fiscal_year()

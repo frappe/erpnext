@@ -45,8 +45,7 @@ cur_frm.pformat.other_charges= function(doc){
 	var make_row = function(title,val,bold){
 		var bstart = '<b>'; var bend = '</b>';
 		return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-		 +'<td style="width:25%;text-align:right;"></td>'
-		 +'<td style="width:25%;text-align:right;">'+format_currency(val, doc.currency)+'</td>'
+		 +'<td style="width:50%;text-align:right;">'+format_currency(val, doc.currency)+'</td>'
 		 +'</tr>'
 	}
 
