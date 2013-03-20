@@ -24,10 +24,11 @@ from buying.utils import get_item_details
 from setup.utils import get_company_currency
 from webnotes.model.utils import round_floats_in_doc
 
-from controllers.accounts_controller import AccountsController
+from controllers.stock_controller import StockController
 
-class BuyingController(AccountsController):
-	def validate(self):		
+class BuyingController(StockController):
+	def validate(self):
+		super(BuyingController, self).validate()
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")
@@ -37,7 +38,7 @@ class BuyingController(AccountsController):
 			
 			# IMPORTANT: enable this only when client side code is similar to this one
 			# self.calculate_taxes_and_totals()
-			
+						
 			# set total in words
 			self.set_total_in_words()
 		

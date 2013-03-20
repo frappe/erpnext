@@ -47,6 +47,7 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
+		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj('Sales Common')
@@ -126,11 +127,14 @@ class DocType(SellingController):
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
+		
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
+
 		sales_com_obj.update_prevdoc_detail(0, self)
 		
 		self.make_gl_entries()
-
+		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
@@ -398,8 +402,7 @@ class DocType(SellingController):
 		if lst:
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-	
-	
+			
 	def validate_customer(self):
 		"""	Validate customer name with SO and DN"""
 		for d in getlist(self.doclist,'entries'):
@@ -636,10 +639,9 @@ class DocType(SellingController):
 
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-				
+		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-	
-
+		
 	def get_actual_qty(self,args):
 		args = eval(args)
 		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
@@ -704,9 +706,9 @@ class DocType(SellingController):
 			
 		if auto_inventory_accounting:
 			if cint(self.doc.is_pos) and cint(self.doc.update_stock):
-				stock_account = self.get_stock_in_hand_account()
+				stock_account = self.get_default_account("stock_in_hand_account")
 			else:
-				stock_account = "Stock Delivered But Not Billed - %s" % (self.company_abbr,)
+				stock_account = self.get_default_account("stock_delivered_but_not_billed")
 		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			# income account gl entries
@@ -794,7 +796,8 @@ class DocType(SellingController):
 			stock_ledger_entries = item_sales_bom = None
 			
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if item.item_code in self.stock_items:
+			if item.item_code in self.stock_items or \
+					(item_sales_bom and item_sales_bom.get(item.item_code)):
 				item.buying_amount = self.get_item_buying_amount(item, stock_ledger_entries, 
 					item_sales_bom)
 				webnotes.conn.set_value("Sales Invoice Item", item.name, 
@@ -804,8 +807,9 @@ class DocType(SellingController):
 		item_buying_amount = 0
 		if stock_ledger_entries:
 			# is pos and update stock
-			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+			item.buying_amount = item_buying_amount > 0 and item_buying_amount or 0
 		elif item.delivery_note and item.dn_detail:
 			# against delivery note
 			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 
@@ -828,12 +832,6 @@ class DocType(SellingController):
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 
-	def check_next_docstatus(self):
-		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-	
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):

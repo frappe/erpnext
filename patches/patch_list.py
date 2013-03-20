@@ -211,5 +211,8 @@ patch_list = [
 	"patches.march_2013.p02_get_global_default",
 	"patches.march_2013.p03_rename_blog_to_blog_post",
 	"execute:webnotes.reload_doc('hr', 'search_criteria', 'monthly_attendance_details')",
+	"patches.march_2013.p04_pos_update_stock_check",
 	"patches.march_2013.p05_payment_reconciliation",
+	"patches.march_2013.p06_remove_sales_purchase_return_tool",
+	"execute:webnotes.bean('Global Defaults').save()"
 ]

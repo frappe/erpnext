@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-19 12:28:27", 
+  "creation": "2013-02-21 14:54:43", 
   "docstatus": 0, 
-  "modified": "2013-02-20 14:09:00", 
+  "modified": "2013-03-19 14:46:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -250,6 +250,13 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "description": "If checked, then in POS Sales Invoice, Update Stock gets checked by default", 
+  "doctype": "DocField", 
+  "fieldname": "update_stock", 
+  "fieldtype": "Check", 
+  "label": "Update Stock when using POS Sales Invoice"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "account_info", 
   "fieldtype": "HTML", 
@@ -403,7 +410,7 @@
   "fieldname": "emp_created_by", 
   "fieldtype": "Select", 
   "label": "Employee Records to be created by ", 
-  "options": "\nNaming Series\nEmployee Number"
+  "options": "Naming Series\nEmployee Number"
  }, 
  {
   "doctype": "DocField", 

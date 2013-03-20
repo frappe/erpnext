@@ -39,7 +39,7 @@ class DocType:
 		self.check_stock_frozen_date()
 		self.scrub_posting_time()
 		self.doc.fiscal_year = get_fiscal_year(self.doc.posting_date)[0]
-	
+		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:

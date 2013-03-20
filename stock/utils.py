@@ -165,8 +165,8 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	return wlist
 
 def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, voucher_detail_no, 
-		stock_ledger_entries, item_sales_bom):
-	if item_sales_bom.get(item_code):
+		stock_ledger_entries, item_sales_bom=None):
+	if item_sales_bom and item_sales_bom.get(item_code):
 		# sales bom item
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
@@ -182,13 +182,15 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 		stock_ledger_entries):
 	for i, sle in enumerate(stock_ledger_entries):
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
-				len(stock_ledger_entries) > i+1:
-			if (sle.voucher_detail_no == item_row) or \
-				(sle.item_code == item_code and sle.warehouse == warehouse and \
-				abs(flt(sle.qty)) == qty):
-					buying_amount = flt(stock_ledger_entries[i+1].stock_value) - \
-						flt(sle.stock_value)
-					return buying_amount
+			(sle.voucher_detail_no == item_row or (sle.voucher_type != "Stock Reconciliation" 
+			and sle.item_code == item_code and sle.warehouse == warehouse and flt(sle.qty) == qty)):
+				# print "previous_sle", stock_ledger_entries[i+1]
+				# print "current sle", sle
+				previous_stock_value = len(stock_ledger_entries) > i+1 and \
+					flt(stock_ledger_entries[i+1].stock_value) or 0.0
+					
+				buying_amount =  previous_stock_value - flt(sle.stock_value)						
+				return buying_amount
 	return 0.0
 
 def get_sales_bom():

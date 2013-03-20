@@ -64,12 +64,6 @@ wn.module_page["Accounts"] = [
 				description: "Close Balance Sheet and book Profit or Loss."
 			},
 			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label": wn._("Sales and Purchase Return Tool"),
-				description: wn._("Manage sales or purchase returns"),
-				"doctype": "Sales and Purchase Return Tool"
-			},
-			{
 				"page":"voucher-import-tool",
 				"label": wn._("Voucher Import Tool"),
 				"description": "Import accounting entries from CSV."

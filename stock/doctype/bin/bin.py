@@ -16,15 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _
-
-from webnotes.utils import add_days, cint, cstr, flt, now, nowdate, \
-	get_url_to_form, formatdate
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild
-from webnotes.model.bean import copy_doclist
-from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes.utils import add_days, cint,flt, nowdate, get_url_to_form, formatdate
+from webnotes import msgprint, _
 sql = webnotes.conn.sql
 
 import webnotes.defaults
@@ -61,7 +54,7 @@ class DocType:
 			from stock.stock_ledger import update_entries_after
 			
 			if not args.get("posting_date"):
-				posting_date = nowdate()
+				args["posting_date"] = nowdate()
 			
 			# update valuation and qty after transaction for post dated entry
 			update_entries_after({
@@ -70,7 +63,7 @@ class DocType:
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time")
 			})
-					
+			
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
 		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(args.get("actual_qty"))
@@ -83,11 +76,11 @@ class DocType:
 		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		
 		self.doc.save()
-				
+		
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
 			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
-			
+		
 	def get_first_sle(self):
 		sle = sql("""
 			select * from `tabStock Ledger Entry`
@@ -108,11 +101,10 @@ class DocType:
 			#check if re-order is required
 			item_reorder = webnotes.conn.get("Item Reorder", 
 				{"parent": self.doc.item_code, "warehouse": self.doc.warehouse})
-			
 			if item_reorder:
 				reorder_level = item_reorder.warehouse_reorder_level
 				reorder_qty = item_reorder.warehouse_reorder_qty
-				material_request_type = item_reorder.material_request_type
+				material_request_type = item_reorder.material_request_type or "Purchase"
 			else:
 				reorder_level, reorder_qty = webnotes.conn.get_value("Item", self.doc.item_code,
 					["re_order_level", "re_order_qty"])
@@ -123,7 +115,7 @@ class DocType:
 					material_request_type)
 
 	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty,
-			material_request_type):
+			material_request_type="Purchase"):
 		"""	Create indent on reaching reorder level	"""
 		defaults = webnotes.defaults.get_defaults()
 		item = webnotes.doc("Item", self.doc.item_code)
@@ -151,7 +143,6 @@ class DocType:
 			"qty": reorder_qty,
 			"brand": item.brand,
 		}])
-		
 		mr.insert()
 		mr.submit()
 
