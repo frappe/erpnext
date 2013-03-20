@@ -560,6 +560,7 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Receipt",
 			"fiscal_year": "_Test Fiscal Year 2013", 
+			"expense_adjustment_account": "Stock Adjustment - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -582,6 +583,7 @@ test_records = [
 			"posting_time": "17:15", 
 			"purpose": "Material Issue",
 			"fiscal_year": "_Test Fiscal Year 2013", 
+			"expense_adjustment_account": "Stock Adjustment - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -604,6 +606,7 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Transfer",
 			"fiscal_year": "_Test Fiscal Year 2013", 
+			"expense_adjustment_account": "Stock Adjustment - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 

@@ -24,9 +24,9 @@ from buying.utils import get_item_details
 from setup.utils import get_company_currency
 from webnotes.model.utils import round_floats_in_doc
 
-from controllers.accounts_controller import AccountsController
+from controllers.stock_controller import StockController
 
-class BuyingController(AccountsController):
+class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		if self.meta.get_field("currency"):

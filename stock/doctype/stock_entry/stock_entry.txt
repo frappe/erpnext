@@ -60,6 +60,7 @@
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_width": "50%", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -76,6 +77,7 @@
   "oldfieldtype": "Select", 
   "options": "\nSTE", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
@@ -95,6 +97,7 @@
   "oldfieldtype": "Select", 
   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nManufacture/Repack\nSubcontract\nSales Return\nPurchase Return", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
@@ -152,6 +155,7 @@
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_width": "50%", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -169,6 +173,7 @@
   "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 1
@@ -185,16 +190,26 @@
   "oldfieldname": "posting_time", 
   "oldfieldtype": "Time", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
+  "doctype": "DocField", 
+  "fieldname": "expense_adjustment_account", 
+  "fieldtype": "Link", 
+  "label": "Expense/Adjustment Account", 
+  "options": "Account"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "items_section", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -210,6 +225,7 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -217,7 +233,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -233,6 +250,7 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -241,7 +259,8 @@
   "doctype": "DocField", 
   "fieldname": "sb0", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -256,6 +275,7 @@
   "oldfieldtype": "Table", 
   "options": "Stock Entry Detail", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -268,14 +288,16 @@
   "label": "Get Stock and Rate", 
   "oldfieldtype": "Button", 
   "options": "get_stock_and_rate", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:(doc.purpose!==\"Sales Return\" || doc.purpose!==\"Purchase Return\")", 
   "doctype": "DocField", 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
-  "label": "Reference"
+  "label": "Reference", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -291,6 +313,7 @@
   "oldfieldtype": "Link", 
   "options": "Production Order", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 1
@@ -301,7 +324,8 @@
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
   "label": "BOM No", 
-  "options": "BOM"
+  "options": "BOM", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -317,6 +341,7 @@
   "oldfieldname": "fg_completed_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -324,7 +349,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "cb1", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "default": "1", 
@@ -333,7 +359,8 @@
   "doctype": "DocField", 
   "fieldname": "use_multi_level_bom", 
   "fieldtype": "Check", 
-  "label": "Use Multi-Level BOM"
+  "label": "Use Multi-Level BOM", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -347,6 +374,7 @@
   "no_copy": 0, 
   "oldfieldtype": "Button", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -356,7 +384,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -372,6 +401,7 @@
   "oldfieldtype": "Link", 
   "options": "Supplier", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -407,6 +437,7 @@
   "oldfieldname": "supplier_address", 
   "oldfieldtype": "Small Text", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -425,6 +456,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -460,6 +492,7 @@
   "oldfieldname": "customer_address", 
   "oldfieldtype": "Small Text", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -469,13 +502,15 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col4", 
   "fieldtype": "Column Break", 
   "print_width": "50%", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -486,7 +521,8 @@
   "label": "Project Name", 
   "oldfieldname": "project_name", 
   "oldfieldtype": "Link", 
-  "options": "Project"
+  "options": "Project", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -501,6 +537,7 @@
   "oldfieldtype": "Link", 
   "options": "Print Heading", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -518,6 +555,7 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
@@ -527,6 +565,7 @@
   "fieldname": "col5", 
   "fieldtype": "Column Break", 
   "print_width": "50%", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -559,6 +598,7 @@
   "oldfieldname": "remarks", 
   "oldfieldtype": "Text", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 0
@@ -570,5 +610,13 @@
  {
   "doctype": "DocPerm", 
   "role": "Manufacturing User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Manufacturing Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
  }
 ]

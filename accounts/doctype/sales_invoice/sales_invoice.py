@@ -704,9 +704,9 @@ class DocType(SellingController):
 			
 		if auto_inventory_accounting:
 			if cint(self.doc.is_pos) and cint(self.doc.update_stock):
-				stock_account = self.get_stock_in_hand_account()
+				stock_account = self.get_default_account("stock_in_hand_account")
 			else:
-				stock_account = "Stock Delivered But Not Billed - %s" % (self.company_abbr,)
+				stock_account = self.get_default_account("stock_delivered_but_not_billed")
 		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			# income account gl entries
@@ -794,7 +794,8 @@ class DocType(SellingController):
 			stock_ledger_entries = item_sales_bom = None
 			
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if item.item_code in self.stock_items:
+			if item.item_code in self.stock_items or \
+					(item_sales_bom and item_sales_bom.get(item.item_code)):
 				item.buying_amount = self.get_item_buying_amount(item, stock_ledger_entries, 
 					item_sales_bom)
 				webnotes.conn.set_value("Sales Invoice Item", item.name, 
@@ -804,8 +805,9 @@ class DocType(SellingController):
 		item_buying_amount = 0
 		if stock_ledger_entries:
 			# is pos and update stock
-			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+			item.buying_amount = item_buying_amount > 0 and item_buying_amount or 0
 		elif item.delivery_note and item.dn_detail:
 			# against delivery note
 			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 

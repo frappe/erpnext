@@ -31,9 +31,9 @@ sql = webnotes.conn.sql
 class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass
 	
-from controllers.accounts_controller import AccountsController
+from controllers.stock_controller import StockController
 
-class DocType(AccountsController):
+class DocType(StockController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -171,41 +171,24 @@ class DocType(AccountsController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
-		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
-		stock_in_hand_account = self.get_stock_in_hand_account()
-		total_valuation_amount = self.get_total_valuation_amount()
-
-		if total_valuation_amount:
-			gl_entries = [
-				# debit stock in hand account
-				self.get_gl_dict({
-					"account": stock_in_hand_account,
-					"against": "Stock Adjustment - %s" % abbr,
-					"debit": total_valuation_amount,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-				
-				# debit stock received but not billed account
-				self.get_gl_dict({
-					"account": "Stock Adjustment - %s" % abbr,
-					"against": stock_in_hand_account,
-					"credit": total_valuation_amount,
-					"cost_center": "Auto Inventory Accounting - %s" % abbr, 
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-			]
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+		if not self.doc.expense_adjustment_account:
+			webnotes.msgprint(_("Please enter Expense/Adjustment Account"), raise_exception=1)
 			
+		cost_center = "Auto Inventory Accounting - %s" % (self.company_abbr,)
+		total_valuation_amount = self.get_total_valuation_amount()
+		
+		super(DocType, self).make_gl_entries(self.doc.expense_adjustment_account, 
+			total_valuation_amount, cost_center)
+		
 	def get_total_valuation_amount(self):
 		total_valuation_amount = 0
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.t_warehouse and not item.s_warehouse:
 				total_valuation_amount += flt(item.incoming_rate) * flt(item.transfer_qty)
-				
+			
 			if item.s_warehouse and not item.t_warehouse:
 				total_valuation_amount -= flt(item.incoming_rate) * flt(item.transfer_qty)
-						
+		
 		return total_valuation_amount
 			
 	def get_stock_and_rate(self):

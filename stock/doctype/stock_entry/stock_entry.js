@@ -18,6 +18,33 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
+	onload: function() {
+		this.set_default_account();
+	}, 
+	
+	set_default_account: function() {
+		var me = this;
+		
+		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_adjustment_account) {
+			if (this.frm.doc.purpose == "Sales Return") 
+				account_for = "stock_delivered_but_not_billed";
+			else if (this.frm.doc.purpose == "Purchase Return") 
+				account_for = "stock_received_but_not_billed";
+			else account_for = "stock_adjustment_account";
+			
+			this.frm.call({
+				method: "controllers.accounts_controller.get_default_account",
+				args: {
+					"account_for": account_for, 
+					"company": this.frm.doc.company
+				},
+				callback: function(r) {
+					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
+				}
+			});
+		}
+	},
+	
 	setup: function() {
 		var me = this;
 		
@@ -49,6 +76,16 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		};
 		
+		if (sys_defaults.auto_inventory_accounting) {
+			this.frm.add_fetch("company", "expense_adjustment_account", "stock_adjustment_account");
+
+			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
+				return {
+					"query": "accounts.utils.get_account_list", 
+					"filters": { "company": me.frm.doc.company }
+				}
+			}
+		}
 	},
 	
 	onload_post_render: function() {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:55", 
   "docstatus": 0, 
-  "modified": "2013-03-11 14:58:50", 
+  "modified": "2013-03-18 15:41:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -207,14 +207,16 @@
   "width": "120px"
  }, 
  {
+  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_filter": 1, 
   "label": "Expense Account", 
   "options": "Account", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 

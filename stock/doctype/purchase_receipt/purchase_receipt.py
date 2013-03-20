@@ -20,8 +20,7 @@ import webnotes
 from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes.model.doc import Document
-from webnotes import msgprint, _
+from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
@@ -319,32 +318,10 @@ class DocType(BuyingController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
-		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
-		stock_received_account = "Stock Received But Not Billed - %s" % (abbr,)
-		stock_in_hand_account = self.get_stock_in_hand_account()
-		
+		against_stock_account = self.get_default_account("stock_received_but_not_billed")
 		total_valuation_amount = self.get_total_valuation_amount()
 		
-		if total_valuation_amount:
-			gl_entries = [
-				# debit stock in hand account
-				self.get_gl_dict({
-					"account": stock_in_hand_account,
-					"against": stock_received_account,
-					"debit": total_valuation_amount,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-			
-				# credit stock received but not billed account
-				self.get_gl_dict({
-					"account": stock_received_account,
-					"against": stock_in_hand_account,
-					"credit": total_valuation_amount,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-			]
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+		super(DocType, self).make_gl_entries(against_stock_account, total_valuation_amount)
 		
 	def get_total_valuation_amount(self):
 		total_valuation_amount = 0.0
