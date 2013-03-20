@@ -23,6 +23,7 @@ from controllers.accounts_controller import AccountsController
 
 class SellingController(AccountsController):
 	def validate(self):
+		super(SellingController, self).validate()
 		self.set_total_in_words()
 		
 	def set_total_in_words(self):

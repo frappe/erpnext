@@ -21,6 +21,10 @@ from webnotes.utils import flt
 from utilities.transaction_base import TransactionBase
 
 class AccountsController(TransactionBase):
+	def validate(self):
+		if self.meta.get_field("grand_total"):
+			self.validate_value("grand_total", ">=", 0)
+
 	def get_gl_dict(self, args, cancel=None):
 		"""this method populates the common properties of a gl entry record"""
 		if cancel is None:
