@@ -43,6 +43,7 @@ keydict = {
 	'maintain_same_rate' : 'maintain_same_rate',
 	'session_expiry': 'session_expiry',
 	'disable_rounded_total': 'disable_rounded_total',
+	"update_stock": "update_stock",
 }
 
 class DocType:
