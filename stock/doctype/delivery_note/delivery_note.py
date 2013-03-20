@@ -24,7 +24,6 @@ from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -401,11 +400,14 @@ class DocType(SellingController):
 		
 		if stock_ledger_entries:
 			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-				item.buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
-					self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
-					item_sales_bom)
-				webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
-					item.buying_amount)
+				if item.item_code in self.stock_items or \
+						(item_sales_bom and item_sales_bom.get(item.item_code)):
+					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
+						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+						item_sales_bom)
+					item.buying_amount = buying_amount > 0 and buying_amount or 0
+					webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
+						item.buying_amount)
 		
 		self.validate_warehouse()
 		
@@ -420,32 +422,11 @@ class DocType(SellingController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
-		abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
-		stock_delivered_account = "Stock Delivered But Not Billed - %s" % (abbr,)
-		stock_in_hand_account = self.get_stock_in_hand_account()
-		
+		against_stock_account = self.get_default_account("stock_delivered_but_not_billed")
 		total_buying_amount = self.get_total_buying_amount()
-		if total_buying_amount:
-			gl_entries = [
-				# credit stock in hand account
-				self.get_gl_dict({
-					"account": stock_in_hand_account,
-					"against": stock_delivered_account,
-					"credit": total_buying_amount,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-				
-				# debit stock received but not billed account
-				self.get_gl_dict({
-					"account": stock_delivered_account,
-					"against": stock_in_hand_account,
-					"debit": total_buying_amount,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
-			]
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
-			
+		
+		super(DocType, self).make_gl_entries(against_stock_account, -1*total_buying_amount)
+		
 	def get_total_buying_amount(self):
 		total_buying_amount = sum([item.buying_amount for item in 
 			self.doclist.get({"parentfield": "delivery_note_details"})])

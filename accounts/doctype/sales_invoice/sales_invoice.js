@@ -271,8 +271,6 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-/* **************************** TRIGGERS ********************************** */
-
 // Get Items based on SO or DN Selected
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) {
@@ -371,6 +369,18 @@ cur_frm.set_query("income_account", "entries", function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';	
 })
 
+// expense account
+cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "Yes",
+			"debit_or_credit": "Debit",
+			"company": doc.company
+		}
+	}
+}
+
 // warehouse in detail table
 //----------------------------
 cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
@@ -380,8 +390,11 @@ cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(d
 
 // Cost Center in Details Table
 // -----------------------------
-cur_frm.fields_dict.entries.grid.get_field("cost_center").get_query = function(doc) {
-	return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
+cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
+	return {
+		query: "accounts.utils.get_cost_center_list",
+		filters: { company_name: doc.company}
+	}
 }
 
 // Sales Order

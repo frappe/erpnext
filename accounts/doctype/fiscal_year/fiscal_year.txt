@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:06", 
+  "creation": "2013-01-22 16:50:25", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:46:59", 
+  "modified": "2013-03-13 12:29:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,7 +23,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -43,22 +42,6 @@
   "name": "Fiscal Year"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "year_details", 
-  "fieldtype": "Section Break", 
-  "label": "Fiscal Year Details", 
-  "oldfieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
- }, 
- {
   "description": "For e.g. 2012, 2012-13", 
   "doctype": "DocField", 
   "fieldname": "year", 
@@ -73,6 +56,7 @@
   "fieldname": "year_start_date", 
   "fieldtype": "Date", 
   "label": "Year Start Date", 
+  "no_copy": 1, 
   "oldfieldname": "year_start_date", 
   "oldfieldtype": "Date", 
   "reqd": 1
@@ -84,6 +68,7 @@
   "fieldname": "is_fiscal_year_closed", 
   "fieldtype": "Select", 
   "label": "Year Closed", 
+  "no_copy": 1, 
   "oldfieldname": "is_fiscal_year_closed", 
   "oldfieldtype": "Select", 
   "options": "\nNo\nYes", 

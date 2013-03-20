@@ -72,7 +72,7 @@ def update_entries_after(args, verbose=1):
 				(qty_after_transaction * valuation_rate) or 0
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
-						
+			# print sle.posting_date, sle.actual_qty, sle.incoming_rate, stock_queue, stock_value
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,

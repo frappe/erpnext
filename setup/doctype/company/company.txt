@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:54", 
+  "creation": "2013-02-27 09:38:05", 
   "docstatus": 0, 
-  "modified": "2013-02-26 10:57:39", 
+  "modified": "2013-03-19 12:52:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -125,17 +125,6 @@
   "options": "Account"
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "description": "This account will be used to maintain value of available stock", 
-  "doctype": "DocField", 
-  "fieldname": "stock_in_hand_account", 
-  "fieldtype": "Link", 
-  "label": "Stock In Hand Account", 
-  "no_copy": 1, 
-  "options": "Account", 
-  "read_only": 0
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
@@ -180,6 +169,57 @@
   "oldfieldname": "monthly_bgt_flag", 
   "oldfieldtype": "Select", 
   "options": "\nWarn\nIgnore\nStop"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal && sys_defaults.auto_inventory_accounting", 
+  "doctype": "DocField", 
+  "fieldname": "auto_inventory_accounting_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Auto Inventory Accounting Settings"
+ }, 
+ {
+  "description": "This account will be used to maintain value of available stock", 
+  "doctype": "DocField", 
+  "fieldname": "stock_in_hand_account", 
+  "fieldtype": "Link", 
+  "label": "Stock In Hand Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_adjustment_account", 
+  "fieldtype": "Link", 
+  "label": "Stock Adjustment Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expenses_included_in_valuation", 
+  "fieldtype": "Link", 
+  "label": "Expenses Included In Valuation", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break23", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_delivered_but_not_billed", 
+  "fieldtype": "Link", 
+  "label": "Stock Delivered But Not Billed", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_received_but_not_billed", 
+  "fieldtype": "Link", 
+  "label": "Stock Received But Not Billed", 
+  "options": "Account"
  }, 
  {
   "description": "For reference only.", 

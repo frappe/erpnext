@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
 from webnotes.utils import flt
+
 from utilities.transaction_base import TransactionBase
 
 class AccountsController(TransactionBase):
@@ -70,16 +71,15 @@ class AccountsController(TransactionBase):
 				"advance_amount": flt(d.amount),
 				"allocate_amount": 0
 			})
-			
-	def get_stock_in_hand_account(self):
-		stock_in_hand_account = webnotes.conn.get_value("Company", self.doc.company, "stock_in_hand_account")
 		
-		if not stock_in_hand_account:
-			msgprint(_("Missing") + ": " 
-				+ _(webnotes.get_doctype("company").get_label("stock_in_hand_account")
-				+ " " + _("for Company") + " " + self.doc.company), raise_exception=True)
-		
-		return stock_in_hand_account
+	def get_default_account(self, account_for):
+		account = webnotes.conn.get_value("Company", self.doc.company, account_for)
+		if not account:
+			msgprint(_("Please mention default account for '") + 
+				_(webnotes.get_doctype("company").get_label(account_for) + 
+				_("' in Company: ") + self.doc.company), raise_exception=True)
+				
+		return account
 		
 	@property
 	def stock_items(self):
@@ -88,7 +88,7 @@ class AccountsController(TransactionBase):
 			self._stock_items = [r[0] for r in webnotes.conn.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
-
+				
 		return self._stock_items
 		
 	@property
@@ -97,3 +97,8 @@ class AccountsController(TransactionBase):
 			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
+
+
+@webnotes.whitelist()
+def get_default_account(account_for, company):
+	return webnotes.conn.get_value("Company", company, account_for)
