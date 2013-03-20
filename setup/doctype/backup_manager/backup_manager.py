@@ -30,7 +30,6 @@ def take_backups_dropbox():
 		backup_to_dropbox()
 		send_email(True, "Dropbox")
 	except Exception, e:
-		webnotes.errprint(e)
 		send_email(False, "Dropbox", e)
 
 #backup to gdrive 
@@ -56,8 +55,7 @@ def send_email(success, service_name, error_status=None):
 		failed.</p>
 		<p>Error message: %s</p>
 		<p>Please contact your system manager for more information.</p>
-		<p>Detailed Error Trace: %s</p>""" % \
-		(service_name, error_status, getTraceback().replace("\n", "<br>"))
+		""" % (service_name, error_status)
 	
 	# email system managers
 	from webnotes.utils.email_lib import sendmail
