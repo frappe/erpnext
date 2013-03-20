@@ -115,6 +115,42 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
 			self.assertEqual(item.item_code, expected_values[i][0])
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
+			
+	def test_purchase_invoice_with_advance(self):
+		from accounts.doctype.journal_voucher.test_journal_voucher \
+			import test_records as jv_test_records
+			
+		jv = webnotes.bean(copy=jv_test_records[1])
+		jv.insert()
+		jv.submit()
+		
+		pi = webnotes.bean(copy=test_records[0])
+		pi.doclist.append({
+			"doctype": "Purchase Invoice Advance",
+			"parentfield": "advance_allocation_details",
+			"journal_voucher": jv.doc.name,
+			"jv_detail_no": jv.doclist[1].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.doc.remark
+		})
+		pi.run_method("calculate_taxes_and_totals")
+		pi.insert()
+		pi.submit()
+		pi.load_from_db()
+		
+		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_voucher=%s""", pi.doc.name))
+		
+		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_voucher=%s and debit=300""", pi.doc.name))
+			
+		self.assertEqual(pi.doc.outstanding_amount, 1212.30)
+		
+		pi.cancel()
+		
+		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_voucher=%s""", pi.doc.name))
 	
 test_records = [
 	[

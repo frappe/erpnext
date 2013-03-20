@@ -281,6 +281,7 @@ class TestSalesInvoice(unittest.TestCase):
 		return dn
 		
 	def _insert_pos_settings(self):
+		webnotes.conn.sql("""delete from `tabPOS Setting`""")
 		ps = webnotes.bean([
 			{
 				"cash_bank_account": "_Test Account Bank Account - _TC", 
@@ -296,6 +297,42 @@ class TestSalesInvoice(unittest.TestCase):
 			}
 		])
 		ps.insert()
+		
+	def test_sales_invoice_with_advance(self):
+		from accounts.doctype.journal_voucher.test_journal_voucher \
+			import test_records as jv_test_records
+			
+		jv = webnotes.bean(copy=jv_test_records[0])
+		jv.insert()
+		jv.submit()
+		
+		si = webnotes.bean(copy=test_records[0])
+		si.doclist.append({
+			"doctype": "Sales Invoice Advance",
+			"parentfield": "advance_adjustment_details",
+			"journal_voucher": jv.doc.name,
+			"jv_detail_no": jv.doclist[1].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.doc.remark
+		})
+		si.insert()
+		si.submit()
+		si.load_from_db()
+		
+		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_invoice=%s""", si.doc.name))
+		
+		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_invoice=%s and credit=300""", si.doc.name))
+			
+		self.assertEqual(si.doc.outstanding_amount, 261.8)
+		
+		si.cancel()
+		
+		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+			where against_invoice=%s""", si.doc.name))
+		
 		
 test_dependencies = ["Journal Voucher", "POS Setting"]
 

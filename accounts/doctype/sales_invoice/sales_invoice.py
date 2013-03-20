@@ -127,11 +127,14 @@ class DocType(SellingController):
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
+		
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
+
 		sales_com_obj.update_prevdoc_detail(0, self)
 		
 		self.make_gl_entries()
-
+		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
@@ -399,8 +402,7 @@ class DocType(SellingController):
 		if lst:
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-	
-	
+			
 	def validate_customer(self):
 		"""	Validate customer name with SO and DN"""
 		for d in getlist(self.doclist,'entries'):
@@ -830,12 +832,6 @@ class DocType(SellingController):
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 
-	def check_next_docstatus(self):
-		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-	
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):
