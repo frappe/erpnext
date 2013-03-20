@@ -107,7 +107,7 @@ def get_gdrive_flow():
 	# for installed apps since google does not support subdomains
 	
 	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
-		"https://www.googleapis.com/auth/drive", conf.gdrive_redirect_url)
+		"https://www.googleapis.com/auth/drive", 'urn:ietf:wg:oauth:2.0:oob')
 	return flow
 	
 @webnotes.whitelist()
