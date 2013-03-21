@@ -6,6 +6,6 @@ wn.query_reports["Gross Profit"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": wn.defaults.get_user_default("company")
-		}
+		},
 	]
 }

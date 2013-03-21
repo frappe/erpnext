@@ -39,3 +39,24 @@ class SellingController(StockController):
 		if self.meta.get_field("in_words_export"):
 			self.doc.in_words_export = money_in_words(disable_rounded_total and 
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
+
+	def set_buying_amount(self):
+		from stock.utils import get_buying_amount
+		stock_ledger_entries = self.get_stock_ledger_entries()
+
+		item_sales_bom = {}
+		for d in self.doclist.get({"parentfield": "packing_details"}):
+			new_d = webnotes._dict(d.fields.copy())
+			new_d.total_qty = -1 * d.qty
+			item_sales_bom.setdefault(d.parent_item, []).append(new_d)
+		
+		if stock_ledger_entries:
+			for item in self.doclist.get({"parentfield": self.fname}):
+				if item.item_code in self.stock_items or \
+						(item_sales_bom and item_sales_bom.get(item.item_code)):
+					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
+						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+						item_sales_bom)
+					item.buying_amount = buying_amount > 0 and buying_amount or 0
+					webnotes.conn.set_value(self.tname, item.name, "buying_amount", 
+						item.buying_amount)

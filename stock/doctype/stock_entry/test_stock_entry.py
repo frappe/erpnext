@@ -26,7 +26,7 @@ class TestStockEntry(unittest.TestCase):
 			
 		self.assertTrue(mr_name)
 		
-	def atest_material_receipt_gl_entry(self):
+	def test_material_receipt_gl_entry(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
@@ -63,7 +63,7 @@ class TestStockEntry(unittest.TestCase):
 		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 
-	def atest_material_issue_gl_entry(self):
+	def test_material_issue_gl_entry(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
@@ -151,7 +151,7 @@ class TestStockEntry(unittest.TestCase):
 			self.assertEquals(expected_sle[i][1], sle.warehouse)
 			self.assertEquals(expected_sle[i][2], sle.actual_qty)
 		
-	def acheck_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
+	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		# check gl entries
 		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit

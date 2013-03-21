@@ -192,30 +192,3 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 				
 				return buying_amount
 	return 0.0
-
-def get_sales_bom(doctype=None, docname=None):
-	item_sales_bom = webnotes._dict()
-	
-	query = """select parenttype, parent, parent_item,
-		item_code, warehouse, -1*qty as total_qty
-		from `tabDelivery Note Packing Item` where docstatus=1"""
-	
-	args = {}
-	if doctype:
-		query += " and parenttype=%(parenttype)s"
-		args["parenttype"] = doctype
-		
-		if docname:
-			query += " and parent=%(parent)s"
-			args["parent"] = docname
-	
-	for d in webnotes.conn.sql(query, args, as_dict=1):
-		item_sales_bom.setdefault(d.parenttype, webnotes._dict()).setdefault(d.parent,
-			webnotes._dict()).setdefault(d.parent_item, []).append(d)
-	
-	if doctype and docname:
-		return item_sales_bom[doctype].get(docname, webnotes._dict())
-	elif doctype:
-		return item_sales_bom[doctype]
-	else:
-		return item_sales_bom
