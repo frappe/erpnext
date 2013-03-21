@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-12 11:56:25", 
+  "creation": "2013-03-20 17:01:58", 
   "docstatus": 0, 
-  "modified": "2013-03-12 14:31:24", 
+  "modified": "2013-03-20 19:17:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -1093,7 +1093,7 @@
   "description": "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ", 
   "doctype": "DocField", 
   "fieldname": "repeat_on_day_of_month", 
-  "fieldtype": "Data", 
+  "fieldtype": "Int", 
   "label": "Repeat on Day of Month", 
   "no_copy": 1, 
   "print_hide": 1
