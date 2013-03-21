@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-12 11:56:25", 
+  "creation": "2013-03-19 17:03:01", 
   "docstatus": 0, 
-  "modified": "2013-03-12 14:31:24", 
+  "modified": "2013-03-21 12:14:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,6 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -750,11 +749,12 @@
  }, 
  {
   "default": "No", 
+  "description": "Considered as an Opening Balance", 
   "doctype": "DocField", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
   "in_filter": 1, 
-  "label": "Is Opening", 
+  "label": "Is Opening Entry", 
   "oldfieldname": "is_opening", 
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
@@ -762,6 +762,7 @@
   "search_index": 0
  }, 
  {
+  "description": "Actual Invoice Date", 
   "doctype": "DocField", 
   "fieldname": "aging_date", 
   "fieldtype": "Date", 
@@ -1194,17 +1195,49 @@
   "print_hide": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Accounts User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "customer", 
+  "permlevel": 0, 
   "role": "Customer"
  }
 ]
