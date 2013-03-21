@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:40", 
+  "creation": "2013-03-08 15:36:46", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:26", 
+  "modified": "2013-03-20 16:52:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,7 +40,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "jv_detail_no", 
-  "fieldtype": "Date", 
+  "fieldtype": "Data", 
   "hidden": 1, 
   "label": "Journal Voucher Detail No", 
   "oldfieldname": "jv_detail_no", 

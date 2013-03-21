@@ -1094,7 +1094,7 @@
   "description": "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ", 
   "doctype": "DocField", 
   "fieldname": "repeat_on_day_of_month", 
-  "fieldtype": "Data", 
+  "fieldtype": "Int", 
   "label": "Repeat on Day of Month", 
   "no_copy": 1, 
   "print_hide": 1
