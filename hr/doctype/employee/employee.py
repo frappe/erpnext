@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate, validate_email_add
+from webnotes.utils import getdate, validate_email_add, cstr
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
@@ -71,7 +71,9 @@ class DocType:
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
 		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
 		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
-		
+		if self.doc.reports_to:
+			webnotes.conn.set_default("leave_approver", webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id"), self.doc.user_id)
+
 	def update_profile(self):
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
@@ -104,7 +106,7 @@ class DocType:
 				fname, fid = file_args.split(",")
 				if self.doc.image == fname:
 					new_file_args = fname + "," + fid
-					file_list = profile_wrapper.doc.file_list.split("\n")
+					file_list = cstr(profile_wrapper.doc.file_list).split("\n")
 					if new_file_args not in file_list:
 						file_list += [new_file_args]
 					profile_wrapper.doc.file_list = "\n".join(file_list)
