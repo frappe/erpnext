@@ -793,7 +793,7 @@ class DocType(SellingController):
 	def set_buying_amount(self):
 		if cint(self.doc.is_pos) and cint(self.doc.update_stock):
 			stock_ledger_entries = self.get_stock_ledger_entries()
-			item_sales_bom = get_sales_bom()
+			item_sales_bom = get_sales_bom(self.doc.doctype, self.doc.name)
 		else:
 			stock_ledger_entries = item_sales_bom = None
 			

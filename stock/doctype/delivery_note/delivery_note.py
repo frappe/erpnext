@@ -396,7 +396,7 @@ class DocType(SellingController):
 	def set_buying_amount(self):
 		from stock.utils import get_buying_amount, get_sales_bom
 		stock_ledger_entries = self.get_stock_ledger_entries()
-		item_sales_bom = get_sales_bom()
+		item_sales_bom = get_sales_bom(self.doc.doctype, self.doc.name)
 		
 		if stock_ledger_entries:
 			for item in self.doclist.get({"parentfield": "delivery_note_details"}):

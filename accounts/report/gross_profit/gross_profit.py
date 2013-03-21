@@ -7,7 +7,8 @@ def execute(filters=None):
 	if not filters: filters = {}
 	
 	stock_ledger_entries = get_stock_ledger_entries(filters)
-	item_sales_bom = get_sales_bom()
+	
+	item_sales_bom = get_sales_bom("Delivery Note")
 	
 	delivery_note_items = webnotes.conn.sql("""select dn.name, dn.posting_date, dn.posting_time,
 		dn.project_name, item.item_code, item.item_name, item.description, item.warehouse,
@@ -25,7 +26,9 @@ def execute(filters=None):
 	for row in delivery_note_items:
 		selling_amount = flt(row.amount)
 		buying_amount = get_buying_amount(row.item_code, row.warehouse, -1*row.qty, 
-			"Delivery Note", row.name, row.item_row, stock_ledger_entries, item_sales_bom)
+			"Delivery Note", row.name, row.item_row, stock_ledger_entries, 
+			item_sales_bom.get(row.name, webnotes._dict()))
+		
 		buying_amount = buying_amount > 0 and buying_amount or 0
 		
 		if selling_amount:
