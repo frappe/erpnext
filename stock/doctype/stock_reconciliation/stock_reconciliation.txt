@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-19 10:23:35", 
+  "creation": "2013-01-22 16:50:41", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:24", 
+  "modified": "2013-03-18 12:48:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -40,6 +41,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Material Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -81,6 +83,22 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
+  "doctype": "DocField", 
+  "fieldname": "expense_account", 
+  "fieldtype": "Link", 
+  "label": "Expense Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "col1", 
   "fieldtype": "Column Break"
  }, 
@@ -119,12 +137,14 @@
   "read_only": 1
  }, 
  {
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "role": "Material Manager"
+  "doctype": "DocField", 
+  "fieldname": "stock_value_difference", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Stock Value Difference", 
+  "print_hide": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
+  "doctype": "DocPerm"
  }
 ]

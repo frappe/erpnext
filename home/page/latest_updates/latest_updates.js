@@ -1,4 +1,5 @@
 erpnext.updates = [
+	["19th March", ["Sales and Purchase Return Tool deprecated. Use Stock Entry instead."]],
 	["12th March", ["Updates to website module. Added more options in Style Settings and Website Settings."]],
 	["5th March", ["Refactored Upload Attendance Tool"]],
 	["4th March", ["Lead organization added in Quotation classic/spartan/modern print format"]],

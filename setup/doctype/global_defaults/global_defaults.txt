@@ -261,6 +261,13 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "description": "If checked, then in POS Sales Invoice, Update Stock gets checked by default", 
+  "doctype": "DocField", 
+  "fieldname": "update_stock", 
+  "fieldtype": "Check", 
+  "label": "Update Stock when using POS Sales Invoice"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "account_info", 
   "fieldtype": "HTML", 
@@ -414,7 +421,7 @@
   "fieldname": "emp_created_by", 
   "fieldtype": "Select", 
   "label": "Employee Records to be created by ", 
-  "options": "\nNaming Series\nEmployee Number"
+  "options": "Naming Series\nEmployee Number"
  }, 
  {
   "doctype": "DocField", 

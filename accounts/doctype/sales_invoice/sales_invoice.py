@@ -17,7 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate
+from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+
 from webnotes.utils.email_lib import sendmail
 from webnotes.utils import comma_and
 from webnotes.model.doc import make_autoname
@@ -47,6 +49,7 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
+		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj('Sales Common')
@@ -126,11 +129,14 @@ class DocType(SellingController):
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
+		
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
+
 		sales_com_obj.update_prevdoc_detail(0, self)
 		
 		self.make_gl_entries()
-
+		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
@@ -398,8 +404,7 @@ class DocType(SellingController):
 		if lst:
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-	
-	
+			
 	def validate_customer(self):
 		"""	Validate customer name with SO and DN"""
 		for d in getlist(self.doclist,'entries'):
@@ -636,10 +641,9 @@ class DocType(SellingController):
 
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-				
+		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-	
-
+		
 	def get_actual_qty(self,args):
 		args = eval(args)
 		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
@@ -704,9 +708,9 @@ class DocType(SellingController):
 			
 		if auto_inventory_accounting:
 			if cint(self.doc.is_pos) and cint(self.doc.update_stock):
-				stock_account = self.get_stock_in_hand_account()
+				stock_account = self.get_default_account("stock_in_hand_account")
 			else:
-				stock_account = "Stock Delivered But Not Billed - %s" % (self.company_abbr,)
+				stock_account = self.get_default_account("stock_delivered_but_not_billed")
 		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			# income account gl entries
@@ -794,7 +798,8 @@ class DocType(SellingController):
 			stock_ledger_entries = item_sales_bom = None
 			
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if item.item_code in self.stock_items:
+			if item.item_code in self.stock_items or \
+					(item_sales_bom and item_sales_bom.get(item.item_code)):
 				item.buying_amount = self.get_item_buying_amount(item, stock_ledger_entries, 
 					item_sales_bom)
 				webnotes.conn.set_value("Sales Invoice Item", item.name, 
@@ -804,8 +809,9 @@ class DocType(SellingController):
 		item_buying_amount = 0
 		if stock_ledger_entries:
 			# is pos and update stock
-			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, item.qty, 
+			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
+			item.buying_amount = item_buying_amount > 0 and item_buying_amount or 0
 		elif item.delivery_note and item.dn_detail:
 			# against delivery note
 			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 
@@ -828,12 +834,6 @@ class DocType(SellingController):
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 
-	def check_next_docstatus(self):
-		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-	
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):
@@ -893,25 +893,18 @@ class DocType(SellingController):
 		
 		next_date = get_next_date(self.doc.posting_date,
 			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
+		
 		webnotes.conn.set(self.doc, 'next_date', next_date)
 	
 def get_next_date(dt, mcount, day=None):
-	import datetime
-	month = getdate(dt).month + mcount
-	year = getdate(dt).year
-	if not day:
-		day = getdate(dt).day
-	if month > 12:
-		month, year = month-12, year+1
-	try:
-		next_month_date = datetime.date(year, month, day)
-	except:
-		import calendar
-		last_day = calendar.monthrange(year, month)[1]
-		next_month_date = datetime.date(year, month, last_day)
-	return next_month_date.strftime("%Y-%m-%d")
-
-def manage_recurring_invoices(next_date=None):
+	dt = getdate(dt)
+	
+	from dateutil.relativedelta import relativedelta
+	dt += relativedelta(months=mcount, day=day)
+	
+	return dt
+	
+def manage_recurring_invoices(next_date=None, commit=True):
 	""" 
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
@@ -931,19 +924,22 @@ def manage_recurring_invoices(next_date=None):
 				ref_wrapper = webnotes.bean('Sales Invoice', ref_invoice)
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
-				webnotes.conn.commit()
+				if commit:
+					webnotes.conn.commit()
 			except:
-				webnotes.conn.rollback()
+				if commit:
+					webnotes.conn.rollback()
 
-				webnotes.conn.begin()
-				webnotes.conn.sql("update `tabSales Invoice` set \
-					convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
-				notify_errors(ref_invoice, ref_wrapper.doc.owner)
-				webnotes.conn.commit()
+					webnotes.conn.begin()
+					webnotes.conn.sql("update `tabSales Invoice` set \
+						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
+					notify_errors(ref_invoice, ref_wrapper.doc.owner)
+					webnotes.conn.commit()
 
 				exception_list.append(webnotes.getTraceback())
 			finally:
-				webnotes.conn.begin()
+				if commit:
+					webnotes.conn.begin()
 			
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
@@ -955,19 +951,27 @@ def make_new_invoice(ref_wrapper, posting_date):
 	new_invoice = clone(ref_wrapper)
 	
 	mcount = month_map[ref_wrapper.doc.recurring_type]
-		
+	
+	invoice_period_from_date = get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount)
+	
+	# get last day of the month to maintain period if the from date is first day of its own month 
+	# and to date is the last day of its own month
+	if (cstr(get_first_day(ref_wrapper.doc.invoice_period_from_date)) == \
+			cstr(ref_wrapper.doc.invoice_period_from_date)) and \
+		(cstr(get_last_day(ref_wrapper.doc.invoice_period_to_date)) == \
+			cstr(ref_wrapper.doc.invoice_period_to_date)):
+		invoice_period_to_date = get_last_day(get_next_date(ref_wrapper.doc.invoice_period_to_date,
+			mcount))
+	else:
+		invoice_period_to_date = get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount)
+	
 	new_invoice.doc.fields.update({
 		"posting_date": posting_date,
 		"aging_date": posting_date,
-		
 		"due_date": add_days(posting_date, cint(date_diff(ref_wrapper.doc.due_date,
 			ref_wrapper.doc.posting_date))),
-			
-		"invoice_period_from_date": \
-			get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount),
-			
-		"invoice_period_to_date": \
-			get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount),
+		"invoice_period_from_date": invoice_period_from_date,
+		"invoice_period_to_date": invoice_period_to_date,
 		"fiscal_year": get_fiscal_year(posting_date)[0],
 		"owner": ref_wrapper.doc.owner,
 	})

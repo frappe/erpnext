@@ -58,3 +58,43 @@ cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 cur_frm.fields_dict.payables_group.get_query = function(doc) {  
   return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.company = "'+doc.name+'" AND `tabAccount`.group_or_ledger = "Group" AND `tabAccount`.docstatus != 2 AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';
 }
+
+
+cur_frm.fields_dict["stock_in_hand_account"].get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "No",
+			"debit_or_credit": "Debit",
+			"company": doc.name
+		}
+	}
+}
+
+cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "Yes",
+			"debit_or_credit": "Debit",
+			"company": doc.name
+		}
+	}
+}
+
+cur_frm.fields_dict["expenses_included_in_valuation"].get_query = 
+	cur_frm.fields_dict["stock_adjustment_account"].get_query;
+	
+cur_frm.fields_dict["stock_delivered_but_not_billed"].get_query = 
+	cur_frm.fields_dict["stock_in_hand_account"].get_query;
+
+cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "No",
+			"debit_or_credit": "Credit",
+			"company": doc.name
+		}
+	}
+}

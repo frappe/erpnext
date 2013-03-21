@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import nowdate, cstr, flt
+from webnotes.utils import nowdate, cstr, flt, now
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
@@ -234,3 +234,17 @@ def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
 		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" % 
 		(conditions, searchfield, "%s", "%s", "%s"), 
 		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
+		
+def remove_against_link_from_jv(ref_type, ref_no, against_field):
+	webnotes.conn.sql("""update `tabJournal Voucher Detail` set `%s`=null,
+		modified=%s, modified_by=%s
+		where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"), 
+		(now(), webnotes.session.user, ref_no))
+	
+	webnotes.conn.sql("""update `tabGL Entry`
+		set against_voucher_type=null, against_voucher=null,
+		modified=%s, modified_by=%s
+		where against_voucher_type=%s and against_voucher=%s
+		and voucher_no != ifnull(against_voucher, "")
+		and ifnull(is_cancelled, "No")="No" """,
+		(now(), webnotes.session.user, ref_type, ref_no))

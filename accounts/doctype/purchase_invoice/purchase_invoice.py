@@ -444,6 +444,9 @@ class DocType(BuyingController):
 					
 		# item gl entries
 		stock_item_and_auto_inventory_accounting = False
+		if auto_inventory_accounting:
+			stock_acocunt = self.get_default_account("stock_received_but_not_billed")
+			
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_inventory_accounting and item.item_code in self.stock_items:
 				if flt(item.valuation_rate):
@@ -455,7 +458,7 @@ class DocType(BuyingController):
 					
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": "Stock Received But Not Billed - %s" % (self.company_abbr,),
+							"account": stock_acocunt,
 							"against": self.doc.credit_to,
 							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
 								*  flt(item.qty),
@@ -480,7 +483,7 @@ class DocType(BuyingController):
 			# this will balance out valuation amount included in cost of goods sold
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": "Expenses Included In Valuation - %s" % (self.company_abbr,),
+					"account": self.get_default_account("expenses_included_in_valuation"),
 					"cost_center": "Auto Inventory Accounting - %s" % self.company_abbr,
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,
@@ -504,18 +507,13 @@ class DocType(BuyingController):
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=is_cancel)
 
-	def check_next_docstatus(self):
-		submit_jv = sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_voucher = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-	
 	def on_cancel(self):
-		self.check_next_docstatus()
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
 		
 		self.make_gl_entries(is_cancel=1)
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
-
+		
 	def on_update(self):
 		pass
 		

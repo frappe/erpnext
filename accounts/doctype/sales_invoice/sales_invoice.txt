@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 17:54:09", 
+  "creation": "2013-03-20 17:01:58", 
   "docstatus": 0, 
-  "modified": "2013-01-29 18:22:52", 
+  "modified": "2013-03-20 19:17:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -77,7 +77,6 @@
   "print_hide": 1
  }, 
  {
-  "default": "1", 
   "depends_on": "eval:doc.is_pos==1", 
   "doctype": "DocField", 
   "fieldname": "update_stock", 
@@ -1094,7 +1093,7 @@
   "description": "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ", 
   "doctype": "DocField", 
   "fieldname": "repeat_on_day_of_month", 
-  "fieldtype": "Data", 
+  "fieldtype": "Int", 
   "label": "Repeat on Day of Month", 
   "no_copy": 1, 
   "print_hide": 1

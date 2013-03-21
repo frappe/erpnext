@@ -28,18 +28,10 @@ cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = func
 
 
 // Fetch item details
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	if(locals[cdt][cdn].item_code) {
-		$c_obj(make_doclist(cdt, cdn), 'get_item_details', doc.delivery_note, function(r, rt) {
-			if(r.exc) {
-				msgprint(r.exc);
-			} else {
-				refresh_field('item_details');
-			}
-		});
-	}
-}
-
+cur_frm.add_fetch("item_code", "item_name", "item_name");
+cur_frm.add_fetch("item_code", "stock_uom", "stock_uom");
+cur_frm.add_fetch("item_code", "net_weight", "net_weight");
+cur_frm.add_fetch("item_code", "weight_uom", "weight_uom");
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.delivery_note && doc.__islocal) {

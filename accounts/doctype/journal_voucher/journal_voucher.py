@@ -63,6 +63,9 @@ class DocType(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
+		
 		self.make_gl_entries(cancel=1)
 
 	def validate_debit_credit(self):
