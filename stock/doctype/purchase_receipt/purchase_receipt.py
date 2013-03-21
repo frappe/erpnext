@@ -318,10 +318,14 @@ class DocType(BuyingController):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
 		
+		from accounts.general_ledger import make_gl_entries
+		
 		against_stock_account = self.get_default_account("stock_received_but_not_billed")
 		total_valuation_amount = self.get_total_valuation_amount()
+		gl_entries = self.get_gl_entries_for_stock(against_stock_account, total_valuation_amount)
 		
-		super(DocType, self).make_gl_entries(against_stock_account, total_valuation_amount)
+		if gl_entries:
+			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
 		
 	def get_total_valuation_amount(self):
 		total_valuation_amount = 0.0

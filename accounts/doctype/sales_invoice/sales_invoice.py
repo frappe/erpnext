@@ -27,8 +27,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
-from stock.utils import get_buying_amount, get_sales_bom
-
 session = webnotes.session
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
@@ -701,19 +699,9 @@ class DocType(SellingController):
 					})
 				)
 				
-	def make_item_gl_entries(self, gl_entries):
-		# item gl entries
-		auto_inventory_accounting = \
-			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
-			
-		if auto_inventory_accounting:
-			if cint(self.doc.is_pos) and cint(self.doc.update_stock):
-				stock_account = self.get_default_account("stock_in_hand_account")
-			else:
-				stock_account = self.get_default_account("stock_delivered_but_not_billed")
-		
+	def make_item_gl_entries(self, gl_entries):			
+		# income account gl entries	
 		for item in self.doclist.get({"parentfield": "entries"}):
-			# income account gl entries
 			if flt(item.amount):
 				gl_entries.append(
 					self.get_gl_dict({
@@ -725,28 +713,16 @@ class DocType(SellingController):
 					})
 				)
 				
-			# expense account gl entries
-			if auto_inventory_accounting and flt(item.buying_amount):
+		# expense account gl entries
+		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+				and cint(self.doc.is_pos) and cint(self.doc.update_stock):
+			
+			for item in self.doclist.get({"parentfield": "entries"}):
 				self.check_expense_account(item)
+			
+				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
+					-1*item.buying_amount, cost_center=item.cost_center)
 				
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"against": stock_account,
-						"debit": item.buying_amount,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock",
-						"cost_center": item.cost_center
-					})
-				)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": stock_account,
-						"against": item.expense_account,
-						"credit": item.buying_amount,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock"
-					})
-				)
-	
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:
 			# POS, make payment entries
@@ -789,42 +765,6 @@ class DocType(SellingController):
 						"cost_center": self.doc.write_off_cost_center
 					})
 				)
-	
-	def set_buying_amount(self):
-		if cint(self.doc.is_pos) and cint(self.doc.update_stock):
-			stock_ledger_entries = self.get_stock_ledger_entries()
-			item_sales_bom = get_sales_bom()
-		else:
-			stock_ledger_entries = item_sales_bom = None
-			
-		for item in self.doclist.get({"parentfield": "entries"}):
-			if item.item_code in self.stock_items or \
-					(item_sales_bom and item_sales_bom.get(item.item_code)):
-				item.buying_amount = self.get_item_buying_amount(item, stock_ledger_entries, 
-					item_sales_bom)
-				webnotes.conn.set_value("Sales Invoice Item", item.name, 
-					"buying_amount", item.buying_amount)
-	
-	def get_item_buying_amount(self, item, stock_ledger_entries, item_sales_bom):
-		item_buying_amount = 0
-		if stock_ledger_entries:
-			# is pos and update stock
-			item_buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
-				self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, item_sales_bom)
-			item.buying_amount = item_buying_amount > 0 and item_buying_amount or 0
-		elif item.delivery_note and item.dn_detail:
-			# against delivery note
-			dn_item = webnotes.conn.get_value("Delivery Note Item", item.dn_detail, 
-				["buying_amount", "qty"], as_dict=1)
-			item_buying_rate = flt(dn_item.buying_amount) / flt(dn_item.qty)
-			item_buying_amount = item_buying_rate * flt(item.qty)
-		
-		return item_buying_amount
-		
-	def check_expense_account(self, item):
-		if not item.expense_account:
-			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
-				raise_exception=1)
 			
 	def update_c_form(self):
 		"""Update amended id in C-form"""

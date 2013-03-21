@@ -16,11 +16,14 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
-	def make_gl_entries(self, against_stock_account, amount, cost_center=None):
-		stock_in_hand_account = self.get_default_account("stock_in_hand_account")
+	def get_gl_entries_for_stock(self, against_stock_account, amount, 
+			stock_in_hand_account=None, cost_center=None):
+		if not stock_in_hand_account:
+			stock_in_hand_account = self.get_default_account("stock_in_hand_account")
 		
 		if amount:
 			gl_entries = [
@@ -41,9 +44,14 @@ class StockController(AccountsController):
 					"remarks": self.doc.remarks or "Accounting Entry for Stock",
 				}, self.doc.docstatus == 2),
 			]
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
 			
+			return gl_entries
+			
+			
+	def check_expense_account(self, item):
+		if not item.expense_account:
+			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				raise_exception=1)	
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
 		if not (item_list and warehouse_list):
