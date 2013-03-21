@@ -76,7 +76,10 @@ def get_html(page_name):
 			from_cache = True
 
 	if not html:
-		webnotes.connect()
+		from webnotes.auth import HTTPRequest
+		webnotes.http_request = HTTPRequest()
+		
+		#webnotes.connect()
 		html = load_into_cache(page_name)
 		from_cache = False
 	
