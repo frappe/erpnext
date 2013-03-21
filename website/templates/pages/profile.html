@@ -3,8 +3,13 @@
 {% set title="My Profile" %}
 
 {% block content %}
-<div class="span9">
-	<h2>My Profile</h2>
+<div class="span12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a> <span class="divider">/</span></li>
+    	<li><a href="account">My Account</a> <span class="divider">/</span></li>
+    	<li class="active">My Profile</li>
+    </ul>
+	<h2><i class="icon-user"></i> My Profile</h2>
 	<hr>
 	<div class="alert" id="message" style="display: none;"></div>
 	<form class="form-horizontal">

@@ -70,7 +70,8 @@ $(document).ready(function() {
 	// update login
 	var full_name = getCookie("full_name");
 	if(full_name) {
-		$("#user-tools").html(repl('<a href="account" title="My Account" id="user-full-name">%(full_name)s</a> | \
+		$("#user-tools").html(repl('<a href="profile" title="My Profile" id="user-full-name">%(full_name)s</a> | \
+			<a href="account" title="My Account">My Account</a> | \
 			<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> (%(count)s)</a> | \
 			<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>', {
 			full_name: full_name,

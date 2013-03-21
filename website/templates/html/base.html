@@ -10,21 +10,18 @@
 	<script type="text/javascript" src="js/wn-web.js"></script>
 	<link type="text/css" rel="stylesheet" href="css/all-web.css">
 	<link type="text/css" rel="stylesheet" href="css/wn-web.css">
-	
-	{% if favicon %}
+	{%- if favicon %}
 	<link rel="shortcut icon" href="files/{{ favicon }}" type="image/x-icon">
 	<link rel="icon" href="files/{{ favicon }}" type="image/x-icon">
 	{% else %}
 	<link rel="shortcut icon" href="app/images/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="app/images/favicon.ico" type="image/x-icon">
-	{% endif %}
-	
-	{% if description %}
+	{% endif -%}	
+	{% if description -%}
 	<meta name="description" content="{{ description }}">	
-	{% endif %}
-	
-	{% block header %}
-	{% endblock %}
+	{%- endif %}
+	{% block header -%}
+	{%- endblock %}
 </head>
 <body>
 	{% block body %}

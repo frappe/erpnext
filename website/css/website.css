@@ -2,11 +2,10 @@ div.outer {
 	padding: 30px;
 	margin: 30px -30px 10px -30px;
 	min-height: 400px;
-	overflow: hidden;
 }
 
 .outer .navbar {
-	margin: -30px -30px 10px -30px;
+	margin: -30px -30px 20px -30px;
 }
 
 footer {

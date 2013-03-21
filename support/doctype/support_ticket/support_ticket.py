@@ -70,4 +70,11 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
-	
+
+@webnotes.whitelist()
+def get_tickets():
+	tickets = webnotes.conn.sql("""select name, subject, status from
+		`tabSupport Ticket` where raised_by=%s order by modified desc""", 
+			webnotes.session.user, as_dict=1)
+	return tickets
+

@@ -1,0 +1,20 @@
+[
+ {
+  "creation": "2013-03-21 15:24:28", 
+  "docstatus": 0, 
+  "modified": "2013-03-21 15:26:21", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doc_type": "Sales Invoice", 
+  "doctype": "Print Format", 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "standard": "Yes"
+ }, 
+ {
+  "doctype": "Print Format", 
+  "name": "SalesInvoice"
+ }
+]
