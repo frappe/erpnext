@@ -188,7 +188,6 @@ class DocType(DocListController):
 		for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
 			if gle["account"] in accounts:
 				income += gle["credit"] - gle["debit"]
-		
 		return income, self.get_html(label or self.meta.get_label("income"), self.currency,
 			fmt_money(income))
 		
