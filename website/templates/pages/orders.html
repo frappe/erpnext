@@ -44,19 +44,21 @@ $(document).ready(function() {
 				
 				// parent
 				var $order = $(repl('<div class="row">\
-					<div class="span4"><a href="order?name=%(name)s">%(name)s</a></div>\
-					<div class="span8"></div>\
+					<div class="span3"><a href="order?name=%(name)s">%(name)s</a></div>\
+					<div class="span9"></div>\
 				</div>', order)).appendTo($list);
 				
 				// items
 				$.each(order.items || [], function(i, item) {
 					item.export_rate = format_currency(item.export_rate, order.currency);
+					item.export_amount = format_currency(item.export_amount, order.currency);
 					var $item = $(repl('<div class="row">\
-							<div class="span4">%(item_name)s</div>\
-							<div class="span2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
+							<div class="span3">%(item_name)s</div>\
 							<div class="span2" style="text-align: right;">%(export_rate)s</div>\
+							<div class="span2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
+							<div class="span2" style="text-align: right;">%(export_amount)s</div>\
 						</div>\
-					</div>', item)).appendTo($order.find(".span8"));
+					</div>', item)).appendTo($order.find(".span9"));
 				});
 				
 				$("<hr>").appendTo($list);

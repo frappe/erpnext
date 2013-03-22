@@ -372,7 +372,7 @@ def get_orders():
 			""", customer, as_dict=1)
 		for order in orders:
 			order.items = webnotes.conn.sql("""select 
-				item_name, qty, export_rate, delivered_qty, stock_uom
+				item_name, qty, export_rate, export_amount, delivered_qty, stock_uom
 				from `tabSales Order Item` 
 				where parent=%s 
 				order by idx""", order.name, as_dict=1)
