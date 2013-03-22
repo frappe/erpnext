@@ -30,4 +30,4 @@ page_settings_map = {
 	"ticket": "support.doctype.support_ticket.support_ticket.get_website_args"
 }
 
-no_cache = ["message", "print"]
+no_cache = ["message", "print", "order", "ticket"]
