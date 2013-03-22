@@ -86,68 +86,6 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertEquals(gle_count[0][0], 8)
 		
-	def test_sales_invoice_gl_entry_with_aii_delivery_note(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		
-		self._insert_purchase_receipt()
-		dn = self._insert_delivery_note()
-		
-		si_against_dn = webnotes.copy_doclist(test_records[1])
-		si_against_dn[1]["delivery_note"] = dn.doc.name
-		si_against_dn[1]["dn_detail"] = dn.doclist[1].name
-		si = webnotes.bean(si_against_dn)		
-		si.insert()
-		
-		si.submit()
-		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""", si.doc.name, as_dict=1)
-		self.assertTrue(gl_entries)
-		
-		expected_values = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
-			[test_records[1][1]["income_account"], 0.0, 500.0],
-			[test_records[1][2]["account_head"], 0.0, 80.0],
-			[test_records[1][3]["account_head"], 0.0, 50.0],
-			["Stock Delivered But Not Billed - _TC", 0.0, 375.0],
-			[test_records[1][1]["expense_account"], 375.0, 0.0]
-		])
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
-			
-		si.cancel()
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			and ifnull(is_cancelled, 'No') = 'No' 
-			order by account asc, name asc""", si.doc.name, as_dict=1)
-			
-		expected_values = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
-			[si.doc.debit_to, 0.0, 630.0],
-			[test_records[1][1]["income_account"], 0.0, 500.0],
-			[test_records[1][1]["income_account"], 500.0, 0.0],
-			[test_records[1][2]["account_head"], 0.0, 80.0],
-			[test_records[1][2]["account_head"], 80.0, 0.0],
-			[test_records[1][3]["account_head"], 0.0, 50.0],
-			[test_records[1][3]["account_head"], 50.0, 0.0],
-			["Stock Delivered But Not Billed - _TC", 0.0, 375.0],
-			["Stock Delivered But Not Billed - _TC", 375.0, 0.0],
-			[test_records[1][1]["expense_account"], 375.0, 0.0],
-			[test_records[1][1]["expense_account"], 0.0, 375.0]
-			
-		])
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
-			
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		
 	def test_pos_gl_entry_with_aii(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
@@ -261,8 +199,6 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][2], gle.credit)
 				
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		
-		
 		
 	def _insert_purchase_receipt(self):
 		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \

@@ -144,6 +144,8 @@ class DocType(SellingController):
 		self.validate_mandatory()
 		self.validate_reference_value()
 		self.validate_for_items()
+		self.validate_warehouse()
+		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
 		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.check_conversion_rate(self)
@@ -203,6 +205,12 @@ class DocType(SellingController):
 				else:
 					chk_dupl_itm.append(f)
 
+	def validate_warehouse(self):
+		for d in self.get_item_list():
+			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
+				if not d['warehouse']:
+					msgprint("Please enter Warehouse for item %s as it is stock item"
+						% d['item_code'], raise_exception=1)
 
 	def validate_items_with_prevdoc(self, d):
 		"""check if same item, warehouse present in prevdoc"""
@@ -393,41 +401,17 @@ class DocType(SellingController):
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			get_obj('Sales Common').check_credit(self, total)
 		
-	def set_buying_amount(self):
-		from stock.utils import get_buying_amount, get_sales_bom
-		stock_ledger_entries = self.get_stock_ledger_entries()
-		item_sales_bom = get_sales_bom()
-		
-		if stock_ledger_entries:
-			for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-				if item.item_code in self.stock_items or \
-						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
-						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
-						item_sales_bom)
-					item.buying_amount = buying_amount > 0 and buying_amount or 0
-					webnotes.conn.set_value("Delivery Note Item", item.name, "buying_amount", 
-						item.buying_amount)
-		
-		self.validate_warehouse()
-		
-	def validate_warehouse(self):
-		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				if not d['warehouse']:
-					msgprint("Please enter Warehouse for item %s as it is stock item"
-						% d['item_code'], raise_exception=1)
-		
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
-		
-		against_stock_account = self.get_default_account("stock_delivered_but_not_billed")
-		total_buying_amount = self.get_total_buying_amount()
-		
-		super(DocType, self).make_gl_entries(against_stock_account, -1*total_buying_amount)
-		
-	def get_total_buying_amount(self):
-		total_buying_amount = sum([item.buying_amount for item in 
-			self.doclist.get({"parentfield": "delivery_note_details"})])
-		return total_buying_amount
+			
+		gl_entries = []	
+		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
+			self.check_expense_account(item)
+			
+			gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
+				cost_center=item.cost_center)
+				
+		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
+			make_gl_entries(gl_entries)

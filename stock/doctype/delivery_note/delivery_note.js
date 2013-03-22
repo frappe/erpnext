@@ -309,3 +309,23 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(wn.boot.notification_settings.delivery_note_message);
 	}
 }
+
+// expense account
+cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_account_list", 
+		"filters": {
+			"is_pl_account": "Yes",
+			"debit_or_credit": "Debit",
+			"company": doc.company
+		}
+	}
+}
+
+// cost center
+cur_frm.fields_dict["delivery_note_details"].grid.get_field("cost_center").get_query = function(doc) {
+	return {
+		query: "accounts.utils.get_cost_center_list",
+		filters: { company_name: doc.company}
+	}
+}

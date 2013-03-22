@@ -64,7 +64,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		// update balance (only needed in case of valuation)
 		wh.balance_qty += sl.qty;
 		wh.balance_value += value_diff;
-
+		
 		return value_diff;
 	},
 	get_fifo_value_diff: function(wh, sl) {
@@ -109,9 +109,9 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		
 		var value_diff = 0.0;
 		
-		$.each(sl.serial_no.trim().split("\n"), function(i, serial_no) {
-			if(serial_no) {
-				value_diff += flt(me.serialized_buying_rates[serial_no]);
+		$.each(sl.serial_no.trim().split("\n"), function(i, sr) {
+			if(sr) {
+				value_diff += flt(me.serialized_buying_rates[sr.trim()]);
 			}
 		});
 		
@@ -125,7 +125,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			if(sle.qty > 0 && sle.serial_no) {
 				$.each(sle.serial_no.trim().split("\n"), function(i, sr) {
 					if(sr && sle.incoming_rate !== undefined) {
-						serialized_buying_rates[sr] = flt(sle.incoming_rate);
+						serialized_buying_rates[sr.trim()] = flt(sle.incoming_rate);
 					}
 				});
 			}

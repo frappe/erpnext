@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 15:46:43", 
+  "modified": "2013-03-21 18:36:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -236,12 +236,35 @@
   "doctype": "DocField", 
   "fieldname": "batch_no", 
   "fieldtype": "Link", 
+  "hidden": 0, 
   "label": "Batch No", 
   "oldfieldname": "batch_no", 
   "oldfieldtype": "Link", 
   "options": "Batch", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_account", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Expense Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "print_hide": 1, 
+  "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center", 
+  "print_hide": 1, 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 

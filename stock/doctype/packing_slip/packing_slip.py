@@ -40,15 +40,12 @@ class DocType:
 		"""
 			Validates if delivery note has status as submitted
 		"""
-		res = webnotes.conn.sql("""\
-			SELECT docstatus FROM `tabDelivery Note`
-			WHERE name=%(delivery_note)s
-			""", self.doc.fields)
+		res = webnotes.conn.sql("""SELECT docstatus FROM `tabDelivery Note` 
+			WHERE name=%(delivery_note)s""", self.doc.fields)
 
 		if not(res and res[0][0]==0):
 			webnotes.msgprint("""Invalid Delivery Note. Delivery Note should exist 
-				and should be in draft state. Please rectify and try again.""", 
-				raise_exception=1)
+				and should be in draft state. Please rectify and try again.""", raise_exception=1)
 
 
 	def validate_case_nos(self):
@@ -65,11 +62,10 @@ class DocType:
 				raise_exception=1)
 		
 		
-		res = webnotes.conn.sql("""\
-			SELECT name FROM `tabPacking Slip`
+		res = webnotes.conn.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
-			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)\
+			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)
 			""", self.doc.fields)
 
 		if res:
@@ -133,10 +129,10 @@ class DocType:
 		item['recommended_qty'] = (flt(item['qty']) - flt(item['packed_qty'])) / no_of_cases
 		item['specified_qty'] = flt(ps_item_qty[item['item_code']])
 		
-		webnotes.msgprint("""\
+		webnotes.msgprint("""
 			Invalid Quantity specified (%(specified_qty)s %(stock_uom)s).
 			%(packed_qty)s out of %(qty)s %(stock_uom)s already packed for %(item_code)s.
-			<b>Recommended quantity for %(item_code)s = %(recommended_qty)s \
+			<b>Recommended quantity for %(item_code)s = %(recommended_qty)s 
 			%(stock_uom)s</b>""" % item, raise_exception=1)
 
 
@@ -167,16 +163,15 @@ class DocType:
 		for item in dn_details:
 			new_packed_qty = flt(item['packed_qty'])
 			if (new_packed_qty < 0) or (new_packed_qty > flt(item['qty'])):
-				webnotes.msgprint("Invalid new packed quantity for item %s. \
-					Please try again or contact support@erpnext.com" % item['item_code'], raise_exception=1)
+				webnotes.msgprint("""Invalid new packed quantity for item %s. 
+					Please try again or contact support@erpnext.com""" % 
+					item['item_code'], raise_exception=1)
 			
-			webnotes.conn.sql("""\
-				UPDATE `tabDelivery Note Item`
-				SET packed_qty = %s
-				WHERE parent = %s AND item_code = %s""",
+			webnotes.conn.sql("""UPDATE `tabDelivery Note Item`
+				SET packed_qty = %s WHERE parent = %s AND item_code = %s""",
 				(new_packed_qty, self.doc.delivery_note, item['item_code']))
-			webnotes.conn.set_value("Delivery Note", self.doc.delivery_note,
-				"modified", now())
+				
+			webnotes.conn.set_value("Delivery Note", self.doc.delivery_note, "modified", now())
 
 
 	def update_item_details(self):
@@ -191,8 +186,7 @@ class DocType:
 
 
 	def set_item_details(self, row):
-		res = webnotes.conn.sql("""\
-			SELECT item_name, SUM(IFNULL(qty, 0)) as total_qty,
+		res = webnotes.conn.sql("""SELECT item_name, SUM(IFNULL(qty, 0)) as total_qty,
 			IFNULL(packed_qty,	0) as packed_qty, stock_uom
 			FROM `tabDelivery Note Item`
 			WHERE parent=%s AND item_code=%s GROUP BY item_code""",
@@ -203,10 +197,9 @@ class DocType:
 			if not row.qty:
 				row.qty = qty >= 0 and qty or 0
 
-		res = webnotes.conn.sql("""\
-			SELECT net_weight, weight_uom FROM `tabItem`
-			WHERE name=%s""", self.doc.item_code, as_dict=1)
-
+		res = webnotes.conn.sql("""SELECT net_weight, weight_uom FROM `tabItem`
+			WHERE name=%s""", row.item_code, as_dict=1)
+			
 		if res and len(res)>0:
 			row.net_weight = res[0]["net_weight"]
 			row.weight_uom = res[0]["weight_uom"]
@@ -217,8 +210,7 @@ class DocType:
 			Returns the next case no. for a new packing slip for a delivery
 			note
 		"""
-		recommended_case_no = webnotes.conn.sql("""\
-			SELECT MAX(to_case_no) FROM `tabPacking Slip`
+		recommended_case_no = webnotes.conn.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
 
 		return cint(recommended_case_no[0][0]) + 1
