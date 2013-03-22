@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-20 17:01:58", 
+  "creation": "2013-03-22 18:37:25", 
   "docstatus": 0, 
-  "modified": "2013-03-20 19:17:38", 
+  "modified": "2013-03-22 18:38:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -750,11 +750,12 @@
  }, 
  {
   "default": "No", 
+  "description": "Considered as an Opening Balance", 
   "doctype": "DocField", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
   "in_filter": 1, 
-  "label": "Is Opening", 
+  "label": "Is Opening Entry", 
   "oldfieldname": "is_opening", 
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
@@ -762,6 +763,7 @@
   "search_index": 0
  }, 
  {
+  "description": "Actual Invoice Date", 
   "doctype": "DocField", 
   "fieldname": "aging_date", 
   "fieldtype": "Date", 

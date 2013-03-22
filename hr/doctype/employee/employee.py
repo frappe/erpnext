@@ -71,7 +71,9 @@ class DocType:
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
 		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
 		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
-		
+		if self.doc.reports_to:
+			webnotes.conn.set_default("leave_approver", webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id"), self.doc.user_id)
+
 	def update_profile(self):
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole

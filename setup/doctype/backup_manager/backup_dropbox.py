@@ -61,7 +61,7 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 	webnotes.response['page_name'] = 'message.html'
 
 def backup_to_dropbox():
-	from dropbox import client, session, rest
+	from dropbox import client, session
 	from conf import dropbox_access_key, dropbox_secret_key
 	from webnotes.utils.backups import new_backup
 	if not webnotes.conn:
@@ -81,24 +81,23 @@ def backup_to_dropbox():
 	upload_file_to_dropbox(filename, "database", dropbox_client)
 
 	response = dropbox_client.metadata("/files")
-
 	# upload files to files folder
-	filename = os.path.join(get_base_path(), "public", "files")
-	for filename in os.listdir(filename):
+	path = os.path.join(get_base_path(), "public", "files")
+	for filename in os.listdir(path):
 		found = False
+		filepath = os.path.join(path, filename)
 		for file_metadata in response["contents"]:
- 			if filename==os.path.basename(file_metadata["path"]):
-				if os.stat(filename).st_size==file_metadata["bytes"]:
-					found=True
-		
+ 			if os.path.basename(filepath) == os.path.basename(file_metadata["path"]) and os.stat(filepath).st_size == int(file_metadata["bytes"]):
+				found = True
+				break
 		if not found:
-			upload_file_to_dropbox(os.path.join(get_base_path(),"public", "files", filename), "files", dropbox_client)
+			upload_file_to_dropbox(filepath, "files", dropbox_client)
 
 def get_dropbox_session():
 	from dropbox import session
 	try:
 		from conf import dropbox_access_key, dropbox_secret_key
-	except ImportError, e:
+	except ImportError:
 		webnotes.msgprint(_("Please set Dropbox access keys in") + " conf.py", 
 		raise_exception=True)
 	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
@@ -113,11 +112,11 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 		while uploader.offset < size:
 			try:
 				uploader.upload_chunked()
-				uploader.finish(folder + '/' + os.path.basename(filename), overwrite='True')
-			except rest.ErrorResponse, e:
+				uploader.finish(os.path.join(folder, os.path.basename(filename)), overwrite=True)
+			except rest.ErrorResponse:
 				pass
 	else:
-		response = dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
+		dropbox_client.put_file(os.path.join(folder, os.path.basename(filename)), f, overwrite=True)
 
 if __name__=="__main__":
 	backup_to_dropbox()
