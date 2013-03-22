@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-30 12:49:46", 
+  "creation": "2013-03-07 12:35:57", 
   "docstatus": 0, 
-  "modified": "2013-02-01 10:50:16", 
+  "modified": "2013-03-21 13:02:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,6 +24,9 @@
   "permlevel": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Journal Voucher", 
@@ -31,7 +34,9 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -278,6 +283,7 @@
  }, 
  {
   "default": "No", 
+  "description": "Considered as Opening Balance", 
   "doctype": "DocField", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
@@ -290,7 +296,7 @@
   "search_index": 1
  }, 
  {
-  "description": "For opening invoice entry, this date will reflect in the period-wise aging report.", 
+  "description": "Actual Posting Date", 
   "doctype": "DocField", 
   "fieldname": "aging_date", 
   "fieldtype": "Date", 
@@ -444,30 +450,11 @@
   "read_only": 1
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts User", 
-  "submit": 1, 
-  "write": 1
+  "role": "Accounts Manager"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "Auditor", 
-  "submit": 0, 
-  "write": 0
+  "role": "Accounts User"
  }
 ]
