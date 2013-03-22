@@ -51,8 +51,6 @@ def upload_files(name, mimetype, service, folder_id):
 
 def backup_to_gdrive():
 	from webnotes.utils.backups import new_backup
-	found_database = False
-	found_files = False
 	if not webnotes.conn:
 		webnotes.connect()
 	flow = get_gdrive_flow()
@@ -73,10 +71,11 @@ def backup_to_gdrive():
 
 	# upload files to files folder
 	path = os.path.join(get_base_path(), "public", "files")
-	for files in os.listdir(path):
-		filename = path + "/" + files
+	for filename in os.listdir(path):
+		found = False
+		filepath = os.path.join(path, filename)
 		ext = filename.split('.')[-1]
-		size = os.path.getsize(filename)
+		size = os.path.getsize(filepath)
 		if ext == 'gz' or ext == 'gzip':
 			mimetype = 'application/x-gzip'
 		else:
@@ -88,11 +87,11 @@ def backup_to_gdrive():
 			**param).execute()
 	  	for child in children.get('items', []):
 			file = drive_service.files().get(fileId=child['id']).execute()
-			if files == file['title'] and size == int(file['fileSize']):
-				found_files = True
+			if filename == file['title'] and size == int(file['fileSize']):
+				found = True
 				break
-		if not found_files:
-			upload_files(filename, mimetype, drive_service, webnotes.conn.get_value("Backup Manager", None, "files_folder_id"))
+		if not found:
+			upload_files(filepath, mimetype, drive_service, webnotes.conn.get_value("Backup Manager", None, "files_folder_id"))
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
@@ -106,10 +105,9 @@ def get_gdrive_flow():
 	#	+ "?cmd=setup.doctype.backup_manager.backup_googledrive.googledrive_callback"
 	
 	# for installed apps since google does not support subdomains
-	redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
 	
 	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
-		"https://www.googleapis.com/auth/drive", redirect_uri)
+		"https://www.googleapis.com/auth/drive", 'urn:ietf:wg:oauth:2.0:oob')
 	return flow
 	
 @webnotes.whitelist()

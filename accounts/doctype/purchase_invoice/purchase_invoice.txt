@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 17:54:09", 
+  "creation": "2013-03-07 13:16:13", 
   "docstatus": 0, 
-  "modified": "2013-01-29 18:25:24", 
+  "modified": "2013-03-22 18:17:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -636,6 +636,7 @@
  }, 
  {
   "default": "No", 
+  "description": "Considered as Opening Balance", 
   "doctype": "DocField", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
@@ -648,6 +649,7 @@
   "search_index": 1
  }, 
  {
+  "description": "Actual Invoice Date", 
   "doctype": "DocField", 
   "fieldname": "aging_date", 
   "fieldtype": "Date", 
@@ -774,40 +776,8 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Purchase User", 
-  "submit": 0, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "role": "Supplier", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Accounts Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "Auditor", 
-  "submit": 0, 
-  "write": 0
+  "role": "Supplier"
  }
 ]
