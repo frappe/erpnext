@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-19 17:03:01", 
   "docstatus": 0, 
-  "modified": "2013-03-21 12:14:57", 
+  "modified": "2013-03-22 18:16:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -1094,7 +1095,7 @@
   "description": "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ", 
   "doctype": "DocField", 
   "fieldname": "repeat_on_day_of_month", 
-  "fieldtype": "Int", 
+  "fieldtype": "Data", 
   "label": "Repeat on Day of Month", 
   "no_copy": 1, 
   "print_hide": 1
@@ -1195,49 +1196,17 @@
   "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Accounts Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts User", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "permlevel": 0, 
   "role": "Customer"
  }
 ]
