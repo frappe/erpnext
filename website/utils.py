@@ -166,6 +166,7 @@ def prepare_args(page_name):
 				args.update(webnotes.get_method(target)())
 			else:
 				args.obj = webnotes.bean(page_settings_map[page_name]).obj
+
 	else:
 		args = get_doc_fields(page_name)
 	
