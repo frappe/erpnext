@@ -1,10 +1,10 @@
 [
  {
-  "creation": "2013-02-22 01:27:40", 
+  "creation": "2013-03-08 15:36:47", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:29", 
+  "modified": "2013-03-22 16:45:28", 
   "modified_by": "Administrator", 
-  "owner": "wasim@webnotestech.com"
+  "owner": "Administrator"
  }, 
  {
   "autoname": "PVTD.######", 
@@ -25,6 +25,17 @@
  {
   "doctype": "DocType", 
   "name": "Purchase Taxes and Charges"
+ }, 
+ {
+  "default": "Valuation and Total", 
+  "doctype": "DocField", 
+  "fieldname": "category", 
+  "fieldtype": "Select", 
+  "label": "Consider Tax or Charge for", 
+  "oldfieldname": "category", 
+  "oldfieldtype": "Select", 
+  "options": "Valuation and Total\nValuation\nTotal", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -104,17 +115,6 @@
   "label": "Enter Row", 
   "oldfieldname": "row_id", 
   "oldfieldtype": "Data"
- }, 
- {
-  "default": "Valuation and Total", 
-  "doctype": "DocField", 
-  "fieldname": "category", 
-  "fieldtype": "Select", 
-  "label": "Consider Tax or Charge for", 
-  "oldfieldname": "category", 
-  "oldfieldtype": "Select", 
-  "options": "Valuation and Total\nValuation\nTotal", 
-  "reqd": 1
  }, 
  {
   "default": "Add", 
