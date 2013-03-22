@@ -16,6 +16,7 @@
 
 report.customize_filters = function() {
   this.hide_all_filters();
+  this.dt.set_no_limit(1);
 
   // hide transaction based on permissions
   var all_transactions = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice",
