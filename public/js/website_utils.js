@@ -72,7 +72,7 @@ $(document).ready(function() {
 	if(full_name) {
 		$("#user-tools").html(repl('<a href="profile" title="My Profile" id="user-full-name">%(full_name)s</a> | \
 			<a href="account" title="My Account">My Account</a> | \
-			<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> (%(count)s)</a> | \
+			<!--<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> (%(count)s)</a> | -->\
 			<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>', {
 			full_name: full_name,
 			count: getCookie("cart_count") || "0"
@@ -106,6 +106,10 @@ function repl(s, dict) {
 		s = s.split("%("+key+")s").join(dict[key]);
 	}
 	return s;
+}
+
+function replace_all(s, t1, t2) {
+	return s.split(t1).join(t2);
 }
 
 function getCookie(name) {

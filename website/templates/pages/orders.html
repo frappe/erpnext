@@ -3,6 +3,11 @@
 {% set title="My Orders" %}
 
 {% block content %}
+<script>
+global_number_format = "{{ global_number_format }}";
+currency = "{{ currency }}";
+wn.currency_symbols = {{ currency_symbols }};
+</script>
 <div class="span12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a> <span class="divider">/</span></li>
@@ -39,18 +44,19 @@ $(document).ready(function() {
 				
 				// parent
 				var $order = $(repl('<div class="row">\
-					<div class="span4"><a href="order?id=%(name)s">%(name)s</a></span3>\
+					<div class="span4"><a href="order?name=%(name)s">%(name)s</a></div>\
+					<div class="span8"></div>\
 				</div>', order)).appendTo($list);
 				
 				// items
 				$.each(order.items || [], function(i, item) {
-					var $item = $(repl('<div class="span8">\
-						<div class="row">\
+					item.export_rate = format_currency(item.export_rate, order.currency);
+					var $item = $(repl('<div class="row">\
 							<div class="span4">%(item_name)s</div>\
-							<div class="span2">%(export_rate)s</div>\
-							<div class="span2">%(status)s</div>\
+							<div class="span2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
+							<div class="span2" style="text-align: right;">%(export_rate)s</div>\
 						</div>\
-					</div>', item)).appendTo($order);
+					</div>', item)).appendTo($order.find(".span8"));
 				});
 				
 				$("<hr>").appendTo($list);

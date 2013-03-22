@@ -98,7 +98,8 @@
 					{{ doc.terms }}
 				</td>
 				<td>
-					<table cellspacing=0 width=100%><tbody>
+					<table cellspacing=0 width=100%>
+					<tbody>
 						<tr>
 							<td>Net Total</td>
 							<td width=40% style="text-align: right;">{{
@@ -121,7 +122,8 @@
 							<td>Rounded Total</td>
 							<td style="text-align: right;">{{ utils.fmt_money(doc.rounded_total_export, currency=doc.currency) }}</td>
 						</tr>
-					</tbody></table>
+					</tbody>
+					</table>
 					<br /><b>In Words</b><br />
 					<i>{{ doc.in_words_export }}</i>
 				</td>

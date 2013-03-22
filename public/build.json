@@ -7,7 +7,8 @@
 		"app/public/js/startup.css"
 	],
 	"public/js/all-web.min.js": [
-		"app/public/js/website_utils.js"
+		"app/public/js/website_utils.js",
+		"lib/public/js/wn/misc/number_format.js"
 	],
 	"public/js/all-app.min.js": [
 		"app/public/js/startup.js",

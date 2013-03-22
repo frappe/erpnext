@@ -18,36 +18,9 @@ from __future__ import unicode_literals
 
 import os
 import conf
+from website.settings import *
 import webnotes
-
-page_map = {
-	'Web Page': webnotes._dict({
-		"template": 'html/web_page.html',
-		"condition_field": "published"
-	}),
-	'Blog Post': webnotes._dict({
-		"template": 'html/blog_page.html',
-		"condition_field": "published",
-	}),
-	'Item': webnotes._dict({
-		"template": 'html/product_page.html',
-		"condition_field": "show_in_website",
-	}),
-	'Item Group': webnotes._dict({
-		"template": "html/product_group.html",
-		"condition_field": "show_in_website"
-	})
-}
-
-page_settings_map = {
-	"about": "website.doctype.about_us_settings.about_us_settings.get_args",
-	"contact": "Contact Us Settings",
-	"blog": "website.helpers.blog.get_blog_template_args",
-	"writers": "website.helpers.blog.get_writers_args",
-	"print": "core.doctype.print_format.print_format.get_args"
-}
-
-no_cache = ["message", "print"]
+import webnotes.utils
 
 def render(page_name):
 	"""render html page"""
@@ -257,7 +230,8 @@ def get_outer_env(page_name, args):
 			order by idx asc""", as_dict=1),
 			
 		'int':int,
-		"webnotes": webnotes
+		"webnotes": webnotes,
+		"utils": webnotes.utils
 	})
 	
 	args.update(ret)
