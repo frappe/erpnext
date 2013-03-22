@@ -8,9 +8,9 @@ def execute(filters=None):
 	
 	stock_ledger_entries = get_stock_ledger_entries(filters)
 	
-	item_sales_bom = get_item_sales_bom()
-			
 	source = get_source_data(filters)
+	
+	item_sales_bom = get_item_sales_bom()
 	
 	columns = ["Delivery Note/Sales Invoice::120", "Posting Date:Date", "Posting Time", 
 		"Item Code:Link/Item", "Item Name", "Description", "Warehouse:Link/Warehouse",
@@ -43,7 +43,8 @@ def get_stock_ledger_entries(filters):
 	query = """select item_code, voucher_type, voucher_no,
 		voucher_detail_no, posting_date, posting_time, stock_value,
 		warehouse, actual_qty as qty
-		from `tabStock Ledger Entry` where ifnull(`is_cancelled`, "No") = "No" """
+		from `tabStock Ledger Entry`
+		where ifnull(`is_cancelled`, "No") = "No" """
 	
 	if filters.get("company"):
 		query += """ and company=%(company)s"""
@@ -57,7 +58,7 @@ def get_item_sales_bom():
 	
 	for d in webnotes.conn.sql("""select parenttype, parent, parent_item,
 		item_code, warehouse, -1*qty as total_qty
-		from `tabDelivery Note Packing Item` where docstatus=1""", as_dict=1):
+		from `tabDelivery Note Packing Item` where docstatus=1""", as_dict=True):
 		item_sales_bom.setdefault(d.parenttype, webnotes._dict()).setdefault(d.parent,
 			webnotes._dict()).setdefault(d.parent_item, []).append(d)
 
@@ -67,6 +68,10 @@ def get_source_data(filters):
 	conditions = ""
 	if filters.get("company"):
 		conditions += " and company=%(company)s"
+	if filters.get("from_date"):
+		conditions += " and posting_date>=%(from_date)s"
+	if filters.get("to_date"):
+		conditions += " and posting_date<=%(to_date)s"
 	
 	delivery_note_items = webnotes.conn.sql("""select item.parenttype, dn.name, 
 		dn.posting_date, dn.posting_time, dn.project_name, 
