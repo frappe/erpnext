@@ -19,7 +19,7 @@
 			</div>
 			<div class="clearfix"></div>
 			<p><select class="span6" name="subject">
-				{% for option in obj.doc.query_options %}
+				{% for option in obj.query_options %}
 					<option value="{{ option }}">{{ option }}</option>
 				{% endfor %}
 			</select></p>
