@@ -56,14 +56,18 @@ class TestDeliveryNote(unittest.TestCase):
 		self._insert_purchase_receipt()
 		
 		dn = webnotes.bean(copy=test_records[0])
+		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
+		dn.doclist[1].cost_center = "Auto Inventory Accounting - _TC"
+
 		stock_in_hand_account = webnotes.conn.get_value("Company", dn.doc.company, 
 			"stock_in_hand_account")
 		
 		from accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
-			
+
 		dn.insert()
 		dn.submit()
+		
 		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Delivery Note' and voucher_no=%s
@@ -72,9 +76,8 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		expected_values = sorted([
 			[stock_in_hand_account, 0.0, 375.0],
-			["Stock Delivered But Not Billed - _TC", 375.0, 0.0]
+			["Cost of Goods Sold - _TC", 375.0, 0.0]
 		])
-		
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals(expected_values[i][0], gle.account)
 			self.assertEquals(expected_values[i][1], gle.debit)

@@ -171,7 +171,8 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
 			buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
-				bom_item.item_code, warehouse, bom_item.qty * qty, stock_ledger_entries)
+				bom_item.item_code, bom_item.warehouse or warehouse, 
+				bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
 		return buying_amount
 	else:
 		# doesn't have sales bom
@@ -184,21 +185,10 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
 			(sle.voucher_detail_no == item_row or (sle.voucher_type != "Stock Reconciliation" 
 			and sle.item_code == item_code and sle.warehouse == warehouse and flt(sle.qty) == qty)):
-				# print "previous_sle", stock_ledger_entries[i+1]
-				# print "current sle", sle
 				previous_stock_value = len(stock_ledger_entries) > i+1 and \
 					flt(stock_ledger_entries[i+1].stock_value) or 0.0
 					
 				buying_amount =  previous_stock_value - flt(sle.stock_value)						
+				
 				return buying_amount
 	return 0.0
-
-def get_sales_bom():
-	item_sales_bom = {}
-	# for r in webnotes.conn.sql("""select parent_item, item_code, qty, warehouse, voucher_detail_no
-	# 	from `tabDelivery Note Packing Item` where docstatus = 1""", as_dict=1):
-	for r in webnotes.conn.sql("""select parent, item_code, qty from `tabSales BOM Item`""",
-	 	as_dict=1):
-			item_sales_bom.setdefault(r.parent, []).append(r)
-			
-	return item_sales_bom

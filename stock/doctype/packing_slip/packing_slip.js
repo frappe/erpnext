@@ -19,7 +19,8 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 }
 
 
-cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = 
+		function(doc, cdt, cdn) {
 	var query = 'SELECT name, item_name, description FROM `tabItem` WHERE name IN ( \
 		SELECT item_code FROM `tabDelivery Note Item` dnd \
 		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) AND %(key)s LIKE "%s" LIMIT 50';
@@ -34,9 +35,10 @@ cur_frm.add_fetch("item_code", "net_weight", "net_weight");
 cur_frm.add_fetch("item_code", "weight_uom", "weight_uom");
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
+	console.log(make_doclist(cdt, cdn));
 	if(doc.delivery_note && doc.__islocal) {
 		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
-		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
+		if(!(flt(ps_detail.net_weight) && cstr(ps_detail.weight_uom))) {
 			cur_frm.cscript.update_item_details(doc);
 		}
 	}
