@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 
 import webnotes
 from core.doctype.communication.communication import make
+from webnotes.utils import now
 
 max_communications_per_hour = 300
 
@@ -38,7 +39,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 	
 	# guest method, cap max writes per hour
 	if webnotes.conn.sql("""select count(*) from `tabCommunication`
-		where TIMEDIFF(NOW(), modified) < '01:00:00'""")[0][0] > max_communications_per_hour:
+		where TIMEDIFF(%s, modified) < '01:00:00'""", now())[0][0] > max_communications_per_hour:
 		webnotes.response["message"] = "Sorry: we believe we have received an unreasonably high number of requests of this kind. Please try later"
 		return
 	
