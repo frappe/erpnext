@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-21 18:36:22", 
+  "modified": "2013-03-22 18:43:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -257,10 +257,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "cost_center", 
+  "fieldname": "purchase_cost_center", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "label": "Cost Center", 
+  "label": "Purchase Cost Center", 
   "no_copy": 1, 
   "options": "Cost Center", 
   "print_hide": 1, 

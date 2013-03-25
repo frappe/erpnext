@@ -33,9 +33,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			else account_for = "stock_adjustment_account";
 			
 			this.frm.call({
-				method: "controllers.accounts_controller.get_default_account",
+				method: "accounts.utils.get_company_default",
 				args: {
-					"account_for": account_for, 
+					"fieldname": account_for, 
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {

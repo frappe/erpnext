@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-27 09:38:05", 
   "docstatus": 0, 
-  "modified": "2013-03-19 12:52:00", 
+  "modified": "2013-03-22 18:19:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -189,16 +189,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_adjustment_account", 
+  "fieldname": "stock_received_but_not_billed", 
   "fieldtype": "Link", 
-  "label": "Stock Adjustment Account", 
-  "options": "Account"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "expenses_included_in_valuation", 
-  "fieldtype": "Link", 
-  "label": "Expenses Included In Valuation", 
+  "label": "Stock Received But Not Billed", 
+  "no_copy": 1, 
   "options": "Account"
  }, 
  {
@@ -209,17 +203,27 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_delivered_but_not_billed", 
+  "fieldname": "stock_adjustment_account", 
   "fieldtype": "Link", 
-  "label": "Stock Delivered But Not Billed", 
+  "label": "Stock Adjustment Account", 
+  "no_copy": 1, 
   "options": "Account"
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_received_but_not_billed", 
+  "fieldname": "expenses_included_in_valuation", 
   "fieldtype": "Link", 
-  "label": "Stock Received But Not Billed", 
+  "label": "Expenses Included In Valuation", 
+  "no_copy": 1, 
   "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_adjustment_cost_center", 
+  "fieldtype": "Link", 
+  "label": "Stock Adjustment Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
  }, 
  {
   "description": "For reference only.", 

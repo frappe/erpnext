@@ -249,7 +249,7 @@ class DocType(SellingController):
 					['Delivery Note Item', 'Sales Invoice Item'],
 					['Sales Taxes and Charges','Sales Taxes and Charges'],
 					['Sales Team','Sales Team']]""")								
-			self.get_income_account('entries')
+			self.get_income_expense_account('entries')
 			
 		elif self.doc.sales_order_main:
 			self.validate_prev_docname('sales order')
@@ -259,7 +259,7 @@ class DocType(SellingController):
 				"""[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'], 
 				['Sales Taxes and Charges','Sales Taxes and Charges'], 
 				['Sales Team', 'Sales Team']]""")
-			self.get_income_account('entries')
+			self.get_income_expense_account('entries')
 			
 		ret = self.get_debit_to()
 		self.doc.debit_to = ret.get('debit_to')
@@ -269,16 +269,21 @@ class DocType(SellingController):
 		"""
 			Loads default accounts from items, customer when called from mapper
 		"""
-		self.get_income_account('entries')
+		self.get_income_expense_account('entries')
 		
 		
-	def get_income_account(self,doctype):		
+	def get_income_expense_account(self,doctype):		
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
-				item = webnotes.conn.get_value("Item", d.item_code, 
-					["default_income_account", "default_sales_cost_center"], as_dict=True)
+				item = webnotes.conn.get_value("Item", d.item_code, ["default_income_account", 
+					"default_sales_cost_center", "purchase_account", "cost_center"], as_dict=True)
 				d.income_account = item['default_income_account'] or ""
-				d.cost_center = item['default_sales_cost_center'] or ""			
+				d.cost_center = item['default_sales_cost_center'] or ""
+				
+				if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+						and cint(self.doc.is_pos) and cint(self.doc.update_stock):
+					d.expense_account = item['purchase_account'] or ""
+					d.purchase_cost_center = item['cost_center'] or ""
 
 
 	def get_item_details(self, args=None):
@@ -294,8 +299,10 @@ class DocType(SellingController):
 						'item_code':doc.fields.get('item_code'), 	
 						'income_account':doc.fields.get('income_account'), 
 						'cost_center': doc.fields.get('cost_center'), 
-						'warehouse': doc.fields.get('warehouse')
-					};
+						'warehouse': doc.fields.get('warehouse'),
+						'expense_account': doc.fields.get('expense_account'),
+						'purchase_cost_center': doc.fields.get('purchase_cost_center')
+					}
 
 					ret = self.get_pos_details(arg)
 					for r in ret:

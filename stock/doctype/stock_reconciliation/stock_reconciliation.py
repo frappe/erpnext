@@ -310,11 +310,9 @@ class DocType(StockController):
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 			
 		from accounts.general_ledger import make_gl_entries
-		
-		cost_center = "Auto Inventory Accounting - %s" % (self.company_abbr,)
-		
+				
 		gl_entries = self.get_gl_entries_for_stock(self.doc.expense_account, 
-			self.doc.stock_value_difference, cost_center=cost_center)
+			self.doc.stock_value_difference)
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
 		

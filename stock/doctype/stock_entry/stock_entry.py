@@ -176,11 +176,10 @@ class DocType(StockController):
 		
 		from accounts.general_ledger import make_gl_entries
 		
-		cost_center = "Auto Inventory Accounting - %s" % (self.company_abbr,)
 		total_valuation_amount = self.get_total_valuation_amount()
 		
 		gl_entries = self.get_gl_entries_for_stock(self.doc.expense_adjustment_account, 
-			total_valuation_amount, cost_center=cost_center)
+			total_valuation_amount)
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
 				

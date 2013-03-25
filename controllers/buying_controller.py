@@ -332,9 +332,9 @@ class BuyingController(StockController):
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
 		for d in self.doclist.get({"parentfield": parentfield}):
-			d.conversion_factor = d.conversion_factor or webnotes.conn.get_value(
+			d.conversion_factor = d.conversion_factor or flt(webnotes.conn.get_value(
 				"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
-				"conversion_factor") or 1
+				"conversion_factor")) or 1
 			if d.item_code and d.qty:
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it

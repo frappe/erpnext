@@ -17,11 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, getdate, nowdate, formatdate
+from webnotes.utils import cint, cstr, flt, getdate, nowdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from webnotes import msgprint
 from setup.utils import get_company_currency
 
 get_value = webnotes.conn.get_value
@@ -127,7 +127,7 @@ class DocType(TransactionBase):
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html, barcode from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
+		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, purchase_account, cost_center, description_html, barcode from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , args['item_code'])
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
@@ -141,7 +141,9 @@ class DocType(TransactionBase):
 			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
 			'warehouse'				: item and item[0]['default_warehouse'] or args.get('warehouse'),
 			'income_account'		: item and item[0]['default_income_account'] or args.get('income_account'),
+			'expense_account'		: item and item[0]['purchase_account'] or args.get('expense_account'),
 			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center'),
+			'purchase_cost_center'	: item and item[0]['cost_center'] or args.get('purchase_cost_center'),
 			'qty'					: 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
 			'adj_rate'				: 0,
 			'amount'				: 0,

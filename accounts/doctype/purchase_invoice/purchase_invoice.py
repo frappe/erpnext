@@ -33,6 +33,47 @@ class DocType(BuyingController):
 		self.doc, self.doclist = d, dl 
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
+		
+	def validate(self):
+		super(DocType, self).validate()
+		
+		self.po_required()
+		self.pr_required()
+		self.check_active_purchase_items()
+		self.check_conversion_rate()
+		self.validate_bill_no_date()
+		self.validate_bill_no()
+		self.validate_reference_value()
+		self.validate_credit_acc()
+		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
+		self.check_for_acc_head_of_supplier()
+		self.check_for_stopped_status()
+
+		self.po_list, self.pr_list = [], []
+		for d in getlist(self.doclist, 'entries'):
+			self.validate_supplier(d)
+			self.validate_po_pr(d)
+			if not d.purchase_order in self.po_list:
+				self.po_list.append(d.purchase_order)
+			if not d.purhcase_receipt in self.pr_list:
+				self.pr_list.append(d.purchase_receipt)
+
+
+		if not self.doc.is_opening:
+			self.doc.is_opening = 'No'
+
+		self.set_aging_date()
+
+		#set against account for credit to
+		self.set_against_expense_account()
+
+		#FY validation
+		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,
+		 	self.doc.posting_date,'Posting Date')
+		
+		self.validate_write_off_account()
+		self.update_raw_material_cost()
+		self.update_valuation_rate("entries")
 
 	def get_credit_to(self):
 		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.company_abbr,self.doc.supplier))		
@@ -265,7 +306,7 @@ class DocType(BuyingController):
 	def set_against_expense_account(self):
 		auto_inventory_accounting = \
 			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
-		stock_not_billed_account = "Stock Received But Not Billed - %s" % self.company_abbr
+		stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 		
 		against_accounts = []
 		for item in self.doclist.get({"parentfield": "entries"}):
@@ -276,6 +317,10 @@ class DocType(BuyingController):
 				
 				if stock_not_billed_account not in against_accounts:
 					against_accounts.append(stock_not_billed_account)
+			
+			elif not item.expense_head:
+				msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+					raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
 				# if no auto_inventory_accounting or not a stock item
@@ -302,47 +347,6 @@ class DocType(BuyingController):
 	def validate_write_off_account(self):
 		if self.doc.write_off_amount and not self.doc.write_off_account:
 			msgprint("Please enter Write Off Account", raise_exception=1)
-
-	def validate(self):
-		super(DocType, self).validate()
-		
-		self.po_required()
-		self.pr_required()
-		self.check_active_purchase_items()
-		self.check_conversion_rate()
-		self.validate_bill_no_date()
-		self.validate_bill_no()
-		self.validate_reference_value()
-		self.validate_credit_acc()
-		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
-		self.check_for_acc_head_of_supplier()
-		self.check_for_stopped_status()
-
-		self.po_list, self.pr_list = [], []
-		for d in getlist(self.doclist, 'entries'):
-			self.validate_supplier(d)
-			self.validate_po_pr(d)
-			if not d.purchase_order in self.po_list:
-				self.po_list.append(d.purchase_order)
-			if not d.purhcase_receipt in self.pr_list:
-				self.pr_list.append(d.purchase_receipt)
-
-
-		if not self.doc.is_opening:
-			self.doc.is_opening = 'No'
-
-		self.set_aging_date()
-
-		#set against account for credit to
-		self.set_against_expense_account()
-
-		#FY validation
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,
-		 	self.doc.posting_date,'Posting Date')
-		
-		self.validate_write_off_account()
-		self.update_raw_material_cost()
-		self.update_valuation_rate("entries")
 
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
@@ -445,7 +449,7 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_inventory_accounting = False
 		if auto_inventory_accounting:
-			stock_acocunt = self.get_default_account("stock_received_but_not_billed")
+			stock_account = self.get_company_default("stock_received_but_not_billed")
 			
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_inventory_accounting and item.item_code in self.stock_items:
@@ -458,7 +462,7 @@ class DocType(BuyingController):
 					
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": stock_acocunt,
+							"account": stock_account,
 							"against": self.doc.credit_to,
 							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
 								*  flt(item.qty),
@@ -483,8 +487,8 @@ class DocType(BuyingController):
 			# this will balance out valuation amount included in cost of goods sold
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.get_default_account("expenses_included_in_valuation"),
-					"cost_center": "Auto Inventory Accounting - %s" % self.company_abbr,
+					"account": self.get_company_default("expenses_included_in_valuation"),
+					"cost_center": self.get_company_default("stock_adjustment_cost_center"),
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock"
@@ -525,8 +529,8 @@ class DocType(BuyingController):
 					and is_active = 1 """, (d.item_code,))
 				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
 				
-				d.conversion_factor = d.conversion_factor or webnotes.conn.get_value(
+				d.conversion_factor = d.conversion_factor or flt(webnotes.conn.get_value(
 					"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
-					"conversion_factor") or 1
+					"conversion_factor")) or 1
 		
 				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)

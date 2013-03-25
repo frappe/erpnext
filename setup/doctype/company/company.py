@@ -199,12 +199,7 @@ class DocType:
 		if not self.doc.payables_group and webnotes.conn.exists('Account', 
 			'Accounts Payable - ' + self.doc.abbr):
 				webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - ' + self.doc.abbr)
-			
-		if not self.doc.stock_delivered_but_not_billed and webnotes.conn.exists("Account", 
-			"Stock Delivered But Not Billed - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "stock_delivered_but_not_billed", 
-					"Stock Delivered But Not Billed - " + self.doc.abbr)
-					
+								
 		if not self.doc.stock_received_but_not_billed and webnotes.conn.exists("Account", 
 			"Stock Received But Not Billed - " + self.doc.abbr):
 				webnotes.conn.set(self.doc, "stock_received_but_not_billed", 
@@ -219,7 +214,12 @@ class DocType:
 			"Expenses Included In Valuation - " + self.doc.abbr):
 				webnotes.conn.set(self.doc, "expenses_included_in_valuation", 
 					"Expenses Included In Valuation - " + self.doc.abbr)
-			
+		
+		if not self.doc.stock_adjustment_cost_center and webnotes.conn.exists("Cost Center", 
+			"Auto Inventory Accounting - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", 
+					"Auto Inventory Accounting - " + self.doc.abbr)
+	
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):

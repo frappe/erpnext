@@ -320,7 +320,7 @@ class DocType(BuyingController):
 		
 		from accounts.general_ledger import make_gl_entries
 		
-		against_stock_account = self.get_default_account("stock_received_but_not_billed")
+		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		total_valuation_amount = self.get_total_valuation_amount()
 		gl_entries = self.get_gl_entries_for_stock(against_stock_account, total_valuation_amount)
 		

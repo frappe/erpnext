@@ -248,3 +248,64 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 		and voucher_no != ifnull(against_voucher, "")
 		and ifnull(is_cancelled, "No")="No" """,
 		(now(), webnotes.session.user, ref_type, ref_no))
+
+@webnotes.whitelist()
+def get_company_default(company, fieldname):
+	value = webnotes.conn.get_value("Company", company, fieldname)
+	
+	if not value:
+		msgprint(_("Please mention default value for '") + 
+			_(webnotes.get_doctype("company").get_label(fieldname) + 
+			_("' in Company: ") + company), raise_exception=True)
+			
+	return value
+		
+def create_stock_in_hand_jv(reverse=False):
+	from webnotes.utils import nowdate
+	today = nowdate()
+	fiscal_year = get_fiscal_year(today)[0]
+	
+	for company in webnotes.conn.sql_list("select name from `tabCompany`"):
+		stock_rbnb_value = get_stock_rbnb_value(company)
+		
+		jv = webnotes.bean([
+			{
+				"doctype": "Journal Voucher",
+				"naming_series": "_PATCH-",
+				"company": company,
+				"posting_date": today,
+				"fiscal_year": fiscal_year,
+				"voucher_type": "Journal Entry"
+			},
+			{
+				"doctype": "Journal Voucher Detail",
+				"parentfield": "entries",
+				"account": get_company_default(company, "stock_received_but_not_billed"),
+				(reverse and "debit" or "credit"): stock_rbnb_value
+			},
+			{
+				"doctype": "Journal Voucher Detail",
+				"parentfield": "entries",
+				"account": get_company_default(company, "stock_adjustment_account"),
+				(reverse and "credit" or "debit"): stock_rbnb_value
+			},
+		])
+		jv.insert()
+		jv.submit()
+		
+def get_stock_rbnb_value(company):	
+	total_received_amount = webnotes.conn.sql("""select sum(valuation_amount) 
+		from `tabPurchase Receipt Item` pr_item where docstatus=1 
+		and exists(select name from `tabItem` where name = pr_item.item_code 
+			and is_stock_item='Yes')
+		and exist(select name from `tabPurchase Receipt` 
+			where name = pr_item.parent and company = %s)""", company)
+		
+	total_billed_amount = webnotes.conn.sql("""select sum(valuation_amount) 
+		from `tabPurchase Invoice Item` pi_item where docstatus=1 
+		and exists(select name from `tabItem` where name = pi_item.item_code 
+			and is_stock_item='Yes')
+		and exist(select name from `tabPurchase Invoice` 
+			where name = pi_item.parent and company = %s)""", company)
+		
+	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])
