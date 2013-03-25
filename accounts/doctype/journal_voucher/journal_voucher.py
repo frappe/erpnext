@@ -349,6 +349,10 @@ class DocType(AccountsController):
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
 
+@webnotes.whitelist()
+def get_default_bank_cash_account(company, voucher_type):
+	return webnotes.conn.get_value("Company", company,
+		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 
 def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
