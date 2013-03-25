@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:55", 
+  "creation": "2013-03-25 15:35:04", 
   "docstatus": 0, 
-  "modified": "2013-03-22 18:40:48", 
+  "modified": "2013-03-25 15:35:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -215,6 +215,7 @@
   "label": "Expense Account", 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "120px"
  }, 
  {
@@ -230,17 +231,6 @@
   "print_width": "120px", 
   "read_only": 0, 
   "reqd": 0, 
-  "width": "120px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "purchase_cost_center", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "label": "Purchase Cost Center", 
-  "options": "Cost Center", 
-  "print_hide": 1, 
   "width": "120px"
  }, 
  {

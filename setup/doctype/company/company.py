@@ -249,14 +249,16 @@ class DocType:
 			
 	def on_update(self):
 		self.set_letter_head()
-		ac = sql("select name from tabAccount where company=%s and docstatus<2 limit 1",
-			self.doc.name)
-		if not ac:
+
+		if not webnotes.conn.sql("""select name from tabAccount 
+			where company=%s and docstatus<2 limit 1""", self.doc.name):
 			self.create_default_accounts()
-		self.set_default_accounts()
-		cc = sql("select name from `tabCost Center` where cost_center_name = 'Root' and company_name = '%s'"%(self.doc.name))
-		if not cc:
+		
+		if not webnotes.conn.sql("""select name from `tabCost Center` 
+			where cost_center_name = 'Root' and company_name = %s""", self.doc.name):
 			self.create_default_cost_center()
+			
+		self.set_default_accounts()
 			
 		if self.doc.default_currency:
 			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)

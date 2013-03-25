@@ -27,8 +27,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
-session = webnotes.session
-
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 
@@ -156,46 +154,57 @@ class DocType(SellingController):
 
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""
-		pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
-		if not pos:
-			pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+		pos = self.pos_details
+
 		if pos:
-			val = webnotes.conn.sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
+			val = webnotes.conn.sql("""select name from `tabAccount` 
+				where name = %s and docstatus != 2""", 
+				(cstr(self.doc.customer) + " - " + self.get_company_abbr()))
+
 			val = val and val[0][0] or ''
-			if not val: val = pos and pos[0]['customer_account'] or ''
+			if not val: val = pos[0]['customer_account'] or ''
+			
 			if not self.doc.debit_to:
 				webnotes.conn.set(self.doc,'debit_to',val)
 			
-			lst = ['territory','naming_series','currency','charge','letter_head','tc_name','price_list_name','company','select_print_heading','cash_bank_account']
+			lst = ['territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
+				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account']
 				
 			for i in lst:
-				val = pos and pos[0][i] or ''
-				self.doc.fields[i] = val
+				self.doc.fields[i] = pos[0][i] or ''
+
 			self.set_pos_item_values()
 			
-			val = pos and flt(pos[0]['conversion_rate']) or 0	
-			self.doc.conversion_rate = val
+			self.doc.conversion_rate = flt(pos[0]['conversion_rate']) or 0	
 
 			#fetch terms	
-			if self.doc.tc_name:	 self.get_tc_details()
+			if self.doc.tc_name:
+				self.get_tc_details()
 			
 			#fetch charges
-			if self.doc.charge:		self.get_other_charges()
+			if self.doc.charge:
+				self.get_other_charges()
 
 
 	def set_pos_item_values(self):
 		"""Set default values related to pos for previously created sales invoice."""
-		if cint(self.doc.is_pos) ==1:
-			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
-			if not dtl:
-				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+		if cint(self.doc.is_pos) == 1:
+			dtl = self.pos_details
+			
 			for d in getlist(self.doclist,'entries'):
 				# overwrite if mentioned in item
-				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-				d.income_account = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or d.income_account
-				d.cost_center = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or d.cost_center
-				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or d.warehouse
-
+				item = webnotes.conn.sql("""select default_income_account,
+					default_sales_cost_center, default_warehouse, purchase_account
+					from tabItem where name = %s""", (d.item_code,), as_dict=1)
+				
+				d.income_account = (item and item[0]['default_income_account']) \
+					or (dtl and dtl[0]['income_account']) or d.income_account
+				d.cost_center = (item and item[0]['default_sales_cost_center']) \
+					or (dtl and dtl[0]['cost_center']) or d.cost_center
+				d.warehouse = (item and item[0]['default_warehouse']) \
+					or (dtl and dtl[0]['warehouse']) or d.warehouse
+				d.expense_account = (item and item[0].purchase_account) \
+					or (dtl and dtl[0].expense_account) or d.expense_account
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -276,15 +285,13 @@ class DocType(SellingController):
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
 				item = webnotes.conn.get_value("Item", d.item_code, ["default_income_account", 
-					"default_sales_cost_center", "purchase_account", "cost_center"], as_dict=True)
+					"default_sales_cost_center", "purchase_account"], as_dict=True)
 				d.income_account = item['default_income_account'] or ""
 				d.cost_center = item['default_sales_cost_center'] or ""
 				
 				if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
 						and cint(self.doc.is_pos) and cint(self.doc.update_stock):
 					d.expense_account = item['purchase_account'] or ""
-					d.purchase_cost_center = item['cost_center'] or ""
-
 
 	def get_item_details(self, args=None):
 		import json
@@ -301,7 +308,6 @@ class DocType(SellingController):
 						'cost_center': doc.fields.get('cost_center'), 
 						'warehouse': doc.fields.get('warehouse'),
 						'expense_account': doc.fields.get('expense_account'),
-						'purchase_cost_center': doc.fields.get('purchase_cost_center')
 					}
 
 					ret = self.get_pos_details(arg)
@@ -309,14 +315,27 @@ class DocType(SellingController):
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]		
 
+	@property
+	def pos_details(self):
+		if not hasattr(self, "_pos_details"):
+			dtl = webnotes.conn.sql("""select income_account, warehouse, cost_center, 
+				expense_account from `tabPOS Setting` where user = %s and company = %s""", 
+				(webnotes.session['user'], self.doc.company), as_dict=1)			 
+			if not dtl:
+				dtl = webnotes.conn.sql("""select income_account, warehouse, cost_center, 
+					expense_account from `tabPOS Setting` where ifnull(user,'') = '' 
+					and company = %s""", self.doc.company, as_dict=1)
+			self._pos_details = dtl
+			
+		return self._pos_details
 
 	def get_pos_details(self, args, ret = {}):
 		if args['item_code'] and cint(self.doc.is_pos) == 1:
-			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
-			if not dtl:
-				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+			dtl = self.pos_details
 
-			item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(args['item_code']), as_dict=1)
+			item = webnotes.conn.sql("""select default_income_account, default_sales_cost_center, 
+				default_warehouse, purchase_account from tabItem where name = %s""", 
+				args['item_code'], as_dict=1)
 
 			ret['income_account'] = item and item[0].get('default_income_account') \
 				or (dtl and dtl[0].get('income_account') or args.get('income_account'))
@@ -326,9 +345,14 @@ class DocType(SellingController):
 			
 			ret['warehouse'] = item and item[0].get('default_warehouse') \
 				or (dtl and dtl[0].get('warehouse') or args.get('warehouse'))
+			
+			ret['expense_account'] = item and item[0].get('purchase_account') \
+				or (dtl and dtl[0].get('expense_account') or args.get('expense_account'))
 
 			if ret['warehouse']:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], ret['warehouse']))
+				actual_qty = webnotes.conn.sql("""select actual_qty from `tabBin` 
+					where item_code = %s and warehouse = %s""", 
+					(args['item_code'], ret['warehouse']))
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
 
@@ -545,7 +569,7 @@ class DocType(SellingController):
 	 
 	
 	def get_warehouse(self):
-		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (webnotes.session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
 			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)

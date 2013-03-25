@@ -48,15 +48,17 @@ class DocType:
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				msgprint("Parent account does not exists", raise_exception=1)
-			elif par and par[0][0] == self.doc.name:
+			elif par[0][0] == self.doc.name:
 				msgprint("You can not assign itself as parent account", raise_exception=1)
-			elif par and par[0][1] != 'Group':
+			elif par[0][1] != 'Group':
 				msgprint("Parent account can not be a ledger", raise_exception=1)
-			elif par and self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
+			elif self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
 				msgprint("You can not move a %s account under %s account" % 
 					(self.doc.debit_or_credit, par[0][3]), raise_exception=1)
-			elif par and not self.doc.is_pl_account:
+			
+			if not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
+			if not self.doc.debit_or_credit:
 				self.doc.debit_or_credit = par[0][3]
 
 	def validate_max_root_accounts(self):

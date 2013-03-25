@@ -65,4 +65,4 @@ class SellingController(StockController):
 	def check_expense_account(self, item):
 		if item.buying_amount and not item.expense_account:
 			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
-				raise_exception=1)	
+				raise_exception=1)

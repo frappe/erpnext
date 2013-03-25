@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:59", 
+  "creation": "2013-03-25 11:55:16", 
   "docstatus": 0, 
-  "modified": "2013-03-22 18:43:10", 
+  "modified": "2013-03-25 15:43:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -253,14 +253,15 @@
   "no_copy": 1, 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "120px"
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "purchase_cost_center", 
+  "fieldname": "cost_center", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "label": "Purchase Cost Center", 
+  "label": "Cost Center", 
   "no_copy": 1, 
   "options": "Cost Center", 
   "print_hide": 1, 
