@@ -1,13 +1,12 @@
 [
  {
-  "creation": "2012-07-03 13:30:55", 
+  "creation": "2012-07-12 23:29:44", 
   "docstatus": 0, 
-  "modified": "2012-07-12 16:16:27", 
+  "modified": "2013-03-25 17:32:05", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
-  "_last_update": "1325570647", 
   "allow_copy": 1, 
   "allow_email": 1, 
   "allow_print": 1, 
@@ -16,9 +15,7 @@
   "in_create": 1, 
   "issingle": 1, 
   "module": "Setup", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "version": 1
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -37,18 +34,14 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
+  "report": 0, 
   "role": "System Manager", 
+  "submit": 0, 
   "write": 1
  }, 
  {
   "doctype": "DocType", 
   "name": "Email Settings"
- }, 
- {
-  "doctype": "DocPerm"
- }, 
- {
-  "doctype": "DocPerm"
  }, 
  {
   "description": "Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.", 
@@ -101,6 +94,13 @@
   "fieldname": "auto_email_id", 
   "fieldtype": "Data", 
   "label": "Auto Email Id"
+ }, 
+ {
+  "description": "If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.", 
+  "doctype": "DocField", 
+  "fieldname": "send_print_in_body_and_attachment", 
+  "fieldtype": "Check", 
+  "label": "Send Print in Body and Attachment"
  }, 
  {
   "description": "Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets", 
@@ -180,5 +180,8 @@
   "fieldname": "support_autoreply", 
   "fieldtype": "Text", 
   "label": "Custom Autoreply Message"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

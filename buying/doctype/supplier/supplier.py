@@ -106,9 +106,9 @@ class DocType(TransactionBase):
 	def create_account_head(self):
 		if self.doc.company :
 			abbr = self.get_company_abbr() 
+			parent_account = self.get_parent_account(abbr)
 						
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
-				parent_account = self.get_parent_account(abbr)
 				
 				ac = add_ac({
 					'account_name': self.doc.name,
@@ -121,10 +121,18 @@ class DocType(TransactionBase):
 					'master_name': self.doc.name,
 				})
 				msgprint(_("Created Account Head: ") + ac)
-				
+			else:
+				self.check_parent_account(parent_account, abbr)
 		else : 
 			msgprint("Please select Company under which you want to create account head")
-			
+	
+	def check_parent_account(self, parent_account, abbr):
+		if webnotes.conn.get_value("Account", self.doc.name + " - " + abbr, 
+			"parent_account") != parent_account:
+			ac = webnotes.bean("Account", self.doc.name + " - " + abbr)
+			ac.doc.parent_account = parent_account
+			ac.save()
+	
 	def get_contacts(self,nm):
 		if nm:
 			contact_details =webnotes.conn.convert_to_lists(sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = '%s'"%nm))
