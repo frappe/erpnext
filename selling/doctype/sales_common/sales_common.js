@@ -310,8 +310,10 @@ cur_frm.cscript.barcode = function(doc, cdt, cdn) {
 	var callback = function(r, rt) {
 		cur_frm.cscript.item_code(doc, cdt, cdn);
 	}
-	get_server_fields('get_barcode_details', d.barcode, cur_frm.cscript.fname, 
+	if(d.barcode) {
+		get_server_fields('get_barcode_details', d.barcode, cur_frm.cscript.fname, 
 		doc, cdt, cdn, 1, callback);
+	}
 }
 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field('batch_no').get_query = 
