@@ -153,7 +153,8 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			callback: function(r) {
 				if(r.message) {
 					var jvdetail = wn.model.add_child(doc, "Journal Voucher Detail", "entries");
-					jvdetail.account = r.message || "";
+					jvdetail.account = r.message.account;
+					jvdetail.balance = r.message.balance;
 					refresh_field("entries");
 				}
 			}
