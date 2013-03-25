@@ -1,0 +1,49 @@
+{% extends "html/page.html" %}
+
+{% set title=doc.name %}
+
+{% block content %}
+<div class="span12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a> <span class="divider">/</span></li>
+    	<li><a href="account">My Account</a> <span class="divider">/</span></li>
+    	<li><a href="tickets">My Tickets</a> <span class="divider">/</span></li>
+    	<li class="active">{{ doc.name }}</li>
+    </ul>
+	<h3><i class="icon-file"></i> {{ doc.name }}</h3>
+	<hr>
+	{%- if doc.status -%}
+	<div class="row">
+		<div class="span2">
+			<div class="label">{{ doc.status }}</div>
+		</div>
+		<div class="span7">
+			{{ doc.subject }}
+		</div>
+		<div class="span3">
+			{{ utils.formatdate(doc.transaction_date) }}
+		</div>
+	</div>
+	<br>
+	<h4>Messages</h4>
+	{%- if doclist.get({"doctype":"Communication"}) -%}
+	<div style="font-size: 13px;">
+		<table class="table table-bordered table-striped">
+			<tbody>
+				{%- for comm in doclist.get({"doctype":"Communication"}) %}
+				<tr>
+					<td>
+					<h5>{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
+					<p>{{ comm.content }}</p>
+					</td>
+				</tr>
+				{% endfor -%}
+			</tbody>
+		</table>
+	</div>
+	{%- else -%}
+	<div class="alert">No messages</div>
+	{%- endif -%}
+	{%- endif -%}
+</div>
+{% endblock %}

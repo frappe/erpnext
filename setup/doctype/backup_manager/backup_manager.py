@@ -3,8 +3,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
-from backup_dropbox import dropbox_callback, get_dropbox_session, get_dropbox_authorize_url
-from backup_googledrive import gdrive_callback, get_gdrive_flow, get_gdrive_authorize_url
 
 class DocType:
 	def __init__(self, d, dl):

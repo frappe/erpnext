@@ -17,27 +17,53 @@ $(document).ready(function(wrapper) {
 
 // Login
 login.do_login = function(){
-
     var args = {};
-    args['usr']=$("#login_id").val();
-    args['pwd']=$("#password").val();
+	if(window.is_sign_up) {
+		args.cmd = "core.doctype.profile.profile.sign_up";
+		args.email = $("#login_id").val();
+	    args.full_name = $("#full_name").val();
 
-	if(!args.usr || !args.pwd) {
-		login.set_message("Both login and password required.");
+		if(!args.email || !valid_email(args.email) || !args.full_name) {
+			login.set_message("Valid email and name required.");
+			return false;
+		}
+	} else if(window.is_forgot) {
+		args.cmd = "reset_password";
+		args.user = $("#login_id").val();
+		
+		if(!args.user) {
+			login.set_message("Valid Login Id required.");
+			return false;
+		}
+
+	} else {
+		args.cmd = "login"
+	    args.usr = $("#login_id").val();
+	    args.pwd = $("#password").val();
+
+		if(!args.usr || !args.pwd) {
+			login.set_message("Both login and password required.");
+			return false;
+		}	
 	}
 
 	$('#login_btn').attr("disabled", "disabled");
+	$("#login-spinner").toggle(true);
 	$('#login_message').toggle(false);
 	
 	$.ajax({
 		type: "POST",
 		url: "server.py",
-		data: {cmd:"login", usr:args.usr, pwd: args.pwd},
+		data: args,
 		dataType: "json",
 		success: function(data) {
+			$("input").val("");
+			$("#login-spinner").toggle(false);
 			$('#login_btn').attr("disabled", false);
 			if(data.message=="Logged In") {
 				window.location.href = "app.html";
+			} else if(data.message=="No App") {
+				window.location.href = "index";
 			} else {
 				login.set_message(data.message);
 			}
@@ -47,28 +73,23 @@ login.do_login = function(){
 	return false;
 }
 
-login.show_forgot_password = function(){
-    // create dialog
-	var login_id = $("#login_id").val();
-	if(!login_id || !valid_email(login_id)) {
-		login.set_message("Please set your login id (which is your email where the password will be sent);");
-		return;
-	}
-	login.set_message("Sending email with new password...");
-	$("#forgot-password").remove();
+login.sign_up = function() {
+	$("#login_wrapper h3").html("Sign Up");
+	$("#login-label").html("Email Id");
+	$("#password-row, #sign-up-wrapper, #login_message").toggle(false);
+	$("#full-name-row").toggle(true);
+	$("#login_btn").html("Register");
+	$("#forgot-wrapper").html("<a onclick='location.reload()' href='#'>Login</a>")
+	window.is_sign_up = true;
+}
 
-	$.ajax({
-		method: "POST",
-		url: "server.py",
-		data: {
-			cmd: "reset_password",
-			user: login_id,
-			_type: "POST"
-		},
-		success: function(data) {
-			login.set_message("A new password has been sent to your email id.", "GREEN");
-		}
-	})
+login.show_forgot_password = function() {
+	$("#login_wrapper h3").html("Forgot");
+	$("#login-label").html("Email Id");
+	$("#password-row, #sign-up-wrapper, #login_message").toggle(false);
+	$("#login_btn").html("Send Password");
+	$("#forgot-wrapper").html("<a onclick='location.reload()' href='#'>Login</a>")
+	window.is_forgot = true;
 }
 
 login.set_message = function(message, color) {

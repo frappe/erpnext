@@ -1,0 +1,56 @@
+{% extends "html/page.html" %}
+
+{% set title="My Profile" %}
+
+{% block content %}
+<div class="span12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a> <span class="divider">/</span></li>
+    	<li><a href="account">My Account</a> <span class="divider">/</span></li>
+    	<li class="active">My Profile</li>
+    </ul>
+	<h2><i class="icon-user"></i> My Profile</h2>
+	<hr>
+	<div class="alert" id="message" style="display: none;"></div>
+	<form class="form-horizontal">
+		<div class="control-group">
+			<label class="control-label" for="fullname">Full Name</label>
+			<div class="controls">
+				<input type="text" id="fullname" placeholder="Your Name">
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="password">Password</label>
+			<div class="controls">
+				<input type="password" id="password" placeholder="Password">
+			</div>
+		</div>
+		<div class="control-group">
+			<div class="controls">
+			<button id="update_profile" type="submit" class="btn">Update</button>
+			</div>
+		</div>
+	</form>
+</div>
+<script>
+$(document).ready(function() {
+	$("#fullname").val(getCookie("full_name") || "");
+	$("#update_profile").click(function() {
+		wn.call({
+			method: "core.doctype.profile.profile.update_profile",
+			type: "POST",
+			args: {
+				fullname: $("#fullname").val(),
+				password: $("#password").val()
+			},
+			btn: this,
+			msg: $("#message"),
+			callback: function(r) {
+				if(!r.exc) $("#user-full-name").html($("#fullname").val());
+			}
+		});
+		return false;
+	})
+})
+</script>
+{% endblock %}

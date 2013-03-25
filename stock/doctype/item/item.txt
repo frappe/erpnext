@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-21 14:54:43", 
+  "creation": "2013-03-07 15:53:11", 
   "docstatus": 0, 
-  "modified": "2013-03-06 16:02:47", 
+  "modified": "2013-03-20 15:10:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,7 +33,6 @@
   "parent": "Item", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
   "submit": 0
@@ -786,6 +785,12 @@
   "fieldtype": "Section Break"
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "copy_from_item_group", 
+  "fieldtype": "Button", 
+  "label": "Copy From Item Group"
+ }, 
+ {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "item_website_specifications", 
@@ -804,6 +809,24 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Material Master Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material Master Manager", 
   "write": 1
  }, 
@@ -812,6 +835,15 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "System Manager"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
   "role": "Material Manager", 
   "write": 0
  }, 
@@ -820,6 +852,25 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material User", 
   "write": 0
  }

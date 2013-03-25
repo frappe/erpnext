@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-08 11:36:50", 
   "docstatus": 0, 
-  "modified": "2013-03-11 15:23:21", 
+  "modified": "2013-03-18 13:55:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -65,6 +65,7 @@
   "doctype": "DocField", 
   "fieldname": "blogger", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Blogger", 
   "options": "Blogger", 
   "reqd": 1
@@ -73,6 +74,7 @@
   "doctype": "DocField", 
   "fieldname": "blog_category", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Blog Category", 
   "options": "Blog Category"
  }, 
@@ -86,6 +88,7 @@
   "doctype": "DocField", 
   "fieldname": "blog_intro", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Blog Intro", 
   "reqd": 1
  }, 

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-21 14:54:43", 
+  "creation": "2013-02-21 12:28:24", 
   "docstatus": 0, 
-  "modified": "2013-03-19 14:46:49", 
+  "modified": "2013-03-21 15:42:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -58,6 +56,19 @@
   "fieldname": "session_expiry", 
   "fieldtype": "Data", 
   "label": "Session Expiry"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "For Server Side Print Formats", 
+  "doctype": "DocField", 
+  "fieldname": "print_style", 
+  "fieldtype": "Select", 
+  "label": "Print Format Style", 
+  "options": "Standard\nClassic\nModern\nSpartan"
  }, 
  {
   "doctype": "DocField", 
@@ -423,6 +434,11 @@
   "fieldname": "sms_sender_name", 
   "fieldtype": "Data", 
   "label": "SMS Sender Name"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"

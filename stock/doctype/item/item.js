@@ -137,3 +137,17 @@ cur_frm.cscript.on_remove_attachment = function(doc) {
 			+ wn.meta.get_docfield(doc.doctype, "description_html").label);
 	}
 };
+
+cur_frm.cscript.copy_from_item_group = function(doc) {
+	wn.model.with_doc("Item Group", doc.item_group, function() {
+		$.each(wn.model.get("Item Website Specification", {parent:doc.item_group}), 
+			function(i, d) {
+				var n = wn.model.add_child(doc, "Item Website Specification", 
+					"item_website_specifications");
+				n.label = d.label;
+				n.description = d.description;
+			}
+		);
+		cur_frm.refresh();
+	});
+}

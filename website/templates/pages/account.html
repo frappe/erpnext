@@ -1,0 +1,18 @@
+{% extends "html/page.html" %}
+
+{% set title="My Account" %}
+
+{% block content %}
+<div class="span12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a> <span class="divider">/</span></li>
+    	<li class="active">My Account</li>
+    </ul>
+	<h3>My Account</h3>
+	<p><a href="profile"><i class="icon-user"></i> Change my name, password</a></p>
+	<p><a href="orders"><i class="icon-list"></i> My Orders</a></p>
+	<p><a href="tickets"><i class="icon-tags"></i> My Tickets</a></p>
+	<p><a href="server.py?cmd=web_logout"><i class="icon-signout"></i> Logout</a></p>
+	</ul>
+</div>
+{% endblock %}

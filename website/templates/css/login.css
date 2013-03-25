@@ -4,9 +4,17 @@
 			margin: 70px auto;
 		}
 
+		#login_wrapper,
+		#login_wrapper h3 {
+			color: #333;
+		}
+		
+		#login_wrapper a {
+			color: #0088cc;
+		}
+
 		.layout-wrapper {
 			background-color: #fff;
-			color: #333;
 			padding: 10px;
 			box-shadow: 1px 1px 3px 3px #ccc;
 			font-size: 12px;
@@ -31,8 +39,5 @@
 		.login-footer {
 			text-align: center;
 			padding: 15px;
-		}
-		.login-footer, .login-footer a {
-			color: #999;
 		}
 	</style>

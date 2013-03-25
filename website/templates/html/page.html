@@ -1,20 +1,20 @@
 {% extends "html/outer.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title -%}{{ title }}{%- endblock %}
 
-{% block header %}
+{% block header -%}
 	{{ super() }}
 	<script>
-	{% block javascript %}
-	{% endblock %}
+	{% block javascript -%}
+	{%- endblock %}
 	</script>
-	{% block css %}
-	{% if insert_style %}	
+	{% block css -%}
+	{% if insert_style -%}	
 	<style>{{ css }}</style>
-	{% endif %}
-	{% endblock %}
-{% endblock %}
+	{%- endif %}
+	{%- endblock %}
+{%- endblock -%}
 
-{% block content %}
+{%- block content -%}
 	{{ content }}
-{% endblock %}
+{%- endblock %}

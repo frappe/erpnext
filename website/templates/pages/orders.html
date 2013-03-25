@@ -1,0 +1,70 @@
+{% extends "html/page.html" %}
+
+{% set title="My Orders" %}
+
+{% block content %}
+<script>
+global_number_format = "{{ global_number_format }}";
+currency = "{{ currency }}";
+wn.currency_symbols = {{ currency_symbols }};
+</script>
+<div class="span12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a> <span class="divider">/</span></li>
+    	<li><a href="account">My Account</a> <span class="divider">/</span></li>
+    	<li class="active">My Orders</li>
+    </ul>
+	<h3><i class="icon-list"></i> My Orders</h3>
+	<hr>
+	<div id="order-list" style="font-size: 13px;">
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 100%;"></div>
+		</div>
+	</div>
+</div>
+<script>
+$(document).ready(function() {
+	var order_start = 0;
+		
+	wn.call({
+		method: "selling.doctype.sales_order.sales_order.get_orders",
+		args: {
+			start: order_start
+		},
+		callback: function(r) {
+			$("#order-list .progress").remove();
+			var $list = $("#order-list");
+			
+			if(!(r.message && r.message.length)) {
+				$list.html("<div class='alert'>No Orders Yet</div>");
+				return;
+			}
+			
+			$.each(r.message, function(i, order) {
+				
+				// parent
+				var $order = $(repl('<div class="row">\
+					<div class="span3"><a href="order?name=%(name)s">%(name)s</a></div>\
+					<div class="span9"></div>\
+				</div>', order)).appendTo($list);
+				
+				// items
+				$.each(order.items || [], function(i, item) {
+					item.export_rate = format_currency(item.export_rate, order.currency);
+					item.export_amount = format_currency(item.export_amount, order.currency);
+					var $item = $(repl('<div class="row">\
+							<div class="span3">%(item_name)s</div>\
+							<div class="span2" style="text-align: right;">%(export_rate)s</div>\
+							<div class="span2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
+							<div class="span2" style="text-align: right;">%(export_amount)s</div>\
+						</div>\
+					</div>', item)).appendTo($order.find(".span9"));
+				});
+				
+				$("<hr>").appendTo($list);
+			});
+		}
+	})
+})
+</script>
+{% endblock %}

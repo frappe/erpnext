@@ -70,4 +70,28 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
-	
+
+@webnotes.whitelist()
+def get_tickets():
+	tickets = webnotes.conn.sql("""select 
+		name, subject, status 
+		from `tabSupport Ticket` 
+		where raised_by=%s 
+		order by modified desc
+		limit 20""", 
+			webnotes.session.user, as_dict=1)
+	return tickets
+
+def get_website_args():	
+	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
+	if bean.doc.raised_by != webnotes.session.user:
+		return {
+			"doc": {"name": "Not Allowed"}
+		}
+	else:
+		return {
+			"doc": bean.doc,
+			"doclist": bean.doclist,
+			"webnotes": webnotes,
+			"utils": webnotes.utils
+		}

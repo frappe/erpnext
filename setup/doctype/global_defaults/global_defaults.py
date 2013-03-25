@@ -21,6 +21,7 @@ import webnotes.defaults
 from webnotes.utils import cint
 
 keydict = {
+	"print_style": "print_style",
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',

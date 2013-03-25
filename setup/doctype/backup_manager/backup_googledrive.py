@@ -11,12 +11,11 @@
 # gdrive_client_secret
 
 import httplib2
-import sys
 import os
 import mimetypes
 import webnotes
 import oauth2client.client
-from webnotes.utils import get_request_site_address, get_base_path
+from webnotes.utils import get_base_path
 from webnotes import _, msgprint
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
@@ -53,7 +52,7 @@ def backup_to_gdrive():
 	from webnotes.utils.backups import new_backup
 	if not webnotes.conn:
 		webnotes.connect()
-	flow = get_gdrive_flow()
+	get_gdrive_flow()
 	credentials_json = webnotes.conn.get_value("Backup Manager", None, "gdrive_credentials")
 	credentials = oauth2client.client.Credentials.new_from_json(credentials_json)
 	http = httplib2.Http()
@@ -101,11 +100,6 @@ def get_gdrive_flow():
 		webnotes.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
 		raise_exception=True)
 
-	#callback_url = get_request_site_address(True) \
-	#	+ "?cmd=setup.doctype.backup_manager.backup_googledrive.googledrive_callback"
-	
-	# for installed apps since google does not support subdomains
-	
 	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
 		"https://www.googleapis.com/auth/drive", 'urn:ietf:wg:oauth:2.0:oob')
 	return flow
