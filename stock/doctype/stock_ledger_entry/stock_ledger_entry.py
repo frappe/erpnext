@@ -24,7 +24,7 @@ sql = webnotes.conn.sql
 msgprint = webnotes.msgprint
 from accounts.utils import get_fiscal_year
 
-
+class InvalidWarehouseCompany(Exception): pass
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -35,6 +35,7 @@ class DocType:
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_warehouse_user()
+		self.validate_warehouse_company()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
 		self.scrub_posting_time()
@@ -62,6 +63,13 @@ class DocType:
 		if warehouse_users and not webnotes.session.user in warehouse_users:
 			webnotes.msgprint(_("User not allowed entry in the Warehouse") \
 				+ ": " + webnotes.session.user + " / " + self.doc.warehouse, raise_exception = 1)
+
+	def validate_warehouse_company(self):
+		warehouse_company = webnotes.conn.get_value("Warehouse", self.doc.warehouse, "company")
+		if warehouse_company and warehouse_company != self.doc.company:
+			webnotes.msgprint(_("Warehouse does not belong to company.") + " (" + \
+				self.doc.warehouse + ", " + self.doc.company +")", 
+				raise_exception=InvalidWarehouseCompany)
 
 	def validate_mandatory(self):		
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']

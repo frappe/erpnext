@@ -67,6 +67,11 @@ class DocType(AccountsController):
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
 		
 		self.make_gl_entries(cancel=1)
+		
+	def on_trash(self):
+		pass
+		#if self.doc.amended_from:
+		#	webnotes.delete_doc("Journal Voucher", self.doc.amended_from)
 
 	def validate_debit_credit(self):
 		for d in getlist(self.doclist, 'entries'):
