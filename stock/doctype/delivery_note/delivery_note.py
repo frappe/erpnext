@@ -387,7 +387,8 @@ class DocType(SellingController):
 			'fiscal_year'				: self.doc.fiscal_year,
 			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
 			'batch_no'					: d['batch_no'],
-			'serial_no'					: d['serial_no']
+			'serial_no'					: d['serial_no'],
+			"project"					: self.doc.project_name
 		})
 
 

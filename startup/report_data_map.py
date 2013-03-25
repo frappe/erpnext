@@ -80,6 +80,11 @@ data_map = {
 		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},
+	"Project": {
+		"columns": ["name"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name"
+	},
 	"Warehouse": {
 		"columns": ["name"],
 		"conditions": ["docstatus < 2"],
@@ -87,13 +92,14 @@ data_map = {
 	},
 	"Stock Ledger Entry": {
 		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", 
-			"actual_qty as qty", "voucher_type", "voucher_no", 
+			"actual_qty as qty", "voucher_type", "voucher_no", "project",
 			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],
-			"warehouse": ["Warehouse", "name"]
+			"warehouse": ["Warehouse", "name"],
+			"project": ["Project", "name"]
 		},
 		"force_index": "posting_sort_index"
 	},

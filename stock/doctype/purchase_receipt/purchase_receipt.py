@@ -196,21 +196,22 @@ class DocType(BuyingController):
 			serial_no = cstr(d.serial_no).strip()
 
 		self.values.append({
-			'item_code'					: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
-			'warehouse'					: wh,
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Purchase Receipt',
-			'voucher_no'				: self.doc.name,
-			'voucher_detail_no'			: d.name,
-			'actual_qty'				: qty,
-			'stock_uom'					: d.stock_uom,
-			'incoming_rate'				: in_value,
-			'company'					: self.doc.company,
-			'fiscal_year'				: self.doc.fiscal_year,
-			'is_cancelled'				: (is_submit==1) and 'No' or 'Yes',
-			'batch_no'					: cstr(d.batch_no).strip(),
-			'serial_no'					: serial_no
+			'item_code'			: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
+			'warehouse'			: wh,
+			'posting_date'		: self.doc.posting_date,
+			'posting_time'		: self.doc.posting_time,
+			'voucher_type'		: 'Purchase Receipt',
+			'voucher_no'		: self.doc.name,
+			'voucher_detail_no'	: d.name,
+			'actual_qty'		: qty,
+			'stock_uom'			: d.stock_uom,
+			'incoming_rate'		: in_value,
+			'company'			: self.doc.company,
+			'fiscal_year'		: self.doc.fiscal_year,
+			'is_cancelled'		: (is_submit==1) and 'No' or 'Yes',
+			'batch_no'			: cstr(d.batch_no).strip(),
+			'serial_no'			: serial_no,
+			"project"			: d.project_name
 			})
 
 

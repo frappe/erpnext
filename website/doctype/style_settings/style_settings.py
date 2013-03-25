@@ -85,7 +85,7 @@ class DocType:
 				"UPPERCASE": "uppercase",
 				"Title Case":"capitalize",
 				"lowercase": "lowercase"
-			}[self.doc.heading_text_as]
+			}.get(self.doc.heading_text_as) or ""
 		
 		self.doc.at_import = ""
 		for f in fonts:

@@ -608,22 +608,23 @@ class DocType(SellingController):
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
 		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d['item_code'])
 		self.values.append({
-			'item_code'					 : d['item_code'],
-			'warehouse'					 : wh,
-			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Sales Invoice',
-			'voucher_no'					: cstr(self.doc.name),
-			'voucher_detail_no'	 		: cstr(d['name']), 
-			'actual_qty'					: qty, 
-			'stock_uom'					 : st_uom and st_uom[0][0] or '',
-			'incoming_rate'			 : in_value,
-			'company'						 : self.doc.company,
-			'fiscal_year'				 : self.doc.fiscal_year,
-			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'						: cstr(d['batch_no']),
-			'serial_no'					 : d['serial_no']
+			'item_code'			: d['item_code'],
+			'warehouse'			: wh,
+			'transaction_date'	: getdate(self.doc.modified).strftime('%Y-%m-%d'),
+			'posting_date'		: self.doc.posting_date,
+			'posting_time'		: self.doc.posting_time,
+			'voucher_type'		: 'Sales Invoice',
+			'voucher_no'		: cstr(self.doc.name),
+			'voucher_detail_no'	: cstr(d['name']), 
+			'actual_qty'		: qty, 
+			'stock_uom'			: st_uom and st_uom[0][0] or '',
+			'incoming_rate'		: in_value,
+			'company'			: self.doc.company,
+			'fiscal_year'		: self.doc.fiscal_year,
+			'is_cancelled'		: (update_stock==1) and 'No' or 'Yes',
+			'batch_no'			: cstr(d['batch_no']),
+			'serial_no'			: d['serial_no'],
+			"project"			: self.doc.project_name
 		})			
 
 	def update_stock_ledger(self, update_stock):
