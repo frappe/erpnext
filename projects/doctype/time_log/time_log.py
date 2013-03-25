@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
+from webnotes.utils import cstr
 
 from webnotes.widgets.reportview import build_match_conditions
 
@@ -41,9 +42,11 @@ class DocType:
 				(to_time between %s and %s) or 
 				(%s between from_time and to_time)) 
 			and name!=%s
+			and ifnull(task, "")=%s
 			and docstatus < 2""", 
 			(self.doc.owner, self.doc.from_time, self.doc.to_time, self.doc.from_time, 
-				self.doc.to_time, self.doc.from_time, self.doc.name or "No Name"))
+				self.doc.to_time, self.doc.from_time, self.doc.name or "No Name",
+				cstr(self.doc.task)))
 
 		if existing:
 			webnotes.msgprint(_("This Time Log conflicts with") + ":" + ', '.join(existing),
