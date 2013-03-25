@@ -35,7 +35,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		this._super(wrapper, {
 			title: "Stock Balance",
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
-				"Stock Entry"],
+				"Stock Entry", "Project"],
 		});
 	},
 	setup_columns: function() {
@@ -76,6 +76,10 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
+		{fieldtype:"Select", label: "Project", link:"Project", 
+			default_value: "Select Project...", filter: function(val, item, opts, me) {
+				return me.apply_zero_filter(val, item, opts, me);
+			}, link_formatter: {filter_input: "project"}},
 		{fieldtype:"Date", label: "From Date"},
 		{fieldtype:"Label", label: "To"},
 		{fieldtype:"Date", label: "To Date"},
@@ -105,7 +109,8 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 			var sl = data[i];
 			var sl_posting_date = dateutil.str_to_obj(sl.posting_date);
 			
-			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
+			if((me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) &&
+				(me.is_default("project") ? true : me.project == sl.project)) {
 				var item = me.item_by_name[sl.item_code];
 				var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
 				var valuation_method = item.valuation_method ? 

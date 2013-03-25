@@ -214,5 +214,8 @@ patch_list = [
 	"patches.march_2013.p04_pos_update_stock_check",
 	"patches.march_2013.p05_payment_reconciliation",
 	"patches.march_2013.p06_remove_sales_purchase_return_tool",
-	"execute:webnotes.bean('Global Defaults').save()"
+	"execute:webnotes.bean('Global Defaults').save()",
+	"patches.march_2013.p07_update_project_in_stock_ledger",
+	"execute:webnotes.bean('Style Settings').save() #2013-03-25",
+	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)"
 ]

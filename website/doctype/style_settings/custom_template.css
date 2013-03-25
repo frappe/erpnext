@@ -69,7 +69,6 @@ div.web-footer, div.web-footer a {
 .navbar-inverse .navbar-inner {
     background-color: #{{ doc.top_bar_background or "444444"}};
     background-repeat: repeat-x;
-	border-color: transparent;
 	background-image: none;
 }
 

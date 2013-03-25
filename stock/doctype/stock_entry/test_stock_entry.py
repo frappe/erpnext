@@ -25,7 +25,14 @@ class TestStockEntry(unittest.TestCase):
 			where item_code='_Test Item'""")
 			
 		self.assertTrue(mr_name)
-		
+
+	def test_warehouse_company_validation(self):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
+		st1 = webnotes.bean(copy=test_records[0])
+		st1.doclist[1].t_warehouse="_Test Warehouse 2"
+		st1.insert()
+		self.assertRaises(InvalidWarehouseCompany, st1.submit)
+
 	def test_material_receipt_gl_entry(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
