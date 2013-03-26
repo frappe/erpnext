@@ -307,35 +307,27 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 	);
 }
 
-
-
-// Make Bank Voucher Button
-// -------------------------
-cur_frm.cscript.make_bank_voucher = function(doc, dt, dn) {
-	$c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
-		if(!r.exc) {
-		  cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
+cur_frm.cscript.make_bank_voucher = function() {
+	wn.call({
+		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+		args: {
+			"company": cur_frm.doc.company,
+			"voucher_type": "Bank Voucher"
+		},
+		callback: function(r) {
+			cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
 		}
 	});
 }
 
-
-/* ***************************** Get Query Functions ************************** */
-
-// Debit To
-// ---------
 cur_frm.fields_dict.debit_to.get_query = function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
-// Cash/bank account
-//------------------
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
-// Write off account
-//------------------
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "Yes" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
@@ -429,16 +421,23 @@ cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
 
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn){
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
+}
+
+cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+}
+
+cur_frm.cscript.copy_account_in_all_row = function(doc, cdt, cdn, fieldname) {
 	var d = locals[cdt][cdn];
-	if(d.income_account){
+	if(d[fieldname]){
 		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
 		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].income_account) cl[i].income_account = d.income_account;
+			if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
 		}
 	}
 	refresh_field(cur_frm.cscript.fname);
 }
-
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
@@ -451,10 +450,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	refresh_field(cur_frm.cscript.fname);
 }
 
-/* **************************************** Utility Functions *************************************** */
-
-// Details Calculation
-// --------------------
 cur_frm.cscript.calc_adjustment_amount = function(doc,cdt,cdn) {
 	var doc = locals[doc.doctype][doc.name];
 	var el = getchildren('Sales Invoice Advance',doc.name,'advance_adjustment_details');
@@ -488,8 +483,9 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 
 	// credit to bank
 	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = bank_account;
+	d1.account = bank_account.account;
 	d1.debit = doc.outstanding_amount;
+	d1.balance = bank_account.balance;
 
 	loaddoc('Journal Voucher', jv.name);
 }
