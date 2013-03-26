@@ -127,7 +127,7 @@ function getCookies() {
 			var parts = cookie.split(/=/, 2),
 				name = decodeURIComponent(parts[0].trimLeft()),
 				value = parts.length > 1 ? decodeURIComponent(parts[1].trimRight()) : null;
-			if(value.charAt(0)==='"') {
+			if(value && value.charAt(0)==='"') {
 				value = value.substr(1, value.length-2);
 			}
 			cookies[name] = value;
