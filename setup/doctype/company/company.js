@@ -102,3 +102,10 @@ cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 		}
 	}
 }
+
+cur_frm.fields_dict["stock_adjustment_cost_center"].get_query = function(doc) {
+	return {
+		"query": "accounts.utils.get_cost_center_list", 
+		"filters": {"company": doc.name}
+	}
+}

@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint
 from setup.utils import get_company_currency
+from webnotes import msgprint, _
 
 from controllers.stock_controller import StockController
 
@@ -58,5 +59,10 @@ class SellingController(StockController):
 						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
 						item_sales_bom)
 					item.buying_amount = buying_amount > 0 and buying_amount or 0
-					webnotes.conn.set_value(self.tname, item.name, "buying_amount", 
+					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
 						item.buying_amount)
+						
+	def check_expense_account(self, item):
+		if item.buying_amount and not item.expense_account:
+			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				raise_exception=1)

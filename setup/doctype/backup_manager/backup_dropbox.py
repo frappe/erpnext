@@ -44,7 +44,10 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
 			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
 			dropbox_client = client.DropboxClient(sess)
-			dropbox_client.file_create_folder("files")
+			try:
+				dropbox_client.file_create_folder("files")
+			except:
+				pass
 
 		else:
 			allowed = 0
@@ -94,7 +97,11 @@ def backup_to_dropbox():
 			upload_file_to_dropbox(filepath, "files", dropbox_client)
 
 def get_dropbox_session():
-	from dropbox import session
+	try:
+		from dropbox import session
+	except:
+		webnotes.msgprint(_("Please install dropbox python module"), raise_exception=1)
+		
 	try:
 		from conf import dropbox_access_key, dropbox_secret_key
 	except ImportError:
@@ -107,16 +114,20 @@ def upload_file_to_dropbox(filename, folder, dropbox_client):
 	from dropbox import rest
 	size = os.stat(filename).st_size
 	f = open(filename,'r')
-	if size > 4194304:
+	
+	# if max packet size reached, use chunked uploader
+	max_packet_size = 4194304
+	
+	if size > max_packet_size:
 		uploader = dropbox_client.get_chunked_uploader(f, size)
 		while uploader.offset < size:
 			try:
 				uploader.upload_chunked()
-				uploader.finish(os.path.join(folder, os.path.basename(filename)), overwrite=True)
+				uploader.finish(folder + "/" + os.path.basename(filename), overwrite=True)
 			except rest.ErrorResponse:
 				pass
 	else:
-		dropbox_client.put_file(os.path.join(folder, os.path.basename(filename)), f, overwrite=True)
+		dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
 
 if __name__=="__main__":
 	backup_to_dropbox()

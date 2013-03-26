@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:55", 
+  "creation": "2013-03-25 15:35:04", 
   "docstatus": 0, 
-  "modified": "2013-03-21 18:35:47", 
+  "modified": "2013-03-25 15:35:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -215,6 +215,7 @@
   "label": "Expense Account", 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "120px"
  }, 
  {
@@ -222,7 +223,7 @@
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Cost Center", 
+  "label": "Sales Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 

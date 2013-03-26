@@ -1,4 +1,4 @@
-test_ignore = ["Account"]
+test_ignore = ["Account", "Cost Center"]
 
 test_records = [
 	[{

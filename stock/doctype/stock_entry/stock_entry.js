@@ -27,15 +27,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		
 		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_adjustment_account) {
 			if (this.frm.doc.purpose == "Sales Return") 
-				account_for = "stock_delivered_but_not_billed";
+				account_for = "stock_in_hand_account";
 			else if (this.frm.doc.purpose == "Purchase Return") 
 				account_for = "stock_received_but_not_billed";
 			else account_for = "stock_adjustment_account";
 			
 			this.frm.call({
-				method: "controllers.accounts_controller.get_default_account",
+				method: "accounts.utils.get_company_default",
 				args: {
-					"account_for": account_for, 
+					"fieldname": account_for, 
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {

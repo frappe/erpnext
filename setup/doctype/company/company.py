@@ -199,12 +199,7 @@ class DocType:
 		if not self.doc.payables_group and webnotes.conn.exists('Account', 
 			'Accounts Payable - ' + self.doc.abbr):
 				webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - ' + self.doc.abbr)
-			
-		if not self.doc.stock_delivered_but_not_billed and webnotes.conn.exists("Account", 
-			"Stock Delivered But Not Billed - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "stock_delivered_but_not_billed", 
-					"Stock Delivered But Not Billed - " + self.doc.abbr)
-					
+								
 		if not self.doc.stock_received_but_not_billed and webnotes.conn.exists("Account", 
 			"Stock Received But Not Billed - " + self.doc.abbr):
 				webnotes.conn.set(self.doc, "stock_received_but_not_billed", 
@@ -219,7 +214,12 @@ class DocType:
 			"Expenses Included In Valuation - " + self.doc.abbr):
 				webnotes.conn.set(self.doc, "expenses_included_in_valuation", 
 					"Expenses Included In Valuation - " + self.doc.abbr)
-			
+		
+		if not self.doc.stock_adjustment_cost_center and webnotes.conn.exists("Cost Center", 
+			"Auto Inventory Accounting - " + self.doc.abbr):
+				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", 
+					"Auto Inventory Accounting - " + self.doc.abbr)
+	
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
@@ -249,14 +249,16 @@ class DocType:
 			
 	def on_update(self):
 		self.set_letter_head()
-		ac = sql("select name from tabAccount where company=%s and docstatus<2 limit 1",
-			self.doc.name)
-		if not ac:
+
+		if not webnotes.conn.sql("""select name from tabAccount 
+			where company=%s and docstatus<2 limit 1""", self.doc.name):
 			self.create_default_accounts()
-		self.set_default_accounts()
-		cc = sql("select name from `tabCost Center` where cost_center_name = 'Root' and company_name = '%s'"%(self.doc.name))
-		if not cc:
+		
+		if not webnotes.conn.sql("""select name from `tabCost Center` 
+			where cost_center_name = 'Root' and company_name = %s""", self.doc.name):
 			self.create_default_cost_center()
+			
+		self.set_default_accounts()
 			
 		if self.doc.default_currency:
 			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)

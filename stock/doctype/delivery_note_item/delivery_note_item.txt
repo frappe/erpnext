@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:59", 
+  "creation": "2013-03-25 11:55:16", 
   "docstatus": 0, 
-  "modified": "2013-03-21 18:36:22", 
+  "modified": "2013-03-25 15:43:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -253,6 +253,7 @@
   "no_copy": 1, 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "120px"
  }, 
  {

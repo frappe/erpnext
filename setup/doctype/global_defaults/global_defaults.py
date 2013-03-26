@@ -45,11 +45,20 @@ keydict = {
 	'session_expiry': 'session_expiry',
 	'disable_rounded_total': 'disable_rounded_total',
 	"update_stock": "update_stock",
+	# "auto_inventory_accounting": "auto_inventory_accounting",
 }
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def validate(self):
+		previous_auto_inventory_accounting = cint(webnotes.conn.get_value("Global Defaults", None,
+			"auto_inventory_accounting"))
+		if cint(self.doc.auto_inventory_accounting) != previous_auto_inventory_accounting:
+			from accounts.utils import create_stock_in_hand_jv
+			create_stock_in_hand_jv(reverse = \
+				cint(self.doc.auto_inventory_accounting) < previous_auto_inventory_accounting)
 
 	def on_update(self):
 		"""update defaults"""

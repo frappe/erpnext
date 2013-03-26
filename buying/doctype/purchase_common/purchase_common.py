@@ -402,7 +402,7 @@ class DocType(BuyingController):
 		yed=add_days(str(ysd),365)		
 		if str(transaction_date) < str(ysd) or str(transaction_date) > str(yed):
 			msgprint("'%s' Not Within The Fiscal Year"%(dn))
-			raise Exception			
+			raise Exception
 
 	def load_default_taxes(self, obj):
 		return self.get_purchase_tax_details(obj, 1)

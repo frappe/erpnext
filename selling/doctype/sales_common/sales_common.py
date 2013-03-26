@@ -17,11 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, getdate, nowdate, formatdate
+from webnotes.utils import cint, cstr, flt, getdate, nowdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from webnotes import msgprint
 from setup.utils import get_company_currency
 
 get_value = webnotes.conn.get_value
@@ -127,27 +127,40 @@ class DocType(TransactionBase):
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html, barcode from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
-		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , args['item_code'])
+		item = webnotes.conn.sql("""select description, item_name, brand, item_group, stock_uom, 
+			default_warehouse, default_income_account, default_sales_cost_center, 
+			purchase_account, description_html, barcode from `tabItem` 
+			where name = %s and (ifnull(end_of_life,'')='' or end_of_life >	now() 
+			or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' 
+			or is_service_item = 'Yes')""", args['item_code'], as_dict=1)
+		tax = webnotes.conn.sql("""select tax_type, tax_rate from `tabItem Tax` 
+			where parent = %s""", args['item_code'])
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
-			'description'			: item and item[0]['description_html'] or item[0]['description'],
-			'barcode'				: item and item[0]['barcode'] or '',
-			'item_group'			: item and item[0]['item_group'] or '',
-			'item_name'				: item and item[0]['item_name'] or '',
-			'brand'					: item and item[0]['brand'] or '',
-			'stock_uom'				: item and item[0]['stock_uom'] or '',
-			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
-			'warehouse'				: item and item[0]['default_warehouse'] or args.get('warehouse'),
-			'income_account'		: item and item[0]['default_income_account'] or args.get('income_account'),
-			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center'),
-			'qty'					: 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
-			'adj_rate'				: 0,
-			'amount'				: 0,
-			'export_amount'			: 0,
-			'item_tax_rate'			: json.dumps(t),
-			'batch_no'				: ''
+			'description': item and item[0]['description_html'] or \
+				item[0]['description'],
+			'barcode': item and item[0]['barcode'] or '',
+			'item_group': item and item[0]['item_group'] or '',
+			'item_name': item and item[0]['item_name'] or '',
+			'brand': item and item[0]['brand'] or '',
+			'stock_uom': item and item[0]['stock_uom'] or '',
+			'reserved_warehouse': item and item[0]['default_warehouse'] or '',
+			'warehouse': item and item[0]['default_warehouse'] or \
+				args.get('warehouse'),
+			'income_account': item and item[0]['default_income_account'] or \
+				args.get('income_account'),
+			'expense_account': item and item[0]['purchase_account'] or \
+			 	args.get('expense_account'),
+			'cost_center': item and item[0]['default_sales_cost_center'] or \
+				args.get('cost_center'),
+			# this is done coz if item once fetched is fetched again than its qty shld be reset to 1
+			'qty': 1.00, 
+			'adj_rate': 0,
+			'amount': 0,
+			'export_amount': 0,
+			'item_tax_rate': json.dumps(t),
+			'batch_no': ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
 			base_ref_rate =	self.get_ref_rate(args['item_code'], obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
@@ -172,14 +185,18 @@ class DocType(TransactionBase):
 
 
 	def get_item_defaults(self, args):
-		item = webnotes.conn.sql("""select default_warehouse, default_income_account, default_sales_cost_center from `tabItem` 
-			where name = '%s' and (ifnull(end_of_life,'') = '' or end_of_life > now() or end_of_life = '0000-00-00') 
-			and (is_sales_item = 'Yes' or is_service_item = 'Yes') """ % (args['item_code']), as_dict=1)
+		item = webnotes.conn.sql("""select default_warehouse, default_income_account, 
+			default_sales_cost_center, purchase_account from `tabItem` where name = %s 
+			and (ifnull(end_of_life,'') = '' or end_of_life > now() or end_of_life = '0000-00-00') 
+			and (is_sales_item = 'Yes' or is_service_item = 'Yes') """, 
+			(args['item_code']), as_dict=1)
 		ret = {
-			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
-			'warehouse'				: item and item[0]['default_warehouse'] or args.get('warehouse'),
-			'income_account'		: item and item[0]['default_income_account'] or args.get('income_account'),
-			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center')
+			'reserved_warehouse': item and item[0]['default_warehouse'] or '',
+			'warehouse': item and item[0]['default_warehouse'] or args.get('warehouse'),
+			'income_account': item and item[0]['default_income_account'] or \
+				args.get('income_account'),
+			'expense_account': item and item[0]['purchase_account'] or args.get('expense_account'),
+			'cost_center': item and item[0]['default_sales_cost_center'] or args.get('cost_center'),
 		}
 
 		return ret

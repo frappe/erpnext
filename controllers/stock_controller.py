@@ -23,7 +23,9 @@ class StockController(AccountsController):
 	def get_gl_entries_for_stock(self, against_stock_account, amount, 
 			stock_in_hand_account=None, cost_center=None):
 		if not stock_in_hand_account:
-			stock_in_hand_account = self.get_default_account("stock_in_hand_account")
+			stock_in_hand_account = self.get_company_default("stock_in_hand_account")
+		if not cost_center:
+			cost_center = self.get_company_default("stock_adjustment_cost_center")
 		
 		if amount:
 			gl_entries = [
@@ -46,12 +48,6 @@ class StockController(AccountsController):
 			]
 			
 			return gl_entries
-			
-			
-	def check_expense_account(self, item):
-		if not item.expense_account:
-			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
-				raise_exception=1)	
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
 		if not (item_list and warehouse_list):

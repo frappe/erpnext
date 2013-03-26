@@ -76,14 +76,9 @@ class AccountsController(TransactionBase):
 				"allocate_amount": 0
 			})
 		
-	def get_default_account(self, account_for):
-		account = webnotes.conn.get_value("Company", self.doc.company, account_for)
-		if not account:
-			msgprint(_("Please mention default account for '") + 
-				_(webnotes.get_doctype("company").get_label(account_for) + 
-				_("' in Company: ") + self.doc.company), raise_exception=True)
-				
-		return account
+	def get_company_default(self, fieldname):
+		from accounts.utils import get_company_default
+		return get_company_default(self.doc.company, fieldname)
 		
 	@property
 	def stock_items(self):
@@ -101,8 +96,3 @@ class AccountsController(TransactionBase):
 			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
-
-
-@webnotes.whitelist()
-def get_default_account(account_for, company):
-	return webnotes.conn.get_value("Company", company, account_for)

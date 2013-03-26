@@ -85,8 +85,11 @@ class DocType(SellingController):
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+					arg = {
+						'item_code':doc.fields.get('item_code'),
+						'expense_account':doc.fields.get('expense_account'), 
+						'cost_center': doc.fields.get('cost_center'), 
+						'warehouse': doc.fields.get('warehouse')};
 					ret = obj.get_item_defaults(arg)
 					for r in ret:
 						if not doc.fields.get(r):
@@ -374,7 +377,6 @@ class DocType(SellingController):
 		self.values.append({
 			'item_code'					: d['item_code'],
 			'warehouse'					: wh,
-			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Delivery Note',
