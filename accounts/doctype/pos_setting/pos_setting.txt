@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-24 11:03:29", 
+  "creation": "2013-03-26 11:03:07", 
   "docstatus": 0, 
-  "modified": "2013-03-25 15:27:52", 
+  "modified": "2013-03-26 12:48:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -18,7 +18,8 @@
   "parent": "POS Setting", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocPerm", 
@@ -141,12 +142,15 @@
   "reqd": 1
  }, 
  {
+  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
+  "hidden": 0, 
   "label": "Expense Account", 
   "options": "Account", 
-  "reqd": 1
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
