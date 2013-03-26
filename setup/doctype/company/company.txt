@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-27 09:38:05", 
+  "creation": "2013-03-21 17:41:00", 
   "docstatus": 0, 
-  "modified": "2013-03-22 18:19:36", 
+  "modified": "2013-03-25 15:35:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,19 +25,14 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Company", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -100,6 +95,13 @@
   "no_copy": 1, 
   "oldfieldname": "default_bank_account", 
   "oldfieldtype": "Link", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_cash_account", 
+  "fieldtype": "Link", 
+  "label": "Default Cash Account", 
   "options": "Account"
  }, 
  {
@@ -311,6 +313,19 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All", 
+  "write": 0
  }
 ]

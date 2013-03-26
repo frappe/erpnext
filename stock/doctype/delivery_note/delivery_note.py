@@ -85,8 +85,11 @@ class DocType(SellingController):
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+					arg = {
+						'item_code':doc.fields.get('item_code'),
+						'expense_account':doc.fields.get('expense_account'), 
+						'cost_center': doc.fields.get('cost_center'), 
+						'warehouse': doc.fields.get('warehouse')};
 					ret = obj.get_item_defaults(arg)
 					for r in ret:
 						if not doc.fields.get(r):
@@ -387,7 +390,8 @@ class DocType(SellingController):
 			'fiscal_year'				: self.doc.fiscal_year,
 			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
 			'batch_no'					: d['batch_no'],
-			'serial_no'					: d['serial_no']
+			'serial_no'					: d['serial_no'],
+			"project"					: self.doc.project_name
 		})
 
 

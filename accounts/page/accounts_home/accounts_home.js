@@ -39,6 +39,16 @@ wn.module_page["Accounts"] = [
 				description: wn._("Structure cost centers for budgeting."),
 				doctype:"Cost Center"
 			},
+			{
+				label: wn._("Customer"),
+				description: wn._("Customer database."),
+				doctype:"Customer"
+			},
+			{
+				label: wn._("Supplier"),
+				description: wn._("Supplier database."),
+				doctype:"Supplier"
+			},
 		]
 	},
 	{

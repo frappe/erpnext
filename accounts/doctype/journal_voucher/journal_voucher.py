@@ -67,6 +67,11 @@ class DocType(AccountsController):
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
 		
 		self.make_gl_entries(cancel=1)
+		
+	def on_trash(self):
+		pass
+		#if self.doc.amended_from:
+		#	webnotes.delete_doc("Journal Voucher", self.doc.amended_from)
 
 	def validate_debit_credit(self):
 		for d in getlist(self.doclist, 'entries'):
@@ -344,6 +349,16 @@ class DocType(AccountsController):
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
 
+@webnotes.whitelist()
+def get_default_bank_cash_account(company, voucher_type):
+	from accounts.utils import get_balance_on
+	account = webnotes.conn.get_value("Company", company,
+		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+	if account:
+		return {
+			"account": account,
+			"balance": get_balance_on(account)
+		}
 
 def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 

@@ -27,7 +27,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		
 		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_adjustment_account) {
 			if (this.frm.doc.purpose == "Sales Return") 
-				account_for = "stock_delivered_but_not_billed";
+				account_for = "stock_in_hand_account";
 			else if (this.frm.doc.purpose == "Purchase Return") 
 				account_for = "stock_received_but_not_billed";
 			else account_for = "stock_adjustment_account";

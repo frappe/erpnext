@@ -603,7 +603,8 @@ class DocType(StockController):
 			'company': self.doc.company,
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
 			'batch_no': cstr(d.batch_no).strip(),
-			'serial_no': cstr(d.serial_no).strip()
+			'serial_no': cstr(d.serial_no).strip(),
+			"project": self.doc.project_name
 		})
 	
 	def get_cust_values(self):

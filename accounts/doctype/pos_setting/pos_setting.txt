@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:07", 
+  "creation": "2013-01-24 11:03:29", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:55:20", 
+  "modified": "2013-03-25 15:27:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -137,6 +137,14 @@
   "label": "Income Account", 
   "oldfieldname": "income_account", 
   "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_account", 
+  "fieldtype": "Link", 
+  "label": "Expense Account", 
   "options": "Account", 
   "reqd": 1
  }, 
