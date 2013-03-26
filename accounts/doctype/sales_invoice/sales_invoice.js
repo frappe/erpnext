@@ -421,16 +421,23 @@ cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
 
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn){
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
+}
+
+cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+}
+
+cur_frm.cscript.copy_account_in_all_row = function(doc, cdt, cdn, fieldname) {
 	var d = locals[cdt][cdn];
-	if(d.income_account){
+	if(d[fieldname]){
 		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
 		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].income_account) cl[i].income_account = d.income_account;
+			if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
 		}
 	}
 	refresh_field(cur_frm.cscript.fname);
 }
-
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
@@ -443,10 +450,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	refresh_field(cur_frm.cscript.fname);
 }
 
-/* **************************************** Utility Functions *************************************** */
-
-// Details Calculation
-// --------------------
 cur_frm.cscript.calc_adjustment_amount = function(doc,cdt,cdn) {
 	var doc = locals[doc.doctype][doc.name];
 	var el = getchildren('Sales Invoice Advance',doc.name,'advance_adjustment_details');
