@@ -55,6 +55,7 @@ class DocType(StockController):
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
+		self.validate_fiscal_year()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -67,6 +68,11 @@ class DocType(StockController):
 		self.update_stock_ledger(1)
 		self.update_production_order(0)
 		self.make_gl_entries()
+		
+	def validate_fiscal_year(self):
+		import accounts.utils
+		accounts.utils.validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year,
+			self.meta.get_label("posting_date"))
 		
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", 

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-11 12:34:40", 
+  "creation": "2013-03-26 06:51:17", 
   "docstatus": 0, 
-  "modified": "2013-03-19 17:48:29", 
+  "modified": "2013-03-26 07:24:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -543,6 +543,16 @@
   "search_index": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "company", 
@@ -610,13 +620,5 @@
  {
   "doctype": "DocPerm", 
   "role": "Manufacturing User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Manufacturing Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Material Manager"
  }
 ]
