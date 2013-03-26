@@ -76,9 +76,13 @@ div.web-footer, div.web-footer a {
 	box-shadow: none;
 }
 
-{% if doc.top_bar_background == doc.page_background %}.navbar-inner {
-	border-bottom: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
-}{% endif %}
+.navbar-inner {
+	border-bottom: 1px solid {% if doc.top_bar_background == doc.page_background -%}
+		#{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	{%- else -%}
+		transparent;
+	{%- endif %}
+}
 
 .navbar-inverse .brand,
 .navbar-inverse .brand:hover,
