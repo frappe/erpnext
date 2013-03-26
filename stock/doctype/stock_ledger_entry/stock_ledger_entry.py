@@ -16,17 +16,13 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _
-
+from webnotes import _, msgprint
 from webnotes.utils import cint, flt, getdate
-
-sql = webnotes.conn.sql
-msgprint = webnotes.msgprint
-from accounts.utils import get_fiscal_year
+from webnotes.model.controller import DocListController
 
 class InvalidWarehouseCompany(Exception): pass
 
-class DocType:
+class DocType(DocListController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -39,12 +35,14 @@ class DocType:
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
 		self.scrub_posting_time()
-		self.doc.fiscal_year = get_fiscal_year(self.doc.posting_date)[0]
+		
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, self.meta.get_label("posting_date"))
 		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:
-			batch_bal = flt(sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and batch_no = '%s'"%(self.doc.warehouse,self.doc.item_code,self.doc.batch_no))[0][0])
+			batch_bal = flt(webnotes.conn.sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and batch_no = '%s'"%(self.doc.warehouse,self.doc.item_code,self.doc.batch_no))[0][0])
 			self.doc.fields.update({'batch_bal': batch_bal})
 
 			if (batch_bal + self.doc.actual_qty) < 0:
@@ -77,11 +75,11 @@ class DocType:
 			if self.doc.fields.get(k)==None:
 				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)
 			elif k == 'warehouse':
-				if not sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
+				if not webnotes.conn.sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
-		item_det = sql("""select name, has_batch_no, docstatus, 
+		item_det = webnotes.conn.sql("""select name, has_batch_no, docstatus, 
 			ifnull(is_stock_item, 'No') from tabItem where name=%s""", 
 			self.doc.item_code)
 
@@ -106,7 +104,7 @@ class DocType:
 				raise Exception
 		
 			# check if batch belongs to item
-			if not sql("select name from `tabBatch` where item='%s' and name ='%s' and docstatus != 2" % (self.doc.item_code, self.doc.batch_no)):
+			if not webnotes.conn.sql("select name from `tabBatch` where item='%s' and name ='%s' and docstatus != 2" % (self.doc.item_code, self.doc.batch_no)):
 				msgprint("'%s' is not a valid Batch Number for Item '%s'" % (self.doc.batch_no, self.doc.item_code), raise_exception = 1)
 	
 	# Nobody can do SL Entries where posting date is before freezing date except authorized person
