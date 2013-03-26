@@ -84,13 +84,13 @@ cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var el = getchildren('Journal Voucher Detail', doc.name, 'entries');
 	for(var i in el) {
-		td += flt(el[i].debit);
-		tc += flt(el[i].credit);
+		td += flt(el[i].debit, 2);
+		tc += flt(el[i].credit, 2);
 	}
 	var doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
 	doc.total_credit = tc;
-	doc.difference = flt(td - tc);
+	doc.difference = flt((td - tc), 2);
 	refresh_many(['total_debit','total_credit','difference']);
 }
 

@@ -114,8 +114,8 @@ class DocType(AccountsController):
 		debit, credit = 0.0, 0.0
 		debit_list, credit_list = [], []
 		for d in getlist(self.doclist, 'entries'):
-			debit += flt(d.debit)
-			credit += flt(d.credit)
+			debit += flt(d.debit, 2)
+			credit += flt(d.credit, 2)
 			if flt(d.debit)>0 and (d.account not in debit_list): debit_list.append(d.account)
 			if flt(d.credit)>0 and (d.account not in credit_list): credit_list.append(d.account)
 
@@ -289,32 +289,32 @@ class DocType(AccountsController):
 		if not getlist(self.doclist,'entries'):
 			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
 		else:
-			flag, self.doc.total_debit, self.doc.total_credit = 0,0,0
-			diff = flt(self.doc.difference)
+			flag, self.doc.total_debit, self.doc.total_credit = 0, 0, 0
+			diff = flt(self.doc.difference, 2)
 			
 			# If any row without amount, set the diff on that row
 			for d in getlist(self.doclist,'entries'):
-				if not d.credit and not d.debit and flt(diff) != 0:
+				if not d.credit and not d.debit and diff != 0:
 					if diff>0:
-						d.credit = flt(diff)
+						d.credit = diff
 					elif diff<0:
-						d.debit = flt(diff)
+						d.debit = diff
 					flag = 1
 					
 			# Set the diff in a new row
-			if flag == 0 and (flt(diff) != 0):
+			if flag == 0 and diff != 0:
 				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 				if diff>0:
-					jd.credit = flt(abs(diff))
+					jd.credit = abs(diff)
 				elif diff<0:
-					jd.debit = flt(abs(diff))
+					jd.debit = abs(diff)
 					
 			# Set the total debit, total credit and difference
 			for d in getlist(self.doclist,'entries'):
-				self.doc.total_debit += flt(d.debit)
-				self.doc.total_credit += flt(d.credit)
+				self.doc.total_debit += flt(d.debit, 2)
+				self.doc.total_credit += flt(d.credit, 2)
 
-			self.doc.difference = flt(self.doc.total_debit) - flt(self.doc.total_credit)
+			self.doc.difference = flt(self.doc.total_debit, 2) - flt(self.doc.total_credit, 2)
 
 	def get_outstanding_invoices(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'entries')
@@ -375,9 +375,9 @@ def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filter
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 		
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, posting_date, user_remark 
+	return webnotes.conn.sql("""select jv.name, jv.posting_date, jv.user_remark 
 		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail 
-		where jv_detail.parent = jv.name and jv_detail.account = %s and docstatus = 1 
+		where jv_detail.parent = jv.name and jv_detail.account = %s and jv.docstatus = 1 
 		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))

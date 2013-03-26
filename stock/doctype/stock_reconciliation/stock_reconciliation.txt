@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 16:50:41", 
+  "creation": "2013-03-26 06:51:17", 
   "docstatus": 0, 
-  "modified": "2013-03-18 12:48:42", 
+  "modified": "2013-03-26 08:32:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -41,7 +40,6 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "Material Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -80,6 +78,15 @@
   "options": "Stock Reconciliation", 
   "print_hide": 1, 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -145,6 +152,12 @@
   "print_hide": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }
 ]

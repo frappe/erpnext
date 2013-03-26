@@ -1,7 +1,7 @@
 import webnotes
 
 def execute():
-	for purchase_invoice in webnotes.conn.sql("""select distinct parent 
+	for purchase_invoice in webnotes.conn.sql_list("""select distinct parent 
 		from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(valuation_rate, 0)=0"""):
 		pi = webnotes.get_obj("Purchase Invoice", purchase_invoice)
 		pi.calculate_taxes_and_totals()

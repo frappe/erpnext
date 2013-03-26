@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-28 10:06:01", 
+  "creation": "2013-01-28 17:07:01", 
   "docstatus": 0, 
-  "modified": "2013-01-28 15:28:49", 
+  "modified": "2013-03-26 14:05:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,18 +23,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Lead", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -63,6 +58,19 @@
   "oldfieldtype": "Data", 
   "reqd": 1, 
   "search_index": 1
+ }, 
+ {
+  "description": "Name of organization from where lead has come", 
+  "doctype": "DocField", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Company Name", 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 0, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
@@ -105,45 +113,12 @@
   "no_copy": 1, 
   "oldfieldname": "source", 
   "oldfieldtype": "Select", 
-  "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail", 
+  "options": "\nAdvertisement\nBlog Post\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail", 
   "reqd": 0, 
   "search_index": 0
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "communication_history", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "allow_on_submit": 0, 
-  "doctype": "DocField", 
-  "fieldname": "communication_html", 
-  "fieldtype": "HTML", 
-  "label": "Communication HTML", 
-  "oldfieldname": "follow_up", 
-  "oldfieldtype": "Table"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sb8", 
-  "fieldtype": "Section Break", 
-  "label": "Lead Details"
- }, 
- {
-  "description": "Name of organization from where lead has come", 
-  "doctype": "DocField", 
-  "fieldname": "company_name", 
-  "fieldtype": "Data", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Company Name", 
-  "oldfieldname": "company_name", 
-  "oldfieldtype": "Data", 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "depends_on": "eval:doc.source == 'Existing Customer'", 
+  "depends_on": "eval:doc.source == 'Customer'", 
   "description": "Source of th", 
   "doctype": "DocField", 
   "fieldname": "customer", 
@@ -168,19 +143,24 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "label": "Communication HTML", 
+  "oldfieldname": "follow_up", 
+  "oldfieldtype": "Table"
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "type", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Lead Type", 
-  "oldfieldname": "type", 
-  "oldfieldtype": "Select", 
-  "options": "\nClient\nChannel Partner\nConsultant"
+  "fieldname": "contact_info", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "oldfieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -189,13 +169,6 @@
   "label": "Remark", 
   "oldfieldname": "remark", 
   "oldfieldtype": "Text"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_info", 
-  "fieldtype": "Section Break", 
-  "label": "Contact Info", 
-  "oldfieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -311,6 +284,16 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Lead Type", 
+  "oldfieldname": "type", 
+  "oldfieldtype": "Select", 
+  "options": "\nClient\nChannel Partner\nConsultant"
  }, 
  {
   "default": "__user", 
@@ -462,18 +445,69 @@
   "label": "Blog Subscriber"
  }, 
  {
-  "cancel": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales User"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Guest", 
+  "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
   "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Manager"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Sales Manager", 
+  "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Sales User", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "System Manager", 
+  "write": 1
  }
 ]

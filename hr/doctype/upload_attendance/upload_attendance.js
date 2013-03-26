@@ -44,20 +44,17 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 	show_upload: function() {
 		var me = this;
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-		var upload_area = $('<div id="dit-upload-area"></div>').appendTo($wrapper);
 		
 		// upload
 		wn.upload.make({
-			parent: $('#dit-upload-area'),
+			parent: $wrapper,
 			args: {
 				method: 'hr.doctype.upload_attendance.upload_attendance.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(r) {
 				var $log_wrapper = $(cur_frm.fields_dict.import_log.wrapper).empty();
-				var log_area = $('<div id="dit-output"></div>').appendTo($log_wrapper);
 				
-				$wrapper.find(".dit-progress-area").toggle(false);
 				if(!r.messages) r.messages = [];
 				// replace links if error has occured
 				if(r.exc || r.error) {
@@ -81,7 +78,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 				console.log(r.messages);
 				
 				$.each(r.messages, function(i, v) {
-					var $p = $('<p>').html(v).appendTo('#dit-output');
+					var $p = $('<p>').html(v).appendTo($log_wrapper);
 					if(v.substr(0,5)=='Error') {
 						$p.css('color', 'red');
 					} else if(v.substr(0,8)=='Inserted') {
@@ -96,11 +93,8 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 		});
 		
 		// rename button
-		$('#dit-upload-area form input[type="submit"]')
+		$wrapper.find('form input[type="submit"]')
 			.attr('value', 'Upload and Import')
-			.click(function() {
-				$wrapper.find(".dit-progress-area").toggle(true);
-			});
 	}
 })
 

@@ -252,7 +252,8 @@ class DocType(StockController):
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
 			"is_cancelled": "No",
-			"voucher_detail_no": row.voucher_detail_no
+			"voucher_detail_no": row.voucher_detail_no,
+			"fiscal_year": self.doc.fiscal_year,
 		})
 		args.update(opts)
 		# create stock ledger entry

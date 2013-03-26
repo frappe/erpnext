@@ -306,7 +306,9 @@ class DocType(BuyingController):
 	def set_against_expense_account(self):
 		auto_inventory_accounting = \
 			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
-		stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+
+		if auto_inventory_accounting:
+			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 		
 		against_accounts = []
 		for item in self.doclist.get({"parentfield": "entries"}):

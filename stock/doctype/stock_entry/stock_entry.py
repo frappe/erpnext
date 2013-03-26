@@ -55,6 +55,7 @@ class DocType(StockController):
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
+		self.validate_fiscal_year()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -67,6 +68,11 @@ class DocType(StockController):
 		self.update_stock_ledger(1)
 		self.update_production_order(0)
 		self.make_gl_entries()
+		
+	def validate_fiscal_year(self):
+		import accounts.utils
+		accounts.utils.validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year,
+			self.meta.get_label("posting_date"))
 		
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", 
@@ -604,7 +610,8 @@ class DocType(StockController):
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
 			'batch_no': cstr(d.batch_no).strip(),
 			'serial_no': cstr(d.serial_no).strip(),
-			"project": self.doc.project_name
+			"project": self.doc.project_name,
+			"fiscal_year": self.doc.fiscal_year,
 		})
 	
 	def get_cust_values(self):
@@ -776,8 +783,6 @@ def make_return_jv(stock_entry):
 	
 	from accounts.utils import get_balance_on
 	for r in result:
-		if not r.get("account"):
-			print result
 		jv_list.append({
 			"__islocal": 1,
 			"doctype": "Journal Voucher Detail",

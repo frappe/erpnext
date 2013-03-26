@@ -310,6 +310,17 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
+cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+	var d = locals[cdt][cdn];
+	if(d.expense_account) {
+		var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
+		for(var i = 0; i < cl.length; i++){
+			if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
+		}
+	}
+	refresh_field(cur_frm.cscript.fname);
+}
+
 // expense account
 cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
 	return {

@@ -230,6 +230,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Sales Return"
 		se.doc.sales_invoice_no = si.doc.name
 		se.doc.posting_date = "2013-03-10"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].item_code = "_Test Item Home Desktop 200"
 		se.doclist[1].qty = returned_qty
 		se.doclist[1].transfer_qty = returned_qty
@@ -241,6 +242,7 @@ class TestStockEntry(unittest.TestCase):
 		se = webnotes.bean(copy=test_records[0])
 		se.doc.purpose = "Sales Return"
 		se.doc.posting_date = "2013-03-10"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doc.sales_invoice_no = si.doc.name
 		se.doclist[1].qty = returned_qty
 		se.doclist[1].transfer_qty = returned_qty
@@ -300,6 +302,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Sales Return"
 		se.doc.delivery_note_no = dn.doc.name
 		se.doc.posting_date = "2013-03-10"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
 		
 		se.insert()
@@ -399,6 +402,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Sales Return"
 		se.doc.delivery_note_no = dn.doc.name
 		se.doc.posting_date = "2013-03-10"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
 
 		se.insert()
@@ -449,6 +453,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Purchase Return"
 		se.doc.purchase_receipt_no = pr.doc.name
 		se.doc.posting_date = "2013-03-01"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
 		se.doclist[1].s_warehouse = "_Test Warehouse"
 		se.insert()
@@ -471,6 +476,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Purchase Return"
 		se.doc.purchase_receipt_no = pr_docname
 		se.doc.posting_date = "2013-03-01"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 6
 		se.doclist[1].s_warehouse = "_Test Warehouse"
 		
@@ -490,7 +496,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_make_return_jv_for_purchase_receipt(self):
 		se, pr_name = self.test_purchase_receipt_return()
 		self._test_purchase_return_jv(se)
-		
+
 		se, pr_name = self._test_purchase_return_return_against_purchase_order()
 		self._test_purchase_return_jv(se)
 		
@@ -547,6 +553,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.purpose = "Purchase Return"
 		se.doc.purchase_receipt_no = pr.doc.name
 		se.doc.posting_date = "2013-03-01"
+		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
 		se.doclist[1].s_warehouse = "_Test Warehouse"
 		se.insert()
