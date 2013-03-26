@@ -159,7 +159,7 @@ erpnext.AccountsChart = Class.extend({
 	rename: function() {
 		var node = this.selected_node();
 		wn.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
-			node.data('label', new_name).find(".tree-label").html(new_name);
+			node.parents("ul:first").parent().find(".tree-link:first").trigger("reload");
 		});
 	},
 	delete: function() {
