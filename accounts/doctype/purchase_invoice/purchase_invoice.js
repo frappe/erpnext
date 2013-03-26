@@ -177,10 +177,15 @@ cur_frm.cscript.allocated_amount = function(doc,cdt,cdn) {
 
 
 cur_frm.cscript.make_bank_voucher = function() {
-	$c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
-		if(!r.exc) {
+	wn.call({
+		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+		args: {
+			"company": cur_frm.doc.company,
+			"voucher_type": "Bank Voucher"
+		},
+		callback: function(r) {
 			cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
-	}
+		}
 	});
 }
 
@@ -289,8 +294,9 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	
 	// credit to bank
 	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = bank_account;
+	d1.account = bank_account.account;
 	d1.credit = doc.outstanding_amount;
+	d1.balance = bank_account.balance;
 	
 	loaddoc('Journal Voucher', jv.name);
 }
