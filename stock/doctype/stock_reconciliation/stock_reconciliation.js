@@ -101,22 +101,25 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	show_upload: function() {
 		var me = this;
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-		var upload_area = $('<div id="dit-upload-area"></div>').appendTo($wrapper);
 		
 		// upload
 		wn.upload.make({
-			parent: $('#dit-upload-area'),
+			parent: $wrapper,
 			args: {
 				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(r) {
-				$wrapper.find(".dit-progress-area").toggle(false);
 				me.frm.set_value("reconciliation_json", JSON.stringify(r));
 				me.show_reconciliation_data();
 				me.frm.save();
 			}
 		});
+
+		// rename button
+		$wrapper.find('form input[type="submit"]')
+			.attr('value', 'Upload')
+
 	},
 	
 	show_download_reconciliation_data: function() {

@@ -76,6 +76,12 @@ wn.module_page["Setup"] = [
 				label: wn._("Manage numbering series"),
 				"description":wn._("Set multiple numbering series for transactions")
 			},
+			{
+				"route":"Form/Rename Tool",
+				doctype: "Rename Tool",
+				label: wn._("Rename Tool"),
+				"description":wn._("Rename multiple items in one go")
+			},
 		]
 	},
 	{
