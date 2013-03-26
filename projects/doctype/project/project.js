@@ -26,6 +26,9 @@ cur_frm.cscript.refresh = function(doc) {
 				.appendTo(cur_frm.fields_dict.project_tasks.wrapper);
 		cur_frm.gantt_area.empty();
 		erpnext.show_task_gantt(cur_frm.gantt_area, cur_frm.docname);		
+	} else {
+		if(cur_frm.gantt_area)
+			cur_frm.gantt_area.empty();
 	}
 }
 

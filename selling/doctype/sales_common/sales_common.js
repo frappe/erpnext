@@ -860,9 +860,9 @@ cur_frm.cscript.commission_rate = function(doc, cdt, cdn) {
 		alert("Commision rate cannot be greater than 100.");
 		doc.total_commission = 0;
 		doc.commission_rate = 0;
-	}
-	else
+	} else {
 		doc.total_commission = doc.net_total * doc.commission_rate / 100;
+	}
 	refresh_many(['total_commission','commission_rate']);
 
 }
@@ -874,9 +874,9 @@ cur_frm.cscript.total_commission = function(doc, cdt, cdn) {
 			alert("Total commission cannot be greater than net total.");
 			doc.total_commission = 0;
 			doc.commission_rate = 0;
-		}
-		else
+		} else {
 			doc.commission_rate = doc.total_commission * 100 / doc.net_total;
+		}
 		refresh_many(['total_commission','commission_rate']);
 	}
 }
