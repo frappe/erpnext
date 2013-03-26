@@ -490,7 +490,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_make_return_jv_for_purchase_receipt(self):
 		se, pr_name = self.test_purchase_receipt_return()
 		self._test_purchase_return_jv(se)
-		
+
 		se, pr_name = self._test_purchase_return_return_against_purchase_order()
 		self._test_purchase_return_jv(se)
 		

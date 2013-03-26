@@ -251,3 +251,4 @@ class TransactionBase(DocListController):
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
 			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')
+	
