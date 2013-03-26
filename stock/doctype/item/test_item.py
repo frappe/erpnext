@@ -146,4 +146,23 @@ test_records = [
 		"is_sub_contracted_item": "No",
 		"stock_uom": "_Test UOM"
 	}],
+	[{
+		"doctype": "Item",
+		"item_code": "_Test Serialized Item",
+		"item_name": "_Test Serialized Item",
+		"description": "_Test Serialized Item",
+		"item_group": "_Test Item Group Desktops",
+		"is_stock_item": "Yes",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "Yes",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"is_sample_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "No",
+		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
+	}],
 ]

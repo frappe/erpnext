@@ -1,93 +1,102 @@
 # ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+# For license information, please see license.txt
 
 from __future__ import unicode_literals
-import unittest
-import webnotes
-from webnotes.tests import insert_test_data
-
-company = webnotes.conn.get_default("company")
+import webnotes, unittest
 
 class TestSerialNo(unittest.TestCase):
-	def setUp(self):
-		webnotes.conn.begin()
-		self.insert_test_data()
-
-	def tearDown(self):
-		# print "Message Log:", "\n--\n".join(webnotes.message_log)
-		# print "Debug Log:", "\n--\n".join(webnotes.debug_log)
-		webnotes.conn.rollback()
+	def test_aii_gl_entries_for_serial_no_in_store(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
-	def test_serialized_stock_entry(self):
-		data = [["2012-01-01", "01:00", "10001", 400, 400],
-			["2012-01-01", "03:00", "10002", 500, 700],
-			["2012-01-01", "04:00", "10003", 700, 700],
-			["2012-01-01", "05:00", "10004", 1200, 800],
-			["2012-01-01", "05:00", "10005", 800, 800],
-			["2012-01-01", "02:00", "10006", 1200, 800],
-			["2012-01-01", "06:00", "10007", 1500, 900]]
-		for d in data:
-			webnotes.bean([{
-				"doctype": "Serial No",
-				"item_code": "Nebula 8",
-				"warehouse": "Default Warehouse", 
-				"status": "In Store",
-				"sle_exists": 0,
-				"purchase_date": d[0],
-				"purchase_time": d[1],
-				"serial_no": d[2],
-				"purchase_rate": d[3],
-				"company": company,
-			}]).insert()
+		sr = webnotes.bean(copy=test_records[0])
+		sr.doc.serial_no = "_Test Serial No 1"
+		sr.insert()
+		
+		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
+			"stock_in_hand_account")
+		against_stock_account = webnotes.conn.get_value("Company", "_Test Company", 
+			"stock_adjustment_account")
+		
+		# check stock ledger entries
+		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where voucher_type = 'Serial No' and voucher_no = %s""", sr.doc.name, as_dict=1)[0]
+		self.assertTrue(sle)
+		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
+			["_Test Serialized Item", "_Test Warehouse", 1.0])
 			
-		for d in data:
-			res = webnotes.conn.sql("""select valuation_rate from `tabStock Ledger Entry`
-				where posting_date=%s and posting_time=%s and actual_qty=1 and serial_no=%s""",
-				(d[0], d[1], d[2]))
-			self.assertEquals(res[0][0], d[4])
+		# check gl entries
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Serial No' and voucher_no=%s
+			order by account desc""", sr.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
 		
-		print "deleted"
-		webnotes.delete_doc("Serial No", "10002")
+		expected_values = [
+			[stock_in_hand_account, 1000.0, 0.0],
+			[against_stock_account, 0.0, 1000.0]
+		]
 		
-		test_data = [["10001", 400, 400],
-			["10003", 700, 766.666667],
-			["10004", 1200, 875],
-			["10005", 800, 860],
-			["10006", 1200, 800],
-			["10007", 1500, 966.666667]]
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
 		
-		for d in test_data:
-			res = webnotes.conn.sql("""select valuation_rate from `tabStock Ledger Entry`
-				where actual_qty=1 and serial_no=%s""", (d[0],))
-			self.assertEquals(res[0][0], d[2])
+		sr.load_from_db()
+		self.assertEquals(sr.doc.sle_exists, 1)
+		
+		# save again	
+		sr.save()
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Serial No' and voucher_no=%s
+			order by account desc""", sr.doc.name, as_dict=1)
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+			
+		# trash/cancel
+		sr.submit()
+		sr.cancel()
+		
+		gl_count = webnotes.conn.sql("""select count(name) from `tabGL Entry` 
+			where voucher_type='Serial No' and voucher_no=%s and ifnull(is_cancelled, 'No') = 'Yes' 
+			order by account asc, name asc""", sr.doc.name)
+		
+		self.assertEquals(gl_count[0][0], 4)
+		
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		
+		
+	def test_aii_gl_entries_for_serial_no_delivered(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		
+		sr = webnotes.bean(copy=test_records[0])
+		sr.doc.serial_no = "_Test Serial No 2"
+		sr.doc.status = "Delivered"
+		sr.insert()
+		
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Serial No' and voucher_no=%s
+			order by account desc""", sr.doc.name, as_dict=1)
+		self.assertFalse(gl_entries)
+		
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 	
-	def insert_test_data(self):
-		# create default warehouse
-		if not webnotes.conn.exists("Warehouse", "Default Warehouse"):
-			webnotes.insert({"doctype": "Warehouse", 
-				"warehouse_name": "Default Warehouse",
-				"warehouse_type": "Stores"})
-
-		# create UOM: Nos.
-		if not webnotes.conn.exists("UOM", "Nos"):
-			webnotes.insert({"doctype": "UOM", "uom_name": "Nos"})
-			
-		# create item groups and items
-		insert_test_data("Item Group", 
-			sort_fn=lambda ig: (ig[0].get('parent_item_group'), ig[0].get('name')))
-		
-		insert_test_data("Item")
+	
+test_records = [
+	[
+		{
+			"company": "_Test Company", 
+			"doctype": "Serial No", 
+			"serial_no": "_Test Serial No", 
+			"status": "In Store",
+			"item_code": "_Test Serialized Item", 
+			"item_group": "_Test Item Group", 
+			"warehouse": "_Test Warehouse",
+			"purchase_rate": 1000.0, 
+			"purchase_time": "11:37:39", 
+			"purchase_date": "2013-02-26",
+			'fiscal_year': "_Test Fiscal Year 2013"
+		}
+	]
+]
