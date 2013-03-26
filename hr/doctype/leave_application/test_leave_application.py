@@ -29,7 +29,7 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		application = self.get_application(test_records[1])
 		self.assertTrue(application.insert())
-
+		
 	def test_overlap(self):
 		application = self.get_application(test_records[1])
 		self.assertRaises(OverlapError, application.insert)
@@ -57,6 +57,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
+test_dependencies = ["Leave Block List"]		
 
 test_records = [
 	[{
