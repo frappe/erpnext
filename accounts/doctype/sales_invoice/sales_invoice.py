@@ -318,9 +318,8 @@ class DocType(SellingController):
 	@property
 	def pos_details(self):
 		if not hasattr(self, "_pos_details"):
-			dtl = webnotes.conn.sql("""select income_account, warehouse, cost_center, 
-				expense_account from `tabPOS Setting` where user = %s and company = %s""", 
-				(webnotes.session['user'], self.doc.company), as_dict=1)			 
+			dtl = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
+				and company = %s""", (webnotes.session['user'], self.doc.company), as_dict=1)			 
 			if not dtl:
 				dtl = webnotes.conn.sql("""select income_account, warehouse, cost_center, 
 					expense_account from `tabPOS Setting` where ifnull(user,'') = '' 
