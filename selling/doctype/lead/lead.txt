@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 17:07:01", 
   "docstatus": 0, 
-  "modified": "2013-03-26 13:07:11", 
+  "modified": "2013-03-26 14:05:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -118,6 +118,18 @@
   "search_index": 0
  }, 
  {
+  "depends_on": "eval:doc.source == 'Customer'", 
+  "description": "Source of th", 
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "label": "From Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer"
+ }, 
+ {
   "depends_on": "eval:doc.source == 'Campaign'", 
   "description": "Enter campaign name if the source of lead is campaign.", 
   "doctype": "DocField", 
@@ -145,37 +157,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "sb8", 
+  "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "label": "Lead Details"
- }, 
- {
-  "depends_on": "eval:doc.source == 'Existing Customer'", 
-  "description": "Source of th", 
-  "doctype": "DocField", 
-  "fieldname": "customer", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "From Customer", 
-  "oldfieldname": "customer", 
-  "oldfieldtype": "Link", 
-  "options": "Customer"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "type", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Lead Type", 
-  "oldfieldname": "type", 
-  "oldfieldtype": "Select", 
-  "options": "\nClient\nChannel Partner\nConsultant"
+  "label": "Contact Info", 
+  "oldfieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -184,13 +169,6 @@
   "label": "Remark", 
   "oldfieldname": "remark", 
   "oldfieldtype": "Text"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_info", 
-  "fieldtype": "Section Break", 
-  "label": "Contact Info", 
-  "oldfieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -306,6 +284,16 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Lead Type", 
+  "oldfieldname": "type", 
+  "oldfieldtype": "Select", 
+  "options": "\nClient\nChannel Partner\nConsultant"
  }, 
  {
   "default": "__user", 

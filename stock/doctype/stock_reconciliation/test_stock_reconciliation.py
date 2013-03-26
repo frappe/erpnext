@@ -228,35 +228,40 @@ class TestStockReconciliation(unittest.TestCase):
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
 				"posting_date": "2012-12-12", "posting_time": "01:00",
-				"actual_qty": 20, "incoming_rate": 1000, "company": "_Test Company"
+				"actual_qty": 20, "incoming_rate": 1000, "company": "_Test Company",
+				"fiscal_year": "_Test Fiscal Year 2012",
 			},
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
 				"posting_date": "2012-12-15", "posting_time": "02:00",
-				"actual_qty": 10, "incoming_rate": 700, "company": "_Test Company"
+				"actual_qty": 10, "incoming_rate": 700, "company": "_Test Company",
+				"fiscal_year": "_Test Fiscal Year 2012",
 			},
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
 				"posting_date": "2012-12-25", "posting_time": "03:00",
-				"actual_qty": -15, "company": "_Test Company"
+				"actual_qty": -15, "company": "_Test Company",
+				"fiscal_year": "_Test Fiscal Year 2012",
 			},
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
 				"posting_date": "2012-12-31", "posting_time": "08:00",
-				"actual_qty": -20, "company": "_Test Company"
+				"actual_qty": -20, "company": "_Test Company",
+				"fiscal_year": "_Test Fiscal Year 2012",
 			},
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
 				"posting_date": "2013-01-05", "posting_time": "07:00",
-				"actual_qty": 15, "incoming_rate": 1200, "company": "_Test Company"
+				"actual_qty": 15, "incoming_rate": 1200, "company": "_Test Company",
+				"fiscal_year": "_Test Fiscal Year 2013",
 			},
 		]
 		

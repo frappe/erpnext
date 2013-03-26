@@ -375,9 +375,9 @@ def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filter
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 		
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, posting_date, user_remark 
+	return webnotes.conn.sql("""select jv.name, jv.posting_date, jv.user_remark 
 		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail 
-		where jv_detail.parent = jv.name and jv_detail.account = %s and docstatus = 1 
+		where jv_detail.parent = jv.name and jv_detail.account = %s and jv.docstatus = 1 
 		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))

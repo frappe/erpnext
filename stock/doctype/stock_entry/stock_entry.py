@@ -610,7 +610,8 @@ class DocType(StockController):
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
 			'batch_no': cstr(d.batch_no).strip(),
 			'serial_no': cstr(d.serial_no).strip(),
-			"project": self.doc.project_name
+			"project": self.doc.project_name,
+			"fiscal_year": self.doc.fiscal_year,
 		})
 	
 	def get_cust_values(self):
