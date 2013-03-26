@@ -776,8 +776,6 @@ def make_return_jv(stock_entry):
 	
 	from accounts.utils import get_balance_on
 	for r in result:
-		if not r.get("account"):
-			print result
 		jv_list.append({
 			"__islocal": 1,
 			"doctype": "Journal Voucher Detail",
