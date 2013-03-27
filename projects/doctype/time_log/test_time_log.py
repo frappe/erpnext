@@ -9,6 +9,7 @@ class TestTimeLog(unittest.TestCase):
 		self.assertRaises(OverlapError, ts.insert)
 
 test_records = [[{
+	"doctype": "Time Log",
 	"from_time": "2013-01-01 10:00:00",
 	"to_time": "2013-01-01 11:00:00",
 	"activity_type": "_Test Activity Type",
