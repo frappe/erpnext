@@ -74,7 +74,7 @@ class DocType(DocTypeNestedSet):
 		for d in self.doc.sub_groups:
 			d.count = get_group_item_count(d.name)
 			
-		self.doc.items = get_product_list_for_group(product_group = self.doc.name, limit=20)
+		self.doc.items = get_product_list_for_group(product_group = self.doc.name, limit=100)
 		self.parent_groups = get_parent_item_groups(self.doc.name)
 		self.doc.title = self.doc.name
 
