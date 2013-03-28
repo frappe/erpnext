@@ -219,4 +219,5 @@ patch_list = [
 	"execute:webnotes.bean('Style Settings').save() #2013-03-25",
 	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)",
 	"patches.march_2013.p09_unset_user_type_partner",
+	"patches.march_2013.p10_update_against_expense_account",
 ]
