@@ -1,74 +1,74 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:27:54", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:03", 
+  "modified": "2013-03-28 07:18:30", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-25 13:20:51"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
   "autoname": "field:brand", 
-  "module": "Setup", 
   "doctype": "DocType", 
-  "in_dialog": 1, 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "in_dialog": 0, 
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
-  "read_only": 0, 
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Brand", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "read_only": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Brand", 
-  "read": 1, 
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Brand", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1
  }, 
  {
-  "name": "Brand", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Brand"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Brand Name", 
-  "oldfieldname": "brand", 
   "fieldname": "brand", 
   "fieldtype": "Data", 
+  "label": "Brand Name", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text", 
+  "width": "300px"
  }, 
  {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
   "role": "Material Master Manager", 
-  "cancel": 1
+  "write": 1
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Material User", 
-  "cancel": 0
+  "submit": 0, 
+  "write": 0
  }
 ]
