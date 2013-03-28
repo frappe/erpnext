@@ -216,7 +216,12 @@ patch_list = [
 	"patches.march_2013.p06_remove_sales_purchase_return_tool",
 	"execute:webnotes.bean('Global Defaults').save()",
 	"patches.march_2013.p07_update_project_in_stock_ledger",
+	"execute:webnotes.reload_doc('stock', 'doctype', 'item') #2013-03-25",
+	"execute:webnotes.reload_doc('setup', 'doctype', 'item_group') #2013-03-25",
+	"execute:webnotes.reload_doc('website', 'doctype', 'blog_post') #2013-03-25",
+	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-03-25",
 	"execute:webnotes.bean('Style Settings').save() #2013-03-25",
 	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)",
 	"patches.march_2013.p09_unset_user_type_partner",
+	"patches.march_2013.p10_set_fiscal_year_for_stock",
 ]
