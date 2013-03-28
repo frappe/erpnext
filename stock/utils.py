@@ -170,9 +170,10 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 		# sales bom item
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
-			buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
-				bom_item.item_code, bom_item.warehouse or warehouse, 
-				bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
+			if bom_item.get("parent_detail_docname")==voucher_detail_no:
+				buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
+					bom_item.item_code, bom_item.warehouse or warehouse, 
+					bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
 		return buying_amount
 	else:
 		# doesn't have sales bom
@@ -181,13 +182,16 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 		
 def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse, qty, 
 		stock_ledger_entries):
-	for i, sle in enumerate(stock_ledger_entries):
+	relevant_stock_ledger_entries = [sle for sle in stock_ledger_entries 
+		if sle.item_code == item_code and sle.warehouse == warehouse]
+		
+	for i, sle in enumerate(relevant_stock_ledger_entries):
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
-			(sle.voucher_detail_no == item_row or (sle.voucher_type != "Stock Reconciliation" 
-			and sle.item_code == item_code and sle.warehouse == warehouse and flt(sle.qty) == qty)):
-				previous_stock_value = len(stock_ledger_entries) > i+1 and \
-					flt(stock_ledger_entries[i+1].stock_value) or 0.0
-					
+			((sle.voucher_detail_no == item_row) or (sle.voucher_type != "Stock Reconciliation" 
+			and flt(sle.qty) == qty)):
+				previous_stock_value = len(relevant_stock_ledger_entries) > i+1 and \
+					flt(relevant_stock_ledger_entries[i+1].stock_value) or 0.0
+				
 				buying_amount =  previous_stock_value - flt(sle.stock_value)						
 				
 				return buying_amount

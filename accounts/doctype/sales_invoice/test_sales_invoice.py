@@ -217,21 +217,11 @@ class TestSalesInvoice(unittest.TestCase):
 		return dn
 		
 	def _insert_pos_settings(self):
+		from accounts.doctype.pos_setting.test_pos_setting \
+			import test_records as pos_setting_test_records
 		webnotes.conn.sql("""delete from `tabPOS Setting`""")
-		ps = webnotes.bean([
-			{
-				"cash_bank_account": "_Test Account Bank Account - _TC", 
-				"company": "_Test Company", 
-				"conversion_rate": 1.0, 
-				"cost_center": "_Test Cost Center - _TC", 
-				"currency": "INR", 
-				"doctype": "POS Setting", 
-				"income_account": "_Test Account Bank Account - _TC", 
-				"price_list_name": "_Test Price List", 
-				"territory": "_Test Territory", 
-				"warehouse": "_Test Warehouse"
-			}
-		])
+		
+		ps = webnotes.bean(copy=pos_setting_test_records[0])
 		ps.insert()
 		
 	def test_sales_invoice_with_advance(self):

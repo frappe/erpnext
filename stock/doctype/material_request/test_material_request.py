@@ -24,7 +24,8 @@ class TestMaterialRequest(unittest.TestCase):
 				"doctype": "Stock Entry", 
 				"posting_date": "2013-03-01", 
 				"posting_time": "00:00:00", 
-				"purpose": "Material Receipt"
+				"purpose": "Material Receipt",
+				"fiscal_year": "_Test Fiscal Year 2013",
 			}, 
 			{
 				"conversion_factor": 1.0, 
@@ -125,7 +126,8 @@ class TestMaterialRequest(unittest.TestCase):
 			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
 		se_doclist[0].fields.update({
 			"posting_date": "2013-03-01",
-			"posting_time": "01:00"
+			"posting_time": "01:00",
+			"fiscal_year": "_Test Fiscal Year 2013",
 		})
 		se_doclist[1].fields.update({
 			"qty": 27.0,
@@ -186,7 +188,8 @@ class TestMaterialRequest(unittest.TestCase):
 			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
 		se_doclist[0].fields.update({
 			"posting_date": "2013-03-01",
-			"posting_time": "00:00"
+			"posting_time": "00:00",
+			"fiscal_year": "_Test Fiscal Year 2013",
 		})
 		se_doclist[1].fields.update({
 			"qty": 60.0,
@@ -239,7 +242,8 @@ class TestMaterialRequest(unittest.TestCase):
 			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
 		se_doclist[0].fields.update({
 			"posting_date": "2013-03-01",
-			"posting_time": "00:00"
+			"posting_time": "00:00",
+			"fiscal_year": "_Test Fiscal Year 2013",
 		})
 		se_doclist[1].fields.update({
 			"qty": 60.0,
