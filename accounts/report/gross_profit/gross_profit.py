@@ -12,7 +12,7 @@ def execute(filters=None):
 	
 	item_sales_bom = get_item_sales_bom()
 	
-	columns = ["Delivery Note/Sales Invoice::120", "Posting Date:Date", "Posting Time", 
+	columns = ["Delivery Note/Sales Invoice::120", "Link::30", "Posting Date:Date", "Posting Time", 
 		"Item Code:Link/Item", "Item Name", "Description", "Warehouse:Link/Warehouse",
 		"Qty:Float", "Selling Rate:Currency", "Selling Amount:Currency", "Buying Amount:Currency",
 		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
@@ -32,8 +32,9 @@ def execute(filters=None):
 		else:
 			gross_profit = gross_profit_percent = 0.0
 		
-		name = """<a href="%s">%s</a>""" % ("/".join(["#Form", row.parenttype, row.name]), row.name)
-		data.append([name, row.posting_date, row.posting_time, row.item_code, row.item_name,
+		icon = """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
+			% ("/".join(["#Form", row.parenttype, row.name]),)
+		data.append([row.name, icon, row.posting_date, row.posting_time, row.item_code, row.item_name,
 			row.description, row.warehouse, row.qty, row.basic_rate, row.amount, buying_amount,
 			gross_profit, gross_profit_percent, row.project])
 			
@@ -57,7 +58,7 @@ def get_item_sales_bom():
 	item_sales_bom = {}
 	
 	for d in webnotes.conn.sql("""select parenttype, parent, parent_item,
-		item_code, warehouse, -1*qty as total_qty
+		item_code, warehouse, -1*qty as total_qty, parent_detail_docname
 		from `tabDelivery Note Packing Item` where docstatus=1""", as_dict=True):
 		item_sales_bom.setdefault(d.parenttype, webnotes._dict()).setdefault(d.parent,
 			webnotes._dict()).setdefault(d.parent_item, []).append(d)

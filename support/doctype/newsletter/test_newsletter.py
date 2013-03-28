@@ -38,18 +38,21 @@ test_dependencies = ["Lead", "Contact"]
 
 test_records =[
 	[{
+		"doctype": "Newsletter",
 		"subject": "_Test Newsletter to Lead",
 		"send_to_type": "Lead",
 		"lead_source": "All",
 		"message": "This is a test newsletter"
 	}],
 	[{
+		"doctype": "Newsletter",
 		"subject": "_Test Newsletter to Contact",
 		"send_to_type": "Contact",
 		"contact_type": "Customer",
 		"message": "This is a test newsletter"
 	}],
 	[{
+		"doctype": "Newsletter",
 		"subject": "_Test Newsletter to Custom",
 		"send_to_type": "Custom",
 		"email_list": "test_custom@example.com, test_custom1@example.com, test_custom2@example.com",

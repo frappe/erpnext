@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import webnotes
 from webnotes.utils import cstr
-from website.utils import build_html, url_for_website, delete_page_cache
+from website.utils import build_html, delete_page_cache
 
 
 @webnotes.whitelist(allow_guest=True)
@@ -90,7 +90,6 @@ def scrub_item_for_list(r):
 		r.website_description = "No description given"
 	if len(r.website_description.split(" ")) > 24:
 		r.website_description = " ".join(r.website_description.split(" ")[:24]) + "..."
-	r.website_image = url_for_website(r.website_image)
 
 def get_parent_item_groups(item_group_name):
 	item_group = webnotes.doc("Item Group", item_group_name)

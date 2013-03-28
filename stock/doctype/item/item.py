@@ -235,9 +235,8 @@ class DocType(DocListController):
 			clear_cache(self.doc.page_name)
 			
 	def prepare_template_args(self):
-		from website.helpers.product import get_parent_item_groups, url_for_website
+		from website.helpers.product import get_parent_item_groups
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
-		self.doc.website_image = url_for_website(self.doc.website_image)
 		self.doc.title = self.doc.item_name
 
 		if self.doc.slideshow:

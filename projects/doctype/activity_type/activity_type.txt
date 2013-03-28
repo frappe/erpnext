@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-05 12:53:23", 
+  "creation": "2013-03-05 10:14:59", 
   "docstatus": 0, 
-  "modified": "2013-03-05 12:54:22", 
+  "modified": "2013-03-28 07:18:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,7 +10,7 @@
   "autoname": "field:activity_type", 
   "doctype": "DocType", 
   "document_type": "Master", 
-  "in_dialog": 1, 
+  "in_dialog": 0, 
   "module": "Projects", 
   "name": "__common__"
  }, 

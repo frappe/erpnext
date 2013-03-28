@@ -77,14 +77,10 @@ for r in res:
 	r.append(net_total)
 
 	#Get tax for account heads
-	acc_head_tax = sql("""select account_head, sum(tax_amount) 
-						  from `tabPurchase Taxes and Charges` 
-						  where parent = '%s' 
-						  and parenttype = 'Purchase Invoice' 
-						  and add_deduct_tax = 'Add' 
-						  and category in ('Total', 'Valuation and Total')
-						  group by account_head
-						""" %(r[col_idx['ID']],))
+	acc_head_tax = sql("""select account_head, 
+		sum(if(add_deduct_tax='Add', tax_amount, -tax_amount)) 
+		from `tabPurchase Taxes and Charges` where parent = %s and parenttype = 'Purchase Invoice' 
+		and category in ('Total', 'Valuation and Total') group by account_head""", r[col_idx['ID']])
 
 	#Convert the result to dictionary for easy retrieval
 	acc_head_tax_dict = {}

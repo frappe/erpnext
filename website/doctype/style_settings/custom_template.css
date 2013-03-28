@@ -4,7 +4,7 @@
 
 body {
 {% if doc.background_image %}
-	background: url("../files/{{ doc.background_image }}") repeat;
+	background: url("../{{ doc.background_image }}") repeat;
 {% elif doc.background_color %}
 	background-color: #{{ doc.background_color }};
 	background-image: none;
@@ -67,16 +67,10 @@ div.web-footer, div.web-footer a {
 
 /* Bootstrap Navbar */
 .navbar-inverse .navbar-inner {
+	box-shadow: none;
     background-color: #{{ doc.top_bar_background or "444444"}};
     background-repeat: repeat-x;
 	background-image: none;
-}
-
-.navbar-inner {
-	box-shadow: none;
-}
-
-.navbar-inner {
 	border-bottom: 1px solid {% if doc.top_bar_background == doc.page_background -%}
 		#{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
 	{%- else -%}
