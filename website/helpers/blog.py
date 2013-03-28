@@ -46,8 +46,6 @@ def get_blog_list(start=0, by=None, category=None):
 		if not res['content']:
 			res['content'] = website.utils.get_html(res['page_name'])
 		res['content'] = res['content'][:140]
-		if res.avatar and not "/" in res.avatar:
-			res.avatar = "files/" + res.avatar
 		
 	return result
 
@@ -133,9 +131,6 @@ def get_blog_template_args():
 def get_writers_args():
 	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
 	 	order by posts desc""", as_dict=1)
-	for blogger in bloggers:
-		if blogger.avatar and not "/" in blogger.avatar:
-			blogger.avatar = "files/" + blogger.avatar
 		
 	args = {
 		"bloggers": bloggers,
