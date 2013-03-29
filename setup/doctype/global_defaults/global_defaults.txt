@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-21 12:28:24", 
+  "creation": "2013-03-25 11:08:14", 
   "docstatus": 0, 
-  "modified": "2013-03-21 15:42:59", 
+  "modified": "2013-03-28 15:41:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,6 +27,8 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -48,19 +50,22 @@
   "doctype": "DocField", 
   "fieldname": "general", 
   "fieldtype": "Section Break", 
-  "label": "General"
+  "label": "General", 
+  "read_only": 0
  }, 
  {
   "description": "Session Expiry in Hours e.g. 06:00", 
   "doctype": "DocField", 
   "fieldname": "session_expiry", 
   "fieldtype": "Data", 
-  "label": "Session Expiry"
+  "label": "Session Expiry", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break_3", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "For Server Side Print Formats", 
@@ -68,13 +73,15 @@
   "fieldname": "print_style", 
   "fieldtype": "Select", 
   "label": "Print Format Style", 
-  "options": "Standard\nClassic\nModern\nSpartan"
+  "options": "Standard\nClassic\nModern\nSpartan", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Section Break", 
-  "label": "Company"
+  "label": "Company", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -82,6 +89,7 @@
   "fieldtype": "Link", 
   "label": "Default Company", 
   "options": "Company", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -90,6 +98,7 @@
   "fieldtype": "Link", 
   "label": "Current Fiscal Year", 
   "options": "Fiscal Year", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -97,12 +106,14 @@
   "fieldname": "date_format", 
   "fieldtype": "Select", 
   "label": "Date Format", 
-  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy"
+  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -111,7 +122,8 @@
   "fieldname": "hide_currency_symbol", 
   "fieldtype": "Select", 
   "label": "Hide Currency Symbol", 
-  "options": "\nNo\nYes"
+  "options": "\nNo\nYes", 
+  "read_only": 0
  }, 
  {
   "default": "INR", 
@@ -120,6 +132,7 @@
   "fieldtype": "Link", 
   "label": "Default Currency", 
   "options": "Currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -128,7 +141,8 @@
   "fieldname": "number_format", 
   "fieldtype": "Select", 
   "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###", 
+  "read_only": 0
  }, 
  {
   "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
@@ -136,18 +150,21 @@
   "fieldname": "float_precision", 
   "fieldtype": "Select", 
   "label": "Float Precision", 
-  "options": "\n2\n3\n4\n5\n6"
+  "options": "\n2\n3\n4\n5\n6", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "stock", 
   "fieldtype": "Section Break", 
-  "label": "Stock"
+  "label": "Stock", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -155,54 +172,62 @@
   "fieldname": "default_item_group", 
   "fieldtype": "Link", 
   "label": "Default Item Group", 
-  "options": "Item Group"
+  "options": "Item Group", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "ighelp", 
   "fieldtype": "HTML", 
   "label": "IGHelp", 
-  "options": "<a href=\"#!Sales Browser/Item Group\">To manage Item Groups, click here</a>"
+  "options": "<a href=\"#!Sales Browser/Item Group\">To manage Item Groups, click here</a>", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_stock_uom", 
   "fieldtype": "Link", 
   "label": "Default Stock UOM", 
-  "options": "UOM"
+  "options": "UOM", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_valuation_method", 
   "fieldtype": "Select", 
   "label": "Default Valuation Method", 
-  "options": "FIFO\nMoving Average"
+  "options": "FIFO\nMoving Average", 
+  "read_only": 0
  }, 
  {
   "description": "Applicable only if valuation method is moving average", 
   "doctype": "DocField", 
   "fieldname": "allow_negative_stock", 
   "fieldtype": "Check", 
-  "label": "Allow Negative Stock"
+  "label": "Allow Negative Stock", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_warehouse_type", 
   "fieldtype": "Link", 
   "label": "Default Warehouse Type", 
-  "options": "Warehouse Type"
+  "options": "Warehouse Type", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "auto_indent", 
   "fieldtype": "Check", 
-  "label": "Raise Material Request when stock reaches re-order level"
+  "label": "Raise Material Request when stock reaches re-order level", 
+  "read_only": 0
  }, 
  {
   "default": "1", 
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -210,14 +235,16 @@
   "doctype": "DocField", 
   "fieldname": "tolerance", 
   "fieldtype": "Float", 
-  "label": "Allowance Percent"
+  "label": "Allowance Percent", 
+  "read_only": 0
  }, 
  {
   "description": "Stock level frozen up to this date, nobody can do / modify entry except authorized person", 
   "doctype": "DocField", 
   "fieldname": "stock_frozen_upto", 
   "fieldtype": "Date", 
-  "label": "Stock Frozen Upto"
+  "label": "Stock Frozen Upto", 
+  "read_only": 0
  }, 
  {
   "description": "Users with this role are allowed to do / modify stock entry before frozen date", 
@@ -225,20 +252,32 @@
   "fieldname": "stock_auth_role", 
   "fieldtype": "Link", 
   "label": "Authorized Role (Frozen Entry)", 
-  "options": "Role"
+  "options": "Role", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "accounts", 
   "fieldtype": "Section Break", 
-  "label": "Accounts"
+  "label": "Accounts", 
+  "read_only": 0
+ }, 
+ {
+  "description": "If enabled, the system will post accounting entries for inventory automatically", 
+  "doctype": "DocField", 
+  "fieldname": "auto_inventory_accounting", 
+  "fieldtype": "Check", 
+  "label": "Auto Inventory Accounting", 
+  "no_copy": 0, 
+  "print_hide": 1
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person", 
   "doctype": "DocField", 
   "fieldname": "acc_frozen_upto", 
   "fieldtype": "Date", 
-  "label": "Accounts Frozen Upto"
+  "label": "Accounts Frozen Upto", 
+  "read_only": 0
  }, 
  {
   "description": "Users with this role are allowed to do / modify accounting entry before frozen date", 
@@ -246,39 +285,45 @@
   "fieldname": "bde_auth_role", 
   "fieldtype": "Link", 
   "label": "Authourized Role (Frozen Entry)", 
-  "options": "Role"
+  "options": "Role", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "credit_controller", 
   "fieldtype": "Link", 
   "label": "Credit Controller", 
-  "options": "Role"
+  "options": "Role", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break4", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "If checked, then in POS Sales Invoice, Update Stock gets checked by default", 
   "doctype": "DocField", 
   "fieldname": "update_stock", 
   "fieldtype": "Check", 
-  "label": "Update Stock when using POS Sales Invoice"
+  "label": "Update Stock when using POS Sales Invoice", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "account_info", 
   "fieldtype": "HTML", 
   "label": "Account Info", 
-  "options": "<div class=\"help-box\">For more accounting defaults, Open <a href=\"#!List/Company\">Company</a></div>"
+  "options": "<div class=\"help-box\">For more accounting defaults, Open <a href=\"#!List/Company\">Company</a></div>", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "selling", 
   "fieldtype": "Section Break", 
-  "label": "Selling"
+  "label": "Selling", 
+  "read_only": 0
  }, 
  {
   "default": "Customer Name", 
@@ -286,40 +331,46 @@
   "fieldname": "cust_master_name", 
   "fieldtype": "Select", 
   "label": "Customer Master created by ", 
-  "options": "Customer Name\nNaming Series"
+  "options": "Customer Name\nNaming Series", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_customer_group", 
   "fieldtype": "Link", 
   "label": "Default Customer Group", 
-  "options": "Customer Group"
+  "options": "Customer Group", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cghelp", 
   "fieldtype": "HTML", 
   "label": "CGHelp", 
-  "options": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>"
+  "options": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_territory", 
   "fieldtype": "Link", 
   "label": "Default Territory", 
-  "options": "Territory"
+  "options": "Territory", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "territoryhelp", 
   "fieldtype": "HTML", 
   "label": "TerritoryHelp", 
-  "options": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>"
+  "options": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break5", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -327,14 +378,16 @@
   "fieldname": "default_price_list", 
   "fieldtype": "Link", 
   "label": "Default Price List", 
-  "options": "Price List"
+  "options": "Price List", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_price_list_currency", 
   "fieldtype": "Link", 
   "label": "Default Price List Currency", 
-  "options": "Currency"
+  "options": "Currency", 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -342,7 +395,8 @@
   "fieldname": "so_required", 
   "fieldtype": "Select", 
   "label": "Sales Order Required", 
-  "options": "No\nYes"
+  "options": "No\nYes", 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -350,27 +404,31 @@
   "fieldname": "dn_required", 
   "fieldtype": "Select", 
   "label": "Delivery Note Required", 
-  "options": "No\nYes"
+  "options": "No\nYes", 
+  "read_only": 0
  }, 
  {
   "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
   "doctype": "DocField", 
   "fieldname": "disable_rounded_total", 
   "fieldtype": "Check", 
-  "label": "Disable Rounded Total"
+  "label": "Disable Rounded Total", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "buying", 
   "fieldtype": "Section Break", 
-  "label": "Buying"
+  "label": "Buying", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_supplier_type", 
   "fieldtype": "Link", 
   "label": "Default Supplier Type", 
-  "options": "Supplier Type"
+  "options": "Supplier Type", 
+  "read_only": 0
  }, 
  {
   "default": "Supplier Name", 
@@ -378,12 +436,14 @@
   "fieldname": "supp_master_name", 
   "fieldtype": "Select", 
   "label": "Supplier Master created by ", 
-  "options": "Supplier Name\nNaming Series"
+  "options": "Supplier Name\nNaming Series", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break6", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -392,7 +452,8 @@
   "fieldname": "po_required", 
   "fieldtype": "Select", 
   "label": "Purchase Order Required", 
-  "options": "No\nYes"
+  "options": "No\nYes", 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -400,20 +461,23 @@
   "fieldname": "pr_required", 
   "fieldtype": "Select", 
   "label": "Purchase Receipt Required", 
-  "options": "No\nYes"
+  "options": "No\nYes", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "maintain_same_rate", 
   "fieldtype": "Check", 
-  "label": "Maintain same rate throughout purchase cycle"
+  "label": "Maintain same rate throughout purchase cycle", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "hr", 
   "fieldtype": "Section Break", 
   "label": "HR", 
-  "options": "<div style=\"padding-top: 8px;\" class=\"columnHeading\">HR</div>"
+  "options": "<div style=\"padding-top: 8px;\" class=\"columnHeading\">HR</div>", 
+  "read_only": 0
  }, 
  {
   "description": "Employee record is created using selected field. ", 
@@ -421,24 +485,22 @@
   "fieldname": "emp_created_by", 
   "fieldtype": "Select", 
   "label": "Employee Records to be created by ", 
-  "options": "Naming Series\nEmployee Number"
+  "options": "Naming Series\nEmployee Number", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "system", 
   "fieldtype": "Section Break", 
-  "label": "System"
+  "label": "System", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "sms_sender_name", 
   "fieldtype": "Data", 
-  "label": "SMS Sender Name"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "doctype": "DocPerm"
+  "label": "SMS Sender Name", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocPerm"

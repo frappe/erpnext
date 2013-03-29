@@ -224,5 +224,10 @@ patch_list = [
 	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)",
 	"patches.march_2013.p09_unset_user_type_partner",
 	"patches.march_2013.p10_set_fiscal_year_for_stock",
+	"patches.march_2013.p10_update_against_expense_account",
 	"patches.march_2013.p11_update_attach_files",
+	"patches.march_2013.p12_set_item_tax_rate_in_json",
+	"patches.march_2013.p07_update_valuation_rate",
+	"patches.march_2013.p08_create_aii_accounts",
+	"patches.march_2013.p03_update_buying_amount",
 ]

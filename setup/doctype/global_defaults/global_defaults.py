@@ -45,7 +45,7 @@ keydict = {
 	'session_expiry': 'session_expiry',
 	'disable_rounded_total': 'disable_rounded_total',
 	"update_stock": "update_stock",
-	# "auto_inventory_accounting": "auto_inventory_accounting",
+	"auto_inventory_accounting": "auto_inventory_accounting",
 }
 
 class DocType:
@@ -62,7 +62,6 @@ class DocType:
 
 	def on_update(self):
 		"""update defaults"""
-		
 		self.validate_session_expiry()
 		
 		for key in keydict:

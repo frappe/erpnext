@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:04", 
+  "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:32", 
+  "modified": "2013-03-29 19:43:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -158,6 +158,7 @@
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
   "oldfieldtype": "Currency", 
+  "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
  }, 
@@ -168,6 +169,7 @@
   "label": "Qty as per Stock UOM", 
   "oldfieldname": "transfer_qty", 
   "oldfieldtype": "Currency", 
+  "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
  }, 
@@ -180,6 +182,7 @@
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
   "options": "UOM", 
+  "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 
   "search_index": 0

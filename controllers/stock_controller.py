@@ -16,7 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _
+from webnotes.utils import cint
+import webnotes.defaults
 from controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
@@ -73,3 +74,9 @@ class StockController(AccountsController):
 			warehouse_list.append(item.warehouse)
 			
 		return list(set(item_list)), list(set(warehouse_list))
+		
+	def make_cancel_gl_entries(self):
+		if webnotes.conn.sql("""select name from `tabGL Entry` where voucher_type=%s 
+			and voucher_no=%s and ifnull(is_cancelled, 'No')='No'""",
+			(self.doc.doctype, self.doc.name)):
+				self.make_gl_entries()

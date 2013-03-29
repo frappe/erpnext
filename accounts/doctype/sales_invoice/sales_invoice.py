@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.defaults
 
 from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
 	get_first_day, get_last_day
@@ -131,7 +132,7 @@ class DocType(SellingController):
 
 		sales_com_obj.update_prevdoc_detail(0, self)
 		
-		self.make_gl_entries()
+		self.make_cancel_gl_entries()
 		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()

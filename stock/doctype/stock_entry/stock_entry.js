@@ -77,7 +77,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		};
 		
 		if (sys_defaults.auto_inventory_accounting) {
-			this.frm.add_fetch("company", "expense_adjustment_account", "stock_adjustment_account");
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
 				return {
@@ -205,25 +205,27 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	make_return_jv: function() {
-		this.frm.call({
-			method: "make_return_jv",
-			args: {
-				stock_entry: this.frm.doc.name
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					var jv_name = wn.model.make_new_doc_and_get_name('Journal Voucher');
-					var jv = locals["Journal Voucher"][jv_name];
-					$.extend(jv, r.message[0]);
-					$.each(r.message.slice(1), function(i, jvd) {
-						var child = wn.model.add_child(jv, "Journal Voucher Detail", "entries");
-						$.extend(child, jvd);
-					});
-					loaddoc("Journal Voucher", jv_name);
+		if(this.get_doctype_docname()) {
+			this.frm.call({
+				method: "make_return_jv",
+				args: {
+					stock_entry: this.frm.doc.name
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						var jv_name = wn.model.make_new_doc_and_get_name('Journal Voucher');
+						var jv = locals["Journal Voucher"][jv_name];
+						$.extend(jv, r.message[0]);
+						$.each(r.message.slice(1), function(i, jvd) {
+							var child = wn.model.add_child(jv, "Journal Voucher Detail", "entries");
+							$.extend(child, jvd);
+						});
+						loaddoc("Journal Voucher", jv_name);
+					}
+
 				}
-				
-			}
-		});
+			});
+		}
 	},
 
 });
@@ -358,6 +360,8 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_items(doc);
+	if($.inArray(cur_frm.doc.purpose, ["Purchase Return", "Sales Return"])!==-1)
+		validated = cur_frm.cscript.get_doctype_docname() ? true : false;
 }
 
 cur_frm.cscript.validate_items = function(doc) {

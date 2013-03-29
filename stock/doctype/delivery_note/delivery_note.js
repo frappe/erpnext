@@ -74,6 +74,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer);
 	
 	set_print_hide(doc, cdt, cdn);
+	
+	// unhide expense_account and cost_center is auto_inventory_accounting enabled
+	var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
+	cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
+	cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
 }
 
 

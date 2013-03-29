@@ -171,7 +171,7 @@ def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, vouch
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
 			if bom_item.get("parent_detail_docname")==voucher_detail_no:
-				buying_amount += _get_buying_amount(voucher_type, voucher_no, "[** No Item Row **]",
+				buying_amount += _get_buying_amount(voucher_type, voucher_no, voucher_detail_no,
 					bom_item.item_code, bom_item.warehouse or warehouse, 
 					bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
 		return buying_amount
@@ -187,8 +187,7 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 		
 	for i, sle in enumerate(relevant_stock_ledger_entries):
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
-			((sle.voucher_detail_no == item_row) or (sle.voucher_type != "Stock Reconciliation" 
-			and flt(sle.qty) == qty)):
+			sle.voucher_detail_no == item_row:
 				previous_stock_value = len(relevant_stock_ledger_entries) > i+1 and \
 					flt(relevant_stock_ledger_entries[i+1].stock_value) or 0.0
 				

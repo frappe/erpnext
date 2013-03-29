@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.defaults
 
 from webnotes.utils import cstr, cint, flt, comma_or
 from webnotes.model.doc import Document, addchild
@@ -67,7 +68,7 @@ class DocType(StockController):
 		self.update_serial_no(0)
 		self.update_stock_ledger(1)
 		self.update_production_order(0)
-		self.make_gl_entries()
+		self.make_cancel_gl_entries()
 		
 	def validate_fiscal_year(self):
 		import accounts.utils
@@ -426,16 +427,18 @@ class DocType(StockController):
 		
 	def get_warehouse_details(self, args):
 		args = json.loads(args)
-		args.update({
-			"posting_date": self.doc.posting_date,
-			"posting_time": self.doc.posting_time,
-		})
-		args = webnotes._dict(args)
+		ret = {}
+		if args.get('warehouse') and args.get('item_code'):
+			args.update({
+				"posting_date": self.doc.posting_date,
+				"posting_time": self.doc.posting_time,
+			})
+			args = webnotes._dict(args)
 		
-		ret = {
-			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-			"incoming_rate" : self.get_incoming_rate(args)
-		}
+			ret = {
+				"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
+				"incoming_rate" : self.get_incoming_rate(args)
+			}
 		return ret
 		
 	def get_items(self):
