@@ -192,6 +192,7 @@ def get_source_doc(page_name):
 	return None, None
 	
 def get_outer_env(page_name, args):
+	
 	from webnotes.utils import get_request_site_address
 	from urllib import quote
 	
@@ -238,7 +239,7 @@ def get_outer_env(page_name, args):
 	args.update(ret)
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["banner_html", "brand_html", "copyright", "address", "twitter_share_via"
+	for k in ["banner_html", "brand_html", "copyright", "address", "twitter_share_via",
 		"favicon", "facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
 		if k in settings.fields:
 			args[k] = settings.fields.get(k)
@@ -280,13 +281,7 @@ def get_all_pages():
 def delete_page_cache(page_name):
 	if page_name:
 		webnotes.cache().delete_value("page:" + page_name)
-	
-def url_for_website(url):
-	if url and not url.lower().startswith("http"):
-		return "files/" + url
-	else:
-		return url
-		
+			
 def get_hex_shade(color, percent):
 	
 	def p(c):

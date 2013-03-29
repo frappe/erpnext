@@ -366,6 +366,7 @@ class DocType(SellingController):
 						
 				# Reduce actual qty from warehouse
 				self.make_sl_entry(d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
+		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 
 

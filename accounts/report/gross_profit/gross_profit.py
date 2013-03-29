@@ -25,12 +25,12 @@ def execute(filters=None):
 			item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict()))
 		
 		buying_amount = buying_amount > 0 and buying_amount or 0
-		
+
+		gross_profit = selling_amount - buying_amount
 		if selling_amount:
-			gross_profit = selling_amount - buying_amount
 			gross_profit_percent = (gross_profit / selling_amount) * 100.0
 		else:
-			gross_profit = gross_profit_percent = 0.0
+			gross_profit_percent = 0.0
 		
 		icon = """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
 			% ("/".join(["#Form", row.parenttype, row.name]),)

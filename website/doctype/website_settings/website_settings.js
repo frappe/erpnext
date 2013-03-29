@@ -48,7 +48,6 @@ cur_frm.cscript.set_banner_from_image = function(doc) {
 		msgprint(wn._("Select a Banner Image first."));
 	}
 	var src = doc.banner_image;
-	if(src.indexOf("/")==-1) src = "files/" + src;
 	cur_frm.set_value("banner_html", "<a href='/'><img src='"+ src
 		+"' style='max-width: 200px;'></a>");
 }
