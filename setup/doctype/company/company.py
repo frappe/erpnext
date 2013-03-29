@@ -49,8 +49,6 @@ class DocType:
 						['Earnest Money','Securities and Deposits','Ledger','No','','Debit',self.doc.name,''],
 					['Stock Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
 						['Stock In Hand','Stock Assets','Ledger','No','','Debit',self.doc.name,''],
-						['Stock Delivered But Not Billed', 'Stock Assets', 'Ledger', 
-							'No', '', 'Debit', self.doc.name, ''],
 					['Tax Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','No','','Debit',self.doc.name,''],
 					['Capital Equipments','Fixed Assets','Ledger','No','Fixed Asset Account','Debit',self.doc.name,''],

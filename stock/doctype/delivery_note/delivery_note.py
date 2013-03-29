@@ -21,6 +21,8 @@ from webnotes.utils import cstr, flt, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+import webnotes.defaults
+
 
 sql = webnotes.conn.sql
 
@@ -312,7 +314,7 @@ class DocType(SellingController):
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 		
-		self.make_gl_entries()
+		self.make_cancel_gl_entries()
 
 
 	def check_next_docstatus(self):

@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, getdate, nowdate
 import datetime
-from webnotes import msgprint, _
+from webnotes import msgprint
 	
 from controllers.stock_controller import StockController
 
@@ -103,7 +103,12 @@ class DocType(StockController):
 		elif self.doc.status == 'In Store': 
 			webnotes.conn.set(self.doc, 'status', 'Not in Use')
 			self.make_stock_ledger_entry(-1)
-			self.make_gl_entries(cancel=True)
+			
+			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+				and webnotes.conn.sql("""select name from `tabGL Entry`
+				where voucher_type=%s and voucher_no=%s and ifnull(is_cancelled, 'No')='No'""",
+				(self.doc.doctype, self.doc.name)):
+					self.make_gl_entries(cancel=True)
 
 
 	def on_cancel(self):

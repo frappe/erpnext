@@ -62,7 +62,6 @@ class DocType:
 
 	def on_update(self):
 		"""update defaults"""
-		
 		self.validate_session_expiry()
 		
 		for key in keydict:

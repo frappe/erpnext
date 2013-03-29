@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.defaults
 import json
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, cint
@@ -37,7 +38,7 @@ class DocType(StockController):
 		
 	def on_cancel(self):
 		self.delete_stock_ledger_entries()
-		self.make_gl_entries()
+		self.make_cancel_gl_entries()
 		
 	def validate_data(self):
 		if not self.doc.reconciliation_json:

@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, flt, now, nowdate
-from webnotes.model.doc import Document, addchild
+from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -76,7 +76,7 @@ class DocType:
 
 	def get_item_details(self, item_code):
 		res = sql("""select description, stock_uom as uom
-			from `tabItem` where item_code = %s""", item_code, as_dict = 1, debug=1)
+			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
 		return res and res[0] or {}
 
 	def get_workstation_details(self,workstation):

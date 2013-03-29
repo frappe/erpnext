@@ -41,9 +41,10 @@ class SellingController(StockController):
 			self.doc.in_words_export = money_in_words(disable_rounded_total and 
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
 
-	def set_buying_amount(self):
+	def set_buying_amount(self, stock_ledger_entries = None):
 		from stock.utils import get_buying_amount
-		stock_ledger_entries = self.get_stock_ledger_entries()
+		if not stock_ledger_entries:
+			stock_ledger_entries = self.get_stock_ledger_entries()
 
 		item_sales_bom = {}
 		for d in self.doclist.get({"parentfield": "packing_details"}):
@@ -65,4 +66,8 @@ class SellingController(StockController):
 	def check_expense_account(self, item):
 		if item.buying_amount and not item.expense_account:
 			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				raise_exception=1)
+				
+		if item.buying_amount and not item.cost_center:
+			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code, 
 				raise_exception=1)
