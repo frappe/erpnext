@@ -2,6 +2,9 @@ import webnotes
 from webnotes.utils import now_datetime
 
 def execute():
+	webnotes.reload_doc("stock", "doctype", "delivery_note_item")
+	webnotes.reload_doc("accounts", "doctype", "sales_invoice_item")
+
 	webnotes.conn.auto_commit_on_many_writes = True
 	for company in webnotes.conn.sql("select name from `tabCompany`"):
 		print company[0]

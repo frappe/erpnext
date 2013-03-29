@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt
+from webnotes.utils import cstr, flt, cint
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
@@ -119,7 +119,7 @@ class DocType(DocListController):
 	def check_ref_rate_detail(self):
 		check_list=[]
 		for d in getlist(self.doclist,'ref_rate_details'):
-			if [cstr(d.price_list_name),cstr(d.ref_currency)] in check_list:
+			if [cstr(d.price_list_name),cstr(d.ref_currency),cint(d.selling),cint(d.buying)] in check_list:
 				msgprint("Ref Rate is entered twice for Price List : '%s' and Currency : '%s'." % (d.price_list_name,d.ref_currency))
 				raise Exception
 			else:

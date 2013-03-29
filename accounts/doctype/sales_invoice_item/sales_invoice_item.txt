@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 11:03:08", 
+  "creation": "2013-03-29 18:21:58", 
   "docstatus": 0, 
-  "modified": "2013-03-28 15:42:14", 
+  "modified": "2013-03-29 19:32:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -223,7 +223,7 @@
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Sales Cost Center", 
+  "label": "Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 

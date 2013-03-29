@@ -1,6 +1,8 @@
 import webnotes
 
 def execute():
+	webnotes.reload_doc("accounts", "doctype", "purchase_invoice_item")
+	
 	for purchase_invoice in webnotes.conn.sql_list("""select distinct parent 
 		from `tabPurchase Invoice Item` pi_item where docstatus = 1 and ifnull(valuation_rate, 0)=0 
 		and exists(select name from `tabPurchase Invoice` where name = pi_item.parent)"""):
