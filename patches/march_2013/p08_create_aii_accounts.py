@@ -2,6 +2,7 @@ import webnotes
 def execute():
 	add_group_accounts()
 	add_ledger_accounts()
+	add_aii_cost_center()
 	
 def _check(parent_account, company):
 	def _get_root(is_pl_account, debit_or_credit):
@@ -34,7 +35,6 @@ def add_group_accounts():
 def add_ledger_accounts():
 	accounts_to_add = [
 		["Stock In Hand", "Stock Assets", "Ledger", ""],
-		["Stock Debit But Not Billed", "Stock Assets", "Ledger", ""],
 		["Cost of Goods Sold", "Stock Expenses", "Ledger", "Expense Account"],
 		["Stock Adjustment", "Stock Expenses", "Ledger", "Expense Account"],
 		["Expenses Included In Valuation", "Stock Expenses", "Ledger", "Expense Account"],
@@ -59,3 +59,20 @@ def add_accounts(accounts_to_add, check_fn=None):
 					"company": company
 				})
 				account.insert()
+				
+def add_aii_cost_center():
+	for company, abbr in webnotes.conn.sql("""select name, abbr from `tabCompany`"""):
+		if not webnotes.conn.exists("Cost Center", "Auto Inventory Accounting - %s" % abbr):
+			parent_cost_center = webnotes.conn.get_value("Cost Center", 
+				{"parent_cost_center['']": '', "company_name": company}, 'name')
+			
+			cc = webnotes.bean({
+				"doctype": "Cost Center",
+				"cost_center_name": "Auto Inventory Accounting",
+				"parent_cost_center": parent_cost_center,
+				"group_or_ledger": "Ledger",
+				"company_name": company
+			})
+			cc.insert()
+				
+				

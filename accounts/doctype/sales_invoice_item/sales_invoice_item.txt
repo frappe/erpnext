@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 15:35:04", 
+  "creation": "2013-03-26 11:03:08", 
   "docstatus": 0, 
-  "modified": "2013-03-25 15:35:23", 
+  "modified": "2013-03-28 15:42:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -210,7 +210,7 @@
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_filter": 1, 
   "label": "Expense Account", 
   "options": "Account", 

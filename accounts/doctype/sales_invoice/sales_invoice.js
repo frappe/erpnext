@@ -80,7 +80,8 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	'total_commission', 'advances'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
-	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 'delivered_qty']
+	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 
+		'delivered_qty', 'expense_account']
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);

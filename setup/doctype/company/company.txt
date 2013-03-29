@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-21 17:41:00", 
+  "creation": "2013-03-26 11:03:08", 
   "docstatus": 0, 
-  "modified": "2013-03-25 15:35:34", 
+  "modified": "2013-03-28 16:04:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,14 +25,19 @@
  }, 
  {
   "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Company", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "submit": 0
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -43,7 +48,8 @@
   "fieldname": "details", 
   "fieldtype": "Section Break", 
   "label": "Company Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
@@ -54,12 +60,14 @@
   "no_copy": 0, 
   "oldfieldname": "abbr", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -69,6 +77,7 @@
   "no_copy": 0, 
   "oldfieldname": "company_name", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -76,7 +85,8 @@
   "fieldname": "default_settings", 
   "fieldtype": "Section Break", 
   "label": "Default Settings", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -84,6 +94,7 @@
   "fieldtype": "Link", 
   "label": "Default Currency", 
   "options": "Currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -95,14 +106,16 @@
   "no_copy": 1, 
   "oldfieldname": "default_bank_account", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "default_cash_account", 
   "fieldtype": "Link", 
   "label": "Default Cash Account", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -113,7 +126,8 @@
   "no_copy": 1, 
   "oldfieldname": "receivables_group", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -124,13 +138,15 @@
   "no_copy": 1, 
   "oldfieldname": "payables_group", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -140,7 +156,8 @@
   "fieldtype": "Int", 
   "label": "Credit Days", 
   "oldfieldname": "credit_days", 
-  "oldfieldtype": "Int"
+  "oldfieldtype": "Int", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -150,7 +167,8 @@
   "label": "Credit Limit", 
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
-  "options": "default_currency"
+  "options": "default_currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -160,7 +178,8 @@
   "label": "If Yearly Budget Exceeded", 
   "oldfieldname": "yearly_bgt_flag", 
   "oldfieldtype": "Select", 
-  "options": "\nWarn\nIgnore\nStop"
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -170,14 +189,16 @@
   "label": "If Monthly Budget Exceeded", 
   "oldfieldname": "monthly_bgt_flag", 
   "oldfieldtype": "Select", 
-  "options": "\nWarn\nIgnore\nStop"
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
  }, 
  {
-  "depends_on": "eval:!doc.__islocal && sys_defaults.auto_inventory_accounting", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "auto_inventory_accounting_settings", 
   "fieldtype": "Section Break", 
-  "label": "Auto Inventory Accounting Settings"
+  "label": "Auto Inventory Accounting Settings", 
+  "read_only": 0
  }, 
  {
   "description": "This account will be used to maintain value of available stock", 
@@ -195,12 +216,14 @@
   "fieldtype": "Link", 
   "label": "Stock Received But Not Billed", 
   "no_copy": 1, 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break23", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -209,7 +232,8 @@
   "fieldtype": "Link", 
   "label": "Stock Adjustment Account", 
   "no_copy": 1, 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -217,7 +241,8 @@
   "fieldtype": "Link", 
   "label": "Expenses Included In Valuation", 
   "no_copy": 1, 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -225,14 +250,16 @@
   "fieldtype": "Link", 
   "label": "Stock Adjustment Cost Center", 
   "no_copy": 1, 
-  "options": "Cost Center"
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "description": "For reference only.", 
   "doctype": "DocField", 
   "fieldname": "company_info", 
   "fieldtype": "Section Break", 
-  "label": "Company Info"
+  "label": "Company Info", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -240,13 +267,15 @@
   "fieldtype": "Small Text", 
   "label": "Address", 
   "oldfieldname": "address", 
-  "oldfieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -256,7 +285,8 @@
   "label": "Phone No", 
   "oldfieldname": "phone_no", 
   "oldfieldtype": "Data", 
-  "options": "Phone"
+  "options": "Phone", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -265,7 +295,8 @@
   "label": "Fax", 
   "oldfieldname": "fax", 
   "oldfieldtype": "Data", 
-  "options": "Phone"
+  "options": "Phone", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -274,7 +305,8 @@
   "label": "Email", 
   "oldfieldname": "email", 
   "oldfieldtype": "Data", 
-  "options": "Email"
+  "options": "Email", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -282,7 +314,8 @@
   "fieldtype": "Data", 
   "label": "Website", 
   "oldfieldname": "website", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 0
  }, 
  {
   "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
@@ -291,6 +324,7 @@
   "fieldtype": "Section Break", 
   "label": "Registration Info", 
   "oldfieldtype": "Section Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -300,7 +334,8 @@
   "fieldtype": "Code", 
   "label": "Registration Details", 
   "oldfieldname": "registration_details", 
-  "oldfieldtype": "Code"
+  "oldfieldtype": "Code", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -313,19 +348,6 @@
   "read_only": 1
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All", 
-  "write": 0
+  "doctype": "DocPerm"
  }
 ]

@@ -89,9 +89,6 @@ cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
 cur_frm.fields_dict["expenses_included_in_valuation"].get_query = 
 	cur_frm.fields_dict["stock_adjustment_account"].get_query;
 	
-cur_frm.fields_dict["stock_delivered_but_not_billed"].get_query = 
-	cur_frm.fields_dict["stock_in_hand_account"].get_query;
-
 cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 	return {
 		"query": "accounts.utils.get_account_list", 
@@ -106,6 +103,6 @@ cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 cur_frm.fields_dict["stock_adjustment_cost_center"].get_query = function(doc) {
 	return {
 		"query": "accounts.utils.get_cost_center_list", 
-		"filters": {"company": doc.name}
+		"filters": {"company_name": doc.name}
 	}
 }
