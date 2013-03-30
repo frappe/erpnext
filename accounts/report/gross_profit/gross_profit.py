@@ -14,7 +14,8 @@ def execute(filters=None):
 	
 	columns = ["Delivery Note/Sales Invoice::120", "Link::30", "Posting Date:Date", "Posting Time", 
 		"Item Code:Link/Item", "Item Name", "Description", "Warehouse:Link/Warehouse",
-		"Qty:Float", "Selling Rate:Currency", "Selling Amount:Currency", "Buying Amount:Currency",
+		"Qty:Float", "Selling Rate:Currency", "Avg. Buying Rate:Currency", 
+		"Selling Amount:Currency", "Buying Amount:Currency",
 		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
 	
 	data = []
@@ -35,7 +36,8 @@ def execute(filters=None):
 		icon = """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
 			% ("/".join(["#Form", row.parenttype, row.name]),)
 		data.append([row.name, icon, row.posting_date, row.posting_time, row.item_code, row.item_name,
-			row.description, row.warehouse, row.qty, row.basic_rate, row.amount, buying_amount,
+			row.description, row.warehouse, row.qty, row.basic_rate, 
+			row.qty and (buying_amount / row.qty) or 0, row.amount, buying_amount,
 			gross_profit, gross_profit_percent, row.project])
 			
 	return columns, data

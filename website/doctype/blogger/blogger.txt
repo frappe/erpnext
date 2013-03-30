@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-08 11:36:52", 
+  "creation": "2013-03-25 16:00:51", 
   "docstatus": 0, 
-  "modified": "2013-03-11 14:00:37", 
+  "modified": "2013-03-29 10:37:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,6 +50,7 @@
   "doctype": "DocField", 
   "fieldname": "full_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Full Name", 
   "reqd": 1
  }, 
@@ -77,6 +78,7 @@
   "doctype": "DocField", 
   "fieldname": "posts", 
   "fieldtype": "Int", 
+  "in_list_view": 1, 
   "label": "Posts", 
   "read_only": 1
  }, 
