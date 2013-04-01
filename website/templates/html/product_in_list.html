@@ -1,10 +1,12 @@
 <div class="span3">
 	<div style="height: 120px; overflow: hidden;">
-		{% if website_image %}
+		<a href="{{ page_name }}">
+		{%- if website_image -%}
 		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image }}">
-		{% else %}
+		{%- else -%}
 		{% include 'html/product_missing_image.html' %}
-		{% endif %}
+		{%- endif -%}
+		</a>
 	</div>
 	<div style="height: 100px; overflow: hidden; font-size: 80%;">
 		<h4 style="margin-bottom: 2px;"><a href="{{ page_name }}">{{ item_name }}</a></h4>
