@@ -39,7 +39,7 @@ class DocType:
 		for d in getlist(obj.doclist, table_name):
 			if d.serial_no:
 				serial_nos = cstr(d.serial_no).strip().replace(',', '\n').split('\n')
-				d.serial_nos = "\n".join(map(lambda x: x.strip(), serial_nos))
+				d.serial_no = "\n".join(map(lambda x: x.strip(), serial_nos))
 				d.save()
 
 	def validate_serial_no_warehouse(self, obj, fname):
