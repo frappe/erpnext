@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 11:55:16", 
+  "creation": "2013-03-26 11:03:09", 
   "docstatus": 0, 
-  "modified": "2013-03-25 15:43:04", 
+  "modified": "2013-03-28 15:42:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -248,7 +248,7 @@
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Expense Account", 
   "no_copy": 1, 
   "options": "Account", 
@@ -260,11 +260,12 @@
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Cost Center", 
   "no_copy": 1, 
   "options": "Cost Center", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "120px"
  }, 
  {
