@@ -38,9 +38,9 @@ class DocType:
 		
 		for d in getlist(obj.doclist, table_name):
 			if d.serial_no:
-				d.serial_no = cstr(d.serial_no).strip().replace(',', '\n')
+				serial_nos = cstr(d.serial_no).strip().replace(',', '\n').split('\n')
+				d.serial_nos = ", ".join(map(lambda x: x.strip(), serial_nos))
 				d.save()
-
 
 	def validate_serial_no_warehouse(self, obj, fname):
 		for d in getlist(obj.doclist, fname):
@@ -84,6 +84,7 @@ class DocType:
 		item_details = webnotes.conn.sql("""select item_group, warranty_period 
 			from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or 
 			end_of_life = '0000-00-00' or end_of_life > now()) """ %(d.item_code), as_dict=1)
+		webnotes.errprint([d.item_code, d.valuation_rate])
 		
 		s.purchase_document_type	=	obj.doc.doctype
 		s.purchase_document_no		=	obj.doc.name

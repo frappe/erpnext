@@ -8,6 +8,6 @@ def execute():
 		pi.update_raw_material_cost()
 		pi.update_valuation_rate("entries")
 		for item in pi.doclist.get({"parentfield": "entries"}):
-			webnotes.conn.set_value("Purchase Invoice Item", item.name, "valuation_rate",
-				item.valuation_rate)
+			webnotes.conn.sql("""update `tabPurchase Invoice Item` set valuation_rate = %s 
+				where name = %s""", (item.valuation_rate, item.name))
 	

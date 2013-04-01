@@ -212,7 +212,8 @@ class DocType:
 				if flt(d.qty):
 					d.valuation_rate = (flt(d.purchase_rate) + (flt(d.rm_supp_cost)/flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
 					d.save()
-					self.update_serial_no(d.serial_no, d.valuation_rate)
+					if d.serial_no:
+						self.update_serial_no(d.serial_no, d.valuation_rate)
 				sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
 				
 				res = sql("""select item_code, warehouse, posting_date, posting_time 
@@ -226,10 +227,10 @@ class DocType:
 	
 	def update_serial_no(self, sr_no, rate):
 		""" update valuation rate in serial no"""
-		sr_no = cstr(sr_no).split('\n')
-		for d in sr_no:
-			sql("update `tabSerial No` set purchase_rate = %s where name = %s", (rate, d))
-
+		sr_no = map(lambda x: x.strip(), cstr(sr_no).split('\n'))
+		
+		webnotes.conn.sql("""update `tabSerial No` set purchase_rate = %s where name in (%s)""" % 
+			('%s', ', '.join(['%s']*len(sr_no))), tuple([rate] + sr_no))
 				
 	def update_landed_cost(self):
 		""" 
