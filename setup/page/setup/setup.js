@@ -205,7 +205,7 @@ wn.module_page["Setup"] = [
 		right: true,
 		items: [
 			{
-				"page":"update-this-app",
+				"page":"update-manager",
 				label: wn._("Update This Application"),
 				"description":wn._("Apply latest updates and patches to this app")
 			},
