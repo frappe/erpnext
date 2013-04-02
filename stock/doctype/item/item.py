@@ -86,7 +86,7 @@ class DocType(DocListController):
 				self.doclist.get({"doctype":"Website Item Group"})]
 		
 		if self.doc.show_in_website:
-			from website.utils import update_page_name
+			from webnotes.webutils import update_page_name
 			if self.doc.name==self.doc.item_name:
 				page_name_from = self.doc.name
 			else:
@@ -98,7 +98,7 @@ class DocType(DocListController):
 		
 		elif self.doc.page_name:
 			# if unchecked show in website
-			from website.utils import delete_page_cache
+			from webnotes.webutils import delete_page_cache
 			delete_page_cache(self.doc.page_name)
 			
 			_invalidate_cache()
@@ -112,7 +112,7 @@ class DocType(DocListController):
 			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 		
 		if self.doc.page_name:
-			from website.utils import clear_cache
+			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 		
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
@@ -231,7 +231,7 @@ class DocType(DocListController):
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 		if self.doc.page_name:
-			from website.utils import clear_cache
+			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 			
 	def prepare_template_args(self):

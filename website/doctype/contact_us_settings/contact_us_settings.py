@@ -17,5 +17,5 @@ class DocType:
 			self.address = webnotes.bean("Address", self.doc.address).doc
 			
 	def on_update(self):
-		from website.utils import clear_cache
+		from webnotes.webutils import clear_cache
 		clear_cache("contact")

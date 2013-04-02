@@ -35,13 +35,13 @@ class DocType(DocTypeNestedSet):
 		
 		
 		if self.doc.show_in_website:
-			from website.utils import update_page_name
+			from webnotes.webutils import update_page_name
 			# webpage updates
 			page_name = self.doc.name
 			if webnotes.conn.get_value("Product Settings", None, 
 				"default_product_category")==self.doc.name:
 				page_name = "products"
-				from website.utils import clear_cache
+				from webnotes.webutils import clear_cache
 				clear_cache()
 				
 			update_page_name(self.doc, page_name)
@@ -51,7 +51,7 @@ class DocType(DocTypeNestedSet):
 		elif self.doc.page_name:
 			# if unchecked show in website
 			
-			from website.utils import delete_page_cache
+			from webnotes.webutils import delete_page_cache
 			delete_page_cache(self.doc.page_name)
 			
 			invalidate_cache_for(self.doc.name)
