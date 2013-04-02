@@ -53,16 +53,14 @@ cur_frm.pformat.other_charges= function(doc){
 		var new_val = flt(val)/flt(doc.conversion_rate);
 		return new_val;
 	}
+	
+	function print_hide(fieldname) {
+		var doc_field = wn.meta.get_docfield(doc.doctype, fieldname, doc.name);
+		return doc_field.print_hide;
+	}
+	
 	out ='';
 	if (!doc.print_without_amount) {
-		print_hide_dict = {};
-		for(var i in locals['DocField']) {
-			var doc_field = locals['DocField'][i];
-			if(doc_field.fieldname) {
-				print_hide_dict[doc_field.fieldname] = doc_field.print_hide;
-			}
-		}
-
 		var cl = getchildren('Sales Taxes and Charges',doc.name,'other_charges');
 
 		// outer table  
@@ -71,7 +69,7 @@ cur_frm.pformat.other_charges= function(doc){
 		// main table
 
 		out +='<table class="noborder" style="width:100%">';
-		if(!print_hide_dict['net_total']) {
+		if(!print_hide('net_total')) {
 			out +=make_row('Net Total',convert_rate(doc.net_total),1);
 		}
 
@@ -84,15 +82,15 @@ cur_frm.pformat.other_charges= function(doc){
 		}
 
 		// grand total
-		if(!print_hide_dict['grand_total_export']) {
+		if(!print_hide('grand_total_export')) {
 			out += make_row('Grand Total',doc.grand_total_export,1);
 		}
 		
-		if(!print_hide_dict['rounded_total_export']) {
+		if(!print_hide('rounded_total_export')) {
 			out += make_row('Rounded Total',doc.rounded_total_export,1);
 		}
 
-		if(doc.in_words_export && !print_hide_dict['in_words_export']){
+		if(doc.in_words_export && !print_hide('in_words_export')){
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
 			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'

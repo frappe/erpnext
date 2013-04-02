@@ -13,7 +13,7 @@ def generate(domain):
 	global frame_xml, link_xml
 	import urllib, os
 	import webnotes
-	import website.utils
+	import webnotes.webutils
 
 	# settings
 	max_doctypes = 10
@@ -24,8 +24,8 @@ def generate(domain):
 	
 	if domain:
 		# list of all pages in web cache
-		for doctype in website.utils.page_map:
-			d = website.utils.page_map[doctype];
+		for doctype in webnotes.webutils.page_map:
+			d = webnotes.webutils.page_map[doctype];
 			pages = webnotes.conn.sql("""select page_name, `modified`
 				from `tab%s` where ifnull(%s,0)=1
 				order by modified desc""" % (doctype, d.condition_field))

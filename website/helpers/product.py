@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import webnotes
 from webnotes.utils import cstr
-from website.utils import build_html, delete_page_cache
+from webnotes.webutils import build_html, delete_page_cache
 
 
 @webnotes.whitelist(allow_guest=True)

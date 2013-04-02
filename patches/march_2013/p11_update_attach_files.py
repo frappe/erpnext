@@ -11,6 +11,6 @@ def execute():
 		else:
 			webnotes.conn.sql("""update `tab%(parent)s`
 				set %(fieldname)s = 
-					if(substr(%(fieldname)s,0,4)='http' or substr(%(fieldname)s, 0, 5)='files',
+					if(substr(%(fieldname)s,1,4)='http' or substr(%(fieldname)s,1,5)='files',
 					 	%(fieldname)s, 
 						concat('files/', %(fieldname)s))""" % f)

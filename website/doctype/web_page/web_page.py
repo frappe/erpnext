@@ -22,11 +22,11 @@ class DocType():
 		self.doc, self.doclist = d, dl
 
 	def autoname(self):
-		from website.utils import page_name
+		from webnotes.webutils import page_name
 		self.doc.name = page_name(self.doc.title)
 
 	def on_update(self):
-		from website.utils import update_page_name
+		from webnotes.webutils import update_page_name
 		update_page_name(self.doc, self.doc.title)
 		self.if_home_clear_cache()
 
@@ -36,7 +36,7 @@ class DocType():
 			from webnotes.sessions import clear_cache
 			clear_cache('Guest')
 			
-			from website.utils import clear_cache
+			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 			clear_cache('index')
 			

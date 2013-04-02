@@ -199,6 +199,18 @@ wn.module_page["Setup"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Update Manager"),
+		icon: "icon-magnet",
+		right: true,
+		items: [
+			{
+				"page":"update-manager",
+				label: wn._("Update This Application"),
+				"description":wn._("Apply latest updates and patches to this app")
+			},
+		]
+	},
 ]
 
 pscript['onload_Setup'] = function(wrapper) {

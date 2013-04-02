@@ -294,18 +294,18 @@ def create_stock_in_hand_jv(reverse=False):
 		jv.submit()
 		
 def get_stock_rbnb_value(company):	
-	total_received_amount = webnotes.conn.sql("""select sum(valuation_amount) 
+	total_received_amount = webnotes.conn.sql("""select sum(valuation_rate*qty) 
 		from `tabPurchase Receipt Item` pr_item where docstatus=1 
 		and exists(select name from `tabItem` where name = pr_item.item_code 
 			and is_stock_item='Yes')
-		and exist(select name from `tabPurchase Receipt` 
+		and exists(select name from `tabPurchase Receipt` 
 			where name = pr_item.parent and company = %s)""", company)
 		
-	total_billed_amount = webnotes.conn.sql("""select sum(valuation_amount) 
+	total_billed_amount = webnotes.conn.sql("""select sum(valuation_rate*qty) 
 		from `tabPurchase Invoice Item` pi_item where docstatus=1 
 		and exists(select name from `tabItem` where name = pi_item.item_code 
 			and is_stock_item='Yes')
-		and exist(select name from `tabPurchase Invoice` 
+		and exists(select name from `tabPurchase Invoice` 
 			where name = pi_item.parent and company = %s)""", company)
 		
 	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])

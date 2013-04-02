@@ -9,7 +9,7 @@ class DocType:
 		
 	def on_update(self):
 		"""clear web cache"""
-		from website.utils import clear_cache
+		from webnotes.webutils import clear_cache
 		clear_cache()
 		
 		if self.doc.default_product_category:

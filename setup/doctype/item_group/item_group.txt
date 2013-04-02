@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 20:00:16", 
+  "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-03-20 15:09:28", 
+  "modified": "2013-04-01 12:06:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -124,6 +124,7 @@
   "label": "Description"
  }, 
  {
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "item_website_specifications", 
   "fieldtype": "Table", 
@@ -182,20 +183,6 @@
   "print_hide": 1
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Material Master Manager", 
-  "write": 1
- }, 
- {
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
@@ -210,5 +197,19 @@
   "doctype": "DocPerm", 
   "role": "Material User", 
   "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager", 
+  "write": 1
  }
 ]

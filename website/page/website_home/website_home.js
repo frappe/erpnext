@@ -93,6 +93,7 @@ wn.module_page["Website"] = [
 	{
 		title: wn._("Advanced Scripting"),
 		icon: "icon-wrench",
+		right: true,
 		items: [
 			{
 				"route":"Form/Website Script",
