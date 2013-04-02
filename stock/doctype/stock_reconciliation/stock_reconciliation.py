@@ -145,11 +145,12 @@ class DocType(StockController):
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time
 			})
-			
+
 			# check valuation rate mandatory
 			if row.qty != "" and not row.valuation_rate and \
 					flt(previous_sle.get("qty_after_transaction")) <= 0:
 				webnotes.msgprint(_("As existing qty for item: ") + row.item_code + 
+					_(" at warehouse: ") + row.warehouse +
 					_(" is less than equals to zero in the system, \
 						valuation rate is mandatory for this item"), raise_exception=1)
 			
