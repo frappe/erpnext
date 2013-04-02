@@ -76,7 +76,11 @@ class DocType(BuyingController):
 		self.update_valuation_rate("entries")
 
 	def get_credit_to(self):
-		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.company_abbr,self.doc.supplier))		
+		acc_head = sql("""select name, credit_days from `tabAccount` 
+			where (name = %s or (master_name = %s and master_type = 'supplier')) 
+			and docstatus != 2 and company = %s""", 
+			(cstr(self.doc.supplier) + " - " + self.company_abbr, 
+			self.doc.supplier, self.doc.company))
 
 		ret = {}
 		if acc_head and acc_head[0][0]:
@@ -217,7 +221,8 @@ class DocType(BuyingController):
 	# 3. Is not a PL Account
 	# ----------------------------
 	def validate_credit_acc(self):
-		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s'" % self.doc.credit_to)
+		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
+			self.doc.credit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.credit_to + "does not exist")
 			raise Exception
@@ -409,7 +414,7 @@ class DocType(BuyingController):
 		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
 
 
-	def make_gl_entries(self, is_cancel = 0):
+	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries
 		auto_inventory_accounting = \
 			cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
@@ -426,7 +431,7 @@ class DocType(BuyingController):
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,
-				}, is_cancel)
+				})
 			)
 	
 		# tax table gl entries
@@ -441,7 +446,7 @@ class DocType(BuyingController):
 						"credit": tax.add_deduct_tax == "Deduct" and tax.tax_amount or 0,
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center
-					}, is_cancel)
+					})
 				)
 			
 			# accumulate valuation tax
@@ -469,7 +474,7 @@ class DocType(BuyingController):
 							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
 								*  flt(item.qty),
 							"remarks": self.doc.remarks or "Accounting Entry for Stock"
-						}, is_cancel)
+						})
 					)
 			
 			elif flt(item.amount):
@@ -481,7 +486,7 @@ class DocType(BuyingController):
 						"debit": item.amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
-					}, is_cancel)
+					})
 				)
 				
 		if stock_item_and_auto_inventory_accounting and valuation_tax:
@@ -494,7 +499,7 @@ class DocType(BuyingController):
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock"
-				}, is_cancel)
+				})
 			)
 		
 		# writeoff account includes petty difference in the invoice amount 
@@ -507,18 +512,18 @@ class DocType(BuyingController):
 					"credit": flt(self.doc.write_off_amount),
 					"remarks": self.doc.remarks,
 					"cost_center": self.doc.write_off_cost_center
-				}, is_cancel)
+				})
 			)
 		
 		if gl_entries:
-			make_gl_entries(gl_entries, cancel=is_cancel)
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 	def on_cancel(self):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
-		
-		self.make_gl_entries(is_cancel=1)
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
+		
+		self.make_cancel_gl_entries()
 		
 	def on_update(self):
 		pass

@@ -212,7 +212,8 @@ class DocType(TransactionBase):
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
-		ref_rate = webnotes.conn.sql("select ref_rate from `tabItem Price` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
+		ref_rate = webnotes.conn.sql("select ref_rate from `tabItem Price` where parent = %s and price_list_name = %s and ref_currency = %s and selling=1", 
+		(item_code, price_list_name, price_list_currency))
 		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
 		return base_ref_rate
 
@@ -361,7 +362,7 @@ class DocType(TransactionBase):
 		sales_team_list = obj.doclist.get({"parentfield": "sales_team"})
 		total_allocation = sum([flt(d.allocated_percentage) for d in sales_team_list])
 		if sales_team_list and total_allocation != 100.0:
-			msgprint("Total Allocated %% of Sales Persons should be 100%", raise_exception=True)
+			msgprint("Total Allocated % of Sales Persons should be 100%", raise_exception=True)
 			
 	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
 	# ===========================================================================

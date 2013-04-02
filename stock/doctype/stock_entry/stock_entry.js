@@ -77,7 +77,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		};
 		
 		if (sys_defaults.auto_inventory_accounting) {
-			this.frm.add_fetch("company", "expense_adjustment_account", "stock_adjustment_account");
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
 				return {

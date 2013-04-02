@@ -264,48 +264,61 @@ def create_stock_in_hand_jv(reverse=False):
 	from webnotes.utils import nowdate
 	today = nowdate()
 	fiscal_year = get_fiscal_year(today)[0]
+	jv_list = []
 	
 	for company in webnotes.conn.sql_list("select name from `tabCompany`"):
 		stock_rbnb_value = get_stock_rbnb_value(company)
+		stock_rbnb_value = reverse and -1*stock_rbnb_value or stock_rbnb_value
+		if stock_rbnb_value:
+			jv = webnotes.bean([
+				{
+					"doctype": "Journal Voucher",
+					"naming_series": "_PATCH-",
+					"company": company,
+					"posting_date": today,
+					"fiscal_year": fiscal_year,
+					"voucher_type": "Journal Entry",
+					"user_remark": "Accounting Entry for Stock: \
+						Initial booking of stock received but not billed account"
+				},
+				{
+					"doctype": "Journal Voucher Detail",
+					"parentfield": "entries",
+					"account": get_company_default(company, "stock_received_but_not_billed"),
+					(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
+				},
+				{
+					"doctype": "Journal Voucher Detail",
+					"parentfield": "entries",
+					"account": get_company_default(company, "stock_adjustment_account"),
+					(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
+					"cost_center": get_company_default(company, "stock_adjustment_cost_center")
+				},
+			])
+			jv.insert()
+			jv.submit()
+			
+			jv_list.append(jv.doc.name)
+	
+	if jv_list:
+		webnotes.msgprint("""Folowing Journal Vouchers has been created automatically: 
+			%s""" % '\n'.join(jv_list))
+			
+	webnotes.msgprint("""Please refresh the system to get effect of Auto Inventory Accounting""")
+			
 		
-		jv = webnotes.bean([
-			{
-				"doctype": "Journal Voucher",
-				"naming_series": "_PATCH-",
-				"company": company,
-				"posting_date": today,
-				"fiscal_year": fiscal_year,
-				"voucher_type": "Journal Entry"
-			},
-			{
-				"doctype": "Journal Voucher Detail",
-				"parentfield": "entries",
-				"account": get_company_default(company, "stock_received_but_not_billed"),
-				(reverse and "debit" or "credit"): stock_rbnb_value
-			},
-			{
-				"doctype": "Journal Voucher Detail",
-				"parentfield": "entries",
-				"account": get_company_default(company, "stock_adjustment_account"),
-				(reverse and "credit" or "debit"): stock_rbnb_value
-			},
-		])
-		jv.insert()
-		jv.submit()
-		
-def get_stock_rbnb_value(company):	
-	total_received_amount = webnotes.conn.sql("""select sum(valuation_rate*qty) 
+def get_stock_rbnb_value(company):
+	total_received_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
 		from `tabPurchase Receipt Item` pr_item where docstatus=1 
 		and exists(select name from `tabItem` where name = pr_item.item_code 
 			and is_stock_item='Yes')
 		and exists(select name from `tabPurchase Receipt` 
 			where name = pr_item.parent and company = %s)""", company)
 		
-	total_billed_amount = webnotes.conn.sql("""select sum(valuation_rate*qty) 
+	total_billed_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
 		from `tabPurchase Invoice Item` pi_item where docstatus=1 
 		and exists(select name from `tabItem` where name = pi_item.item_code 
 			and is_stock_item='Yes')
 		and exists(select name from `tabPurchase Invoice` 
 			where name = pi_item.parent and company = %s)""", company)
-		
 	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])

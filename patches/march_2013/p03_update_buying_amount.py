@@ -1,10 +1,33 @@
 import webnotes
+from webnotes.utils import now_datetime
 
 def execute():
-	dn_list = webnotes.conn.sql("""select name from `tabDelivery Note` where docstatus < 2""")
-	for dn in dn_list:
-		webnotes.bean("Delivery Note", dn[0]).run_method("set_buying_amount")
+	webnotes.reload_doc("stock", "doctype", "delivery_note_item")
+	webnotes.reload_doc("accounts", "doctype", "sales_invoice_item")
+
+	webnotes.conn.auto_commit_on_many_writes = True
+	for company in webnotes.conn.sql("select name from `tabCompany`"):
+		print company[0]
+		stock_ledger_entries = webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
+			voucher_detail_no, posting_date, posting_time, stock_value, 
+			warehouse, actual_qty as qty from `tabStock Ledger Entry` 
+			where ifnull(`is_cancelled`, "No") = "No" and company = %s
+			order by item_code desc, warehouse desc, 
+			posting_date desc, posting_time desc, name desc""", company[0], as_dict=True)
 		
-	si_list = webnotes.conn.sql("""select name from `tabSales Invoice` where docstatus < 2""")
-	for si in si_list:
-		webnotes.bean("Sales Invoice", si[0]).run_method("set_buying_amount")
+		dn_list = webnotes.conn.sql("""select name from `tabDelivery Note` 
+			where docstatus < 2 and company = %s""", company[0])
+		print "Total Delivery Note: ", len(dn_list)
+		
+		for dn in dn_list:
+			dn = webnotes.get_obj("Delivery Note", dn[0], with_children = 1)
+			dn.set_buying_amount(stock_ledger_entries)
+		
+		si_list = webnotes.conn.sql("""select name from `tabSales Invoice` 
+			where docstatus < 2	and company = %s""", company[0])
+		print "Total Sales Invoice: ", len(si_list)
+		for si in si_list:
+			si = webnotes.get_obj("Sales Invoice", si[0], with_children = 1)
+			si.set_buying_amount(stock_ledger_entries)
+		
+	webnotes.conn.auto_commit_on_many_writes = False

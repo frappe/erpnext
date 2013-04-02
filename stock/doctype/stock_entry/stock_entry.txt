@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 06:51:17", 
+  "creation": "2013-03-28 15:56:40", 
   "docstatus": 0, 
-  "modified": "2013-03-26 07:24:53", 
+  "modified": "2013-03-29 15:31:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -116,6 +116,7 @@
   "oldfieldtype": "Link", 
   "options": "Delivery Note", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 1
@@ -129,7 +130,8 @@
   "label": "Sales Invoice No", 
   "no_copy": 1, 
   "options": "Sales Invoice", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -145,6 +147,7 @@
   "oldfieldtype": "Link", 
   "options": "Purchase Receipt", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0, 
   "search_index": 1
@@ -201,7 +204,9 @@
   "fieldname": "expense_adjustment_account", 
   "fieldtype": "Link", 
   "label": "Expense/Adjustment Account", 
-  "options": "Account"
+  "options": "Account", 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -550,6 +555,7 @@
   "label": "Fiscal Year", 
   "options": "link:Fiscal Year", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -620,5 +626,13 @@
  {
   "doctype": "DocPerm", 
   "role": "Manufacturing User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Manufacturing Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
  }
 ]

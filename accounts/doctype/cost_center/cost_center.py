@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 from webnotes.utils.nestedset import DocTypeNestedSet
 
@@ -37,6 +37,8 @@ class DocType(DocTypeNestedSet):
 			
 		if self.doc.cost_center_name != 'Root' and not self.doc.parent_cost_center:
 			msgprint("Please enter parent cost center", raise_exception=1)
+		elif self.doc.cost_center_name == "Root" and self.doc.parent_cost_center:
+			msgprint(_("Root cannot have a parent cost center"), raise_exception=1)
 		
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

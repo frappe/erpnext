@@ -21,6 +21,7 @@ from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+import webnotes.defaults
 
 sql = webnotes.conn.sql
 
@@ -290,7 +291,7 @@ class DocType(BuyingController):
 		# 6. Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, 0)
 		
-		self.make_gl_entries()
+		self.make_cancel_gl_entries()
 
 	def bk_flush_supp_wh(self, is_submit):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
@@ -326,7 +327,7 @@ class DocType(BuyingController):
 		gl_entries = self.get_gl_entries_for_stock(against_stock_account, total_valuation_amount)
 		
 		if gl_entries:
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 		
 	def get_total_valuation_amount(self):
 		total_valuation_amount = 0.0
