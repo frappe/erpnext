@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-import website.utils
+import webnotes.webutils
 from webnotes import _
 
 class DocType:
@@ -25,7 +25,7 @@ class DocType:
 		self.doc, self.doclist = d, dl
 
 	def autoname(self):
-		from website.utils import page_name
+		from webnotes.webutils import page_name
 		self.doc.name = page_name(self.doc.title)
 
 	def validate(self):
@@ -38,8 +38,8 @@ class DocType:
 			where name=%s""", self.doc.blogger)
 
 	def on_update(self):
-		website.utils.update_page_name(self.doc, self.doc.title)
-		website.utils.delete_page_cache("writers")
+		webnotes.webutils.update_page_name(self.doc, self.doc.title)
+		webnotes.webutils.delete_page_cache("writers")
 
 	def send_emails(self):
 		"""send emails to subscribers"""

@@ -27,7 +27,7 @@ class DocType:
 	def validate(self):
 		"""make custom css"""
 		from jinja2 import Template
-		from website.utils import get_hex_shade
+		from webnotes.webutils import get_hex_shade
 		import os
 		
 		self.validate_colors()
@@ -46,7 +46,7 @@ class DocType:
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
 
-		from website.utils import clear_cache
+		from webnotes.webutils import clear_cache
 		clear_cache()
 		
 		for f in ["small_font_size", "at_import", "heading_text_style"]:

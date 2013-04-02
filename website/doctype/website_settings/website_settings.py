@@ -28,7 +28,7 @@ class DocType:
 		make()
 		
 		# clear web cache (for menus!)
-		from website.utils import clear_cache
+		from webnotes.webutils import clear_cache
 		clear_cache()
 
 	def set_home_page(self):

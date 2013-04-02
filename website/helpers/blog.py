@@ -3,15 +3,15 @@
 
 from __future__ import unicode_literals
 import webnotes
-import website.utils
+import webnotes.webutils
 from webnotes import _
 
 def clear_blog_cache():
 	for blog in webnotes.conn.sql_list("""select page_name from 
 		`tabBlog Post` where ifnull(published,0)=1"""):
-		website.utils.delete_page_cache(blog)
+		webnotes.webutils.delete_page_cache(blog)
 	
-	website.utils.delete_page_cache("writers")
+	webnotes.webutils.delete_page_cache("writers")
 
 @webnotes.whitelist(allow_guest=True)
 def get_blog_list(start=0, by=None, category=None):
@@ -44,7 +44,7 @@ def get_blog_list(start=0, by=None, category=None):
 		from webnotes.utils import global_date_format, get_fullname
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
-			res['content'] = website.utils.get_html(res['page_name'])
+			res['content'] = webnotes.webutils.get_html(res['page_name'])
 		res['content'] = res['content'][:140]
 		
 	return result
@@ -71,13 +71,13 @@ def add_comment(args=None):
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	website.utils.clear_cache(args.get('page_name'))
+	webnotes.webutils.clear_cache(args.get('page_name'))
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
 	
 	# get html of comment row
-	comment_html = website.utils.build_html(template_args)
+	comment_html = webnotes.webutils.build_html(template_args)
 	
 	# notify commentors 
 	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
@@ -115,8 +115,8 @@ def add_subscriber(name, email_id):
 	lead.save()
 
 def get_blog_content(blog_page_name):
-	import website.utils
-	content = website.utils.get_html(blog_page_name)
+	import webnotes.webutils
+	content = webnotes.webutils.get_html(blog_page_name)
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
 	return content
