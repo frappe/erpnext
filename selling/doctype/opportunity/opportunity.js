@@ -34,7 +34,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 // ===============================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
-	if(!doc.enquiry_from) hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'lead_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+	if(!doc.enquiry_from) hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.date) doc.transaction_date = date.obj_to_str(new Date());
 	if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
@@ -42,10 +42,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	
 	if(doc.enquiry_from) {
 		if(doc.enquiry_from == 'Customer') {
-			hide_field(['lead', 'lead_name']);
+			hide_field('lead');
 		}
 		else if (doc.enquiry_from == 'Lead') {
-			hide_field(['customer', 'customer_address', 'contact_person', 'customer_name', 'contact_display', 'customer_group']);
+			hide_field(['customer', 'customer_address', 'contact_person', 'customer_group']);
 		}
 	} 
 
@@ -85,13 +85,14 @@ cur_frm.cscript.enquiry_from = function(doc,cdt,cdn){
 cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){	
 	if(doc.enquiry_from == 'Lead'){
 		unhide_field(['lead']);
-		hide_field(['lead_name','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-		doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
+		hide_field(['customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+		doc.lead = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
 	}
 	else if(doc.enquiry_from == 'Customer'){		
 		unhide_field(['customer']);
-		hide_field(['lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory', 'customer_group']);		
-		doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
+		hide_field(['lead', 'address_display', 'contact_display', 'contact_mobile', 
+			'contact_email', 'territory', 'customer_group']);		
+		doc.lead = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
 	}
 }
 
@@ -154,8 +155,11 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
 	
-	if(doc.lead) get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
-	if(doc.lead) unhide_field(['lead_name','address_display','contact_mobile','contact_email','territory']);	
+	if(doc.lead) {
+		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
+		unhide_field(['customer_name', 'address_display','contact_mobile', 'contact_email', 
+			'territory']);	
+	}
 }
 
 

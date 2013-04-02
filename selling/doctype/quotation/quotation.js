@@ -29,7 +29,10 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 // ===================================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.cscript.manage_rounded_total();
-	if(!doc.quotation_to) hide_field(['customer','customer_address','contact_person','customer_name','lead', 'lead_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+	if(!doc.quotation_to) 
+		hide_field(['customer','customer_address','contact_person','customer_name','lead', 
+	 		'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
+			'territory', 'customer_group']);
 	if(!doc.price_list_name) set_multiple(cdt,cdn,{price_list_name:sys_defaults.price_list_name});
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
@@ -42,10 +45,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	
 	if(doc.quotation_to) {
 		if(doc.quotation_to == 'Customer') {
-			hide_field(['lead', 'lead_name', 'organization']);
+			hide_field('lead');
 		}
 		else if (doc.quotation_to == 'Lead') {
-			hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
+			hide_field(['customer', 'customer_address', 'contact_person', 'customer_group']);
 		}
 	}
 }
@@ -61,13 +64,13 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // hide - unhide fields based on lead or customer..
 // =======================================================================================================================
 cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
-	hide_field(['lead', 'lead_name','customer','customer_address','contact_person',
+	hide_field(['lead', 'customer','customer_address','contact_person',
 		'customer_name','address_display','contact_display','contact_mobile','contact_email',
-		'territory','customer_group', 'organization']);
+		'territory','customer_group']);
 	if(doc.quotation_to == 'Lead') unhide_field(['lead']);
 	else if(doc.quotation_to == 'Customer') unhide_field(['customer']);
 	
-	doc.lead = doc.lead_name = doc.customer = doc.customer_name = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = doc.organization = "";
+	doc.lead = doc.customer = doc.customer_name = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
 }
 
 
@@ -185,7 +188,9 @@ cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 			else if(doc.quotation_to == 'Customer') {
 				unhide_field(['customer','customer_address','contact_person','territory','customer_group']);
 			}
-			refresh_many(['quotation_details','quotation_to','customer','customer_address','contact_person','lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','order_type']);
+			refresh_many(['quotation_details','quotation_to','customer','customer_address', 
+				'contact_person', 'lead', 'address_display', 'contact_display', 'contact_mobile', 
+				'contact_email', 'territory', 'customer_group', 'order_type']);
 		}
 	}
 

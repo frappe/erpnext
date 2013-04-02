@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:18", 
+  "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-01-29 14:23:07", 
+  "modified": "2013-04-02 16:28:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,6 +53,7 @@
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
   "options": "OPPT", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -64,6 +65,7 @@
   "oldfieldtype": "Select", 
   "options": "\nLead\nCustomer", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1
  }, 
@@ -79,6 +81,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 0
  }, 
@@ -93,13 +96,15 @@
   "oldfieldname": "lead", 
   "oldfieldtype": "Link", 
   "options": "Lead", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -124,6 +129,7 @@
   "oldfieldname": "enquiry_type", 
   "oldfieldtype": "Select", 
   "options": "\nSales\nMaintenance", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -131,7 +137,8 @@
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "description": "Items which do not exist in Item master can also be entered on customer's request", 
@@ -141,14 +148,16 @@
   "label": "Opportunity Items", 
   "oldfieldname": "enquiry_details", 
   "oldfieldtype": "Table", 
-  "options": "Opportunity Item"
+  "options": "Opportunity Item", 
+  "read_only": 0
  }, 
  {
   "description": "Keep a track of communication related to this enquiry which will help for future reference.", 
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -157,13 +166,15 @@
   "fieldtype": "HTML", 
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
-  "oldfieldtype": "Table"
+  "oldfieldtype": "Table", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -172,7 +183,8 @@
   "in_filter": 1, 
   "label": "Contact Person", 
   "options": "Contact", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -181,7 +193,8 @@
   "in_filter": 1, 
   "label": "Customer Address", 
   "options": "Address", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -204,7 +217,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -228,16 +242,6 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "lead_name", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Name", 
-  "oldfieldname": "lead_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 1
- }, 
- {
   "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
   "description": "<a href=\"#Sales Browser/Customer Group\">To manage Territory, click here</a>", 
   "doctype": "DocField", 
@@ -250,6 +254,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer Group", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -262,6 +267,7 @@
   "label": "Territory", 
   "options": "Territory", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -271,13 +277,15 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -289,6 +297,7 @@
   "label": "Opportunity Date", 
   "oldfieldname": "transaction_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "50px"
  }, 
@@ -302,6 +311,7 @@
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -312,7 +322,8 @@
   "label": "Source", 
   "oldfieldname": "source", 
   "oldfieldtype": "Select", 
-  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWalk In"
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWalk In", 
+  "read_only": 0
  }, 
  {
   "description": "Enter name of campaign if source of enquiry is campaign", 
@@ -322,7 +333,8 @@
   "label": "Campaign", 
   "oldfieldname": "campaign", 
   "oldfieldtype": "Link", 
-  "options": "Campaign"
+  "options": "Campaign", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -346,6 +358,7 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -354,6 +367,7 @@
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -366,6 +380,7 @@
   "oldfieldname": "contact_by", 
   "oldfieldtype": "Link", 
   "options": "Profile", 
+  "read_only": 0, 
   "width": "75px"
  }, 
  {
@@ -375,7 +390,8 @@
   "fieldtype": "Date", 
   "label": "Next Contact Date", 
   "oldfieldname": "contact_date", 
-  "oldfieldtype": "Date"
+  "oldfieldtype": "Date", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 0, 
@@ -398,7 +414,8 @@
   "label": "To Discuss", 
   "no_copy": 1, 
   "oldfieldname": "to_discuss", 
-  "oldfieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
