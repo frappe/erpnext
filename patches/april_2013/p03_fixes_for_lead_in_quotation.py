@@ -13,3 +13,6 @@ def execute():
 		
 	webnotes.conn.sql("""update `tabOpportunity` set contact_display = lead_name 
 		where enquiry_from = 'Lead' and ifnull(lead, '') != '' and ifnull(lead_name, '') != ''""")
+		
+	webnotes.conn.sql("""update `tabOpportunity` opp, `tabLead` lead 
+		set opp.customer_name = lead.company_name where opp.lead = lead.name""")
