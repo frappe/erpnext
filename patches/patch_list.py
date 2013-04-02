@@ -230,4 +230,5 @@ patch_list = [
 	"patches.march_2013.p07_update_valuation_rate",
 	"patches.march_2013.p08_create_aii_accounts",
 	"patches.march_2013.p03_update_buying_amount",
+	"patches.april_2013.p01_update_serial_no_valuation_rate",
 ]

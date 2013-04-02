@@ -24,7 +24,7 @@ class DocType:
 
 	def get_rate(self, arg):
 		from webnotes.model.code import get_obj
-		return get_obj('Sales Common').get_rate(arg, self)
+		return get_obj('Sales Common').get_rate(arg)
 
 	def update_other_default_charges(self):
 		webnotes.conn.sql("update `tabSales Taxes and Charges Master` set is_default = 0 where ifnull(is_default,0) = 1 and name != '%s' and company = '%s'" % (self.doc.name, self.doc.company))
