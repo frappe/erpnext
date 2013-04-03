@@ -3,29 +3,27 @@ import webnotes
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = ["Employee::150", "From Time::120", "To Time::120", "Hours::70", "Task::150",
+	columns = ["Employee::150", "From Datetime::120", "To Datetime::120", "Hours::70", "Task::150",
 		"Project:Link/Project:120", "Status::70"]
 			
 	profile_map = get_profile_map()
-		
-	if filters.get("employee_name"):
-		filters["employee_name"] = "%" + filters.get("employee_name") + "%"
 		
 	conditions = build_conditions(filters)
 	time_logs = webnotes.conn.sql("""select * from `tabTime Log` 
 		where docstatus < 2 %s order by owner asc""" % (conditions,), filters, as_dict=1)
 	
 	data = []
-	profiles = []
+	profiles = [time_logs[0].owner]
 		
 	for tl in time_logs:
-		employee_name = profile_map[tl.owner]
-		if employee_name not in profiles:
-			data.append(employee_name)
-			profiles.append(employee_name)
 		
-		data.append(["", tl.from_time, tl.to_time, tl.hours, tl.task, tl.project, tl.status])
-			
+		if tl.owner not in profiles:
+			profiles.append(tl.owner)
+			data.append([])
+
+		data.append([profile_map[tl.owner], tl.from_time, tl.to_time, tl.hours, 
+				tl.task, tl.project, tl.status])		
+		
 	return columns, data
 	
 def get_profile_map():
@@ -39,12 +37,7 @@ def get_profile_map():
 	return profile_map
 	
 def build_conditions(filters):
-	conditions = ""
-	if filters.get("employee_name"):
-		conditions += """ and owner in (select name from `tabProfile` 
-			where concat(first_name, if(last_name, (' ' + last_name), '')) 
-			like %(employee_name)s)"""
-			
+	conditions = ""			
 	if filters.get("from_date"):
 		conditions += " and from_time >= %(from_date)s"
 	if filters.get("to_date"):
