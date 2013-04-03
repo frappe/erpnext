@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:19", 
+  "creation": "2013-04-03 09:50:56", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:53", 
+  "modified": "2013-04-03 09:53:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,9 +34,7 @@
   "parent": "Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -46,6 +44,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -59,6 +58,7 @@
   "oldfieldtype": "Select", 
   "options": "QTN", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -71,6 +71,7 @@
   "oldfieldtype": "Select", 
   "options": "\nLead\nCustomer", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1
  }, 
@@ -85,6 +86,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -97,17 +99,8 @@
   "oldfieldname": "lead", 
   "oldfieldtype": "Link", 
   "options": "Lead", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "lead_name", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "in_filter": 0, 
-  "in_list_view": 1, 
-  "label": "Lead Name", 
-  "read_only": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -116,14 +109,6 @@
   "hidden": 1, 
   "in_list_view": 1, 
   "label": "Customer Name", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "organization", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Organization", 
   "read_only": 1
  }, 
  {
@@ -173,6 +158,7 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -186,6 +172,7 @@
   "no_copy": 1, 
   "oldfieldname": "transaction_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "100px"
@@ -201,6 +188,7 @@
   "oldfieldtype": "Select", 
   "options": "\nSales\nMaintenance", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -211,6 +199,7 @@
   "label": "Items", 
   "oldfieldtype": "Section Break", 
   "print_hide": 0, 
+  "read_only": 0, 
   "search_index": 0
  }, 
  {
@@ -222,18 +211,21 @@
   "oldfieldname": "quotation_details", 
   "oldfieldtype": "Table", 
   "options": "Quotation Item", 
+  "read_only": 0, 
   "width": "40px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "sec_break23", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break34", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -256,12 +248,14 @@
   "fieldtype": "Button", 
   "label": "Re-Calculate Values", 
   "oldfieldtype": "Button", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break35", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -277,6 +271,7 @@
   "oldfieldtype": "Link", 
   "options": "Opportunity", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0, 
   "search_index": 0
  }, 
@@ -289,13 +284,15 @@
   "no_copy": 0, 
   "oldfieldtype": "Button", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "label": "Price List and Currency"
+  "label": "Price List and Currency", 
+  "read_only": 0
  }, 
  {
   "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
@@ -308,6 +305,7 @@
   "oldfieldtype": "Select", 
   "options": "link:Price List", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0, 
   "width": "100px"
@@ -320,6 +318,7 @@
   "label": "Price List Currency", 
   "options": "Currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -329,12 +328,14 @@
   "fieldtype": "Float", 
   "label": "Price List Currency Conversion Rate", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -348,6 +349,7 @@
   "oldfieldtype": "Select", 
   "options": "Currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0, 
   "width": "100px"
@@ -362,6 +364,7 @@
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -370,7 +373,8 @@
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -381,7 +385,8 @@
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -390,7 +395,8 @@
   "hidden": 0, 
   "label": "Get Taxes and Charges", 
   "oldfieldtype": "Button", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -399,7 +405,8 @@
   "label": "Sales Taxes and Charges", 
   "oldfieldname": "other_charges", 
   "oldfieldtype": "Table", 
-  "options": "Sales Taxes and Charges"
+  "options": "Sales Taxes and Charges", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -407,7 +414,8 @@
   "fieldtype": "Button", 
   "label": "Calculate Taxes and Charges", 
   "oldfieldtype": "Button", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -426,7 +434,8 @@
   "fieldtype": "HTML", 
   "label": "Taxes and Charges Calculation", 
   "oldfieldtype": "HTML", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -434,7 +443,8 @@
   "fieldtype": "Section Break", 
   "label": "Totals", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -482,6 +492,7 @@
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -532,7 +543,8 @@
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -543,6 +555,7 @@
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -551,7 +564,8 @@
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "options": "get_tc_details"
+  "options": "get_tc_details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -560,7 +574,8 @@
   "label": "Terms and Conditions HTML", 
   "oldfieldtype": "HTML", 
   "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -568,18 +583,21 @@
   "fieldtype": "Text Editor", 
   "label": "Term Details", 
   "oldfieldname": "terms", 
-  "oldfieldtype": "Text Editor"
+  "oldfieldtype": "Text Editor", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break98", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -590,7 +608,8 @@
   "in_filter": 1, 
   "label": "Customer Address", 
   "options": "Address", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -603,12 +622,14 @@
   "oldfieldtype": "Link", 
   "options": "Contact", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break99", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -621,6 +642,7 @@
   "label": "Territory", 
   "options": "Territory", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -634,6 +656,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer Group", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 0
  }, 
@@ -644,7 +667,8 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -654,8 +678,9 @@
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
   "oldfieldtype": "Select", 
-  "options": "link:Letter Head", 
-  "print_hide": 1
+  "options": "\nDefault\nERP Grey Large\nERP LOGO\nERPNext Logo Black\nERPNext WT Logo", 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "description": "Select the relevant company name if you have multiple companies.", 
@@ -668,6 +693,7 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0, 
   "width": "150px"
@@ -683,6 +709,7 @@
   "oldfieldtype": "Select", 
   "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -695,6 +722,7 @@
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -717,6 +745,7 @@
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -747,6 +776,7 @@
   "oldfieldtype": "Link", 
   "options": "Campaign", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -758,7 +788,8 @@
   "no_copy": 1, 
   "oldfieldname": "order_lost_reason", 
   "oldfieldtype": "Small Text", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -771,6 +802,7 @@
   "oldfieldtype": "Link", 
   "options": "Print Heading", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -795,6 +827,7 @@
   "oldfieldname": "amendment_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -804,7 +837,8 @@
   "fieldtype": "Section Break", 
   "label": "Communication History", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -815,6 +849,7 @@
   "oldfieldname": "follow_up", 
   "oldfieldtype": "Table", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "40px"
  }, 
  {
@@ -824,13 +859,27 @@
   "hidden": 1, 
   "label": "File List", 
   "no_copy": 1, 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales Manager", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Sales Manager", 
   "submit": 1, 
   "write": 1
@@ -840,6 +889,8 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
@@ -849,6 +900,19 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Customer", 
   "submit": 0, 
   "write": 0
@@ -858,17 +922,43 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Maintenance Manager", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Maintenance Manager", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Maintenance User", 
+  "submit": 0, 
+  "write": 0
  }
 ]

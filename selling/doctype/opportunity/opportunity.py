@@ -98,8 +98,8 @@ class DocType(TransactionBase):
 			else:
 				desc = 'Contact customer '+cstr(self.doc.customer)
 		elif self.doc.lead:
-			if self.doc.lead_name:
-				desc = 'Contact '+cstr(self.doc.lead_name)
+			if self.doc.contact_display:
+				desc = 'Contact '+cstr(self.doc.contact_display)
 			else:
 				desc = 'Contact lead '+cstr(self.doc.lead)
 		desc = desc+ '. By : ' + cstr(self.doc.contact_by)

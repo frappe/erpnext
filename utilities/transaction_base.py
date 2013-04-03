@@ -161,12 +161,12 @@ class TransactionBase(DocListController):
 		if address_display.startswith('\n'): address_display = address_display[1:]
 		
 		ret = {
-			'lead_name' : extract('lead_name'),
+			'contact_display' : extract('lead_name'),
 			'address_display' : address_display,
 			'territory' : extract('territory'),
 			'contact_mobile' : extract('mobile_no'),
 			'contact_email' : extract('email_id'),
-			'organization' : extract('company_name')
+			'customer_name' : extract('company_name') or extract('lead_name')
 		}
 		return ret
 		
