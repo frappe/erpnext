@@ -749,8 +749,9 @@ class DocType(SellingController):
 			for item in self.doclist.get({"parentfield": "entries"}):
 				self.check_expense_account(item)
 			
-				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-					-1*item.buying_amount, cost_center=item.cost_center)
+				if item.buying_amount:
+					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
+						-1*item.buying_amount, cost_center=item.cost_center)
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

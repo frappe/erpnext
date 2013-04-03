@@ -413,8 +413,9 @@ class DocType(SellingController):
 		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
 			self.check_expense_account(item)
 			
-			gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
-				cost_center=item.cost_center)
+			if item.buying_amount:
+				gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
+					cost_center=item.cost_center)
 				
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
