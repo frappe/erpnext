@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-03 09:50:56", 
+  "creation": "2013-04-03 09:10:44", 
   "docstatus": 0, 
-  "modified": "2013-04-03 09:53:04", 
+  "modified": "2013-04-03 09:58:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,7 +34,9 @@
   "parent": "Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -678,7 +680,7 @@
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
   "oldfieldtype": "Select", 
-  "options": "\nDefault\nERP Grey Large\nERP LOGO\nERPNext Logo Black\nERPNext WT Logo", 
+  "options": "link:Letter Head", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -863,23 +865,10 @@
   "read_only": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Sales Manager", 
   "submit": 1, 
   "write": 1
@@ -889,8 +878,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
@@ -900,19 +887,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Customer", 
   "submit": 0, 
   "write": 0
@@ -922,43 +896,17 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Maintenance Manager", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Maintenance Manager", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Maintenance User", 
-  "submit": 0, 
-  "write": 0
  }
 ]
