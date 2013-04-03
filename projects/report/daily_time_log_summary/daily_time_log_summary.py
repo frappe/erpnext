@@ -3,8 +3,8 @@ import webnotes
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = ["Profile:Link:150", "From Time::120", "To Time::120", "Hours::70", "Task::150",
-		"Project:Link/Project:100", "Status::70"]
+	columns = ["Employee::150", "From Time::120", "To Time::120", "Hours::70", "Task::150",
+		"Project:Link/Project:120", "Status::70"]
 			
 	profile_map = get_profile_map()
 		
