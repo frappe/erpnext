@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 18:50:30", 
+  "creation": "2013-04-03 09:50:56", 
   "docstatus": 0, 
-  "modified": "2013-04-02 16:02:45", 
+  "modified": "2013-04-03 09:53:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,9 +34,7 @@
   "parent": "Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -305,7 +303,7 @@
   "label": "Price List", 
   "oldfieldname": "price_list_name", 
   "oldfieldtype": "Select", 
-  "options": "\n1000 sms\n10000 sms\n25000 sms\n5000 sms\nEast\nEast Price List\nEnterprise Plan\nGeneral\nPL\nSolo Plan", 
+  "options": "link:Price List", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1, 
@@ -722,7 +720,7 @@
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
-  "options": "\n2008-2009\n2009-2010\n2010-2011\n2011-2012\n2012-2013\n2013-2014", 
+  "options": "link:Fiscal Year", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1, 
@@ -865,24 +863,23 @@
   "read_only": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Sales User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "match": "customer_name", 
-  "role": "Customer"
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales Manager", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Sales Manager", 
   "submit": 1, 
   "write": 1
@@ -892,17 +889,76 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Maintenance Manager", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Sales User", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Customer", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Maintenance Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Maintenance Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Maintenance User", 
+  "submit": 0, 
+  "write": 0
  }
 ]
