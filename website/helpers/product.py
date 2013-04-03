@@ -82,7 +82,7 @@ def get_group_item_count(item_group):
 
 def get_item_for_list_in_html(r):
 	scrub_item_for_list(r)
-	r.template = "html/product_in_list.html"
+	r.template = "app/website/templates/html/product_in_list.html"
 	return build_html(r)
 
 def scrub_item_for_list(r):

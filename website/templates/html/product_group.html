@@ -1,11 +1,11 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block content %}
-{% include 'html/product_search_box.html' %}
-{% include 'html/product_breadcrumbs.html' %}
+{% include 'app/website/templates/html/product_search_box.html' %}
+{% include 'app/website/templates/html/product_breadcrumbs.html' %}
 <div class="span12">
 	{% if slideshow %}<!-- slideshow -->
-	{% include "html/slideshow.html" %}
+	{% include "app/website/templates/html/slideshow.html" %}
 	{% endif %}
 	{% if description %}<!-- description -->
 	<div>{{ description or ""}}</div>

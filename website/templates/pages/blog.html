@@ -1,11 +1,11 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block javascript %}
-	{% include "js/blog.js" %}
+	{% include "app/website/templates/js/blog.js" %}
 {% endblock %}
 
 {% block css %}
-	{% include "css/blog.css" %}
+	{% include "app/website/templates/css/blog.css" %}
 {% endblock %}
 
 {% set title="Blog" %}
@@ -29,5 +29,5 @@
 			style="display:none;">More...</button>
 	</div>
 </div>
-{% include 'html/blog_footer.html' %}
+{% include 'app/website/templates/html/blog_footer.html' %}
 {% endblock %}

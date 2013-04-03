@@ -1,9 +1,9 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% set title="Product Search" %}
 
 {% block javascript %}
-{% include "js/product_list.js" %}
+{% include "app/website/templates/js/product_list.js" %}
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@ $(document).ready(function() {
 });
 </script>
 
-{% include 'html/product_search_box.html' %}
+{% include 'app/website/templates/html/product_search_box.html' %}
 <div class="span12">
 	<h3 class="search-results">Search Results</h3>
 	<div id="search-list" class="row">

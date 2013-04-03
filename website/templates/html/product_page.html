@@ -1,28 +1,28 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block javascript %}
-	{% include "js/product_page.js" %}
+	{% include "app/website/templates/js/product_page.js" %}
 {% endblock %}
 
 {% block css %}
-	{% include "css/product_page.css" %}
+	{% include "app/website/templates/css/product_page.css" %}
 {% endblock %}
 
 {% block content %}
-	{% include 'html/product_search_box.html' %}
-	{% include 'html/product_breadcrumbs.html' %}
+	{% include 'app/website/templates/html/product_search_box.html' %}
+	{% include 'app/website/templates/html/product_breadcrumbs.html' %}
 	<div class="span12 product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="span6">
 				{% if slideshow %}
-					{% include "html/slideshow.html" %}
+					{% include "app/website/templates/html/slideshow.html" %}
 				{% else %}
 					{% if website_image %}
 					<image itemprop="image" class="item-main-image"
 						src="{{ website_image }}" />
 					{% else %}
 					<div class="img-area">
-						{% include 'html/product_missing_image.html' %}
+						{% include 'app/website/templates/html/product_missing_image.html' %}
 					</div>
 					{% endif %}
 				{% endif %}

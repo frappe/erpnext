@@ -74,7 +74,7 @@ def add_comment(args=None):
 	webnotes.webutils.clear_cache(args.get('page_name'))
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
-	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
+	template_args = { 'comment_list': [comment], 'template': 'app/website/templates/html/comment.html' }
 	
 	# get html of comment row
 	comment_html = webnotes.webutils.build_html(template_args)

@@ -75,5 +75,72 @@
 			"label": "Knowledge Base",
 			"icon": "icon-question-sign"
 		}
+	},
+	"web": {
+		"pages": {
+			"about": {
+				"template": "app/website/templates/pages/about",
+				"args_method": "website.doctype.about_us_settings.about_us_settings.get_args"
+			},
+			"account": {
+				"template": "app/website/templates/pages/account"
+			},
+			"attributions": {
+				"template": "app/website/templates/pages/attributions"
+			},
+			"blog": {
+				"template": "app/website/templates/pages/blog",
+				"args_method": "website.helpers.blog.get_blog_template_args"
+			},
+			"contact": {
+				"template": "app/website/templates/pages/contact",
+				"args_doctype": "Contact Us Settings"
+			},
+			"index": {
+				"template": "app/website/templates/pages/index"
+			},
+			"order": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/order",
+				"args_method": "selling.doctype.sales_order.sales_order.get_website_args"
+			},
+			"orders": {
+				"template": "app/website/templates/pages/orders",
+				"args_method": "selling.doctype.sales_order.sales_order.get_currency_and_number_format"
+			},
+			"product_search": {
+				"template": "app/website/templates/pages/product_search"
+			},
+			"ticket": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/ticket",
+				"get_website_args": "support.doctype.support_ticket.support_ticket.get_website_args"
+			},
+			"tickets": {
+				"template": "app/website/templates/pages/tickets"
+			},
+			"writers": {
+				"template": "app/website/templates/pages/writers",
+				"args_method": "website.helpers.blog.get_writers_args"
+			}
+		},
+		"generators": {
+			"Web Page": {
+				"template": "app/website/templates/html/web_page.html",
+				"condition_field": "published"
+			},
+			"Blog Post": {
+				"template": "app/website/templates/html/blog_page.html",
+				"condition_field": "published"
+			},
+			"Item": {
+				"template": "app/website/templates/html/product_page.html",
+				"condition_field": "show_in_website"
+			},
+			"Item Group":{
+				"template": "app/website/templates/html/product_group.html",
+				"condition_field": "show_in_website"
+			}
+		}
 	}
 }
