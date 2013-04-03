@@ -234,5 +234,6 @@ patch_list = [
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Classic") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Modern") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-04-02',
+	"execute:webnotes.delete_doc('Search Criteria', 'time_log_summary')"
 	
 ]

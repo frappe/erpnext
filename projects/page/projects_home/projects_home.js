@@ -62,8 +62,8 @@ wn.module_page["Projects"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Time Log Summary"),
-				route: "Report2/Time Log/Time Log Summary",
+				"label":wn._("Daily Time Log Summary"),
+				route: "query-report/Daily Time Log Summary",
 				doctype: "Time Log"
 			},
 		]

@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-04-03 11:27:52", 
+  "docstatus": 0, 
+  "modified": "2013-04-03 11:48:07", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Time Log", 
+  "report_name": "Daily Time Log Summary", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Daily Time Log Summary"
+ }
+]
