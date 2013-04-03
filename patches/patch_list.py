@@ -234,5 +234,5 @@ patch_list = [
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Classic") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Modern") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-04-02',
-	
+	"patches.april_2013.p04_reverse_modules_list",
 ]

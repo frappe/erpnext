@@ -1,0 +1,79 @@
+{
+	"modules": {
+		"Selling": {
+			"link": "selling-home",
+			"color": "#3f4901",
+			"icon": "icon-tag",
+			"type": "module"
+		},
+		"Accounts": {
+			"link": "accounts-home",
+			"color": "#025770",
+			"icon": "icon-money",
+			"type": "module"
+		},
+		"Stock": {
+			"type": "module",
+			"link": "stock-home",
+			"color": "#a66a02",
+			"icon": "icon-truck"
+		},
+		"Buying": {
+			"type": "module",
+			"link": "buying-home",
+			"color": "#8F0222",
+			"icon": "icon-shopping-cart"
+		},
+		"Support": {
+			"type": "module",
+			"link": "support-home",
+			"color": "#410169",
+			"icon": "icon-phone"
+		},
+		"Projects": {
+			"type": "module",
+			"link": "projects-home",
+			"color": "#473b7f",
+			"icon": "icon-tasks"
+		},
+		"Manufacturing": {
+			"type": "module",
+			"link": "manufacturing-home",
+			"color": "#590116",
+			"icon": "icon-magic"
+		},
+		"Website": {
+			"type": "module",
+			"link": "website-home",
+			"color": "#968c00",
+			"icon": "icon-globe"
+		},
+		"HR": {
+			"type": "module",
+			"link": "hr-home",
+			"color": "#018d6c",
+			"label": "Human Resources",
+			"icon": "icon-group"
+		},
+		"Setup": {
+			"type": "setup",
+			"link": "Setup",
+			"color": "#484848",
+			"icon": "icon-wrench"
+		},
+		"Activity": {
+			"type": "page",
+			"link": "activity",
+			"color": "#633501",
+			"icon": "icon-play",
+			"label": "Activity"
+		},
+		"Knowledge Base": {
+			"type": "page",
+			"link": "questions",
+			"color": "#01372b",
+			"label": "Knowledge Base",
+			"icon": "icon-question-sign"
+		}
+	}
+}

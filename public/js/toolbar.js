@@ -74,12 +74,11 @@ erpnext.toolbar.add_modules = function() {
 	}
 
 	// add to dropdown
-	for(var i in modules_list) {
-		var m = modules_list[i]
-		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1 && wn.modules[m]) {
+	$.each(modules_list,function(i, m) {
+		if(m!='Setup') {
 			$('.navbar .modules').append(_get_list_item(m));			
 		}
-	}
+	})
 	
 	// setup for system manager
 	if(user_roles.indexOf("System Manager")!=-1) {
