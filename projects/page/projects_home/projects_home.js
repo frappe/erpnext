@@ -26,12 +26,6 @@ wn.module_page["Projects"] = [
 				description: wn._("Batch Time Logs for billing."),
 				doctype:"Time Log Batch"
 			},
-			{
-				label: wn._("Timesheet"),
-				description: wn._("[DEPRECATED] Timesheet for tasks."),
-				doctype:"Timesheet"
-			},
-
 		]
 	},
 	{
