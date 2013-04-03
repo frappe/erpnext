@@ -12,4 +12,3 @@ def execute():
 		for item in pi.doclist.get({"parentfield": "entries"}):
 			webnotes.conn.sql("""update `tabPurchase Invoice Item` set valuation_rate = %s 
 				where name = %s""", (item.valuation_rate, item.name))
-	
