@@ -26,12 +26,6 @@ wn.module_page["Projects"] = [
 				description: wn._("Batch Time Logs for billing."),
 				doctype:"Time Log Batch"
 			},
-			{
-				label: wn._("Timesheet"),
-				description: wn._("[DEPRECATED] Timesheet for tasks."),
-				doctype:"Timesheet"
-			},
-
 		]
 	},
 	{
@@ -62,8 +56,8 @@ wn.module_page["Projects"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Time Log Summary"),
-				route: "Report2/Time Log/Time Log Summary",
+				"label":wn._("Daily Time Log Summary"),
+				route: "query-report/Daily Time Log Summary",
 				doctype: "Time Log"
 			},
 		]

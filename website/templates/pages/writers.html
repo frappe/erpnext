@@ -1,4 +1,4 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% set title="Blog Writers" %}
 
@@ -10,8 +10,8 @@
 	{% endif %}
 	<hr>
 	{% for blogger_info in bloggers %}
-	{% include "html/blogger.html" %}	
+	{% include "app/website/templates/html/blogger.html" %}	
 	{% endfor %}
 </div>
-{% include 'html/blog_footer.html' %}
+{% include 'app/website/templates/html/blog_footer.html' %}
 {% endblock %}

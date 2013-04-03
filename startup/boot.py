@@ -26,9 +26,7 @@ def boot_session(bootinfo):
 		import webnotes.model.doctype
 		bootinfo['notification_settings'] = webnotes.doc("Notification Control", 
 			"Notification Control").get_values()
-		
-		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
-		
+				
 		# if no company, show a dialog box to create a new company
 		bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
 			tabCompany limit 1""") and 'Yes' or 'No'

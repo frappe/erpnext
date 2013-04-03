@@ -1,4 +1,4 @@
-{% extends "html/base.html" %}
+{% extends "lib/templates/base.html" %}
 
 {% block body %}
 	<div class="container">
@@ -10,13 +10,13 @@
 			<div class="span12">{{ banner_html }}</div>
 		</div>{% endif %}
 		<div class="outer">
-			{% include "html/navbar.html" %}
+			{% include "app/website/templates/html/navbar.html" %}
 			<div class="content row" id="page-{{ name }}" style="display: block;">
 			{%- block content -%}
 			{%- endblock -%}
 			</div>
 		</div>
 	</div>
-	{% include "html/footer.html" %}
+	{% include "app/website/templates/html/footer.html" %}
 
 {% endblock %}

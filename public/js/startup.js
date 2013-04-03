@@ -31,11 +31,7 @@ erpnext.startup.start = function() {
 
 	if(user != 'Guest'){
 		erpnext.setup_mousetrap();
-		
-		// always allow apps
-		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
-			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
-		
+				
 		// setup toolbar
 		erpnext.toolbar.setup();
 		

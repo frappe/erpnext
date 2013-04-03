@@ -1,0 +1,146 @@
+{
+	"modules": {
+		"Selling": {
+			"link": "selling-home",
+			"color": "#3f4901",
+			"icon": "icon-tag",
+			"type": "module"
+		},
+		"Accounts": {
+			"link": "accounts-home",
+			"color": "#025770",
+			"icon": "icon-money",
+			"type": "module"
+		},
+		"Stock": {
+			"type": "module",
+			"link": "stock-home",
+			"color": "#a66a02",
+			"icon": "icon-truck"
+		},
+		"Buying": {
+			"type": "module",
+			"link": "buying-home",
+			"color": "#8F0222",
+			"icon": "icon-shopping-cart"
+		},
+		"Support": {
+			"type": "module",
+			"link": "support-home",
+			"color": "#410169",
+			"icon": "icon-phone"
+		},
+		"Projects": {
+			"type": "module",
+			"link": "projects-home",
+			"color": "#473b7f",
+			"icon": "icon-tasks"
+		},
+		"Manufacturing": {
+			"type": "module",
+			"link": "manufacturing-home",
+			"color": "#590116",
+			"icon": "icon-magic"
+		},
+		"Website": {
+			"type": "module",
+			"link": "website-home",
+			"color": "#968c00",
+			"icon": "icon-globe"
+		},
+		"HR": {
+			"type": "module",
+			"link": "hr-home",
+			"color": "#018d6c",
+			"label": "Human Resources",
+			"icon": "icon-group"
+		},
+		"Setup": {
+			"type": "setup",
+			"link": "Setup",
+			"color": "#484848",
+			"icon": "icon-wrench"
+		},
+		"Activity": {
+			"type": "page",
+			"link": "activity",
+			"color": "#633501",
+			"icon": "icon-play",
+			"label": "Activity"
+		},
+		"Knowledge Base": {
+			"type": "page",
+			"link": "questions",
+			"color": "#01372b",
+			"label": "Knowledge Base",
+			"icon": "icon-question-sign"
+		}
+	},
+	"web": {
+		"pages": {
+			"about": {
+				"template": "app/website/templates/pages/about",
+				"args_method": "website.doctype.about_us_settings.about_us_settings.get_args"
+			},
+			"account": {
+				"template": "app/website/templates/pages/account"
+			},
+			"attributions": {
+				"template": "app/website/templates/pages/attributions"
+			},
+			"blog": {
+				"template": "app/website/templates/pages/blog",
+				"args_method": "website.helpers.blog.get_blog_template_args"
+			},
+			"contact": {
+				"template": "app/website/templates/pages/contact",
+				"args_doctype": "Contact Us Settings"
+			},
+			"index": {
+				"template": "app/website/templates/pages/index"
+			},
+			"order": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/order",
+				"args_method": "selling.doctype.sales_order.sales_order.get_website_args"
+			},
+			"orders": {
+				"template": "app/website/templates/pages/orders",
+				"args_method": "selling.doctype.sales_order.sales_order.get_currency_and_number_format"
+			},
+			"product_search": {
+				"template": "app/website/templates/pages/product_search"
+			},
+			"ticket": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/ticket",
+				"get_website_args": "support.doctype.support_ticket.support_ticket.get_website_args"
+			},
+			"tickets": {
+				"template": "app/website/templates/pages/tickets"
+			},
+			"writers": {
+				"template": "app/website/templates/pages/writers",
+				"args_method": "website.helpers.blog.get_writers_args"
+			}
+		},
+		"generators": {
+			"Web Page": {
+				"template": "app/website/templates/html/web_page.html",
+				"condition_field": "published"
+			},
+			"Blog Post": {
+				"template": "app/website/templates/html/blog_page.html",
+				"condition_field": "published"
+			},
+			"Item": {
+				"template": "app/website/templates/html/product_page.html",
+				"condition_field": "show_in_website"
+			},
+			"Item Group":{
+				"template": "app/website/templates/html/product_group.html",
+				"condition_field": "show_in_website"
+			}
+		}
+	}
+}

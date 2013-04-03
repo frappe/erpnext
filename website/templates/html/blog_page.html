@@ -1,11 +1,11 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block javascript %}
-	{% include "js/blog_page.js" %}
+	{% include "app/website/templates/js/blog_page.js" %}
 {% endblock %}
 
 {% block css %}
-	{% include "css/blog_page.css" %}
+	{% include "app/website/templates/css/blog_page.css" %}
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
 	<!-- end blog content -->
 	{% if blogger_info %}
 	<hr />
-	{% include "html/blogger.html" %}
+	{% include "app/website/templates/html/blogger.html" %}
 	{% endif %}
 	<hr>
 	<h3>{{ texts.comments }}</h3><br>
@@ -35,7 +35,7 @@
 		</div>
 		{% endif %}
 		
-		{% include 'html/comment.html' %}
+		{% include 'app/website/templates/html/comment.html' %}
 	</div>
 	<div><button class="btn add-comment">{{ texts.add_comment }}</button></div>
 	<div style="display: none; margin-top: 10px;" 
@@ -52,5 +52,5 @@
 		</form>
 	</div>
 </div>
-{% include 'html/blog_footer.html' %}
+{% include 'app/website/templates/html/blog_footer.html' %}
 {% endblock %}

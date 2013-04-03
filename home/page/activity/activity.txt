@@ -1,21 +1,32 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2012-06-14 18:44:56", 
   "docstatus": 0, 
-  "creation": "2012-02-29 11:59:13", 
+  "modified": "2013-04-03 14:59:38", 
   "modified_by": "Administrator", 
-  "modified": "2012-02-29 12:11:46"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Activity", 
-  "module": "Home", 
   "doctype": "Page", 
+  "module": "Home", 
+  "name": "__common__", 
   "page_name": "activity", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Activity"
  }, 
  {
-  "name": "activity", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "activity", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "All"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "activity"
+ }, 
+ {
+  "doctype": "Page Role"
  }
 ]
