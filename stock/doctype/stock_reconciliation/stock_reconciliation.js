@@ -67,7 +67,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 					attach the modified file.");
 			}
 		} else if(this.frm.doc.docstatus == 1) {
-			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify it's effect.");
+			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify its effect.");
 			this.show_stock_ledger();
 		} else {
 			this.frm.set_intro("");

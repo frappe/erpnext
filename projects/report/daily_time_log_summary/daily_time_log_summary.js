@@ -3,13 +3,13 @@ wn.query_reports["Daily Time Log Summary"] = {
 		{
 			"fieldname":"from_date",
 			"label": "From Date",
-			"fieldtype": "Datetime",
+			"fieldtype": "Date",
 			"default": wn.datetime.get_today()
 		},
 		{
 			"fieldname":"to_date",
 			"label": "To Date",
-			"fieldtype": "Datetime",
+			"fieldtype": "Date",
 			"default": wn.datetime.get_today()
 		},
 	]
