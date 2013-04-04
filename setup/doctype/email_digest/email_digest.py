@@ -315,7 +315,7 @@ class DocType(DocListController):
 			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
-		from utilities.page.todo.todo import get
+		from core.page.todo.todo import get
 		todo_list = get()
 		
 		html = ""

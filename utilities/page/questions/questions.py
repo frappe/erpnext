@@ -55,7 +55,7 @@ def add_question(arg):
 	d.save(1)
 	
 	if args['suggest']:
-		from utilities.page.messages import messages
+		from core.page.messages import messages
 		for s in args['suggest']:
 			if s:
 				messages.post(json.dumps({
