@@ -142,11 +142,11 @@ class DocType(TransactionBase):
 			return ''
 			
 	def delete_supplier_address(self):
-		for rec in sql("select * from `tabAddress` where supplier='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabAddress` where supplier=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabAddress` where name=%s",(rec['name']))
 	
 	def delete_supplier_contact(self):
-		for rec in sql("select * from `tabContact` where supplier='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabContact` where supplier=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabContact` where name=%s",(rec['name']))
 			
 	def delete_supplier_communication(self):

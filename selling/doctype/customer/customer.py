@@ -188,11 +188,11 @@ class DocType(TransactionBase):
 				self.doc.name, raise_exception=1)
 
 	def delete_customer_address(self):
-		for rec in sql("select * from `tabAddress` where customer='%s'" %(self.doc.name), as_dict=1):
-			sql("delete from `tabAddress` where name=%s",(rec['name']))
+		for rec in sql("select * from `tabAddress` where customer=%s", (self.doc.name,), as_dict=1):
+			sql("delete from `tabAddress` where name=%s", (rec['name']))
 	
 	def delete_customer_contact(self):
-		for rec in sql("select * from `tabContact` where customer='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabContact` where customer=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabContact` where name=%s",(rec['name']))
 	
 	def delete_customer_communication(self):
@@ -236,8 +236,7 @@ class DocType(TransactionBase):
 			('Serial No', 'customer'),
 			('Shipping Address', 'customer'),
 			('Stock Entry', 'customer'),
-			('Support Ticket', 'customer'),
-			('Task', 'customer')]
+			('Support Ticket', 'customer')]
 			for rec in update_fields:
 				sql("""update `tab%s` set customer_name = %s
 					where `%s` = %s""" % (rec[0], "%s" ,rec[1], "%s"), (new, old))
