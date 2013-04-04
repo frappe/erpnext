@@ -40,7 +40,7 @@ class DocType(DocListController):
 		self.update_website()
 			
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
-		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
+		if bin and cstr(bin[0][0]) and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
 			raise Exception
 		check_list = []
