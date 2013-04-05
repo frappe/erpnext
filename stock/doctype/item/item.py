@@ -181,7 +181,8 @@ class DocType(DocListController):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.check_non_asset_warehouse()
-
+		self.cant_change()
+		
 		if cstr(self.doc.is_manufactured_item) == "No":
 			self.doc.is_pro_applicable = "No"
 
@@ -242,3 +243,15 @@ class DocType(DocListController):
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow
 			get_slideshow(self)
+	
+	def cant_change(self):
+		vals = webnotes.conn.get_value("Item", self.doc.name, 
+			["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
+			
+		if (vals.has_serial_no != self.doc.has_serial_no or 
+			vals.is_stock_item != self.doc.is_stock_item or 
+			vals.valuation_method != self.doc.valuation_method):
+				if self.check_if_sle_exists():
+					webnotes.msgprint(_("As there are existing stock transactions for this item, \
+						you can not change the values of 'Has Serial No', 'Is Stock Item' and \
+						'Valuation Method'"), raise_exception=1)
