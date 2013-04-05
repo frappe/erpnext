@@ -35,7 +35,6 @@ cur_frm.add_fetch("item_code", "net_weight", "net_weight");
 cur_frm.add_fetch("item_code", "weight_uom", "weight_uom");
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	console.log(make_doclist(cdt, cdn));
 	if(doc.delivery_note && doc.__islocal) {
 		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
 		if(!(flt(ps_detail.net_weight) && cstr(ps_detail.weight_uom))) {
