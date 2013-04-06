@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:28", 
+  "creation": "2013-03-07 18:50:31", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:40", 
+  "modified": "2013-04-05 15:40:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -48,12 +48,14 @@
   "doctype": "DocField", 
   "fieldname": "packing_slip_details", 
   "fieldtype": "Section Break", 
-  "label": "Packing Slip Items"
+  "label": "Packing Slip Items", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "Indicates that the package is a part of this delivery", 
@@ -62,12 +64,14 @@
   "fieldtype": "Link", 
   "label": "Delivery Note", 
   "options": "Delivery Note", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -77,17 +81,20 @@
   "no_copy": 0, 
   "options": "PS", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "Identification of the package for the delivery (for print)", 
@@ -96,13 +103,15 @@
   "fieldtype": "Data", 
   "label": "From Package No.", 
   "no_copy": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "50px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "If more than one package of the same type (for print)", 
@@ -111,26 +120,30 @@
   "fieldtype": "Data", 
   "label": "To Package No.", 
   "no_copy": 1, 
+  "read_only": 0, 
   "width": "50px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "package_item_details", 
   "fieldtype": "Section Break", 
-  "label": "Package Item Details"
+  "label": "Package Item Details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "item_details", 
   "fieldtype": "Table", 
   "label": "Items", 
-  "options": "Packing Slip Item"
+  "options": "Packing Slip Item", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "package_weight_details", 
   "fieldtype": "Section Break", 
-  "label": "Package Weight Details"
+  "label": "Package Weight Details", 
+  "read_only": 0
  }, 
  {
   "description": "The net weight of this package. (calculated automatically as sum of net weight of items)", 
@@ -144,15 +157,17 @@
  {
   "doctype": "DocField", 
   "fieldname": "net_weight_uom", 
-  "fieldtype": "Data", 
+  "fieldtype": "Link", 
   "label": "Net Weight UOM", 
   "no_copy": 1, 
+  "options": "UOM", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break4", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "The gross weight of the package. Usually net weight + packaging material weight. (for print)", 
@@ -160,7 +175,8 @@
   "fieldname": "gross_weight_pkg", 
   "fieldtype": "Float", 
   "label": "Gross Weight", 
-  "no_copy": 1
+  "no_copy": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -168,13 +184,15 @@
   "fieldtype": "Link", 
   "label": "Gross Weight UOM", 
   "no_copy": 1, 
-  "options": "UOM"
+  "options": "UOM", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "misc_details", 
   "fieldtype": "Section Break", 
-  "label": "Misc Details"
+  "label": "Misc Details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -194,7 +212,8 @@
   "fieldtype": "Date", 
   "label": "Amendment Date", 
   "no_copy": 1, 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocPerm", 

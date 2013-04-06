@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:02", 
+  "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:26", 
+  "modified": "2013-04-05 16:06:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "label": "Item Code", 
   "options": "Item", 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -50,6 +51,7 @@
   "fieldtype": "Float", 
   "label": "Quantity", 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -85,6 +87,14 @@
   "doctype": "DocField", 
   "fieldname": "page_break", 
   "fieldtype": "Check", 
-  "label": "Page Break"
+  "label": "Page Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dn_detail", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "DN Detail"
  }
 ]

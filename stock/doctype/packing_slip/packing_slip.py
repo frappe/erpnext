@@ -128,6 +128,7 @@ class DocType:
 		"""
 		item['recommended_qty'] = (flt(item['qty']) - flt(item['packed_qty'])) / no_of_cases
 		item['specified_qty'] = flt(ps_item_qty[item['item_code']])
+		if not item['packed_qty']: item['packed_qty'] = 0
 		
 		webnotes.msgprint("""
 			Invalid Quantity specified (%(specified_qty)s %(stock_uom)s).
