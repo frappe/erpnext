@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 patch_list = [
 	"execute:webnotes.reload_doc('core', 'doctype', 'docfield')",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') # 2013-04-07",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report')",
 	"execute:webnotes.reload_doc('core', 'doctype', 'doctype')",
 	"patches.mar_2012.so_rv_mapper_fix", 
@@ -234,6 +235,5 @@ patch_list = [
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Classic") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Modern") # 2013-04-02',
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-04-02',
-	"execute:webnotes.delete_doc('Search Criteria', 'time_log_summary')"
-	
+	"execute:webnotes.delete_doc('Search Criteria', 'time_log_summary')",
 ]
