@@ -88,9 +88,6 @@ if (sys_defaults.auto_inventory_accounting) {
 
 	cur_frm.fields_dict["expenses_included_in_valuation"].get_query = 
 		cur_frm.fields_dict["stock_adjustment_account"].get_query;
-	
-	cur_frm.fields_dict["stock_delivered_but_not_billed"].get_query = 
-		cur_frm.fields_dict["stock_in_hand_account"].get_query;
 
 	cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 		return {
