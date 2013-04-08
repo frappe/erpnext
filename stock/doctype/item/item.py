@@ -40,7 +40,7 @@ class DocType(DocListController):
 		self.update_website()
 			
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
-		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
+		if bin and cstr(bin[0][0]) and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
 			raise Exception
 		check_list = []
@@ -181,7 +181,8 @@ class DocType(DocListController):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.check_non_asset_warehouse()
-
+		self.cant_change()
+		
 		if cstr(self.doc.is_manufactured_item) == "No":
 			self.doc.is_pro_applicable = "No"
 
@@ -193,9 +194,7 @@ class DocType(DocListController):
 
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
-			
-		self.validate_is_stock_item()
-					
+								
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
 			existing_qty = sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
@@ -215,14 +214,6 @@ class DocType(DocListController):
 		}
 		return ret
 		
-	def validate_is_stock_item(self):
-		if not self.doc.fields.get("__islocal"):
-			if webnotes.conn.get_value("Item", self.doc.name, "is_stock_item")=="Yes" and \
-				((not self.doc.is_stock_item) or self.doc.is_stock_item == "No"):
-					if self.check_if_sle_exists() == "exists":
-						webnotes.msgprint(self.meta.get_label("is_stock_item") + ": " 
-							+ _("""Cannot change to Yes. Reason: Stock Ledger Entries exist for""")
-							+ """ "%s" """ % self.doc.name, raise_exception=True)
 
 	def check_if_sle_exists(self):
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
@@ -242,3 +233,16 @@ class DocType(DocListController):
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow
 			get_slideshow(self)
+	
+	def cant_change(self):
+		if not self.doc.fields.get("__islocal"):
+			vals = webnotes.conn.get_value("Item", self.doc.name, 
+				["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
+			
+			if vals and (vals.has_serial_no != self.doc.has_serial_no or 
+				vals.is_stock_item != self.doc.is_stock_item or 
+				vals.valuation_method != self.doc.valuation_method):
+					if self.check_if_sle_exists():
+						webnotes.msgprint(_("As there are existing stock transactions for this \
+							item, you can not change the values of 'Has Serial No', \
+							'Is Stock Item' and 'Valuation Method'"), raise_exception=1)

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 12:35:57", 
+  "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-03-21 13:02:27", 
+  "modified": "2013-04-05 11:10:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,9 +24,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Journal Voucher", 
@@ -34,9 +31,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 1, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -47,6 +42,7 @@
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -60,6 +56,7 @@
   "oldfieldtype": "Select", 
   "options": "JV", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -73,6 +70,7 @@
   "oldfieldtype": "Select", 
   "options": "\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher", 
   "print_hide": 0, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -80,6 +78,7 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -93,6 +92,7 @@
   "no_copy": 1, 
   "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -102,7 +102,8 @@
   "fieldtype": "Section Break", 
   "label": "Journal Entries", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -113,13 +114,15 @@
   "oldfieldname": "entries", 
   "oldfieldtype": "Table", 
   "options": "Journal Voucher Detail", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break99", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -149,7 +152,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "column_break99", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -168,13 +172,15 @@
   "fieldname": "get_balance", 
   "fieldtype": "Button", 
   "label": "Make Difference Entry", 
-  "oldfieldtype": "Button"
+  "oldfieldtype": "Button", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "reference", 
   "fieldtype": "Section Break", 
-  "label": "Reference"
+  "label": "Reference", 
+  "read_only": 0
  }, 
  {
   "description": "eg. Cheque Number", 
@@ -187,6 +193,7 @@
   "no_copy": 1, 
   "oldfieldname": "cheque_no", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -196,7 +203,8 @@
   "label": "Reference Date", 
   "no_copy": 1, 
   "oldfieldname": "cheque_date", 
-  "oldfieldtype": "Date"
+  "oldfieldtype": "Date", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -214,7 +222,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "column_break98", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -224,7 +233,8 @@
   "label": "User Remark", 
   "no_copy": 1, 
   "oldfieldname": "user_remark", 
-  "oldfieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
  }, 
  {
   "description": "User Remark will be added to Auto Remark", 
@@ -247,7 +257,8 @@
   "label": "Bill No", 
   "oldfieldname": "bill_no", 
   "oldfieldtype": "Data", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -256,7 +267,8 @@
   "label": "Bill Date", 
   "oldfieldname": "bill_date", 
   "oldfieldtype": "Date", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -265,20 +277,23 @@
   "label": "Due Date", 
   "oldfieldname": "due_date", 
   "oldfieldtype": "Date", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "addtional_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -293,6 +308,7 @@
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -304,7 +320,8 @@
   "no_copy": 0, 
   "oldfieldname": "aging_date", 
   "oldfieldtype": "Date", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "Accounts Receivable", 
@@ -315,6 +332,7 @@
   "label": "Write Off Based On", 
   "options": "Accounts Receivable\nAccounts Payable", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -325,6 +343,7 @@
   "label": "Write Off Amount <=", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -334,13 +353,22 @@
   "fieldtype": "Button", 
   "label": "Get Outstanding Invoices", 
   "options": "get_outstanding_invoices", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Link", 
+  "label": "Letter Head", 
+  "options": "Letter Head"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -351,6 +379,7 @@
   "label": "Pay To / Recd From", 
   "no_copy": 1, 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -386,6 +415,7 @@
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -399,6 +429,7 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -413,6 +444,7 @@
   "oldfieldtype": "Link", 
   "options": "Print Heading", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -436,7 +468,8 @@
   "no_copy": 1, 
   "oldfieldname": "amendment_date", 
   "oldfieldtype": "Date", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -450,11 +483,30 @@
   "read_only": 1
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts Manager"
+  "role": "Accounts User", 
+  "submit": 1, 
+  "write": 1
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts User"
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Auditor", 
+  "submit": 0, 
+  "write": 0
  }
 ]

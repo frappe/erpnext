@@ -41,16 +41,17 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	
 	setup: function() {
 		var me = this;
+		if (sys_defaults.auto_inventory_accounting) {
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 		
-		this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-		
-		this.frm.fields_dict["expense_account"].get_query = function() {
-			return {
-				"query": "accounts.utils.get_account_list", 
-				"filters": {
-					"is_pl_account": "Yes",
-					"debit_or_credit": "Debit",
-					"company": me.frm.doc.company
+			this.frm.fields_dict["expense_account"].get_query = function() {
+				return {
+					"query": "accounts.utils.get_account_list", 
+					"filters": {
+						"is_pl_account": "Yes",
+						"debit_or_credit": "Debit",
+						"company": me.frm.doc.company
+					}
 				}
 			}
 		}
@@ -67,7 +68,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 					attach the modified file.");
 			}
 		} else if(this.frm.doc.docstatus == 1) {
-			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify it's effect.");
+			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify its effect.");
 			this.show_stock_ledger();
 		} else {
 			this.frm.set_intro("");
