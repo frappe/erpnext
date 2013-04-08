@@ -362,13 +362,15 @@ cur_frm.set_query("income_account", "entries", function(doc) {
 })
 
 // expense account
-cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
-	return {
-		"query": "accounts.utils.get_account_list", 
-		"filters": {
-			"is_pl_account": "Yes",
-			"debit_or_credit": "Debit",
-			"company": doc.company
+if (sys_defaults.auto_inventory_accounting) {
+	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
+		return {
+			"query": "accounts.utils.get_account_list", 
+			"filters": {
+				"is_pl_account": "Yes",
+				"debit_or_credit": "Debit",
+				"company": doc.company
+			}
 		}
 	}
 }

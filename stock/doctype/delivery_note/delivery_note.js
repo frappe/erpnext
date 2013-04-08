@@ -310,33 +310,36 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.expense_account = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(d.expense_account) {
-		var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
+if (sys_defaults.auto_inventory_accounting) {
+
+	cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.expense_account) {
+			var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
+			for(var i = 0; i < cl.length; i++){
+				if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
+			}
+		}
+		refresh_field(cur_frm.cscript.fname);
+	}
+
+	// expense account
+	cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
+		return {
+			"query": "accounts.utils.get_account_list", 
+			"filters": {
+				"is_pl_account": "Yes",
+				"debit_or_credit": "Debit",
+				"company": doc.company
+			}
 		}
 	}
-	refresh_field(cur_frm.cscript.fname);
-}
 
-// expense account
-cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
-	return {
-		"query": "accounts.utils.get_account_list", 
-		"filters": {
-			"is_pl_account": "Yes",
-			"debit_or_credit": "Debit",
-			"company": doc.company
+	// cost center
+	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
+		return {
+			query: "accounts.utils.get_cost_center_list",
+			filters: { company_name: doc.company}
 		}
-	}
-}
-
-// cost center
-cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
-	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
 	}
 }
