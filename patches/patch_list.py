@@ -230,7 +230,6 @@ patch_list = [
 	"patches.march_2013.p11_update_attach_files",
 	"patches.march_2013.p12_set_item_tax_rate_in_json",
 	"patches.march_2013.p07_update_valuation_rate",
-	"patches.april_2013.p05_create_chart_of_accounts",
 	"patches.march_2013.p08_create_aii_accounts",
 	"patches.march_2013.p03_update_buying_amount",
 	"patches.april_2013.p01_update_serial_no_valuation_rate",
