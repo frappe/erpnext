@@ -34,10 +34,8 @@ def execute():
 				except Exception, e:
 					# if duplicate entry, then dont update
 					if e[0]!=1062:
-						print webnotes.getTraceback()
 						raise e
 		
-		print change_map
 		
 		changed_keys = change_map.keys()
 			
@@ -61,6 +59,5 @@ def execute():
 				
 			except Exception, e:
 				if e[0]!=1146:
-					print webnotes.getTraceback()
 					raise e
 	
