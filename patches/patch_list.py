@@ -240,4 +240,5 @@ patch_list = [
 	'execute:webnotes.reload_doc("selling", "Print Format", "Quotation Spartan") # 2013-04-02',
 	"patches.april_2013.p04_reverse_modules_list",
 	"execute:webnotes.delete_doc('Search Criteria', 'time_log_summary')"
+	"patches.april_2013.p04_update_role_in_pages",
 ]
