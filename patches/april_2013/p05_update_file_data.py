@@ -2,11 +2,13 @@ import webnotes, webnotes.utils, os
 from webnotes.modules.export_file import export_to_files
 
 def execute():
+	webnotes.reload_doc("core", "doctype", "file_data")
+	webontes.reset_perms("File Data")
+	
 	singles = webnotes.conn.sql_list("""select name from tabDocType
 		where ifnull(issingle,0)=1""")
 	for doctype in webnotes.conn.sql_list("""select parent from tabDocField where 
 		fieldname='file_list' and fieldtype='Text'"""):
-		print doctype
 		if doctype in singles:
 			doc = webnotes.doc(doctype, doctype)
 			update_for_doc(doctype, doc)
