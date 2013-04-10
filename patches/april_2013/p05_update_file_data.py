@@ -11,8 +11,9 @@ def execute():
 		fieldname='file_list' and fieldtype='Text'"""):
 		if doctype in singles:
 			doc = webnotes.doc(doctype, doctype)
-			update_for_doc(doctype, doc)
-			webnotes.conn.set_value(doctype, None, "file_list", None)
+			if doc.file_list:
+				update_for_doc(doctype, doc)
+				webnotes.conn.set_value(doctype, None, "file_list", None)
 		else:
 			try:
 				for doc in webnotes.conn.sql("""select name, file_list from `tab%s` where 
