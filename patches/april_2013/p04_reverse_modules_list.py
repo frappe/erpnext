@@ -6,6 +6,7 @@ def execute():
 	
 	ml = json.loads(webnotes.conn.get_global("modules_list") or "[]")
 	
-	webnotes.conn.set_global("hidden_modules", 
-		json.dumps(list(set(modules.keys()).difference(set(ml)))))
+	if ml:
+		webnotes.conn.set_global("hidden_modules", 
+			json.dumps(list(set(modules.keys()).difference(set(ml)))))
 	

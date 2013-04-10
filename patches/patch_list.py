@@ -241,4 +241,5 @@ patch_list = [
 	"patches.april_2013.p04_reverse_modules_list",
 	"execute:webnotes.delete_doc('Search Criteria', 'time_log_summary')",
 	"patches.april_2013.p04_update_role_in_pages",
+	"patches.april_2013.p05_fixes_in_reverse_modules",
 ]
