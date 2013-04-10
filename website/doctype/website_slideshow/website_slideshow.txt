@@ -1,84 +1,78 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-03-07 14:48:40", 
   "docstatus": 0, 
-  "creation": "2012-12-25 16:47:53", 
+  "modified": "2012-12-25 16:56:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-25 16:56:34"
+  "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
   "autoname": "field:slideshow_name", 
-  "name": "__common__", 
-  "module": "Website", 
+  "description": "Slideshow like display for the website", 
   "doctype": "DocType", 
-  "max_attachments": 10, 
   "document_type": "Transaction", 
-  "description": "Slideshow like display for the website"
+  "max_attachments": 10, 
+  "module": "Website", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Website Slideshow", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Website Slideshow", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Website Slideshow", 
-  "read": 1, 
-  "report": 1, 
   "cancel": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Website Slideshow", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "Website Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "Website Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Website Slideshow", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Website Slideshow"
  }, 
  {
-  "read_only": 0, 
   "doctype": "DocField", 
-  "label": "Slideshow Name", 
   "fieldname": "slideshow_name", 
   "fieldtype": "Data", 
+  "label": "Slideshow Name", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Slideshow Items", 
   "fieldname": "sb0", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Slideshow Items"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Slideshow Items", 
   "fieldname": "slideshow_items", 
   "fieldtype": "Table", 
+  "label": "Slideshow Items", 
   "options": "Website Slideshow Item"
  }, 
  {
-  "description": "This goes above the slideshow.", 
   "depends_on": "eval:!doc.__islocal", 
+  "description": "This goes above the slideshow.", 
   "doctype": "DocField", 
-  "label": "Header", 
   "fieldname": "header", 
-  "fieldtype": "Text Editor"
- }, 
- {
-  "doctype": "DocField", 
-  "label": "File List", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1
+  "fieldtype": "Text Editor", 
+  "label": "Header"
  }, 
  {
   "doctype": "DocPerm"

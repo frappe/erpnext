@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-07 11:55:11", 
+  "creation": "2013-03-25 16:01:34", 
   "docstatus": 0, 
   "modified": "2013-03-13 16:25:22", 
   "modified_by": "Administrator", 
@@ -226,15 +226,6 @@
   "hidden": 1, 
   "label": "Domain List", 
   "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "create": 1, 

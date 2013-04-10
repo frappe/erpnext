@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-07 13:16:13", 
+  "creation": "2013-04-09 10:18:10", 
   "docstatus": 0, 
   "modified": "2013-03-22 18:17:14", 
   "modified_by": "Administrator", 
@@ -30,9 +30,7 @@
   "parent": "Purchase Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -758,19 +756,69 @@
   "reqd": 0
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "role": "Purchase User", 
+  "submit": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Purchase User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
@@ -778,6 +826,8 @@
  {
   "doctype": "DocPerm", 
   "match": "supplier", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Supplier"
  }
 ]

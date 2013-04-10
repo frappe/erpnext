@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-30 12:49:46", 
+  "creation": "2013-03-07 14:48:29", 
   "docstatus": 0, 
   "modified": "2013-02-13 11:29:18", 
   "modified_by": "Administrator", 
@@ -24,17 +24,13 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "C-Form", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -158,15 +154,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
   "label": "Amended From", 
@@ -176,11 +163,28 @@
   "read_only": 1
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts User"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Accounts User", 
+  "write": 1
  }, 
  {
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts Manager"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "role": "All"
  }
 ]

@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-02-21 14:15:25", 
+  "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
   "modified": "2013-02-25 15:38:02", 
   "modified_by": "Administrator", 
@@ -329,15 +329,6 @@
   "fieldtype": "Link", 
   "label": "Select Print Heading", 
   "options": "Print Heading", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
   "print_hide": 1
  }, 
  {

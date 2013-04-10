@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-08 11:36:53", 
+  "creation": "2013-03-25 16:01:33", 
   "docstatus": 0, 
   "modified": "2013-03-14 11:57:20", 
   "modified_by": "Administrator", 
@@ -183,15 +183,6 @@
   "fieldtype": "Code", 
   "label": "Custom CSS", 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "create": 1, 
