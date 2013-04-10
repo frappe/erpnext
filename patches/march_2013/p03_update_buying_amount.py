@@ -7,7 +7,6 @@ def execute():
 
 	webnotes.conn.auto_commit_on_many_writes = True
 	for company in webnotes.conn.sql("select name from `tabCompany`"):
-		print company[0]
 		stock_ledger_entries = webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
 			voucher_detail_no, posting_date, posting_time, stock_value, 
 			warehouse, actual_qty as qty from `tabStock Ledger Entry` 
@@ -17,7 +16,6 @@ def execute():
 		
 		dn_list = webnotes.conn.sql("""select name from `tabDelivery Note` 
 			where docstatus < 2 and company = %s""", company[0])
-		print "Total Delivery Note: ", len(dn_list)
 		
 		for dn in dn_list:
 			dn = webnotes.get_obj("Delivery Note", dn[0], with_children = 1)
@@ -25,7 +23,6 @@ def execute():
 		
 		si_list = webnotes.conn.sql("""select name from `tabSales Invoice` 
 			where docstatus < 2	and company = %s""", company[0])
-		print "Total Sales Invoice: ", len(si_list)
 		for si in si_list:
 			si = webnotes.get_obj("Sales Invoice", si[0], with_children = 1)
 			si.set_buying_amount(stock_ledger_entries)

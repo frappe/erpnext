@@ -17,8 +17,4 @@ def execute():
 			if ((r["against_voucher_type"]=='Sales Invoice' and flt(r["outstanding"]) >= 0) \
 				or (r["against_voucher_type"]=="Purchase Invoice" and flt(["outstanding"]) <= 0)):
 				webnotes.conn.set_value(r["against_voucher_type"], r["against_voucher"], 
-					"outstanding_amount", abs(flt(r["outstanding"])))
-			else:
-				print r["against_voucher_type"], r["against_voucher"], \
-					outstanding[0][1], abs(flt(r["outstanding"]))
-		
+					"outstanding_amount", abs(flt(r["outstanding"])))		

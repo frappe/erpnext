@@ -231,7 +231,7 @@ patch_list = [
 	"patches.march_2013.p12_set_item_tax_rate_in_json",
 	"patches.march_2013.p07_update_valuation_rate",
 	"patches.march_2013.p08_create_aii_accounts",
-	"patches.march_2013.p03_update_buying_amount",
+	# "patches.march_2013.p03_update_buying_amount",
 	"patches.april_2013.p01_update_serial_no_valuation_rate",
 	"patches.april_2013.p02_add_country_and_currency",
 	"patches.april_2013.p03_fixes_for_lead_in_quotation",
@@ -243,4 +243,5 @@ patch_list = [
 	"patches.april_2013.p04_update_role_in_pages",
 	"patches.april_2013.p05_update_file_data",
 	"patches.april_2013.p06_update_file_size",
+	"patches.april_2013.p05_fixes_in_reverse_modules",
 ]

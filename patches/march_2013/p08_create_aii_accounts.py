@@ -56,8 +56,8 @@ def add_accounts(accounts_to_add, check_fn=None):
 			where company=%s and ifnull(parent_account, '')=''""", company)[0][0]
 		
 		if count > 4:
-			print "Company", company, \
-				"has more than 4 root accounts. cannot apply patch to this company."
+			webnotes.errprint("Company" + company + 
+				"has more than 4 root accounts. cannot apply patch to this company.")
 			continue
 		
 		for account_name, parent_account_name, group_or_ledger, account_type in accounts_to_add:
@@ -82,7 +82,7 @@ def add_aii_cost_center():
 				{"parent_cost_center['']": '', "company_name": company})
 				
 			if not parent_cost_center:
-				print "Company", company, "does not have a root cost center"
+				webnotes.errprint("Company " + company + "does not have a root cost center")
 				continue
 			
 			cc = webnotes.bean({

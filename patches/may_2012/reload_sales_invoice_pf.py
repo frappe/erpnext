@@ -12,6 +12,5 @@ def execute():
 					'Sales Invoice Spartan',
 					'Sales Invoice Modern'
 				]:
-			print r.get('name')
 			webnotes.modules.reload_doc(r.get('module'), 'Print Format', r.get('name'))		
 			
