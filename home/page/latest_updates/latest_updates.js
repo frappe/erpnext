@@ -1,4 +1,5 @@
 erpnext.updates = [
+	["10th April", ["Redesigned File Uploads and added File Manager in Setup"]],
 	["27th March", ["Rename multiple items together. Go to Setup > Rename Tool"]],
 	["26th March", ["Added project to Stock Ledger and Balance",
 		"Added Default Cash Account in Company."]],
