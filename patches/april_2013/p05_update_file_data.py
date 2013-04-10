@@ -3,7 +3,7 @@ from webnotes.modules.export_file import export_to_files
 
 def execute():
 	webnotes.reload_doc("core", "doctype", "file_data")
-	webontes.reset_perms("File Data")
+	webnotes.reset_perms("File Data")
 	
 	singles = webnotes.conn.sql_list("""select name from tabDocType
 		where ifnull(issingle,0)=1""")
