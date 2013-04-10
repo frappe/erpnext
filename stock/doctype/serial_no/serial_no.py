@@ -79,7 +79,6 @@ class DocType(StockController):
 		values = [{
 			'item_code'				: self.doc.item_code,
 			'warehouse'				: self.doc.warehouse,
-			'transaction_date'		: nowdate(),
 			'posting_date'			: self.doc.purchase_date or (self.doc.creation and self.doc.creation.split(' ')[0]) or nowdate(),
 			'posting_time'			: self.doc.purchase_time or '00:00',
 			'voucher_type'			: 'Serial No',
