@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-28 17:07:01", 
+  "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-03-26 14:05:01", 
+  "modified": "2013-04-10 11:49:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,13 +23,18 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Lead", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "submit": 0
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -445,69 +450,13 @@
   "label": "Blog Subscriber"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Guest", 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales User", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales Manager", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
   "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Sales Manager", 
-  "write": 1
+  "role": "Sales Manager"
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All"
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "System Manager", 
-  "write": 1
+  "role": "Sales User"
  }
 ]
