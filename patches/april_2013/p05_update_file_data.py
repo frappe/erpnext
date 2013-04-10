@@ -32,7 +32,11 @@ def update_for_doc(doctype, doc):
 		if not filedata:
 			continue
 			
-		filename, fileid = filedata.split(",")
+		filedata = filedata.split(",")
+		if len(filedata)==2:
+			filename, fileid = filedata[0], filedata[1] 
+		else:
+			continue
 		
 		exists = True
 		if not (filename.startswith("http://") or filename.startswith("https://")):
