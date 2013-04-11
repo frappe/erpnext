@@ -239,8 +239,8 @@ class DocType(DocListController):
 			vals = webnotes.conn.get_value("Item", self.doc.name, 
 				["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
 			
-			if vals and (vals.has_serial_no != self.doc.has_serial_no or 
-				vals.is_stock_item != self.doc.is_stock_item or 
+			if vals and ((self.doc.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
+				vals.has_serial_no != self.doc.has_serial_no or 
 				vals.valuation_method != self.doc.valuation_method):
 					if self.check_if_sle_exists():
 						webnotes.msgprint(_("As there are existing stock transactions for this \
