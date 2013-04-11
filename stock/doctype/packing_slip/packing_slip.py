@@ -94,12 +94,10 @@ class DocType:
 			* Item Quantity dict of current packing slip doc
 			* No. of Cases of this packing slip
 		"""
-		item_codes = ", ".join([('"' + d.item_code + '"') for d in
-			self.doclist])
 		
 		items = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
 		
-		if not item_codes: webnotes.msgprint("No Items to Pack",
+		if not items: webnotes.msgprint("No Items to Pack",
 				raise_exception=1)
 		
 		# gets item code, qty per item code, latest packed qty per item code and stock uom

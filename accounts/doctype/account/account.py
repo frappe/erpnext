@@ -69,11 +69,13 @@ class DocType:
 				raise_exception=1)
 	
 	def validate_duplicate_account(self):
-		if (self.doc.fields.get('__islocal') or not self.doc.name) and \
-				sql("""select name from tabAccount where account_name=%s and company=%s""", 
-					(self.doc.account_name, self.doc.company)):
-			msgprint("Account Name: %s already exists, please rename" 
-				% self.doc.account_name, raise_exception=1)
+		
+		if self.doc.fields.get('__islocal') or not self.doc.name:
+			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+			if sql("""select name from tabAccount where name=%s""", 
+				(self.doc.account_name + " - " + company_abbr)):
+					msgprint("Account Name: %s already exists, please rename" 
+						% self.doc.account_name, raise_exception=1)
 				
 	def validate_root_details(self):
 		#does not exists parent
