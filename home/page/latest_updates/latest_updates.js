@@ -1,4 +1,5 @@
 erpnext.updates = [
+	["12th April", ["Employee: List of Leave Approvers who can approve the Employee's Leave Applications"]],
 	["27th March", ["Rename multiple items together. Go to Setup > Rename Tool"]],
 	["26th March", ["Added project to Stock Ledger and Balance",
 		"Added Default Cash Account in Company."]],
