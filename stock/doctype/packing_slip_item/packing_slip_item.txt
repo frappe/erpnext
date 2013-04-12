@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:59", 
+  "creation": "2013-04-08 13:10:16", 
   "docstatus": 0, 
-  "modified": "2013-04-05 16:06:40", 
+  "modified": "2013-04-11 15:06:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -70,7 +70,7 @@
   "fieldtype": "Float", 
   "label": "Net Weight", 
   "print_width": "100px", 
-  "read_only": 1, 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -80,7 +80,7 @@
   "label": "Weight UOM", 
   "options": "UOM", 
   "print_width": "100px", 
-  "read_only": 1, 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -95,6 +95,7 @@
   "fieldname": "dn_detail", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "DN Detail"
+  "label": "DN Detail", 
+  "read_only": 0
  }
 ]

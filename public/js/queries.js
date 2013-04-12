@@ -133,10 +133,8 @@ erpnext.queries.item = function(opts) {
 		WHERE tabItem.docstatus!=2 \
 		AND (ifnull(`tabItem`.`end_of_life`,"") in ("", "0000-00-00") \
 			OR `tabItem`.`end_of_life` > NOW()) \
-		AND tabItem.%(key)s LIKE "%s" ' + (conditions 
-			? (" AND " + conditions.join(" AND "))
-			: "")
-		+ " LIMIT 50"
+		AND (tabItem.%(key)s LIKE \"%s\" OR tabItem.item_name LIKE \"%%%s\")' + 
+			(conditions ? (" AND " + conditions.join(" AND ")) : "") + " LIMIT 50"
 }
 
 erpnext.queries.item_std = function() {
