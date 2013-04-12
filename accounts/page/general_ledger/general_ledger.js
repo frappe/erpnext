@@ -307,10 +307,10 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 
 	make_account_by_name: function() {
 		this.account_by_name = this.make_name_map(wn.report_dump.data["Account"]);
-		this.make_voucher_acconuts_map();
+		this.make_voucher_accounts_map();
 	},
 	
-	make_voucher_acconuts_map: function() {
+	make_voucher_accounts_map: function() {
 		this.voucher_accounts = {};
 		var data = wn.report_dump.data["GL Entry"];
 		for(var i=0, j=data.length; i<j; i++) {
