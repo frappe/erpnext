@@ -39,7 +39,8 @@ class DocType(DocListController):
 		# webpage updates
 		self.update_website()
 			
-		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
+		bin = sql("select stock_uom from `tabBin` where item_code = %s", 
+			self.doc.item_code)
 		if bin and cstr(bin[0][0]) and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
 			raise Exception
@@ -149,7 +150,7 @@ class DocType(DocListController):
 
 	def check_for_active_boms(self, field_label):
 		if field_label in ['Is Active', 'Is Purchase Item']:
-			bom_mat = sql("select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 where t1.item_code ='%s' and (t1.bom_no = '' or t1.bom_no is NULL) and t2.name = t1.parent and t2.is_active = 1 and t2.docstatus = 1 and t1.docstatus =1 " % self.doc.name )
+			bom_mat = sql("select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 where t1.item_code =%s and (t1.bom_no = '' or t1.bom_no is NULL) and t2.name = t1.parent and t2.is_active = 1 and t2.docstatus = 1 and t1.docstatus =1 ", self.doc.name)
 			if bom_mat and bom_mat[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
@@ -157,7 +158,7 @@ class DocType(DocListController):
 				and self.doc.is_sub_contracted_item != 'Yes') 
 				or (field_label == 'Is Sub Contracted Item' 
 				and self.doc.is_manufactured_item != 'Yes')):
-			bom = sql("select name from `tabBOM` where item = '%s' and is_active = 1" % cstr(self.doc.name))
+			bom = sql("select name from `tabBOM` where item = %s and is_active = 1", self.doc.name)
 			if bom and bom[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
