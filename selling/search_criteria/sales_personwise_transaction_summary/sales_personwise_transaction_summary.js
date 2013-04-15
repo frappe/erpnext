@@ -39,10 +39,7 @@ report.get_query = function() {
   sp = this.get_filter('Sales Person', 'Sales Person').get_value();
 
   date_fld = 'transaction_date';
-  if(based_on == 'Sales Invoice') {
-    based_on = 'Sales Invoice';
-    date_fld = 'posting_date';
-  }
+  if(based_on == 'Sales Invoice' || based_on == "Delivery Note") date_fld = 'posting_date';
 
   sp_cond = '';
   if (from_date) sp_cond += ' AND t1.' + date_fld + '>= "' + from_date + '"';
