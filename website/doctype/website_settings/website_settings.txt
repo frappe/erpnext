@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 16:01:34", 
   "docstatus": 0, 
-  "modified": "2013-03-13 16:25:22", 
+  "modified": "2013-04-12 10:30:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,7 +50,7 @@
   "fieldtype": "Link", 
   "label": "Home Page", 
   "options": "Web Page", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "description": "The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.", 
