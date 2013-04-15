@@ -61,7 +61,8 @@ def add_accounts(accounts_to_add, check_fn=None):
 			continue
 		
 		for account_name, parent_account_name, group_or_ledger, account_type in accounts_to_add:
-			if not webnotes.conn.exists("Account", "%s - %s" % (account_name, abbr)):
+			if not webnotes.conn.sql("""select name from `tabAccount` where account_name = %s 
+					and company = %s""", (account_name, company)):
 				parent_account = "%s - %s" % (parent_account_name, abbr)
 				if check_fn:
 					parent_account = check_fn(parent_account, company)
@@ -77,7 +78,8 @@ def add_accounts(accounts_to_add, check_fn=None):
 				
 def add_aii_cost_center():
 	for company, abbr in webnotes.conn.sql("""select name, abbr from `tabCompany`"""):
-		if not webnotes.conn.exists("Cost Center", "Auto Inventory Accounting - %s" % abbr):
+		if not webnotes.conn.sql("""select name from `tabCost Center` where cost_center_name = 
+				'Auto Inventory Accounting' and company_name = %s""", company):
 			parent_cost_center = webnotes.conn.get_value("Cost Center", 
 				{"parent_cost_center['']": '', "company_name": company})
 				
