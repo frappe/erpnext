@@ -185,17 +185,6 @@ class DocType:
 
 
 	def set_item_details(self, row):
-		res = webnotes.conn.sql("""SELECT item_name, SUM(IFNULL(qty, 0)) as total_qty,
-			IFNULL(packed_qty,	0) as packed_qty, stock_uom
-			FROM `tabDelivery Note Item`
-			WHERE parent=%s AND item_code=%s GROUP BY item_code""",
-			(self.doc.delivery_note, row.item_code), as_dict=1)
-
-		if res and len(res)>0:
-			qty = res[0]['total_qty'] - res[0]['packed_qty']
-			if not row.qty:
-				row.qty = qty >= 0 and qty or 0
-
 		res = webnotes.conn.sql("""SELECT net_weight, weight_uom FROM `tabItem`
 			WHERE name=%s""", row.item_code, as_dict=1)
 			
