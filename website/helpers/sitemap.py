@@ -14,25 +14,40 @@ def generate(domain):
 	import urllib, os
 	import webnotes
 	import webnotes.webutils
+	from webnotes.utils import nowdate
 
 	# settings
-	max_doctypes = 10
 	max_items = 1000
+	count = 0
 	
 	site_map = ''
-	page_list = []
-	
 	if domain:
-		# list of all pages in web cache
-		for doctype in webnotes.webutils.page_map:
-			d = webnotes.webutils.page_map[doctype];
+		today = nowdate()
+		
+		# generated pages
+		for doctype, opts in webnotes.webutils.get_generators().items():
 			pages = webnotes.conn.sql("""select page_name, `modified`
 				from `tab%s` where ifnull(%s,0)=1
-				order by modified desc""" % (doctype, d.condition_field))
+				order by modified desc""" % (doctype, opts.get("condition_field")))
 		
 			for p in pages:
+				if count >= max_items: break
 				page_url = os.path.join(domain, urllib.quote(p[0]))
 				modified = p[1].strftime('%Y-%m-%d')
 				site_map += link_xml % (page_url, modified)
+				count += 1
+				
+			if count >= max_items: break
+		
+		# standard pages
+		for page, opts in webnotes.get_config()["web"]["pages"].items():
+			if "no_cache" in opts:
+				continue
+			
+			if count >= max_items: break
+			page_url = os.path.join(domain, urllib.quote(page))
+			modified = today
+			site_map += link_xml % (page_url, modified)
+			count += 1
 
-		return frame_xml % site_map
+	return frame_xml % site_map
