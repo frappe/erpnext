@@ -114,7 +114,6 @@ class DocType:
 				except webnotes.DuplicateEntryError, e:
 					# already exists
 					pass
-			break
 			
 		profile_wrapper.save()
 		
