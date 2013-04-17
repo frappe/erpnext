@@ -22,12 +22,10 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
-
 from webnotes.model.controller import DocListController
 class DocType(DocListController):
 	def get_tax_rate(self, tax_type):
-		rate = sql("select tax_rate from tabAccount where name = %s", tax_type)
+		rate = webnotes.conn.sql("select tax_rate from tabAccount where name = %s", tax_type)
 		ret = {
 			'tax_rate'	:	rate and flt(rate[0][0]) or 0
 		}
@@ -39,7 +37,7 @@ class DocType(DocListController):
 		# webpage updates
 		self.update_website()
 			
-		bin = sql("select stock_uom from `tabBin` where item_code = %s", 
+		bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
 			self.doc.item_code)
 		if bin and cstr(bin[0][0]) and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
@@ -108,8 +106,8 @@ class DocType(DocListController):
 
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):
-		sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
-		sql("""delete from `tabStock Ledger Entry` 
+		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
 			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 		
 		if self.doc.page_name:
@@ -150,7 +148,7 @@ class DocType(DocListController):
 
 	def check_for_active_boms(self, field_label):
 		if field_label in ['Is Active', 'Is Purchase Item']:
-			bom_mat = sql("select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 where t1.item_code =%s and (t1.bom_no = '' or t1.bom_no is NULL) and t2.name = t1.parent and t2.is_active = 1 and t2.docstatus = 1 and t1.docstatus =1 ", self.doc.name)
+			bom_mat = webnotes.conn.sql("select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 where t1.item_code =%s and (t1.bom_no = '' or t1.bom_no is NULL) and t2.name = t1.parent and t2.is_active = 1 and t2.docstatus = 1 and t1.docstatus =1 ", self.doc.name)
 			if bom_mat and bom_mat[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
@@ -158,25 +156,27 @@ class DocType(DocListController):
 				and self.doc.is_sub_contracted_item != 'Yes') 
 				or (field_label == 'Is Sub Contracted Item' 
 				and self.doc.is_manufactured_item != 'Yes')):
-			bom = sql("select name from `tabBOM` where item = %s and is_active = 1", self.doc.name)
+			bom = webnotes.conn.sql("select name from `tabBOM` where item = %s and is_active = 1",
+				(self.doc.name,))
 			if bom and bom[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
 				
 	def validate_barcode(self):
 		if self.doc.barcode:
-			duplicate = sql("select name from tabItem where barcode = %s and name != %s", (self.doc.barcode, self.doc.name))
+			duplicate = webnotes.conn.sql("select name from tabItem where barcode = %s and name != %s", (self.doc.barcode, self.doc.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % (self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 
 	def validate(self):
-		fl = {'is_manufactured_item'	:'Allow Bill of Materials',
+		if not cint(self.doc.fields.get("__islocal")):
+			fl = {'is_manufactured_item'	:'Allow Bill of Materials',
 					'is_sub_contracted_item':'Is Sub Contracted Item',
 					'is_purchase_item'			:'Is Purchase Item',
 					'is_pro_applicable'		 :'Allow Production Order'}
-		for d in fl:
-			if cstr(self.doc.fields.get(d)) != 'Yes':
-				self.check_for_active_boms(fl[d])
+			for d in fl:
+				if cstr(self.doc.fields.get(d)) != 'Yes':
+					self.check_for_active_boms(fl[d])
 		self.check_ref_rate_detail()
 		self.fill_customer_code()
 		self.check_item_tax()
@@ -198,7 +198,7 @@ class DocType(DocListController):
 								
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
-			existing_qty = sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
+			existing_qty = webnotes.conn.sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
 			for e in existing_qty:
 				msgprint("%s Units exist in Warehouse %s, which is not an Asset Warehouse." % (e[1],e[0]))
 			if existing_qty:
@@ -207,7 +207,7 @@ class DocType(DocListController):
 				raise Exception
 
 	def get_file_details(self, arg = ''):
-		file = sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
+		file = webnotes.conn.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
 
 		ret = {
 			'file_group'	:	file and file[0]['file_group'] or '',
@@ -217,11 +217,11 @@ class DocType(DocListController):
 		
 
 	def check_if_sle_exists(self):
-		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
+		sle = webnotes.conn.sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
 	def on_rename(self,newdn,olddn):
-		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
+		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
