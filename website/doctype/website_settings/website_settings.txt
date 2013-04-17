@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:55:11", 
+  "creation": "2013-03-26 06:51:18", 
   "docstatus": 0, 
-  "modified": "2013-03-13 16:25:22", 
+  "modified": "2013-04-17 11:51:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,7 +50,7 @@
   "fieldtype": "Link", 
   "label": "Home Page", 
   "options": "Web Page", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "description": "The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.", 
@@ -235,13 +235,6 @@
   "label": "File List", 
   "no_copy": 1, 
   "print_hide": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
  }, 
  {
   "create": 1, 
