@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 16:01:34", 
+  "creation": "2013-03-26 06:51:18", 
   "docstatus": 0, 
-  "modified": "2013-04-12 10:30:18", 
+  "modified": "2013-04-17 11:51:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -226,13 +226,6 @@
   "hidden": 1, 
   "label": "Domain List", 
   "reqd": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
  }, 
  {
   "create": 1, 
