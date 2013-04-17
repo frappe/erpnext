@@ -36,7 +36,8 @@ def boot_session(bootinfo):
 		for key in ['max_users', 'expires_on', 'max_space', 'status', 'developer_mode']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
-		bootinfo['docs'] += webnotes.conn.sql("select name, default_currency from `tabCompany`", 
+		bootinfo['docs'] += webnotes.conn.sql("""select name, default_currency, cost_center,
+			cost_center as 'cost_center_other_charges' from `tabCompany`""", 
 			as_dict=1, update={"doctype":":Company"})
 			
 def get_letter_heads():
