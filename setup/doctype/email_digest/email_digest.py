@@ -94,8 +94,7 @@ class DocType(DocListController):
 				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
 					common_msg)
 				from webnotes.utils.email_lib import sendmail
-				sendmail(recipients=user_id, subject=(self.doc.frequency + " Digest"),
-					sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
+				sendmail(recipients=user_id, subject="[ERPNext] " + (self.doc.frequency + " Digest"),
 					msg=msg_for_this_receipient)
 			
 	def get_digest_msg(self):

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-08 15:36:47", 
+  "creation": "2013-03-26 06:51:12", 
   "docstatus": 0, 
-  "modified": "2013-03-22 16:45:28", 
+  "modified": "2013-04-17 14:05:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,6 +58,7 @@
   "reqd": 1
  }, 
  {
+  "default": ":Company", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 

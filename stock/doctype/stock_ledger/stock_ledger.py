@@ -84,7 +84,6 @@ class DocType:
 		item_details = webnotes.conn.sql("""select item_group, warranty_period 
 			from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or 
 			end_of_life = '0000-00-00' or end_of_life > now()) """ %(d.item_code), as_dict=1)
-		webnotes.errprint([d.item_code, d.valuation_rate])
 		
 		s.purchase_document_type	=	obj.doc.doctype
 		s.purchase_document_no		=	obj.doc.name
