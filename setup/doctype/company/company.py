@@ -153,7 +153,7 @@ class DocType:
 		for d in acc_list_common:
 			self.add_acc(d)
 
-		country = sql("select value from tabSingles where field = 'country' and doctype = 'Control Panel'")
+		country = webnotes.conn.sql("select value from tabSingles where field = 'country' and doctype = 'Control Panel'")
 		country = country and cstr(country[0][0]) or ''
 
 		# load taxes (only for India)
@@ -265,26 +265,31 @@ class DocType:
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		rec = sql("SELECT name from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'No' and company = %s", self.doc.name)
+		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'No' and company = %s", self.doc.name)
 		if not rec:
 			# delete gl entry
-			sql("delete from `tabGL Entry` where company = %s", self.doc.name)
+			webnotes.conn.sql("delete from `tabGL Entry` where company = %s", self.doc.name)
 
 			#delete tabAccount
-			sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
+			webnotes.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
 			
 			#delete cost center child table - budget detail
-			sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company_name = %s", self.doc.name)
+			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company_name = %s", self.doc.name)
 			#delete cost center
-			sql("delete from `tabCost Center` WHERE company_name = %s order by lft desc, rgt desc", self.doc.name)
+			webnotes.conn.sql("delete from `tabCost Center` WHERE company_name = %s order by lft desc, rgt desc", self.doc.name)
 			
-			webnotes.defaults.clear_default("company", value=self.doc.name)
+		webnotes.defaults.clear_default("company", value=self.doc.name)
 			
-			#update value as blank for tabSingles Global Defaults
-			sql("update `tabSingles` set value = '' where doctype='Global Defaults' and field = 'default_company' and value = %s", self.doc.name)
-
+		webnotes.conn.sql("""update `tabSingles` set value=""
+			where doctype='Global Defaults' and field='default_company' 
+			and value=%s""", self.doc.name)
+			
 	def on_rename(self,newdn,olddn):
-		sql("update `tabCompany` set company_name = '%s' where name = '%s'" %(newdn,olddn))	
-		sql("update `tabSingles` set value = %s where doctype='Global Defaults' and field = 'default_company' and value = %s", (newdn, olddn))	
-		if webnotes.defaults.get_global_default('company') == olddn:
-			webnotes.defaults.set_global_default('company', newdn)
+		webnotes.conn.sql("""update `tabCompany` set company_name=%s
+			where name=%s""", (newdn, olddn))
+		
+		webnotes.conn.sql("""update `tabSingles` set value=%s
+			where doctype='Global Defaults' and field='default_company' 
+			and value=%s""", (newdn, olddn))
+		
+		webnotes.defaults.clear_default("company", value=olddn)

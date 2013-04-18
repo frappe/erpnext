@@ -56,12 +56,13 @@ def add_accounts(accounts_to_add, check_fn=None):
 			where company=%s and ifnull(parent_account, '')=''""", company)[0][0]
 		
 		if count > 4:
-			print "Company", company, \
-				"has more than 4 root accounts. cannot apply patch to this company."
+			webnotes.errprint("Company" + company + 
+				"has more than 4 root accounts. cannot apply patch to this company.")
 			continue
 		
 		for account_name, parent_account_name, group_or_ledger, account_type in accounts_to_add:
-			if not webnotes.conn.exists("Account", "%s - %s" % (account_name, abbr)):
+			if not webnotes.conn.sql("""select name from `tabAccount` where account_name = %s 
+					and company = %s""", (account_name, company)):
 				parent_account = "%s - %s" % (parent_account_name, abbr)
 				if check_fn:
 					parent_account = check_fn(parent_account, company)
@@ -77,12 +78,13 @@ def add_accounts(accounts_to_add, check_fn=None):
 				
 def add_aii_cost_center():
 	for company, abbr in webnotes.conn.sql("""select name, abbr from `tabCompany`"""):
-		if not webnotes.conn.exists("Cost Center", "Auto Inventory Accounting - %s" % abbr):
+		if not webnotes.conn.sql("""select name from `tabCost Center` where cost_center_name = 
+				'Auto Inventory Accounting' and company_name = %s""", company):
 			parent_cost_center = webnotes.conn.get_value("Cost Center", 
 				{"parent_cost_center['']": '', "company_name": company})
 				
 			if not parent_cost_center:
-				print "Company", company, "does not have a root cost center"
+				webnotes.errprint("Company " + company + "does not have a root cost center")
 				continue
 			
 			cc = webnotes.bean({

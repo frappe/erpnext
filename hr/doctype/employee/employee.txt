@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:17", 
+  "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-02-08 13:07:25", 
+  "modified": "2013-04-12 07:16:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -323,15 +323,6 @@
   "reqd": 0
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "reports_to", 
-  "fieldtype": "Link", 
-  "label": "Reports to", 
-  "oldfieldname": "reports_to", 
-  "oldfieldtype": "Link", 
-  "options": "Employee"
- }, 
- {
   "description": "Provide email id registered in company", 
   "doctype": "DocField", 
   "fieldname": "company_email", 
@@ -341,6 +332,14 @@
   "oldfieldname": "company_email", 
   "oldfieldtype": "Data", 
   "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "notice_number_of_days", 
+  "fieldtype": "Int", 
+  "label": "Notice - Number of Days", 
+  "oldfieldname": "notice_number_of_days", 
+  "oldfieldtype": "Int"
  }, 
  {
   "doctype": "DocField", 
@@ -407,6 +406,29 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "organization_profile", 
+  "fieldtype": "Section Break", 
+  "label": "Organization Profile"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reports_to", 
+  "fieldtype": "Link", 
+  "label": "Reports to", 
+  "oldfieldname": "reports_to", 
+  "oldfieldtype": "Link", 
+  "options": "Employee"
+ }, 
+ {
+  "description": "The first Leave Approver in the list will be set as the default Leave Approver", 
+  "doctype": "DocField", 
+  "fieldname": "employee_leave_approvers", 
+  "fieldtype": "Table", 
+  "label": "Leave Approvers", 
+  "options": "Employee Leave Approver"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "contact_details", 
   "fieldtype": "Section Break", 
   "label": "Contact Details"
@@ -428,14 +450,6 @@
   "fieldname": "personal_email", 
   "fieldtype": "Data", 
   "label": "Personal Email"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "notice_number_of_days", 
-  "fieldtype": "Int", 
-  "label": "Notice - Number of Days", 
-  "oldfieldname": "notice_number_of_days", 
-  "oldfieldtype": "Int"
  }, 
  {
   "doctype": "DocField", 

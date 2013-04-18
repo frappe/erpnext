@@ -12,5 +12,4 @@ def execute():
 					where voucher_type = %s and voucher_no = %s""", 
 					(entry['voucher_type'], entry['voucher_no']))
 		except Exception, e:
-			print entry
-			print e			
+			pass

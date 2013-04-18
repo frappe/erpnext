@@ -18,11 +18,13 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 
-from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form
+from webnotes.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, \
+	comma_or, get_fullname
 from webnotes import msgprint
 
-class LeaveDayBlockedError(Exception): pass
-class OverlapError(Exception): pass
+class LeaveDayBlockedError(webnotes.ValidationError): pass
+class OverlapError(webnotes.ValidationError): pass
+class InvalidLeaveApproverError(webnotes.ValidationError): pass
 	
 from webnotes.model.controller import DocListController
 class DocType(DocListController):
@@ -39,6 +41,7 @@ class DocType(DocListController):
 		self.validate_max_days()
 		self.show_block_day_warning()
 		self.validate_block_days()
+		self.validate_leave_approver()
 		
 	def on_update(self):
 		if (not self.previous_doc and self.doc.leave_approver) or (self.previous_doc and \
@@ -156,6 +159,21 @@ class DocType(DocListController):
 			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
 			raise Exception
 			
+	def validate_leave_approver(self):
+		employee = webnotes.bean("Employee", self.doc.employee)
+		leave_approvers = [l.leave_approver for l in 
+			employee.doclist.get({"parentfield": "employee_leave_approvers"})]
+
+		if len(leave_approvers) and self.doc.leave_approver not in leave_approvers:
+			msgprint(("[" + _("For Employee") + ' "' + self.doc.employee + '"] ' 
+				+ _("Leave Approver can be one of") + ": "
+				+ comma_or(leave_approvers)), raise_exception=InvalidLeaveApproverError)
+		
+		elif self.doc.leave_approver and not webnotes.conn.sql("""select name from `tabUserRole` 
+			where parent=%s and role='Leave Approver'""", self.doc.leave_approver):
+				msgprint(get_fullname(self.doc.leave_approver) + ": " \
+					+ _("does not have role 'Leave Approver'"), raise_exception=InvalidLeaveApproverError)
+			
 	def notify_employee(self, status):
 		employee = webnotes.doc("Employee", self.doc.employee)
 		if not employee.user_id:
@@ -220,15 +238,6 @@ def get_leave_balance(employee, leave_type, fiscal_year):
 	
 	ret = {'leave_balance': leave_all - leave_app}
 	return ret
-
-@webnotes.whitelist()
-def get_approver_list():
-	roles = [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
-		where role='Leave Approver'""")]
-	if not roles:
-		webnotes.msgprint("No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.")
-		
-	return roles
 
 def is_lwp(leave_type):
 	lwp = webnotes.conn.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)

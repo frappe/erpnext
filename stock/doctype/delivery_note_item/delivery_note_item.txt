@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-26 11:03:09", 
   "docstatus": 0, 
-  "modified": "2013-03-28 15:42:41", 
+  "modified": "2013-04-17 17:20:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -331,17 +331,6 @@
   "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
- }, 
- {
-  "allow_on_submit": 1, 
-  "default": "0", 
-  "doctype": "DocField", 
-  "fieldname": "packed_qty", 
-  "fieldtype": "Float", 
-  "label": "Packed Quantity", 
-  "no_copy": 1, 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

@@ -52,12 +52,3 @@ class DocType:
 		if not getlist(self.doclist, 'expense_voucher_details'):
 			msgprint("Please add expense voucher details")
 			raise Exception
-		
-@webnotes.whitelist()
-def get_approver_list():
-	roles = [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
-		where role='Expense Approver'""")]
-	if not roles:
-		webnotes.msgprint("No Expense Approvers. Please assign 'Expense Approver' \
-			Role to atleast one user.")
-	return roles

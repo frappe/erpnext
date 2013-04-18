@@ -29,7 +29,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 	}
 
 	cur_frm.call({
-		method:"get_approver_list",
+		method:"hr.utils.get_expense_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("exp_approver", "options", r.message);
 		}

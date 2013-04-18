@@ -24,7 +24,6 @@ def handle_custom_fields():
 		* Create property setter entry of previous field
 		* Remove custom fields from tabDocField
 	"""
-	print "in handle custom fields"
 	cf = get_cf()
 	assign_idx(cf)
 	create_prev_field_prop_setter(cf)
@@ -120,7 +119,6 @@ def create_file_list():
 		webnotes.clear_cache(doctype=obj.doc.name)
 
 def change_to_decimal():
-	print "in change to decimal"
 	webnotes.conn.commit()
 	tables = webnotes.conn.sql("SHOW TABLES")
 	alter_tables_list = []

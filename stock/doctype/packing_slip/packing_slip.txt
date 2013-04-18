@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 18:50:31", 
+  "creation": "2013-04-11 15:32:24", 
   "docstatus": 0, 
-  "modified": "2013-04-05 15:40:59", 
+  "modified": "2013-04-16 17:33:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -129,6 +129,12 @@
   "fieldtype": "Section Break", 
   "label": "Package Item Details", 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_items", 
+  "fieldtype": "Button", 
+  "label": "Get Items"
  }, 
  {
   "doctype": "DocField", 

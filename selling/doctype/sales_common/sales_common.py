@@ -125,8 +125,7 @@ class DocType(TransactionBase):
 	def get_item_details(self, args, obj):
 		import json
 		if not obj.doc.price_list_name:
-			msgprint("Please Select Price List before selecting Items")
-			raise Exception
+			msgprint("Please Select Price List before selecting Items", raise_exception=True)
 		item = webnotes.conn.sql("""select description, item_name, brand, item_group, stock_uom, 
 			default_warehouse, default_income_account, default_sales_cost_center, 
 			purchase_account, description_html, barcode from `tabItem` 

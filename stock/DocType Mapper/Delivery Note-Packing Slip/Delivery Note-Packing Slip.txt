@@ -2,7 +2,7 @@
  {
   "creation": "2012-02-02 11:50:33", 
   "docstatus": 0, 
-  "modified": "2013-04-05 16:08:22", 
+  "modified": "2013-04-16 12:26:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -59,6 +59,13 @@
   "map": "Yes", 
   "match_id": 1, 
   "to_field": "dn_detail"
+ }, 
+ {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval: flt(obj.qty) - flt(obj.packed_qty)", 
+  "map": "Yes", 
+  "match_id": 1, 
+  "to_field": "qty"
  }, 
  {
   "doctype": "Table Mapper Detail", 

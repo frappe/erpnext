@@ -23,7 +23,6 @@ def repost_reserved_qty():
 	i = 0
 	for d in bins:
 		i += 1
-		print i
 		reserved_qty = webnotes.conn.sql("""
 			select 
 				sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
@@ -54,7 +53,6 @@ def repost_reserved_qty():
 		""", (d[0], d[1]))
 
 		if flt(d[3]) != flt(reserved_qty[0][0]):
-			print d[3], reserved_qty[0][0]
 			webnotes.conn.sql("""
 				update `tabBin` set reserved_qty = %s where name = %s
 			""", (reserved_qty and reserved_qty[0][0] or 0, d[2]))
@@ -77,7 +75,6 @@ def cleanup_wrong_sle():
 		)
 	""")
 	if sle:
-		print sle
 		for d in sle:
 			webnotes.conn.sql("update `tabStock Ledger Entry` set is_cancelled = 'Yes' where name = %s", d[3])
 			create_comment(d[3])
