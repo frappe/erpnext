@@ -1,5 +1,4 @@
 import webnotes, webnotes.utils, os
-from webnotes.modules.export_file import export_to_files
 
 def execute():
 	webnotes.reload_doc("core", "doctype", "file_data")
@@ -26,7 +25,6 @@ def execute():
 		
 		webnotes.conn.sql("""delete from tabDocField where fieldname='file_list'
 				and parent=%s""", doctype)
-		export_to_files([["DocType", doctype]])
 
 def update_for_doc(doctype, doc):
 	for filedata in doc.file_list.split("\n"):
