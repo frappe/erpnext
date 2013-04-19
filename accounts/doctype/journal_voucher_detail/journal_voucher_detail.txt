@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:23", 
+  "modified": "2013-04-17 14:05:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,6 +58,7 @@
   "options": "Company:company:default_currency"
  }, 
  {
+  "default": ":Company", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 

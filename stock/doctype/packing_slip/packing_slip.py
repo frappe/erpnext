@@ -16,12 +16,13 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt, cint, now
+from webnotes.utils import flt, cint
+from webnotes import msgprint, _
+from webnotes.model.doc import addchild
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-
 
 	def validate(self):
 		"""
@@ -32,47 +33,47 @@ class DocType:
 			It is necessary to validate case nos before checking quantity
 		"""
 		self.validate_delivery_note()
+		self.validate_items_mandatory()
 		self.validate_case_nos()
 		self.validate_qty()
 
-
 	def validate_delivery_note(self):
 		"""
-			Validates if delivery note has status as submitted
+			Validates if delivery note has status as draft
 		"""
-		res = webnotes.conn.sql("""SELECT docstatus FROM `tabDelivery Note` 
-			WHERE name=%(delivery_note)s""", self.doc.fields)
-
-		if not(res and res[0][0]==0):
-			webnotes.msgprint("""Invalid Delivery Note. Delivery Note should exist 
-				and should be in draft state. Please rectify and try again.""", raise_exception=1)
-
+		if cint(webnotes.conn.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
+			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in 
+				draft state. Please rectify and try again."""), raise_exception=1)
+	
+	def validate_items_mandatory(self):
+		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
+		if not rows:
+			webnotes.msgprint(_("No Items to Pack"), raise_exception=1)
 
 	def validate_case_nos(self):
 		"""
-			Validate if case nos overlap
-			If they do, recommend next case no.
+			Validate if case nos overlap. If they do, recommend next case no.
 		"""
 		if not cint(self.doc.from_case_no):
-			webnotes.msgprint("Please specify a valid 'From Case No.'", raise_exception=1)
+			webnotes.msgprint(_("Please specify a valid 'From Case No.'"), raise_exception=1)
 		elif not self.doc.to_case_no:
 			self.doc.to_case_no = self.doc.from_case_no
 		elif self.doc.from_case_no > self.doc.to_case_no:
-			webnotes.msgprint("'To Case No.' cannot be less than 'From Case No.'",
+			webnotes.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
 				raise_exception=1)
 		
 		
 		res = webnotes.conn.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
-			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)
+			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
+			OR %(from_case_no)s BETWEEN from_case_no AND to_case_no)
 			""", self.doc.fields)
 
 		if res:
-			webnotes.msgprint("""Case No(s). already in use. Please rectify and try again.
-				Recommended <b>From Case No. = %s</b>""" % self.get_recommended_case_no(),
+			webnotes.msgprint(_("""Case No(s) already in use. Please rectify and try again.
+				Recommended <b>From Case No. = %s</b>""") % self.get_recommended_case_no(),
 				raise_exception=1)
-
 
 	def validate_qty(self):
 		"""
@@ -82,8 +83,9 @@ class DocType:
 		dn_details, ps_item_qty, no_of_cases = self.get_details_for_packing()
 
 		for item in dn_details:
-			new_packed_qty = (flt(ps_item_qty[item['item_code']]) * no_of_cases) + flt(item['packed_qty'])
-			if new_packed_qty > flt(item['qty']):
+			new_packed_qty = (flt(ps_item_qty[item['item_code']]) * no_of_cases) + \
+			 	flt(item['packed_qty'])
+			if new_packed_qty > flt(item['qty']) and no_of_cases:
 				self.recommend_new_qty(item, ps_item_qty, no_of_cases)
 
 
@@ -95,26 +97,25 @@ class DocType:
 			* No. of Cases of this packing slip
 		"""
 		
-		items = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
+		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
 		
-		if not items: webnotes.msgprint("No Items to Pack",
-				raise_exception=1)
+		condition = ""
+		if rows:
+			condition = " and item_code in (%s)" % (", ".join(["%s"]*len(rows)))
 		
 		# gets item code, qty per item code, latest packed qty per item code and stock uom
 		res = webnotes.conn.sql("""select item_code, ifnull(sum(qty), 0) as qty,
 			(select sum(ifnull(psi.qty, 0) * (abs(ps.to_case_no - ps.from_case_no) + 1))
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
-				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code)
-					as packed_qty,
-			stock_uom
+				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code) as packed_qty,
+			stock_uom, item_name
 			from `tabDelivery Note Item` dni
-			where parent=%s and item_code in (%s)
-			group by item_code""" % ("%s", ", ".join(["%s"]*len(items))),
-			tuple([self.doc.delivery_note] + items), as_dict=1)
-			
-		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
+			where parent=%s %s 
+			group by item_code""" % ("%s", condition),
+			tuple([self.doc.delivery_note] + rows), as_dict=1)
 
+		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
 		no_of_cases = cint(self.doc.to_case_no) - cint(self.doc.from_case_no) + 1
 
 		return res, ps_item_qty, no_of_cases
@@ -134,45 +135,6 @@ class DocType:
 			<b>Recommended quantity for %(item_code)s = %(recommended_qty)s 
 			%(stock_uom)s</b>""" % item, raise_exception=1)
 
-
-	def on_submit(self):
-		"""
-			* Update packed qty for all items
-		"""
-		self.update_packed_qty(event='submit')
-
-
-	def on_cancel(self):
-		"""
-			* Update packed qty for all items
-		"""
-		self.update_packed_qty(event='cancel')
-
-
-	def update_packed_qty(self, event=''):
-		"""
-			Updates packed qty for all items
-		"""
-		if event not in ['submit', 'cancel']:
-			raise Exception('update_packed_quantity can only be called on submit or cancel')
-
-		# Get Delivery Note Items, Item Quantity Dict and No. of Cases for this Packing slip
-		dn_details, ps_item_qty, no_of_cases = self.get_details_for_packing()
-
-		for item in dn_details:
-			new_packed_qty = flt(item['packed_qty'])
-			if (new_packed_qty < 0) or (new_packed_qty > flt(item['qty'])):
-				webnotes.msgprint("""Invalid new packed quantity for item %s. 
-					Please try again or contact support@erpnext.com""" % 
-					item['item_code'], raise_exception=1)
-			
-			webnotes.conn.sql("""UPDATE `tabDelivery Note Item`
-				SET packed_qty = %s WHERE parent = %s AND item_code = %s""",
-				(new_packed_qty, self.doc.delivery_note, item['item_code']))
-				
-			webnotes.conn.set_value("Delivery Note", self.doc.delivery_note, "modified", now())
-
-
 	def update_item_details(self):
 		"""
 			Fill empty columns in Packing Slip Item
@@ -181,17 +143,12 @@ class DocType:
 			self.doc.from_case_no = self.get_recommended_case_no()
 
 		for d in self.doclist.get({"parentfield": "item_details"}):
-			self.set_item_details(d)
-
-
-	def set_item_details(self, row):
-		res = webnotes.conn.sql("""SELECT net_weight, weight_uom FROM `tabItem`
-			WHERE name=%s""", row.item_code, as_dict=1)
+			res = webnotes.conn.get_value("Item", d.item_code, 
+				["net_weight", "weight_uom"], as_dict=True)
 			
-		if res and len(res)>0:
-			row.net_weight = res[0]["net_weight"]
-			row.weight_uom = res[0]["weight_uom"]
-
+			if res and len(res)>0:
+				d.net_weight = res["net_weight"]
+				d.weight_uom = res["weight_uom"]
 
 	def get_recommended_case_no(self):
 		"""
@@ -200,5 +157,18 @@ class DocType:
 		"""
 		recommended_case_no = webnotes.conn.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
-
+		
 		return cint(recommended_case_no[0][0]) + 1
+		
+	def get_items(self):
+		self.doclist = self.doc.clear_table(self.doclist, "item_details", 1)
+		
+		dn_details = self.get_details_for_packing()[0]
+		for item in dn_details:
+			if flt(item.qty) > flt(item.packed_qty):
+				ch = addchild(self.doc, 'item_details', 'Packing Slip Item', self.doclist)
+				ch.item_code = item.item_code
+				ch.item_name = item.item_name
+				ch.stock_uom = item.stock_uom
+				ch.qty = flt(item.qty) - flt(item.packed_qty)
+		self.update_item_details()

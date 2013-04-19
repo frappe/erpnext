@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 11:03:08", 
+  "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-03-28 16:04:27", 
+  "modified": "2013-04-17 14:07:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -140,6 +140,15 @@
   "oldfieldtype": "Link", 
   "options": "Account", 
   "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
  }, 
  {
   "doctype": "DocField", 

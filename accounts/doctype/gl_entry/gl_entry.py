@@ -35,8 +35,9 @@ class DocType:
 		self.check_credit_limit()
 		self.check_pl_account()
 
-	def on_update(self,adv_adj, cancel, update_outstanding = 'Yes'):
+	def on_update(self, adv_adj, cancel, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
+		self.validate_cost_center()
 		self.check_freezing_date(adv_adj)
 		self.check_negative_balance(adv_adj)
 
@@ -97,21 +98,36 @@ class DocType:
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)
 		
 		if ret and ret[0]["group_or_ledger"]=='Group':
-			msgprint(_("Account: ") + self.doc.account + _(" is not a ledger"), raise_exception=1)
+			msgprint(_("Account") + ": " + self.doc.account + _(" is not a ledger"), raise_exception=1)
 
 		if ret and ret[0]["docstatus"]==2:
-			msgprint(_("Account: ") + self.doc.account + _(" is not active"), raise_exception=1)
+			msgprint(_("Account") + ": " + self.doc.account + _(" is not active"), raise_exception=1)
 			
 		# Account has been freezed for other users except account manager
 		if ret and ret[0]["freeze_account"]== 'Yes' and not adv_adj \
 				and not 'Accounts Manager' in webnotes.user.get_roles():
-			msgprint(_("Account: ") + self.doc.account + _(" has been freezed. \
+			msgprint(_("Account") + ": " + self.doc.account + _(" has been freezed. \
 				Only Accounts Manager can do transaction against this account"), raise_exception=1)
 			
 		if ret and ret[0]["company"] != self.doc.company:
-			msgprint(_("Account: ") + self.doc.account + _(" does not belong to the company: ") + 
-				self.doc.company, raise_exception=1)
-
+			msgprint(_("Account") + ": " + self.doc.account + _(" does not belong to the company") \
+				+ ": " + self.doc.company, raise_exception=1)
+				
+	def validate_cost_center(self):
+		if not hasattr(self, "cost_center_company"):
+			self.cost_center_company = {}
+		
+		def _get_cost_center_company():
+			if not self.cost_center_company.get(self.doc.cost_center):
+				self.cost_center_company[self.doc.cost_center] = webnotes.conn.get_value("Cost Center",
+					self.doc.cost_center, "company_name")
+			
+			return self.cost_center_company[self.doc.cost_center]
+			
+		if self.doc.cost_center and _get_cost_center_company() != self.doc.company:
+			msgprint(_("Cost Center") + ": " + self.doc.cost_center \
+				+ _(" does not belong to the company") + ": " + self.doc.company, raise_exception=True)
+		
 	def check_freezing_date(self, adv_adj):
 		"""
 			Nobody can do GL Entries where posting date is before freezing date 

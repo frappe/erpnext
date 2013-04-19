@@ -245,6 +245,9 @@ class DocType:
 		for cc in cc_list:
 			add_cc(cc)
 			
+		webnotes.conn.set_value("Company", self.doc.name, "cost_center",
+			"Default CC Ledger - " + self.doc.abbr)
+			
 	def on_update(self):
 		self.set_letter_head()
 
