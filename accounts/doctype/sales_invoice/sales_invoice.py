@@ -725,7 +725,7 @@ class DocType(SellingController):
 						"against": self.doc.debit_to,
 						"credit": flt(tax.tax_amount),
 						"remarks": self.doc.remarks,
-						"cost_center": tax.cost_center_other_charges
+						"cost_center": tax.cost_center
 					})
 				)
 				

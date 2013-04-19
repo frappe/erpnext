@@ -244,5 +244,6 @@ patch_list = [
 	"patches.april_2013.p06_update_file_size",
 	"patches.april_2013.p05_fixes_in_reverse_modules",
 	"execute:webnotes.delete_doc('DocType Mapper', 'Delivery Note-Packing Slip')",
+	"patches.april_2013.p07_rename_cost_center_other_charges",
 	"patches.april_2013.p06_default_cost_center",
 ]
