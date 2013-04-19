@@ -25,7 +25,7 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Accounts")
+	wrapper.appframe.add_module_icon("Accounts")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 

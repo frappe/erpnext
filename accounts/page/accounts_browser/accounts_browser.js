@@ -23,7 +23,7 @@
 pscript['onload_Accounts Browser'] = function(wrapper){
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Accounts")
+	wrapper.appframe.add_module_icon("Accounts")
 	
 	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
 		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },

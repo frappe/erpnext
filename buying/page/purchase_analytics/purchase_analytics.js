@@ -24,7 +24,7 @@ wn.pages['purchase-analytics'].onload = function(wrapper) {
 	new erpnext.PurchaseAnalytics(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Buying")
+	wrapper.appframe.add_module_icon("Buying")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 

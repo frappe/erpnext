@@ -17,7 +17,7 @@
 pscript['onload_Sales Browser'] = function(wrapper){
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Selling")
+	wrapper.appframe.add_module_icon("Selling")
 	
 	wrapper.appframe.add_button('Refresh', function() {  
 			wrapper.make_tree();
