@@ -1,68 +1,68 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
+  "creation": "2012-12-04 17:49:20", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:49", 
+  "modified": "2013-04-19 10:59:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-04 16:33:37"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "name": "__common__", 
+  "allow_rename": 1, 
   "autoname": "field:mode_of_payment", 
-  "module": "Accounts", 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Mode of Payment", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
+  "read_only": 0
  }, 
  {
-  "parent": "Mode of Payment", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "cancel": 1, 
-  "name": "__common__", 
-  "amend": 0, 
   "create": 1, 
-  "submit": 0, 
-  "write": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Mode of Payment", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "Accounts Manager", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Mode of Payment", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Mode of Payment"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Mode of Payment", 
-  "oldfieldname": "mode_of_payment", 
   "fieldname": "mode_of_payment", 
   "fieldtype": "Data", 
+  "label": "Mode of Payment", 
+  "oldfieldname": "mode_of_payment", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
+  "label": "Company", 
   "options": "Company"
  }, 
  {
   "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
   "doctype": "DocField", 
-  "label": "Default Account", 
   "fieldname": "default_account", 
   "fieldtype": "Link", 
+  "label": "Default Account", 
   "options": "Account"
  }, 
  {

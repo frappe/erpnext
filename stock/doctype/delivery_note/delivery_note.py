@@ -20,7 +20,7 @@ import webnotes
 from webnotes.utils import cstr, flt, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 import webnotes.defaults
 
 
@@ -333,17 +333,15 @@ class DocType(SellingController):
 		"""
 			Cancel submitted packing slips related to this delivery note
 		"""
-		res = webnotes.conn.sql("""\
-			SELECT name, count(*) FROM `tabPacking Slip`
-			WHERE delivery_note = %s AND docstatus = 1
-			""", self.doc.name)
+		res = webnotes.conn.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s 
+			AND docstatus = 1""", self.doc.name)
 
-		if res and res[0][1]>0:
+		if res:
 			from webnotes.model.bean import Bean
 			for r in res:
 				ps = Bean(dt='Packing Slip', dn=r[0])
 				ps.cancel()
-			webnotes.msgprint("%s Packing Slip(s) Cancelled" % res[0][1])
+			webnotes.msgprint(_("Packing Slip(s) Cancelled"))
 
 
 	def update_stock_ledger(self, update_stock):

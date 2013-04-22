@@ -23,51 +23,35 @@ cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query =
 		function(doc, cdt, cdn) {
 	var query = 'SELECT name, item_name, description FROM `tabItem` WHERE name IN ( \
 		SELECT item_code FROM `tabDelivery Note Item` dnd \
-		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) AND %(key)s LIKE "%s" LIMIT 50';
+		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) \
+		AND %(key)s LIKE "%s" LIMIT 50';
 	return query;
 }
 
-
-// Fetch item details
-cur_frm.add_fetch("item_code", "item_name", "item_name");
-cur_frm.add_fetch("item_code", "stock_uom", "stock_uom");
-cur_frm.add_fetch("item_code", "net_weight", "net_weight");
-cur_frm.add_fetch("item_code", "weight_uom", "weight_uom");
-
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.delivery_note && doc.__islocal) {
-		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
-		if(!(flt(ps_detail.net_weight) && cstr(ps_detail.weight_uom))) {
-			cur_frm.cscript.update_item_details(doc);
-		}
+			cur_frm.cscript.get_items(doc, cdt, cdn);
 	}
 }
 
-cur_frm.cscript.refresh = function(doc, dt, dn) {
-	if(!doc.amended_from) {
-		hide_field('misc_details');
-	} else {
-		unhide_field('misc_details');
-	}
-}
-
-
-cur_frm.cscript.update_item_details = function(doc) {
-	$c_obj(make_doclist(doc.doctype, doc.name), 'update_item_details', '', function(r, rt) {
-		if(r.exc) {
-			msgprint(r.exc);
-		} else {
-			refresh_many(['item_details', 'naming_series', 'from_case_no', 'to_case_no'])
+cur_frm.cscript.get_items = function(doc, cdt, cdn) {
+	this.frm.call({
+		doc: this.frm.doc,
+		method: "get_items",
+		callback: function(r) {
+			if(!r.exc) cur_frm.refresh();
 		}
 	});
 }
 
+cur_frm.cscript.refresh = function(doc, dt, dn) {
+	cur_frm.toggle_display("misc_details", doc.amended_from);
+}
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_case_nos(doc);
 	cur_frm.cscript.validate_calculate_item_details(doc);
 }
-
 
 // To Case No. cannot be less than From Case No.
 cur_frm.cscript.validate_case_nos = function(doc) {
@@ -99,7 +83,7 @@ cur_frm.cscript.validate_calculate_item_details = function(doc) {
 cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		for(var j=0; j<ps_detail.length; j++) {
-			if(i!=j && ps_detail[i].dn_detail && ps_detail[i].dn_detail==ps_detail[j].dn_detail) {
+			if(i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
 				msgprint("You have entered duplicate items. Please rectify and try again.");
 				validated = false;
 				return;

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:41", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:31", 
+  "modified": "2013-04-17 14:05:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -48,6 +48,7 @@
   "search_index": 1
  }, 
  {
+  "default": ":Company", 
   "doctype": "DocField", 
   "fieldname": "cost_center_other_charges", 
   "fieldtype": "Link", 

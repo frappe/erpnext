@@ -158,7 +158,6 @@ cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
 }
 
 
-// ****************************** DELIVERY TYPE ************************************
 cur_frm.cscript.delivery_type = function(doc, cdt, cdn) {
 	if (doc.delivery_type = 'Sample') cfn_set_fields(doc, cdt, cdn);
 }
@@ -185,7 +184,6 @@ cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 	return 'SELECT DISTINCT `tabSupplier`.`name` FROM `tabSupplier` WHERE `tabSupplier`.supplier_type = "transporter" AND `tabSupplier`.docstatus != 2 AND `tabSupplier`.%(key)s LIKE "%s" ORDER BY `tabSupplier`.`name` LIMIT 50';
 }
 
-//-----------------------------------Make Sales Invoice----------------------------------------------
 cur_frm.cscript['Make Sales Invoice'] = function() {
 	var doc = cur_frm.doc
 	n = wn.model.make_new_doc_and_get_name('Sales Invoice');
@@ -201,7 +199,6 @@ cur_frm.cscript['Make Sales Invoice'] = function() {
 	);
 }
 
-//-----------------------------------Make Installation Note----------------------------------------------
 cur_frm.cscript['Make Installation Note'] = function() {
 	var doc = cur_frm.doc;
 	if(doc.per_installed < 99.99){
@@ -221,30 +218,18 @@ cur_frm.cscript['Make Installation Note'] = function() {
 		msgprint("Item installation is already completed")
 }
 
-//-----------------------------------Make Sales Invoice----------------------------------------------
 cur_frm.cscript['Make Packing Slip'] = function() {
-	var doc = cur_frm.doc
 	n = wn.model.make_new_doc_and_get_name('Packing Slip');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Packing Slip'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Packing Slip',
-		'from_docname':doc.name,
-		'from_to_list':"[['Delivery Note','Packing Slip'],['Delivery Note Item','Packing Slip Item']]"
-		}, function(r,rt) {
-			 loaddoc('Packing Slip', n);
-		}
-	);
+	ps = locals["Packing Slip"][n];
+	ps.delivery_note = cur_frm.doc.name;
+	loaddoc('Packing Slip', n);
 }
 
 
 //get query select Territory
-//=======================================================================================================================
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
-
-//------------------------for printing without amount----------
 
 var set_print_hide= function(doc, cdt, cdn){
 	var dn_fields = wn.meta.docfield_map['Delivery Note'];
