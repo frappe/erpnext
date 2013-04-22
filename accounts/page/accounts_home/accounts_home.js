@@ -139,6 +139,11 @@ wn.module_page["Accounts"] = [
 				"page":"Financial Statements",
 				"label": wn._("Financial Statements")
 			},
+			{
+				"label":wn._("Accounts Receivable"),
+				route: "query-report/Accounts Receivable",
+				doctype: "Sales Invoice"
+			},
 		]
 	},
 	{

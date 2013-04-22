@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:18", 
+  "creation": "2013-03-07 18:50:29", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:35:34", 
+  "modified": "2013-04-22 14:09:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,6 +41,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -52,6 +53,7 @@
   "oldfieldname": "employee", 
   "oldfieldtype": "Link", 
   "options": "Employee", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -116,6 +118,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -129,6 +132,7 @@
   "oldfieldname": "is_active", 
   "oldfieldtype": "Select", 
   "options": "\nYes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -139,6 +143,7 @@
   "label": "From Date", 
   "oldfieldname": "from_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -148,7 +153,8 @@
   "in_list_view": 1, 
   "label": "To Date", 
   "oldfieldname": "to_date", 
-  "oldfieldtype": "Date"
+  "oldfieldtype": "Date", 
+  "read_only": 0
  }, 
  {
   "description": "Cost to Company", 
@@ -156,10 +162,11 @@
   "fieldname": "ctc", 
   "fieldtype": "Currency", 
   "in_filter": 1, 
-  "label": "CTC", 
+  "label": "Annual Cost To Company", 
   "oldfieldname": "ctc", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -169,6 +176,7 @@
   "in_filter": 1, 
   "label": "Company", 
   "options": "link:Company", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -178,7 +186,8 @@
   "fieldtype": "Section Break", 
   "label": "Earning & Deduction", 
   "oldfieldname": "earning_deduction", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -188,6 +197,7 @@
   "label": "Earning", 
   "oldfieldname": "col_brk2", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -198,7 +208,8 @@
   "label": "Earning1", 
   "oldfieldname": "earning_details", 
   "oldfieldtype": "Table", 
-  "options": "Salary Structure Earning"
+  "options": "Salary Structure Earning", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -208,6 +219,7 @@
   "label": "Deduction", 
   "oldfieldname": "col_brk3", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -218,18 +230,21 @@
   "label": "Deduction1", 
   "oldfieldname": "deduction_details", 
   "oldfieldtype": "Table", 
-  "options": "Salary Structure Deduction"
+  "options": "Salary Structure Deduction", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -256,6 +271,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
