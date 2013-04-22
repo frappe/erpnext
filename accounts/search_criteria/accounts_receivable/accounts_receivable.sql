@@ -13,4 +13,4 @@ WHERE
 	 AND `tabGL Entry`.`is_cancelled` = 'No'
 	 AND `tabAccount`.`master_type` = 'Customer'
 	 AND `tabAccount`.`name` = `tabGL Entry`.`account`
-ORDER BY `tabGL Entry`.`posting_date`
+ORDER BY `tabGL Entry`.`posting_date`, `tabGL Entry`.`account`
