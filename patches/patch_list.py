@@ -243,5 +243,7 @@ patch_list = [
 	"patches.april_2013.p05_update_file_data",
 	"patches.april_2013.p06_update_file_size",
 	"patches.april_2013.p05_fixes_in_reverse_modules",
-	"execute:webnotes.delete_doc('DocType Mapper', 'Delivery Note-Packing Slip')"
+	"execute:webnotes.delete_doc('DocType Mapper', 'Delivery Note-Packing Slip')",
+    "execute:webnotes.reload_doc('Stock', 'DocType', 'Delivery Note Item')",
+	"patches.april_2013.p06_default_cost_center",
 ]
