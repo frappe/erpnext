@@ -81,9 +81,10 @@ def backup_to_dropbox():
 	backup = new_backup()
 	filename = os.path.join(get_base_path(), "public", "backups", 
 		os.path.basename(backup.backup_path_db))
-	upload_file_to_dropbox(filename, "database", dropbox_client)
+	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
 	response = dropbox_client.metadata("/files")
+	
 	# upload files to files folder
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
@@ -94,7 +95,7 @@ def backup_to_dropbox():
 				found = True
 				break
 		if not found:
-			upload_file_to_dropbox(filepath, "files", dropbox_client)
+			upload_file_to_dropbox(filepath, "/files", dropbox_client)
 
 def get_dropbox_session():
 	try:
@@ -113,21 +114,21 @@ def get_dropbox_session():
 def upload_file_to_dropbox(filename, folder, dropbox_client):
 	from dropbox import rest
 	size = os.stat(filename).st_size
-	f = open(filename,'r')
 	
-	# if max packet size reached, use chunked uploader
-	max_packet_size = 4194304
+	with open(filename, 'r') as f:
+		# if max packet size reached, use chunked uploader
+		max_packet_size = 4194304
 	
-	if size > max_packet_size:
-		uploader = dropbox_client.get_chunked_uploader(f, size)
-		while uploader.offset < size:
-			try:
-				uploader.upload_chunked()
-				uploader.finish(folder + "/" + os.path.basename(filename), overwrite=True)
-			except rest.ErrorResponse:
-				pass
-	else:
-		dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
+		if size > max_packet_size:
+			uploader = dropbox_client.get_chunked_uploader(f, size)
+			while uploader.offset < size:
+				try:
+					uploader.upload_chunked()
+					uploader.finish(folder + "/" + os.path.basename(filename), overwrite=True)
+				except rest.ErrorResponse:
+					pass
+		else:
+			dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
 
 if __name__=="__main__":
 	backup_to_dropbox()
