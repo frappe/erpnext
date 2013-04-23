@@ -21,6 +21,11 @@ from webnotes import _, msgprint
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
 
+# define log config for google drive api's log messages
+# basicConfig redirects log to stderr
+import logging
+logging.basicConfig()
+
 @webnotes.whitelist()
 def get_gdrive_authorize_url():
 	flow = get_gdrive_flow()
@@ -31,9 +36,6 @@ def get_gdrive_authorize_url():
 
 @webnotes.whitelist()
 def upload_files(name, mimetype, service, folder_id):
-	import logging
-	logging.basicConfig()
-	
 	if not webnotes.conn:
 		webnotes.connect()
 	file_name = os.path.basename(name)
