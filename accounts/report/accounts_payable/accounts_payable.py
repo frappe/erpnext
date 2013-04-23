@@ -13,7 +13,7 @@ def execute(filters=None):
 	
 	account_supplier_type_map = get_account_supplier_type_map()
 	pi_map = get_pi_map()
-		
+
 	# Age of the invoice on this date
 	age_on = getdate(filters.get("report_date")) > getdate(nowdate()) \
 		and nowdate() or filters.get("report_date")
@@ -24,8 +24,13 @@ def execute(filters=None):
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
 				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
 			
-			due_date = (gle.voucher_type == "Purchase Invoice") \
-				and pi_map.get(gle.voucher_no).get("due_date") or ""
+			if gle.voucher_type == "Purchase Invoice":
+				pi_info = pi_map.get(gle.voucher_no)
+				due_date = pi_info.get("due_date")
+				bill_no = pi_info.get("bill_no")
+				bill_date = pi_info.get("bill_date")
+			else:
+				due_date = bill_no = bill_date = ""
 		
 			invoiced_amount = gle.credit > 0 and gle.credit or 0		
 			paid_amount = get_paid_amount(gle, filters.get("report_date") or nowdate(), 
@@ -34,9 +39,8 @@ def execute(filters=None):
 		
 			if abs(flt(outstanding_amount)) > 0.01:
 				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
-					gle.remarks, account_supplier_type_map.get(gle.account), due_date, 
-					pi_map.get("bill_no"), pi_map.get("bill_date"), invoiced_amount, 
-					paid_amount, outstanding_amount]
+					gle.remarks, account_supplier_type_map.get(gle.account), due_date, bill_no, 
+					bill_date, invoiced_amount, paid_amount, outstanding_amount]
 				
 				# Ageing
 				if filters.get("ageing_based_on") == "Due Date":
