@@ -7,11 +7,13 @@
 # dropbox_access_key
 # dropbox_access_secret
 
-
+from __future__ import unicode_literals
 import os
 import webnotes
-from webnotes.utils import get_request_site_address, get_base_path
+from webnotes.utils import get_request_site_address, get_base_path, cstr
 from webnotes import _
+
+from backup_manager import ignore_list
 
 @webnotes.whitelist()
 def get_dropbox_authorize_url():
@@ -58,7 +60,7 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 
 	webnotes.message_title = "Dropbox Approval"
 	webnotes.message = "<h3>%s</h3><p>Please close this window.</p>" % message
-
+	
 	webnotes.conn.commit()
 	webnotes.response['type'] = 'page'
 	webnotes.response['page_name'] = 'message.html'
@@ -81,12 +83,18 @@ def backup_to_dropbox():
 	backup = new_backup()
 	filename = os.path.join(get_base_path(), "public", "backups", 
 		os.path.basename(backup.backup_path_db))
-	upload_file_to_dropbox(filename, "database", dropbox_client)
+	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
 	response = dropbox_client.metadata("/files")
+	
 	# upload files to files folder
+	did_not_upload = []
+	error_log = []
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
+		if filename in ignore_list:
+			continue
+		
 		found = False
 		filepath = os.path.join(path, filename)
 		for file_metadata in response["contents"]:
@@ -94,7 +102,13 @@ def backup_to_dropbox():
 				found = True
 				break
 		if not found:
-			upload_file_to_dropbox(filepath, "files", dropbox_client)
+			try:
+				upload_file_to_dropbox(filepath, "/files", dropbox_client)
+			except Exception, e:
+				did_not_upload.append(filename)
+				error_log.append(cstr(e))
+	
+	return did_not_upload, list(set(error_log))
 
 def get_dropbox_session():
 	try:
@@ -113,21 +127,21 @@ def get_dropbox_session():
 def upload_file_to_dropbox(filename, folder, dropbox_client):
 	from dropbox import rest
 	size = os.stat(filename).st_size
-	f = open(filename,'r')
 	
-	# if max packet size reached, use chunked uploader
-	max_packet_size = 4194304
+	with open(filename, 'r') as f:
+		# if max packet size reached, use chunked uploader
+		max_packet_size = 4194304
 	
-	if size > max_packet_size:
-		uploader = dropbox_client.get_chunked_uploader(f, size)
-		while uploader.offset < size:
-			try:
-				uploader.upload_chunked()
-				uploader.finish(folder + "/" + os.path.basename(filename), overwrite=True)
-			except rest.ErrorResponse:
-				pass
-	else:
-		dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
+		if size > max_packet_size:
+			uploader = dropbox_client.get_chunked_uploader(f, size)
+			while uploader.offset < size:
+				try:
+					uploader.upload_chunked()
+					uploader.finish(folder + "/" + os.path.basename(filename), overwrite=True)
+				except rest.ErrorResponse:
+					pass
+		else:
+			dropbox_client.put_file(folder + "/" + os.path.basename(filename), f, overwrite=True)
 
 if __name__=="__main__":
 	backup_to_dropbox()
