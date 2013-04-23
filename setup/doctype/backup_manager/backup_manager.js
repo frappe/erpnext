@@ -41,7 +41,9 @@ cur_frm.cscript.allow_gdrive_access = function(doc) {
 		wn.call({
 			method: "setup.doctype.backup_manager.backup_googledrive.get_gdrive_authorize_url",
 			callback: function(r) {
-				window.open(r.message.authorize_url);
+				if(!r.exc) {
+					window.open(r.message.authorize_url);
+				}
 			}
 		})
 	}
@@ -49,7 +51,7 @@ cur_frm.cscript.allow_gdrive_access = function(doc) {
 
 cur_frm.cscript.validate_gdrive = function(doc) {
 	wn.call({
-		method: "setup.doctype.backup_manager.backup_manager.gdrive_callback",
+		method: "setup.doctype.backup_manager.backup_googledrive.gdrive_callback",
 		args: {
 			verification_code: doc.verification_code
 		},
