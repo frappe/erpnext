@@ -144,6 +144,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Accounts Receivable",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Accounts Payable"),
+				route: "query-report/Accounts Payable",
+				doctype: "Purchase Invoice"
+			},
 		]
 	},
 	{

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
+from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters:
@@ -22,6 +23,7 @@ def execute(filters=None):
 	if time_logs:
 		profiles = [time_logs[0].owner]
 		
+	total_hours = 0
 	for tl in time_logs:
 		if tl.owner not in profiles:
 			profiles.append(tl.owner)
@@ -29,6 +31,11 @@ def execute(filters=None):
 
 		data.append([tl.name, profile_map[tl.owner], tl.from_time, tl.to_time, tl.hours, 
 				tl.activity_type, tl.task, task_map.get(tl.task), tl.project, tl.status])
+				
+		total_hours += flt(tl.hours)
+	
+	if total_hours:
+		data.append(["", "", "", "Total", total_hours, "", "", "", "", ""])
 		
 	return columns, data
 	
