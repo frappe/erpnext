@@ -27,8 +27,8 @@ def take_backups_dropbox():
 		from setup.doctype.backup_manager.backup_dropbox import backup_to_dropbox
 		backup_to_dropbox()
 		send_email(True, "Dropbox")
-	except Exception, e:
-		send_email(False, "Dropbox", e)
+	except Exception:
+		send_email(False, "Dropbox", webnotes.getTraceback())
 
 #backup to gdrive 
 @webnotes.whitelist()
@@ -37,8 +37,8 @@ def take_backups_gdrive():
 		from setup.doctype.backup_manager.backup_googledrive import backup_to_gdrive
 		backup_to_gdrive()
 		send_email(True, "Google Drive")
-	except Exception, e:
-		send_email(False, "Google Drive", e)
+	except Exception:
+		send_email(False, "Google Drive", webnotes.getTraceback())
 
 def send_email(success, service_name, error_status=None):
 	if success:
