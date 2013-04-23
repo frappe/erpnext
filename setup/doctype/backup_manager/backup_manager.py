@@ -33,7 +33,8 @@ def take_backups_dropbox():
 		
 		send_email(True, "Dropbox")
 	except Exception:
-		error_message = ("\n".join(error_log) + "\n" + webnotes.getTraceback())
+		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
+		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
 		print error_message
 		send_email(False, "Dropbox", error_message)
 
@@ -48,7 +49,8 @@ def take_backups_gdrive():
 		
 		send_email(True, "Google Drive")
 	except Exception:
-		error_message = ("\n".join(error_log) + "\n" + webnotes.getTraceback())
+		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
+		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
 		print error_message
 		send_email(False, "Google Drive", error_message)
 
