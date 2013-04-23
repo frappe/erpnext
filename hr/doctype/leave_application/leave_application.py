@@ -333,7 +333,7 @@ def add_holidays(events, start, end, employee, company):
 
 @webnotes.whitelist()
 def query_for_permitted_employees(doctype, txt, searchfield, start, page_len, filters):
-	txt = cstr(txt) + "%"
+	txt = "%" + cstr(txt) + "%"
 	
 	return webnotes.conn.sql("""select name, employee_name from `tabEmployee` emp
 		where status = 'Active' and docstatus < 2 and
@@ -346,4 +346,4 @@ def query_for_permitted_employees(doctype, txt, searchfield, start, page_len, fi
 		case when name like %s then 0 else 1 end,
 		case when employee_name like %s then 0 else 1 end,
 		name limit %s, %s""" % tuple([searchfield] + ["%s"]*8), 
-		(txt, txt, webnotes.session.user, webnotes.session.user, txt, txt, start, page_len), debug=1)
+		(txt, txt, webnotes.session.user, webnotes.session.user, txt, txt, start, page_len))
