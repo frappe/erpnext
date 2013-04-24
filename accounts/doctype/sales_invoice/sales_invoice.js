@@ -159,7 +159,6 @@ cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
-
 cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
 	var d = locals[cdt][cdn];
 	if (!d.item_code) { msgprint("please enter item code first"); return };

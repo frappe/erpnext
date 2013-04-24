@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
+from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters:
@@ -18,17 +19,29 @@ def execute(filters=None):
 	time_logs = webnotes.conn.sql("""select * from `tabTime Log` 
 		where docstatus < 2 %s order by owner asc""" % (conditions, ), filters, as_dict=1)
 
-	data = []	
 	if time_logs:
 		profiles = [time_logs[0].owner]
 		
+	data = []	
+	total_hours = total_employee_hours = count = 0
 	for tl in time_logs:
 		if tl.owner not in profiles:
 			profiles.append(tl.owner)
-			data.append([])
-
+			data.append(["", "", "", "Total", total_employee_hours, "", "", "", "", ""])
+			total_employee_hours = 0
+			
 		data.append([tl.name, profile_map[tl.owner], tl.from_time, tl.to_time, tl.hours, 
 				tl.activity_type, tl.task, task_map.get(tl.task), tl.project, tl.status])
+			
+		count += 1
+		total_hours += flt(tl.hours)
+		total_employee_hours += flt(tl.hours)
+		
+		if count == len(time_logs):
+			data.append(["", "", "", "Total Hours", total_employee_hours, "", "", "", "", ""])
+
+	if total_hours:
+		data.append(["", "", "", "Grand Total", total_hours, "", "", "", "", ""])
 		
 	return columns, data
 	
