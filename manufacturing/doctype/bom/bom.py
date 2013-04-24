@@ -32,7 +32,7 @@ class DocType:
 
 	def autoname(self):
 		last_name = sql("""select max(name) from `tabBOM` 
-			where name like 'BOM/%s/%%'""" % self.doc.item)
+			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1]) + 1
 		else:
@@ -67,16 +67,16 @@ class DocType:
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = sql("""select name, is_asset_item, is_purchase_item, docstatus, description,
-		 	is_sub_contracted_item, stock_uom, default_bom, 
+		item = webnotes.conn.sql("""select name, is_asset_item, is_purchase_item, 
+			docstatus, description, is_sub_contracted_item, stock_uom, default_bom, 
 			last_purchase_rate, standard_rate, is_manufactured_item 
-			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
+			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
 
 	def get_item_details(self, item_code):
-		res = sql("""select description, stock_uom as uom
-			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
+		res = webnotes.conn.sql("""select description, stock_uom as uom
+			from `tabItem` where name=%s""", item_code, as_dict = 1)
 		return res and res[0] or {}
 
 	def get_workstation_details(self,workstation):
@@ -209,7 +209,7 @@ class DocType:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
 					is not present at Operations table""" % 
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
-		
+			
 			item = self.get_item_det(m.item_code)
 			if item[0]['is_manufactured_item'] == 'Yes':
 				if not m.bom_no:
