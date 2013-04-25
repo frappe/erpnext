@@ -246,4 +246,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType Mapper', 'Delivery Note-Packing Slip')",
     "execute:webnotes.reload_doc('Stock', 'DocType', 'Delivery Note Item')",
 	"patches.april_2013.p06_default_cost_center",
+	"execute:webnotes.reset_perms('File Data')",
 ]
