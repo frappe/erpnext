@@ -29,12 +29,12 @@ class DocType:
 
 	def get_transactions(self, arg=None):
 		return {
-			"transactions": "\n".join([''] + [i[0] for i in 
-				sql("""select `tabDocField`.`parent` 
-					FROM `tabDocField`, `tabDocType`
-					WHERE `tabDocField`.`fieldname` = 'naming_series' 
-					and `tabDocType`.name=`tabDocField`.parent
-					order by `tabDocField`.parent""")]),
+			"transactions": "\n".join([''] + sorted(list(set(
+				webnotes.conn.sql_list("""select parent
+					from `tabDocField` where fieldname='naming_series'""") 
+				+ webnotes.conn.sql_list("""select dt from `tabCustom Field` 
+					where fieldname='naming_series'""")
+				)))),
 			"prefixes": "\n".join([''] + [i[0] for i in 
 				sql("""select name from tabSeries""")])
 		}
@@ -89,7 +89,6 @@ class DocType:
 					'property': prop,
 					'value': prop_dict[prop],
 					'property_type': 'Select',
-					'select_doctype': doctype
 				})
 				ps.save(1)
 
@@ -101,11 +100,18 @@ class DocType:
 		from core.doctype.doctype.doctype import DocType
 		dt = DocType()
 	
-		parent = sql("""select dt.name from `tabDocField` df, `tabDocType` dt 
-			where dt.name = df.parent and df.fieldname='naming_series' and dt.name != %s""", 
-			self.doc.select_doc_for_series)
-		sr = ([webnotes.model.doctype.get_property(p[0], 'options', 'naming_series'), p[0]] 
-			for p in parent)
+		parent = list(set(
+			webnotes.conn.sql_list("""select dt.name 
+				from `tabDocField` df, `tabDocType` dt 
+				where dt.name = df.parent and df.fieldname='naming_series' and dt.name != %s""",
+				self.doc.select_doc_for_series)
+			+ webnotes.conn.sql_list("""select dt.name 
+				from `tabCustom Field` df, `tabDocType` dt 
+				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
+				self.doc.select_doc_for_series)
+			))
+		sr = [[webnotes.model.doctype.get_property(p, 'options', 'naming_series'), p] 
+			for p in parent]
 		options = self.scrub_options_list(self.doc.set_options.split("\n"))
 		for series in options:
 			dt.validate_series(series, self.doc.select_doc_for_series)
