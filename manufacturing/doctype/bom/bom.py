@@ -89,7 +89,7 @@ class DocType:
 				"qty": item.qty	})
 			
 			for r in ret:
-				if not item.fields[r]:
+				if not item.fields.get(r):
 					item.fields[r] = ret[r]
 		
 	def get_bom_material_detail(self, args=None):
@@ -117,7 +117,7 @@ class DocType:
 
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
-
+		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg and (arg['is_purchase_item'] == 'Yes' or arg['is_sub_contracted_item'] == 'Yes'):
