@@ -395,7 +395,7 @@ class TestSalesInvoice(unittest.TestCase):
 		for i in xrange(count):
 			base_si = _test(i)
 		
-test_dependencies = ["Journal Voucher", "POS Setting"]
+test_dependencies = ["Journal Voucher", "POS Setting", "Contact", "Address"]
 
 test_records = [
 	[
