@@ -44,10 +44,11 @@ class DocType:
 		self.validate_main_item()
 		self.validate_operations()
 		self.validate_materials()
+		self.set_bom_material_details()
+		self.calculate_cost()
 		
 	def on_update(self):
 		self.check_recursion()
-		self.calculate_cost()
 		self.update_exploded_items()
 		self.doc.save()
 	
@@ -73,15 +74,7 @@ class DocType:
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
-
-	def get_item_details(self, item_code):
-		res = webnotes.conn.sql("""select description, stock_uom as uom
-			from `tabItem` where name=%s""", item_code, as_dict = 1)
-		return res and res[0] or {}
-
-	def get_workstation_details(self,workstation):
-		return {'hour_rate': webnotes.conn.get_value("Workstation", workstation, "hour_rate")}
-
+		
 	def validate_rm_item(self, item):
 		if item[0]['name'] == self.doc.item:
 			msgprint("Item_code: %s in materials tab cannot be same as FG Item", 
@@ -89,25 +82,35 @@ class DocType:
 		
 		if not item or item[0]['docstatus'] == 2:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
-
-	def get_bom_material_detail(self):
+			
+	def set_bom_material_details(self):
+		for item in self.doclist.get({"parentfield": "bom_materials"}):			
+			ret = self.get_bom_material_detail({ "item_code": item.item_code, "bom_no": item.bom_no,
+				"qty": item.qty	})
+			
+			for r in ret:
+				if not item.fields[r]:
+					item.fields[r] = ret[r]
+		
+	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
 
-		arg = webnotes.form_dict.get('args')
-		import json
-		arg = json.loads(arg)
-		
-		item = self.get_item_det(arg['item_code'])
+		if not args:
+			args = webnotes.form_dict.get('args')
+			import json
+			args = json.loads(args)
+			
+		item = self.get_item_det(args['item_code'])
 		self.validate_rm_item(item)
 		
-		arg['bom_no'] = arg['bom_no'] or item and cstr(item[0]['default_bom']) or ''
-		arg.update(item[0])
+		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args.update(item[0])
 
-		rate = self.get_rm_rate(arg)
+		rate = self.get_rm_rate(args)
 		ret_item = {
-			 'description'  : item and arg['description'] or '',
-			 'stock_uom'	: item and arg['stock_uom'] or '',
-			 'bom_no'		: arg['bom_no'],
+			 'description'  : item and args['description'] or '',
+			 'stock_uom'	: item and args['stock_uom'] or '',
+			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate
 		}
 		return ret_item
@@ -183,11 +186,14 @@ class DocType:
 		if not item:
 			msgprint("Item %s does not exists in the system or expired." % 
 				self.doc.item, raise_exception = 1)
-
 		elif item[0]['is_manufactured_item'] != 'Yes' \
 				and item[0]['is_sub_contracted_item'] != 'Yes':
 			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
 				you can not make BOM for it""" % self.doc.item, raise_exception = 1)
+		else:
+			ret = webnotes.conn.get_value("Item", self.doc.item, ["description", "stock_uom"])
+			self.doc.description = ret[0]
+			self.doc.uom = ret[1]
 
 	def validate_operations(self):
 		""" Check duplicate operation no"""
@@ -293,9 +299,10 @@ class DocType:
 		"""Update workstation rate and calculates totals"""
 		total_op_cost = 0
 		for d in getlist(self.doclist, 'bom_operations'):
+			if d.workstation and not d.hour_rate:
+				d.hour_rate = webnotes.conn.get_value("Workstation", d.workstation, "hour_rate")
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
-			d.save()
 			total_op_cost += flt(d.operating_cost)
 		self.doc.operating_cost = total_op_cost
 		
@@ -307,7 +314,6 @@ class DocType:
 				d.rate = self.get_bom_unitcost(d.bom_no)
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
-			d.save()
 			total_rm_cost += d.amount
 		self.doc.raw_material_cost = total_rm_cost
 
