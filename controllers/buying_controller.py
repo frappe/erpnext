@@ -29,6 +29,7 @@ from controllers.stock_controller import StockController
 class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
+		self.validate_stock_or_nonstock_items()
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")
@@ -41,7 +42,24 @@ class BuyingController(StockController):
 						
 			# set total in words
 			self.set_total_in_words()
-		
+			
+	def validate_stock_or_nonstock_items(self):
+		items = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
+		if self.stock_items and len(items) > len(self.stock_items):
+			nonstock_items = list(set(items) - set(self.stock_items))
+			webnotes.msgprint(_("Stock and non-stock items can not be entered at the same ") + 
+				self.doc.doctype + _(""". You should make separate documents for them.
+				Stock Items: """) + ", ".join(self.stock_items) + _("""
+				Non-stock Items: """) + ", ".join(nonstock_items), raise_exception=1)
+				
+		elif items and not self.stock_items:
+			tax_for_valuation = [d.account_head for d in 
+				self.doclist.get({"parentfield": "purchase_tax_details"}) 
+				if d.category in ["Valuation", "Valuation and Total"]]
+			if tax_for_valuation:
+				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' 
+					as all items are non-stock items"""), raise_exception=1)
+			
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):
 			ret = get_item_details({
