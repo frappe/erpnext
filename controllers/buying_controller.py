@@ -47,7 +47,7 @@ class BuyingController(StockController):
 		items = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
 		if self.stock_items and len(items) > len(self.stock_items):
 			nonstock_items = list(set(items) - set(self.stock_items))
-			webnotes.msgprint(_("Stock and non-stock items can not be entered at the same ") + 
+			webnotes.msgprint(_("Stock and non-stock items can not be entered in the same ") + 
 				self.doc.doctype + _(""". You should make separate documents for them.
 				Stock Items: """) + ", ".join(self.stock_items) + _("""
 				Non-stock Items: """) + ", ".join(nonstock_items), raise_exception=1)
