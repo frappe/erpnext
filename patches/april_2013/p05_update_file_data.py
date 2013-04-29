@@ -53,10 +53,17 @@ def update_for_doc(doctype, doc):
 				exists = False
 
 		if exists:
-			webnotes.conn.sql("""update `tabFile Data` 
-				set attached_to_doctype=%s, attached_to_name=%s
-				where name=%s""", (doctype, doc.name, fileid))
-		
+			if webnotes.conn.exists("File Data", fileid):
+				fd = webnotes.bean("File Data", fileid)
+				if not (fd.doc.attached_to_doctype and fd.doc.attached_to_name):
+					fd.doc.attached_to_doctype = doctype
+					fd.doc.attached_to_name = doc.name
+					fd.save()
+				else:
+					fd = webnotes.bean("File Data", copy=fd.doclist)
+					fd.doc.attached_to_doctype = doctype
+					fd.doc.attached_to_name = doc.name
+					fd.insert()
 		else:
 			webnotes.conn.sql("""delete from `tabFile Data` where name=%s""",
-				fileid)	
+				fileid)
