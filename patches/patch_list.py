@@ -248,4 +248,5 @@ patch_list = [
 	"patches.april_2013.p06_default_cost_center",
 	"execute:webnotes.reset_perms('File Data')",
 	"patches.april_2013.p07_update_file_data_2",
+	"patches.april_2013.rebuild_sales_browser",
 ]
