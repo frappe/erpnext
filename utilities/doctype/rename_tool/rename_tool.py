@@ -34,7 +34,8 @@ def upload(select_doctype=None, rows=None):
 	
 	rename_log = []
 	for row in rows:
-		if len(row) > 2:
+		# if row has some content
+		if len(row) > 1 and row[0] and row[1]:
 			try:
 				if rename_doc(select_doctype, row[0], row[1]):
 					rename_log.append(_("Successful: ") + row[0] + " -> " + row[1])
@@ -45,5 +46,5 @@ def upload(select_doctype=None, rows=None):
 				rename_log.append("<span style='color: RED'>" + \
 					_("Failed: ") + row[0] + " -> " + row[1] + "</span>")
 				rename_log.append("<span style='margin-left: 20px;'>" + repr(e) + "</span>")
-				
+	
 	return rename_log
