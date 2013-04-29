@@ -108,8 +108,8 @@ class DocType:
 				and not 'Accounts Manager' in webnotes.user.get_roles():
 			msgprint(_("Account") + ": " + self.doc.account + _(" has been freezed. \
 				Only Accounts Manager can do transaction against this account"), raise_exception=1)
-			
-		if ret and ret[0]["company"] != self.doc.company:
+		
+		if self.doc.is_cancelled in ("No", None) and ret and ret[0]["company"] != self.doc.company:
 			msgprint(_("Account") + ": " + self.doc.account + _(" does not belong to the company") \
 				+ ": " + self.doc.company, raise_exception=1)
 				
@@ -124,9 +124,10 @@ class DocType:
 			
 			return self.cost_center_company[self.doc.cost_center]
 			
-		if self.doc.cost_center and _get_cost_center_company() != self.doc.company:
-			msgprint(_("Cost Center") + ": " + self.doc.cost_center \
-				+ _(" does not belong to the company") + ": " + self.doc.company, raise_exception=True)
+		if self.doc.is_cancelled in ("No", None) and \
+			self.doc.cost_center and _get_cost_center_company() != self.doc.company:
+				msgprint(_("Cost Center") + ": " + self.doc.cost_center \
+					+ _(" does not belong to the company") + ": " + self.doc.company, raise_exception=True)
 		
 	def check_freezing_date(self, adv_adj):
 		"""
