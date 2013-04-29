@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-06 14:08:07", 
+  "creation": "2013-04-03 16:38:41", 
   "docstatus": 0, 
   "modified": "2013-04-03 15:51:32", 
   "modified_by": "Administrator", 
@@ -183,17 +183,6 @@
   "fieldname": "column_break_16", 
   "fieldtype": "Column Break", 
   "permlevel": 0, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "permlevel": 0, 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {

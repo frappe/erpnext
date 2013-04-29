@@ -1,90 +1,82 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-02 17:08:46", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:42", 
+  "modified": "2013-01-01 18:58:55", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-01 18:58:55"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 1, 
-  "in_create": 1, 
+  "allow_attach": 0, 
   "autoname": "QUES.#######", 
-  "name": "__common__", 
-  "module": "Utilities", 
   "doctype": "DocType", 
-  "allow_attach": 0
+  "in_create": 1, 
+  "module": "Utilities", 
+  "name": "__common__", 
+  "read_only": 1
  }, 
  {
-  "name": "__common__", 
-  "parent": "Question", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Question", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Question", 
-  "read": 1, 
-  "report": 1, 
   "cancel": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Question", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "All", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "All", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Question", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Question"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "question", 
+  "fieldtype": "Text", 
   "label": "Question", 
   "oldfieldname": "question", 
-  "fieldname": "question", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Points", 
   "fieldname": "points", 
   "fieldtype": "Int", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Points"
  }, 
  {
-  "oldfieldtype": "Text Editor", 
   "doctype": "DocField", 
+  "fieldname": "answer", 
+  "fieldtype": "Text Editor", 
   "label": "Answer", 
   "oldfieldname": "answer", 
-  "fieldname": "answer", 
-  "fieldtype": "Text Editor"
+  "oldfieldtype": "Text Editor"
  }, 
  {
   "doctype": "DocField", 
-  "label": "User Tags", 
   "fieldname": "_user_tags", 
   "fieldtype": "Data", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "User Tags"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "_users_voted", 
   "fieldtype": "Text", 
   "label": "Users Voted"
- }, 
- {
-  "oldfieldtype": "Text", 
-  "doctype": "DocField", 
-  "label": "File List", 
-  "oldfieldname": "file_list", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1
  }, 
  {
   "doctype": "DocPerm"

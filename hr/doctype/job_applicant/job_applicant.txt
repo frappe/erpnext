@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-15 16:32:13", 
+  "creation": "2013-01-29 19:25:37", 
   "docstatus": 0, 
   "modified": "2013-01-29 17:44:52", 
   "modified_by": "Administrator", 
@@ -87,16 +87,6 @@
   "fieldname": "thread_html", 
   "fieldtype": "HTML", 
   "label": "Thread HTML"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "in_list_view": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-10 16:34:31", 
+  "creation": "2013-01-31 22:22:27", 
   "docstatus": 0, 
   "modified": "2013-01-31 22:17:24", 
   "modified_by": "Administrator", 
@@ -23,18 +23,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Support Ticket", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -242,27 +237,51 @@
   "label": "Content Type"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Guest", 
+  "write": 1
  }, 
  {
-  "cancel": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Guest"
- }, 
- {
-  "cancel": 0, 
-  "doctype": "DocPerm", 
-  "role": "Customer"
+  "match": "customer", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Customer", 
+  "write": 1
  }, 
  {
   "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Support Team", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 1, 
+  "role": "Support Team", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 2, 
   "role": "Support Team"
  }
 ]

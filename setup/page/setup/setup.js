@@ -82,6 +82,12 @@ wn.module_page["Setup"] = [
 				label: wn._("Rename Tool"),
 				"description":wn._("Rename multiple items in one go")
 			},
+			{
+				"route":"List/File Data",
+				doctype: "File Data",
+				label: wn._("File Manager"),
+				"description":wn._("List, delete uploaded files.")
+			},
 		]
 	},
 	{

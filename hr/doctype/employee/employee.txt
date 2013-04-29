@@ -30,9 +30,7 @@
   "parent": "Employee", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "submit": 0
  }, 
  {
@@ -743,14 +741,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
   "label": "Trash Reason", 
@@ -763,6 +753,18 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "match": "employee", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Employee", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
   "role": "Employee", 
   "write": 0
  }, 
@@ -771,6 +773,8 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "match": "company", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "HR User", 
   "write": 1
  }, 
@@ -778,7 +782,29 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "HR Manager", 
   "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "HR User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "HR Manager", 
+  "write": 0
  }
 ]

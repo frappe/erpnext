@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-01 08:21:54", 
+  "creation": "2013-03-01 19:09:43", 
   "docstatus": 0, 
   "modified": "2013-03-01 08:22:16", 
   "modified_by": "Administrator", 
@@ -24,19 +24,14 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Batch", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "role": "Material Master Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -108,15 +103,19 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "write": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1
  }
 ]

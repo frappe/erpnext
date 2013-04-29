@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-08 11:36:50", 
+  "creation": "2013-03-28 10:35:30", 
   "docstatus": 0, 
   "modified": "2013-03-18 13:55:53", 
   "modified_by": "Administrator", 
@@ -113,15 +113,6 @@
   "fieldtype": "Check", 
   "hidden": 1, 
   "label": "Email Sent"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "create": 1, 
