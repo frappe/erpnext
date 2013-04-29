@@ -8,7 +8,7 @@ def execute():
 	singles = get_single_doctypes()
 	
 	for doctype in webnotes.conn.sql_list("""select parent from tabDocField where 
-		fieldname='file_list' and fieldtype='Text'"""):
+		fieldname='file_list'"""):
 		update_file_list(doctype, singles)
 		
 		webnotes.conn.sql("""delete from tabDocField where fieldname='file_list'
@@ -32,9 +32,11 @@ def update_file_list(doctype, singles):
 				ifnull(file_list, '')!=''""" % doctype, as_dict=True):
 				update_for_doc(doctype, doc)
 			webnotes.conn.commit()
-			webnotes.conn.sql("""alter table `tab%s` drop column file_list""" % doctype)
+			webnotes.conn.sql("""alter table `tab%s` drop column `file_list`""" % doctype)
 		except Exception, e:
-			if e.args[0]!=1054: raise e
+			print webnotes.getTraceback()
+			if (e.args and e.args[0]!=1054) or not e.args:
+				raise e
 
 def update_for_doc(doctype, doc):
 	for filedata in doc.file_list.split("\n"):
@@ -60,10 +62,14 @@ def update_for_doc(doctype, doc):
 					fd.doc.attached_to_name = doc.name
 					fd.save()
 				else:
-					fd = webnotes.bean("File Data", copy=fd.doclist)
-					fd.doc.attached_to_doctype = doctype
-					fd.doc.attached_to_name = doc.name
-					fd.insert()
+					try:
+						fd = webnotes.bean("File Data", copy=fd.doclist)
+						fd.doc.attached_to_doctype = doctype
+						fd.doc.attached_to_name = doc.name
+						fd.doc.name = None
+						fd.insert()
+					except webnotes.DuplicateEntryError:
+						pass
 		else:
 			webnotes.conn.sql("""delete from `tabFile Data` where name=%s""",
 				fileid)
