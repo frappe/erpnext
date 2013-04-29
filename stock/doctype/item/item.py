@@ -55,12 +55,13 @@ class DocType(DocListController):
 			ch.conversion_factor = 1
 
 	def check_stock_uom_with_bin(self):
-		bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
-			self.doc.item_code)
-		if self.doc.stock_uom and bin and cstr(bin[0][0]) \
-				and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
-			msgprint(_("Please Update Stock UOM with the help of Stock UOM Replace Utility."), 
-				raise_exception=1)
+		if not self.doc.__islocal:
+			bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
+				self.doc.name)
+			if self.doc.stock_uom and bin and cstr(bin[0][0]) \
+					and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
+				msgprint(_("Please Update Stock UOM with the help of Stock UOM Replace Utility."), 
+					raise_exception=1)
 	
 	def validate_conversion_factor(self):
 		check_list = []
@@ -154,13 +155,14 @@ class DocType(DocListController):
 						
 	def validate_barcode(self):
 		if self.doc.barcode:
-			duplicate = webnotes.conn.sql("select name from tabItem where barcode = %s and name != %s", (self.doc.barcode, self.doc.name))
+			duplicate = webnotes.conn.sql("""select name from tabItem where barcode = %s 
+				and name != %s""", (self.doc.barcode, self.doc.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
 					(self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 					
 	def check_non_asset_warehouse(self):
-		if self.doc.is_asset_item == "Yes":
+		if not self.doc.__islocal and self.doc.is_asset_item == "Yes":
 			existing_qty = webnotes.conn.sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
 			for e in existing_qty:
 				msgprint("%s Units exist in Warehouse %s, which is not an Asset Warehouse." % 
