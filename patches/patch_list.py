@@ -247,4 +247,5 @@ patch_list = [
     "execute:webnotes.reload_doc('Stock', 'DocType', 'Delivery Note Item')",
 	"patches.april_2013.p06_default_cost_center",
 	"execute:webnotes.reset_perms('File Data')",
+	"patches.april_2013.p07_update_file_data_custom_field",
 ]
