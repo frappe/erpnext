@@ -249,4 +249,5 @@ patch_list = [
 	"execute:webnotes.reset_perms('File Data')",
 	"patches.april_2013.p07_update_file_data_2",
 	"patches.april_2013.rebuild_sales_browser",
+	"patches.april_2013.p08_price_list_country",
 ]
