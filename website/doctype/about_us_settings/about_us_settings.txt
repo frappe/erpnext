@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-03-07 15:53:15", 
+  "creation": "2013-03-26 12:48:00", 
   "docstatus": 0, 
   "modified": "2013-03-12 14:48:34", 
   "modified_by": "Administrator", 
@@ -101,15 +101,6 @@
   "fieldname": "footer", 
   "fieldtype": "Text Editor", 
   "label": "Footer"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-02-18 18:37:56", 
+  "creation": "2013-02-20 11:18:11", 
   "docstatus": 0, 
   "modified": "2013-02-19 16:30:05", 
   "modified_by": "Administrator", 
@@ -8,7 +8,6 @@
  }, 
  {
   "allow_attach": 1, 
-  "allow_import": 1, 
   "autoname": "LAP/.#####", 
   "description": "Apply / Approve Leaves", 
   "doctype": "DocType", 
@@ -228,16 +227,6 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "permlevel": 0, 
-  "print_hide": 1
- }, 
- {
   "create": 1, 
   "doctype": "DocPerm", 
   "match": "employee", 
@@ -251,6 +240,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "role": "All", 
   "submit": 0
@@ -260,7 +250,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "company", 
   "permlevel": 0, 
   "report": 1, 
   "role": "HR User", 
@@ -269,8 +258,8 @@
  }, 
  {
   "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "match": "leave_approver:user", 
   "permlevel": 0, 
@@ -284,6 +273,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "report": 1, 
   "role": "HR User", 
@@ -295,6 +285,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "report": 1, 
   "role": "Leave Approver", 

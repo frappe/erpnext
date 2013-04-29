@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-29 19:25:50", 
+  "creation": "2013-03-25 16:01:24", 
   "docstatus": 0, 
   "modified": "2013-02-18 13:37:11", 
   "modified_by": "Administrator", 
@@ -804,19 +804,11 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Material User", 
@@ -839,6 +831,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Purchase Manager", 
@@ -861,6 +854,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 0, 
   "report": 1, 
   "role": "Purchase User", 
@@ -872,6 +866,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "", 
   "permlevel": 1, 
   "role": "All", 
   "submit": 0

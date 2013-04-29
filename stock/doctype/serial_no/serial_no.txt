@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-10 16:34:29", 
+  "creation": "2013-01-29 19:25:41", 
   "docstatus": 0, 
   "modified": "2013-01-29 16:27:57", 
   "modified_by": "Administrator", 
@@ -31,8 +31,8 @@
   "parent": "Serial No", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1
+  "read": 1, 
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -478,15 +478,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "sle_exists", 
   "fieldtype": "Check", 
   "hidden": 1, 
@@ -497,24 +488,81 @@
   "report_hide": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "match": "", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "report": 1, 
-  "role": "Material User", 
-  "submit": 0, 
+  "role": "System Manager", 
   "write": 1
  }, 
  {
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales User"
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Material Master Manager", 
+  "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Purchase User"
+  "match": "", 
+  "permlevel": 1, 
+  "role": "System Manager"
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Accounts User"
+  "match": "", 
+  "permlevel": 1, 
+  "role": "Sales Master Manager"
  }
 ]

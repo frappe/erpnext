@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-02-22 01:28:09", 
+  "creation": "2013-03-07 12:26:33", 
   "docstatus": 0, 
   "modified": "2013-03-07 07:03:34", 
   "modified_by": "Administrator", 
@@ -48,14 +48,5 @@
   "label": "Description", 
   "print_width": "200px", 
   "width": "200px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }
 ]
