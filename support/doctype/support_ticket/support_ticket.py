@@ -45,6 +45,10 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.update_status()
 		
+		if self.doc.status == "Closed":
+			from webnotes.widgets.form.assign_to import clear
+			clear(self.doc.doctype, self.doc.name)
+		
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
 		if comm.lead and not self.doc.lead:
