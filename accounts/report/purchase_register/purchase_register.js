@@ -1,4 +1,4 @@
-wn.query_reports["Sales Register"] = {
+wn.query_reports["Purchase Register"] = {
 	"add_total_row": true, 
 	"filters": [
 		{
@@ -25,9 +25,9 @@ wn.query_reports["Sales Register"] = {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
 						"is_pl_account": "No",
-						"debit_or_credit": "Debit",
+						"debit_or_credit": "Credit",
 						"company": company,
-						"master_type": "Customer"
+						"master_type": "Supplier"
 					}
 				}
 			}
