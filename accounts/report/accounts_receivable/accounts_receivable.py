@@ -18,7 +18,6 @@ def execute(filters=None):
 		and nowdate() or filters.get("report_date")
 
 	data = []
-	total_invoiced_amount = total_payment = total_outstanding = 0
 	for gle in entries:
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
 				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
@@ -41,17 +40,9 @@ def execute(filters=None):
 				else:
 					ageing_based_on_date = gle.posting_date
 				row += get_ageing_data(ageing_based_on_date, age_on, outstanding_amount)
-				
-				# Add to total
-				total_invoiced_amount += flt(invoiced_amount)
-				total_payment += flt(payment_amount)
-				total_outstanding += flt(outstanding_amount)
-				
+								
 				data.append(row)
-	if data:
-		data.append(["", "", "", "", "", "", "Total", total_invoiced_amount, total_payment, 
-			total_outstanding, "", "", "", ""])
-				
+								
 	return columns, data
 	
 def get_columns():

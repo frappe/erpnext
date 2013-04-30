@@ -1,5 +1,4 @@
 wn.query_reports["Sales Register"] = {
-	"add_total_row": true, 
 	"filters": [
 		{
 			"fieldname":"from_date",
