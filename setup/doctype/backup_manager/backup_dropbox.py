@@ -85,6 +85,7 @@ def backup_to_dropbox():
 		os.path.basename(backup.backup_path_db))
 	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
+	webnotes.conn.close()
 	response = dropbox_client.metadata("/files")
 	
 	# upload files to files folder
@@ -108,6 +109,7 @@ def backup_to_dropbox():
 				did_not_upload.append(filename)
 				error_log.append(cstr(e))
 	
+	webnotes.connect()
 	return did_not_upload, list(set(error_log))
 
 def get_dropbox_session():
