@@ -30,9 +30,7 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -1286,20 +1284,12 @@
   "report_hide": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
@@ -1307,6 +1297,8 @@
  {
   "doctype": "DocPerm", 
   "match": "customer", 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Customer"
- }
+ }, 
 ]

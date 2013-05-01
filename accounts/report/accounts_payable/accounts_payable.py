@@ -19,7 +19,6 @@ def execute(filters=None):
 		and nowdate() or filters.get("report_date")
 
 	data = []
-	total_invoiced_amount = total_paid = total_outstanding = 0
 	for gle in entries:
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
 				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
@@ -36,7 +35,7 @@ def execute(filters=None):
 			paid_amount = get_paid_amount(gle, filters.get("report_date") or nowdate(), 
 				entries_after_report_date)
 			outstanding_amount = invoiced_amount - paid_amount
-		
+
 			if abs(flt(outstanding_amount)) > 0.01:
 				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
 					gle.remarks, account_supplier_type_map.get(gle.account), due_date, bill_no, 
@@ -47,16 +46,9 @@ def execute(filters=None):
 					ageing_based_on_date = due_date
 				else:
 					ageing_based_on_date = gle.posting_date
+					
 				row += get_ageing_data(ageing_based_on_date, age_on, outstanding_amount)
-				
-				# Add to total
-				total_invoiced_amount += flt(invoiced_amount)
-				total_paid += flt(paid_amount)
-				total_outstanding += flt(outstanding_amount)
 				data.append(row)
-	if data:
-		data.append(["", "", "", "", "", "", "", "Total", "", total_invoiced_amount, total_paid, 
-			total_outstanding, "", "", "", ""])
 				
 	return columns, data
 	

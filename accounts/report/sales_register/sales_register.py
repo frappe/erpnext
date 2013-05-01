@@ -94,8 +94,8 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, posting_date, territory, debit_to, territory, 
-		project_name, customer, remarks, net_total, other_charges_total, grand_total 
+	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
+		remarks, net_total, other_charges_total, grand_total 
 		from `tabSales Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	

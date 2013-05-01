@@ -59,27 +59,22 @@ cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
 	set_operation_no(doc);
 }
 
-cur_frm.cscript.item = function(doc, dt, dn) {
-	if (doc.item) {
-		get_server_fields('get_item_details', doc.item, '', doc, dt, dn, 1);
-	}
-}
+cur_frm.add_fetch("item", "description", "description");
+cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	if (d.workstation) {
-		var callback = function(r, rt) {
-			calculate_op_cost(doc, dt, dn);
-			calculate_total(doc);
-		}
-		get_server_fields('get_workstation_details', d.workstation, 
-			'bom_operations', doc, dt, dn, 1, callback);
-	}
+	wn.model.with_doc("Workstation", d.workstation, function(i, v) {
+		d.hour_rate = v.hour_rate;
+		refresh_field("hour_rate");
+		calculate_op_cost(doc);
+		calculate_total(doc);
+	});
 }
 
 
 cur_frm.cscript.hour_rate = function(doc, dt, dn) {
-	calculate_op_cost(doc, dt, dn);
+	calculate_op_cost(doc);
 	calculate_total(doc);
 }
 
@@ -114,7 +109,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 				$.extend(d, r.message);
 				refresh_field("bom_materials");
 				doc = locals[doc.doctype][doc.name];
-				calculate_rm_cost(doc, cdt, cdn);
+				calculate_rm_cost(doc);
 				calculate_total(doc);
 			},
 			freeze: true
@@ -124,7 +119,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 
 
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
-	calculate_rm_cost(doc, cdt, cdn);
+	calculate_rm_cost(doc);
 	calculate_total(doc);
 }
 
@@ -134,12 +129,12 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		msgprint("You can not change rate if BOM mentioned agianst any item");
 		get_bom_material_detail(doc, cdt, cdn);
 	} else {
-		calculate_rm_cost(doc, cdt, cdn);
+		calculate_rm_cost(doc);
 		calculate_total(doc);
 	}
 }
 
-var calculate_op_cost = function(doc, dt, dn) {	
+var calculate_op_cost = function(doc) {	
 	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
@@ -151,7 +146,7 @@ var calculate_op_cost = function(doc, dt, dn) {
 	refresh_field('operating_cost');
 }
 
-var calculate_rm_cost = function(doc, dt, dn) {	
+var calculate_rm_cost = function(doc) {	
 	var rm = getchildren('BOM Item', doc.name, 'bom_materials');
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
@@ -201,7 +196,7 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = functi
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
-	calculate_op_cost(doc, dt, dn);
-	calculate_rm_cost(doc, dt, dn);
+	calculate_op_cost(doc);
+	calculate_rm_cost(doc);
 	calculate_total(doc);
 }

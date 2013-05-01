@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-22 16:16:03", 
+  "creation": "2013-04-29 16:13:11", 
   "docstatus": 0, 
-  "modified": "2013-04-30 17:55:54", 
+  "modified": "2013-04-30 17:51:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,11 +12,11 @@
   "is_standard": "Yes", 
   "name": "__common__", 
   "ref_doctype": "Purchase Invoice", 
-  "report_name": "Accounts Payable", 
-  "report_type": "Report Builder"
+  "report_name": "Purchase Register", 
+  "report_type": "Script Report"
  }, 
  {
   "doctype": "Report", 
-  "name": "Accounts Payable"
+  "name": "Purchase Register"
  }
 ]

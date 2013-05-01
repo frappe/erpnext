@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-10 16:34:23", 
+  "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
   "modified": "2013-01-22 14:56:41", 
   "modified_by": "Administrator", 
@@ -61,13 +61,6 @@
   "options": "<div class=\"help\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List"
- }, 
- {
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
@@ -85,6 +78,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "match": "", 
   "role": "Sales Master Manager", 
   "write": 1
  }

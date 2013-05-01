@@ -83,15 +83,6 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Website Manager"

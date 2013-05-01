@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-02-12 13:19:11", 
+  "creation": "2013-03-28 10:35:30", 
   "docstatus": 0, 
   "modified": "2013-03-11 17:41:11", 
   "modified_by": "Administrator", 
@@ -24,14 +24,12 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Web Page", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "read": 1, 
-  "report": 1, 
   "role": "Website Manager", 
   "submit": 0
  }, 
@@ -139,26 +137,18 @@
   "options": "CSS"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
-  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
+  "report": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "write": 0
+  "match": "", 
+  "permlevel": 1
  }
 ]

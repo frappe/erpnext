@@ -81,7 +81,7 @@ class DocType(DocTypeNestedSet):
 		"""
 			Cost Center name must be unique
 		"""
-		if (self.doc.__islocal or not self.doc.name) and webnotes.conn.sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
+		if (self.doc.fields.get("__islocal") or not self.doc.name) and webnotes.conn.sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
 			msgprint("Cost Center Name already exists, please rename", raise_exception=1)
 			
 		self.validate_mandatory()
