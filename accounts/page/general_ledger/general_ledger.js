@@ -186,7 +186,6 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var totals = this.make_summary_row("Totals", this.account);
 
 		var grouped_ledgers = {};
-
 		$.each(data, function(i, item) {
 			if((me.is_default("company") ? true : me.apply_filter(item, "company")) &&
 				(me.account ? me.is_child_account(me.account, item.account) 
@@ -217,8 +216,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					grouped_ledgers[item.account].totals.debit += item.debit;
 					grouped_ledgers[item.account].totals.credit += item.credit;
 				}
-
-				if(me.account) {
+				if(item.account) {
 					item.against_account = me.voucher_accounts[item.voucher_type + ":"
 						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");
 				}

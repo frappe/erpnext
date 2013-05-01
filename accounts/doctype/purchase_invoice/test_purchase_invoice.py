@@ -72,7 +72,38 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["Stock Received But Not Billed - _TC", 750.0, 0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
-			["Expenses Included In Valuation - _TC", 0, 250.0]
+			["Expenses Included In Valuation - _TC", 0, 250.0],
+		])
+		
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+		
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+
+	def test_gl_entries_with_aia_for_non_stock_items(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		
+		pi = webnotes.bean(copy=test_records[1])
+		pi.doclist[1].item_code = "_Test Non Stock Item"
+		pi.doclist[1].expense_head = "_Test Account Cost for Goods Sold - _TC"
+		pi.doclist.pop(2)
+		pi.doclist.pop(3)
+		pi.run_method("calculate_taxes_and_totals")
+		pi.insert()
+		pi.submit()
+		
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
+		
+		expected_values = sorted([
+			["_Test Supplier - _TC", 0, 620],
+			["_Test Account Cost for Goods Sold - _TC", 500.0, 0],
+			["_Test Account VAT - _TC", 120.0, 0],
 		])
 		
 		for i, gle in enumerate(gl_entries):
@@ -106,7 +137,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
-			# print tax.account_head, tax.tax_amount, tax.item_wise_tax_detail
 
 		expected_values = [
 			["_Test Item Home Desktop 100", 90, 59],
@@ -142,7 +172,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
-			# print tax.account_head, tax.tax_amount, tax.item_wise_tax_detail
 
 		expected_values = [
 			["_Test FG Item", 90, 7059],

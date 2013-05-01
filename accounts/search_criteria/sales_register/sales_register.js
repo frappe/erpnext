@@ -28,5 +28,5 @@ report.customize_filters = function() {
   this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Grand Total <='].df.filter_hide = 1;
   this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Fiscal Year'].df.filter_hide = 1;
   this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Sales Partner'].df.filter_hide = 1;
-  this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Is Opening'].df.filter_hide = 1;
+  this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Is Opening Entry'].df.filter_hide = 1;
 }
