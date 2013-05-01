@@ -188,6 +188,11 @@ wn.module_page["Accounts"] = [
 		icon: "icon-list",
 		items: [
 			{
+				"label":wn._("Bank Reconciliation Statement"),
+				route: "query-report/Bank Reconciliation Statement",
+				doctype: "Journal Voucher"
+			},
+			{
 				"label":wn._("Delivered Items To Be Billed"),
 				route: "query-report/Delivered Items To Be Billed",
 				doctype: "Sales Invoice"
