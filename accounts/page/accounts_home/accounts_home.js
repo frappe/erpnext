@@ -202,6 +202,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Ordered Items To Be Billed",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Bank Clearance Summary"),
+				route: "query-report/Bank Clearance Summary",
+				doctype: "Journal Voucher"
+			},
 		]
 	}
 ]
