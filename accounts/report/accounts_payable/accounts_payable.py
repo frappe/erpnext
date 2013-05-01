@@ -67,8 +67,7 @@ def get_gl_entries(filters, before_report_date=True):
 	gl_entries = []
 	gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
 		where ifnull(is_cancelled, 'No') = 'No' %s order by posting_date, account""" % 
-		(conditions) % (", ".join(['%s']*len(supplier_accounts))), 
-		tuple(supplier_accounts), as_dict=1)
+		(conditions), tuple(supplier_accounts), as_dict=1)
 	return gl_entries
 	
 def get_conditions(filters, before_report_date=True):
@@ -85,7 +84,7 @@ def get_conditions(filters, before_report_date=True):
 			conditions, filters)
 	
 	if supplier_accounts:
-		conditions += " and account in (%s)"
+		conditions += " and account in (%s)" % (", ".join(['%s']*len(supplier_accounts)))
 		
 	if filters.get("report_date"):
 		if before_report_date:
