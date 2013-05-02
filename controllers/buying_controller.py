@@ -47,13 +47,13 @@ class BuyingController(StockController):
 			self.set_total_in_words()
 	
 	def validate_warehouse_belongs_to_company(self):
-		for d in self.doclist.get({"warehouse": True}):
-			warehouse_company = webnotes.conn.get_value("Warehouse", d.warehouse, "company")
-			if warehouse_company and warehouse_company != self.doc.company:
+		for warehouse, company in webnotes.conn.get_values("Warehouse", 
+			self.doclist.get_distinct_values("warehouse"), "company").items():
+			if company and company != self.doc.company:
 				webnotes.msgprint(_("Warehouse must belong to company") + \
-					(": %s (%s, %s)" % (d.warehouse, warehouse_company, self.doc.company)),
+					(": %s (%s, %s)" % (warehouse, company, self.doc.company)),
 					raise_exception=WrongWarehouseCompany)
-	
+
 	def validate_stock_or_nonstock_items(self):
 		items = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
 		if self.stock_items:

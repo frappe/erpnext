@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:41", 
+  "modified": "2013-05-02 14:44:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,12 +53,20 @@
   "reqd": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "options": "Currency", 
+  "reqd": 1
+ }, 
+ {
   "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "fieldname": "how_to_upload", 
   "fieldtype": "HTML", 
   "label": "How to upload", 
-  "options": "<div class=\"help\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
+  "options": "<div class=\"well\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
  }, 
  {
   "cancel": 0, 
@@ -78,7 +86,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "", 
   "role": "Sales Master Manager", 
   "write": 1
  }
