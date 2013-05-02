@@ -29,9 +29,14 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.show_item_prices = function() {
-	cur_frm.toggle_display("item_prices_section", cur_frm.doc.__item_price && cur_frm.doc.__item_price.length);
+	var item_price = wn.model.get("Item Price", {price_list_name: cur_frm.doc.name});
+	
+	var show = item_price && item_price.length;
+	
+	cur_frm.toggle_display("item_prices_section", show);
 	$(cur_frm.fields_dict.item_prices.wrapper).empty();
-	if (!cur_frm.doc.__item_price) return;
+	if (!show) return;
+	
 	var out = '<table class="table table-striped table-bordered">\
 		<thead><tr>\
 			<th>' + wn._("Item Code") + '</th>\
@@ -40,7 +45,7 @@ cur_frm.cscript.show_item_prices = function() {
 			<th>' + wn._("Valid For Buying") + '</th>\
 		</tr></thead>\
 		<tbody>'
-		+ $.map(cur_frm.doc.__item_price.sort(function(a, b) { return a.parent.localeCompare(b.parent); }), function(d) {
+		+ $.map(item_price.sort(function(a, b) { return a.parent.localeCompare(b.parent); }), function(d) {
 			return '<tr>'
 				+ '<td>' + d.parent + '</td>'
 				+ '<td style="text-align: right;">' + format_currency(d.ref_rate, d.ref_currency) + '</td>'

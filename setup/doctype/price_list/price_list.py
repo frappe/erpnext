@@ -25,8 +25,8 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def onload(self):
-		self.doc.fields["__item_price"] = webnotes.conn.sql("""select parent, ref_rate, ref_currency, selling, buying
-			from `tabItem Price` where price_list_name=%s""", self.doc.name, as_dict=True)
+		self.doclist.extend(webnotes.conn.sql("""select * from `tabItem Price` 
+			where price_list_name=%s""", self.doc.name, as_dict=True, update={"doctype": "Item Price"}))
 	
 	def validate(self):
 		if not (cint(self.doc.valid_for_all_countries) or len(self.doclist.get({"parentfield": "valid_for_countries"}))):
