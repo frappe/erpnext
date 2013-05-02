@@ -55,7 +55,7 @@ class DocType(DocListController):
 			ch.conversion_factor = 1
 
 	def check_stock_uom_with_bin(self):
-		if not self.doc.__islocal:
+		if not self.doc.fields.get("__islocal"):
 			bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
 				self.doc.name)
 			if self.doc.stock_uom and bin and cstr(bin[0][0]) \
