@@ -114,7 +114,8 @@ class DocType:
 	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, purpose = '', rejected=None):
 		exists = webnotes.conn.sql("select name, status, docstatus from `tabSerial No` where name = '%s'" % (serial_no))
 		if is_submit:
-			if exists and exists[0][2] != 2 and purpose not in ['Material Transfer', 'Sales Return']:
+			if exists and exists[0][2] != 2 and \
+					purpose not in ['Material Transfer', "Material Receipt", 'Sales Return']:
 				msgprint("Serial No: %s already %s" % (serial_no, exists and exists[0][1]), raise_exception = 1)
 			elif exists:
 				s = Document('Serial No', exists and exists[0][0])

@@ -263,6 +263,12 @@ class TestMaterialRequest(unittest.TestCase):
 		se = webnotes.bean(copy=se_doclist)
 		self.assertRaises(webnotes.MappingMismatchError, se.insert)
 		
+	def test_warehouse_company_validation(self):
+		from controllers.buying_controller import WrongWarehouseCompany
+		mr = webnotes.bean(copy=test_records[0])
+		mr.doc.company = "_Test Company 1"
+		self.assertRaises(WrongWarehouseCompany, mr.insert)
+		
 test_records = [
 	[
 		{
