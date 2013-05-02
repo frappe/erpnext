@@ -71,8 +71,8 @@ def update_template_args(page_name, args):
 		"disable_signup"]:
 		args[k] = cint(args.get(k) or 0)
 	
-	args.url = quote(cstr(get_request_site_address(full_address=True)), cstr(""))
-	args.encoded_title = quote(cstr(args.title or ""), cstr(""))
+	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
+	args.encoded_title = quote(str(args.title or ""), str(""))
 	
 	return args
 	
