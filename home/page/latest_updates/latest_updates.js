@@ -1,4 +1,6 @@
 erpnext.updates = [
+	["2nd May", ["Buying: Warehouse must belong to same company as transaction",
+		"Price List": "Added Currency Field. One price list can have only one currency"]],
 	["18th April", ["Cost Center: Set a default Cost Center for a Company"]],
 	["12th April", ["Employee: List of Leave Approvers who can approve the Employee's Leave Applications"]],
 	["10th April", ["Redesigned File Uploads and added File Manager in Setup"]],

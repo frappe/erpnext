@@ -28,6 +28,14 @@ class TestItem(unittest.TestCase):
 		item.doclist.append(webnotes.doc(item_price.fields.copy()))
 		self.assertRaises(webnotes.DuplicateEntryError, item.insert)
 
+	def test_price_list_mismatch(self):
+		from stock.doctype.item.item import PriceListCurrencyMismatch
+		item = webnotes.bean(copy=test_records[0])
+		item.doc.item_code = "_Test Item 11"
+		item_price = item.doclist.get({"doctype": "Item Price"})[0].ref_currency="USD"
+		self.assertRaises(PriceListCurrencyMismatch, item.insert)
+
+
 test_records = [
 	[{
 		"doctype": "Item",
