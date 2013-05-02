@@ -1,7 +1,7 @@
 wn.query_reports["Collection Report"] = {
 	"filters": [
 		{
-			"fieldname":"from_date",
+			"fieldname": "from_date",
 			"label": "From Date",
 			"fieldtype": "Date",
 			"default": wn.defaults.get_user_default("year_start_date"),

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import getdate, nowdate, flt, cstr
+from accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -125,19 +126,3 @@ def get_paid_amount(gle, report_date, entries_after_report_date):
 			(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
 	
 	return flt(paid_amount)
-
-def get_ageing_data(ageing_based_on_date, age_on, outstanding_amount):
-	val1 = val2 = val3 = val4 = diff = 0
-	diff = age_on and ageing_based_on_date \
-		and (getdate(age_on) - getdate(ageing_based_on_date)).days or 0
-
-	if diff <= 30:
-		val1 = outstanding_amount
-	elif 30 < diff <= 60:
-		val2 = outstanding_amount
-	elif 60 < diff <= 90:
-		val3 = outstanding_amount
-	elif diff > 90:
-		val4 = outstanding_amount
-		
-	return [diff, val1, val2, val3, val4]
