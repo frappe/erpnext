@@ -27,6 +27,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.insert()		
 		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
 
+	def test_warehouse_company_validation(self):
+		from controllers.buying_controller import WrongWarehouseCompany
+		po = webnotes.bean(copy=test_records[0])
+		po.doc.company = "_Test Company 1"
+		self.assertRaises(WrongWarehouseCompany, po.insert)
+
 
 test_dependencies = ["BOM"]
 
