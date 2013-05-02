@@ -47,7 +47,7 @@ cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
 		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['address_html'].wrapper,
-			page_length: 2,
+			page_length: 5,
 			new_doctype: "Address",
 			custom_new_doc: function(doctype) {
 				var address = wn.model.make_new_doc_and_get_name('Address');
@@ -78,7 +78,7 @@ cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
 		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
-			page_length: 2,
+			page_length: 5,
 			new_doctype: "Contact",
 			custom_new_doc: function(doctype) {
 				var contact = wn.model.make_new_doc_and_get_name('Contact');
