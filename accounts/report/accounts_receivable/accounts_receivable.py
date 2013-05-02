@@ -58,8 +58,7 @@ def get_gl_entries(filters, upto_report_date=True):
 	conditions, customer_accounts = get_conditions(filters, upto_report_date)
 	return webnotes.conn.sql("""select * from `tabGL Entry` 
 		where ifnull(is_cancelled, 'No') = 'No' %s order by posting_date, account""" % 
-		(conditions) % (", ".join(['%s']*len(customer_accounts))), 
-		tuple(customer_accounts), as_dict=1)
+		(conditions), tuple(customer_accounts), as_dict=1)
 	
 def get_conditions(filters, upto_report_date=True):
 	conditions = ""
@@ -75,7 +74,7 @@ def get_conditions(filters, upto_report_date=True):
 			conditions, filters)
 	
 	if customer_accounts:
-		conditions += " and account in (%s)"
+		conditions += " and account in (%s)" % (", ".join(['%s']*len(customer_accounts)))
 		
 	if filters.get("report_date"):
 		if upto_report_date:
@@ -96,7 +95,7 @@ def get_account_territory_map():
 def get_si_due_date_map():
 	""" get due_date from sales invoice """
 	si_due_date_map = {}
-	for t in webnotes.conn.sql("""select name, due_date from `tabSales Invoice` group by name"""):
+	for t in webnotes.conn.sql("""select name, due_date from `tabSales Invoice`"""):
 		si_due_date_map[t[0]] = t[1]
 		
 	return si_due_date_map

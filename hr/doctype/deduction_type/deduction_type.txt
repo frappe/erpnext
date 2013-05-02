@@ -1,12 +1,13 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-01-22 16:50:30", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:25:38", 
+  "modified": "2013-05-02 11:22:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_rename": 1, 
   "autoname": "field:deduction_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
