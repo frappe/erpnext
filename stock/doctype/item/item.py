@@ -27,6 +27,13 @@ from webnotes.model.controller import DocListController
 class PriceListCurrencyMismatch(Exception): pass
 
 class DocType(DocListController):
+	def autoname(self):
+		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
+			from webnotes.model.doc import make_autoname
+			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
+
+		self.doc.name = self.doc.item_code
+			
 	def validate(self):
 		if not self.doc.stock_uom:
 			msgprint(_("Please enter Default Unit of Measure"), raise_exception=1)

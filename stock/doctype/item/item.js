@@ -20,7 +20,11 @@ cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
-	cur_frm.toggle_enable("item_code", doc.__islocal);
+	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
+		&& doc.__islocal)
+	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
+		&& doc.__islocal)
+
 
 	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
 		var callback = function(r, rt) {
