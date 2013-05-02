@@ -34,7 +34,6 @@ def get_gdrive_authorize_url():
 		"authorize_url": authorize_url,
 	}
 
-@webnotes.whitelist()
 def upload_files(name, mimetype, service, folder_id):
 	if not webnotes.conn:
 		webnotes.connect()
@@ -78,6 +77,9 @@ def backup_to_gdrive():
 	did_not_upload = []
 	error_log = []
 	
+	files_folder_id = webnotes.conn.get_value("Backup Manager", None, "files_folder_id")
+	
+	webnotes.conn.close()
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
 		found = False
@@ -90,10 +92,7 @@ def backup_to_gdrive():
 			mimetype = mimetypes.types_map.get("." + ext) or "application/octet-stream"
 		
 		#Compare Local File with Server File
-		param = {}
-	  	children = drive_service.children().list(
-			folderId=webnotes.conn.get_value("Backup Manager", None, "files_folder_id"), 
-			**param).execute()
+	  	children = drive_service.children().list(folderId=files_folder_id).execute()
 	  	for child in children.get('items', []):
 			file = drive_service.files().get(fileId=child['id']).execute()
 			if filename == file['title'] and size == int(file['fileSize']):
@@ -101,12 +100,12 @@ def backup_to_gdrive():
 				break
 		if not found:
 			try:
-				upload_files(filepath, mimetype, drive_service, 
-					webnotes.conn.get_value("Backup Manager", None, "files_folder_id"))
+				upload_files(filepath, mimetype, drive_service, files_folder_id)
 			except Exception, e:
 				did_not_upload.append(filename)
 				error_log.append(cstr(e))
 	
+	webnotes.connect()
 	return did_not_upload, list(set(error_log))
 
 def get_gdrive_flow():

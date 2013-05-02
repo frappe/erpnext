@@ -1,6 +1,12 @@
 erpnext.updates = [
+	["2nd May", ["Buying: Warehouse must belong to same company as transaction",
+		"Price List: Added Currency Field. One price list can have only one currency",
+		"Item: Naming can now be by series or item code",
+		"Naming Series: Set number of digits in series (optionally)"]],
+	["18th April", ["Cost Center: Set a default Cost Center for a Company"]],
 	["12th April", ["Employee: List of Leave Approvers who can approve the Employee's Leave Applications"]],
 	["10th April", ["Redesigned File Uploads and added File Manager in Setup"]],
+	["3rd April", ["Update Manager: Open source users can update their ERPNext instance from Setup > Update Manager"]],
 	["27th March", ["Rename multiple items together. Go to Setup > Rename Tool"]],
 	["26th March", ["Added project to Stock Ledger and Balance",
 		"Added Default Cash Account in Company."]],

@@ -95,6 +95,8 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		
 		this.data = [].concat(this._data);
 		
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
+		
 		$.each(this.data, function(i, d) {
 			me.reset_item_values(d);
 		});

@@ -94,8 +94,8 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, posting_date, territory, debit_to, territory, 
-		project_name, customer, remarks, net_total, other_charges_total, grand_total 
+	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
+		remarks, net_total, other_charges_total, grand_total 
 		from `tabSales Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
@@ -145,7 +145,6 @@ def get_customer_deatils(invoice_list):
 	customers = list(set([inv.customer for inv in invoice_list]))
 	for cust in webnotes.conn.sql("""select name, territory from `tabCustomer` 
 		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
-			customer_map.setdefault(cust.name, "")
 			customer_map[cust.name] = cust.territory
 	
 	return customer_map
@@ -155,7 +154,6 @@ def get_account_details(invoice_list):
 	accounts = list(set([inv.debit_to for inv in invoice_list]))
 	for acc in webnotes.conn.sql("""select name, parent_account from tabAccount 
 		where name in (%s)""" % ", ".join(["%s"]*len(accounts)), tuple(accounts), as_dict=1):
-			account_map.setdefault(acc.name, "")
 			account_map[acc.name] = acc.parent_account
 						
 	return account_map

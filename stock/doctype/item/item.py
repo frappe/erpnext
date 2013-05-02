@@ -23,7 +23,17 @@ from webnotes.model.bean import getlist
 from webnotes import msgprint, _
 
 from webnotes.model.controller import DocListController
+
+class PriceListCurrencyMismatch(Exception): pass
+
 class DocType(DocListController):
+	def autoname(self):
+		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
+			from webnotes.model.doc import make_autoname
+			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
+
+		self.doc.name = self.doc.item_code
+			
 	def validate(self):
 		if not self.doc.stock_uom:
 			msgprint(_("Please enter Default Unit of Measure"), raise_exception=1)
@@ -33,7 +43,7 @@ class DocType(DocListController):
 		self.add_default_uom_in_conversion_factor_table()
 		self.valiadte_item_type()
 		self.check_for_active_boms()
-		self.check_ref_rate_detail()
+		self.validate_price_lists()
 		self.fill_customer_code()
 		self.check_item_tax()
 		self.validate_barcode()
@@ -55,12 +65,13 @@ class DocType(DocListController):
 			ch.conversion_factor = 1
 
 	def check_stock_uom_with_bin(self):
-		bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
-			self.doc.item_code)
-		if self.doc.stock_uom and bin and cstr(bin[0][0]) \
-				and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
-			msgprint(_("Please Update Stock UOM with the help of Stock UOM Replace Utility."), 
-				raise_exception=1)
+		if not self.doc.fields.get("__islocal"):
+			bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
+				self.doc.name)
+			if self.doc.stock_uom and bin and cstr(bin[0][0]) \
+					and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
+				msgprint(_("Please Update Stock UOM with the help of Stock UOM Replace Utility."), 
+					raise_exception=1)
 	
 	def validate_conversion_factor(self):
 		check_list = []
@@ -120,16 +131,21 @@ class DocType(DocListController):
 				if cstr(self.doc.fields.get(d)) != 'Yes':
 					_check_for_active_boms(fl[d])
 			
-	def check_ref_rate_detail(self):
-		check_list=[]
+	def validate_price_lists(self):
+		price_lists=[]
 		for d in getlist(self.doclist,'ref_rate_details'):
-			if [cstr(d.price_list_name), cstr(d.ref_currency), 
-					cint(d.selling), cint(d.buying)] in check_list:
-				msgprint("Ref Rate is entered twice for Price List : '%s' and Currency : '%s'." % 
-					(d.price_list_name,d.ref_currency), raise_exception=1)
+			if d.price_list_name in price_lists:
+				msgprint(_("Cannot have two prices for same Price List") + ": " + d.price_list_name,
+					raise_exception= webnotes.DuplicateEntryError)
 			else:
-				check_list.append([cstr(d.price_list_name),cstr(d.ref_currency)])
-	
+				price_list_currency = webnotes.conn.get_value("Price List", d.price_list_name, "currency")
+				if price_list_currency and d.ref_currency != price_list_currency:
+					msgprint(_("Currency does not match Price List Currency for Price List") \
+						+ ": " + d.price_list_name, raise_exception=PriceListCurrencyMismatch)
+				
+				price_lists.append(d.price_list_name)
+			
+					
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
@@ -154,13 +170,14 @@ class DocType(DocListController):
 						
 	def validate_barcode(self):
 		if self.doc.barcode:
-			duplicate = webnotes.conn.sql("select name from tabItem where barcode = %s and name != %s", (self.doc.barcode, self.doc.name))
+			duplicate = webnotes.conn.sql("""select name from tabItem where barcode = %s 
+				and name != %s""", (self.doc.barcode, self.doc.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
 					(self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 					
 	def check_non_asset_warehouse(self):
-		if self.doc.is_asset_item == "Yes":
+		if not self.doc.__islocal and self.doc.is_asset_item == "Yes":
 			existing_qty = webnotes.conn.sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
 			for e in existing_qty:
 				msgprint("%s Units exist in Warehouse %s, which is not an Asset Warehouse." % 

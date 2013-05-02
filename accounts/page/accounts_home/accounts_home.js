@@ -154,6 +154,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Sales Register",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Purchase Register"),
+				route: "query-report/Purchase Register",
+				doctype: "Purchase Invoice"
+			},
 		]
 	},
 	{
@@ -183,6 +188,11 @@ wn.module_page["Accounts"] = [
 		icon: "icon-list",
 		items: [
 			{
+				"label":wn._("Bank Reconciliation Statement"),
+				route: "query-report/Bank Reconciliation Statement",
+				doctype: "Journal Voucher"
+			},
+			{
 				"label":wn._("Delivered Items To Be Billed"),
 				route: "query-report/Delivered Items To Be Billed",
 				doctype: "Sales Invoice"
@@ -191,6 +201,21 @@ wn.module_page["Accounts"] = [
 				"label":wn._("Ordered Items To Be Billed"),
 				route: "query-report/Ordered Items To Be Billed",
 				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Bank Clearance Summary"),
+				route: "query-report/Bank Clearance Summary",
+				doctype: "Journal Voucher"
+			},
+			{
+				"label":wn._("Payment Collection With Ageing"),
+				route: "query-report/Payment Collection With Ageing",
+				doctype: "Journal Voucher"
+			},
+			{
+				"label":wn._("Payment Made With Ageing"),
+				route: "query-report/Payment Made With Ageing",
+				doctype: "Journal Voucher"
 			},
 		]
 	}

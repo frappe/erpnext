@@ -26,10 +26,13 @@ from webnotes.model.utils import round_floats_in_doc
 
 from controllers.stock_controller import StockController
 
+class WrongWarehouseCompany(Exception): pass
+
 class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		self.validate_stock_or_nonstock_items()
+		self.validate_warehouse_belongs_to_company()
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")
@@ -42,15 +45,24 @@ class BuyingController(StockController):
 						
 			# set total in words
 			self.set_total_in_words()
-			
+	
+	def validate_warehouse_belongs_to_company(self):
+		for warehouse, company in webnotes.conn.get_values("Warehouse", 
+			self.doclist.get_distinct_values("warehouse"), "company").items():
+			if company and company != self.doc.company:
+				webnotes.msgprint(_("Warehouse must belong to company") + \
+					(": %s (%s, %s)" % (warehouse, company, self.doc.company)),
+					raise_exception=WrongWarehouseCompany)
+
 	def validate_stock_or_nonstock_items(self):
 		items = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
-		if self.stock_items and len(items) > len(self.stock_items):
+		if self.stock_items:
 			nonstock_items = list(set(items) - set(self.stock_items))
-			webnotes.msgprint(_("Stock and non-stock items can not be entered at the same ") + 
-				self.doc.doctype + _(""". You should make separate documents for them.
-				Stock Items: """) + ", ".join(self.stock_items) + _("""
-				Non-stock Items: """) + ", ".join(nonstock_items), raise_exception=1)
+			if nonstock_items:
+				webnotes.msgprint(_("Stock and non-stock items can not be entered in the same ") + 
+					self.doc.doctype + _(""". You should make separate documents for them.
+					Stock Items: """) + ", ".join(self.stock_items) + _("""
+					Non-stock Items: """) + ", ".join(nonstock_items), raise_exception=1)
 				
 		elif items and not self.stock_items:
 			tax_for_valuation = [d.account_head for d in 

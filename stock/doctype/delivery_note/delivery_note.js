@@ -326,6 +326,17 @@ if (sys_defaults.auto_inventory_accounting) {
 	}
 
 	// cost center
+	cur_frm.cscript.cost_center = function(doc, cdt, cdn){
+		var d = locals[cdt][cdn];
+		if(d.cost_center) {
+			var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
+			for(var i = 0; i < cl.length; i++){
+				if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
+			}
+		}
+		refresh_field(cur_frm.cscript.fname);
+	}
+	
 	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
 		return {
 			query: "accounts.utils.get_cost_center_list",

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-15 11:06:59", 
+  "creation": "2013-04-30 12:58:38", 
   "docstatus": 0, 
-  "modified": "2013-03-15 17:27:33", 
+  "modified": "2013-05-02 11:42:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -109,6 +109,7 @@
   "doctype": "DocField", 
   "fieldname": "sync_with_gdrive", 
   "fieldtype": "Section Break", 
+  "hidden": 1, 
   "label": "Sync with Google Drive"
  }, 
  {
