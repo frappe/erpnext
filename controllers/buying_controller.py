@@ -50,8 +50,7 @@ class BuyingController(StockController):
 		for warehouse, company in webnotes.conn.get_values("Warehouse", 
 			self.doclist.get_distinct_values("warehouse"), "company").items():
 			if company and company != self.doc.company:
-				webnotes.msgprint(_("Warehouse must belong to company") + \
-					(": %s (%s, %s)" % (warehouse, company, self.doc.company)),
+				webnotes.msgprint(_("Company mismatch for Warehouse") + (": %s" % (warehouse,)),
 					raise_exception=WrongWarehouseCompany)
 
 	def validate_stock_or_nonstock_items(self):
