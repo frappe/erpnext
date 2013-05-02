@@ -1,0 +1,36 @@
+[
+ {
+  "creation": "2013-04-29 18:24:32", 
+  "docstatus": 0, 
+  "modified": "2013-04-29 18:24:32", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "PLCNTRY-.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "country", 
+  "fieldtype": "Link", 
+  "label": "Country", 
+  "name": "__common__", 
+  "options": "Country", 
+  "parent": "Price List Country", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Price List Country"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]
