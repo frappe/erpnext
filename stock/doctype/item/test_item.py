@@ -20,6 +20,14 @@ import webnotes
 
 test_ignore = ["BOM"]
 
+class TestItem(unittest.TestCase):
+	def test_duplicate_price_list(self):
+		item = webnotes.bean(copy=test_records[0])
+		item.doc.item_code = "_Test Item 10"
+		item_price = item.doclist.get({"doctype": "Item Price"})[0]
+		item.doclist.append(webnotes.doc(item_price.fields.copy()))
+		self.assertRaises(webnotes.DuplicateEntryError, item.insert)
+
 test_records = [
 	[{
 		"doctype": "Item",
@@ -45,7 +53,14 @@ test_records = [
 		"warehouse": "_Test Warehouse",
 		"warehouse_reorder_level": 20,
 		"warehouse_reorder_qty": 20
-	}],
+	}, {
+		"doctype": "Item Price",
+		"parentfield": "ref_rate_details",
+		"price_list_name": "_Test Price List",
+		"ref_rate": 100,
+		"ref_currency": "INR"
+	}
+	],
 	[{
 		"doctype": "Item",
 		"item_code": "_Test Item Home Desktop 100",

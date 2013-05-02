@@ -23,6 +23,7 @@ from webnotes.model.bean import getlist
 from webnotes import msgprint, _
 
 from webnotes.model.controller import DocListController
+
 class DocType(DocListController):
 	def validate(self):
 		if not self.doc.stock_uom:
@@ -124,13 +125,12 @@ class DocType(DocListController):
 	def check_ref_rate_detail(self):
 		check_list=[]
 		for d in getlist(self.doclist,'ref_rate_details'):
-			if [cstr(d.price_list_name), cstr(d.ref_currency), 
-					cint(d.selling), cint(d.buying)] in check_list:
-				msgprint("Ref Rate is entered twice for Price List : '%s' and Currency : '%s'." % 
-					(d.price_list_name,d.ref_currency), raise_exception=1)
+			if d.price_list_name in check_list:
+				msgprint(_("Cannot have two prices for same Price List") + ": " + d.price_list_name,
+					raise_exception= webnotes.DuplicateEntryError)
 			else:
-				check_list.append([cstr(d.price_list_name),cstr(d.ref_currency)])
-	
+				check_list.append(d.price_list_name)
+					
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
