@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-01 12:29:12", 
+  "creation": "2013-05-02 12:09:51", 
   "docstatus": 0, 
-  "modified": "2013-05-01 12:29:12", 
+  "modified": "2013-05-02 12:09:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,11 +12,11 @@
   "is_standard": "Yes", 
   "name": "__common__", 
   "ref_doctype": "Journal Voucher", 
-  "report_name": "Collection Report", 
+  "report_name": "Payment Collection With Ageing", 
   "report_type": "Script Report"
  }, 
  {
   "doctype": "Report", 
-  "name": "Collection Report"
+  "name": "Payment Collection With Ageing"
  }
 ]

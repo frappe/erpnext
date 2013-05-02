@@ -207,6 +207,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Bank Clearance Summary",
 				doctype: "Journal Voucher"
 			},
+			{
+				"label":wn._("Payment Collection With Ageing"),
+				route: "query-report/Payment Collection With Ageing",
+				doctype: "Journal Voucher"
+			},
 		]
 	}
 ]

@@ -1,4 +1,4 @@
-wn.query_reports["Collection Report"] = {
+wn.query_reports["Payment Collection With Ageing"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
