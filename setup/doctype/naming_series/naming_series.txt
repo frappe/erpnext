@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:23", 
+  "creation": "2013-01-25 11:35:08", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:34", 
+  "modified": "2013-05-02 15:34:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,8 +25,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -62,7 +60,7 @@
   "fieldname": "help_html", 
   "fieldtype": "HTML", 
   "label": "Help HTML", 
-  "options": "<div class=\"help-box\">\nEdit list of Series in the box below. Each Series Prefix on a new line.<br><br>\nAllowed special characters are \"/\" and \"-\"<br>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\n</div>"
+  "options": "<div class=\"well\">\nEdit list of Series in the box below. Rules:\n<ul>\n<li>Each Series Prefix on a new line.</li>\n<li>Allowed special characters are \"/\" and \"-\"</li>\n<li>Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, \".####\" means that the series will have four digits. Default is five digits.</li>\n</ul>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\nINV-.####<br>\n</div>"
  }, 
  {
   "doctype": "DocField", 
