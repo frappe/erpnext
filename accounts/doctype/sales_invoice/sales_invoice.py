@@ -45,15 +45,7 @@ class DocType(SellingController):
 		
 	def validate(self):
 		super(DocType, self).validate()
-		
-		if not (self.doc.contact_person and self.doc.customer_address):
-			for fieldname, val in self.get_default_address_and_contact("customer").items():
-				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
-					self.doc.fields[fieldname] = val
-					
-		if cint(self.doc.is_pos):
-			self.set_pos_fields(for_validate=True)
-		
+		self.fetch_missing_values()
 		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
@@ -145,6 +137,26 @@ class DocType(SellingController):
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
+		
+	def fetch_missing_values(self):
+		# fetch contact and address details for customer, if they are not mentioned
+		if not (self.doc.contact_person and self.doc.customer_address):
+			for fieldname, val in self.get_default_address_and_contact("customer").items():
+				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+					self.doc.fields[fieldname] = val
+					
+		# fetch missing item values
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if item.fields.get("item_code"):
+				ret = get_obj('Sales Common').get_item_details(item.fields, self)
+				for fieldname, value in ret.items():
+					if self.meta.get_field(fieldname, parentfield="entries") and \
+						not item.fields.get(fieldname):
+							item.fields[fieldname] = value
+		
+		# fetch pos details, if they are not fetched
+		if cint(self.doc.is_pos):
+			self.set_pos_fields(for_validate=True)
 
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
@@ -294,6 +306,7 @@ class DocType(SellingController):
 				ret = self.apply_pos_settings(args, ret)
 			
 			return ret
+		
 		elif cint(self.doc.is_pos) == 1 and self.pos_settings:
 			for doc in self.doclist.get({"parentfield": "entries"}):
 				if doc.fields.get('item_code'):
