@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 12:48:00", 
+  "creation": "2013-03-19 12:02:15", 
   "docstatus": 0, 
-  "modified": "2013-03-12 14:48:34", 
+  "modified": "2013-05-03 11:01:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,7 +10,7 @@
   "allow_attach": 1, 
   "description": "Settings for the About Us Page", 
   "doctype": "DocType", 
-  "document_type": "Master", 
+  "document_type": "Other", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"
@@ -21,7 +21,8 @@
   "parent": "About Us Settings", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "read_only": 0
  }, 
  {
   "create": 1, 
