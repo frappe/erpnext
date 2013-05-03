@@ -157,7 +157,7 @@ class DocType(SellingController):
 		# fetch pos details, if they are not fetched
 		if cint(self.doc.is_pos):
 			self.set_pos_fields(for_validate=True)
-
+			
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
