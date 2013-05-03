@@ -152,7 +152,7 @@ class DocType(TransactionBase):
 				d.e_modified_amount = round(flt(d.e_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
 			elif not self.doc.payment_days:
 				d.e_modified_amount = 0
-			self.doc.gross_pay += d.e_modified_amount
+			self.doc.gross_pay += flt(d.e_modified_amount)
 	
 	def calculate_ded_total(self):
 		"""
@@ -165,7 +165,7 @@ class DocType(TransactionBase):
 			elif not self.doc.payment_days:
 				d.d_modified_amount = 0
 			
-			self.doc.total_deduction += d.d_modified_amount
+			self.doc.total_deduction += flt(d.d_modified_amount)
 				
 	def calculate_net_pay(self):
 		"""
