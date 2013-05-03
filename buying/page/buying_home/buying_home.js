@@ -98,6 +98,17 @@ wn.module_page["Buying"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Item-wise Purchase History"),
+				route: "query-report/Item-wise Purchase History",
+			},
+		]
+	}
 ]
 
 pscript['onload_buying-home'] = function(wrapper) {
