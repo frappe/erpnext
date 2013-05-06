@@ -122,7 +122,6 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 		'get_default_customer_address', '', callback);
 	if(doc.customer) unhide_field(['customer_address','contact_person','territory', 'customer_group']);
 	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
-		console.log(doc.customer_group);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
