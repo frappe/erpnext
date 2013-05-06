@@ -140,31 +140,28 @@ class BuyingController(StockController):
 			item.fields[base_field] = flt((flt(item.fields[print_field],
 				self.precision.item[print_field]) * self.doc.conversion_rate),
 				self.precision.item[base_field])
-
-		for item in self.item_doclist:
-			round_floats_in_doc(item, self.precision.item)
+		
+		# hack! - cleaned up in _cleanup()
+		if self.doc.doctype != "Purchase Invoice":
+			self.precision.item["rate"] = self.precision.item.purchase_rate
 			
+		for item in self.item_doclist:
 			# hack! - cleaned up in _cleanup()
 			if self.doc.doctype != "Purchase Invoice":
 				item.rate = item.purchase_rate
-				self.precision.item.rate = self.precision.item.purchase_rate
 				
-				item.discount = item.discount_rate
-				self.precision.item.discount = self.precision.item.discount_rate
+			round_floats_in_doc(item, self.precision.item)
 
-			if item.discount == 100:
-				if not item.import_ref_rate:
-					item.import_ref_rate = item.import_rate
+			if item.discount_rate == 100:
+				item.import_ref_rate = item.import_ref_rate or item.import_rate
 				item.import_rate = 0
 			else:
 				if item.import_ref_rate:
-					item.import_rate = flt(item.import_ref_rate *
-						(1.0 - (item.discount_rate / 100.0)),
+					item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
 						self.precision.item.import_rate)
 				else:
-					# assume that print rate and discount are specified
-					item.import_ref_rate = flt(item.import_rate / 
-						(1.0 - (item.discount_rate / 100.0)),
+					# assume that print rate and discount_rate are specified
+					item.import_ref_rate = flt(item.import_rate / (1.0 - (item.discount_rate / 100.0)),
 						self.precision.item.import_ref_rate)
 						
 			item.import_amount = flt(item.import_rate * item.qty,
@@ -297,9 +294,6 @@ class BuyingController(StockController):
 				item.purchase_rate = item.rate
 				del item.fields["rate"]
 				
-				item.discount_rate = item.discount
-				del item.fields["discount"]
-		
 	def validate_on_previous_row(self, tax):
 		"""
 			validate if a valid row id is mentioned in case of
