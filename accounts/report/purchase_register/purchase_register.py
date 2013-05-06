@@ -20,9 +20,10 @@ from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns, expense_accounts, tax_accounts = get_columns()
-	
+
 	invoice_list = get_invoices(filters)
+	columns, expense_accounts, tax_accounts = get_columns(invoice_list)
+	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
 	invoice_tax_map = get_invoice_tax_map(invoice_list)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
@@ -55,7 +56,7 @@ def execute(filters=None):
 	return columns, data
 	
 	
-def get_columns():
+def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
 		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier:Link/Supplier:120", 
@@ -66,10 +67,14 @@ def get_columns():
 	
 	expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
 		from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
-		order by expense_head""")
+		and parent in (%s) order by expense_head""" % 
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+		
 	tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
 		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice' 
-		and docstatus = 1 and ifnull(account_head, '') != '' order by account_head""")
+		and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
+		order by account_head""" % 
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
 	columns = columns + [(account + ":Currency:120") for account in expense_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
