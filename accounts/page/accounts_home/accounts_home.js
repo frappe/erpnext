@@ -217,6 +217,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Payment Made With Ageing",
 				doctype: "Journal Voucher"
 			},
+			{
+				"label":wn._("Sales Partners Commission"),
+				route: "query-report/Sales Partners Commission",
+				doctype: "Sales Invoice"
+			},
 		]
 	}
 ]
