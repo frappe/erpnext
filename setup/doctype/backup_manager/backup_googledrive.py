@@ -92,8 +92,7 @@ def backup_to_gdrive():
 			mimetype = mimetypes.types_map.get("." + ext) or "application/octet-stream"
 		
 		#Compare Local File with Server File
-		param = {}
-	  	children = drive_service.children().list(folderId=files_folder_id, **param).execute()
+	  	children = drive_service.children().list(folderId=files_folder_id).execute()
 	  	for child in children.get('items', []):
 			file = drive_service.files().get(fileId=child['id']).execute()
 			if filename == file['title'] and size == int(file['fileSize']):

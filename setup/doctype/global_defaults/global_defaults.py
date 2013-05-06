@@ -21,6 +21,7 @@ import webnotes.defaults
 from webnotes.utils import cint
 
 keydict = {
+	# "key in defaults": "key in Global Defaults"
 	"print_style": "print_style",
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
@@ -31,6 +32,7 @@ keydict = {
 	'item_group': 'default_item_group',
 	'customer_group': 'default_customer_group',
 	'cust_master_name': 'cust_master_name', 
+	"item_naming_by": "item_naming_by",
 	'supplier_type': 'default_supplier_type',
 	'supp_master_name': 'supp_master_name', 
 	'territory': 'default_territory',

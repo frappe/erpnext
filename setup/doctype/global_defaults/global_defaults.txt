@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 11:08:14", 
+  "creation": "2013-04-01 15:05:24", 
   "docstatus": 0, 
-  "modified": "2013-03-28 15:41:03", 
+  "modified": "2013-05-02 15:05:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -166,6 +164,13 @@
   "fieldtype": "Column Break", 
   "read_only": 0, 
   "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_naming_by", 
+  "fieldtype": "Select", 
+  "label": "Item Naming By", 
+  "options": "Item Code\nNaming Series"
  }, 
  {
   "doctype": "DocField", 
@@ -501,6 +506,11 @@
   "fieldtype": "Data", 
   "label": "SMS Sender Name", 
   "read_only": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"

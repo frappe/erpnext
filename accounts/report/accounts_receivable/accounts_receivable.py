@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import getdate, nowdate, flt, cstr
 
 def execute(filters=None):
@@ -58,8 +59,7 @@ def get_gl_entries(filters, upto_report_date=True):
 	conditions, customer_accounts = get_conditions(filters, upto_report_date)
 	return webnotes.conn.sql("""select * from `tabGL Entry` 
 		where ifnull(is_cancelled, 'No') = 'No' %s order by posting_date, account""" % 
-		(conditions) % (", ".join(['%s']*len(customer_accounts))), 
-		tuple(customer_accounts), as_dict=1)
+		(conditions), tuple(customer_accounts), as_dict=1)
 	
 def get_conditions(filters, upto_report_date=True):
 	conditions = ""
@@ -69,13 +69,16 @@ def get_conditions(filters, upto_report_date=True):
 	customer_accounts = []
 	if filters.get("account"):
 		customer_accounts = [filters["account"]]
-	elif filters.get("company"):
+	else:
 		customer_accounts = webnotes.conn.sql_list("""select name from `tabAccount` 
 			where ifnull(master_type, '') = 'Customer' and docstatus < 2 %s""" % 
 			conditions, filters)
 	
 	if customer_accounts:
-		conditions += " and account in (%s)"
+		conditions += " and account in (%s)" % (", ".join(['%s']*len(customer_accounts)))
+	else:
+		msgprint(_("No Customer Accounts found. Customer Accounts are identified based on \
+			'Master Type' value in account record."), raise_exception=1)
 		
 	if filters.get("report_date"):
 		if upto_report_date:
@@ -96,7 +99,7 @@ def get_account_territory_map():
 def get_si_due_date_map():
 	""" get due_date from sales invoice """
 	si_due_date_map = {}
-	for t in webnotes.conn.sql("""select name, due_date from `tabSales Invoice` group by name"""):
+	for t in webnotes.conn.sql("""select name, due_date from `tabSales Invoice`"""):
 		si_due_date_map[t[0]] = t[1]
 		
 	return si_due_date_map

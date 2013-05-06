@@ -141,7 +141,6 @@ def get_account_details(invoice_list):
 	accounts = list(set([inv.credit_to for inv in invoice_list]))
 	for acc in webnotes.conn.sql("""select name, parent_account from tabAccount 
 		where name in (%s)""" % ", ".join(["%s"]*len(accounts)), tuple(accounts), as_dict=1):
-			account_map.setdefault(acc.name, "")
 			account_map[acc.name] = acc.parent_account
 						
 	return account_map	

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 06:51:18", 
+  "creation": "2013-04-30 12:58:46", 
   "docstatus": 0, 
-  "modified": "2013-04-17 11:51:30", 
+  "modified": "2013-05-02 15:51:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -219,13 +219,16 @@
   "reqd": 0
  }, 
  {
-  "description": "Enter domain names associated to this website, each on a new line", 
   "doctype": "DocField", 
-  "fieldname": "domain_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "Domain List", 
-  "reqd": 0
+  "fieldname": "column_break_28", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Disable Customer Signup link in Login page", 
+  "doctype": "DocField", 
+  "fieldname": "disable_signup", 
+  "fieldtype": "Check", 
+  "label": "Disable Signup"
  }, 
  {
   "create": 1, 

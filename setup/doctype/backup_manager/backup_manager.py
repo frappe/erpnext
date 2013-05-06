@@ -20,8 +20,8 @@ def take_backups_if(freq):
 	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
 		take_backups_dropbox()
 		
-	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
-		take_backups_gdrive()
+	# if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
+	# 	take_backups_gdrive()
 	
 @webnotes.whitelist()
 def take_backups_dropbox():
@@ -35,7 +35,7 @@ def take_backups_dropbox():
 	except Exception:
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
 		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
-		print error_message
+		webnotes.errprint(error_message)
 		send_email(False, "Dropbox", error_message)
 
 #backup to gdrive 
@@ -51,7 +51,7 @@ def take_backups_gdrive():
 	except Exception:
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
 		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
-		print error_message
+		webnotes.errprint(error_message)
 		send_email(False, "Google Drive", error_message)
 
 def send_email(success, service_name, error_status=None):
