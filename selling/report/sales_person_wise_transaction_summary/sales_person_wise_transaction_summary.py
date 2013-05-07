@@ -32,8 +32,8 @@ def get_columns(filters):
 		
 	return [filters["doc_type"] + ":Link/" + filters["doc_type"] + ":140", 
 		"Customer:Link/Customer:140", "Territory:Link/Territory:100", "Posting Date:Date:100", 
-		"Item Code:Link/Item:120", "Qty:Currency:100", "Amount:Currency:120", 
-		"Sales Person:Link/Sales Person:140", "Contribution %:Currency:110", 
+		"Item Code:Link/Item:120", "Qty:Float:100", "Amount:Currency:120", 
+		"Sales Person:Link/Sales Person:140", "Contribution %:Float:110", 
 		"Contribution Amount:Currency:140"]
 	
 def get_entries(filters):

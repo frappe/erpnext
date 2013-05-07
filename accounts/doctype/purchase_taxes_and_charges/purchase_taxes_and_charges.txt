@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 06:51:12", 
+  "creation": "2013-04-19 11:00:06", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:05:19", 
+  "modified": "2013-05-07 11:23:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,6 +35,7 @@
   "oldfieldname": "category", 
   "oldfieldtype": "Select", 
   "options": "Valuation and Total\nValuation\nTotal", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -45,6 +46,7 @@
   "oldfieldname": "charge_type", 
   "oldfieldtype": "Select", 
   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -55,6 +57,7 @@
   "oldfieldname": "account_head", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -65,7 +68,8 @@
   "label": "Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
-  "options": "Cost Center"
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -75,17 +79,18 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -96,6 +101,7 @@
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -115,7 +121,8 @@
   "hidden": 0, 
   "label": "Enter Row", 
   "oldfieldname": "row_id", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 0
  }, 
  {
   "default": "Add", 
@@ -126,6 +133,7 @@
   "oldfieldname": "add_deduct_tax", 
   "oldfieldtype": "Select", 
   "options": "Add\nDeduct", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -149,6 +157,7 @@
   "oldfieldname": "parenttype", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 0
  }, 
  {
@@ -163,6 +172,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -177,6 +187,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }
 ]
