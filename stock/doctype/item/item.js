@@ -153,3 +153,7 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 		cur_frm.refresh();
 	});
 }
+
+cur_frm.cscript.image = function() {
+	refresh_field("image_view");
+}
