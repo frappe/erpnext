@@ -31,7 +31,9 @@ class DocType(DocListController):
 		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
 			from webnotes.model.doc import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
-
+		elif not self.doc.item_code:
+			msgprint(_("Item Code is mandatory"), raise_exception=1)
+			
 		self.doc.name = self.doc.item_code
 			
 	def validate(self):

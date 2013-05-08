@@ -107,6 +107,10 @@ wn.module_page["Buying"] = [
 				"label":wn._("Item-wise Purchase History"),
 				route: "query-report/Item-wise Purchase History",
 			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
 		]
 	}
 ]

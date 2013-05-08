@@ -197,6 +197,10 @@ wn.module_page["Stock"] = [
 				route: "query-report/Item-Wise Price List",
 				doctype: "Item"
 			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
 		]
 	}
 ]

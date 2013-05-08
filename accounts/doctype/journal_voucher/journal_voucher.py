@@ -43,6 +43,8 @@ class DocType(AccountsController):
 		if not self.doc.is_opening:
 			self.doc.is_opening='No'
 			
+		self.doc.clearance_date = None
+			
 		self.validate_debit_credit()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()

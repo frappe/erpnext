@@ -46,11 +46,7 @@ class DocType:
 		webnotes.conn.sql("""update `tabBOM Item` set bom_no=%s, 
 			rate=%s, amount=qty*%s where bom_no = %s and docstatus < 2""", 
 			(self.doc.new_bom, current_bom_unitcost, current_bom_unitcost, self.doc.current_bom))
-			
-	def get_parent_boms(bom_no):
-		return [d[0] for d in webnotes.conn.sql("""select distinct parent from
-			`tabBOM Item` where ifnull(bom_no, '')=%s and docstatus < 2""", bom_no)]
-	
+				
 	def get_parent_boms(self):
 		return [d[0] for d in webnotes.conn.sql("""select distinct parent 
 			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2""",

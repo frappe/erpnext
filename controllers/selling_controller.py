@@ -59,7 +59,8 @@ class SellingController(StockController):
 					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
 						item_sales_bom)
-					item.buying_amount = buying_amount > 0 and buying_amount or 0
+					
+					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
 					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
 						item.buying_amount)
 						
