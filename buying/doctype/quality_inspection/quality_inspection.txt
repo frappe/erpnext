@@ -1,13 +1,13 @@
 [
  {
-  "creation": "2013-01-10 16:34:11", 
+  "creation": "2013-04-30 13:13:03", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:21", 
+  "modified": "2013-05-09 14:34:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "QAI/.######", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
   "is_submittable": 1, 
   "module": "Buying", 

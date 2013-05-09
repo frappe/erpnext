@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes.utils import cstr
 
 from utilities.transaction_base import TransactionBase
 
@@ -32,15 +32,16 @@ class DocType(TransactionBase):
 		webnotes.conn.set(self.doc, 'status', 'Replied')
 
 	def autoname(self):
-		if self.doc.customer:
-			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.customer
-		elif self.doc.supplier:
-			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.supplier
-		elif self.doc.sales_partner:
-			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.sales_partner	
-		else:
-			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '')
-
+		# concat first and last name
+		self.doc.name = " ".join(filter(None, 
+			[cstr(self.doc.fields.get(f)).strip() for f in ["first_name", "last_name"]]))
+		
+		# concat party name if reqd
+		for fieldname in ("customer", "supplier", "sales_partner"):
+			if self.doc.fields.get(fieldname):
+				self.doc.name = self.doc.name + "-" + cstr(self.doc.fields.get(fieldname)).strip()
+				break
+		
 	def validate(self):
 		self.validate_primary_contact()
 
