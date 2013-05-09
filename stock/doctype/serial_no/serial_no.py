@@ -117,7 +117,7 @@ class DocType(StockController):
 		self.make_stock_ledger_entry(1)
 		self.make_gl_entries()
 	
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		"""rename serial_no text fields"""
 		for dt in webnotes.conn.sql("""select parent from tabDocField 
 			where fieldname='serial_no' and fieldtype='Text'"""):

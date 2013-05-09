@@ -287,7 +287,7 @@ class DocType:
 			where doctype='Global Defaults' and field='default_company' 
 			and value=%s""", self.doc.name)
 			
-	def on_rename(self,newdn,olddn):
+	def on_rename(self,newdn,olddn, merge=False):
 		webnotes.conn.sql("""update `tabCompany` set company_name=%s
 			where name=%s""", (newdn, olddn))
 		

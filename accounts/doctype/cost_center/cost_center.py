@@ -87,7 +87,7 @@ class DocType(DocTypeNestedSet):
 		self.validate_mandatory()
 		self.validate_budget_details()
 		
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		company_abbr = webnotes.conn.get_value("Company", self.doc.company_name, "abbr")		
 		parts = new.split(" - ")	
 
