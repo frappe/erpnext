@@ -30,7 +30,6 @@ from webnotes import _, msgprint
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -40,9 +39,6 @@ class DocType(SellingController):
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
 
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
-		
 	def validate(self):
 		super(DocType, self).validate()
 		self.fetch_missing_values()
