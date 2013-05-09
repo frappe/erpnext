@@ -161,3 +161,7 @@ erpnext.queries.bom = function(opts) {
 		+ " LIMIT 50"
 
 }
+
+erpnext.queries.task = function() {
+	return { query: "projects.utils.query_task" };
+};
