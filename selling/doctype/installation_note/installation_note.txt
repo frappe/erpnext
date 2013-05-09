@@ -1,13 +1,13 @@
 [
  {
-  "creation": "2013-01-10 16:34:18", 
+  "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:02", 
+  "modified": "2013-05-09 14:43:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "IN/.####", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
   "is_submittable": 1, 
   "module": "Selling", 
@@ -33,6 +33,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
@@ -302,15 +303,6 @@
   "options": "Installation Note Item"
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Sales User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Sales Manager"
+  "doctype": "DocPerm"
  }
 ]

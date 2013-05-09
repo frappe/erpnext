@@ -18,7 +18,6 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import getdate, nowdate
-from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
@@ -28,9 +27,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 		
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
 	def get_emp_name(self):
 		return {
 			"employee_name": webnotes.conn.get_value("Employee", 
