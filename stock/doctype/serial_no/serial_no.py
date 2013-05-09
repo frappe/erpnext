@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, getdate, nowdate
 import datetime
-from webnotes import msgprint
+from webnotes import msgprint, _
 	
 from controllers.stock_controller import StockController
 
@@ -119,6 +119,9 @@ class DocType(StockController):
 	
 	def on_rename(self, new, old, merge=False):
 		"""rename serial_no text fields"""
+		if merge:
+			msgprint(_("Sorry. Serial Nos. cannot be merged"), raise_exception=True)
+		
 		for dt in webnotes.conn.sql("""select parent from tabDocField 
 			where fieldname='serial_no' and fieldtype='Text'"""):
 			
