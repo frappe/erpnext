@@ -272,7 +272,7 @@ class DocType(DocListController):
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 
-	def on_rename(self,newdn,olddn):
+	def on_rename(self,newdn,olddn, merge=False):
 		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
