@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-28 15:56:40", 
+  "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2013-03-29 15:31:42", 
+  "modified": "2013-05-09 13:31:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -520,6 +520,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "label": "Total Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -559,6 +567,14 @@
   "reqd": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "col5", 
+  "fieldtype": "Column Break", 
+  "print_width": "50%", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "company", 
@@ -575,14 +591,6 @@
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col5", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "read_only": 0, 
-  "width": "50%"
  }, 
  {
   "allow_on_submit": 0, 

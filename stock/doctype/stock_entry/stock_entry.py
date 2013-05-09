@@ -57,6 +57,7 @@ class DocType(StockController):
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_fiscal_year()
+		self.set_total_amount()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -174,6 +175,9 @@ class DocType(StockController):
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
 			
+	def set_total_amount(self):
+		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
+			
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
@@ -220,7 +224,7 @@ class DocType(StockController):
 			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(args)
 				
-			d.amount = flt(d.qty) * flt(d.incoming_rate)
+			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 			
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
