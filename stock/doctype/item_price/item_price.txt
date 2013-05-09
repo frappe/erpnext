@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-08 15:37:16", 
+  "creation": "2013-04-29 15:18:04", 
   "docstatus": 0, 
-  "modified": "2013-03-21 17:29:15", 
+  "modified": "2013-04-29 19:16:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -68,13 +68,13 @@
   "doctype": "DocField", 
   "fieldname": "selling", 
   "fieldtype": "Check", 
-  "label": "For Selling"
+  "label": "Valid For Selling"
  }, 
  {
   "description": "Allow this price in purchase related forms", 
   "doctype": "DocField", 
   "fieldname": "buying", 
   "fieldtype": "Check", 
-  "label": "For Buying"
+  "label": "Valid For Buying"
  }
 ]

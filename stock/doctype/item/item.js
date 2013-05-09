@@ -134,11 +134,7 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 	erpnext.utils.supplier_query;
 
 cur_frm.cscript.on_remove_attachment = function(doc) {
-	// refresh image list before unsetting image
-	refresh_field("image");
 	if(!inList(cur_frm.fields_dict.image.df.options.split("\n"), doc.image)) {
-		// if the selected image is removed from attachment, unset it
-		cur_frm.set_value("image", "");
 		msgprint(wn._("Attachment removed. You may need to update: ") 
 			+ wn.meta.get_docfield(doc.doctype, "description_html").label);
 	}
@@ -156,4 +152,8 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 		);
 		cur_frm.refresh();
 	});
+}
+
+cur_frm.cscript.image = function() {
+	refresh_field("image_view");
 }

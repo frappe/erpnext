@@ -194,10 +194,10 @@ class DocType(StockController):
 		total_valuation_amount = 0
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.t_warehouse and not item.s_warehouse:
-				total_valuation_amount += flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount += flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 			
 			if item.s_warehouse and not item.t_warehouse:
-				total_valuation_amount -= flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount -= flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 		
 		return total_valuation_amount
 			
@@ -607,7 +607,7 @@ class DocType(StockController):
 			'voucher_no': self.doc.name, 
 			'voucher_detail_no': d.name,
 			'actual_qty': qty,
-			'incoming_rate': flt(d.incoming_rate) or 0,
+			'incoming_rate': flt(d.incoming_rate, 2) or 0,
 			'stock_uom': d.stock_uom,
 			'company': self.doc.company,
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',

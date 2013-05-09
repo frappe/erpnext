@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-26 11:03:07", 
+  "creation": "2013-04-30 12:58:25", 
   "docstatus": 0, 
-  "modified": "2013-03-26 12:48:18", 
+  "modified": "2013-05-03 14:36:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,7 @@
   "doctype": "DocField", 
   "fieldname": "user", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "User", 
   "oldfieldname": "user", 
   "oldfieldtype": "Link", 
@@ -99,6 +100,7 @@
   "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Company", 
   "oldfieldname": "company", 
   "oldfieldtype": "Link", 
@@ -209,12 +211,6 @@
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Select", 
   "options": "link:Print Heading"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
  }, 
  {
   "create": 1, 

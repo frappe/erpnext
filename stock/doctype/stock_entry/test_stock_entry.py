@@ -25,6 +25,8 @@ class TestStockEntry(unittest.TestCase):
 			where item_code='_Test Item'""")
 			
 		self.assertTrue(mr_name)
+		
+		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
 		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
@@ -71,7 +73,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 
 	def test_material_issue_gl_entry(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		self._clear_stock()
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
@@ -111,9 +113,10 @@ class TestStockEntry(unittest.TestCase):
 		)
 		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.conn.set_default("company", self.old_default_company)
 		
 	def test_material_transfer_gl_entry(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		self._clear_stock()
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 
 		mr = webnotes.bean(copy=test_records[0])
@@ -145,6 +148,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertFalse(gl_entries)
 		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.conn.set_default("company", self.old_default_company)
 	
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		# check stock ledger entries
@@ -173,6 +177,9 @@ class TestStockEntry(unittest.TestCase):
 	def _clear_stock(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.conn.sql("""delete from `tabBin`""")
+		
+		self.old_default_company = webnotes.conn.get_default("company")
+		webnotes.conn.set_default("company", "_Test Company")
 	
 	def _insert_material_receipt(self):
 		self._clear_stock()
@@ -184,6 +191,8 @@ class TestStockEntry(unittest.TestCase):
 		se2.doclist[1].item_code = "_Test Item Home Desktop 100"
 		se2.insert()
 		se2.submit()
+		
+		webnotes.conn.set_default("company", self.old_default_company)
 		
 	def _get_actual_qty(self):
 		return flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
@@ -463,6 +472,8 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
 		
+		webnotes.conn.set_default("company", self.old_default_company)
+		
 		return se, pr.doc.name
 		
 	def test_over_stock_return(self):
@@ -562,6 +573,8 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_2 = self._get_actual_qty()
 		
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
+		
+		webnotes.conn.set_default("company", self.old_default_company)
 		
 		return se, pr.doc.name
 		

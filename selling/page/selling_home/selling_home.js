@@ -157,6 +157,14 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Orders Pending to be Delivered"),
 				route: "query-report/Sales Orders Pending To Be Delivered"
 			},
+			{
+				"label":wn._("Sales Person-wise Transaction Summary"),
+				route: "query-report/Sales Person-wise Transaction Summary",
+			},
+			{
+				"label":wn._("Item-wise Sales History"),
+				route: "query-report/Item-wise Sales History",
+			},
 		]
 	}
 ]

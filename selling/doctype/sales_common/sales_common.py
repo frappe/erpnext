@@ -374,7 +374,7 @@ class DocType(TransactionBase):
 			msgprint("Please Enter Appropriate Conversion Rate for Customer's Currency to Base Currency (%s --> %s)" % (obj.doc.currency, default_currency), raise_exception = 1)
 	
 		if (obj.doc.price_list_currency == default_currency and flt(obj.doc.plc_conversion_rate) != 1.00) or not obj.doc.plc_conversion_rate or (obj.doc.price_list_currency != default_currency and flt(obj.doc.plc_conversion_rate) == 1.00):
-			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency ( (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
+			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
 	
 
 

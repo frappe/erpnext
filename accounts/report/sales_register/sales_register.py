@@ -20,9 +20,10 @@ from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns, income_accounts, tax_accounts = get_columns()
 	
 	invoice_list = get_invoices(filters)
+	columns, income_accounts, tax_accounts = get_columns(invoice_list)
+	
 	invoice_income_map = get_invoice_income_map(invoice_list)
 	invoice_tax_map = get_invoice_tax_map(invoice_list)
 	
@@ -59,7 +60,7 @@ def execute(filters=None):
 	return columns, data
 	
 	
-def get_columns():
+def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
 		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer:Link/Customer:120", 
@@ -69,11 +70,14 @@ def get_columns():
 	]
 	
 	income_accounts = webnotes.conn.sql_list("""select distinct income_account 
-		from `tabSales Invoice Item` where docstatus = 1 order by income_account""")
+		from `tabSales Invoice Item` where docstatus = 1 and parent in (%s) 
+		order by income_account""" % 
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
 	tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
-		and docstatus = 1 order by account_head""")
+		and docstatus = 1 and parent in (%s) order by account_head""" % 
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
 	columns = columns + [(account + ":Currency:120") for account in income_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \

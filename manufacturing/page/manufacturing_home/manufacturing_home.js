@@ -58,6 +58,17 @@ wn.module_page["Manufacturing"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Issued Items Against Production Order"),
+				route: "query-report/Issued Items Against Production Order",
+			},
+		]
+	}
 ]
 
 pscript['onload_manufacturing-home'] = function(wrapper) {

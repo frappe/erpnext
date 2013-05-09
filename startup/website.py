@@ -1,4 +1,5 @@
 import webnotes, conf, os
+from webnotes.utils import cint, cstr
 
 def get_templates_path():
 	return os.path.join(os.path.dirname(conf.__file__), "app", "website", "templates")
@@ -61,12 +62,14 @@ def update_template_args(page_name, args):
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
 	for k in ["banner_html", "brand_html", "copyright", "address", "twitter_share_via",
-		"favicon", "facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
+		"favicon", "facebook_share", "google_plus_one", "twitter_share", "linked_in_share",
+		"disable_signup"]:
 		if k in settings.fields:
 			args[k] = settings.fields.get(k)
 
-	for k in ["facebook_share", "google_plus_one", "twitter_share", "linked_in_share"]:
-		args[k] = int(args.get(k) or 0)
+	for k in ["facebook_share", "google_plus_one", "twitter_share", "linked_in_share",
+		"disable_signup"]:
+		args[k] = cint(args.get(k) or 0)
 	
 	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
 	args.encoded_title = quote(str(args.title or ""), str(""))

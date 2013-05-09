@@ -66,6 +66,6 @@ class DocType:
 				vouchers.append(d.voucher_id)
 
 		if vouchers:
-			msgprint("Clearance Date updated in %s" % vouchers)
+			msgprint("Clearance Date updated in %s" % ", ".join(vouchers))
 		else:
 			msgprint("Clearance Date not mentioned")
