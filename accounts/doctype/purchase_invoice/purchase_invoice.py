@@ -464,15 +464,17 @@ class DocType(BuyingController):
 					# if auto inventory accounting enabled and stock item, 
 					# then do stock related gl entries
 					# expense will be booked in sales invoice
-					
 					stock_item_and_auto_inventory_accounting = True
+					
+					valuation_amt = (flt(item.amount, self.precision.item.amount) + 
+						flt(item.item_tax_amount, self.precision.item.item_tax_amount) + 
+						flt(item.rm_supp_cost, self.precision.item.rm_supp_cost))
 					
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": stock_account,
 							"against": self.doc.credit_to,
-							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
-								*  flt(item.qty),
+							"debit": valuation_amt,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock"
 						})
 					)
