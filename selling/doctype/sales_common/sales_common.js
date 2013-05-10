@@ -518,6 +518,8 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	if(flt(doc.conversion_rate)>1) {
 		net_total_incl *= flt(doc.conversion_rate);
 	}
+	
+	// TODO: store net_total_export
 
 	doc.net_total = inclusive_rate ? flt(net_total_incl) : flt(net_total);
 	doc.other_charges_total = roundNumber(flt(other_charges_total), 2);

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-19 11:00:14", 
+  "creation": "2013-05-06 12:03:41", 
   "docstatus": 0, 
-  "modified": "2013-04-22 11:59:40", 
+  "modified": "2013-05-09 17:34:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "document_type": "Transaction", 
   "is_submittable": 1, 
   "module": "Accounts", 
   "name": "__common__", 
@@ -30,6 +31,7 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1
  }, 
  {
@@ -251,7 +253,6 @@
   "width": "50%"
  }, 
  {
-  "description": "Will be calculated automatically when you enter the details", 
   "doctype": "DocField", 
   "fieldname": "net_total", 
   "fieldtype": "Currency", 
@@ -259,9 +260,18 @@
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
-  "print_hide": 0, 
+  "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -1288,7 +1298,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
@@ -1297,8 +1306,7 @@
  {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "permlevel": 0, 
-  "report": 1, 
+  "report": 0, 
   "role": "Customer"
  }
 ]

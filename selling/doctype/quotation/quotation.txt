@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-03 09:10:44", 
+  "creation": "2013-05-06 12:03:40", 
   "docstatus": 0, 
-  "modified": "2013-04-03 09:58:02", 
+  "modified": "2013-05-06 13:07:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -239,10 +239,18 @@
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
-  "print_hide": 0, 
+  "print_hide": 1, 
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

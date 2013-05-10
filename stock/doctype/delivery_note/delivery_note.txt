@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-02 10:50:50", 
+  "creation": "2013-05-06 12:03:30", 
   "docstatus": 0, 
-  "modified": "2013-02-02 19:18:38", 
+  "modified": "2013-05-06 13:08:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -255,11 +255,19 @@
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
-  "print_hide": 0, 
+  "print_hide": 1, 
   "print_width": "150px", 
   "read_only": 1, 
   "reqd": 0, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -1136,7 +1144,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Material User", 
@@ -1159,7 +1166,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Material Manager", 
@@ -1171,7 +1177,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 0, 
   "report": 1, 
   "role": "Sales User", 
@@ -1183,7 +1188,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Sales User", 
@@ -1205,7 +1209,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "role": "Accounts User", 
   "submit": 0
