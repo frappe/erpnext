@@ -191,11 +191,11 @@ class DocType(SellingController):
 						self.doc.fields[fieldname] = pos.get(fieldname)
 
 			# set pos values in items
-			for doc in self.doclist.get({"parentfield": "entries"}):
-				if doc.fields.get('item_code'):
-					for fieldname, val in self.apply_pos_settings(doc.fields).items():
-						if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
-							doc.fields[fieldname] = val
+			for item in self.doclist.get({"parentfield": "entries"}):
+				if item.fields.get('item_code'):
+					for fieldname, val in self.apply_pos_settings(item.fields).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
+							item.fields[fieldname] = val
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
