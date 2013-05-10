@@ -137,8 +137,8 @@ class BuyingController(StockController):
 		def _set_base(item, print_field, base_field):
 			"""set values in base currency"""
 			item.fields[base_field] = flt((flt(item.fields[print_field],
-				self.precision_of(print_field, item.parentfield)) * self.doc.conversion_rate),
-				self.precision_of(base_field, item.parentfield))
+				self.precision(print_field, item.parentfield)) * self.doc.conversion_rate),
+				self.precision(base_field, item.parentfield))
 		
 		# hack! - cleaned up in _cleanup()
 		if self.doc.doctype != "Purchase Invoice":
@@ -158,19 +158,19 @@ class BuyingController(StockController):
 			else:
 				if item.import_ref_rate:
 					item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
-						self.precision_of("import_rate", item.parentfield))
+						self.precision("import_rate", item.parentfield))
 				else:
 					# assume that print rate and discount_rate are specified
 					item.import_ref_rate = flt(item.import_rate / (1.0 - (item.discount_rate / 100.0)),
-						self.precision_of("import_ref_rate", item.parentfield))
+						self.precision("import_ref_rate", item.parentfield))
 						
 			item.import_amount = flt(item.import_rate * item.qty,
-				self.precision_of("import_amount", item.parentfield))
+				self.precision("import_amount", item.parentfield))
 				
 			_set_base(item, "import_ref_rate", "purchase_ref_rate")
 			_set_base(item, "import_rate", "rate")
 			_set_base(item, "import_amount", "amount")
-		
+			
 	def initialize_taxes(self):
 		for tax in self.tax_doclist:
 			# initialize totals to 0
@@ -193,9 +193,9 @@ class BuyingController(StockController):
 			self.doc.net_total += item.amount
 			self.doc.net_total_import += item.import_amount
 			
-		self.doc.net_total = flt(self.doc.net_total, self.precision_of("net_total"))
+		self.doc.net_total = flt(self.doc.net_total, self.precision("net_total"))
 		self.doc.net_total_import = flt(self.doc.net_total_import,
-			self.precision_of("net_total_import"))
+			self.precision("net_total_import"))
 		
 	def calculate_taxes(self):
 		for item in self.item_doclist:
@@ -213,7 +213,7 @@ class BuyingController(StockController):
 				# and tax.grand_total_for_current_item for the first such iteration
 				if not (current_tax_amount or self.doc.net_total or tax.tax_amount) and \
 						tax.charge_type=="Actual":
-					zero_net_total_adjustment = flt(tax.rate, self.precision_of("tax_amount", tax.parentfield))
+					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
 					current_tax_amount += zero_net_total_adjustment
 
 				# store tax_amount for current item as it will be used for
@@ -235,12 +235,12 @@ class BuyingController(StockController):
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
 					tax.grand_total_for_current_item = flt(item.amount +
-						current_tax_amount, self.precision_of("total", tax.parentfield))
+						current_tax_amount, self.precision("total", tax.parentfield))
 
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
-							current_tax_amount, self.precision_of("total", tax.parentfield))
+							current_tax_amount, self.precision("total", tax.parentfield))
 
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
@@ -252,20 +252,20 @@ class BuyingController(StockController):
 	def calculate_totals(self):
 		if self.tax_doclist:
 			self.doc.grand_total = flt(self.tax_doclist[-1].total,
-				self.precision_of("grand_total"))
+				self.precision("grand_total"))
 			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
-				self.precision_of("grand_total_import"))
+				self.precision("grand_total_import"))
 		else:
 			self.doc.grand_total = flt(self.doc.net_total,
-				self.precision_of("grand_total"))
+				self.precision("grand_total"))
 			self.doc.grand_total_import = flt(
 				self.doc.grand_total / self.doc.conversion_rate,
-				self.precision_of("grand_total_import"))
+				self.precision("grand_total_import"))
 
 		self.doc.total_tax = \
 			flt(self.doc.grand_total - self.doc.net_total,
-			self.precision_of("total_tax"))
+			self.precision("total_tax"))
 
 		if self.meta.get_field("rounded_total"):
 			self.doc.rounded_total = round(self.doc.grand_total)
@@ -276,11 +276,11 @@ class BuyingController(StockController):
 	def calculate_outstanding_amount(self):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus == 0:
 			self.doc.total_advance = flt(self.doc.total_advance,
-				self.precision_of("total_advance"))
+				self.precision("total_advance"))
 			self.doc.total_amount_to_pay = flt(self.doc.grand_total - flt(self.doc.write_off_amount,
-				self.precision_of("write_off_amount")), self.precision_of("total_amount_to_pay"))
+				self.precision("write_off_amount")), self.precision("total_amount_to_pay"))
 			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
-				self.precision_of("outstanding_amount"))
+				self.precision("outstanding_amount"))
 			
 	def _cleanup(self):
 		for tax in self.tax_doclist:
@@ -293,6 +293,11 @@ class BuyingController(StockController):
 			for item in self.item_doclist:
 				item.purchase_rate = item.rate
 				del item.fields["rate"]
+				
+		# reset fieldname of rate
+		if self.doc.doctype != "Purchase Invoice":
+			df = self.meta.get_field("rate", parentfield=self.fname)
+			df.fieldname = "purchase_rate"
 				
 	def validate_on_previous_row(self, tax):
 		"""
@@ -319,7 +324,7 @@ class BuyingController(StockController):
 
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
-			actual = flt(tax.rate, self.precision_of("tax_amount", tax.parentfield))
+			actual = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
 			current_tax_amount = (self.doc.net_total
 				and ((item.amount / self.doc.net_total) * actual)
 				or 0)
@@ -332,11 +337,11 @@ class BuyingController(StockController):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		return flt(current_tax_amount, self.precision_of("tax_amount", tax.parentfield))
+		return flt(current_tax_amount, self.precision("tax_amount", tax.parentfield))
 		
 	def _get_tax_rate(self, tax, item_tax_map):
 		if item_tax_map.has_key(tax.account_head):
-			return flt(item_tax_map.get(tax.account_head), self.precision_of("rate", tax.parentfield))
+			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax.parentfield))
 		else:
 			return tax.rate
 			
@@ -350,26 +355,31 @@ class BuyingController(StockController):
 		if tax.category in ["Valuation", "Valuation and Total"] and \
 				item.item_code in self.stock_items:
 			item.item_tax_amount += flt(current_tax_amount,
-				self.precision_of("item_tax_amount", item.parentfield))
+				self.precision("item_tax_amount", item.parentfield))
 				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
-		for d in self.doclist.get({"parentfield": parentfield}):
-			d.conversion_factor = d.conversion_factor or flt(webnotes.conn.get_value(
-				"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
+		for item in self.doclist.get({"parentfield": parentfield}):
+			item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
+				"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 				"conversion_factor")) or 1
-			if d.item_code and d.qty:
+			if item.item_code and item.qty:
+				if self.doc.doctype == "Purchase Invoice":
+					purchase_rate = flt(item.rate, self.precision("rate", item.parentfield))
+				else:
+					purchase_rate = flt(item.purchase_rate, self.precision("purchase_rate", item.parentfield))
+					
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it
-				d.valuation_rate = flt((flt(d.purchase_rate, self.precision.item.purchase_rate) or 
-					flt(d.rate, self.precision.item.rate) + 
-					(flt(d.item_tax_amount, self.precision.item.item_tax_amount) + 
-					flt(d.rm_supp_cost, self.precision.item.rm_supp_cost)) / 
-					flt(d.qty, self.precision.item.qty)) / 
-					flt(d.conversion_factor, self.precision.item.conversion_factor), 
-					self.precision.item.valuation_rate)					
+				item.valuation_rate = flt(
+					(purchase_rate + \
+						(flt(item.item_tax_amount, self.precision("item_tax_amount", item.parentfield)) + 
+							flt(item.rm_supp_cost, self.precision("rm_supp_cost", item.parentfield))
+						) / flt(item.qty, self.precision("qty", item.parentfield))
+					) / flt(item.conversion_factor, self.precision("conversion_factor", item.parentfield)), 
+					self.precision("valuation_rate", item.parentfield))
 			else:
-				d.valuation_rate = 0.0
+				item.valuation_rate = 0.0
 				
 	def validate_for_subcontracting(self):
 		if not self.doc.is_subcontracted and self.sub_contracted_items:

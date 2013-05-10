@@ -122,12 +122,12 @@ class SellingController(StockController):
 			
 			if cumulated_tax_fraction:
 				item.basic_rate = flt((item.export_rate * self.doc.conversion_rate) / 
-					(1 + cumulated_tax_fraction), self.precision_of("basic_rate", item.parentfield))
+					(1 + cumulated_tax_fraction), self.precision("basic_rate", item.parentfield))
 				
-				item.amount = flt(item.basic_rate * item.qty, self.precision_of("amount", item.parentfield))
+				item.amount = flt(item.basic_rate * item.qty, self.precision("amount", item.parentfield))
 				
 				item.base_ref_rate = flt(item.basic_rate / (1 - (item.adj_rate / 100.0)),
-					self.precision_of("base_ref_rate", item.parentfield))
+					self.precision("base_ref_rate", item.parentfield))
 			
 	def get_current_tax_fraction(self, tax, item_tax_map):
 		"""
@@ -156,8 +156,8 @@ class SellingController(StockController):
 		def _set_base(item, print_field, base_field):
 			"""set values in base currency"""
 			item.fields[base_field] = flt((flt(item.fields[print_field],
-				self.precision_of(print_field, item.parentfield)) * self.doc.conversion_rate),
-				self.precision_of(base_field, item.parentfield))
+				self.precision(print_field, item.parentfield)) * self.doc.conversion_rate),
+				self.precision(base_field, item.parentfield))
 
 		for item in self.item_doclist:
 			self.round_floats_in_doc(item, item.parentfield)
@@ -168,14 +168,14 @@ class SellingController(StockController):
 			else:
 				if item.ref_rate:
 					item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
-						self.precision_of("export_rate", item.parentfield))
+						self.precision("export_rate", item.parentfield))
 				else:
 					# assume that print rate and discount are specified
 					item.ref_rate = flt(item.export_rate / (1.0 - (item.adj_rate / 100.0)),
-						self.precision_of("ref_rate", item.parentfield))
+						self.precision("ref_rate", item.parentfield))
 						
 			item.export_amount = flt(item.export_rate * item.qty,
-				self.precision_of("export_amount", item.parentfield))
+				self.precision("export_amount", item.parentfield))
 				
 			_set_base(item, "ref_rate", "base_ref_rate")
 			_set_base(item, "export_rate", "basic_rate")
@@ -199,9 +199,9 @@ class SellingController(StockController):
 			self.doc.net_total += item.amount
 			self.doc.net_total_export += item.export_amount
 			
-		self.doc.net_total = flt(self.doc.net_total, self.precision_of("net_total"))
+		self.doc.net_total = flt(self.doc.net_total, self.precision("net_total"))
 		self.doc.net_total_export = flt(self.doc.net_total_export,
-			self.precision_of("net_total_export"))
+			self.precision("net_total_export"))
 		
 	def calculate_taxes(self):
 		for item in self.item_doclist:
@@ -216,7 +216,7 @@ class SellingController(StockController):
 				# and tax.grand_total_for_current_item for the first such iteration
 				if not (current_tax_amount or self.doc.net_total or tax.tax_amount) and \
 						tax.charge_type=="Actual":
-					zero_net_total_adjustment = flt(tax.rate, self.precision_of("tax_amount", tax.parentfield))
+					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
 					current_tax_amount += zero_net_total_adjustment
 
 				# store tax_amount for current item as it will be used for
@@ -231,12 +231,12 @@ class SellingController(StockController):
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
 					tax.grand_total_for_current_item = flt(item.amount +
-						current_tax_amount, self.precision_of("total", tax.parentfield))
+						current_tax_amount, self.precision("total", tax.parentfield))
 						
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
-							current_tax_amount, self.precision_of("total", tax.parentfield))
+							current_tax_amount, self.precision("total", tax.parentfield))
 							
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
@@ -247,9 +247,9 @@ class SellingController(StockController):
 				
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.tax_doclist and \
-			self.tax_doclist[-1].total or self.doc.net_total, self.precision_of("grand_total"))
+			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
 		self.doc.grand_total_export = flt(self.doc.grand_total / self.doc.conversion_rate, 
-			self.precision_of("grand_total_export"))
+			self.precision("grand_total_export"))
 		
 		self.doc.rounded_total = round(self.doc.grand_total)
 		self.doc.rounded_total_export = round(self.doc.grand_total_export)
@@ -259,7 +259,7 @@ class SellingController(StockController):
 
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
-			actual = flt(tax.rate, self.precision_of("tax_amount", tax.parentfield))
+			actual = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
 			current_tax_amount = (self.doc.net_total
 				and ((item.amount / self.doc.net_total) * actual)
 				or 0)
@@ -272,7 +272,7 @@ class SellingController(StockController):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		return flt(current_tax_amount, self.precision_of("tax_amount", tax.parentfield))
+		return flt(current_tax_amount, self.precision("tax_amount", tax.parentfield))
 	
 	def validate_on_previous_row(self, tax):
 		"""
@@ -334,7 +334,7 @@ class SellingController(StockController):
 		
 	def _get_tax_rate(self, tax, item_tax_map):
 		if item_tax_map.has_key(tax.account_head):
-			return flt(item_tax_map.get(tax.account_head), self.precision_of("rate", tax.parentfield))
+			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax.parentfield))
 		else:
 			return tax.rate
 				
