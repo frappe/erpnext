@@ -36,7 +36,7 @@ def execute(filters=None):
 		# invoice details
 		sales_order = ", ".join(invoice_so_dn_map.get(inv.name, {}).get("sales_order", []))
 		delivery_note = ", ".join(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", []))
-		# webnotes.errprint(customer_map.get(inv.customer, []))
+
 		row = [inv.name, inv.posting_date, inv.customer, inv.debit_to, 
 			account_map.get(inv.debit_to), customer_map.get(inv.customer), inv.project_name, 
 			inv.remarks, sales_order, delivery_note]

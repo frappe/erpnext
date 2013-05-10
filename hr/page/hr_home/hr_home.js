@@ -177,6 +177,10 @@ wn.module_page["HR"] = [
 				"label":wn._("Employee Information"),
 				route: "Report2/Employee/Employee Information"
 			},
+			{
+				"label":wn._("Monthly Salary Register"),
+				route: "query-report/Monthly Salary Register"
+			},
 		]
 	}
 ];
