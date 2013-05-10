@@ -57,6 +57,7 @@ class DocType(StockController):
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_fiscal_year()
+		self.set_total_amount()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -174,6 +175,9 @@ class DocType(StockController):
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
 			
+	def set_total_amount(self):
+		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
+			
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
@@ -194,10 +198,10 @@ class DocType(StockController):
 		total_valuation_amount = 0
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.t_warehouse and not item.s_warehouse:
-				total_valuation_amount += flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount += flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 			
 			if item.s_warehouse and not item.t_warehouse:
-				total_valuation_amount -= flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount -= flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 		
 		return total_valuation_amount
 			
@@ -220,7 +224,7 @@ class DocType(StockController):
 			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(args)
 				
-			d.amount = flt(d.qty) * flt(d.incoming_rate)
+			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 			
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
@@ -607,7 +611,7 @@ class DocType(StockController):
 			'voucher_no': self.doc.name, 
 			'voucher_detail_no': d.name,
 			'actual_qty': qty,
-			'incoming_rate': flt(d.incoming_rate) or 0,
+			'incoming_rate': flt(d.incoming_rate, 2) or 0,
 			'stock_uom': d.stock_uom,
 			'company': self.doc.company,
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',

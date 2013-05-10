@@ -36,7 +36,7 @@ class DocType:
 			if ret[0][0]=='Naming Series':
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
 			elif ret[0][0]=='Employee Number':
-				self.doc.name = make_autoname(self.doc.employee_number)
+				self.doc.name = self.doc.employee_number
 
 		self.doc.employee = self.doc.name
 

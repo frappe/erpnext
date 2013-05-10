@@ -34,7 +34,8 @@ class DocType:
 		last_name = sql("""select max(name) from `tabBOM` 
 			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
 		if last_name:
-			idx = cint(cstr(last_name[0][0]).split('/')[-1]) + 1
+			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
+			
 		else:
 			idx = 1
 		self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx)

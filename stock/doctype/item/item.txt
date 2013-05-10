@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-25 10:56:55", 
+  "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-05-02 15:10:00", 
+  "modified": "2013-05-07 16:00:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,13 +28,14 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Item", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -55,7 +56,8 @@
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "label": "Naming Series", 
-  "options": "\nITEM"
+  "options": "\nITEM", 
+  "read_only": 0
  }, 
  {
   "description": "Item will be saved by this name in the data base.", 
@@ -64,10 +66,11 @@
   "fieldtype": "Data", 
   "in_filter": 0, 
   "label": "Item Code", 
+  "no_copy": 1, 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Data", 
   "read_only": 0, 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 0
  }, 
  {
@@ -887,27 +890,23 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "write": 1
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material Master Manager", 
   "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
  }
 ]

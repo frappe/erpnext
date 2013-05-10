@@ -31,7 +31,9 @@ class DocType(DocListController):
 		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
 			from webnotes.model.doc import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
-
+		elif not self.doc.item_code:
+			msgprint(_("Item Code is mandatory"), raise_exception=1)
+			
 		self.doc.name = self.doc.item_code
 			
 	def validate(self):
@@ -270,7 +272,7 @@ class DocType(DocListController):
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 
-	def on_rename(self,newdn,olddn):
+	def on_rename(self,newdn,olddn, merge=False):
 		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache

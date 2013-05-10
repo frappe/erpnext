@@ -79,7 +79,7 @@ class DocType:
 		
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
-			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
+			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"), args.get("company"))
 		
 	def get_first_sle(self):
 		sle = sql("""
@@ -92,7 +92,7 @@ class DocType:
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
 		return sle and sle[0] or None
 
-	def reorder_item(self,doc_type,doc_name):
+	def reorder_item(self,doc_type,doc_name, company):
 		""" Reorder item if stock reaches reorder level"""
 		if not hasattr(webnotes, "auto_indent"):
 			webnotes.auto_indent = webnotes.conn.get_value('Global Defaults', None, 'auto_indent')
@@ -111,10 +111,10 @@ class DocType:
 				material_request_type = "Purchase"
 			
 			if flt(reorder_qty) and flt(self.doc.projected_qty) < flt(reorder_level):
-				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty,
-					material_request_type)
+				self.create_material_request(doc_type, doc_name, reorder_level, reorder_qty, 
+					company, material_request_type)
 
-	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty,
+	def create_material_request(self, doc_type, doc_name, reorder_level, reorder_qty, company, 
 			material_request_type="Purchase"):
 		"""	Create indent on reaching reorder level	"""
 		defaults = webnotes.defaults.get_defaults()
@@ -122,7 +122,7 @@ class DocType:
 		
 		mr = webnotes.bean([{
 			"doctype": "Material Request",
-			"company": defaults.company,
+			"company": company or defaults.company,
 			"fiscal_year": defaults.fiscal_year,
 			"transaction_date": nowdate(),
 			"material_request_type": material_request_type,

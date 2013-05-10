@@ -64,9 +64,9 @@ cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	wn.model.with_doc("Workstation", d.workstation, function(i, v) {
-		d.hour_rate = v.hour_rate;
-		refresh_field("hour_rate");
+	wn.model.with_doc("Workstation", d.workstation, function(i, r) {
+		d.hour_rate = r.docs[0].hour_rate;
+		refresh_field("hour_rate", dn, "bom_operations");
 		calculate_op_cost(doc);
 		calculate_total(doc);
 	});

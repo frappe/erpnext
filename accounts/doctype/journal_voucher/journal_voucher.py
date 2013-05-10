@@ -34,14 +34,11 @@ class DocType(AccountsController):
 		self.credit_days_global = -1
 		self.is_approving_authority = -1
 
-	def autoname(self):
-		if not self.doc.naming_series:
-			webnotes.msgprint("""Naming Series is mandatory""", raise_exception=1)	
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-		
 	def validate(self):
 		if not self.doc.is_opening:
 			self.doc.is_opening='No'
+			
+		self.doc.clearance_date = None
 			
 		self.validate_debit_credit()
 		self.validate_cheque_info()

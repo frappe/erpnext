@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes import msgprint
+from webnotes.utils import cstr
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -29,7 +30,7 @@ class DocType:
 			self.doc.address_title = self.doc.customer or self.doc.supplier or self.doc.sales_partner
 			
 		if self.doc.address_title:
-			self.doc.name = self.doc.address_title + "-" + self.doc.address_type
+			self.doc.name = cstr(self.doc.address_title).strip() + "-" + cstr(self.doc.address_type).strip()
 			
 		else:
 			webnotes.msgprint("""Address Title is mandatory.""", raise_exception=True)

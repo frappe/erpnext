@@ -18,9 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import make_autoname
-from webnotes.model.bean import getlist, copy_doclist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 from stock.utils import get_valid_serial_nos
@@ -36,9 +34,6 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.tname = 'Installation Note Item'
 		self.fname = 'installed_item_details'
-
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
 	def validate(self):
 		self.validate_fiscal_year()

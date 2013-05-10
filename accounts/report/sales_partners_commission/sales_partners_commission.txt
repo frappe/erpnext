@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-05-06 12:28:23", 
+  "docstatus": 0, 
+  "modified": "2013-05-06 12:41:15", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "SELECT\n    sales_partner as \"Sales Partner:Link/Sales Partner:150\",\n\tsum(net_total) as \"Invoiced Amount (Exculsive Tax):Currency:210\",\n\tsum(total_commission) as \"Total Commission:Currency:150\",\n\tsum(total_commission)*100/sum(net_total) as \"Average Commission Rate:Currency:170\"\nFROM\n\t`tabSales Invoice`\nWHERE\n\tdocstatus = 1 and ifnull(net_total, 0) > 0 and ifnull(total_commission, 0) > 0\nGROUP BY\n\tsales_partner\nORDER BY\n\t\"Total Commission:Currency:120\"", 
+  "ref_doctype": "Sales Invoice", 
+  "report_name": "Sales Partners Commission", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Sales Partners Commission"
+ }
+]

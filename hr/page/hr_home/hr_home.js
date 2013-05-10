@@ -169,6 +169,14 @@ wn.module_page["HR"] = [
 				"label":wn._("Employee Leave Balance"),
 				route: "query-report/Employee Leave Balance"
 			},
+			{
+				"label":wn._("Employee Birthday"),
+				route: "query-report/Employee Birthday"
+			},
+			{
+				"label":wn._("Employee Information"),
+				route: "Report2/Employee/Employee Information"
+			},
 		]
 	}
 ];
