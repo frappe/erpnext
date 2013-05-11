@@ -137,8 +137,8 @@ class BuyingController(StockController):
 		def _set_base(item, print_field, base_field):
 			"""set values in base currency"""
 			item.fields[base_field] = flt((flt(item.fields[print_field],
-				self.precision(print_field, item.parentfield)) * self.doc.conversion_rate),
-				self.precision(base_field, item.parentfield))
+				self.precision(print_field, item)) * self.doc.conversion_rate),
+				self.precision(base_field, item))
 		
 		# hack! - cleaned up in _cleanup()
 		if self.doc.doctype != "Purchase Invoice":
@@ -150,7 +150,7 @@ class BuyingController(StockController):
 			if self.doc.doctype != "Purchase Invoice":
 				item.rate = item.purchase_rate
 				
-			self.round_floats_in_doc(item, item.parentfield)
+			self.round_floats_in(item)
 
 			if item.discount_rate == 100:
 				item.import_ref_rate = item.import_ref_rate or item.import_rate
@@ -158,14 +158,14 @@ class BuyingController(StockController):
 			else:
 				if item.import_ref_rate:
 					item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
-						self.precision("import_rate", item.parentfield))
+						self.precision("import_rate", item))
 				else:
 					# assume that print rate and discount_rate are specified
 					item.import_ref_rate = flt(item.import_rate / (1.0 - (item.discount_rate / 100.0)),
-						self.precision("import_ref_rate", item.parentfield))
+						self.precision("import_ref_rate", item))
 						
 			item.import_amount = flt(item.import_rate * item.qty,
-				self.precision("import_amount", item.parentfield))
+				self.precision("import_amount", item))
 				
 			_set_base(item, "import_ref_rate", "purchase_ref_rate")
 			_set_base(item, "import_rate", "rate")
@@ -183,7 +183,7 @@ class BuyingController(StockController):
 			
 			self.validate_on_previous_row(tax)
 			
-			self.round_floats_in_doc(tax, tax.parentfield)
+			self.round_floats_in(tax)
 		
 	def calculate_net_total(self):
 		self.doc.net_total = 0
@@ -213,7 +213,7 @@ class BuyingController(StockController):
 				# and tax.grand_total_for_current_item for the first such iteration
 				if not (current_tax_amount or self.doc.net_total or tax.tax_amount) and \
 						tax.charge_type=="Actual":
-					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
+					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
 					current_tax_amount += zero_net_total_adjustment
 
 				# store tax_amount for current item as it will be used for
@@ -235,12 +235,12 @@ class BuyingController(StockController):
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
 					tax.grand_total_for_current_item = flt(item.amount +
-						current_tax_amount, self.precision("total", tax.parentfield))
+						current_tax_amount, self.precision("total", tax))
 
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
-							current_tax_amount, self.precision("total", tax.parentfield))
+							current_tax_amount, self.precision("total", tax))
 
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
@@ -324,7 +324,7 @@ class BuyingController(StockController):
 
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
-			actual = flt(tax.rate, self.precision("tax_amount", tax.parentfield))
+			actual = flt(tax.rate, self.precision("tax_amount", tax))
 			current_tax_amount = (self.doc.net_total
 				and ((item.amount / self.doc.net_total) * actual)
 				or 0)
@@ -337,11 +337,11 @@ class BuyingController(StockController):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		return flt(current_tax_amount, self.precision("tax_amount", tax.parentfield))
+		return flt(current_tax_amount, self.precision("tax_amount", tax))
 		
 	def _get_tax_rate(self, tax, item_tax_map):
 		if item_tax_map.has_key(tax.account_head):
-			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax.parentfield))
+			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax))
 		else:
 			return tax.rate
 			
@@ -355,7 +355,7 @@ class BuyingController(StockController):
 		if tax.category in ["Valuation", "Valuation and Total"] and \
 				item.item_code in self.stock_items:
 			item.item_tax_amount += flt(current_tax_amount,
-				self.precision("item_tax_amount", item.parentfield))
+				self.precision("item_tax_amount", item))
 				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
@@ -363,21 +363,17 @@ class BuyingController(StockController):
 			item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
 				"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 				"conversion_factor")) or 1
+			
 			if item.item_code and item.qty:
-				if self.doc.doctype == "Purchase Invoice":
-					purchase_rate = flt(item.rate, self.precision("rate", item.parentfield))
-				else:
-					purchase_rate = flt(item.purchase_rate, self.precision("purchase_rate", item.parentfield))
-					
+				self.round_floats_in(item)
+				
+				purchase_rate = item.rate if self.doc.doctype == "Purchase Invoice" else item.purchase_rate
+				
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it
-				item.valuation_rate = flt(
-					(purchase_rate + \
-						(flt(item.item_tax_amount, self.precision("item_tax_amount", item.parentfield)) + 
-							flt(item.rm_supp_cost, self.precision("rm_supp_cost", item.parentfield))
-						) / flt(item.qty, self.precision("qty", item.parentfield))
-					) / flt(item.conversion_factor, self.precision("conversion_factor", item.parentfield)), 
-					self.precision("valuation_rate", item.parentfield))
+				item.valuation_rate = flt((purchase_rate + 
+					(item.item_tax_amount + item.rm_supp_cost) / item.qty) / item.conversion_factor, 
+					self.precision("valuation_rate", item))
 			else:
 				item.valuation_rate = 0.0
 				
