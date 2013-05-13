@@ -68,7 +68,7 @@ def get_columns(filters):
 	
 def get_attendance_list(conditions, filters):
 	attendance_list = webnotes.conn.sql("""select employee, day(att_date) as day_of_month, 
-		status from tabAttendance where docstatus < 2 %s order by employee, att_date""" % 
+		status from tabAttendance where docstatus = 1 %s order by employee, att_date""" % 
 		conditions, filters, as_dict=1)
 		
 	att_map = {}
