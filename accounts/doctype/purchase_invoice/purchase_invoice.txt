@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-09 10:18:10", 
+  "creation": "2013-05-07 13:50:30", 
   "docstatus": 0, 
-  "modified": "2013-03-22 18:17:14", 
+  "modified": "2013-05-13 11:12:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,9 @@
   "parent": "Purchase Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -41,6 +43,7 @@
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -54,6 +57,7 @@
   "oldfieldtype": "Select", 
   "options": "BILL\nBILLJ", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1
  }, 
@@ -68,6 +72,7 @@
   "oldfieldtype": "Link", 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -80,7 +85,8 @@
   "oldfieldname": "supplier", 
   "oldfieldtype": "Link", 
   "options": "Supplier", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -131,6 +137,7 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "50%"
  }, 
@@ -146,6 +153,7 @@
   "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -159,6 +167,7 @@
   "oldfieldname": "bill_no", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -171,6 +180,7 @@
   "oldfieldname": "bill_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -179,7 +189,8 @@
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "allow_on_submit": 1, 
@@ -189,25 +200,29 @@
   "label": "Entries", 
   "oldfieldname": "entries", 
   "oldfieldtype": "Table", 
-  "options": "Purchase Invoice Item"
+  "options": "Purchase Invoice Item", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "recalculate", 
   "fieldtype": "Button", 
   "label": "Recalculate", 
-  "oldfieldtype": "Button"
+  "oldfieldtype": "Button", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break_17", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "Simple", 
+  "read_only": 0
  }, 
  {
   "description": "Select Items from Purchase Order", 
@@ -218,7 +233,8 @@
   "oldfieldname": "purchase_order_main", 
   "oldfieldtype": "Link", 
   "options": "Purchase Order", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "description": "Select Items from Purchase Receipt", 
@@ -229,7 +245,8 @@
   "oldfieldname": "purchase_receipt_main", 
   "oldfieldtype": "Link", 
   "options": "Purchase Receipt", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -237,13 +254,15 @@
   "fieldtype": "Button", 
   "label": "Get Items", 
   "oldfieldtype": "Button", 
-  "options": "pull_details"
+  "options": "pull_details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List"
+  "label": "Currency & Price List", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -253,7 +272,8 @@
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
   "options": "Currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "1", 
@@ -264,12 +284,14 @@
   "label": "Exchange Rate", 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
@@ -278,7 +300,8 @@
   "fieldtype": "Link", 
   "label": "Price List", 
   "options": "Price List", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "depends_on": "price_list_name", 
@@ -287,7 +310,8 @@
   "fieldtype": "Link", 
   "label": "Price List Currency", 
   "options": "Currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "depends_on": "price_list_name", 
@@ -295,7 +319,8 @@
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
   "label": "Price List Exchange Rate", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "description": "Add / Edit Taxes and Charges", 
@@ -303,7 +328,8 @@
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -313,7 +339,8 @@
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
   "options": "Purchase Taxes and Charges Master", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -322,7 +349,8 @@
   "label": "Get Tax Detail", 
   "oldfieldtype": "Button", 
   "options": "get_purchase_tax_details", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -331,7 +359,8 @@
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
   "oldfieldtype": "Table", 
-  "options": "Purchase Taxes and Charges"
+  "options": "Purchase Taxes and Charges", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -339,7 +368,8 @@
   "fieldtype": "Button", 
   "label": "Calculate Tax", 
   "oldfieldtype": "Button", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -347,7 +377,8 @@
   "fieldtype": "HTML", 
   "label": "Tax Calculation", 
   "oldfieldtype": "HTML", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -364,7 +395,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.supplier", 
@@ -372,12 +404,14 @@
   "fieldname": "supplier_address", 
   "fieldtype": "Link", 
   "label": "Supplier Address", 
-  "options": "Address"
+  "options": "Address", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "col_break23", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -387,14 +421,16 @@
   "fieldtype": "Link", 
   "label": "Contact Person", 
   "options": "Contact", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -497,6 +533,7 @@
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_hide": 1, 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -562,7 +599,8 @@
   "label": "Write Off Amount", 
   "no_copy": 1, 
   "options": "Company:company:default_currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:flt(doc.write_off_amount)!=0", 
@@ -572,7 +610,8 @@
   "label": "Write Off Account", 
   "no_copy": 1, 
   "options": "Account", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:flt(doc.write_off_amount)!=0", 
@@ -581,8 +620,9 @@
   "fieldtype": "Link", 
   "label": "Write Off Cost Center", 
   "no_copy": 1, 
-  "options": "Account", 
-  "print_hide": 1
+  "options": "Cost Center", 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -594,6 +634,7 @@
   "oldfieldname": "against_expense_account", 
   "oldfieldtype": "Small Text", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -602,7 +643,8 @@
   "fieldtype": "Section Break", 
   "label": "Advances", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -611,7 +653,8 @@
   "label": "Get Advances Paid", 
   "oldfieldtype": "Button", 
   "options": "get_advances", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -622,7 +665,8 @@
   "oldfieldname": "advance_allocation_details", 
   "oldfieldtype": "Table", 
   "options": "Purchase Invoice Advance", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -630,7 +674,8 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -644,6 +689,7 @@
   "oldfieldtype": "Select", 
   "options": "No\nYes", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -655,6 +701,7 @@
   "oldfieldname": "aging_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 0
  }, 
  {
@@ -680,6 +727,7 @@
   "oldfieldtype": "Link", 
   "options": "Print Heading", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
@@ -692,6 +740,7 @@
   "oldfieldname": "due_date", 
   "oldfieldtype": "Date", 
   "print_hide": 0, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -701,12 +750,14 @@
   "label": "Mode of Payment", 
   "oldfieldname": "mode_of_payment", 
   "oldfieldtype": "Select", 
-  "options": "link:Mode of Payment"
+  "options": "link:Mode of Payment", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break_63", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -718,6 +769,7 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -730,6 +782,7 @@
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -753,81 +806,53 @@
   "oldfieldname": "remarks", 
   "oldfieldtype": "Text", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Accounts Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Accounts Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Accounts User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "Purchase User", 
-  "submit": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Purchase User", 
-  "submit": 0, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Supplier"
+  "role": "Supplier", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Auditor", 
+  "submit": 0, 
+  "write": 0
  }
 ]
