@@ -100,7 +100,6 @@ def get_naming_series():
 def upload():
 	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
 	from webnotes.modules import scrub
-	from core.page.data_import_tool.data_import_tool import check_record, import_doc
 	
 	rows = read_csv_content_from_uploaded_file()
 	if not rows:
@@ -112,6 +111,9 @@ def upload():
 	ret = []
 	error = False
 	
+	from webnotes.utils.datautils import check_record, import_doc
+	doctype_dl = webnotes.get_doctype("Attendance")
+	
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
 		row_idx = i + 5
@@ -121,7 +123,7 @@ def upload():
 			d["docstatus"] = webnotes.conn.get_value("Attendance", d.name, "docstatus")
 			
 		try:
-			check_record(d)
+			check_record(d, doctype_dl=doctype_dl)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
 		except Exception, e:
 			error = True
