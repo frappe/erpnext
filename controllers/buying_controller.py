@@ -274,7 +274,7 @@ class BuyingController(StockController):
 			self.doc.rounded_total_import = round(self.doc.grand_total_import)
 			
 	def calculate_outstanding_amount(self):
-		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus == 0:
+		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus < 2:
 			self.doc.total_advance = flt(self.doc.total_advance,
 				self.precision("total_advance"))
 			self.doc.total_amount_to_pay = flt(self.doc.grand_total - flt(self.doc.write_off_amount,
