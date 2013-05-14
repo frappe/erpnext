@@ -181,6 +181,10 @@ wn.module_page["HR"] = [
 				"label":wn._("Monthly Salary Register"),
 				route: "query-report/Monthly Salary Register"
 			},
+			{
+				"label":wn._("Monthly Attendance Sheet"),
+				route: "query-report/Monthly Attendance Sheet"
+			},
 		]
 	}
 ];
