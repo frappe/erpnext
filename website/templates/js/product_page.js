@@ -26,8 +26,8 @@ $(document).ready(function() {
 		success: function(data) {
 			if(data.message) {
 				if(data.message.price) {
-					$("<h4>").html(data.message.price[0].ref_currency + " " 
-						+ data.message.price[0].ref_rate).appendTo(".item-price");
+					$("<h4>").html(data.message.price.ref_currency + " " 
+						+ data.message.price.ref_rate).appendTo(".item-price");
 					$(".item-price").toggle(true);
 				}
 				if(data.message.stock==0) {
