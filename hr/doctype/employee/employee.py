@@ -80,7 +80,7 @@ class DocType:
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
 			from webnotes.profile import add_role
-			add_role(self.doc.user_id, "HR User")
+			add_role(self.doc.user_id, "Employee")
 			
 		profile_wrapper = webnotes.bean("Profile", self.doc.user_id)
 		
