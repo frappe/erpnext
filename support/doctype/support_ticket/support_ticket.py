@@ -86,7 +86,7 @@ def get_tickets():
 			webnotes.session.user, as_dict=1)
 	return tickets
 
-def get_website_args():	
+def get_website_args():
 	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
 	if bean.doc.raised_by != webnotes.session.user:
 		return {
