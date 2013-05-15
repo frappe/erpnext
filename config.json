@@ -114,7 +114,7 @@
 			"ticket": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/ticket",
-				"get_website_args": "support.doctype.support_ticket.support_ticket.get_website_args"
+				"args_method": "support.doctype.support_ticket.support_ticket.get_website_args"
 			},
 			"tickets": {
 				"template": "app/website/templates/pages/tickets"
@@ -122,6 +122,10 @@
 			"writers": {
 				"template": "app/website/templates/pages/writers",
 				"args_method": "website.helpers.blog.get_writers_args"
+			},
+			"profile": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/profile"
 			}
 		},
 		"generators": {

@@ -1,16 +1,17 @@
 [
  {
-  "creation": "2013-02-21 14:26:49", 
+  "creation": "2013-02-22 18:01:55", 
   "docstatus": 0, 
-  "modified": "2013-02-22 15:53:01", 
+  "modified": "2013-05-13 16:11:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "add_total_row": 1, 
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "query": "select \n `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n `tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n `tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n `tabPurchase Order`.`project_name` as \"Project\",\n `tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n `tabPurchase Order Item`.qty as \"Qty:Float:100\",\n `tabPurchase Order Item`.received_qty as \"Received Qty:Float:100\", \n (`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) as \"Qty to Receive:Float:100\",\n `tabPurchase Order Item`.item_name as \"Item Name::150\",\n `tabPurchase Order Item`.description as \"Description::200\"\nfrom\n `tabPurchase Order`, `tabPurchase Order Item`\nwhere\n `tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n and `tabPurchase Order`.docstatus = 1\n and `tabPurchase Order`.status != \"Stopped\"\n and ifnull(`tabPurchase Order Item`.received_qty, 0) < ifnull(`tabPurchase Order Item`.qty, 0)\norder by `tabPurchase Order`.transaction_date asc", 
+  "query": "select \n    `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n\t`tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n\t`tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n\t`tabPurchase Order`.`project_name` as \"Project\",\n\t`tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n\t`tabPurchase Order Item`.qty as \"Qty:Float:100\",\n\t`tabPurchase Order Item`.received_qty as \"Received Qty:Float:100\", \n\t(`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) as \"Qty to Receive:Float:100\",\n\t`tabPurchase Order Item`.item_name as \"Item Name::150\",\n\t`tabPurchase Order Item`.description as \"Description::200\"\nfrom\n\t`tabPurchase Order`, `tabPurchase Order Item`\nwhere\n\t`tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n\tand `tabPurchase Order`.docstatus = 1\n\tand `tabPurchase Order`.status != \"Stopped\"\n\tand ifnull(`tabPurchase Order Item`.received_qty, 0) < ifnull(`tabPurchase Order Item`.qty, 0)\norder by `tabPurchase Order`.transaction_date asc", 
   "ref_doctype": "Purchase Receipt", 
   "report_name": "Purchase Order Items To Be Received", 
   "report_type": "Query Report"
