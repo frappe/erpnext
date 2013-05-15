@@ -193,27 +193,26 @@ wn.module_page["Setup"] = [
 		]
 	},
 	{
-		title: wn._("Backups"),
-		icon: "icon-cloud-upload",
-		right: true,
-		items: [
-			{
-				"route":"Form/Backup Manager",
-				doctype:"Backup Manager",
-				label: wn._("Backup Manager"),
-				"description":wn._("Sync backups with remote tools like Dropbox etc.")
-			},
-		]
-	},
-	{
-		title: wn._("Update Manager"),
-		icon: "icon-magnet",
+		title: wn._("Administration"),
+		icon: "icon-rocket",
 		right: true,
 		items: [
 			{
 				"page":"update-manager",
 				label: wn._("Update This Application"),
 				"description":wn._("Apply latest updates and patches to this app")
+			},
+			{
+				"route":"Form/Backup Manager",
+				doctype:"Backup Manager",
+				label: wn._("Backup Manager"),
+				"description":wn._("Sync backups with remote tools like Dropbox etc.")
+			},
+			{
+				"route":"List/Scheduler Log",
+				doctype:"Scheduler Log",
+				label: wn._("Scheduler Error Log"),
+				"description":wn._("Get a list of errors encountered by the Scheduler")
 			},
 		]
 	},
