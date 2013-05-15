@@ -353,3 +353,10 @@ class SellingController(StockController):
 					del tax.fields[fieldname]
 			
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
+			
+	def validate_order_type(self):
+		valid_types = ["Sales", "Maintenance"]
+		if self.doc.order_type not in valid_types:
+			msgprint(_(self.meta.get_label("order_type")) + " " + 
+				_("must be one of") + ": " + comma_or(valid_types),
+				raise_exception=True)

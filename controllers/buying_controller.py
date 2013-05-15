@@ -22,6 +22,7 @@ import json
 
 from buying.utils import get_item_details
 from setup.utils import get_company_currency
+from utilities.transaction_base import validate_conversion_rate
 
 from controllers.stock_controller import StockController
 
@@ -32,12 +33,11 @@ class BuyingController(StockController):
 		super(BuyingController, self).validate()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse_belongs_to_company()
+		
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
-			self.validate_conversion_rate("currency", "conversion_rate")
-			
-			if self.doc.price_list_name and self.doc.price_list_currency:
-				self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
+			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
+				self.meta.get_label("conversion_rate"), self.doc.company)
 			
 			# IMPORTANT: enable this only when client side code is similar to this one
 			# self.calculate_taxes_and_totals()
@@ -88,28 +88,6 @@ class BuyingController(StockController):
 				if not item.fields.get(r):
 					item.fields[r] = ret[r]
 	
-	def validate_conversion_rate(self, currency_field, conversion_rate_field):
-		"""common validation for currency and price list currency"""
-		
-		currency = self.doc.fields.get(currency_field)
-		conversion_rate = flt(self.doc.fields.get(conversion_rate_field))
-		conversion_rate_label = self.meta.get_label(conversion_rate_field)
-		
-		if conversion_rate == 0:
-			msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
-		
-		# parenthesis for 'OR' are necessary as we want it to evaluate as 
-		# mandatory valid condition and (1st optional valid condition 
-		# 	or 2nd optional valid condition)
-		valid_conversion_rate = (conversion_rate and 
-			((currency == self.company_currency and conversion_rate == 1.00)
-				or (currency != self.company_currency and conversion_rate != 1.00)))
-
-		if not valid_conversion_rate:
-			msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
-				+ ("1 %s = [?] %s" % (currency, self.company_currency)),
-				raise_exception=True)
-
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)

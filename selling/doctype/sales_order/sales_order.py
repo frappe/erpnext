@@ -194,6 +194,8 @@ class DocType(SellingController):
 						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
 
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		#validate delivery date
 		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")

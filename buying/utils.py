@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import getdate, flt, add_days
 import json
 
@@ -29,7 +30,11 @@ def get_item_details(args):
 			"warehouse": None,
 			"supplier": None,
 			"transaction_date": None,
-			"conversion_rate": 1.0
+			"conversion_rate": 1.0,
+			"price_list_name": None,
+			"price_list_currency": None,
+			"plc_conversion_rate": 1.0,
+			"is_subcontracted": "Yes" / "No"
 		}
 	"""
 	if isinstance(args, basestring):
@@ -37,36 +42,14 @@ def get_item_details(args):
 		
 	args = webnotes._dict(args)
 	
-	item_wrapper = webnotes.bean("Item", args.item_code)
-	item = item_wrapper.doc
+	item_bean = webnotes.bean("Item", args.item_code)
+	item = item_bean.doc
 	
-	from stock.utils import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life)
+	_validate_item_details(args, item)
 	
-	# fetch basic values
-	out = webnotes._dict()
-	out.update({
-		"item_name": item.item_name,
-		"item_group": item.item_group,
-		"brand": item.brand,
-		"description": item.description,
-		"qty": 0,
-		"stock_uom": item.stock_uom,
-		"uom": item.stock_uom,
-		"conversion_factor": 1.0,
-		"warehouse": args.warehouse or item.default_warehouse,
-		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-			item_wrapper.doclist.get({"parentfield": "item_tax"})))),
-		"batch_no": None,
-		"expense_head": item.purchase_account,
-		"cost_center": item.cost_center
-	})
+	out = _get_basic_details(args, item_bean)
 	
-	if args.supplier:
-		item_supplier = item_wrapper.doclist.get({"parentfield": "item_supplier_details",
-			"supplier": args.supplier})
-		if item_supplier:
-			out["supplier_part_no"] = item_supplier[0].supplier_part_no
+	out.supplier_part_no = _get_supplier_part_no(args, item_bean)
 	
 	if out.warehouse:
 		out.projected_qty = webnotes.conn.get_value("Bin", {"item_code": item.name, 
@@ -84,7 +67,7 @@ def get_item_details(args):
 			"Supplier Quotation"]:
 		# try fetching from price list
 		if args.price_list_name and args.price_list_currency:
-			rates_as_per_price_list = get_rates_as_per_price_list(args, item_wrapper.doclist)
+			rates_as_per_price_list = get_rates_as_per_price_list(args, item_bean.doclist)
 			if rates_as_per_price_list:
 				out.update(rates_as_per_price_list)
 		
@@ -95,6 +78,33 @@ def get_item_details(args):
 				out.update(last_purchase)
 			
 	return out
+	
+def _get_basic_details(args, item_bean):
+	item = item_bean.doc
+	
+	out = webnotes._dict({
+		"description": item.description_html or item.description,
+		"qty": 0.0,
+		"uom": item.stock_uom,
+		"conversion_factor": 1.0,
+		"warehouse": args.warehouse or item.default_warehouse,
+		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
+			item_bean.doclist.get({"parentfield": "item_tax"})))),
+		"batch_no": None,
+		"expense_head": item.purchase_account,
+		"cost_center": item.cost_center
+	})
+	
+	for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
+		out[fieldname] = item.fields.get(fieldname)
+	
+	return out
+	
+def _get_supplier_part_no(args, item_bean):
+	item_supplier = item_bean.doclist.get({"parentfield": "item_supplier_details",
+		"supplier": args.supplier})
+	
+	return item_supplier and item_supplier[0].supplier_part_no or None
 
 def get_rates_as_per_price_list(args, item_doclist=None):
 	if not item_doclist:
@@ -117,6 +127,21 @@ def get_rates_as_per_price_list(args, item_doclist=None):
 		})
 	else:
 		return webnotes._dict()
+		
+def _validate_item_details(args, item):
+	from utilities.transaction_base import validate_item_fetch
+	validate_item_fetch(args, item)
+	
+	# validate if purchase item or subcontracted item
+	if item.is_purchase_item != "Yes":
+		msgprint(_("Item") + (" %s: " % item.name) + _("not a purchase item"),
+			raise_exception=True)
+	
+	if args.is_subcontracted == "Yes" and item.is_sub_contracted_item != "Yes":
+		msgprint(_("Item") + (" %s: " % item.name) + 
+			_("not a sub-contracted item.") +
+			_("Please select a sub-contracted item or do not sub-contract the transaction."), 
+			raise_exception=True)
 
 def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""

@@ -83,26 +83,48 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
-		var item = locals[cdt][cdn];
+		var item = wn.model.get_doc(cdt, cdn);
 		
+		// validate company
 		if(item.item_code) {
-			this.frm.call({
-				method: "buying.utils.get_item_details",
-				child: item,
-				args: {
-					args: {
-						doctype: me.frm.doc.doctype,
-						docname: me.frm.doc.name,
-						item_code: item.item_code,
-						warehouse: item.warehouse,
-						supplier: me.frm.doc.supplier,
-						conversion_rate: me.frm.doc.conversion_rate,
-						price_list_name: me.frm.doc.price_list_name,
-						price_list_currency: me.frm.doc.price_list_currency,
-						plc_conversion_rate: me.frm.doc.plc_conversion_rate
-					}
-				},
+			var fetch = true;
+			$.each(["company", "supplier"], function(i, fieldname) {
+				if(!me.frm.doc[fieldname]) {
+					fetch = false;
+					msgprint(wn._("Please specify") + ": " + 
+						wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+						". " + wn._("It is needed to fetch Item Details."));
+				}
 			});
+			
+			if(!fetch) {
+				item.item_code = null;
+				refresh_field("item_code", item.name, item.parentfield);
+			} else {
+				this.frm.call({
+					method: "buying.utils.get_item_details",
+					child: item,
+					args: {
+						args: {
+							item_code: item.item_code,
+							warehouse: item.warehouse,
+							doctype: me.frm.doc.doctype,
+							docname: me.frm.doc.name,
+							supplier: me.frm.doc.supplier,
+							conversion_rate: me.frm.doc.conversion_rate,
+							price_list_name: me.frm.doc.price_list_name,
+							price_list_currency: me.frm.doc.price_list_currency,
+							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
+							is_subcontracted: me.frm.doc.is_subcontracted,
+							company: me.frm.doc.company,
+							currency: me.frm.doc.currency
+						}
+					},
+					callback: function(r) {
+						// TODO: calculate
+					}
+				});
+			}
 		}
 	},
 	

@@ -21,6 +21,83 @@
 // cur_frm.cscript.other_fname - wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js'); fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
+wn.provide("erpnext.selling");
+
+erpnext.selling.SellingController = wn.ui.form.Controller.extend({
+	setup: function() {
+		
+	},
+	
+	refresh: function() {
+		
+	},
+	
+	item_code: function(doc, cdt, cdn) {
+		var me = this;
+		var item = wn.model.get_doc(cdt, cdn);
+		if(item.item_code) {
+			var fetch = true;
+			$.each(["company", "customer"], function(i, fieldname) {
+				if(!me.frm.doc[fieldname]) {
+					fetch = false;
+					msgprint(wn._("Please specify") + ": " + 
+						wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+						". " + wn._("It is needed to fetch Item Details."));
+				}
+			});
+			
+			if(!fetch) {
+				item.item_code = null;
+				refresh_field("item_code", item.name, item.parentfield);
+			} else {
+				this.frm.call({
+					method: "selling.utils.get_item_details",
+					child: item,
+					args: {
+						args: {
+							item_code: item.item_code,
+							warehouse: item.warehouse,
+							doctype: me.frm.doc.doctype,
+							customer: me.frm.doc.customer,
+							currency: me.frm.doc.currency,
+							conversion_rate: me.frm.doc.conversion_rate,
+							price_list_name: me.frm.doc.price_list_name,
+							price_list_currency: me.frm.doc.price_list_currency,
+							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
+							company: me.frm.doc.company,
+							order_type: me.frm.doc.order_type
+							
+						}
+					},
+					callback: function(r) {
+						// TODO: calculate
+					}
+				});
+			}
+		}
+	},
+	
+	update_item_details: function() {
+		
+	},
+	
+	set_dynamic_labels: function() {
+		
+	},
+	
+	
+});
+
+// to save previous state of cur_frm.cscript
+var prev_cscript = {};
+$.extend(prev_cscript, cur_frm.cscript);
+
+cur_frm.cscript = new erpnext.selling.SellingController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, prev_cscript);
+
+
 // ============== Load Default Taxes ===================
 cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
@@ -264,7 +341,7 @@ cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
 
 // ******************** ITEM CODE ******************************** 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	if (inList(['Maintenance', 'Service'], doc.order_type)) {
+	if (doc.order_type == "Maintenance") {
 	 	return erpnext.queries.item({
 			'ifnull(tabItem.is_service_item, "No")': 'Yes'
 		});
@@ -272,34 +349,6 @@ cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query
 		return erpnext.queries.item({
 			'ifnull(tabItem.is_sales_item, "No")': 'Yes'
 		});
-	}
-}
-
-
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var fname = cur_frm.cscript.fname;
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		if (!doc.company) {
-			msgprint("Please select company to proceed");
-			d.item_code = '';
-			refresh_field('item_code', d.name, fname);
-		} else {
-			var callback = function(r, rt){
-				cur_frm.cscript.recalc(doc, 1);
-			}
-			var args = {
-				'item_code':d.item_code, 
-				'income_account':d.income_account, 
-				'cost_center': d.cost_center, 
-				'warehouse': d.warehouse
-			};
-			get_server_fields('get_item_details',JSON.stringify(args), 
-				fname,doc,cdt,cdn,1,callback);
-		}
-	}
-	if(cur_frm.cscript.custom_item_code){
-		cur_frm.cscript.custom_item_code(doc, cdt, cdn);
 	}
 }
 

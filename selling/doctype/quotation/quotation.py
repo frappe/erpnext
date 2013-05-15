@@ -142,6 +142,8 @@ class DocType(SellingController):
 	#do not allow sales item in maintenance quotation and service item in sales quotation
 	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
 				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)
