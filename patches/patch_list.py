@@ -78,7 +78,6 @@ patch_list = [
 	"patches.july_2012.project_patch_repeat", 
 	"patches.july_2012.repost_stock_due_to_wrong_packing_list", 
 	"patches.july_2012.supplier_quotation", 
-	"patches.august_2012.report_supplier_quotations", 
 	"patches.august_2012.task_allocated_to_assigned", 
 	"patches.august_2012.change_profile_permission", 
 	"patches.august_2012.changed_blog_date_format", 
