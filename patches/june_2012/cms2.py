@@ -3,9 +3,7 @@ def execute():
 	import webnotes
 	
 	# sync doctypes required for the patch
-	webnotes.reload_doc('website', 'doctype', 'web_cache')
 	webnotes.reload_doc('website', 'doctype', 'web_page')
-	webnotes.reload_doc('website', 'doctype', 'blog')
 	webnotes.reload_doc('website', 'doctype', 'website_settings')
 	webnotes.reload_doc('stock', 'doctype', 'item')
 

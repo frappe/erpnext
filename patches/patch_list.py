@@ -74,7 +74,6 @@ patch_list = [
 	"patches.july_2012.auth_table", 
 	"patches.july_2012.remove_event_role_owner_match", 
 	"patches.july_2012.deprecate_bulk_rename", 
-	"patches.july_2012.blog_guest_permission", 
 	"patches.july_2012.bin_permission", 
 	"patches.july_2012.project_patch_repeat", 
 	"patches.july_2012.repost_stock_due_to_wrong_packing_list", 
