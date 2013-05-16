@@ -31,5 +31,4 @@ def execute():
 	webnotes.conn.commit()
 	webnotes.conn.begin()
 	
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'profile')
+	webnotes.reload_doc('core', 'doctype', 'profile')

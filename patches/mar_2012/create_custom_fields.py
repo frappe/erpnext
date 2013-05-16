@@ -94,8 +94,7 @@ from webnotes.model.code import get_obj
 from webnotes.model.doc import Document
 
 def execute():
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'custom_field')	
+	webnotes.reload_doc('core', 'doctype', 'custom_field')	
 	for f in field_list:
 		res = webnotes.conn.sql("""SELECT name FROM `tabCustom Field`
 				WHERE dt=%s AND fieldname=%s""", (f[0], f[1]))

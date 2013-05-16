@@ -4,9 +4,8 @@ def execute():
 	import webnotes
 	import webnotes.utils
 	
-	import webnotes.model.sync
 	webnotes.conn.commit()
-	webnotes.model.sync.sync('setup', 'email_settings')
+	webnotes.reload_doc('setup', 'doctype', 'email_settings')
 	webnotes.conn.begin()
 	
 	sync_support_mails = webnotes.utils.cint(webnotes.conn.get_value('Email Settings',

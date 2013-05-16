@@ -6,7 +6,6 @@ def execute():
 	
 	webnotes.conn.commit()
 	
-	import webnotes.model.sync
-	webnotes.model.sync.sync('website', 'blog', 1)
+	webnotes.reload_doc('website', 'doctype', 'blog')
 
 	webnotes.conn.begin()
