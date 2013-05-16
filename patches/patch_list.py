@@ -90,7 +90,6 @@ patch_list = [
 	"patches.september_2012.plot_patch", 
 	"patches.september_2012.event_permission", 
 	"patches.september_2012.repost_stock", 
-	"patches.september_2012.reload_gross_profit", 
 	"patches.september_2012.rebuild_trees", 
 	"patches.september_2012.deprecate_account_balance", 
 	"patches.september_2012.profile_delete_permission", 
