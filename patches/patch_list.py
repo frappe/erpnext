@@ -80,7 +80,6 @@ patch_list = [
 	"patches.july_2012.supplier_quotation", 
 	"patches.august_2012.task_allocated_to_assigned", 
 	"patches.august_2012.change_profile_permission", 
-	"patches.august_2012.changed_blog_date_format", 
 	"patches.august_2012.repost_billed_amt", 
 	"patches.august_2012.remove_cash_flow_statement", 
 	"patches.september_2012.stock_report_permissions_for_accounts", 
