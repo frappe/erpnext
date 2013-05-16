@@ -13,9 +13,6 @@ def execute():
 		if doctype in singles:
 			update_file_list(doctype, singles)
 		
-		webnotes.conn.sql("""delete from tabDocField where fieldname='file_list'
-				and parent=%s""", doctype)
-		
 		# export_to_files([["DocType", doctype]])
 		
 def get_single_doctypes():
