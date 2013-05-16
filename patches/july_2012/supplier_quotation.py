@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import webnotes
+
 def execute():
 	"""sync supplier quotatoin and create supplier quotation mappers"""
 	webnotes.reload_doc('buying', 'doctype', 'supplier_quotation')
