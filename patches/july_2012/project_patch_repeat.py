@@ -13,6 +13,5 @@ def execute():
 	
 	webnotes.conn.commit()
 	webnotes.reload_doc("buying", "doctype", "purchase_order")
-	webnotes.reload_doc("buying", "doctype", "purchase_request")
 	webnotes.reload_doc("accounts", "doctype", "purchase_invoice")
 	webnotes.conn.begin()
