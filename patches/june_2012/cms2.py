@@ -1,14 +1,11 @@
 from __future__ import unicode_literals
 def execute():
 	import webnotes
-	import webnotes.model.sync
 	
 	# sync doctypes required for the patch
-	webnotes.model.sync.sync('website', 'web_cache')
-	webnotes.model.sync.sync('website', 'web_page')
-	webnotes.model.sync.sync('website', 'blog')
-	webnotes.model.sync.sync('website', 'website_settings')
-	webnotes.model.sync.sync('stock', 'item')
+	webnotes.reload_doc('website', 'doctype', 'web_page')
+	webnotes.reload_doc('website', 'doctype', 'website_settings')
+	webnotes.reload_doc('stock', 'doctype', 'item')
 
 	cleanup()
 

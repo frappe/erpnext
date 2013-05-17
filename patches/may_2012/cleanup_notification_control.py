@@ -25,5 +25,4 @@ def execute():
 	
 	webnotes.conn.commit()
 	webnotes.conn.begin()
-	import webnotes.model.sync
-	webnotes.model.sync.sync('setup', 'notification_control')
+	webnotes.reload_doc('setup', 'doctype', 'notification_control')
