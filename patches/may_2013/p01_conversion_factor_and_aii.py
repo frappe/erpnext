@@ -14,7 +14,7 @@ def execute():
 	webnotes.conn.sql("""update `tabPurchase Invoice Item` pi_item 
 		set conversion_factor = (select ifnull(if(conversion_factor=0, 1, conversion_factor), 1) 
 			from `tabUOM Conversion Detail` 
-			where parent = pi_item.item_code and uom = pi_item.uom
+			where parent = pi_item.item_code and uom = pi_item.uom limit 1
 		)
 		where ifnull(conversion_factor, 0)=0""")
 	
