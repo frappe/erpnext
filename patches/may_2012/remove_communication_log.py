@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 def execute():
 	import webnotes
-	import webnotes.model.sync
-	webnotes.model.sync.sync('support', 'communication')
+	webnotes.reload_doc('support', 'doctype', 'communication')
 	webnotes.conn.commit()
 	webnotes.conn.begin()
 	

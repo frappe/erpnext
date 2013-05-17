@@ -12,8 +12,7 @@ def execute():
 	clean_docfield_properties()
 
 def change_property_setter_fieldnames():
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'property_setter')
+	webnotes.reload_doc('core', 'doctype', 'property_setter')
 	docfield_list = webnotes.conn.sql("""\
 		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
 	custom_field_list = webnotes.conn.sql("""\

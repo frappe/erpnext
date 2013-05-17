@@ -29,6 +29,6 @@ def execute():
 	    except:
 	        pass
 	    i += 1
-	    if i%100 == 0:
+	    if i%50 == 0:
 	        webnotes.conn.sql("commit")
 	        webnotes.conn.sql("start transaction")
