@@ -251,4 +251,5 @@ patch_list = [
 	"patches.april_2013.rebuild_sales_browser",
 	"patches.april_2013.p08_price_list_country",
 	"patches.may_2013.repost_stock_for_no_posting_time",
+	"patches.may_2013.p01_conversion_factor_and_aii",
 ]
