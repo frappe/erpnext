@@ -13,6 +13,4 @@ def execute():
 			
 			webnotes.conn.sql("""delete from `tabCustom Field` where fieldname='file_list'
 				and parent=%s""", doctype)
-			webnotes.conn.sql("""delete from `tabDocField` where fieldname='file_list'
-				and parent=%s""", doctype)
 	

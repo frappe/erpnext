@@ -142,7 +142,8 @@ class DocType(StockController):
 		gl_entries = self.get_gl_entries_for_stock(against_stock_account, self.doc.purchase_rate)
 		
 		for entry in gl_entries:
-			entry["posting_date"] = self.doc.purchase_date
+			entry["posting_date"] = self.doc.purchase_date or (self.doc.creation and 
+				self.doc.creation.split(' ')[0]) or nowdate()
 			
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel)
