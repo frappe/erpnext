@@ -1,4 +1,6 @@
 erpnext.updates = [
+	["17th May", ["Patch: Set Conversion Factor for purchase invoice item in all old records. And repost JV to book Stock Received But Not Billed account, if Auto Inventory Integration enabed."
+	]],
 	["2nd May", ["Buying: Warehouse must belong to same company as transaction",
 		"Price List: Added Currency Field. One price list can have only one currency",
 		"Item: Naming can now be by series or item code",
