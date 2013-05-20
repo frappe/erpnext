@@ -20,8 +20,7 @@ def execute():
 	from stock.stock_ledger import update_entries_after
 	item_warehouse = []
 	# update valuation_rate in transaction
-	doctypes = {"Purchase Receipt": "purchase_receipt_details", 
-			"Purchase Invoice": "entries"}
+	doctypes = {"Purchase Receipt": "purchase_receipt_details", "Purchase Invoice": "entries"}
 	
 	for dt in doctypes:
 		for d in webnotes.conn.sql("""select name from `tab%s` 
