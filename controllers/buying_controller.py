@@ -374,7 +374,6 @@ class BuyingController(StockController):
 					flt(d.qty, self.precision.item.qty)) / 
 					flt(d.conversion_factor, self.precision.item.conversion_factor), 
 					self.precision.item.valuation_rate)	
-				
 			else:
 				d.valuation_rate = 0.0
 				
