@@ -1,14 +1,21 @@
 ---
 {
-	"_label": "Documentation",
+	"_label": "ERPNext",
+	"_no_title": 1,
 	"_toc": [
-		"docs.quickstart",
-		"docs.framework",
-		"docs.modules"
+		"docs.user",
+		"docs.dev",
+		"docs.download",
+		"docs.community",
+		"docs.blog",
+		"docs.about"
 	]
 }
 ---
-Welcome to the ERPNext Developer documentation.
+<div class="jumbotron">
+	<h1>ERPNext</h1>
+	<p>Open Source Organization Management Platform</p>
+</div>
 
 ### Is this for me?
 
