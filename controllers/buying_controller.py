@@ -367,13 +367,13 @@ class BuyingController(StockController):
 			if d.item_code and d.qty:
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it
-				d.valuation_rate = flt((flt(d.purchase_rate, self.precision.item.purchase_rate) or 
-					flt(d.rate, self.precision.item.rate) + 
+				d.valuation_rate = flt(((flt(d.purchase_rate, self.precision.item.purchase_rate) or 
+					flt(d.rate, self.precision.item.rate)) + 
 					(flt(d.item_tax_amount, self.precision.item.item_tax_amount) + 
 					flt(d.rm_supp_cost, self.precision.item.rm_supp_cost)) / 
 					flt(d.qty, self.precision.item.qty)) / 
 					flt(d.conversion_factor, self.precision.item.conversion_factor), 
-					self.precision.item.valuation_rate)					
+					self.precision.item.valuation_rate)	
 			else:
 				d.valuation_rate = 0.0
 				
