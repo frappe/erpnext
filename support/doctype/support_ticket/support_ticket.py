@@ -62,13 +62,9 @@ class DocType(TransactionBase):
 			if not self.doc.contact:
 				self.doc.contact = webnotes.conn.get_value("Contact", {"email_id": email_id})
 				
-			if not self.doc.company:
-				if self.doc.lead:
-					company = webnotes.conn.get_value("Lead", self.doc.lead, "company")
-				elif self.doc.contact:
-					company = webnotes.conn.get_value("Contact", self.doc.contact, "company")
-				
-				self.doc.company = company or webnotes.conn.get_default("company")
+			if not self.doc.company:		
+				self.doc.company = webnotes.conn.get_value("Lead", self.doc.lead, "company") or \
+					webnotes.conn.get_default("company")
 			
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 
