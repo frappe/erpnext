@@ -57,7 +57,8 @@ class SellingController(StockController):
 		from selling.utils import get_item_details
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get("item_code"):
-				ret = get_item_details(item.fields)
+				args = item.fields.copy().update(self.doc.fields)
+				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield="entries") and \
 						not item.fields.get(fieldname):
@@ -319,7 +320,8 @@ class SellingController(StockController):
 		self.doc.rounded_total_export = round(self.doc.grand_total_export)
 	
 	def calculate_commission(self):
-		if self.doc.commission_rate > 100:
+		self.round_floats_in(self.doc, ["net_total", "commission_rate"])
+		if self.doc.commission_rate > 100.0:
 			msgprint(_(self.meta.get_label("commission_rate")) + " " + 
 				_("cannot be greater than 100"), raise_exception=True)
 		
