@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-06 12:03:41", 
+  "creation": "2013-05-21 16:16:41", 
   "docstatus": 0, 
-  "modified": "2013-05-09 17:34:14", 
+  "modified": "2013-05-21 18:25:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -224,11 +224,12 @@
   "doctype": "DocField", 
   "fieldname": "entries", 
   "fieldtype": "Table", 
-  "label": "Entries", 
+  "label": "Sales Invoice Items", 
   "oldfieldname": "entries", 
   "oldfieldtype": "Table", 
   "options": "Sales Invoice Item", 
-  "read_only": 0
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -457,6 +458,15 @@
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Total Taxes and Charges (Export)", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 

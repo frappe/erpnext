@@ -59,23 +59,12 @@ def get_item_details(args):
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
 			item.lead_time_days)
 			
-	# set zero
-	out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
-		out.import_ref_rate = out.import_rate = 0.0
+	meta = webnotes.get_doctype(args.doctype)
 	
-	if args.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt", 
-			"Supplier Quotation"]:
-		# try fetching from price list
-		if args.price_list_name and args.price_list_currency:
-			rates_as_per_price_list = get_rates_as_per_price_list(args, item_bean.doclist)
-			if rates_as_per_price_list:
-				out.update(rates_as_per_price_list)
-		
-		# if not found, fetch from last purchase transaction
-		if not out.purchase_rate:
-			last_purchase = get_last_purchase_details(item.name, args.docname, args.conversion_rate)
-			if last_purchase:
-				out.update(last_purchase)
+	if meta.get_field("currency"):
+		out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
+			out.import_ref_rate = out.import_rate = 0.0
+		out.update(_get_price_list_rate(args, item_bean, meta))
 			
 	return out
 	
@@ -100,34 +89,38 @@ def _get_basic_details(args, item_bean):
 	
 	return out
 	
+def _get_price_list_rate(args, item_bean, meta=None):
+	from utilities.transaction_base import validate_currency
+	item = item_bean.doc
+	out = webnotes._dict()
+	
+	# try fetching from price list
+	if args.price_list_name and args.price_list_currency:
+		price_list_rate = item_bean.doclist.get({
+			"parentfield": "ref_rate_details", 
+			"price_list_name": args.price_list_name, 
+			"ref_currency": args.price_list_currency,
+			"buying": 1})
+		if price_list_rate:
+			out.purchase_ref_rate = flt(price_list_rate[0].ref_rate) * flt(args.plc_conversion_rate)
+		
+	# if not found, fetch from last purchase transaction
+	if not out.purchase_ref_rate:
+		last_purchase = get_last_purchase_details(item.name, args.docname, args.conversion_rate)
+		if last_purchase:
+			out.update(last_purchase)
+	
+	if out.purchase_ref_rate or out.purchase_rate or out.rate:
+		validate_currency(args, item, meta)
+	
+	return out
+	
 def _get_supplier_part_no(args, item_bean):
 	item_supplier = item_bean.doclist.get({"parentfield": "item_supplier_details",
 		"supplier": args.supplier})
 	
 	return item_supplier and item_supplier[0].supplier_part_no or None
 
-def get_rates_as_per_price_list(args, item_doclist=None):
-	if not item_doclist:
-		item_doclist = webnotes.bean("Item", args.item_code).doclist
-	
-	result = item_doclist.get({"parentfield": "ref_rate_details", 
-		"price_list_name": args.price_list_name, "ref_currency": args.price_list_currency,
-		"buying": 1})
-		
-	if result:
-		purchase_ref_rate = flt(result[0].ref_rate) * flt(args.plc_conversion_rate)
-		conversion_rate = flt(args.conversion_rate) or 1.0
-		return webnotes._dict({
-			"purchase_ref_rate": purchase_ref_rate,
-			"purchase_rate": purchase_ref_rate,
-			"rate": purchase_ref_rate,
-			"discount_rate": 0,
-			"import_ref_rate": purchase_ref_rate / conversion_rate,
-			"import_rate": purchase_ref_rate / conversion_rate
-		})
-	else:
-		return webnotes._dict()
-		
 def _validate_item_details(args, item):
 	from utilities.transaction_base import validate_item_fetch
 	validate_item_fetch(args, item)

@@ -95,17 +95,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	# Load Default Charges
-	# ----------------------------------------------------------
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	# Pull details from other charges master (Get Sales Taxes and Charges Master)
-	# ----------------------------------------------------------
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)	
-	
-		 
 # GET TERMS AND CONDITIONS
 # ====================================================================================
 	def get_tc_details(self):

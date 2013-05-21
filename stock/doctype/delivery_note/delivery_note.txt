@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-06 12:03:30", 
+  "creation": "2013-05-21 16:16:31", 
   "docstatus": 0, 
-  "modified": "2013-05-06 13:08:13", 
+  "modified": "2013-05-21 18:30:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -223,7 +223,8 @@
   "oldfieldtype": "Table", 
   "options": "Delivery Note Item", 
   "print_hide": 0, 
-  "read_only": 0
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -442,6 +443,15 @@
   "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total (Export)", 
+  "options": "company", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

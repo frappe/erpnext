@@ -54,10 +54,8 @@ erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.exten
 	}
 });
 
-var new_cscript = new erpnext.buying.PurchaseInvoiceController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
+$.extend(cur_frm.cscript, new erpnext.buying.PurchaseInvoiceController({frm: cur_frm}));
 
 
 cur_frm.cscript.onload = function(doc,dt,dn) {

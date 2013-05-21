@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
-from webnotes.utils import flt
+from webnotes.utils import flt, cint, comma_and
 import json
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
@@ -51,21 +51,44 @@ def get_item_details(args):
 		args = json.loads(args)
 	args = webnotes._dict(args)
 	
+	if args.barcode:
+		args.item_code = _get_item_code(args.barcode)
+	
 	item_bean = webnotes.bean("Item", args.item_code)
 	
 	_validate_item_details(args, item_bean.doc)
 	
 	out = _get_basic_details(args, item_bean)
 	
-	if args.price_list_name and args.price_list_currency:
-		out.update(_get_price_list_rate(args, item_bean))
+	meta = webnotes.get_doctype(args.doctype)
+	if meta.get_field("currency"):
+		out.base_ref_rate = out.basic_rate = out.ref_rate = out.export_rate = 0.0
+		
+		if args.price_list_name and args.price_list_currency:
+			out.update(_get_price_list_rate(args, item_bean, meta))
 	
 	if out.warehouse or out.reserved_warehouse:
 		out.update(_get_available_qty(args, out.warehouse or out.reserved_warehouse))
 	
 	out.customer_item_code = _get_customer_item_code(args, item_bean)
 	
+	if cint(args.is_pos):
+		pos_settings = get_pos_settings(args.company)
+		out.update(apply_pos_settings(pos_settings, out))
+	
 	return out
+	
+def _get_item_code(barcode):
+	item_code = webnotes.conn.sql_list("""select name from `tabItem` where barcode=%s""", barcode)
+			
+	if not item_code:
+		msgprint(_("No Item found with Barcode") + ": %s" % barcode, raise_exception=True)
+	
+	elif len(item_code) > 1:
+		msgprint(_("Items") + " %s " % comma_and(item_code) + 
+			_("have the same Barcode") + " %s" % barcode, raise_exception=True)
+	
+	return item_code[0]
 	
 def _validate_item_details(args, item):
 	from utilities.transaction_base import validate_item_fetch
@@ -106,18 +129,21 @@ def _get_basic_details(args, item_bean):
 			
 	return out
 	
-def _get_price_list_rate(args, item_bean):
+def _get_price_list_rate(args, item_bean, meta=None):
 	base_ref_rate = item_bean.doclist.get({
 		"parentfield": "ref_rate_details",
 		"price_list_name": args.price_list_name, 
 		"price_list_currency": args.price_list_currency,
 		"selling": 1})
-	out = webnotes._dict()
-	out.base_ref_rate = flt(base_ref_rate[0].ref_rate) if base_ref_rate else 0.0
-	out.basic_rate = out.base_ref_rate
-	out.ref_rate = out.base_ref_rate / flt(args.conversion_rate)
-	out.export_rate = out.ref_rate
-	return out
+	
+	if not base_ref_rate:
+		return {}
+	
+	# found price list rate - now we can validate
+	from utilities.transaction_base import validate_currency
+	validate_currency(args, item_bean.doc, meta)
+	
+	return {"base_ref_rate": flt(base_ref_rate[0].ref_rate / args.plc_conversion_rate)}
 	
 def _get_available_qty(args, warehouse):
 	return webnotes.conn.get_value("Bin", {"item_code": args.item_code, "warehouse": warehouse}, 
@@ -129,3 +155,24 @@ def _get_customer_item_code(args, item_bean):
 	
 	return customer_item_code and customer_item_code[0].ref_code or None
 	
+def get_pos_settings(company):
+	pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
+		and company = %s""", (webnotes.session['user'], company), as_dict=1)
+		
+	if not pos_settings:
+		pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` 
+			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
+
+	return pos_settings and pos_settings[0] or None
+	
+def apply_pos_settings(pos_settings, opts):
+	out = {}
+	
+	for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
+		if not opts.get(fieldname):
+			out[fieldname] = pos_settings.get(fieldname)
+			
+	if out.get("warehouse"):
+		out["actual_qty"] = _get_available_qty(opts, out.get("warehouse")).get("actual_qty")
+	
+	return out

@@ -114,16 +114,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-
-	def get_other_charges(self):
-		"""Pull details from Sales Taxes and Charges Master"""
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
-
-
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if webnotes.conn.get_value('Global Defaults', 'Global Defaults', 'so_required') == 'Yes':
@@ -152,7 +142,6 @@ class DocType(SellingController):
 		self.validate_warehouse()
 		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
-		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.check_conversion_rate(self)
 
 		# Set actual qty for each item in selected warehouse

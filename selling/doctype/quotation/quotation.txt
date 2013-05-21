@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-06 12:03:40", 
+  "creation": "2013-05-21 16:16:40", 
   "docstatus": 0, 
-  "modified": "2013-05-06 13:07:37", 
+  "modified": "2013-05-21 18:29:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -214,6 +214,7 @@
   "oldfieldtype": "Table", 
   "options": "Quotation Item", 
   "read_only": 0, 
+  "reqd": 1, 
   "width": "40px"
  }, 
  {
@@ -431,10 +432,19 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_total", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Total*", 
+  "label": "Taxes and Charges Total", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total (Export)", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 

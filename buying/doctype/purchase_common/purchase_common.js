@@ -84,20 +84,8 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = wn.model.get_doc(cdt, cdn);
-		
-		// validate company
 		if(item.item_code) {
-			var fetch = true;
-			$.each(["company", "supplier"], function(i, fieldname) {
-				if(!me.frm.doc[fieldname]) {
-					fetch = false;
-					msgprint(wn._("Please specify") + ": " + 
-						wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-						". " + wn._("It is needed to fetch Item Details."));
-				}
-			});
-			
-			if(!fetch) {
+			if(!this.validate_company_and_party()) {
 				item.item_code = null;
 				refresh_field("item_code", item.name, item.parentfield);
 			} else {
@@ -126,6 +114,19 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 				});
 			}
 		}
+	},
+	
+	validate_company_and_party: function() {
+		var valid = true;
+		$.each(["company", "supplier"], function(i, fieldname) {
+			if(!me.frm.doc[fieldname]) {
+				valid = false;
+				msgprint(wn._("Please specify") + ": " + 
+					wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+					". " + wn._("It is needed to fetch Item Details."));
+			}
+		});
+		return valid;
 	},
 	
 	update_item_details: function(doc, dt, dn, callback) {

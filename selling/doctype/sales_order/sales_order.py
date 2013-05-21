@@ -83,12 +83,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
- 
 	def get_tc_details(self):
 		return get_obj('Sales Common').get_tc_details(self)
 
@@ -225,7 +219,6 @@ class DocType(SellingController):
 		sales_com_obj.check_conversion_rate(self)
 
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
-		sales_com_obj.get_allocated_sum(self)
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 		
 		if not self.doc.status:
