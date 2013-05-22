@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-10 08:35:38", 
+  "creation": "2013-04-19 11:00:07", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:05:20", 
+  "modified": "2013-05-22 12:01:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -224,6 +224,7 @@
   "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Pur Order", 
+  "no_copy": 1, 
   "oldfieldname": "purchase_order", 
   "oldfieldtype": "Link", 
   "options": "Purchase Order", 
@@ -238,6 +239,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "Purchase Order Item", 
+  "no_copy": 1, 
   "oldfieldname": "po_detail", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -250,6 +252,7 @@
   "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Pur Receipt", 
+  "no_copy": 1, 
   "oldfieldname": "purchase_receipt", 
   "oldfieldtype": "Link", 
   "options": "Purchase Receipt", 
@@ -264,6 +267,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "PR Detail", 
+  "no_copy": 1, 
   "oldfieldname": "pr_detail", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
