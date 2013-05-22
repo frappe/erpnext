@@ -250,4 +250,5 @@ patch_list = [
 	"patches.may_2013.p01_conversion_factor_and_aii",
 	"patches.may_2013.p02_update_valuation_rate",
 	"patches.may_2013.p03_update_support_ticket",
+	"patches.may_2013.p04_reorder_level",
 ]
