@@ -1,11 +1,10 @@
 ---
 {
-	"_label": "Introduction"
+	"_label": "Introduction",
+	"_title_image": "img/why-erpnext.png"
 }
 ---
 ## What is an ERP and why should I care?
-
-![Business Owner](img/why-erpnext.png)
 
 Small business are not so different from large ones. They contain most of the complexities of a large business but with many more constraints. Small businesses have to communicate with customers, do accounts, pay taxes, do payroll, manage timelines, deliver quality, answer questions and keep everyone happy just like large businesses.
 

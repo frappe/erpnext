@@ -1,6 +1,7 @@
 ---
 {
-	"_label": "Before We Start"
+	"_label": "Before We Start",
+	"_title_image": "img/before-we-start.png"
 }
 ---
 ## Before We Start
@@ -12,8 +13,6 @@ We have seem dozens of ERP implementations over the past few years and we realiz
 ERPs are not required.
 
 Like exercise. 
-
-![Runner](img/before-we-start.png)
 
 Human body does not require to be exercised today or maybe tomorrow, but in the long run, if you wish to maintain your body and its health, you should get on the treadmill.
 

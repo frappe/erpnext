@@ -1,6 +1,7 @@
 ---
 {
-	"_label": "Foundation: Item"
+	"_label": "Foundation: Item",
+	"_title_image": "img/items.png"
 }
 ---
 Items, Customers and Suppliers form the foundation of any ERP system.

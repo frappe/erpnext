@@ -1,6 +1,7 @@
 ---
 {
-	"_label": "Foundation: Customer"
+	"_label": "Foundation: Customer",
+	"_title_image": "img/customers.png"
 }
 ---
 You can either directly create your Customers via 
