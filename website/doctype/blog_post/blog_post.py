@@ -76,10 +76,12 @@ class DocType:
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.published_on)
 		self.doc.content_html = self.doc.content
+		
 		if self.doc.blogger:
 			self.doc.blogger_info = webnotes.doc("Blogger", self.doc.blogger).fields
 		
 		self.doc.description = self.doc.blog_intro or self.doc.content[:140]
+		self.doc.meta_description = self.doc.description
 		
 		self.doc.categories = webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
 		

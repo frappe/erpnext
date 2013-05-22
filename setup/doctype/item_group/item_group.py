@@ -81,3 +81,4 @@ class DocType(DocTypeNestedSet):
 		if self.doc.slideshow:
 			from website.helpers.slideshow import get_slideshow
 			get_slideshow(self)
+		
