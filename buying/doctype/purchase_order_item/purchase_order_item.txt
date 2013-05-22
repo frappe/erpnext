@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:42", 
+  "creation": "2013-03-07 11:42:55", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:27", 
+  "modified": "2013-05-22 11:59:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -36,6 +36,7 @@
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -49,6 +50,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_hide": 0, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -72,6 +74,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -83,6 +86,7 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -95,6 +99,7 @@
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "print_width": "60px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "60px"
  }, 
@@ -108,6 +113,7 @@
   "options": "UOM", 
   "print_hide": 0, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -117,14 +123,16 @@
   "fieldtype": "Currency", 
   "label": "Ref Rate ", 
   "options": "currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "discount_rate", 
   "fieldtype": "Float", 
   "label": "Discount %", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -135,7 +143,8 @@
   "oldfieldname": "import_rate", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -153,7 +162,8 @@
   "fieldtype": "Currency", 
   "label": "Ref Rate*", 
   "options": "Company:company:default_currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
@@ -166,6 +176,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -192,6 +203,7 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -202,6 +214,7 @@
   "label": "Project Name", 
   "options": "Project", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -214,6 +227,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -237,7 +251,7 @@
   "fieldtype": "Data", 
   "hidden": 1, 
   "label": "Prevdoc DocType", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_doctype", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -250,7 +264,7 @@
   "hidden": 0, 
   "in_filter": 1, 
   "label": "Material Request No", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Link", 
   "options": "Material Request", 
@@ -267,6 +281,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "Material Request Date", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -280,7 +295,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "Material Request Detail No", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_detail_docname", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -294,6 +309,7 @@
   "hidden": 1, 
   "in_filter": 0, 
   "label": "Supplier Quotation", 
+  "no_copy": 1, 
   "options": "Supplier Quotation", 
   "read_only": 1, 
   "search_index": 0
@@ -304,6 +320,7 @@
   "fieldtype": "Link", 
   "hidden": 1, 
   "label": "Supplier Quotation Item", 
+  "no_copy": 1, 
   "options": "Supplier Quotation Item", 
   "read_only": 1
  }, 
@@ -395,6 +412,7 @@
   "no_copy": 1, 
   "oldfieldname": "page_break", 
   "oldfieldtype": "Check", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }
 ]

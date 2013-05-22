@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:52", 
+  "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:29", 
+  "modified": "2013-05-22 12:08:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,6 +37,7 @@
   "options": "Item", 
   "print_hide": 0, 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -60,6 +61,7 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "print_width": "150px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
@@ -73,6 +75,7 @@
   "oldfieldtype": "Small Text", 
   "print_hide": 0, 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -87,6 +90,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 0, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0, 
   "width": "100px"
@@ -115,6 +119,7 @@
   "options": "currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -128,6 +133,7 @@
   "oldfieldtype": "Float", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -142,6 +148,7 @@
   "options": "currency", 
   "print_hide": 0, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
@@ -188,6 +195,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
@@ -291,6 +299,7 @@
   "oldfieldname": "page_break", 
   "oldfieldtype": "Check", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 1
  }
 ]
