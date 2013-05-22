@@ -1,8 +1,6 @@
 {% extends "app/website/templates/html/page.html" %}
 
 {% block content %}
-{% include 'app/website/templates/html/product_search_box.html' %}
-{% include 'app/website/templates/html/product_breadcrumbs.html' %}
 <div class="span12">
 	{% if slideshow %}<!-- slideshow -->
 	{% include "app/website/templates/html/slideshow.html" %}
@@ -12,6 +10,10 @@
 	{% else %}
 	<h3>{{ name }}</h3>
 	{% endif %}
+</div>
+{% include 'app/website/templates/html/product_search_box.html' %}
+{% include 'app/website/templates/html/product_breadcrumbs.html' %}
+<div class="span12">
 	{% if sub_groups %}
 	<hr />
 	<div class="row">
