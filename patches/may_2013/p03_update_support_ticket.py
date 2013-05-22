@@ -17,6 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 def execute():
+	webnotes.reload_doc("support", "doctype", "support_ticket")
+	webnotes.reload_doc("core", "doctype", "communication")
 	for d in webnotes.conn.sql("""select name, raised_by from `tabSupport Ticket` 
 			where docstatus < 2""", as_dict=True):
 		tic = webnotes.get_obj("Support Ticket", d.name)
