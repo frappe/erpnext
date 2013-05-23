@@ -565,7 +565,7 @@ class DocType(SellingController):
 					d.export_rate, d.item_code)
 				
 	def check_value(self, ref_dt, ref_dn, ref_item_dn, val, item_code):
-		ref_val = webnotes.conn.get_value(ref_dt + "Item", ref_item_dn, "export_rate")
+		ref_val = webnotes.conn.get_value(ref_dt + " Item", ref_item_dn, "export_rate")
 		if flt(ref_val) != flt(val):
 			msgprint(_("Rate is not matching with ") + ref_dt + ": " + ref_dn + 
 				_(" for item: ") + item_code, raise_exception=True)
