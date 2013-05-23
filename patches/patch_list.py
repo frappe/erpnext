@@ -251,4 +251,5 @@ patch_list = [
 	"patches.may_2013.p02_update_valuation_rate",
 	"patches.may_2013.p03_update_support_ticket",
 	"patches.may_2013.p04_reorder_level",
+	"patches.may_2013.p05_update_cancelled_gl_entries",
 ]
