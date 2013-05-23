@@ -217,7 +217,10 @@ class DocType(SellingController):
 		self.validate_proj_cust()
 		self.validate_po()
 		#self.validate_reference_value()
-		self.validate_for_items()
+		
+		if self.doc.docstatus == 1:
+			self.validate_for_items()
+		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
