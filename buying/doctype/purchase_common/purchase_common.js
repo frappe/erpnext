@@ -151,7 +151,7 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 	},
 	
 	currency: function() {
-		this.set_dynamic_labels();
+		this.price_list_currency();
 	},
 	
 	company: function() {
@@ -189,7 +189,8 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
 				}
 			});
-		}
+		};
+		
 		
 		setup_field_label_map(["net_total", "total_tax", "grand_total", "in_words",
 			"other_charges_added", "other_charges_deducted", 
@@ -211,6 +212,9 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 		this.frm.toggle_display(["conversion_rate", "net_total", "grand_total", 
 			"in_words", "other_charges_added", "other_charges_deducted"],
 			this.frm.doc.currency != company_currency);
+			
+		this.frm.toggle_display(["plc_conversion_rate"], 
+			this.frm.price_list_currency != company_currency)
 		
 		// set labels
 		$.each(field_label_map, function(fname, label) {
@@ -227,8 +231,9 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = wn.meta.get_docfield(grid_doctype, fname);
 				if(docfield) {
+					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 
-						docfield.label + " (" + currency + ")";
+						label.trim() + " (" + currency + ")";
 				}
 			});
 		}

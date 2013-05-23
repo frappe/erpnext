@@ -58,10 +58,8 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 	// 2
 	refresh: function() {
 		erpnext.hide_naming_series();
-		this.toggle_price_list_fields();
-		
-		// TODO
-		// display item wise taxes in an html table
+		this.show_item_wise_taxes();
+		this.set_dynamic_labels();
 	},
 	
 	// 3
@@ -75,7 +73,6 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 				callback: function(r) {
 					// remove this call when using client side mapper
 					me.set_default_values();
-					
 					me.frm.refresh();
 				}
 			});
@@ -134,15 +131,13 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 	company: function() {
 		if(this.frm.doc.company) {
 			var me = this;
-			var company_currency = wn.model.get_doc(":Company", this.frm.doc.company).default_currency;
+			var company_currency = this.get_company_currency();
 			$.each(["currency", "price_list_currency"], function(i, fieldname) {
 				if(!me.doc[fieldname]) {
 					me.frm.set_value(fieldname, company_currency);
-
-					// TODO - check this
-					me.frm.runclientscript(fieldname);
 				}
 			});
+			this.price_list_currency();
 		}
 	},
 	
@@ -161,7 +156,7 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.refresh();
+							me.frm.refresh_fields();
 							if(me.frm.doc.price_list_name !== price_list_name) me.price_list_name();
 						}
 					}
@@ -172,9 +167,51 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		// TODO hide/unhide related fields
 	},
 	
-	// TODO
 	price_list_name: function() {
-		console.log("price_list_name");
+		var me = this;
+		if(this.frm.doc.price_list_name) {
+			this.frm.call({
+				method: "setup.utils.get_price_list_currency",
+				args: {args: {
+					price_list_name: this.frm.doc.price_list_name,
+					use_for: "selling"
+				}},
+				callback: function(r) {
+					if(!r.exc) {
+						me.price_list_currency();
+					}
+				}
+			});
+		}
+	},
+	
+	currency: function() {
+		this.price_list_currency();
+	},
+	
+	price_list_currency: function() {
+		// What TODO? should we make price list system non-mandatory?
+		// this.frm.toggle_reqd("plc_conversion_rate",
+		// 	!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
+		
+		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
+			this.frm.set_value("plc_conversion_rate", 1.0);
+			this.calculate_taxes_and_totals();
+		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
+			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
+			this.calculate_taxes_and_totals();
+		}
+		
+		this.set_dynamic_labels();
+	},
+	
+	conversion_rate: function() {
+		this.price_list_currency();
+		this.calculate_taxes_and_totals();
+	},
+	
+	plc_conversion_rate: function() {
+		this.price_list_currency();
 	},
 	
 	ref_rate: function(doc, cdt, cdn) {
@@ -214,6 +251,7 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		try {
 			this.validate_on_previous_row(tax);
 			this.validate_inclusive_tax(tax);
+			this.calculate_taxes_and_totals();
 		} catch(e) {
 			tax.included_in_print_rate = 0;
 			refresh_field("included_in_print_rate", tax.name, tax.parentfield);
@@ -294,15 +332,6 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		});
 	},
 	
-	// TODO
-	toggle_price_list_fields: function() {
-		
-	},
-	
-	set_dynamic_labels: function() {
-		
-	},
-	
 	calculate_taxes_and_totals: function() {
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
 		
@@ -320,7 +349,6 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		this.calculate_commission();
 		this.calculate_contribution();
 		this._cleanup();
-		
 		this.frm.doc.in_words = this.frm.doc.in_words_export = "";
 		
 		// TODO
@@ -328,7 +356,8 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		
 		// check for custom_recalc in custom scripts of server
 		
-		this.frm.refresh();
+		this.frm.refresh_fields();
+		this.show_item_wise_taxes();
 				
 	},
 	
@@ -370,6 +399,7 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 			
 			// temporary fields
 			tax.tax_amount_for_current_item = tax.grand_total_for_current_item = 0.0;
+			tax.tax_fraction_for_current_item = tax.grand_total_fraction_for_current_item = 0.0;
 			
 			me.validate_on_previous_row(tax);
 			me.validate_inclusive_tax(tax);
@@ -388,10 +418,10 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 				tax.tax_fraction_for_current_item = me.get_current_tax_fraction(tax, item_tax_map);
 				
 				if(i==0) {
-					tax.grand_total_for_current_item = 1 + tax.tax_fraction_for_current_item;
+					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
 				} else {
-					tax.grand_total_for_current_item = 
-						me.frm.tax_doclist[i-1].grand_total_for_current_item +
+					tax.grand_total_fraction_for_current_item = 
+						me.frm.tax_doclist[i-1].grand_total_fraction_for_current_item +
 						tax.tax_fraction_for_current_item;
 				}
 				
@@ -422,18 +452,18 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 		var current_tax_fraction = 0.0;
 		
 		if(cint(tax.included_in_print_rate)) {
-			var tax_rate = me._get_tax_rate(tax, item_tax_map);
+			var tax_rate = this._get_tax_rate(tax, item_tax_map);
 			
 			if(tax.charge_type == "On Net Total") {
 				current_tax_fraction = (tax_rate / 100.0);
 				
 			} else if(tax.charge_type == "On Previous Row Amount") {
 				current_tax_fraction = (tax_rate / 100.0) *
-					me.frm.tax_doclist[cint(tax.row_id) - 1].tax_fraction_for_current_item;
+					this.frm.tax_doclist[cint(tax.row_id) - 1].tax_fraction_for_current_item;
 				
 			} else if(tax.charge_type == "On Previous Row Total") {
 				current_tax_fraction = (tax_rate / 100.0) *
-					me.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
+					this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
 			}
 		}
 		
@@ -512,15 +542,15 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
-			current_tax_amount = (tax_rate / 100.0);
+			current_tax_amount = (tax_rate / 100.0) * item.amount;
 			
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
-				me.frm.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item;
+				this.frm.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item;
 			
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
-				me.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item;
+				this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item;
 			
 		}
 		
@@ -558,6 +588,7 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 	},
 	
 	calculate_contribution: function() {
+		var me = this;
 		$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
 			{parentfield: "sales_team"}), function(i, sales_person) {
 				wn.model.round_floats_in(sales_person);
@@ -653,9 +684,162 @@ erpnext.selling.SellingController = wn.ui.form.Controller.extend({
 	
 	_get_tax_rate: function(tax, item_tax_map) {
 		return (keys(item_tax_map).indexOf(tax.account_head) != -1) ?
-			flt(item_tax_map.get(tax.account_head), precision("rate", tax)) :
+			flt(item_tax_map[tax.account_head], precision("rate", tax)) :
 			tax.rate;
 	},
+
+	show_item_wise_taxes: function() {
+		$(this.get_item_wise_taxes_html())
+			.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+	},
+	
+	get_item_wise_taxes_html: function() {
+		var item_tax = {};
+		var tax_accounts = [];
+		var company_currency = this.get_company_currency();
+		
+		$.each(this.get_tax_doclist(), function(i, tax) {
+			var tax_amount_precision = precision("tax_amount", tax);
+			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'), 
+				function(item_code, tax_amount) {
+					if(!item_tax[item_code]) item_tax[item_code] = {};
+					item_tax[item_code][tax.account_head] = flt(tax_amount, tax_amount_precision);
+				});
+			tax_accounts.push(tax.account_head);
+		});
+		
+		var headings = $.map([wn._("Item Name")].concat(tax_accounts), 
+			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
+		
+		var rows = $.map(this.get_item_doclist(), function(item) {
+			var item_tax_record = item_tax[item.item_code || item.item_name];
+			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
+				item_name: item.item_name,
+				taxes: $.map(tax_accounts, function(head) {
+					return "<td>" + format_currency(item_tax_record[head], company_currency) + "</td>"
+				}).join("\n")
+			});
+		}).join("\n");
+		
+		return '<div style="overflow-x: scroll;"><table class="table table-bordered table-hover">\
+			<thead><tr>' + headings + '</tr></thead> \
+			<tbody>' + rows + '</tbody> \
+		</table></div>';
+	},
+	
+	get_charges: function() {
+		var me = this;
+		if(this.frm.doc.charge) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "get_other_charges",
+				callback: function(r) {
+					if(!r.exc) {
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
+		}
+	},
+	
+	set_dynamic_labels: function() {
+		var company_currency = this.get_company_currency();
+		
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
+	},
+	
+	change_form_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+		
+		var setup_field_label_map = function(fields_list, currency) {
+			$.each(fields_list, function(i, fname) {
+				var docfield = wn.meta.get_docfield(me.frm.doc.doctype, fname);
+				if(docfield) {
+					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
+					field_label_map[fname] = label.trim() + " (" + currency + ")";
+				}
+			});
+		};
+		
+		setup_field_label_map(["net_total", "other_charges_total", "grand_total", 
+			"rounded_total", "in_words",
+			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
+			company_currency);
+		
+		setup_field_label_map(["net_total_export", "other_charges_total_export", "grand_total_export", 
+			"rounded_total_export", "in_words_export"], this.frm.doc.currency);
+		
+		setup_field_label_map(["conversion_rate"], 	"1 " + this.frm.doc.currency 
+			+ " = [?] " + company_currency);
+		
+		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
+			setup_field_label_map(["plc_conversion_rate"], 	"1 " + this.frm.doc.price_list_currency 
+				+ " = [?] " + company_currency);
+		}
+		
+		// toggle fields
+		this.frm.toggle_display(["conversion_rate", "net_total", "other_charges_total", 
+			"grand_total", "rounded_total", "in_words"],
+			this.frm.doc.currency != company_currency);
+			
+		this.frm.toggle_display(["plc_conversion_rate"], 
+			this.frm.doc.price_list_currency != company_currency);
+		
+		// set labels
+		$.each(field_label_map, function(fname, label) {
+			me.frm.fields_dict[fname].set_label(label);
+		});
+	},
+	
+	change_grid_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+		
+		var setup_field_label_map = function(fields_list, currency, parentfield) {
+			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
+			$.each(fields_list, function(i, fname) {
+				var docfield = wn.meta.get_docfield(grid_doctype, fname);
+				if(docfield) {
+					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
+					field_label_map[grid_doctype + "-" + fname] = 
+						label.trim() + " (" + currency + ")";
+				}
+			});
+		}
+		
+		setup_field_label_map(["basic_rate", "base_ref_rate", "amount"],
+			company_currency, this.fname);
+		
+		setup_field_label_map(["export_rate", "ref_rate", "export_amount"],
+			this.frm.doc.currency, this.fname);
+		
+		setup_field_label_map(["tax_amount", "total"], company_currency, "other_charges");
+		
+		if(this.frm.fields_dict["advance_allocation_details"]) {
+			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency,
+				"advance_allocation_details");
+		}
+		
+		// toggle columns
+		var item_grid = this.frm.fields_dict[this.fname].grid;
+		var show = this.frm.doc.currency != company_currency;
+		$.each(["basic_rate", "base_ref_rate", "amount"], function(i, fname) {
+			if(wn.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, show);
+		});
+		
+		// set labels
+		var $wrapper = $(this.frm.wrapper);
+		$.each(field_label_map, function(fname, label) {
+			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
+		});
+	},
+	
+	get_company_currency: function() {
+		return erpnext.get_currency(this.frm.doc.company);
+	}
 });
 
 // to save previous state of cur_frm.cscript
@@ -666,61 +850,6 @@ cur_frm.cscript = new erpnext.selling.SellingController({frm: cur_frm});
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, prev_cscript);
-
-
-var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
-	//parent flds
-	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Taxes and Charges Total', 
-		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
-	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
-
-	for (d in par_cols_base) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
-	for (d in par_cols_export) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
-	cur_frm.fields_dict['conversion_rate'].label_span.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
-	cur_frm.fields_dict['plc_conversion_rate'].label_span.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
-
-	if (doc.doctype == 'Sales Invoice') {
-		si_cols = {'total_advance': 'Total Advance', 'outstanding_amount': 'Outstanding Amount', 'paid_amount': 'Paid Amount', 'write_off_amount': 'Write Off Amount'}
-		for (d in si_cols) cur_frm.fields_dict[d].label_span.innerHTML = si_cols[d] + ' (' + base_curr + ')';
-	}
-}
-
-
-var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
-	// item table flds
-	item_cols_base = {'basic_rate': 'Basic Rate', 'base_ref_rate': 'Price List Rate', 'amount': 'Amount'};
-	item_cols_export = {'export_rate': 'Basic Rate', 'ref_rate': 'Price List Rate', 'export_amount': 'Amount'};
-		
-	for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
-	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
-
-	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_base) {
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
-	}
-
-	//tax table flds
-	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
-	for (d in tax_cols) $('[data-grid-fieldname="Sales Taxes and Charges-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');
-		
-	if (doc.doctype == 'Sales Invoice') {
-		// advance table flds
-		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
-		for (d in adv_cols) $('[data-grid-fieldname="Sales Invoice Advance-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
-	}
-}
-
-// Change label dynamically based on currency
-//------------------------------------------------------------------
-
-cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
-	cur_frm.cscript.base_currency = base_curr;
-	set_dynamic_label_par(doc, cdt, cdn, base_curr);
-	set_dynamic_label_child(doc, cdt, cdn, base_curr);
-	set_sales_bom_help(doc);
-
-	if (callback) callback(doc, cdt, cdn);
-}
 
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
@@ -746,88 +875,6 @@ var set_sales_bom_help = function(doc) {
 	refresh_field('sales_bom_help');
 }
 
-
-// hide / unhide price list currency based on availability of price list in customer's currency
-//---------------------------------------------------------------------------------------------------
-
-// cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
-// 	if (doc.price_list_name && doc.currency) {
-// 		wn.call({
-// 			method: 'selling.doctype.sales_common.sales_common.get_price_list_currency',
-// 			args: {'price_list':doc.price_list_name, 'company': doc.company},
-// 			callback: function(r, rt) {
-// 				pl_currency = r.message[0]?r.message[0]:[];
-// 				unhide_field(['price_list_currency', 'plc_conversion_rate']);
-// 				
-// 				if (pl_currency.length==1) {
-// 					if (doc.price_list_currency != pl_currency[0]) 
-// 						set_multiple(cdt, cdn, {price_list_currency:pl_currency[0]});
-// 					if (pl_currency[0] == doc.currency) {
-// 						if(doc.plc_conversion_rate != doc.conversion_rate) 
-// 							set_multiple(cdt, cdn, {plc_conversion_rate:doc.conversion_rate});
-// 						hide_field(['price_list_currency', 'plc_conversion_rate']);
-// 					} else if (pl_currency[0] == r.message[1]) {
-// 						if (doc.plc_conversion_rate != 1) 
-// 							set_multiple(cdt, cdn, {plc_conversion_rate:1})
-// 						hide_field(['price_list_currency', 'plc_conversion_rate']);
-// 					}
-// 				}
-// 
-// 				if (r.message[1] == doc.currency) {
-// 					if (doc.conversion_rate != 1) 
-// 						set_multiple(cdt, cdn, {conversion_rate:1});
-// 					hide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
-// 				} else {
-// 					unhide_field(['conversion_rate', 'grand_total_export', 'in_words_export']);
-// 					if(!cint(sys_defaults.disable_rounded_total))
-// 						unhide_field("rounded_total_export");
-// 				}
-// 				if (r.message[1] == doc.price_list_currency) {
-// 					if (doc.plc_conversion_rate != 1) 
-// 						set_multiple(cdt, cdn, {plc_conversion_rate:1});
-// 					hide_field('plc_conversion_rate');
-// 				} else unhide_field('plc_conversion_rate');
-// 				cur_frm.cscript.dynamic_label(doc, cdt, cdn, r.message[1], callback1);	
-// 			}
-// 		})
-// 	}
-// }
-
-
-// TRIGGERS FOR CALCULATIONS
-// =====================================================================================================
-
-// ********************* CURRENCY ******************************
-cur_frm.cscript.currency = function(doc, cdt, cdn) {
-	cur_frm.cscript.price_list_name(doc, cdt, cdn); 
-}
-
-cur_frm.cscript.price_list_currency = cur_frm.cscript.currency;
-cur_frm.cscript.conversion_rate = cur_frm.cscript.currency;
-cur_frm.cscript.plc_conversion_rate = cur_frm.cscript.currency;
-
-
-// ******************** PRICE LIST ******************************
-cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
-	var callback = function() {
-		var fname = cur_frm.cscript.fname;
-		var cl = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
-		if(doc.price_list_name && doc.currency && doc.price_list_currency && doc.conversion_rate && doc.plc_conversion_rate) {
-			$c_obj(make_doclist(doc.doctype, doc.name), 'get_adj_percent', '',
-				function(r, rt) {
-					refresh_field(fname);
-					var doc = locals[cdt][cdn];
-					cur_frm.cscript.recalc(doc,3);		//this is to re-calculate BASIC RATE and AMOUNT on basis of changed REF RATE
-				}
-			);
-		}
-	}
-	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback);
-}
-
-
-
-// ******************** ITEM CODE ******************************** 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if (doc.order_type == "Maintenance") {
 	 	return erpnext.queries.item({
@@ -893,17 +940,5 @@ cur_frm.fields_dict.charge.get_query = function(doc) {
 		AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
 		ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
 }
-
-// ********************* Get Charges ****************************
-cur_frm.cscript.get_charges = function(doc, cdt, cdn, callback) {
-	$c_obj(make_doclist(doc.doctype,doc.name),
-		'get_other_charges',
-		'', 
-		function(r, rt) {
-			cur_frm.cscript.calculate_charges(doc, cdt, cdn);
-			if(callback) callback(doc, cdt, cdn);
-		}, null,null,cur_frm.fields_dict.get_charges.input);
-}
-
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
