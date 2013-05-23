@@ -51,6 +51,7 @@ class DocType(DocListController):
 		self.validate_barcode()
 		self.check_non_asset_warehouse()
 		self.cant_change()
+		self.validate_item_type_for_reorder()
 
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
@@ -201,6 +202,13 @@ class DocType(DocListController):
 						webnotes.msgprint(_("As there are existing stock transactions for this \
 							item, you can not change the values of 'Has Serial No', \
 							'Is Stock Item' and 'Valuation Method'"), raise_exception=1)
+							
+	def validate_item_type_for_reorder(self):
+		if self.doc.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 
+				"material_request_type": "Purchase"})):
+			if not self.doc.is_purchase_item:
+				webnotes.msgprint(_("""To set reorder level, item must be Purchase Item"""), 
+					raise_exception=1)
 	
 	def check_if_sle_exists(self):
 		sle = webnotes.conn.sql("""select name from `tabStock Ledger Entry` 

@@ -50,7 +50,7 @@ class SupportMailbox(POP3Mailbox):
 				"subject": mail.mail["Subject"],
 				"raised_by": mail.from_email,
 				"content_type": mail.content_type,
-				"status": "Open"
+				"status": "Open",
 			}])
 			ticket.insert()
 			new_ticket = True
@@ -58,7 +58,7 @@ class SupportMailbox(POP3Mailbox):
 		mail.save_attachments_in_doc(ticket.doc)
 				
 		make(content=mail.content, sender=mail.from_email, subject = ticket.doc.subject,
-			doctype="Support Ticket", name=ticket.doc.name, 
+			doctype="Support Ticket", name=ticket.doc.name,
 			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
 			
 		if new_ticket and cint(self.email_settings.send_autoreply) and \

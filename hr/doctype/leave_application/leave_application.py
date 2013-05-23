@@ -335,15 +335,22 @@ def add_holidays(events, start, end, employee, company):
 def query_for_permitted_employees(doctype, txt, searchfield, start, page_len, filters):
 	txt = "%" + cstr(txt) + "%"
 	
-	return webnotes.conn.sql("""select name, employee_name from `tabEmployee` emp
+	if "Leave Approver" in webnotes.user.get_roles():
+		condition = """and (exists(select ela.name from `tabEmployee Leave Approver` ela
+				where ela.parent=`tabEmployee`.name and ela.leave_approver= "%s") or 
+			not exists(select ela.name from `tabEmployee Leave Approver` ela 
+				where ela.parent=`tabEmployee`.name)
+			or user_id = "%s")""" % (webnotes.session.user, webnotes.session.user)
+	else:
+		from webnotes.widgets.reportview import build_match_conditions
+		condition = build_match_conditions("Employee")
+		condition = ("and " + condition) if condition else ""
+	
+	return webnotes.conn.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active' and docstatus < 2 and
-		(`%s` like %s or employee_name like %s) and
-		(exists(select ela.name from `tabEmployee Leave Approver` ela
-				where ela.parent=emp.name and ela.leave_approver=%s) or 
-			not exists(select ela.name from `tabEmployee Leave Approver` ela where ela.parent=emp.name)
-			or user_id = %s)
+		(`%s` like %s or employee_name like %s) %s
 		order by
 		case when name like %s then 0 else 1 end,
 		case when employee_name like %s then 0 else 1 end,
-		name limit %s, %s""" % tuple([searchfield] + ["%s"]*8), 
-		(txt, txt, webnotes.session.user, webnotes.session.user, txt, txt, start, page_len))
+		name limit %s, %s""" % tuple([searchfield] + ["%s"]*2 + [condition] + ["%s"]*4), 
+		(txt, txt, txt, txt, start, page_len))

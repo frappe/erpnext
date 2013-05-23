@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:28:03", 
+  "creation": "2013-03-07 11:42:59", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:28", 
+  "modified": "2013-05-22 12:01:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,6 +35,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "100px"
@@ -48,6 +49,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -59,6 +61,7 @@
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
@@ -72,6 +75,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -84,6 +88,7 @@
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -97,6 +102,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "search_index": 0, 
   "width": "100px"
  }, 
@@ -110,6 +116,7 @@
   "options": "UOM", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -119,14 +126,16 @@
   "fieldtype": "Currency", 
   "label": "Ref Rate ", 
   "options": "currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "discount_rate", 
   "fieldtype": "Float", 
   "label": "Discount  %", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
@@ -139,6 +148,7 @@
   "options": "currency", 
   "print_hide": 0, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -157,7 +167,8 @@
   "fieldtype": "Currency", 
   "label": "Ref Rate*", 
   "options": "Company:company:default_currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
@@ -170,6 +181,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -184,6 +196,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -198,6 +211,7 @@
   "options": "Warehouse", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -209,6 +223,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -235,6 +250,7 @@
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Text", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -242,7 +258,8 @@
   "fieldname": "rejected_serial_no", 
   "fieldtype": "Text", 
   "label": "Rejected Serial No", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -252,7 +269,8 @@
   "oldfieldname": "batch_no", 
   "oldfieldtype": "Link", 
   "options": "Batch", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -278,6 +296,7 @@
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0
  }, 
@@ -288,7 +307,8 @@
   "in_filter": 1, 
   "label": "Project Name", 
   "options": "Project", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -299,7 +319,8 @@
   "oldfieldname": "qa_no", 
   "oldfieldtype": "Link", 
   "options": "Quality Inspection", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -336,6 +357,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -344,9 +366,11 @@
   "fieldtype": "Data", 
   "hidden": 1, 
   "label": "Prevdoc Doctype", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_doctype", 
   "oldfieldtype": "Data", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -355,7 +379,7 @@
   "hidden": 0, 
   "in_filter": 1, 
   "label": "PO No", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Link", 
   "options": "Purchase Order", 
@@ -373,6 +397,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "PO Date", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -418,7 +443,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "Purchase Order Item No", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_detail_docname", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -479,6 +504,7 @@
   "label": "Page Break", 
   "oldfieldname": "page_break", 
   "oldfieldtype": "Check", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }
 ]
