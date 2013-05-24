@@ -408,4 +408,4 @@ class DocType(SellingController):
 				
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries)
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))

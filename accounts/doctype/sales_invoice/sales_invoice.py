@@ -468,13 +468,15 @@ class DocType(SellingController):
 		"""Validate values with reference document with previous document"""
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.so_detail:
-				self.check_value("Sales Order", d.so_detail, d.export_rate, d.item_code)
+				self.check_value("Sales Order", d.sales_order, d.so_detail, 
+					d.export_rate, d.item_code)
 			if d.dn_detail:
-				self.check_value("Delivery Note", d.dn_detail, d.export_rate, d.item_code)
+				self.check_value("Delivery Note", d.delivery_note, d.dn_detail, 
+					d.export_rate, d.item_code)
 				
-	def check_value(self, ref_dt, ref_dn, val, item_code):
-		ref_val = webnotes.conn.get_value(ref_dt + "Item", ref_dn, "export_rate")
-		if flt(ref_val) != val:
+	def check_value(self, ref_dt, ref_dn, ref_item_dn, val, item_code):
+		ref_val = webnotes.conn.get_value(ref_dt + " Item", ref_item_dn, "export_rate")
+		if flt(ref_val, 2) != flt(val, 2):
 			msgprint(_("Rate is not matching with ") + ref_dt + ": " + ref_dn + 
 				_(" for item: ") + item_code, raise_exception=True)
 
