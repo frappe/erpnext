@@ -68,11 +68,12 @@
 			"icon": "icon-play",
 			"label": "Activity"
 		},
-		"Knowledge Base": {
-			"type": "page",
-			"link": "questions",
+		"Notes": {
+			"type": "list",
+			"doctype": "Note",
+			"link": "List/Note",
 			"color": "#01372b",
-			"label": "Knowledge Base",
+			"label": "Notes",
 			"icon": "icon-question-sign"
 		}
 	},
