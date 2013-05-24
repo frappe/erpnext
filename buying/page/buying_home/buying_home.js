@@ -111,6 +111,10 @@ wn.module_page["Buying"] = [
 				"label":wn._("Purchase In Transit"),
 				route: "query-report/Purchase In Transit",
 			},
+			{
+				"label":wn._("Requested Items To Be Ordered"),
+				route: "query-report/Requested Items To Be Ordered",
+			},
 		]
 	}
 ]

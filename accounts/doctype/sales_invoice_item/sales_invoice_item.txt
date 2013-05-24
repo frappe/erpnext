@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-10 08:35:44", 
+  "creation": "2013-04-19 11:00:07", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:05:20", 
+  "modified": "2013-05-22 12:06:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -305,6 +305,7 @@
   "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Sales Order", 
+  "no_copy": 1, 
   "oldfieldname": "sales_order", 
   "oldfieldtype": "Link", 
   "options": "Sales Order", 
@@ -319,6 +320,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "SO Detail ", 
+  "no_copy": 1, 
   "oldfieldname": "so_detail", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -331,6 +333,7 @@
   "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Delivery Note", 
+  "no_copy": 1, 
   "oldfieldname": "delivery_note", 
   "oldfieldtype": "Link", 
   "options": "Delivery Note", 
@@ -345,6 +348,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "DN Detail", 
+  "no_copy": 1, 
   "oldfieldname": "dn_detail", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 

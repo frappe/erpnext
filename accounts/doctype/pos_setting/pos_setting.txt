@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-30 12:58:25", 
+  "creation": "2013-05-09 13:16:11", 
   "docstatus": 0, 
-  "modified": "2013-05-03 14:36:24", 
+  "modified": "2013-05-23 12:52:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -213,6 +213,14 @@
   "options": "link:Print Heading"
  }, 
  {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager", 

@@ -201,6 +201,10 @@ wn.module_page["Stock"] = [
 				"label":wn._("Purchase In Transit"),
 				route: "query-report/Purchase In Transit",
 			},
+			{
+				"label":wn._("Requested Items To Be Transferred"),
+				route: "query-report/Requested Items To Be Transferred",
+			},
 		]
 	}
 ]

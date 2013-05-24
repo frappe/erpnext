@@ -12,6 +12,10 @@
 	{% else %}
 	<h3>{{ name }}</h3>
 	{% endif %}
+</div>
+{% include 'app/website/templates/html/product_search_box.html' %}
+{% include 'app/website/templates/html/product_breadcrumbs.html' %}
+<div class="col col-lg-12">
 	{% if sub_groups %}
 	<hr />
 	<div class="row">

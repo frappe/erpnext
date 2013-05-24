@@ -30,7 +30,6 @@ from webnotes import _, msgprint
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -40,9 +39,6 @@ class DocType(SellingController):
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
 
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
-		
 	def validate(self):
 		super(DocType, self).validate()
 		self.fetch_missing_values()
@@ -78,8 +74,10 @@ class DocType(SellingController):
 		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
+		self.validate_rate_with_refdoc()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
+		
 		
 	def on_submit(self):
 		if cint(self.doc.is_pos) == 1:
@@ -195,11 +193,11 @@ class DocType(SellingController):
 						self.doc.fields[fieldname] = pos.get(fieldname)
 
 			# set pos values in items
-			for doc in self.doclist.get({"parentfield": "entries"}):
-				if doc.fields.get('item_code'):
-					for fieldname, val in self.apply_pos_settings(doc.fields).items():
-						if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
-							doc.fields[fieldname] = val
+			for item in self.doclist.get({"parentfield": "entries"}):
+				if item.fields.get('item_code'):
+					for fieldname, val in self.apply_pos_settings(item.fields).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
+							item.fields[fieldname] = val
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
@@ -217,8 +215,9 @@ class DocType(SellingController):
 		if self.doc.customer:
 			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
 				where (name = %s or (master_name = %s and master_type = 'customer')) 
-				and docstatus != 2""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), self.doc.customer))
+				and docstatus != 2 and company = %s""", 
+				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), 
+				self.doc.customer, self.doc.company))
 			
 			if acc_head and acc_head[0][0]:
 				return acc_head[0][0]
@@ -555,6 +554,21 @@ class DocType(SellingController):
 
 			webnotes.conn.set(self.doc, 'c_form_no', '')
 			
+	def validate_rate_with_refdoc(self):
+		"""Validate values with reference document with previous document"""
+		for d in self.doclist.get({"parentfield": "entries"}):
+			if d.so_detail:
+				self.check_value("Sales Order", d.sales_order, d.so_detail, 
+					d.export_rate, d.item_code)
+			if d.dn_detail:
+				self.check_value("Delivery Note", d.delivery_note, d.dn_detail, 
+					d.export_rate, d.item_code)
+				
+	def check_value(self, ref_dt, ref_dn, ref_item_dn, val, item_code):
+		ref_val = webnotes.conn.get_value(ref_dt + " Item", ref_item_dn, "export_rate")
+		if flt(ref_val, 2) != flt(val, 2):
+			msgprint(_("Rate is not matching with ") + ref_dt + ": " + ref_dn + 
+				_(" for item: ") + item_code, raise_exception=True)
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):

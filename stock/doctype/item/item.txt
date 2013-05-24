@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-05-07 15:58:58", 
+  "modified": "2013-05-22 15:48:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -361,21 +361,6 @@
   "fieldname": "re_order_qty", 
   "fieldtype": "Float", 
   "label": "Re-Order Qty", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_31", 
-  "fieldtype": "Column Break", 
-  "read_only": 0
- }, 
- {
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
-  "doctype": "DocField", 
-  "fieldname": "email_notify", 
-  "fieldtype": "Check", 
-  "label": "Notify by Email on Re-order", 
   "read_only": 0
  }, 
  {

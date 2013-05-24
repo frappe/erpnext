@@ -9,10 +9,9 @@ def execute():
 	
 	for doctype in webnotes.conn.sql_list("""select parent from tabDocField where 
 		fieldname='file_list'"""):
-		update_file_list(doctype, singles)
-		
-		webnotes.conn.sql("""delete from tabDocField where fieldname='file_list'
-				and parent=%s""", doctype)
+		# the other scenario is handled in p07_update_file_data_2
+		if doctype in singles:
+			update_file_list(doctype, singles)
 		
 		# export_to_files([["DocType", doctype]])
 		

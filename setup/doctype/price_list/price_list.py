@@ -33,3 +33,6 @@ class DocType:
 			msgprint(_("""Please check "Valid For All Countries" or \
 				enter atlease one row in the "Countries" table."""), raise_exception=True)
 	
+	def on_trash(self):
+		webnotes.conn.sql("""delete from `tabItem Price` where price_list_name = %s""", 
+			self.doc.name)

@@ -4,9 +4,8 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import cstr
+from webnotes.utils import cstr, cint
 from webnotes.webutils import build_html, delete_page_cache
-
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
@@ -20,10 +19,20 @@ def get_product_info(item_code):
 			in_stock = in_stock[0][0] > 0 and 1 or 0
 	else:
 		in_stock = -1
+		
+	price = price_list and webnotes.conn.sql("""select ref_rate, ref_currency from
+		`tabItem Price` where parent=%s and price_list_name=%s""", 
+		(item_code, price_list), as_dict=1) or []
+	
+	price = price and price[0] or None
+	
+	if price:
+		price["ref_currency"] = not cint(webnotes.conn.get_default("hide_currency_symbol")) \
+			and (webnotes.conn.get_value("Currency", price.ref_currency, "symbol") or price.ref_currency) \
+			or ""
+
 	return {
-		"price": price_list and webnotes.conn.sql("""select ref_rate, ref_currency from
-			`tabItem Price` where parent=%s and price_list_name=%s""", 
-			(item_code, price_list), as_dict=1) or [],
+		"price": price,
 		"stock": in_stock
 	}
 

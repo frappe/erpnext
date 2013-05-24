@@ -6,7 +6,6 @@ def execute():
 		where parent in ('Address', 'Contact')""")
 	webnotes.conn.commit()
 	
-	import webnotes.model.sync
-	webnotes.model.sync.sync('utilities', 'address')
-	webnotes.model.sync.sync('utilities', 'contact')
+	webnotes.reload_doc('utilities', 'doctype', 'address')
+	webnotes.reload_doc('utilities', 'doctype', 'contact')
 	webnotes.conn.begin()

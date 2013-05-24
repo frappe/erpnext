@@ -1,5 +1,5 @@
 import webnotes, conf, os
-from webnotes.utils import cint, cstr
+from webnotes.utils import cint, cstr, encode
 
 def get_templates_path():
 	return os.path.join(os.path.dirname(conf.__file__), "app", "website", "templates")
@@ -72,7 +72,7 @@ def update_template_args(page_name, args):
 		args[k] = cint(args.get(k) or 0)
 	
 	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
-	args.encoded_title = quote(str(args.title or ""), str(""))
+	args.encoded_title = quote(encode(args.title or ""), str(""))
 	
 	return args
 	

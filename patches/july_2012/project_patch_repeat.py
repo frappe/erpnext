@@ -12,8 +12,6 @@ def execute():
 		and ifnull(t1.project_name, '') = ''""")
 	
 	webnotes.conn.commit()
-	from webnotes.model.sync import sync
-	sync("buying", "purchase_order")
-	sync("buying", "purchase_request")
-	sync("accounts", "purchase_invoice")
+	webnotes.reload_doc("buying", "doctype", "purchase_order")
+	webnotes.reload_doc("accounts", "doctype", "purchase_invoice")
 	webnotes.conn.begin()

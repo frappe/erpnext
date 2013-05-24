@@ -75,7 +75,6 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 					r.messages = ["<h4 style='color:green'>Import Successful!</h4>"].
 						concat(r.messages)
 				}
-				console.log(r.messages);
 				
 				$.each(r.messages, function(i, v) {
 					var $p = $('<p>').html(v).appendTo($log_wrapper);
