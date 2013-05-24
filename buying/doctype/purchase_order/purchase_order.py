@@ -65,10 +65,6 @@ class DocType(BuyingController):
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
-
-	def get_default_schedule_date(self):
-		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
-		
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'PO Date')
 
@@ -101,7 +97,6 @@ class DocType(BuyingController):
 				"""[['Supplier Quotation', 'Purchase Order'],
 				['Supplier Quotation Item', 'Purchase Order Item'],
 				['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]""")
-			self.get_default_schedule_date()
 			for d in getlist(self.doclist, 'po_details'):
 				if d.prevdoc_detail_docname and not d.schedule_date:
 					d.schedule_date = webnotes.conn.get_value("Material Request Item",

@@ -20,8 +20,9 @@
 // cur_frm.cscript.fname - Details fieldname
 
 wn.provide("erpnext.buying");
+wn.require("app/js/transaction.js");
 
-erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
+erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	setup: function() {
 		var me = this;
 		
@@ -42,50 +43,39 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 		}
 	},
 	
-	refresh: function() {
-		this.frm.clear_custom_buttons();
-		erpnext.hide_naming_series();
+	validate: function() {
 		
-		if(this.frm.fields_dict.supplier)
-			this.frm.toggle_display("contact_section", this.frm.doc.supplier);
-		
-		if(this.frm.fields_dict.currency)
-			this.set_dynamic_labels();
 	},
 	
-	price_list_name: function(callback_fn) {
-		var me = this;
-		
-		if(this.frm.doc.price_list_name) {
-			if(!this.frm.doc.price_list_currency) {
-				// set price list currency
+	supplier: function() {
+		if(this.frm.doc.supplier || this.frm.doc.credit_to) {
+			if(!this.frm.doc.company) {
+				this.frm.set_value("supplier", null);
+				msgprint(wn._("Please specify Company"));
+			} else {
+				var me = this;
+				var price_list_name = this.frm.doc.price_list_name;
+
 				this.frm.call({
-					method: "setup.utils.get_price_list_currency",
-					args: {args: {
-						price_list_name: this.frm.doc.price_list_name,
-						use_for: "buying"
-					}},
+					doc: this.frm.doc,
+					method: "set_supplier_defaults",
+					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							me.price_list_currency();
-							if (typeof callback_fn === "function") 
-								callback_fn(me.frm.doc, me.frm.doc.doctype, me.frm.doc.name);
+							me.frm.refresh_fields();
+							if(me.frm.doc.price_list_name !== price_list_name) me.price_list_name();
 						}
 					}
 				});
-			} else {
-				me.price_list_currency();
-				if (typeof callback_fn === "function") 
-					callback_fn(me.frm.doc, me.frm.doc.doctype, me.frm.doc.name);
 			}
-		} 
-	},
+		}
+	}
 	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code) {
-			if(!this.validate_company_and_party()) {
+			if(!this.validate_company_and_party("supplier")) {
 				item.item_code = null;
 				refresh_field("item_code", item.name, item.parentfield);
 			} else {
@@ -109,65 +99,115 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 						}
 					},
 					callback: function(r) {
-						// TODO: calculate
+						if(!r.exc) {
+							me.ref_rate(me.frm.doc, cdt, cdn);
+						}
 					}
 				});
 			}
 		}
 	},
 	
-	validate_company_and_party: function() {
-		var valid = true;
-		$.each(["company", "supplier"], function(i, fieldname) {
-			if(!me.frm.doc[fieldname]) {
-				valid = false;
-				msgprint(wn._("Please specify") + ": " + 
-					wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-					". " + wn._("It is needed to fetch Item Details."));
-			}
-		});
-		return valid;
+	price_list_name: function(callback_fn) {
+		this._super("buying");
 	},
 	
-	update_item_details: function(doc, dt, dn, callback) {
-		if(!this.frm.doc.__islocal) return;
-		
+	calculate_taxes_and_totals: function() {
+		this._super();
+		this.calculate_outstanding_amount();
+		this.frm.refresh_fields();
+	},
+	
+	calculate_item_values: function() {
 		var me = this;
-		var children = getchildren(this.tname, this.frm.doc.name, this.fname);
-		if(children && children.length) {
-			this.frm.call({
-				doc: me.frm.doc,
-				method: "update_item_details",
-				callback: function(r) {
-					if(!r.exc) {
-						refresh_field(me.fname);
-						me.load_defaults(me.frm.doc, dt, dn, callback);
-					}
-				}
-			})
-		} else {
-			this.load_taxes(doc, dt, dn, callback);
+		
+		if(this.frm.doc.doctype != "Purchase Invoice") {
+			wn.meta.docfield_map[this.tname]["rate"] = $.extend({}, 
+				wn.meta.docfield_map[this.tname]["purchase_rate"]);
+		}
+		
+		$.each(this.frm.item_doclist, function(i, item) {
+			if(me.frm.doc.doctype != "Purchase Invoice") {
+				item.rate = item.purchase_rate;
+			}
+			
+			wn.model.round_floats_in(item);
+			item.import_amount = flt(item.import_rate * item.qty, precision("import_amount", item));
+			item.item_tax_amount = 0.0;
+			
+			me._set_in_company_currency(item, "import_ref_rate", "purchase_ref_rate");
+			me._set_in_company_currency(item, "import_rate", "rate");
+			me._set_in_company_currency(item, "import_amount", "amount");
+		});
+	},
+	
+	calculate_net_total: function() {
+		var me = this;
+
+		this.frm.doc.net_total = this.frm.doc.net_total_import = 0.0;
+		$.each(this.frm.item_doclist, function(i, item) {
+			me.frm.doc.net_total += item.amount;
+			me.frm.doc.net_total_import += item.import_amount;
+		});
+		
+		wn.model.round_floats_in(this.frm.doc, ["net_total", "net_total_import"]);
+	},
+	
+	calculate_totals: function() {
+		var tax_count = this.frm.tax_doclist.length;
+		this.frm.doc.grand_total = flt(
+			tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
+			precision("grand_total"));
+		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
+			precision("grand_total_import"));
+			
+		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
+			precision("total_tax"));
+		
+		if(wn.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
+			this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
+		}
+		
+		if(wn.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
+			this.frm.doc.rounded_total_import = Math.round(this.frm.doc.grand_total_import);
 		}
 	},
 	
-	currency: function() {
-		this.price_list_currency();
+	_cleanup: function() {
+		this._super();
+		this.frm.doc.in_words = this.frm.doc.in_words_import = "";
+
+		// except in purchase invoice, rate field is purchase_rate		
+		// reset fieldname of rate
+		if(this.frm.doc.doctype != "Purchase Invoice") {
+			delete wn.meta.docfield_map[this.tname]["rate"];
+			
+			$.each(this.frm.item_doclist, function(i, item) {
+				item.purchase_rate = item.rate;
+				delete item["rate"];
+			});
+		}
 	},
 	
-	company: function() {
-		this.set_dynamic_labels();
+	calculate_outstanding_amount: function() {
+		if(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.docstatus < 2) {
+			wn.model.round_floats_in(this.frm.doc, ["total_advance", "write_off_amount"]);
+			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.grand_total - this.frm.doc.write_off_amount,
+				precision("total_amount_to_pay"));
+			this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
+				precision("outstanding_amount"));
+		}
 	},
 	
-	price_list_currency: function() {
-		this.frm.toggle_reqd("plc_conversion_rate",
-			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
-		
-		this.set_dynamic_labels();
-				
-		if(this.frm.doc.price_list_currency === this.get_company_currency())
-			this.frm.set_value("plc_conversion_rate", 1.0);
-		else if(this.frm.doc.price_list_currency === this.frm.doc.currency)
-			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate || 1.0);		
+	set_item_tax_amount: function(item, tax, current_tax_amount) {
+		// item_tax_amount is the total tax amount applied on that item
+		// stored for valuation 
+		// 
+		// TODO: rename item_tax_amount to valuation_tax_amount
+		if(["Valuation", "Valuation and Total"].indexOf(tax.category) != -1) {
+			// accumulate only if tax is for Valuation / Valuation and Total
+			item.item_tax_amount += flt(current_tax_amount, precision("item_tax_amount", item));
+		}
 	},
 	
 	set_dynamic_labels: function(doc, dt, dn) {
@@ -265,10 +305,6 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
 		});
 	},
-	
-	get_company_currency: function() {
-		return erpnext.get_currency(this.frm.doc.company);
-	}
 });
 
 // to save previous state of cur_frm.cscript
@@ -283,54 +319,6 @@ $.extend(cur_frm.cscript, prev_cscript);
 
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;
-
-cur_frm.cscript.get_default_schedule_date = function(doc) {
-		var ch = getchildren( tname, doc.name, fname);
-		if (flt(ch.length) > 0){
-			$c_obj(make_doclist(doc.doctype, doc.name), 'get_default_schedule_date', '', function(r, rt) { refresh_field(fname); });
-		}
-}
-
-cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
-	// run if this is not executed from dt_map...
-	doc = locals[doc.doctype][doc.name];
-	if(doc.supplier || getchildren('Purchase Taxes and Charges', doc.name, 'purchase_tax_details', doc.doctype).length) {
-		if(callback) {
-			callback(doc, cdt, cdn);
-		}
-	} else {
-		$c_obj(make_doclist(doc.doctype, doc.name),'load_default_taxes','',function(r,rt){
-			refresh_field('purchase_tax_details');
-			if(callback) callback(doc, cdt, cdn);
-		});
-	}
-}
-
-
-
-// Gets called after existing item details are update to fill in
-// remaining default values
-cur_frm.cscript.load_defaults = function(doc, dt, dn, callback) {
-	if(!cur_frm.doc.__islocal) { return; }
-
-	doc = locals[doc.doctype][doc.name];
-	var fields_to_refresh = wn.model.set_default_values(doc);
-	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
-
-	fields_to_refresh = null;
-	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
-	if(!children) { return; }
-	for(var i=0; i<children.length; i++) {
-		wn.model.set_default_values(children[i]);
-	}
-	refresh_field(cur_frm.cscript.fname);
-	cur_frm.cscript.load_taxes(doc, dt, dn, callback);
-}
-
-// ======================== Conversion Rate ==========================================
-cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
-	cur_frm.cscript.calc_amount( doc, 1);
-}
 
 //==================== Item Code Get Query =======================================================
 // Only Is Purchase Item = 'Yes' and Items not moved to trash are allowed.

@@ -34,66 +34,11 @@ erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.exten
 		
 		cur_frm.cscript.is_opening(doc);
 	},
-	onload_post_render: function(doc, dt, dn) {	
-		var me = this;	
-		var callback1 = function(doc, dt, dn) {
-			var callback2 = function(doc, dt, dn) {
-				if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc, dt, dn);			
-			}
-			me.update_item_details(doc, dt, dn, callback2);
-		}
-		
-		// TODO: improve this
-		if(this.frm.doc.__islocal) {
-			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) {
-				this.price_list_name(callback1);
-			} else {
-				callback1(doc, dt, dn);
-			}
-		}
-	}
 });
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.PurchaseInvoiceController({frm: cur_frm}));
 
-
-cur_frm.cscript.onload = function(doc,dt,dn) {
-	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-}
-
-cur_frm.cscript.supplier = function(doc,dt,dn) {
-	var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];		
-			get_server_fields('get_credit_to','','',doc, dt, dn, 0, callback2);
-	}
-	
-	var callback2 = function(r,rt){
-		var doc = locals[cur_frm.doctype][cur_frm.docname];
-		var el = getchildren('Purchase Invoice Item',doc.name,'entries');
-		for(var i in el){
-			if(el[i].item_code && (!el[i].expense_head || !el[i].cost_center)){
-				args = {
-					item_code: el[i].item_code,
-					expense_head: el[i].expense_head,
-					cost_center: el[i].cost_center
-				};
-				get_server_fields('get_default_values', JSON.stringify(args), 'entries', doc, el[i].doctype, el[i].name, 1);
-			}
-		}
-		cur_frm.cscript.calc_amount(doc, 1);
-	}
-
-	if (doc.supplier) {
-		get_server_fields('get_default_supplier_address',
-			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function(doc, dt, dn) {
-				cur_frm.refresh();
-				callback(doc, dt, dn);
-			});
-		unhide_field(['supplier_address','contact_person']);
-	}
-
-}
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
 	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);

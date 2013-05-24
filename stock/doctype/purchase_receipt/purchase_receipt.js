@@ -38,20 +38,6 @@ erpnext.buying.PurchaseReceiptController = erpnext.buying.BuyingController.exten
 			unhide_field(['challan_no', 'challan_date']);
 		}
 	}, 
-	onload_post_render: function(doc, dt, dn) {	
-		var me = this;
-		var callback = function(doc, dt, dn) {
-			me.update_item_details(doc, dt, dn, function(r,rt) { });
-		}
-		
-		// TODO: improve this
-		if(this.frm.doc.__islocal) {
-			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) 
-				this.price_list_name(callback);
-			else
-				callback(doc, dt, dn);
-		}
-	}
 });
 
 var new_cscript = new erpnext.buying.PurchaseReceiptController({frm: cur_frm});

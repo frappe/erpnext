@@ -26,48 +26,17 @@ wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-		
 
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
 		}
-	},
-	
-	onload_post_render: function(doc, dt, dn) {	
-		var me = this;
-		var callback = function(doc, dt, dn) {
-			cur_frm.cscript.load_taxes(me.frm.doc);
-		}
-		
-		// TODO: improve this
-		if(this.frm.doc.__islocal) {
-			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) {
-				this.price_list_name(callback);
-			} else {
-				callback(doc, dt, dn);
-			}
-		}
-	}
-	
+	},	
 });
 
 var new_cscript = new erpnext.buying.SupplierQuotationController({frm: cur_frm});
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new_cscript);
-
-
-cur_frm.cscript.onload = function(doc, dt, dn) {
-	// set missing values in parent doc
-	set_missing_values(doc, {
-		fiscal_year: sys_defaults.fiscal_year,
-		conversion_rate: 1,
-		currency: sys_defaults.currency,
-		status: "Draft",
-		transaction_date: get_today(),
-		is_subcontracted: "No"
-	});
-}
 
 cur_frm.cscript.make_purchase_order = function() {
 	var new_po_name = wn.model.make_new_doc_and_get_name("Purchase Order");

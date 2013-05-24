@@ -43,15 +43,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	}	
 }
 
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	// defined in sales_common.js
-	var callback = function(doc, dt, dn) {
-		if(doc.__islocal) cur_frm.cscript.update_item_details(doc, dt, dn);
-	}
-
-	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
-} 
-
 // REFRESH
 // ================================================================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 

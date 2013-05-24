@@ -28,7 +28,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	cur_frm.cscript.manage_rounded_total();
+	cur_frm.cscript.toggle_rounded_total();
 	
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
@@ -42,25 +42,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	var callback = function(doc, cdt, cdn) {
-		if(doc.__islocal) {
-			// defined in sales_common.js
-			cur_frm.cscript.update_item_details(doc, cdt, cdn);
-		}
-	}
-	
-	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
-
-}
-
-
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.clear_custom_buttons();
 	erpnext.hide_naming_series();
 
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
-	
 	cur_frm.toggle_display("contact_info", doc.customer);
 	
 	if(doc.docstatus==1) {

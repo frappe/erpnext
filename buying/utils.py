@@ -65,7 +65,10 @@ def get_item_details(args):
 		out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
 			out.import_ref_rate = out.import_rate = 0.0
 		out.update(_get_price_list_rate(args, item_bean, meta))
-			
+	
+	if args.doctype == "Material Request":
+		out.min_order_qty = flt(item.min_order_qty)
+	
 	return out
 	
 def _get_basic_details(args, item_bean):

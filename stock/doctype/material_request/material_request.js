@@ -57,14 +57,6 @@ var new_cscript = new erpnext.buying.MaterialRequestController({frm: cur_frm});
 $.extend(cur_frm.cscript, new_cscript);
 
 	
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
-	if (!doc.status) doc.status = 'Draft';
-
-	// defined in purchase_common.js
-	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
-};
-
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	// second call
 	if(doc.__islocal){ 
@@ -77,12 +69,6 @@ cur_frm.cscript.get_item_defaults = function(doc) {
 		if (flt(ch.length) > 0){
 			$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_defaults', '', function(r, rt) {refresh_field('indent_details'); });
 		}
-};
-
-cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_default_schedule_date(doc);
-	}
 };
 
 cur_frm.cscript.qty = function(doc, cdt, cdn) {

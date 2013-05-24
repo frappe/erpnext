@@ -110,8 +110,8 @@ class TestSalesInvoice(unittest.TestCase):
 		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
 			tax.idx = i+1
 		
-		si.doclist[1].export_rate = 62.5
-		si.doclist[1].export_rate = 191
+		si.doclist[1].ref_rate = 62.5
+		si.doclist[1].ref_rate = 191
 		for i in [3, 5, 6, 7, 8, 9]:
 			si.doclist[i].included_in_print_rate = 1
 		
@@ -173,9 +173,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si = webnotes.bean(copy=test_records[3])
 		si.doc.currency = "USD"
 		si.doc.conversion_rate = 50
-		si.doclist[1].export_rate = 50
+		si.doclist[1].ref_rate = 55.56
 		si.doclist[1].adj_rate = 10
-		si.doclist[2].export_rate = 150
+		si.doclist[2].ref_rate = 187.5
 		si.doclist[2].adj_rate = 20
 		si.doclist[9].rate = 5000
 		
@@ -317,7 +317,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos[0]["cash_bank_account"] = "_Test Account Bank Account - _TC"
 		pos[0]["paid_amount"] = 600.0
 
-		si = webnotes.bean(pos)
+		si = webnotes.bean(copy=pos)
 		si.insert()
 		si.submit()
 		
@@ -340,11 +340,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
-			[test_records[1][1]["income_account"], 0.0, 500.0],
-			[test_records[1][2]["account_head"], 0.0, 80.0],
-			[test_records[1][3]["account_head"], 0.0, 50.0],
+			[pos[1]["income_account"], 0.0, 500.0],
+			[pos[2]["account_head"], 0.0, 80.0],
+			[pos[3]["account_head"], 0.0, 50.0],
 			[stock_in_hand_account, 0.0, 375.0],
-			[test_records[1][1]["expense_account"], 375.0, 0.0],
+			[pos[1]["expense_account"], 375.0, 0.0],
 			[si.doc.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
@@ -760,6 +760,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
+			"ref_rate": 50,
 			"export_rate": 50,
 			"stock_uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
@@ -773,6 +774,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 200",
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
+			"ref_rate": 150,
 			"export_rate": 150,
 			"stock_uom": "_Test UOM",
 			"income_account": "Sales - _TC",
@@ -883,6 +885,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
+			"ref_rate": 62.5,
 			"export_rate": 62.5,
 			"stock_uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
@@ -896,6 +899,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 200",
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
+			"ref_rate": 190.66,
 			"export_rate": 190.66,
 			"stock_uom": "_Test UOM",
 			"income_account": "Sales - _TC",
