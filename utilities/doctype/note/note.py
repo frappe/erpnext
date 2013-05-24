@@ -8,12 +8,13 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def onload(self):
-		if webnotes.session.user != self.doc.owner:
+		if not self.doc.public and webnotes.session.user != self.doc.owner:
 			if webnotes.session.user not in [d.user for d in self.doclist if d.doctype=="Note User"]:
 				webnotes.msgprint("You are not authorized to read this record.", raise_exception=True)
 	
 	def validate(self):
-		if webnotes.session.user != self.doc.owner:
-			if webnotes.session.user not in webnotes.conn.sql_list("""select user from `tabNote User` 
-				where parent=%s and permission='Edit'""", self.doc.name):
-				webnotes.msgprint("You are not authorized to edit this record.", raise_exception=True)
+		if not self.doc.fields.get("__islocal"):
+			if webnotes.session.user != self.doc.owner:
+				if webnotes.session.user not in webnotes.conn.sql_list("""select user from `tabNote User` 
+					where parent=%s and permission='Edit'""", self.doc.name):
+					webnotes.msgprint("You are not authorized to edit this record.", raise_exception=True)

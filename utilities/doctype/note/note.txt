@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 13:41:00", 
   "docstatus": 0, 
-  "modified": "2013-05-24 15:47:11", 
+  "modified": "2013-05-24 16:24:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,13 @@
   "fieldname": "share", 
   "fieldtype": "Section Break", 
   "label": "Share"
+ }, 
+ {
+  "description": "Everyone can read", 
+  "doctype": "DocField", 
+  "fieldname": "public", 
+  "fieldtype": "Check", 
+  "label": "Public"
  }, 
  {
   "doctype": "DocField", 
