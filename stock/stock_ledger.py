@@ -35,6 +35,9 @@ def update_entries_after(args, verbose=1):
 			"posting_time": "12:00"
 		}
 	"""
+	global _exceptions
+	_exceptions = []
+	
 	previous_sle = get_sle_before_datetime(args)
 	
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
