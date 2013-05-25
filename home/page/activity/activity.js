@@ -2,7 +2,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
 	wrapper.appframe.add_home_breadcrumb();
 	wrapper.appframe.add_breadcrumb(wn.modules["Activity"].icon);
-	wrapper.appframe.title('Activity');
+	wrapper.appframe.title(wn._('Activity'));
 	
 	var list = new wn.ui.Listing({
 		appframe: wrapper.appframe,
