@@ -33,10 +33,8 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	},	
 });
 
-var new_cscript = new erpnext.buying.SupplierQuotationController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
+$.extend(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
 
 cur_frm.cscript.make_purchase_order = function() {
 	var new_po_name = wn.model.make_new_doc_and_get_name("Purchase Order");
@@ -49,15 +47,6 @@ cur_frm.cscript.make_purchase_order = function() {
 			['Supplier Quotation Item', 'Purchase Order Item'],
 			['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]),
 	}, function(r, rt) { loaddoc("Purchase Order", new_po_name) });
-}
-
-cur_frm.cscript.supplier = function(doc, dt, dn) {
-	if (doc.supplier) {
-		get_server_fields('get_default_supplier_address',
-			JSON.stringify({ supplier: doc.supplier }), '', doc, dt, dn, 1,
-			function() { cur_frm.refresh(); });
-		cur_frm.cscript.toggle_contact_section(doc);
-	}
 }
 
 cur_frm.cscript.uom = function(doc, cdt, cdn) {

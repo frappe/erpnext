@@ -24,16 +24,17 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 				currency = wn.defaults.get_default("currency");
 			
 			$.each({
-				"posting_date": today,
-				"due_date": today,
-				"transaction_date": today,
-				"currency": currency,
-				"price_list_currency": currency,
-				"status": "Draft",
-				"fiscal_year": wn.defaults.get_default("fiscal_year"),
-				"is_subcontracted": "No",
-				"conversion_rate": 1.0,
-				"plc_conversion_rate": 1.0
+				posting_date: today,
+				due_date: today,
+				transaction_date: today,
+				currency: currency,
+				price_list_currency: currency,
+				status: "Draft",
+				company: wn.defaults.get_default("company"),
+				fiscal_year: wn.defaults.get_default("fiscal_year"),
+				is_subcontracted: "No",
+				conversion_rate: 1.0,
+				plc_conversion_rate: 1.0
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
@@ -433,6 +434,18 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			
 			tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
 		});
+	},
+
+	calculate_total_advance: function(parenttype, advance_parentfield) {
+		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
+			var advance_doclist = wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
+				{parentfield: advance_parentfield});
+			this.frm.doc.total_advance = flt(wn.utils.sum(
+				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
+			), precision("total_advance"));
+			
+			this.calculate_outstanding_amount();
+		}
 	},
 	
 	_set_in_company_currency: function(item, print_field, base_field) {

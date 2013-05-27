@@ -17,10 +17,28 @@
 cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
+
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
-erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.extend({
+wn.provide("erpnext.accounts");
+erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.extend({
+	setup: function() {
+		this._super();
+		
+	},
+	
+	onload: function() {
+		this._super();
+		
+		if(!this.frm.doc.__islocal) {
+			// show credit_to in print format
+			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
+				this.frm.set_df_property("credit_to", "print_hide", 0);
+			}
+		}
+	},
+	
 	refresh: function(doc) {
 		this._super();
 		
@@ -33,6 +51,20 @@ erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.exten
 		}
 		
 		cur_frm.cscript.is_opening(doc);
+	},
+	
+	credit_to: function() {
+		this.supplier();
+	},
+	
+	write_off_amount: function() {
+		this.calculate_outstanding_amount();
+		this.frm.refresh_fields();
+	},
+	
+	allocated_amount: function() {
+		this.calculate_total_advance();
+		this.frm.refresh_fields();
 	},
 });
 
@@ -54,23 +86,6 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 	locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
 }
 
-
-cur_frm.cscript.credit_to = function(doc,dt,dn) {
-
-	var callback = function(doc, dt, dn) {
-			var doc = locals[doc.doctype][doc.name];
-			if(doc.supplier) {
-				get_server_fields('get_default_supplier_address',
-					JSON.stringify({ supplier: doc.supplier }), '', doc, dt, dn, 1, function() {
-						cur_frm.refresh();
-					});
-				unhide_field(['supplier_address','contact_person']);
-			}
-			cur_frm.refresh();
-	}
-
-	get_server_fields('get_cust', '', '', doc, dt, dn, 1, callback);
-}
 
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 	
@@ -95,17 +110,6 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-cur_frm.cscript.write_off_amount = function(doc) {
-	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.write_off_amount);
-	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(doc.total_advance);
-	refresh_many(['outstanding_amount', 'total_amount_to_pay']);
-}
-
-cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
-	cur_frm.cscript.calculate_tax(doc,cdt,cdn);
-	calc_total_advance(doc,cdt,cdn);
-}
-
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address', 'contact_person']);				
@@ -113,11 +117,6 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 	}
 	$c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
-
-cur_frm.cscript.allocated_amount = function(doc,cdt,cdn) {
-	calc_total_advance(doc, cdt, cdn);
-}
-
 
 cur_frm.cscript.make_bank_voucher = function() {
 	wn.call({
@@ -202,21 +201,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 		}
 	}
 	refresh_field('entries');
-}
-
-calc_total_advance = function(doc,cdt,cdn) {
-	var doc = locals[doc.doctype][doc.name];
-	var el = getchildren('Purchase Invoice Advance',doc.name,'advance_allocation_details')
-	var total_advance = 0;
-	for(var i in el) {
-		if (! el[i].allocated_amount == 0) {
-			total_advance += flt(el[i].allocated_amount);
-		}
-	}
-	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.write_off_amount);
-	doc.total_advance = flt(total_advance);
-	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(total_advance);
-	refresh_many(['total_advance','outstanding_amount', 'total_amount_to_pay']);
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {

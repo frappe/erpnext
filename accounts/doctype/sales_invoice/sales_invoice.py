@@ -599,15 +599,6 @@ class DocType(SellingController):
 		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 		
-	def get_actual_qty(self,args):
-		args = eval(args)
-		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
-		}
-		return ret
-
-
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries, merge_similar_entries
 		

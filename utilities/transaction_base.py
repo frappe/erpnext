@@ -298,16 +298,27 @@ def validate_item_fetch(args, item):
 		msgprint(_("Please specify Company"), raise_exception=True)
 	
 def validate_currency(args, item, meta=None):
+	from webnotes.model.meta import get_field_precision
 	if not meta:
 		meta = webnotes.get_doctype(args.doctype)
-	
+		
 	# validate conversion rate
 	if meta.get_field("currency"):
 		validate_conversion_rate(args.currency, args.conversion_rate, 
 			meta.get_label("conversion_rate"), args.company)
+		
+		# round it
+		args.conversion_rate = flt(args.conversion_rate, 
+			get_field_precision(meta.get_field("conversion_rate"), args))
 	
 	# validate price list conversion rate
 	if meta.get_field("price_list_currency") and args.price_list_name and \
 		args.price_list_currency:
 		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate, 
 			meta.get_label("plc_conversion_rate"), args.company)
+		
+		# round it
+		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
+			get_field_precision(meta.get_field("plc_conversion_rate"), args))	
+	
+	

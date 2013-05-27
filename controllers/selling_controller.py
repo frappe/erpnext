@@ -48,6 +48,9 @@ class SellingController(StockController):
 	def set_customer_defaults(self):
 		self.get_default_customer_address()
 		
+		if self.meta.get_field("shipping_address"):
+			self.doc.fields.update(self.get_shipping_address(self.doc.customer))
+		
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)

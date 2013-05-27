@@ -22,17 +22,20 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 // print heading
 cur_frm.pformat.print_heading = 'Invoice';
 
-wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/selling/doctype/sales_common/sales_common.js');
 
-erpnext.selling.SalesInvoiceController = erpnext.selling.SellingController.extend({
+wn.provide("erpnext.accounts");
+erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	onload: function() {
 		this._super();
 		
-		// show debit_to in print format
-		if(!this.frm.doc.customer && this.frm.doc.debit_to) {
-			this.frm.set_df_property("debit_to", "print_hide", 0);
+		if(!this.frm.doc.__islocal) {
+			// show debit_to in print format
+			if(!this.frm.doc.customer && this.frm.doc.debit_to) {
+				this.frm.set_df_property("debit_to", "print_hide", 0);
+			}
 		}
 	},
 	
@@ -40,10 +43,6 @@ erpnext.selling.SalesInvoiceController = erpnext.selling.SellingController.exten
 		this._super();
 		
 		cur_frm.cscript.is_opening(doc, dt, dn);
-
-		// Show / Hide button
-		cur_frm.clear_custom_buttons();
-		// if (!cur_frm.cscript.is_onload)	cur_frm.cscript.hide_price_list_currency(doc, dt, dn); 
 
 		if(doc.docstatus==1) {
 			cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
@@ -78,10 +77,39 @@ erpnext.selling.SalesInvoiceController = erpnext.selling.SellingController.exten
 	debit_to: function() {
 		this.customer();
 	},
+	
+	allocated_amount: function() {
+		this.calculate_total_advance();
+		this.frm.refresh_fields();
+	},
+	
+	write_off_outstanding_amount_automatically: function() {
+		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
+			wn.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
+			this.frm.set_value("write_off_amount", 
+				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
+		}
+		
+		this.frm.runclientscript("write_off_amount");
+		
+		// TODO doubt?
+		// if write off amount = grand total - paid amount
+		// then why is outstanding amount = grand total - write off amount - paid amount - advance
+		// when write off amount already is grand total - paid amount!
+	},
+	
+	write_off_amount: function() {
+		this.calculate_outstanding_amount();
+		this.frm.refresh_fields();
+	},
+	
+	paid_amount: function() {
+		this.write_off_outstanding_amount_automatically();
+	},
 });
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.selling.SalesInvoiceController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
 
 // Hide Fields
 // ------------
@@ -129,33 +157,8 @@ cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
-cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
-	var d = locals[cdt][cdn];
-	if (!d.item_code) { msgprint("please enter item code first"); return };
-	if (d.warehouse) {
-		arg = "{'item_code':'" + d.item_code + "','warehouse':'" + d.warehouse +"'}";
-		get_server_fields('get_actual_qty',arg,'entries',doc,cdt,cdn,1);
-	}
-}
-
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
-cur_frm.cscript.write_off_outstanding_amount_automatically = function(doc) {
-	if (doc.write_off_outstanding_amount_automatically == 1) 
-		doc.write_off_amount = flt(doc.grand_total) - flt(doc.paid_amount);
-	
-	doc.outstanding_amount = flt(doc.grand_total) - flt(doc.paid_amount) - flt(doc.write_off_amount);
-	refresh_field(['write_off_amount', 'outstanding_amount']);
-}
-
-cur_frm.cscript.paid_amount = function(doc) {
-	cur_frm.cscript.write_off_outstanding_amount_automatically(doc);
-}
-
-cur_frm.cscript.write_off_amount = function(doc) {
-	cur_frm.cscript.write_off_outstanding_amount_automatically(doc);
 }
 
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
@@ -192,12 +195,6 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 }
 
 
-
-// Allocated Amount in advances table
-// -----------------------------------
-cur_frm.cscript.allocated_amount = function(doc,cdt,cdn){
-	cur_frm.cscript.calc_adjustment_amount(doc,cdt,cdn);
-}
 
 //Make Delivery Note Button
 //-----------------------------
@@ -362,19 +359,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	}
 	refresh_field(cur_frm.cscript.fname);
 }
-
-cur_frm.cscript.calc_adjustment_amount = function(doc,cdt,cdn) {
-	var doc = locals[doc.doctype][doc.name];
-	var el = getchildren('Sales Invoice Advance',doc.name,'advance_adjustment_details');
-	var total_adjustment_amt = 0
-	for(var i in el) {
-			total_adjustment_amt += flt(el[i].allocated_amount)
-	}
-	doc.total_advance = flt(total_adjustment_amt);
-	doc.outstanding_amount = flt(doc.grand_total) - flt(total_adjustment_amt) - flt(doc.paid_amount) - flt(doc.write_off_amount);
-	refresh_many(['total_advance','outstanding_amount']);
-}
-
 
 // Make Journal Voucher
 // --------------------

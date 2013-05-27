@@ -52,8 +52,7 @@ def get_item_details(args):
 	out.supplier_part_no = _get_supplier_part_no(args, item_bean)
 	
 	if out.warehouse:
-		out.projected_qty = webnotes.conn.get_value("Bin", {"item_code": item.name, 
-			"warehouse": out.warehouse}, "projected_qty")
+		out.projected_qty = get_projected_qty(item.name, out.warehouse)
 	
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -92,7 +91,7 @@ def _get_basic_details(args, item_bean):
 	
 	return out
 	
-def _get_price_list_rate(args, item_bean, meta=None):
+def _get_price_list_rate(args, item_bean, meta):
 	from utilities.transaction_base import validate_currency
 	item = item_bean.doc
 	out = webnotes._dict()
@@ -105,15 +104,16 @@ def _get_price_list_rate(args, item_bean, meta=None):
 			"ref_currency": args.price_list_currency,
 			"buying": 1})
 		if price_list_rate:
-			out.purchase_ref_rate = flt(price_list_rate[0].ref_rate) * flt(args.plc_conversion_rate)
+			out.import_ref_rate = \
+				flt(price_list_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)
 		
 	# if not found, fetch from last purchase transaction
-	if not out.purchase_ref_rate:
+	if not out.import_ref_rate:
 		last_purchase = get_last_purchase_details(item.name, args.docname, args.conversion_rate)
 		if last_purchase:
 			out.update(last_purchase)
 	
-	if out.purchase_ref_rate or out.purchase_rate or out.rate:
+	if out.import_ref_rate or out.import_rate:
 		validate_currency(args, item, meta)
 	
 	return out
@@ -199,3 +199,13 @@ def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 	})
 	
 	return out
+	
+@webnotes.whitelist()
+def get_conversion_factor(item_code, uom):
+	return {"conversion_factor": webnotes.conn.get_value("UOM Conversion Detail",
+		{"parent": item_code, "uom": uom})}
+		
+@webnotes.whitelist()
+def get_projected_qty(item_code, warehouse):
+	return webnotes.conn.get_value("Bin", {"item_code": item_code, 
+			"warehouse": warehouse}, "projected_qty")

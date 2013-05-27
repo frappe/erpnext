@@ -34,6 +34,9 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Delivery Note Item'
 		self.fname = 'delivery_note_details'
+		
+	def set_customer_defaults(self):
+		self.get_default_customer_shipping_address()
 
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
@@ -78,25 +81,6 @@ class DocType(SellingController):
 	def get_tc_details(self):
 		return get_obj('Sales Common').get_tc_details(self)
 
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {
-						'item_code':doc.fields.get('item_code'),
-						'expense_account':doc.fields.get('expense_account'), 
-						'cost_center': doc.fields.get('cost_center'), 
-						'warehouse': doc.fields.get('warehouse')};
-					ret = obj.get_item_defaults(arg)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]					
-
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
@@ -104,12 +88,6 @@ class DocType(SellingController):
 	def get_adj_percent(self, arg=''):
 		"""Re-calculates Basic Rate & amount based on Price List Selected"""
 		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_actual_qty(self,args):
-		"""Get Actual Qty of item in warehouse selected"""
-		return get_obj('Sales Common').get_available_qty(eval(args))
-
 
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)

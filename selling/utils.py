@@ -68,7 +68,7 @@ def get_item_details(args):
 			out.update(_get_price_list_rate(args, item_bean, meta))
 	
 	if out.warehouse or out.reserved_warehouse:
-		out.update(_get_available_qty(args, out.warehouse or out.reserved_warehouse))
+		out.update(get_available_qty(args.item_code, out.warehouse or out.reserved_warehouse))
 	
 	out.customer_item_code = _get_customer_item_code(args, item_bean)
 	
@@ -109,6 +109,7 @@ def _validate_item_details(args, item):
 def _get_basic_details(args, item_bean):
 	item = item_bean.doc
 	out = webnotes._dict({
+			"item_code": item.name,
 			"description": item.description_html or item.description,
 			"reserved_warehouse": item.default_warehouse,
 			"warehouse": item.default_warehouse or args.warehouse,
@@ -129,7 +130,7 @@ def _get_basic_details(args, item_bean):
 			
 	return out
 	
-def _get_price_list_rate(args, item_bean, meta=None):
+def _get_price_list_rate(args, item_bean, meta):
 	base_ref_rate = item_bean.doclist.get({
 		"parentfield": "ref_rate_details",
 		"price_list_name": args.price_list_name, 
@@ -143,10 +144,11 @@ def _get_price_list_rate(args, item_bean, meta=None):
 	from utilities.transaction_base import validate_currency
 	validate_currency(args, item_bean.doc, meta)
 	
-	return {"base_ref_rate": flt(base_ref_rate[0].ref_rate / args.plc_conversion_rate)}
-	
-def _get_available_qty(args, warehouse):
-	return webnotes.conn.get_value("Bin", {"item_code": args.item_code, "warehouse": warehouse}, 
+	return {"ref_rate": flt(base_ref_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)}
+
+@webnotes.whitelist()
+def get_available_qty(item_code, warehouse):
+	return webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
 		["projected_qty", "actual_qty"], as_dict=True) or {}
 		
 def _get_customer_item_code(args, item_bean):
@@ -173,6 +175,6 @@ def apply_pos_settings(pos_settings, opts):
 			out[fieldname] = pos_settings.get(fieldname)
 			
 	if out.get("warehouse"):
-		out["actual_qty"] = _get_available_qty(opts, out.get("warehouse")).get("actual_qty")
+		out["actual_qty"] = get_available_qty(opts.item_code, out.get("warehouse")).get("actual_qty")
 	
 	return out

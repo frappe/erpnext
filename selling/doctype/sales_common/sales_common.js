@@ -182,6 +182,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
+	warehouse: function(doc, cdt, cdn) {
+		var item = webnotes.get_doc(cdt, cdn);
+		if(item.item_code && (item.warehouse || item.reserved_warehouse)) {
+			this.frm.call({
+				method: "selling.utils.get_available_qty",
+				child: item,
+				args: {
+					item_code: item.item_code,
+					warehouse: item.warehouse || item.reserved_warehouse,
+				},
+			});
+		}
+	},
+	
 	toggle_rounded_total: function() {
 		var me = this;
 		if(cint(wn.defaults.get_global_default("disable_rounded_total"))) {
@@ -194,6 +208,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_taxes_and_totals: function() {
 		this._super();
+		this.calculate_total_advance();
 		this.calculate_commission();
 		this.calculate_contribution();
 		
@@ -308,6 +323,23 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);
+	},
+	
+	calculate_total_advance: function() {
+		this._super("Sales Invoice", "advance_adjustment_details");
+	},
+	
+	calculate_outstanding_amount: function() {
+		// TODO - I find this incorrect!
+		// see TODO of sales invoice.js / write_off_outstanding_amount_automatically
+		
+		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus < 2) {
+			wn.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount",
+				"paid_amount"]);
+			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount;
+			this.frm.doc.outstanding_amount = flt(total_amount_to_pay - this.frm.doc.total_advance - 
+				this.frm.doc.paid_amount, precision("outstanding_amount"));
+		}
 	},
 	
 	calculate_commission: function() {
