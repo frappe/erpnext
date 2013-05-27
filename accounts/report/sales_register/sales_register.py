@@ -17,12 +17,17 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
+from webnotes import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
 	
 	invoice_list = get_invoices(filters)
 	columns, income_accounts, tax_accounts = get_columns(invoice_list)
+	
+	if not invoice_list:
+		msgprint(_("No record found"))		
+		return columns, invoice_list
 	
 	invoice_income_map = get_invoice_income_map(invoice_list)
 	invoice_tax_map = get_invoice_tax_map(invoice_list)
@@ -69,15 +74,17 @@ def get_columns(invoice_list):
 		"Remarks::150", "Sales Order:Link/Sales Order:100", "Delivery Note:Link/Delivery Note:100"
 	]
 	
-	income_accounts = webnotes.conn.sql_list("""select distinct income_account 
-		from `tabSales Invoice Item` where docstatus = 1 and parent in (%s) 
-		order by income_account""" % 
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+	income_accounts = tax_accounts = []
+	if invoice_list:
+		income_accounts = webnotes.conn.sql_list("""select distinct income_account 
+			from `tabSales Invoice Item` where docstatus = 1 and parent in (%s) 
+			order by income_account""" % 
+			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
-	tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
-		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
-		and docstatus = 1 and parent in (%s) order by account_head""" % 
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
+			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
+			and docstatus = 1 and parent in (%s) order by account_head""" % 
+			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
 	columns = columns + [(account + ":Currency:120") for account in income_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
@@ -89,19 +96,19 @@ def get_conditions(filters):
 	conditions = ""
 	
 	if filters.get("company"): conditions += " and company=%(company)s"
-	if filters.get("account"): conditions += " and account = %(account)s"
+	if filters.get("account"): conditions += " and debit_to = %(account)s"
 
-	if filters.get("from_date"): conditions += " and posting_date>=%(from_date)s"
-	if filters.get("to_date"): conditions += " and posting_date<=%(to_date)s"
+	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
+	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
 
 	return conditions
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
-		remarks, net_total, other_charges_total, grand_total 
-		from `tabSales Invoice` where docstatus = 1 %s 
-		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
+		remarks, net_total, other_charges_total, grand_total from `tabSales Invoice` 
+		where docstatus = 1 %s order by posting_date desc, name desc""" % 
+		conditions, filters, as_dict=1)
 	
 def get_invoice_income_map(invoice_list):
 	income_details = webnotes.conn.sql("""select parent, income_account, sum(amount) as amount
