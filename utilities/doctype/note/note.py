@@ -7,6 +7,11 @@ class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
+	def autoname(self):
+		# replace forbidden characters
+		import re
+		self.doc.name = re.sub("[%'\"#*?`]", "", self.doc.title.strip())
+		
 	def onload(self):
 		if not self.doc.public and webnotes.session.user != self.doc.owner:
 			if webnotes.session.user not in [d.user for d in self.doclist if d.doctype=="Note User"]:

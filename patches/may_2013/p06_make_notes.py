@@ -2,6 +2,8 @@ import webnotes
 
 def execute():
 	webnotes.reload_doc("utilities", "doctype", "note")
+	webnotes.reload_doc("utilities", "doctype", "note_user")
+	
 	for question in webnotes.conn.sql("""select * from tabQuestion""", as_dict=True):
 		name = question.question[:180]
 		if webnotes.conn.exists("Note", name):

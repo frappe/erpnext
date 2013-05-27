@@ -2,14 +2,13 @@
  {
   "creation": "2013-05-24 13:41:00", 
   "docstatus": 0, 
-  "modified": "2013-05-24 16:47:19", 
+  "modified": "2013-05-27 12:16:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_print": 0, 
   "allow_rename": 1, 
-  "autoname": "field:title", 
   "description": "Note is a free page where users can share documents / notes", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
