@@ -326,7 +326,7 @@ class DocType(BuyingController):
 					against_accounts.append(stock_not_billed_account)
 			
 			elif not item.expense_head:
-				msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				msgprint(_("""Expense account is mandatory for item: """) + (item.item_code or item.item_name), 
 					raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
