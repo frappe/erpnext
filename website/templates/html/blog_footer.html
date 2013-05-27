@@ -5,8 +5,8 @@
 	<ul class="breadcrumb" style="background-color: transparent; padding-left: 0px;">
 	{% for category in categories %}
 		<li><a href="blog?category={{ category }}">{{ category }}</a> 
-		{% if not loop.last %}<span class="divider">/</span>{% endif %}</li>
 	{% endfor %}
+	</ul>
 	<br><br>
 	{% endif %}
 	<p>Show posts by <a href="blog">everyone</a>. Meet the <a href="writers">writers</a> of this blog</p>

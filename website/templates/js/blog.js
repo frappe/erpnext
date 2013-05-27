@@ -87,7 +87,7 @@ var blog = {
 		if(!data.length || data.length < 20) {
 			if(blog.start) {
 				$("#next-page").toggle(false)
-					.parent().append("<div class='alert alert-info'>Nothing more to show.</div>");	
+					.parent().append("<div class='text-muted'>Nothing more to show.</div>");	
 			} else {
 				$("#next-page").toggle(false)
 					.parent().append("<div class='alert'>No blogs written yet.</div>");	

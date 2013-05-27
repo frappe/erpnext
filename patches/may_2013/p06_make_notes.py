@@ -20,3 +20,4 @@ def execute():
 		
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")
+	webnotes.bean("Style Settings").save()
