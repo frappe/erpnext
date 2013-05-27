@@ -8,17 +8,17 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				label: wn._("Material Request"),
-				description: wn._("Request Material for Transfer or Purchase."),
+				description: wn._("Requests for items."),
 				doctype:"Material Request"
 			},
 			{
 				label: wn._("Stock Entry"),
-				description: wn._("Transfer stock from one warehouse to another."),
+				description: wn._("Record item movement."),
 				doctype:"Stock Entry"
 			},
 			{
 				label: wn._("Delivery Note"),
-				description: wn._("Delivery (shipment) to customers."),
+				description: wn._("Shipments to customers."),
 				doctype:"Delivery Note"
 			},
 			{

@@ -8,17 +8,17 @@ wn.module_page["Support"] = [
 		items: [
 			{
 				label: wn._("Support Ticket"),
-				description: wn._("Support queries from customers via email or website."),
+				description: wn._("Support queries from customers."),
 				doctype:"Support Ticket"
 			},
 			{
 				label: wn._("Customer Issue"),
-				description: wn._("Customer Issue against a Serial No (warranty)."),
+				description: wn._("Customer Issue against Serial No."),
 				doctype:"Customer Issue"
 			},
 			{
 				label: wn._("Maintenance Schedule"),
-				description: wn._("Plan for scheduled maintenance contracts."),
+				description: wn._("Plan for maintenance visits."),
 				doctype:"Maintenance Schedule"
 			},
 			{
@@ -28,7 +28,7 @@ wn.module_page["Support"] = [
 			},
 			{
 				label: wn._("Newsletter"),
-				description: wn._("Send Newsletters to your contacts, leads."),
+				description: wn._("Newsletters to contacts, leads."),
 				doctype:"Newsletter"
 			},
 			{
