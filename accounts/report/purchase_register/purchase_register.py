@@ -17,12 +17,18 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
+from webnotes import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
 
 	invoice_list = get_invoices(filters)
 	columns, expense_accounts, tax_accounts = get_columns(invoice_list)
+	
+	
+	if not invoice_list:
+		msgprint(_("No record found"))		
+		return columns, invoice_list
 	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
 	invoice_tax_map = get_invoice_tax_map(invoice_list)
@@ -64,17 +70,18 @@ def get_columns(invoice_list):
 		"Project:Link/Project:80", "Bill No::120", "Bill Date:Date:80", "Remarks::150", 
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
 	]
-	
-	expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
-		from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
-		and parent in (%s) order by expense_head""" % 
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+	expense_accounts = tax_accounts = []
+	if invoice_list:	
+		expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
+			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
+			and parent in (%s) order by expense_head""" % 
+			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 		
-	tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
-		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice' 
-		and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
-		order by account_head""" % 
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
+			from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice' 
+			and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
+			order by account_head""" % 
+			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
 	columns = columns + [(account + ":Currency:120") for account in expense_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
@@ -86,7 +93,7 @@ def get_conditions(filters):
 	conditions = ""
 	
 	if filters.get("company"): conditions += " and company=%(company)s"
-	if filters.get("account"): conditions += " and account = %(account)s"
+	if filters.get("account"): conditions += " and credit_to = %(account)s"
 
 	if filters.get("from_date"): conditions += " and posting_date>=%(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date<=%(to_date)s"
