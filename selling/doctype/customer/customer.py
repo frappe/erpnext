@@ -219,27 +219,8 @@ class DocType(TransactionBase):
 	def on_rename(self, new, old, merge=False):
 		#update customer_name if not naming series
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			update_fields = [
-			('Customer', 'name'),
-			('Address', 'customer'),
-			('Contact', 'customer'),
-			('Customer Issue', 'customer'),
-			('Delivery Note', 'customer'),
-			('Opportunity', 'customer'),
-			('Installation Note', 'customer'),
-			('Maintenance Schedule', 'customer'),
-			('Maintenance Visit', 'customer'),
-			('Project', 'customer'),
-			('Quotation', 'customer'),
-			('Sales Invoice', 'customer'),
-			('Sales Order', 'customer'),
-			('Serial No', 'customer'),
-			('Shipping Address', 'customer'),
-			('Stock Entry', 'customer'),
-			('Support Ticket', 'customer')]
-			for rec in update_fields:
-				sql("""update `tab%s` set customer_name = %s
-					where `%s` = %s""" % (rec[0], "%s" ,rec[1], "%s"), (new, old))
+			webnotes.conn.sql("""update `tabCustomer` set customer_name = %s where name = %s""", 
+				(new, old))
 		
 		for account in webnotes.conn.sql("""select name, account_name from 
 			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
