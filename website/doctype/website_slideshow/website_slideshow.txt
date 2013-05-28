@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 14:48:40", 
+  "creation": "2013-03-07 15:53:15", 
   "docstatus": 0, 
-  "modified": "2012-12-25 16:56:34", 
+  "modified": "2013-05-28 16:57:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,6 +53,7 @@
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
+  "description": "Note: For best results, images must be of the same size and width must be greater than height.", 
   "doctype": "DocField", 
   "fieldname": "sb0", 
   "fieldtype": "Section Break", 

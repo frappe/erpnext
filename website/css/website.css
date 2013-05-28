@@ -97,3 +97,15 @@ h1, h2, h3, h4, h5 {
 .avatar-x-large img {
 	width: 100px; 
 }
+
+.carousel-control .icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+}
