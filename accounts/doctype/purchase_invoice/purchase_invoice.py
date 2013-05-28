@@ -91,6 +91,11 @@ class DocType(BuyingController):
 			msgprint("%s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
 		return ret
 		
+	def set_supplier_defaults(self):
+		self.doc.fields.update(self.get_cust())
+		self.doc.fields.update(self.get_credit_to())
+		super(DocType, self).set_supplier_defaults()
+		
 	def get_cust(self):
 		ret = {}
 		if self.doc.credit_to:
@@ -100,31 +105,6 @@ class DocType(BuyingController):
 			
 		return ret
 		
-	def get_default_values(self, args):
-		if isinstance(args, basestring):
-			import json
-			args = json.loads(args)
-		
-		out = webnotes._dict()
-		
-		item = webnotes.conn.sql("""select name, purchase_account, cost_center,
-			is_stock_item from `tabItem` where name=%s""", args.get("item_code"), as_dict=1)
-		
-		if item and item[0]:
-			item = item[0]
-			
-			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) and \
-				item.is_stock_item == "Yes":
-					# unset expense head for stock item and auto inventory accounting
-					out.expense_head = out.cost_center = None
-			else:
-				if not args.get("expense_head"):
-					out.expense_head = item.purchase_account
-				if not args.get("cost_center"):
-					out.cost_center = item.cost_center
-		
-		return out
-			
 	def pull_details(self):
 		if self.doc.purchase_receipt_main:
 			self.validate_duplicate_docname('purchase_receipt')
@@ -326,7 +306,7 @@ class DocType(BuyingController):
 					against_accounts.append(stock_not_billed_account)
 			
 			elif not item.expense_head:
-				msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				msgprint(_("""Expense account is mandatory for item: """) + (item.item_code or item.item_name), 
 					raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
@@ -466,9 +446,9 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_inventory_accounting = True
 					
-					valuation_amt = (flt(item.amount, self.precision.item.amount) + 
-						flt(item.item_tax_amount, self.precision.item.item_tax_amount) + 
-						flt(item.rm_supp_cost, self.precision.item.rm_supp_cost))
+					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
+						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
+						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)))
 					
 					gl_entries.append(
 						self.get_gl_dict({

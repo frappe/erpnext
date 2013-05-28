@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-19 11:00:07", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:06:15", 
+  "modified": "2013-05-22 12:07:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -107,7 +107,7 @@
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 1, 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 0
  }, 
  {
@@ -163,7 +163,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 1, 
   "search_index": 0
  }, 

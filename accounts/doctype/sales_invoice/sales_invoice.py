@@ -41,7 +41,6 @@ class DocType(SellingController):
 
 	def validate(self):
 		super(DocType, self).validate()
-		self.fetch_missing_values()
 		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
@@ -50,7 +49,6 @@ class DocType(SellingController):
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
 		sales_com_obj.validate_max_discount(self, 'entries')
-		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year, 
 			self.doc.posting_date,'Posting Date')
 		self.validate_customer()
@@ -136,25 +134,16 @@ class DocType(SellingController):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
 		
-	def fetch_missing_values(self):
-		# fetch contact and address details for customer, if they are not mentioned
-		if not (self.doc.contact_person and self.doc.customer_address):
-			for fieldname, val in self.get_default_address_and_contact("customer").items():
-				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
-					self.doc.fields[fieldname] = val
-					
-		# fetch missing item values
-		for item in self.doclist.get({"parentfield": "entries"}):
-			if item.fields.get("item_code"):
-				ret = get_obj('Sales Common').get_item_details(item.fields, self)
-				for fieldname, value in ret.items():
-					if self.meta.get_field(fieldname, parentfield="entries") and \
-						not item.fields.get(fieldname):
-							item.fields[fieldname] = value
+	def set_missing_values(self, for_validate=False):
+		super(DocType, self).set_missing_values(for_validate)
+		self.set_pos_fields(for_validate)
 		
-		# fetch pos details, if they are not fetched
-		if cint(self.doc.is_pos):
-			self.set_pos_fields(for_validate=True)
+	def set_customer_defaults(self):
+		# TODO cleanup these methods
+		self.doc.fields.update(self.get_debit_to())
+		self.get_cust_and_due_date()
+		
+		super(DocType, self).set_customer_defaults()
 			
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
@@ -175,10 +164,11 @@ class DocType(SellingController):
 		"""Set retail related fields from pos settings"""
 		if cint(self.doc.is_pos) != 1:
 			return
+		
+		from selling.utils import get_pos_settings, apply_pos_settings	
+		pos = get_pos_settings(self.doc.company)
 			
-		if self.pos_settings:
-			pos = self.pos_settings[0]
-			
+		if pos:
 			self.doc.conversion_rate = flt(pos.conversion_rate)
 			
 			if not self.doc.debit_to:
@@ -195,7 +185,7 @@ class DocType(SellingController):
 			# set pos values in items
 			for item in self.doclist.get({"parentfield": "entries"}):
 				if item.fields.get('item_code'):
-					for fieldname, val in self.apply_pos_settings(item.fields).items():
+					for fieldname, val in apply_pos_settings(pos, item.fields).items():
 						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
 							item.fields[fieldname] = val
 
@@ -205,7 +195,7 @@ class DocType(SellingController):
 			
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
-				self.get_other_charges()
+				self.set_taxes()
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -275,85 +265,13 @@ class DocType(SellingController):
 		ret = self.get_debit_to()
 		self.doc.debit_to = ret.get('debit_to')
 					
-					
-	def load_default_accounts(self):
-		"""
-			Loads default accounts from items, customer when called from mapper
-		"""
-		self.get_income_expense_account('entries')
-		
-		
-	def get_income_expense_account(self,doctype):		
-		for d in getlist(self.doclist, doctype):			
-			if d.item_code:
-				item = webnotes.conn.get_value("Item", d.item_code, ["default_income_account", 
-					"default_sales_cost_center", "purchase_account"], as_dict=True)
-				d.income_account = item['default_income_account'] or ""
-				d.cost_center = item['default_sales_cost_center'] or ""
-				
-				if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
-						and cint(self.doc.is_pos) and cint(self.doc.update_stock):
-					d.expense_account = item['purchase_account'] or ""
-
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			ret = get_obj('Sales Common').get_item_details(args, self)
-			
-			if cint(self.doc.is_pos) == 1 and self.pos_settings:
-				ret = self.apply_pos_settings(args, ret)
-			
-			return ret
-		
-		elif cint(self.doc.is_pos) == 1 and self.pos_settings:
-			for doc in self.doclist.get({"parentfield": "entries"}):
-				if doc.fields.get('item_code'):
-					ret = self.apply_pos_settings(doc.fields)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]		
-
 	@property
 	def pos_settings(self):
 		if not hasattr(self, "_pos_settings"):
-			dtl = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
-				and company = %s""", (webnotes.session['user'], self.doc.company), as_dict=1)			 
-			if not dtl:
-				dtl = webnotes.conn.sql("""select * from `tabPOS Setting` 
-					where ifnull(user,'') = '' and company = %s""", self.doc.company, as_dict=1)
-			self._pos_settings = dtl
+			from selling.utils import get_pos_settings
+			self._pos_settings = get_pos_settings({"company": self.doc.company})
 			
 		return self._pos_settings
-
-	def apply_pos_settings(self, args, ret=None):
-		if not ret: ret = {}
-		
-		pos = self.pos_settings[0]
-		
-		item = webnotes.conn.sql("""select default_income_account, default_sales_cost_center, 
-			default_warehouse, purchase_account from tabItem where name = %s""", 
-			args.get('item_code'), as_dict=1)
-		
-		if item:
-			item = item[0]
-			
-			ret.update({
-				"income_account": item.get("default_income_account") \
-					or pos.get("income_account") or args.get("income_account"),
-				"cost_center": item.get("default_sales_cost_center") \
-					or pos.get("cost_center") or args.get("cost_center"),
-				"warehouse": item.get("default_warehouse") \
-					or pos.get("warehouse") or args.get("warehouse"),
-				"expense_account": item.get("purchase_account") \
-					or pos.get("expense_account") or args.get("expense_account")
-			})
-			
-			if ret.get("warehouse"):
-				ret["actual_qty"] = flt(webnotes.conn.get_value("Bin",
-					{"item_code": args.get("item_code"), "warehouse": args.get("warehouse")},
-					"actual_qty"))
-		return ret
 
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
@@ -376,14 +294,6 @@ class DocType(SellingController):
 	
 	def get_tc_details(self):
 		return get_obj('Sales Common').get_tc_details(self)
-
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
 
 
 	def get_advances(self):
@@ -629,7 +539,9 @@ class DocType(SellingController):
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			webnotes.conn.set(self.doc,'paid_amount',0)
-
+		
+		# TODO
+		# move to calculations
 		webnotes.conn.set(self.doc, 'outstanding_amount', 
 			flt(self.doc.grand_total) - flt(self.doc.total_advance) - 
 			flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
@@ -687,15 +599,6 @@ class DocType(SellingController):
 		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 		
-	def get_actual_qty(self,args):
-		args = eval(args)
-		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
-		}
-		return ret
-
-
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries, merge_similar_entries
 		
@@ -740,7 +643,7 @@ class DocType(SellingController):
 						"against": self.doc.debit_to,
 						"credit": flt(tax.tax_amount),
 						"remarks": self.doc.remarks,
-						"cost_center": tax.cost_center_other_charges
+						"cost_center": tax.cost_center
 					})
 				)
 				

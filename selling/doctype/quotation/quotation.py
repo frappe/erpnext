@@ -95,17 +95,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	# Load Default Charges
-	# ----------------------------------------------------------
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	# Pull details from other charges master (Get Sales Taxes and Charges Master)
-	# ----------------------------------------------------------
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)	
-	
-		 
 # GET TERMS AND CONDITIONS
 # ====================================================================================
 	def get_tc_details(self):
@@ -142,6 +131,8 @@ class DocType(SellingController):
 	#do not allow sales item in maintenance quotation and service item in sales quotation
 	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
 				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)

@@ -13,8 +13,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-wn.provide('erpnext.utils');
+wn.provide("erpnext.utils");
 
 erpnext.get_currency = function(company) {
 	if(!company && cur_frm)

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:08:32", 
+  "modified": "2013-05-22 12:10:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -119,7 +119,7 @@
   "options": "currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -195,7 +195,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
