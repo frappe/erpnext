@@ -327,7 +327,7 @@ class TestSalesInvoice(unittest.TestCase):
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
-			["_Test Item", "_Test Warehouse", -5.0])
+			["_Test Item", "_Test Warehouse", -1.0])
 		
 		# check gl entries
 		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
@@ -343,8 +343,8 @@ class TestSalesInvoice(unittest.TestCase):
 			[pos[1]["income_account"], 0.0, 500.0],
 			[pos[2]["account_head"], 0.0, 80.0],
 			[pos[3]["account_head"], 0.0, 50.0],
-			[stock_in_hand_account, 0.0, 375.0],
-			[pos[1]["expense_account"], 375.0, 0.0],
+			[stock_in_hand_account, 0.0, 75.0],
+			[pos[1]["expense_account"], 75.0, 0.0],
 			[si.doc.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
@@ -658,7 +658,7 @@ test_records = [
 			"description": "VAT", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 30.0,
+			"rate": 6,
 		}, 
 		{
 			"account_head": "_Test Account Service Tax - _TC", 
@@ -666,7 +666,7 @@ test_records = [
 			"description": "Service Tax", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 31.8,
+			"rate": 6.36,
 		},
 		{
 			"parentfield": "sales_team",
@@ -708,7 +708,7 @@ test_records = [
 			"description": "_Test Item", 
 			"doctype": "Sales Invoice Item", 
 			"parentfield": "entries",
-			"qty": 5.0,
+			"qty": 1.0,
 			"basic_rate": 500.0,
 			"amount": 500.0, 
 			"export_rate": 500.0, 
@@ -723,7 +723,7 @@ test_records = [
 			"description": "VAT", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 80.0,
+			"rate": 16,
 		}, 
 		{
 			"account_head": "_Test Account Service Tax - _TC", 
@@ -731,7 +731,7 @@ test_records = [
 			"description": "Service Tax", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 50.0,
+			"rate": 10
 		}
 	],
 	[
