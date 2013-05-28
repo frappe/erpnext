@@ -158,6 +158,10 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		this.calculate_taxes_and_totals();
 	},
 	
+	calculate_charges: function() {
+		this.calculate_taxes_and_totals();
+	},
+	
 	included_in_print_rate: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);
 		try {

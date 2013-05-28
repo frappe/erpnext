@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-05-28 12:43:23", 
+  "modified": "2013-05-28 18:23:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,6 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1
  }, 
  {
@@ -259,43 +258,6 @@
   "width": "50%"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "label": "Net Total*", 
-  "oldfieldname": "net_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "net_total_export", 
-  "fieldtype": "Currency", 
-  "label": "Net Total (Export)", 
-  "options": "currency", 
-  "print_hide": 0, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break25", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
   "description": "Select Items from Sales Order", 
   "doctype": "DocField", 
   "fieldname": "sales_order_main", 
@@ -327,6 +289,43 @@
   "oldfieldtype": "Button", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break25", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "recalculate_values", 
+  "fieldtype": "Button", 
+  "label": "Re-Calculate Values", 
+  "oldfieldtype": "Button", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total*", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -1310,19 +1309,59 @@
   "report_hide": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "report": 0, 
+  "permlevel": 0, 
+  "report": 1, 
   "role": "Customer"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Retail User"
  }
 ]

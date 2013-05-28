@@ -24,6 +24,7 @@ from webnotes.utils import cint
 import webnotes.defaults
 
 test_dependencies = ["Item", "Cost Center"]
+test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_without_auto_inventory_accounting(self):
