@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-21 16:16:31", 
+  "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-05-21 18:30:32", 
+  "modified": "2013-05-28 12:26:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,10 +76,11 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
@@ -96,34 +97,38 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Shipping Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -690,6 +695,7 @@
   "width": "100px"
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 

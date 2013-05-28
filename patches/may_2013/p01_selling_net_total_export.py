@@ -13,17 +13,4 @@ def execute():
 	
 	for module, doctype in (("Accounts", "Sales Invoice Item"), ("Selling", "Sales Order Item"), ("Selling", "Quotation Item"), 
 		("Stock", "Delivery Note Item")):
-			if cint(webnotes.conn.get_value("DocField", {"parent": doctype, "fieldname": "ref_rate"}, "read_only")) == 0 and \
-				not webnotes.conn.sql("""select name from `tabProperty Setter` where doc_type=%s and doctype_or_field='DocField'
-					and field_name='ref_rate' and property='read_only'""", doctype):
-				webnotes.bean({
-					"doctype": "Property Setter",
-					"doc_type": doctype,
-					"doctype_or_field": "DocField",
-					"field_name": "ref_rate",
-					"property": "read_only",
-					"property_type": "Check",
-					"value": "0"
-				}).insert()
-				
 			webnotes.reload_doc(module, "DocType", doctype)

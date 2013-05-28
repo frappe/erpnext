@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "Material Request Item";
 cur_frm.cscript.fname = "indent_details";
 
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc) {
@@ -48,13 +48,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			cur_frm.toggle_display("sales_order_no", false);
 			cur_frm.fields_dict.indent_details.grid.set_column_disp("sales_order_no", false);
 		}
+	},
+	
+	validate_company_and_party: function(party_field) {
+		return true;
+	},
+	
+	calculate_taxes_and_totals: function() {
+		return;
 	}
 });
 
-var new_cscript = new erpnext.buying.MaterialRequestController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
+$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 	
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

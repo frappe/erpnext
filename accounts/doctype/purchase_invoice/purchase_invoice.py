@@ -92,7 +92,7 @@ class DocType(BuyingController):
 		return ret
 		
 	def set_supplier_defaults(self):
-		# TODO cleanup these methods
+		self.doc.fields.update(self.get_cust())
 		self.doc.fields.update(self.get_credit_to())
 		super(DocType, self).set_supplier_defaults()
 		

@@ -32,7 +32,7 @@ class AccountsController(TransactionBase):
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
 				self.meta.get_label("conversion_rate"), self.doc.company)
 			
-			# self.calculate_taxes_and_totals()
+			self.calculate_taxes_and_totals()
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 			
@@ -84,9 +84,6 @@ class AccountsController(TransactionBase):
 					
 	def calculate_taxes_and_totals(self):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
-		
-		# TODO validate conversion rate
-		
 		self.item_doclist = self.doclist.get({"parentfield": self.fname})
 		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
 		
@@ -264,6 +261,15 @@ class AccountsController(TransactionBase):
 		item.fields[base_field] = flt((flt(item.fields[print_field],
 			self.precision(print_field, item)) * self.doc.conversion_rate),
 			self.precision(base_field, item))
+			
+	def calculate_total_advance(self, parenttype, advance_parentfield):
+		if self.doc.doctype == parenttype and self.doc.docstatus < 2:
+			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.precision("allocated_amount", adv)) 
+				for adv in self.doclist.get({"parentfield": advance_parentfield})])
+
+			self.doc.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
+			
+			self.calculate_outstanding_amount()
 
 	def get_gl_dict(self, args, cancel=None):
 		"""this method populates the common properties of a gl entry record"""

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-21 16:16:41", 
+  "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-05-21 18:30:14", 
+  "modified": "2013-05-28 15:05:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,42 +76,47 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Name", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -448,7 +453,7 @@
   "fieldname": "other_charges_total_export", 
   "fieldtype": "Currency", 
   "label": "Taxes and Charges Total (Export)", 
-  "options": "company", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -596,6 +601,7 @@
   "print_hide": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 

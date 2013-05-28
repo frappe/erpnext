@@ -102,9 +102,9 @@ class SellingController(StockController):
 		
 		super(SellingController, self).calculate_taxes_and_totals()
 		
+		self.calculate_total_advance("Sales Invoice", "advance_adjustment_details")
 		self.calculate_commission()
 		self.calculate_contribution()
-		# self.calculate_outstanding_amount()
 				
 	def determine_exclusive_rate(self):
 		if not any((cint(tax.included_in_print_rate) for tax in self.tax_doclist)):
@@ -201,15 +201,27 @@ class SellingController(StockController):
 		
 		self.doc.rounded_total = round(self.doc.grand_total)
 		self.doc.rounded_total_export = round(self.doc.grand_total_export)
-	
-	def calculate_commission(self):
-		self.round_floats_in(self.doc, ["net_total", "commission_rate"])
-		if self.doc.commission_rate > 100.0:
-			msgprint(_(self.meta.get_label("commission_rate")) + " " + 
-				_("cannot be greater than 100"), raise_exception=True)
 		
-		self.doc.total_commission = flt(self.doc.net_total * self.doc.commission_rate / 100.0,
-			self.precision("total_commission"))
+	def calculate_outstanding_amount(self):
+		# NOTE: 
+		# write_off_amount is only for POS Invoice
+		# total_advance is only for non POS Invoice
+		if self.doc.doctype == "Sales Invoice" and self.doc.docstatus < 2:
+			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
+				"paid_amount"])
+			total_amount_to_pay = self.doc.grand_total - self.doc.write_off_amount
+			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
+				self.precision("outstanding_amount"))
+		
+	def calculate_commission(self):
+		if self.meta.get_field("commission_rate"):
+			self.round_floats_in(self.doc, ["net_total", "commission_rate"])
+			if self.doc.commission_rate > 100.0:
+				msgprint(_(self.meta.get_label("commission_rate")) + " " + 
+					_("cannot be greater than 100"), raise_exception=True)
+		
+			self.doc.total_commission = flt(self.doc.net_total * self.doc.commission_rate / 100.0,
+				self.precision("total_commission"))
 
 	def calculate_contribution(self):
 		total = 0.0

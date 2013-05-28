@@ -192,7 +192,8 @@ class TransactionBase(DocListController):
 	# Get Supplier Default Primary Address - first load
 	# -----------------------
 	def get_default_supplier_address(self, args):
-		args = load_json(args)
+		if isinstance(args, basestring):
+			args = load_json(args)
 		address_text, address_name = self.get_address_text(supplier=args['supplier'])
 		ret = {
 			'supplier_address' : address_name,

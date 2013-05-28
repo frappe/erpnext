@@ -79,23 +79,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	allocated_amount: function() {
-		this.calculate_total_advance();
+		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
 		this.frm.refresh_fields();
 	},
 	
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			wn.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
+			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount", 
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
 		}
 		
 		this.frm.runclientscript("write_off_amount");
-		
-		// TODO doubt?
-		// if write off amount = grand total - paid amount
-		// then why is outstanding amount = grand total - write off amount - paid amount - advance
-		// when write off amount already is grand total - paid amount!
 	},
 	
 	write_off_amount: function() {
@@ -136,8 +132,6 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
-
-	cur_frm.toggle_display("contact_section", doc.customer);
 
 	// India related fields
 	var cp = wn.control_panel;

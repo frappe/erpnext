@@ -50,7 +50,7 @@ class BuyingController(StockController):
 		self.set_missing_item_details(get_item_details)
 		
 	def set_supplier_defaults(self):
-		self.get_default_supplier_address()
+		self.get_default_supplier_address(self.doc.fields)
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
@@ -93,7 +93,7 @@ class BuyingController(StockController):
 	def calculate_taxes_and_totals(self):
 		self.other_fname = "purchase_tax_details"
 		super(BuyingController, self).calculate_taxes_and_totals()
-		self.calculate_outstanding_amount()
+		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
 		
 	def calculate_item_values(self):
 		# hack! - cleaned up in _cleanup()
@@ -167,6 +167,10 @@ class BuyingController(StockController):
 			for item in self.item_doclist:
 				item.purchase_rate = item.rate
 				del item.fields["rate"]
+				
+		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
+			for item in self.item_doclist:
+				del item.fields["item_tax_amount"]
 				
 	def set_item_tax_amount(self, item, tax, current_tax_amount):
 		"""

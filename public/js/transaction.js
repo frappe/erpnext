@@ -46,9 +46,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		this.frm.clear_custom_buttons();
 		erpnext.hide_naming_series();
 		this.show_item_wise_taxes();
-		
-		if(this.frm.fields_dict.currency)
-			this.currency();
+		this.frm.fields_dict.currency ? this.currency() : this.set_dynamic_labels();
 	},
 	
 	onload_post_render: function() {
@@ -65,6 +63,10 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 				}
 			});
 		}
+	},
+	
+	validate: function() {
+		this.calculate_taxes_and_totals();
 	},
 	
 	company: function() {
@@ -129,6 +131,30 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	},
 	
 	qty: function(doc, cdt, cdn) {
+		this.calculate_taxes_and_totals();
+	},
+	
+	tax_rate: function(doc, cdt, cdn) {
+		this.calculate_taxes_and_totals();
+	},
+	
+	row_id: function(doc, cdt, cdn) {
+		var tax = wn.model.get_doc(cdt, cdn);
+		try {
+			this.validate_on_previous_row(tax);
+			this.calculate_taxes_and_totals();
+		} catch(e) {
+			tax.row_id = null;
+			refresh_field("row_id", tax.name, tax.parentfield);
+			throw e;
+		}
+	},
+	
+	recalculate: function() {
+		this.calculate_taxes_and_totals();
+	},
+	
+	recalculate_values: function() {
 		this.calculate_taxes_and_totals();
 	},
 	
@@ -267,14 +293,25 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		});
 	},
 	
+	_validate_before_fetch: function(fieldname) {
+		var me = this;
+		if(!me.frm.doc[fieldname]) {
+			return (wn._("Please specify") + ": " + 
+				wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+				". " + wn._("It is needed to fetch Item Details."));
+		}
+		return null;
+	},
+	
 	validate_company_and_party: function(party_field) {
+		var me = this;
 		var valid = true;
+		var msg = "";
 		$.each(["company", party_field], function(i, fieldname) {
-			if(!me.frm.doc[fieldname]) {
+			var msg_for_fieldname = me._validate_before_fetch(fieldname);
+			if(msg_for_fieldname) {
+				msgprint(msg_for_fieldname);
 				valid = false;
-				msgprint(wn._("Please specify") + ": " + 
-					wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-					". " + wn._("It is needed to fetch Item Details."));
 			}
 		});
 		return valid;
@@ -300,7 +337,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		}
 		
 		var company_currency = this.get_company_currency();
-		var valid_conversion_rate = conversion_rate ?
+		var valid_conversion_rate = this.frm.doc.conversion_rate ?
 			((this.frm.doc.currency == company_currency && this.frm.doc.conversion_rate == 1.0) ||
 			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
 			false;
@@ -323,6 +360,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		this.calculate_taxes();
 		this.calculate_totals();
 		this._cleanup();
+		
 		this.show_item_wise_taxes();
 	},
 	

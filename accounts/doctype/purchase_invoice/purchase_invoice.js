@@ -18,16 +18,11 @@ cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
+wn.provide("erpnext.accounts");
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
-wn.provide("erpnext.accounts");
 erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.extend({
-	setup: function() {
-		this._super();
-		
-	},
-	
 	onload: function() {
 		this._super();
 		
@@ -44,13 +39,13 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 		
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
+			this.frm.add_custom_button('Make Payment Entry', this.make_bank_voucher);
 
 		if(doc.docstatus==1) { 
-			cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+			this.frm.add_custom_button('View Ledger', this.view_ledger_entry);
 		}
 		
-		cur_frm.cscript.is_opening(doc);
+		this.is_opening(doc);
 	},
 	
 	credit_to: function() {
@@ -63,13 +58,13 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 	},
 	
 	allocated_amount: function() {
-		this.calculate_total_advance();
+		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
 		this.frm.refresh_fields();
-	},
+	}
 });
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.PurchaseInvoiceController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.accounts.PurchaseInvoiceController({frm: cur_frm}));
 
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {

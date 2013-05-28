@@ -29,29 +29,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 	},
 	
-	// 1
 	onload: function() {
 		this._super();
 		this.toggle_rounded_total();
-		
-		// TODO set depends_on for customer related fields
-	},
-	
-	validate: function() {
-		this.calculate_taxes_and_totals();
-		
-		// TODO calc adjustment amount
 	},
 	
 	customer: function() {
+		var me = this;
 		if(this.frm.doc.customer || this.frm.doc.debit_to) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("customer", null);
 				msgprint(wn._("Please specify Company"));
 			} else {
-				var me = this;
 				var price_list_name = this.frm.doc.price_list_name;
-
 				this.frm.call({
 					doc: this.frm.doc,
 					method: "set_customer_defaults",
@@ -59,14 +49,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.refresh_fields();
-							if(me.frm.doc.price_list_name !== price_list_name) me.price_list_name();
+							(me.frm.doc.price_list_name !== price_list_name) ? 
+								me.price_list_name() :
+								me.price_list_currency();
 						}
 					}
 				});
 			}
 		}
-		
-		// TODO hide/unhide related fields
 	},
 	
 	barcode: function(doc, cdt, cdn) {
@@ -127,7 +117,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	adj_rate: function(doc, cdt, cdn) {
-		this.ref_rate(doc, cdt, cdn);
+		var item = wn.model.get_doc(cdt, cdn);
+		if(!item.ref_rate) {
+			item.adj_rate = 0.0;
+		} else {
+			this.ref_rate(doc, cdt, cdn);
+		}
 	},
 	
 	export_rate: function(doc, cdt, cdn) {
@@ -208,14 +203,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_taxes_and_totals: function() {
 		this._super();
-		this.calculate_total_advance();
+		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
 		this.calculate_commission();
 		this.calculate_contribution();
-		
-		// TODO
-		// outstanding amount
-		
-		// check for custom_recalc in custom scripts of server
+
+		// TODO check for custom_recalc in custom scripts of server
 		
 		this.frm.refresh_fields();
 	},
@@ -325,14 +317,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);
 	},
 	
-	calculate_total_advance: function() {
-		this._super("Sales Invoice", "advance_adjustment_details");
-	},
-	
 	calculate_outstanding_amount: function() {
-		// TODO - I find this incorrect!
-		// see TODO of sales invoice.js / write_off_outstanding_amount_automatically
-		
+		// NOTE: 
+		// write_off_amount is only for POS Invoice
+		// total_advance is only for non POS Invoice
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus < 2) {
 			wn.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"]);
@@ -343,15 +331,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	calculate_commission: function() {
-		if(this.frm.doc.commission_rate > 100) {
-			var msg = wn._(wn.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
-				" " + wn._("cannot be greater than 100");
-			msgprint(msg);
-			throw msg;
-		}
+		if(this.frm.fields_dict.commission_rate) {
+			if(this.frm.doc.commission_rate > 100) {
+				var msg = wn._(wn.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
+					" " + wn._("cannot be greater than 100");
+				msgprint(msg);
+				throw msg;
+			}
 		
-		this.frm.doc.total_commission = flt(this.frm.doc.net_total * this.frm.doc.commission_rate / 100.0,
-			precision("total_commission"));
+			this.frm.doc.total_commission = flt(this.frm.doc.net_total * this.frm.doc.commission_rate / 100.0,
+				precision("total_commission"));
+		}
 	},
 	
 	calculate_contribution: function() {
@@ -373,8 +363,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	show_item_wise_taxes: function() {
-		$(this.get_item_wise_taxes_html())
-			.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+		if(this.frm.fields_dict.other_charges_calculation) {
+			$(this.get_item_wise_taxes_html())
+				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+		}
 	},
 	
 	get_charges: function() {
@@ -407,7 +399,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = wn.meta.get_docfield(me.frm.doc.doctype, fname);
 				if(docfield) {
-					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
+					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
 				}
 			});
@@ -452,7 +444,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = wn.meta.get_docfield(grid_doctype, fname);
 				if(docfield) {
-					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
+					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 
 						label.trim() + " (" + currency + ")";
 				}

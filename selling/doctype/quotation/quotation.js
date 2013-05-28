@@ -51,6 +51,18 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
 	},
+	
+	validate_company_and_party: function(party_field) {
+		if(this.frm.doc.quotation_to == "Lead") {
+			return true;
+		} else if(!this.frm.doc.quotation_to) {
+			msgprint(wn._("Please select a value for" + " " + wn.meta.get_label(this.frm.doc.doctype,
+				"quotation_to", this.frm.doc.name)));
+			return false;
+		} else {
+			return this._super(party_field);
+		}
+	},
 });
 
 // for backward compatibility: combine new and previous states
