@@ -54,10 +54,11 @@ def upload():
 		rows = read_csv_content_from_uploaded_file()
 	
 		common_values = get_common_values(rows)
-		if not common_values.company:
-			webnotes.msgprint(_("Company is missing in csv file"), raise_exception=1)
-		
 		company_abbr = webnotes.conn.get_value("Company", common_values.company, "abbr")
+		
+		if not company_abbr:
+			webnotes.msgprint(_("Company is missing or entered incorrect value"), raise_exception=1)
+		
 		data, start_idx = get_data(rows, company_abbr)
 	except Exception, e:
 		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
