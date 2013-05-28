@@ -322,3 +322,20 @@ def get_stock_rbnb_value(company):
 		and exists(select name from `tabPurchase Invoice` 
 			where name = pi_item.parent and company = %s)""", company)
 	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])
+
+
+def fix_total_debit_credit():
+	vouchers = webnotes.conn.sql("""select voucher_type, voucher_no, 
+		sum(debit) - sum(credit) as diff 
+		from `tabGL Entry` 
+		group by voucher_type, voucher_no
+		having sum(ifnull(debit, 0)) != sum(ifnull(credit, 0))""", as_dict=1)
+		
+	for d in vouchers:
+		if abs(d.diff) > 0:
+			dr_or_cr = d.voucher_type == "Sales Invoice" and "credit" or "debit"
+			
+			webnotes.conn.sql("""update `tabGL Entry` set %s = %s + %s
+				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
+				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
+				(d.diff, d.voucher_type, d.voucher_no), debug=1)
