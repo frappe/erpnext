@@ -21,3 +21,7 @@ def execute():
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")
 	webnotes.bean("Style Settings").save()
+	
+	# update comment delete
+	webnotes.conn.sql("""update tabDocPerm \
+		set cancel=1 where parent='Comment' and role='System Manager'""")
