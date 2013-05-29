@@ -273,36 +273,45 @@ def create_stock_in_hand_jv(reverse=False):
 			jv = webnotes.bean([
 				{
 					"doctype": "Journal Voucher",
-					"naming_series": "_PATCH-",
+					"naming_series": "JV-AUTO-",
 					"company": company,
 					"posting_date": today,
 					"fiscal_year": fiscal_year,
 					"voucher_type": "Journal Entry",
-					"user_remark": "Accounting Entry for Stock: \
-						Initial booking of stock received but not billed account"
+					"user_remark": (_("Auto Inventory Accounting") + ": " +
+						(_("Disabled") if reverse else _("Enabled")) + ". " +
+						_("Journal Entry for inventory that is received but not yet invoiced"))
 				},
 				{
 					"doctype": "Journal Voucher Detail",
 					"parentfield": "entries",
 					"account": get_company_default(company, "stock_received_but_not_billed"),
-					(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
+						(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
 				},
 				{
 					"doctype": "Journal Voucher Detail",
 					"parentfield": "entries",
 					"account": get_company_default(company, "stock_adjustment_account"),
-					(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
+						(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
 					"cost_center": get_company_default(company, "stock_adjustment_cost_center")
 				},
 			])
 			jv.insert()
-			jv.submit()
 			
 			jv_list.append(jv.doc.name)
 	
 	if jv_list:
-		webnotes.msgprint("""Folowing Journal Vouchers has been created automatically: 
-			%s""" % '\n'.join(jv_list))
+		msgprint(_("Following Journal Vouchers have been created automatically") + \
+			":\n%s" % ("\n".join([("<a href=\"#Form/Journal Voucher/%s\">%s</a>" % (jv, jv)) for jv in jv_list]),))
+		
+		msgprint(_("""These adjustment vouchers book the difference between \
+			the total value of received items and the total value of invoiced items, \
+			as a required step to use Auto Inventory Accounting.
+			This is an approximation to get you started.
+			You will need to submit these vouchers after checking if the values are correct.
+			For more details, read: \
+			<a href="http://erpnext.com/auto-inventory-accounting" target="_blank">\
+			Auto Inventory Accounting</a>"""))
 			
 	webnotes.msgprint("""Please refresh the system to get effect of Auto Inventory Accounting""")
 			
