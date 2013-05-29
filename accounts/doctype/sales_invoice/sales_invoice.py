@@ -351,7 +351,7 @@ class DocType(SellingController):
 			
 			if ret.get("warehouse"):
 				ret["actual_qty"] = flt(webnotes.conn.get_value("Bin",
-					{"item_code": args.get("item_code"), "warehouse": args.get("warehouse")},
+					{"item_code": args.get("item_code"), "warehouse": ret.get("warehouse")},
 					"actual_qty"))
 		return ret
 
