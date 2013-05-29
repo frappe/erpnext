@@ -123,16 +123,9 @@ class DocType:
 			
 	def validate_series_name(self, n):
 		import re
-		if "." in n:
-			parts = n.split(".")
-			if len(parts) > 2:
-				msgprint("Only one dot (.) allowed in " + n, raise_exception=1)
-			if not re.match("#+$", parts[-1]):
-				msgprint("Numbering series must be in hashes (e.g. ####)", raise_exception=1)
-			n = n[0]
-		if not re.match("^[a-zA-Z0-9-/]*$", n):
-			msgprint('Special Characters except "-" and "/" not allowed in naming series')
-			raise Exception
+		if not re.match("^[a-zA-Z0-9-/.#]*$", n):
+			msgprint('Special Characters except "-" and "/" not allowed in naming series',
+				raise_exception=True)
 		
 	def get_options(self, arg=''):
 		sr = webnotes.model.doctype.get_property(self.doc.select_doc_for_series, 

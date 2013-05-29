@@ -73,7 +73,7 @@ wn.module_page["Setup"] = [
 			{
 				"route":"Form/Naming Series/Naming Series",
 				doctype: "Naming Series",
-				label: wn._("Manage numbering series"),
+				label: wn._("Manage Numbering Series"),
 				"description":wn._("Set multiple numbering series for transactions")
 			},
 			{

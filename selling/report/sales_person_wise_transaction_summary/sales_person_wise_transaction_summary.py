@@ -54,6 +54,7 @@ def get_conditions(filters, date_field):
 	conditions = ""
 	if filters.get("company"): conditions += " and dt.company = '%s'" % filters["company"]
 	if filters.get("customer"): conditions += " and dt.customer = '%s'" % filters["customer"]
+	if filters.get("territory"): conditions += " and dt.territory = '%s'" % filters["territory"]
 	
 	if filters.get("from_date"): conditions += " and dt.%s >= '%s'" % \
 		(date_field, filters["from_date"])
