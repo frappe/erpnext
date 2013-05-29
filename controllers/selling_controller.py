@@ -16,16 +16,40 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
+from webnotes.utils import cint, flt, comma_or
 from setup.utils import get_company_currency
+from selling.utils import get_item_details
 from webnotes import msgprint, _
 
 from controllers.stock_controller import StockController
 
 class SellingController(StockController):
-	def validate(self):
-		super(SellingController, self).validate()
-		self.set_total_in_words()
+	def onload_post_render(self):
+		self.set_price_list_currency("selling")
+
+		# contact, address, item details and pos details (if applicable)
+		self.set_missing_values()
+		
+		self.set_taxes("Sales Taxes and Charges", "other_charges", "charge")
+			
+	def set_missing_values(self, for_validate=False):
+		# set contact and address details for customer, if they are not mentioned
+		if self.doc.customer and not (self.doc.contact_person and self.doc.customer_address):
+			for fieldname, val in self.get_default_address_and_contact("customer").items():
+				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+					self.doc.fields[fieldname] = val
+					
+		self.set_missing_item_details(get_item_details)
+							
+	def get_other_charges(self):
+		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
+		self.set_taxes("Sales Taxes and Charges", "other_charges", "charge")
+		
+	def set_customer_defaults(self):
+		self.get_default_customer_address()
+		
+		if self.meta.get_field("shipping_address"):
+			self.doc.fields.update(self.get_shipping_address(self.doc.customer))
 		
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words
@@ -72,3 +96,153 @@ class SellingController(StockController):
 		if item.buying_amount and not item.cost_center:
 			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code, 
 				raise_exception=1)
+				
+	def calculate_taxes_and_totals(self):
+		self.other_fname = "other_charges"
+		
+		super(SellingController, self).calculate_taxes_and_totals()
+		
+		self.calculate_total_advance("Sales Invoice", "advance_adjustment_details")
+		self.calculate_commission()
+		self.calculate_contribution()
+				
+	def determine_exclusive_rate(self):
+		if not any((cint(tax.included_in_print_rate) for tax in self.tax_doclist)):
+			# no inclusive tax
+			return
+		
+		for item in self.item_doclist:
+			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
+			cumulated_tax_fraction = 0
+			for i, tax in enumerate(self.tax_doclist):
+				tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax, item_tax_map)
+				
+				if i==0:
+					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
+				else:
+					tax.grand_total_fraction_for_current_item = \
+						self.tax_doclist[i-1].grand_total_fraction_for_current_item \
+						+ tax.tax_fraction_for_current_item
+						
+				cumulated_tax_fraction += tax.tax_fraction_for_current_item
+			
+			if cumulated_tax_fraction:
+				item.basic_rate = flt((item.export_rate * self.doc.conversion_rate) / 
+					(1 + cumulated_tax_fraction), self.precision("basic_rate", item))
+				
+				item.amount = flt(item.basic_rate * item.qty, self.precision("amount", item))
+				
+				if item.adj_rate == 100:
+					item.base_ref_rate = item.basic_rate
+					item.basic_rate = 0.0
+				else:
+					item.base_ref_rate = flt(item.basic_rate / (1 - (item.adj_rate / 100.0)),
+						self.precision("base_ref_rate", item))
+			
+	def get_current_tax_fraction(self, tax, item_tax_map):
+		"""
+			Get tax fraction for calculating tax exclusive amount
+			from tax inclusive amount
+		"""
+		current_tax_fraction = 0
+		
+		if cint(tax.included_in_print_rate):
+			tax_rate = self._get_tax_rate(tax, item_tax_map)
+			
+			if tax.charge_type == "On Net Total":
+				current_tax_fraction = tax_rate / 100.0
+			
+			elif tax.charge_type == "On Previous Row Amount":
+				current_tax_fraction = (tax_rate / 100.0) * \
+					self.tax_doclist[cint(tax.row_id) - 1].tax_fraction_for_current_item
+			
+			elif tax.charge_type == "On Previous Row Total":
+				current_tax_fraction = (tax_rate / 100.0) * \
+					self.tax_doclist[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
+						
+		return current_tax_fraction
+		
+	def calculate_item_values(self):
+		for item in self.item_doclist:
+			self.round_floats_in(item)
+			
+			if item.adj_rate == 100:
+				item.export_rate = 0
+			elif item.ref_rate:
+				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
+					self.precision("export_rate", item))
+						
+			item.export_amount = flt(item.export_rate * item.qty,
+				self.precision("export_amount", item))
+				
+			self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
+			self._set_in_company_currency(item, "export_rate", "basic_rate")
+			self._set_in_company_currency(item, "export_amount", "amount")
+			
+	def calculate_net_total(self):
+		self.doc.net_total = self.doc.net_total_export = 0.0
+
+		for item in self.item_doclist:
+			self.doc.net_total += item.amount
+			self.doc.net_total_export += item.export_amount
+		
+		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
+				
+	def calculate_totals(self):
+		self.doc.grand_total = flt(self.tax_doclist and \
+			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
+		self.doc.grand_total_export = flt(self.doc.grand_total / self.doc.conversion_rate, 
+			self.precision("grand_total_export"))
+			
+		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
+			self.precision("other_charges_total"))
+		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
+			self.precision("other_charges_total_export"))
+		
+		self.doc.rounded_total = round(self.doc.grand_total)
+		self.doc.rounded_total_export = round(self.doc.grand_total_export)
+		
+	def calculate_outstanding_amount(self):
+		# NOTE: 
+		# write_off_amount is only for POS Invoice
+		# total_advance is only for non POS Invoice
+		if self.doc.doctype == "Sales Invoice" and self.doc.docstatus < 2:
+			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
+				"paid_amount"])
+			total_amount_to_pay = self.doc.grand_total - self.doc.write_off_amount
+			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
+				self.precision("outstanding_amount"))
+		
+	def calculate_commission(self):
+		if self.meta.get_field("commission_rate"):
+			self.round_floats_in(self.doc, ["net_total", "commission_rate"])
+			if self.doc.commission_rate > 100.0:
+				msgprint(_(self.meta.get_label("commission_rate")) + " " + 
+					_("cannot be greater than 100"), raise_exception=True)
+		
+			self.doc.total_commission = flt(self.doc.net_total * self.doc.commission_rate / 100.0,
+				self.precision("total_commission"))
+
+	def calculate_contribution(self):
+		total = 0.0
+		sales_team = self.doclist.get({"parentfield": "sales_team"})
+		for sales_person in sales_team:
+			self.round_floats_in(sales_person)
+
+			sales_person.allocated_amount = flt(
+				self.doc.net_total * sales_person.allocated_percentage / 100.0,
+				self.precision("allocated_amount", sales_person))
+			
+			total += sales_person.allocated_percentage
+		
+		if sales_team and total != 100.0:
+			msgprint(_("Total") + " " + 
+				_(self.meta.get_label("allocated_percentage", parentfield="sales_team")) + 
+				" " + _("should be 100%"), raise_exception=True)
+			
+	def validate_order_type(self):
+		valid_types = ["Sales", "Maintenance"]
+		if self.doc.order_type not in valid_types:
+			msgprint(_(self.meta.get_label("order_type")) + " " + 
+				_("must be one of") + ": " + comma_or(valid_types),
+				raise_exception=True)

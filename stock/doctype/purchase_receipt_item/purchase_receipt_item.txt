@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:59", 
+  "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:01:08", 
+  "modified": "2013-05-28 12:13:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -357,7 +357,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "width": "100px"
  }, 
  {
@@ -370,7 +370,7 @@
   "oldfieldname": "prevdoc_doctype", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
-  "read_only": 0
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

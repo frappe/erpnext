@@ -1,5 +1,4 @@
 import webnotes, webnotes.utils, os
-from webnotes.modules.export_file import export_to_files
 
 def execute():
 	webnotes.reload_doc("core", "doctype", "file_data")

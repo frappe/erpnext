@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 16:01:29", 
+  "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-02-02 19:09:37", 
+  "modified": "2013-05-28 12:21:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -75,43 +75,48 @@
   "width": "150px"
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Supplier Name", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -569,6 +574,7 @@
   "oldfieldtype": "Text Editor"
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
@@ -888,7 +894,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Material Manager", 
@@ -911,7 +916,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Material User", 
@@ -934,7 +938,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 0, 
   "report": 1, 
   "role": "Purchase User", 
@@ -946,7 +949,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "role": "Purchase User", 
   "submit": 0

@@ -19,10 +19,11 @@ cur_frm.cscript.fname = "purchase_receipt_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
-erpnext.buying.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
+wn.provide("erpnext.stock");
+erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
 		
@@ -37,43 +38,49 @@ erpnext.buying.PurchaseReceiptController = erpnext.buying.BuyingController.exten
 		if(wn.boot.control_panel.country == 'India') {
 			unhide_field(['challan_no', 'challan_date']);
 		}
-	}, 
-	onload_post_render: function(doc, dt, dn) {	
-		var me = this;
-		var callback = function(doc, dt, dn) {
-			me.update_item_details(doc, dt, dn, function(r,rt) { });
+	},
+	
+	received_qty: function(doc, cdt, cdn) {
+		var item = wn.model.get_doc(cdt, cdn);
+		wn.model.round_floats_in(item, ["qty", "received_qty"]);
+
+		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
+		this.qty(doc, cdt, cdn);
+	},
+	
+	qty: function(doc, cdt, cdn) {
+		var item = wn.model.get_doc(cdt, cdn);
+		wn.model.round_floats_in(item, ["qty", "received_qty"]);
+		
+		if(item.qty > item.received_qty) {
+			msgprint(wn._("Error") + ": " + wn._(wn.meta.get_label(item.doctype, "qty", item.name))
+				+ " > " + wn._(wn.meta.get_label(item.doctype, "received_qty", item.name)));
+			item.qty = item.rejected_qty = 0.0;
+		} else {
+			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		}
 		
-		// TODO: improve this
-		if(this.frm.doc.__islocal) {
-			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) 
-				this.price_list_name(callback);
-			else
-				callback(doc, dt, dn);
+		this._super();
+	},
+	
+	rejected_qty: function(doc, cdt, cdn) {
+		var item = wn.model.get_doc(cdt, cdn);
+		wn.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
+		
+		if(item.rejected_qty > item.received_qty) {
+			msgprint(wn._("Error") + ": " + wn._(wn.meta.get_label(item.doctype, "rejected_qty", item.name))
+				+ " > " + wn._(wn.meta.get_label(item.doctype, "received_qty", item.name)));
+			item.qty = item.rejected_qty = 0.0;
+		} else {
+			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		}
-	}
+		
+		this.qty(doc, cdt, cdn);
+	},
 });
 
-var new_cscript = new erpnext.buying.PurchaseReceiptController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
-
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(!doc.fiscal_year && doc.__islocal){ wn.model.set_default_values(doc);}
-	if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
-	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
-	if (!doc.status) doc.status = 'Draft';
-}
-
-cur_frm.cscript.supplier = function(doc,dt,dn) {
-	if (doc.supplier) {
-		get_server_fields('get_default_supplier_address',
-			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function() {
-				cur_frm.refresh();
-			});
-	}
-}
+$.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
@@ -149,81 +156,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 // ***************** Get Print Heading	*****************
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
-}
-
-//========================= Received Qty =============================================================
-
-cur_frm.cscript.received_qty = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	ret = {
-			'qty' : (flt(d.qty) && flt(d.qty) < flt(d.received_qty)) 
-			 	? flt(d.qty) : flt(d.received_qty),
-			'stock_qty': 0,
-			'rejected_qty' : 0,
-		}
-	set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
-	cur_frm.cscript.calc_amount(doc, 2);
-}
-
-//======================== Qty (Accepted Qty) =========================================================
-
-cur_frm.cscript.qty = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	// Step 1 :=> Check If Qty > Received Qty
-	if (flt(d.qty) > flt(d.received_qty)) {
-		alert("Accepted Qty cannot be greater than Received Qty")
-		ret = {
-			'qty' : 0,
-			'stock_qty': 0,
-			'rejected_qty' : 0
-		}
-		// => Set Qty = 0 and rejected_qty = 0
-		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
-		cur_frm.cscript.calc_amount(doc, 2);
-		// => Return
-		return
-	}
-	// Step 2 :=> Check IF Qty <= REceived Qty
-	else {
-		ret = {
-			'rejected_qty':flt(d.received_qty) - flt(d.qty)
-		}
-		// => Set Rejected Qty = Received Qty - Qty
-		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
-		// => Calculate Amount
-		cur_frm.cscript.calc_amount(doc, 2);
-		cur_frm.cscript.update_stock_qty(doc,cdt,cdn);
-	}	
-}
-
-//======================== Rejected Qty =========================================================
-cur_frm.cscript.rejected_qty = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	// Step 1 :=> Check If Rejected Qty > Received Qty
-	if (flt(d.rejected_qty) > flt(d.received_qty)) {
-		alert("Rejected Qty cannot be greater than Received Qty") 
-		ret = {
-			'qty' : 0,
-			'stock_qty': 0,
-			'rejected_qty' : 0
-		}
-		// => Set Qty = 0 and rejected_qty = 0
-		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
-		cur_frm.cscript.calc_amount(doc, 2);
-		// => Return
-		return
-	}
-	// Step 2 :=> Check IF Rejected Qty <= REceived Qty
-	else {
-		ret = {
-			'qty':flt(d.received_qty) - flt(d.rejected_qty)
-		}
-		// => Set Qty = Received Qty - Rejected Qty
-		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
-		// Calculate Amount
-		cur_frm.cscript.calc_amount(doc, 2);
-		cur_frm.cscript.update_stock_qty(doc,cdt,cdn);
-	}
 }
 
 //================================= Purchase Order No Get Query ====================================

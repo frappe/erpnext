@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-19 11:00:14", 
+  "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-04-22 11:59:28", 
+  "modified": "2013-05-28 18:23:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "document_type": "Transaction", 
   "is_submittable": 1, 
   "module": "Accounts", 
   "name": "__common__", 
@@ -118,10 +119,11 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Name", 
   "oldfieldname": "customer_name", 
@@ -129,34 +131,38 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -222,11 +228,12 @@
   "doctype": "DocField", 
   "fieldname": "entries", 
   "fieldtype": "Table", 
-  "label": "Entries", 
+  "label": "Sales Invoice Items", 
   "oldfieldname": "entries", 
   "oldfieldtype": "Table", 
   "options": "Sales Invoice Item", 
-  "read_only": 0
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -246,35 +253,6 @@
  {
   "doctype": "DocField", 
   "fieldname": "col_break26", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "description": "Will be calculated automatically when you enter the details", 
-  "doctype": "DocField", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "label": "Net Total*", 
-  "oldfieldname": "net_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 0, 
-  "read_only": 1, 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break25", 
   "fieldtype": "Column Break", 
   "read_only": 0, 
   "width": "50%"
@@ -311,6 +289,43 @@
   "oldfieldtype": "Button", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break25", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "recalculate_values", 
+  "fieldtype": "Button", 
+  "label": "Re-Calculate Values", 
+  "oldfieldtype": "Button", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total*", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -447,6 +462,15 @@
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Total Taxes and Charges (Export)", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -728,6 +752,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
@@ -1284,8 +1309,30 @@
   "report_hide": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
@@ -1295,10 +1342,26 @@
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "report": 0, 
+  "role": "Accounts User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "customer", 
   "permlevel": 0, 
   "report": 1, 
   "role": "Customer"
  }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Retail User"
+ }
 ]
