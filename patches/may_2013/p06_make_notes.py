@@ -1,4 +1,4 @@
-import webnotes
+import webnotes, markdown2
 
 def execute():
 	webnotes.reload_doc("utilities", "doctype", "note")
@@ -11,8 +11,8 @@ def execute():
 		note = webnotes.bean({
 			"doctype":"Note",
 			"title": name,
-			"content": "<hr>".join(webnotes.conn.sql_list("""select answer from tabAnswer 
-				where question=%s""", question.name)),
+			"content": "<hr>".join([markdown2.markdown(c) for c in webnotes.conn.sql_list("""
+				select answer from tabAnswer where question=%s""", question.name)]),
 			"owner": question.owner,
 			"creation": question.creation,
 			"public": 1
