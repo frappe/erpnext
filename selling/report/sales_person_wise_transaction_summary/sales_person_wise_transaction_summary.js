@@ -50,5 +50,11 @@ wn.query_reports["Sales Person-wise Transaction Summary"] = {
 			fieldtype: "Link",
 			options: "Customer",
 		},
+		{
+			fieldname:"territory",
+			label: "Territory",
+			fieldtype: "Link",
+			options: "Territory",
+		},
 	]
 }
