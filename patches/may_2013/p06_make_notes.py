@@ -5,18 +5,19 @@ def execute():
 	webnotes.reload_doc("utilities", "doctype", "note_user")
 	
 	for question in webnotes.conn.sql("""select * from tabQuestion""", as_dict=True):
-		name = question.question[:180]
-		if webnotes.conn.exists("Note", name):
-			webnotes.delete_doc("Note", name)
-		note = webnotes.bean({
-			"doctype":"Note",
-			"title": name,
-			"content": "<hr>".join(webnotes.conn.sql_list("""select answer from tabAnswer 
-				where question=%s""", question.name)),
-			"owner": question.owner,
-			"creation": question.creation,
-			"public": 1
-		}).insert()
+		if question.question:
+			name = question.question[:180]
+			if webnotes.conn.exists("Note", name):
+				webnotes.delete_doc("Note", name)
+			note = webnotes.bean({
+				"doctype":"Note",
+				"title": name,
+				"content": "<hr>".join(webnotes.conn.sql_list("""select answer 
+					from tabAnswer where question=%s""", question.name)),
+				"owner": question.owner,
+				"creation": question.creation,
+				"public": 1
+			}).insert()
 		
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")
