@@ -433,15 +433,15 @@ class DocType(SellingController):
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 			
-	def validate_customer(self):
-		"""	Validate customer name with SO and DN"""
-		for d in getlist(self.doclist,'entries'):
-			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
-			if dt:
-				dt_no = d.delivery_note or d.sales_order
-				cust = webnotes.conn.sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
-				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
-					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
+	def validate_customer_account(self):
+		"""Validates Debit To Account and Customer Matches"""
+		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
+			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
+			
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
+				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
+				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
+					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
 			
 
 	def validate_customer(self):
