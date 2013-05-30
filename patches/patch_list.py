@@ -254,4 +254,5 @@ patch_list = [
 	"patches.may_2013.p04_reorder_level",
 	"patches.may_2013.p05_update_cancelled_gl_entries",
 	"patches.may_2013.p06_make_notes",
+	"patches.may_2013.p07_move_update_stock_to_pos",
 ]

@@ -89,7 +89,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
-							update_stock: cint(me.frm.doc.update_stock),
 						}
 					},
 					callback: function(r) {

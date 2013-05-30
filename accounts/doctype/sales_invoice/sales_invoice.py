@@ -57,18 +57,22 @@ class DocType(SellingController):
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
 		self.add_remarks()
+
 		if cint(self.doc.is_pos):
 			self.validate_pos()
 			self.validate_write_off_account()
-			if cint(self.doc.update_stock):
-				sl = get_obj('Stock Ledger')
-				sl.validate_serial_no(self, 'entries')
-				sl.validate_serial_no(self, 'packing_details')
-				self.validate_item_code()
-				self.update_current_stock()
-				self.validate_delivery_note()
+
+		if cint(self.doc.update_stock):
+			sl = get_obj('Stock Ledger')
+			sl.validate_serial_no(self, 'entries')
+			sl.validate_serial_no(self, 'packing_details')
+			self.validate_item_code()
+			self.update_current_stock()
+			self.validate_delivery_note()
+
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
+
 		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
@@ -78,16 +82,15 @@ class DocType(SellingController):
 		
 		
 	def on_submit(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl_obj = get_obj("Stock Ledger")
-				sl_obj.validate_serial_no_warehouse(self, 'entries')
-				sl_obj.validate_serial_no_warehouse(self, 'packing_details')
-				
-				sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
-				sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock=1)
+		if cint(self.doc.update_stock) == 1:
+			sl_obj = get_obj("Stock Ledger")
+			sl_obj.validate_serial_no_warehouse(self, 'entries')
+			sl_obj.validate_serial_no_warehouse(self, 'packing_details')
+			
+			sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
+			sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
+			
+			self.update_stock_ledger(update_stock=1)
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -112,13 +115,12 @@ class DocType(SellingController):
 		self.update_time_log_batch(None)
 
 	def on_cancel(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl = get_obj('Stock Ledger')
-				sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
-				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock = -1)
+		if cint(self.doc.update_stock) == 1:
+			sl = get_obj('Stock Ledger')
+			sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
+			sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+			
+			self.update_stock_ledger(update_stock = -1)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -181,6 +183,9 @@ class DocType(SellingController):
 				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account'):
 					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
 						self.doc.fields[fieldname] = pos.get(fieldname)
+						
+			if not for_validate:
+				self.doc.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
 			for item in self.doclist.get({"parentfield": "entries"}):
@@ -265,14 +270,6 @@ class DocType(SellingController):
 		ret = self.get_debit_to()
 		self.doc.debit_to = ret.get('debit_to')
 					
-	@property
-	def pos_settings(self):
-		if not hasattr(self, "_pos_settings"):
-			from selling.utils import get_pos_settings
-			self._pos_settings = get_pos_settings({"company": self.doc.company})
-			
-		return self._pos_settings
-
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
@@ -442,13 +439,13 @@ class DocType(SellingController):
 	def validate_item_code(self):
 		for d in getlist(self.doclist, 'entries'):
 			if not d.item_code:
-				msgprint("Please enter Item Code at line no : %s to update stock for POS or remove check from Update Stock in Basic Info Tab." % (d.idx))
-				raise Exception
+				msgprint("Please enter Item Code at line no : %s to update stock or remove check from Update Stock in Basic Info Tab." % (d.idx),
+				raise_exception=True)
 				
 	def validate_delivery_note(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.delivery_note:
-				msgprint("""POS can not be made against Delivery Note""", raise_exception=1)
+				msgprint("""Stock update can not be made against Delivery Note""", raise_exception=1)
 
 
 	def validate_write_off_account(self):
@@ -514,38 +511,28 @@ class DocType(SellingController):
 
 
 	def on_update(self):
-		# Set default warehouse from pos setting
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
+		if cint(self.doc.update_stock) == 1:
+			# Set default warehouse from pos setting
+			if cint(self.doc.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:
 					for d in getlist(self.doclist, 'entries'):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
-							
-				self.make_packing_list()
-			else:
-				self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 
-			if flt(self.doc.paid_amount) == 0:
-				if self.doc.cash_bank_account: 
-					webnotes.conn.set(self.doc, 'paid_amount', 
-						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
-				else:
-					# show message that the amount is not paid
-					webnotes.conn.set(self.doc,'paid_amount',0)
-					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+				if flt(self.doc.paid_amount) == 0:
+					if self.doc.cash_bank_account: 
+						webnotes.conn.set(self.doc, 'paid_amount', 
+							(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+					else:
+						# show message that the amount is not paid
+						webnotes.conn.set(self.doc,'paid_amount',0)
+						webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
 
+			self.make_packing_list()
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			webnotes.conn.set(self.doc,'paid_amount',0)
-		
-		# TODO
-		# move to calculations
-		webnotes.conn.set(self.doc, 'outstanding_amount', 
-			flt(self.doc.grand_total) - flt(self.doc.total_advance) - 
-			flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
-
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
@@ -663,7 +650,7 @@ class DocType(SellingController):
 				
 		# expense account gl entries
 		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
-				and cint(self.doc.is_pos) and cint(self.doc.update_stock):
+				and cint(self.doc.update_stock):
 			
 			for item in self.doclist.get({"parentfield": "entries"}):
 				self.check_expense_account(item)

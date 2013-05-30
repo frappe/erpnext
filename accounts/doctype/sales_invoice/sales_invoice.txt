@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-05-28 18:23:35", 
+  "modified": "2013-05-29 18:53:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -80,7 +80,6 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "eval:doc.is_pos==1", 
   "doctype": "DocField", 
   "fieldname": "update_stock", 
   "fieldtype": "Check", 

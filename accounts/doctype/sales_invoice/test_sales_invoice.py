@@ -1,6 +1,6 @@
 import webnotes
 import unittest, json
-from webnotes.utils import flt
+from webnotes.utils import flt, cint
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
