@@ -190,9 +190,6 @@ class AccountsController(TransactionBase):
 				# accumulate tax amount into tax.tax_amount
 				tax.tax_amount += current_tax_amount
 				
-				# store tax breakup for each item
-				tax.item_wise_tax_detail[item.item_code] = current_tax_amount
-				
 				if tax.category:
 					# if just for valuation, do not add the tax amount in total
 					# hence, setting it as 0 for further steps
@@ -233,8 +230,13 @@ class AccountsController(TransactionBase):
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
+		
+		current_tax_amount = flt(current_tax_amount, self.precision("tax_amount", tax))
+		
+		# store tax breakup for each item
+		tax.item_wise_tax_detail[item.item_code or item.item_name] = [tax_rate, current_tax_amount]
 
-		return flt(current_tax_amount, self.precision("tax_amount", tax))
+		return current_tax_amount
 		
 	def _load_item_tax_rate(self, item_tax_rate):
 		return json.loads(item_tax_rate) if item_tax_rate else {}

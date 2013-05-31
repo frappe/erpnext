@@ -259,10 +259,18 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		
 		$.each(this.get_tax_doclist(), function(i, tax) {
 			var tax_amount_precision = precision("tax_amount", tax);
+			var tax_rate_precision = precision("rate", tax);
 			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'), 
-				function(item_code, tax_amount) {
+				function(item_code, tax_data) {
 					if(!item_tax[item_code]) item_tax[item_code] = {};
-					item_tax[item_code][tax.account_head] = flt(tax_amount, tax_amount_precision);
+					if($.isArray(tax_data)) {
+						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
+							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency);
+						
+						item_tax[item_code][tax.account_head] = [tax_rate, tax_amount];
+					} else {
+						item_tax[item_code][tax.account_head] = [flt(tax_data, tax_rate_precision) + "%", ""];
+					}
 				});
 			tax_accounts.push(tax.account_head);
 		});
@@ -272,14 +280,16 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		
 		var rows = $.map(this.get_item_doclist(), function(item) {
 			var item_tax_record = item_tax[item.item_code || item.item_name];
+			if(!item_tax_record) { return null; }
 			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
 				item_name: item.item_name,
 				taxes: $.map(tax_accounts, function(head) {
-					return "<td>" + format_currency(item_tax_record[head], company_currency) + "</td>"
+					return "<td>(" + item_tax_record[head][0] + ") " + item_tax_record[head][1] + "</td>"
 				}).join("\n")
 			});
 		}).join("\n");
 		
+		if(!rows) return "";
 		return '<div style="overflow-x: scroll;"><table class="table table-bordered table-hover">\
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \
@@ -392,7 +402,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			$.each(me.frm.tax_doclist, function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
-				
+
 				me.set_item_tax_amount && me.set_item_tax_amount(item, tax, current_tax_amount);
 				
 				// case when net total is 0 but there is an actual type charge
@@ -410,9 +420,6 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 				
 				// accumulate tax amount into tax.tax_amount
 				tax.tax_amount += current_tax_amount;
-				
-				// store tax breakup for each item
-				tax.item_wise_tax_detail[item.item_code || item.item_name] = current_tax_amount;
 				
 				// for buying
 				if(tax.category) {
@@ -465,7 +472,12 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			
 		}
 		
-		return flt(current_tax_amount, precision("tax_amount", tax));
+		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
+		
+		// store tax breakup for each item
+		tax.item_wise_tax_detail[item.item_code || item.item_name] = [tax_rate, current_tax_amount];
+		
+		return current_tax_amount;
 	},
 	
 	_cleanup: function() {
