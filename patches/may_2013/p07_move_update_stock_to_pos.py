@@ -16,3 +16,8 @@ def execute():
 	webnotes.defaults.clear_cache("Control Panel")
 
 	webnotes.reload_doc("setup", "doctype", "global_defaults")
+	
+	# previously, update_stock was valid only when is_pos was checked
+	# henceforth it is valid, and hence the patch
+	webnotes.conn.sql("""update `tabSales Invoice` set update_stock=0 
+		where ifnull(is_pos, 0)=0""")
