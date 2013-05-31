@@ -310,7 +310,8 @@ def validate_currency(args, item, meta=None):
 		
 		# round it
 		args.conversion_rate = flt(args.conversion_rate, 
-			get_field_precision(meta.get_field("conversion_rate"), args))
+			get_field_precision(meta.get_field("conversion_rate"), 
+				webnotes._dict({"fields": args})))
 	
 	# validate price list conversion rate
 	if meta.get_field("price_list_currency") and args.price_list_name and \
@@ -320,6 +321,7 @@ def validate_currency(args, item, meta=None):
 		
 		# round it
 		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
-			get_field_precision(meta.get_field("plc_conversion_rate"), args))	
+			get_field_precision(meta.get_field("plc_conversion_rate"), 
+				webnotes._dict({"fields": args})))
 	
 	

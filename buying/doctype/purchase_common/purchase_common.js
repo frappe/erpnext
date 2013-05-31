@@ -224,8 +224,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		
 		if(this.frm.doc.doctype != "Purchase Invoice") {
-			wn.meta.docfield_map[this.tname]["rate"] = $.extend({}, 
-				wn.meta.docfield_map[this.tname]["purchase_rate"]);
+			// hack!
+			wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"] = $.extend({}, 
+				wn.meta.docfield_copy[this.tname][this.frm.doc.name]["purchase_rate"]);
 		}
 		
 		$.each(this.frm.item_doclist, function(i, item) {
@@ -241,6 +242,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			me._set_in_company_currency(item, "import_rate", "rate");
 			me._set_in_company_currency(item, "import_amount", "amount");
 		});
+		
 	},
 	
 	calculate_net_total: function() {
@@ -299,7 +301,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		// except in purchase invoice, rate field is purchase_rate		
 		// reset fieldname of rate
 		if(this.frm.doc.doctype != "Purchase Invoice") {
-			delete wn.meta.docfield_map[this.tname]["rate"];
+			// clear hack
+			delete wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"];
 			
 			$.each(this.frm.item_doclist, function(i, item) {
 				item.purchase_rate = item.rate;
