@@ -6,7 +6,7 @@ wn.listview_settings['Purchase Receipt'] = {
 	group_by: "`tabPurchase Receipt`.name",
 	prepare_data: function(data) {
 		if(data.purchase_order_no) {
-			data.purchase_order_no = data.purchase_order_no.split(",");
+			data.purchase_order_no = $.unique(data.purchase_order_no.split(","));
 			var po_list = [];
 			$.each(data.purchase_order_no, function(i, v){
 				if(po_list.indexOf(v)==-1) po_list.push(

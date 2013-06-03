@@ -19,9 +19,9 @@ import webnotes
 from webnotes.utils import load_json, cstr, flt, now_datetime
 from webnotes.model.doc import addchild
 
-from webnotes.model.controller import DocListController
+from controllers.status_updater import StatusUpdater
 
-class TransactionBase(DocListController):
+class TransactionBase(StatusUpdater):
 	def get_default_address_and_contact(self, party_type):
 		"""get a dict of default field values of address and contact for a given party type
 			party_type can be one of: customer, supplier"""
