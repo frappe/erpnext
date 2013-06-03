@@ -29,6 +29,7 @@ class DocType:
 		self.nsm_parent_field = 'parent_account'
 
 	def autoname(self):
+		"""Append abbreviation to company on naming"""
 		self.doc.name = self.doc.account_name.strip() + ' - ' + \
 			webnotes.conn.get_value("Company", self.doc.company, "abbr")
 
@@ -37,6 +38,7 @@ class DocType:
 		return {'address': address}
 		
 	def validate_master_name(self):
+		"""Remind to add master name"""
 		if (self.doc.master_type == 'Customer' or self.doc.master_type == 'Supplier') \
 				and not self.doc.master_name:
 			msgprint("Message: Please enter Master Name once the account is created.")
@@ -62,6 +64,7 @@ class DocType:
 				self.doc.debit_or_credit = par[0][3]
 
 	def validate_max_root_accounts(self):
+		"""Raise exception if there are more than 4 root accounts"""
 		if webnotes.conn.sql("""select count(*) from tabAccount where
 			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
 			self.doc.company)[0][0] > 4:
@@ -69,7 +72,6 @@ class DocType:
 				raise_exception=1)
 	
 	def validate_duplicate_account(self):
-		
 		if self.doc.fields.get('__islocal') or not self.doc.name:
 			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			if sql("""select name from tabAccount where name=%s""", 
@@ -134,6 +136,7 @@ class DocType:
 			self.doc.parent_account = ''
 
 	def update_nsm_model(self):
+		"""update lft, rgt indices for nested set model"""
 		import webnotes
 		import webnotes.utils.nestedset
 		webnotes.utils.nestedset.update_nsm(self)
