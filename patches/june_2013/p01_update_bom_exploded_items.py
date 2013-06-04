@@ -23,3 +23,4 @@ def execute():
 		if bom[0] not in updated_bom:
 			bom_obj = webnotes.get_obj("BOM", bom[0], with_children=1)
 			updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
+			webnotes.conn.commit()
