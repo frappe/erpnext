@@ -19,7 +19,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	// Build Report Button
 	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
 		wrapper.appframe.add_button('Build Report', function() {
-			wn.set_route('Report2', "Feed");
+			wn.set_route('Report', "Feed");
 		}, 'icon-th')
 	}
 }

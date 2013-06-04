@@ -164,7 +164,7 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				route: "Report2/Stock Ledger Entry/Stock Ledger",
+				route: "Report/Stock Ledger Entry/Stock Ledger",
 				doctype: "Stock Ledger Entry"
 			},
 			{
@@ -179,17 +179,17 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Serial No Service Contract Expiry"),
-				route: "Report2/Serial No/Serial No Service Contract Expiry",
+				route: "Report/Serial No/Serial No Service Contract Expiry",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Status"),
-				route: "Report2/Serial No/Serial No Status",
+				route: "Report/Serial No/Serial No Status",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Warranty Expiry"),
-				route: "Report2/Serial No/Serial No Warranty Expiry",
+				route: "Report/Serial No/Serial No Warranty Expiry",
 				doctype: "Serial No"
 			},
 			{
