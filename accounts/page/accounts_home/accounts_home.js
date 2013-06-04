@@ -237,6 +237,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Customer Account Head",
 				doctype: "Account"
 			},
+			{
+				"label":wn._("Item-wise Sales Register"),
+				route: "query-report/Item-wise Sales Register",
+				doctype: "Sales Invoice"
+			},
 		]
 	}
 ]
