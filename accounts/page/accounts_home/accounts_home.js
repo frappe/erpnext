@@ -232,6 +232,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Sales Partners Commission",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Customer Account Head"),
+				route: "query-report/Customer Account Head",
+				doctype: "Account"
+			},
 		]
 	}
 ]
