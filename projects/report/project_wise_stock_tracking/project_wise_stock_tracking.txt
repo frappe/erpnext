@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-03 17:37:41", 
+  "docstatus": 0, 
+  "modified": "2013-06-03 17:37:41", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Project", 
+  "report_name": "Project wise Stock Tracking ", 
+  "report_type": "Report Builder"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Project wise Stock Tracking"
+ }
+]
