@@ -241,40 +241,30 @@ class DocType:
 	def get_raw_materials(self, bom_dict):
 		""" Get raw materials considering sub-assembly items 
 			{
-				"item_code": [qty_required, description, stock_uom]
+				"item_code": [qty_required, description, stock_uom, min_order_qty]
 			}
 		"""
 		for bom in bom_dict:
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
-				fl_bom_items = sql("""
-					select 
-						item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty, 
-						description, stock_uom, min_order_qty
-					from 
-						( 
-							select distinct fb.name, fb.description, fb.item_code,
-							 	fb.qty_consumed_per_unit, fb.stock_uom, it.min_order_qty 
-							from `tabBOM Explosion Item` fb,`tabItem` it 
-							where it.name = fb.item_code 
-							and ifnull(it.is_pro_applicable, 'No') = 'No'
-							and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
-							and fb.docstatus<2 and fb.parent=%s
-						) a
-					group by item_code,stock_uom
-				""" , (flt(bom_dict[bom]), bom))
+				fl_bom_items = sql("""select fb.item_code, 
+					ifnull(sum(fb.qty_consumed_per_unit), 0)*%s as qty, 
+					fb.description, fb.stock_uom, it.min_order_qty 
+					from `tabBOM Explosion Item` fb,`tabItem` it 
+					where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+					and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
+					and fb.docstatus<2 and fb.parent=%s
+					group by item_code, stock_uom""", (flt(bom_dict[bom]), bom))
 			else:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
-				fl_bom_items = sql("""
-					select bom_item.item_code, 
+				fl_bom_items = sql("""select bom_item.item_code, 
 						ifnull(sum(bom_item.qty_consumed_per_unit), 0) * %s, 
 						bom_item.description, bom_item.stock_uom, item.min_order_qty
 					from `tabBOM Item` bom_item, tabItem item
 					where bom_item.parent = %s and bom_item.docstatus < 2 
-					and bom_item.item_code = item.name
-					group by item_code
-				""", (flt(bom_dict[bom]), bom))
+					and bom_item.item_code = item.name 
+					group by item_code""", (flt(bom_dict[bom]), bom))
 			self.make_items_dict(fl_bom_items)
 
 	def make_items_dict(self, item_list):

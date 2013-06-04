@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:48", 
+  "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:18", 
+  "modified": "2013-06-04 13:13:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -79,25 +79,6 @@
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
   "options": "UOM"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "parent_bom", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Parent BOM", 
-  "oldfieldname": "parent_bom", 
-  "oldfieldtype": "Link", 
-  "options": "BOM", 
-  "print_width": "250px", 
-  "width": "250px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "mat_detail_no", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Mat Detail No"
  }, 
  {
   "doctype": "DocField", 
