@@ -266,7 +266,7 @@ class DocType:
 				for b in boms:
 					if b[0] == self.doc.name:
 						msgprint("""Recursion Occured => '%s' cannot be '%s' of '%s'.
-							""" % (cstr(b), cstr(d[2]), self.doc.name), raise_exception = 1)
+							""" % (cstr(b[0]), cstr(d[2]), self.doc.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
 	
