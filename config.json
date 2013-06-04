@@ -127,6 +127,10 @@
 			"profile": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/profile"
+			},
+			"cart": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/cart.html"
 			}
 		},
 		"generators": {
