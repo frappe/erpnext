@@ -317,9 +317,9 @@ class DocType:
 		
 		items_to_be_requested = webnotes._dict()
 		for item in self.item_dict:
-			if flt(self.item_dict[item][0]) > item_projected_qty[item]:
+			if flt(self.item_dict[item][0]) > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = flt(self.item_dict[item][0]) - item_projected_qty[item]
+				requested_qty = flt(self.item_dict[item][0]) - item_projected_qty.get(item, 0)
 				# comsider minimum order qty
 				requested_qty = requested_qty > flt(self.item_dict[item][3]) and \
 					requested_qty or flt(self.item_dict[item][3])
