@@ -95,12 +95,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-# GET TERMS AND CONDITIONS
-# ====================================================================================
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-		
 # VALIDATE
 # ==============================================================================================
 	

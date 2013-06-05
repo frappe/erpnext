@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-05-28 12:18:35", 
+  "modified": "2013-06-05 14:57:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -671,6 +671,32 @@
   "options": "Purchase Invoice Advance", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Terms and Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Select Terms and Conditions", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_terms", 
+  "fieldtype": "Button", 
+  "label": "Get Terms and Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "label": "Terms and Conditions1"
  }, 
  {
   "doctype": "DocField", 

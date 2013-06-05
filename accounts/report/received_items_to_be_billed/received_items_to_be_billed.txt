@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-28 15:57:59", 
   "docstatus": 0, 
-  "modified": "2013-05-28 17:34:05", 
+  "modified": "2013-06-05 12:59:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,7 +11,7 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "query": "select \n    `tabPurchase Receipt`.`name` as \"Purchase Receipt:Link/Purchase Receipt:120\",\n    `tabPurchase Receipt`.`posting_date` as \"Date:Date:100\",\n    `tabPurchase Receipt`.`supplier` as \"Supplier:Link/Supplier:120\",\n    `tabPurchase Receipt Item`.`project_name` as \"Project\",\n\t`tabPurchase Receipt Item`.item_code as \"Item Code:Link/Item:120\",\n\t`tabPurchase Receipt Item`.qty as \"Qty:Float:100\",\n\t`tabPurchase Receipt Item`.billed_qty as \"Billed Qty:Float:100\", \n\t(`tabPurchase Receipt Item`.qty - ifnull(`tabPurchase Receipt Item`.billed_qty, 0)) as \"Qty to Bill:Float:100\",\n\t`tabPurchase Receipt Item`.item_name as \"Item Name::150\",\n\t`tabPurchase Receipt Item`.description as \"Description::200\"\nfrom\n\t`tabPurchase Receipt`, `tabPurchase Receipt Item`\nwhere\n\t`tabPurchase Receipt Item`.`parent` = `tabPurchase Receipt`.`name`\n\tand `tabPurchase Receipt`.docstatus = 1\n\tand `tabPurchase Receipt`.status != \"Stopped\"\n\tand ifnull(`tabPurchase Receipt Item`.billed_qty, 0) < ifnull(`tabPurchase Receipt Item`.qty, 0)\norder by `tabPurchase Receipt`.posting_date asc", 
+  "query": "select \n    `tabPurchase Receipt`.`name` as \"Purchase Receipt:Link/Purchase Receipt:120\",\n    `tabPurchase Receipt`.`posting_date` as \"Date:Date:100\",\n    `tabPurchase Receipt`.`supplier` as \"Supplier:Link/Supplier:120\",\n    `tabPurchase Receipt Item`.`project_name` as \"Project\",\n\t`tabPurchase Receipt Item`.item_code as \"Item Code:Link/Item:120\",\n\t`tabPurchase Receipt Item`.amount as \"Amount:Currency:100\",\n\t`tabPurchase Receipt Item`.billed_amt as \"Billed Amount:Currency:100\", \n\t(`tabPurchase Receipt Item`.amount - ifnull(`tabPurchase Receipt Item`.billed_amt, 0)) as \"Amount to Bill:Currency:100\",\n\t`tabPurchase Receipt Item`.item_name as \"Item Name::150\",\n\t`tabPurchase Receipt Item`.description as \"Description::200\"\nfrom\n\t`tabPurchase Receipt`, `tabPurchase Receipt Item`\nwhere\n\t`tabPurchase Receipt Item`.`parent` = `tabPurchase Receipt`.`name`\n\tand `tabPurchase Receipt`.docstatus = 1\n\tand `tabPurchase Receipt`.status != \"Stopped\"\n\tand ifnull(`tabPurchase Receipt Item`.billed_amt, 0) < ifnull(`tabPurchase Receipt Item`.amount, 0)\norder by `tabPurchase Receipt`.posting_date asc", 
   "ref_doctype": "Purchase Invoice", 
   "report_name": "Received Items To Be Billed", 
   "report_type": "Query Report"

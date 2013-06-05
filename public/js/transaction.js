@@ -507,4 +507,18 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		item[base_field] = flt(item[print_field] * this.frm.doc.conversion_rate,
 			precision(base_field, item));
 	},
+	
+	get_terms: function() {
+		var me = this;
+		if(this.frm.doc.tc_name) {
+			this.frm.call({
+				method: "webnotes.client.get_value",
+				args: {
+					doctype: "Terms and Conditions",
+					fieldname: "terms",
+					filters: { name: this.frm.doc.tc_name },
+				},
+			});
+		}
+	},
 });

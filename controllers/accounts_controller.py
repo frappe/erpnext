@@ -68,7 +68,7 @@ class AccountsController(TransactionBase):
 				
 			if self.doc.fields.get(tax_master_field):
 				from webnotes.model import default_fields
-				tax_master = webnotes.bean(tax_doctype, self.doc.fields.get(tax_master_field))
+				tax_master = webnotes.bean(tax_doctype + " Master", self.doc.fields.get(tax_master_field))
 				
 				for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
 					for fieldname in default_fields:

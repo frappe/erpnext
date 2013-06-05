@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-05-28 12:26:04", 
+  "modified": "2013-06-05 14:47:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "hide_toolbar": 0, 
   "in_create": 0, 
   "is_submittable": 1, 
   "module": "Stock", 
@@ -32,7 +33,9 @@
   "parent": "Delivery Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -602,17 +605,6 @@
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "options": "get_tc_details", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1149,91 +1141,39 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material Manager", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts User", 
   "submit": 0, 
   "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts User", 
-  "submit": 0
  }, 
  {
   "doctype": "DocPerm", 
   "match": "customer_name", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Customer"
  }
 ]

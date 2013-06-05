@@ -102,10 +102,6 @@ class DocType(BuyingController):
 					d.schedule_date = webnotes.conn.get_value("Material Request Item",
 							d.prevdoc_detail_docname, "schedule_date")
 	
-	def get_tc_details(self):
-		"""get terms & conditions"""
-		return get_obj('Purchase Common').get_tc_details(self)
-
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
 		

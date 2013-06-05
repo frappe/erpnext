@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-05-29 18:53:26", 
+  "modified": "2013-06-05 14:42:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,9 @@
   "parent": "Sales Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -727,17 +729,6 @@
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "options": "get_tc_details", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1308,23 +1299,10 @@
   "report_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Accounts Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts Manager", 
   "submit": 1, 
   "write": 1
@@ -1334,33 +1312,13 @@
   "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Accounts User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Customer"
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Retail User"
  }
 ]

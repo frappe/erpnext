@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-05-28 12:19:41", 
+  "modified": "2013-06-05 14:46:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,9 @@
   "parent": "Supplier Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -504,17 +506,7 @@
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "options": "get_tc_details"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1
+  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
@@ -674,8 +666,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Manufacturing Manager", 
   "submit": 1, 
   "write": 1
@@ -685,8 +675,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -696,8 +684,6 @@
   "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Purchase User", 
   "submit": 0, 
   "write": 1
@@ -707,8 +693,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material User", 
   "submit": 0, 
   "write": 0
@@ -718,20 +702,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Supplier", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "All", 
   "submit": 0, 
   "write": 0
  }
