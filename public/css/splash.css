@@ -28,8 +28,9 @@
 	bottom: 0px;
 	width: 160px;
 	height: 160px;
-	color: #888;
 	text-align: center;
+	color: #888;
+	
 	animation-duration: 1s;
 	animation-name: pulse;
 	animation-iteration-count: infinite;
@@ -39,4 +40,13 @@
 	-webkit-animation-name: pulse;
 	-webkit-animation-iteration-count: infinite;
 	-webkit-animation-direction: alternate;
+}
+
+.splash:after {
+	content: "erpnext";
+	font-size: 30px;
+	font-weight: 700;
+	font-family: Helvetica, Arial, sans-serif;
+	position: relative;
+	top: -20%;
 }
