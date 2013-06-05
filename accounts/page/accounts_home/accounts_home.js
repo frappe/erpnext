@@ -252,6 +252,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Item-wise Sales Register",
 				doctype: "Sales Invoice"
 			},
+			{
+				"label":wn._("Item-wise Purchase Register"),
+				route: "query-report/Item-wise Purchase Register",
+				doctype: "Purchase Invoice"
+			},
 		]
 	}
 ]
