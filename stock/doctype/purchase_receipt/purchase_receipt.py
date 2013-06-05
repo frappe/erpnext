@@ -48,12 +48,6 @@ class DocType(BuyingController):
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
 
-	# GET TERMS & CONDITIONS
-	# =====================================================================================
-	def get_tc_details(self):
-		return get_obj('Purchase Common').get_tc_details(self)
-
-
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)

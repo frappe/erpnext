@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-05-28 15:05:38", 
+  "modified": "2013-05-28 15:05:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -579,7 +579,6 @@
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "options": "get_tc_details", 
   "print_hide": 1
  }, 
  {

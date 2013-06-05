@@ -50,12 +50,12 @@ class BuyingController(StockController):
 		self.set_missing_item_details(get_item_details)
 		
 	def set_supplier_defaults(self):
-		self.get_default_supplier_address(self.doc.fields)
+		self.doc.fields.update(self.get_default_supplier_address(self.doc.fields))
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
 		self.set_taxes()
-			
+		
 	def validate_warehouse_belongs_to_company(self):
 		for warehouse, company in webnotes.conn.get_values("Warehouse", 
 			self.doclist.get_distinct_values("warehouse"), "company").items():

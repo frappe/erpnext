@@ -81,12 +81,6 @@ class DocType(TransactionBase):
 			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + webnotes.conn.get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
 			
-	# Get TERMS AND CONDITIONS
-	# =======================================================================================
-	def get_tc_details(self,obj):
-		r = webnotes.conn.sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
-		if r: obj.doc.terms = r[0][0]
-
 #---------------------------------------- Get Tax Details -------------------------------#
 	def get_tax_details(self, item_code, obj):
 		import json

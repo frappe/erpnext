@@ -435,7 +435,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		$.each(field_label_map, function(fname, label) {
 			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
 		});
-	}
+	},
 });
 
 // to save previous state of cur_frm.cscript

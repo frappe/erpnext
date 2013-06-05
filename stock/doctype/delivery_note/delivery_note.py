@@ -91,9 +91,6 @@ class DocType(SellingController):
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 

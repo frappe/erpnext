@@ -88,13 +88,6 @@ class DocType(BuyingController):
 			msgprint("Supplier : %s does not exists" % (name))
 			raise Exception
 	
-	# Get TERMS AND CONDITIONS
-	# =======================================================================================
-	def get_tc_details(self,obj):
-		r = sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
-		if r: obj.doc.terms = r[0][0]
-
-
 	# Get Available Qty at Warehouse
 	def get_bin_details( self, arg = ''):
 		arg = eval(arg)

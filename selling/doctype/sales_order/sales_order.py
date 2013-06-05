@@ -67,9 +67,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
 	def check_maintenance_schedule(self):
 		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
 		nm = nm and nm[0][0] or ''

@@ -247,7 +247,7 @@ class DocType(SellingController):
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
-				self.get_tc_details()
+				self.doc.terms = webnotes.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
@@ -339,11 +339,6 @@ class DocType(SellingController):
 		"""Get Commission rate of Sales Partner"""
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)	
 	
-	
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
 			"Sales Invoice Advance", "advance_adjustment_details", "credit")
