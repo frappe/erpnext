@@ -33,6 +33,28 @@ class DocType(BuyingController):
 		self.doc, self.doclist = d, dl 
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
+		self.status_updater = [{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'po_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Purchase Order',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'import_amount',
+			'source_field': 'import_amount',
+			'percent_join_field': 'purchase_order',
+		},
+		{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Receipt Item',
+			'join_field': 'pr_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Purchase Receipt',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'import_amount',
+			'source_field': 'import_amount',
+			'percent_join_field': 'purchase_receipt',
+		}]
 		
 	def validate(self):
 		super(DocType, self).validate()
@@ -391,8 +413,8 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 				
 		self.update_against_document_in_jv()
-		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
-
+		
+		self.update_prevdoc_status()
 
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries
@@ -503,7 +525,8 @@ class DocType(BuyingController):
 	def on_cancel(self):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
-		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
+		
+		self.update_prevdoc_status()
 		
 		self.make_cancel_gl_entries()
 		

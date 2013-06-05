@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, getdate, cint
+from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -34,6 +34,19 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Delivery Note Item'
 		self.fname = 'delivery_note_details'
+		self.status_updater = [{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_delivered',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'prevdoc_docname',
+			'status_field': 'delivery_status',
+			'keyword': 'Delivered'
+		}]
 		
 	def set_customer_defaults(self):
 		self.get_default_customer_shipping_address()
@@ -228,8 +241,8 @@ class DocType(SellingController):
 		sl_obj.update_serial_record(self, 'delivery_note_details', is_submit = 1, is_incoming = 0)
 		sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
 		
-		# update delivered qty in sales order
-		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		# update delivered qty in sales order	
+		self.update_prevdoc_status()
 		
 		# create stock ledger entry
 		self.update_stock_ledger(update_stock = 1)
@@ -276,7 +289,8 @@ class DocType(SellingController):
 		sl.update_serial_record(self, 'delivery_note_details', is_submit = 0, is_incoming = 0)
 		sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
 		
-		sales_com_obj.update_prevdoc_detail(0,self)
+		self.update_prevdoc_status()
+		
 		self.update_stock_ledger(update_stock = -1)
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()

@@ -202,10 +202,11 @@ class DocType(BuyingController):
 					msgprint("Please check Item %s is not present in %s %s ." % (d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
 					raise Exception
 				
-				# Check if Warehouse has been modified.
-				if not cstr(data[0]['warehouse']) == cstr(d.warehouse):
-					msgprint("Please check warehouse %s of Item %s which is not present in %s %s ." % (d.warehouse, d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
-					raise Exception
+				if cstr(data[0]['warehouse']) and \
+						not cstr(data[0]['warehouse']) == cstr(d.warehouse):
+					msgprint("""Please check warehouse %s of Item %s 
+						which is not present in %s %s""" % (d.warehouse, d.item_code, 
+						d.prevdoc_doctype, d.prevdoc_docname), raise_exception=1)
 				
 				#	Check if UOM has been modified.
 				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Material Request':
