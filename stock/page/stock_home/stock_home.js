@@ -129,6 +129,11 @@ wn.module_page["Stock"] = [
 		icon: "icon-table",
 		items: [
 			{
+				"label":wn._("Item Reorder Level"),
+				route: "query-report/Item Reorder Level",
+				doctype: "Item"
+			},
+			{
 				"label":wn._("Stock Ledger"),
 				page: "stock-ledger"
 			},

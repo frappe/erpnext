@@ -150,6 +150,11 @@ wn.module_page["Selling"] = [
 		icon: "icon-list",
 		items: [
 			{
+				"label":wn._("No Sales Order from Customers (Since 2 months)"),
+				route: "query-report/No Sales Order from Customers (Since 2 months)",
+				doctype: "Sales Order"
+			},
+			{
 				"label":wn._("Customer Addresses And Contacts"),
 				route: "query-report/Customer Addresses And Contacts"
 			},
@@ -165,6 +170,7 @@ wn.module_page["Selling"] = [
 				"label":wn._("Item-wise Sales History"),
 				route: "query-report/Item-wise Sales History",
 			},
+
 		]
 	}
 ]
