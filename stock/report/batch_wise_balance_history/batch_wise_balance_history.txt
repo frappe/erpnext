@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-04 11:03:47", 
+  "docstatus": 0, 
+  "modified": "2013-06-04 19:32:27", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report_name": "Batch-Wise Balance History", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Batch-Wise Balance History"
+ }
+]
