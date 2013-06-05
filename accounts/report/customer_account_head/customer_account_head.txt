@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-03 16:17:34", 
+  "docstatus": 0, 
+  "modified": "2013-06-03 16:17:34", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Account", 
+  "report_name": "Customer Account Head", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Customer Account Head"
+ }
+]

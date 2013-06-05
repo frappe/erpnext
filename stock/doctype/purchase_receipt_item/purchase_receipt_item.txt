@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-05-28 12:13:59", 
+  "modified": "2013-05-31 14:26:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -453,18 +453,14 @@
   "width": "150px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
-  "fieldname": "billed_qty", 
-  "fieldtype": "Float", 
-  "label": "Billed Quantity", 
+  "fieldname": "billed_amt", 
+  "fieldtype": "Currency", 
+  "label": "Billed Amt", 
   "no_copy": 1, 
-  "oldfieldname": "billed_qty", 
-  "oldfieldtype": "Currency", 
+  "options": "currency", 
   "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "width": "100px"
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

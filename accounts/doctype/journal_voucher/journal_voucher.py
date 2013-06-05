@@ -158,7 +158,7 @@ class DocType(AccountsController):
 		if r:
 			self.doc.remark = ("\n").join(r)
 		else:
-			webnotes.msgprint("Remarks is mandatory", raise_exception=1)
+			webnotes.msgprint("User Remarks is mandatory", raise_exception=1)
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':

@@ -14,38 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from __future__ import unicode_literals
-import unittest
-import webnotes
-
-test_records = [
-	[
-		{
-			"doctype": "BOM", 
-			"item": "_Test FG Item", 
-			"quantity": 1.0,
-			"is_active": 1,
-			"is_default": 1,
-			"docstatus": 1
-		}, 
-		{
-			"doctype": "BOM Item", 
-			"item_code": "_Test Item", 
-			"parentfield": "bom_materials", 
-			"qty": 1.0, 
-			"rate": 5000.0, 
-			"amount": 5000.0, 
-			"stock_uom": "No."
-		}, 
-		{
-			"doctype": "BOM Item", 
-			"item_code": "_Test Item Home Desktop 100", 
-			"parentfield": "bom_materials", 
-			"qty": 2.0, 
-			"rate": 1000.0,
-			"amount": 2000.0,
-			"stock_uom": "No."
-		}
-	]
-]
+def execute():
+	import webnotes
+	webnotes.reload_doc("buying", "doctype", "purchase_order_item")
+	webnotes.reload_doc("stock", "doctype", "purchase_receipt_item")
+	for pi in webnotes.conn.sql("""select name from `tabPurchase Invoice` where docstatus = 1"""):
+		webnotes.get_obj("Purchase Invoice", pi[0], 
+			with_children=1).update_qty(change_modified=False)

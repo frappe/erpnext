@@ -38,6 +38,35 @@ class DocType(SellingController):
 		self.log = []
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
+		self.status_updater = [{
+			'source_dt': 'Sales Invoice Item',
+			'target_field': 'billed_amt',
+			'target_ref_field': 'export_amount',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_billed',
+			'source_field': 'export_amount',
+			'join_field': 'so_detail',
+			'percent_join_field': 'sales_order',
+			'status_field': 'billing_status',
+			'keyword': 'Billed'
+		}, 
+		{
+			'source_dt': 'Sales Invoice Item',
+			'target_dt': 'Delivery Note Item',
+			'join_field': 'dn_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Delivery Note',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'export_amount',
+			'source_field': 'export_amount',
+			'percent_join_field': 'delivery_note',
+			'status_field': 'billing_status',
+			'keyword': 'Billed',
+			'no_tolerance': True,
+		}]
+		
 
 	def validate(self):
 		super(DocType, self).validate()
@@ -99,7 +128,9 @@ class DocType(SellingController):
 				
 		self.set_buying_amount()
 		self.check_prev_docstatus()
-		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -128,9 +159,29 @@ class DocType(SellingController):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
 
-		sales_com_obj.update_prevdoc_detail(0, self)
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
 		
 		self.make_cancel_gl_entries()
+		
+	def update_status_updater_args(self):
+		if cint(self.doc.is_pos) and cint(self.doc.update_stock):
+			self.status_updater.append({
+				'source_dt':'Sales Invoice Item',
+				'target_dt':'Sales Order Item',
+				'target_parent_dt':'Sales Order',
+				'target_parent_field':'per_delivered',
+				'target_field':'delivered_qty',
+				'target_ref_field':'qty',
+				'source_field':'qty',
+				'join_field':'so_detail',
+				'percent_join_field':'sales_order',
+				'status_field':'delivery_status',
+				'keyword':'Delivered',
+				'second_source_dt': 'Delivery Note Item',
+				'second_source_field': 'qty',
+				'second_join_field': 'prevdoc_detail_docname'
+			})
 		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
@@ -269,7 +320,7 @@ class DocType(SellingController):
 			
 		ret = self.get_debit_to()
 		self.doc.debit_to = ret.get('debit_to')
-					
+
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
@@ -340,17 +391,6 @@ class DocType(SellingController):
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 			
-	def validate_customer(self):
-		"""	Validate customer name with SO and DN"""
-		for d in getlist(self.doclist,'entries'):
-			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
-			if dt:
-				dt_no = d.delivery_note or d.sales_order
-				cust = webnotes.conn.sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
-				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
-					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
-			
-
 	def validate_customer_account(self):
 		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
@@ -360,6 +400,19 @@ class DocType(SellingController):
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
 				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
 					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
+			
+
+	def validate_customer(self):
+		"""	Validate customer name with SO and DN"""
+		if self.doc.customer:
+			for d in getlist(self.doclist,'entries'):
+				dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
+				if dt:
+					dt_no = d.delivery_note or d.sales_order
+					cust = webnotes.conn.get_value(dt, dt_no, "customer")
+					if cust and cstr(cust) != cstr(self.doc.customer):
+						msgprint("Customer %s does not match with customer of %s: %s." 
+							%(self.doc.customer, dt, dt_no), raise_exception=1)
 
 
 	def validate_debit_acc(self):
