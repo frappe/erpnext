@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-05-28 14:51:00", 
+  "modified": "2013-06-05 14:43:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -591,16 +591,6 @@
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {
