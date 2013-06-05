@@ -26,10 +26,8 @@
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
-	background-image: none, url("../images/splash.svg");
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: 160px;
+	width: 160px;
+	height: 160px;
 	color: #888;
 	text-align: center;
 	animation-duration: 1s;
