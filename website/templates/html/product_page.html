@@ -11,9 +11,9 @@
 {% block content %}
 	{% include 'app/website/templates/html/product_search_box.html' %}
 	{% include 'app/website/templates/html/product_breadcrumbs.html' %}
-	<div class="span12 product-page-content" itemscope itemtype="http://schema.org/Product">
+	<div class="col col-lg-12 product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="span6">
+			<div class="col col-lg-6">
 				{% if slideshow %}
 					{% include "app/website/templates/html/slideshow.html" %}
 				{% else %}
@@ -27,7 +27,7 @@
 					{% endif %}
 				{% endif %}
 			</div>
-			<div class="span6">
+			<div class="col col-lg-6">
 				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
 				<p class="help">Item Code: {{ name }}</p>
 				<h4>Product Description</h4>
@@ -41,7 +41,7 @@
 		</div>
 		{% if obj.doclist.get({"doctype":"Item Website Specification"}) -%}
 		<div class="row" style="margin-top: 20px">
-			<div class="span12">
+			<div class="col col-lg-12">
 				<h4>Specifications</h4>
 				<table class="table table-bordered" style="width: 100%">
 				{% for d in obj.doclist.get(

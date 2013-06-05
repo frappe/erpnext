@@ -16,14 +16,262 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt
-
-from utilities.transaction_base import TransactionBase
+from webnotes import _, msgprint
+from webnotes.utils import flt, cint
+from setup.utils import get_company_currency, get_price_list_currency
+from utilities.transaction_base import TransactionBase, validate_conversion_rate
+import json
 
 class AccountsController(TransactionBase):
 	def validate(self):
-		if self.meta.get_field("grand_total"):
+		self.set_missing_values(for_validate=True)
+		
+		if self.meta.get_field("currency"):
+			self.company_currency = get_company_currency(self.doc.company)
+			
+			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
+				self.meta.get_label("conversion_rate"), self.doc.company)
+			
+			self.calculate_taxes_and_totals()
 			self.validate_value("grand_total", ">=", 0)
+			self.set_total_in_words()
+			
+	def set_price_list_currency(self, buying_or_selling):
+		# TODO - change this, since price list now has only one currency allowed
+		if self.meta.get_field("price_list_name") and self.doc.price_list_name and \
+			not self.doc.price_list_currency:
+				self.doc.fields.update(get_price_list_currency({
+					"price_list_name": self.doc.price_list_name, 
+					"use_for": buying_or_selling
+				}))
+				
+	def set_missing_item_details(self, get_item_details):
+		"""set missing item values"""
+		for item in self.doclist.get({"parentfield": self.fname}):
+			if item.fields.get("item_code"):
+				args = item.fields.copy().update(self.doc.fields)
+				ret = get_item_details(args)
+				for fieldname, value in ret.items():
+					if self.meta.get_field(fieldname, parentfield=self.fname) and \
+						not item.fields.get(fieldname):
+							item.fields[fieldname] = value
+							
+	def set_taxes(self, tax_doctype, tax_parentfield, tax_master_field):
+		if not self.meta.get_field(tax_parentfield):
+			return
+			
+		if not self.doclist.get({"parentfield": tax_parentfield}):
+			if not self.doc.fields.get(tax_master_field):
+				# get the default tax master
+				self.doc.fields[tax_master_field] = \
+					webnotes.conn.get_value(tax_doctype + " Master", {"is_default": 1})
+				
+			if self.doc.fields.get(tax_master_field):
+				from webnotes.model import default_fields
+				tax_master = webnotes.bean(tax_doctype, self.doc.fields.get(tax_master_field))
+				
+				for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
+					for fieldname in default_fields:
+						tax.fields[fieldname] = None
+					
+					tax.fields.update({
+						"doctype": tax_doctype,
+						"parentfield": tax_parentfield,
+						"idx": i+1
+					})
+					
+					self.doclist.append(tax)
+					
+	def calculate_taxes_and_totals(self):
+		self.doc.conversion_rate = flt(self.doc.conversion_rate)
+		self.item_doclist = self.doclist.get({"parentfield": self.fname})
+		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
+		
+		self.calculate_item_values()
+		self.initialize_taxes()
+		
+		if hasattr(self, "determine_exclusive_rate"):
+			self.determine_exclusive_rate()
+		
+		self.calculate_net_total()
+		self.calculate_taxes()
+		self.calculate_totals()
+		self._cleanup()
+		
+		# TODO
+		# print format: show net_total_export instead of net_total
+		
+	def initialize_taxes(self):
+		for tax in self.tax_doclist:
+			tax.item_wise_tax_detail = {}
+			for fieldname in ["tax_amount", "total", 
+				"tax_amount_for_current_item", "grand_total_for_current_item",
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]:
+					tax.fields[fieldname] = 0.0
+			
+			self.validate_on_previous_row(tax)
+			self.validate_inclusive_tax(tax)
+			self.round_floats_in(tax)
+			
+	def validate_on_previous_row(self, tax):
+		"""
+			validate if a valid row id is mentioned in case of
+			On Previous Row Amount and On Previous Row Total
+		"""
+		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
+				(not tax.row_id or cint(tax.row_id) >= tax.idx):
+			msgprint((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
+				_("Please specify a valid") + " %(row_id_label)s") % {
+					"idx": tax.idx,
+					"taxes_doctype": tax.doctype,
+					"row_id_label": self.meta.get_label("row_id",
+						parentfield=self.other_fname)
+				}, raise_exception=True)
+				
+	def validate_inclusive_tax(self, tax):
+		def _on_previous_row_error(row_range):
+			msgprint((_("Row") + " # %(idx)s [%(doctype)s]: " +
+				_("to be included in Item's rate, it is required that: ") +
+				" [" + _("Row") + " # %(row_range)s] " + _("also be included in Item's rate")) % {
+					"idx": tax.idx,
+					"doctype": tax.doctype,
+					"inclusive_label": self.meta.get_label("included_in_print_rate",
+						parentfield=self.other_fname),
+					"charge_type_label": self.meta.get_label("charge_type",
+						parentfield=self.other_fname),
+					"charge_type": tax.charge_type,
+					"row_range": row_range
+				}, raise_exception=True)
+		
+		if cint(tax.included_in_print_rate):
+			if tax.charge_type == "Actual":
+				# inclusive tax cannot be of type Actual
+				msgprint((_("Row") 
+					+ " # %(idx)s [%(doctype)s]: %(charge_type_label)s = \"%(charge_type)s\" " 
+					+ "cannot be included in Item's rate") % {
+						"idx": tax.idx,
+						"doctype": tax.doctype,
+						"charge_type_label": self.meta.get_label("charge_type",
+							parentfield=self.other_fname),
+						"charge_type": tax.charge_type,
+					}, raise_exception=True)
+			elif tax.charge_type == "On Previous Row Amount" and \
+					not cint(self.tax_doclist[tax.row_id - 1].included_in_print_rate):
+				# referred row should also be inclusive
+				_on_previous_row_error(tax.row_id)
+			elif tax.charge_type == "On Previous Row Total" and \
+					not all([cint(t.included_in_print_rate) for t in self.tax_doclist[:tax.row_id - 1]]):
+				# all rows about the reffered tax should be inclusive
+				_on_previous_row_error("1 - %d" % (tax.row_id,))
+				
+	def calculate_taxes(self):
+		for item in self.item_doclist:
+			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
+
+			for i, tax in enumerate(self.tax_doclist):
+				# tax_amount represents the amount of tax for the current step
+				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+				
+				if hasattr(self, "set_item_tax_amount"):
+					self.set_item_tax_amount(item, tax, current_tax_amount)
+
+				# case when net total is 0 but there is an actual type charge
+				# in this case add the actual amount to tax.tax_amount
+				# and tax.grand_total_for_current_item for the first such iteration
+				if tax.charge_type=="Actual" and \
+						not (current_tax_amount or self.doc.net_total or tax.tax_amount):
+					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
+					current_tax_amount += zero_net_total_adjustment
+
+				# store tax_amount for current item as it will be used for
+				# charge type = 'On Previous Row Amount'
+				tax.tax_amount_for_current_item = current_tax_amount
+
+				# accumulate tax amount into tax.tax_amount
+				tax.tax_amount += current_tax_amount
+				
+				if tax.category:
+					# if just for valuation, do not add the tax amount in total
+					# hence, setting it as 0 for further steps
+					current_tax_amount = 0.0 if (tax.category == "Valuation") else current_tax_amount
+					
+					current_tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
+				
+				# Calculate tax.total viz. grand total till that step
+				# note: grand_total_for_current_item contains the contribution of 
+				# item's amount, previously applied tax and the current tax on that item
+				if i==0:
+					tax.grand_total_for_current_item = flt(item.amount +
+						current_tax_amount, self.precision("total", tax))
+						
+				else:
+					tax.grand_total_for_current_item = \
+						flt(self.tax_doclist[i-1].grand_total_for_current_item +
+							current_tax_amount, self.precision("total", tax))
+							
+				# in tax.total, accumulate grand total of each item
+				tax.total += tax.grand_total_for_current_item
+				
+	def get_current_tax_amount(self, item, tax, item_tax_map):
+		tax_rate = self._get_tax_rate(tax, item_tax_map)
+		current_tax_amount = 0.0
+
+		if tax.charge_type == "Actual":
+			# distribute the tax amount proportionally to each item row
+			actual = flt(tax.rate, self.precision("tax_amount", tax))
+			current_tax_amount = (self.doc.net_total
+				and ((item.amount / self.doc.net_total) * actual)
+				or 0)
+		elif tax.charge_type == "On Net Total":
+			current_tax_amount = (tax_rate / 100.0) * item.amount
+		elif tax.charge_type == "On Previous Row Amount":
+			current_tax_amount = (tax_rate / 100.0) * \
+				self.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item
+		elif tax.charge_type == "On Previous Row Total":
+			current_tax_amount = (tax_rate / 100.0) * \
+				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
+		
+		current_tax_amount = flt(current_tax_amount, self.precision("tax_amount", tax))
+		
+		# store tax breakup for each item
+		tax.item_wise_tax_detail[item.item_code or item.item_name] = [tax_rate, current_tax_amount]
+
+		return current_tax_amount
+		
+	def _load_item_tax_rate(self, item_tax_rate):
+		return json.loads(item_tax_rate) if item_tax_rate else {}
+		
+	def _get_tax_rate(self, tax, item_tax_map):
+		if item_tax_map.has_key(tax.account_head):
+			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax))
+		else:
+			return tax.rate
+	
+	def _cleanup(self):
+		for tax in self.tax_doclist:
+			for fieldname in ("grand_total_for_current_item",
+				"tax_amount_for_current_item",
+				"tax_fraction_for_current_item", 
+				"grand_total_fraction_for_current_item"):
+				if fieldname in tax.fields:
+					del tax.fields[fieldname]
+			
+			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
+			
+	def _set_in_company_currency(self, item, print_field, base_field):
+		"""set values in base currency"""
+		item.fields[base_field] = flt((flt(item.fields[print_field],
+			self.precision(print_field, item)) * self.doc.conversion_rate),
+			self.precision(base_field, item))
+			
+	def calculate_total_advance(self, parenttype, advance_parentfield):
+		if self.doc.doctype == parenttype and self.doc.docstatus < 2:
+			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.precision("allocated_amount", adv)) 
+				for adv in self.doclist.get({"parentfield": advance_parentfield})])
+
+			self.doc.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
+			
+			self.calculate_outstanding_amount()
 
 	def get_gl_dict(self, args, cancel=None):
 		"""this method populates the common properties of a gl entry record"""

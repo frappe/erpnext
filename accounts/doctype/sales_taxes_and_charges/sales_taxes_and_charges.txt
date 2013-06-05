@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:41", 
+  "creation": "2013-04-24 11:39:32", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:05:18", 
+  "modified": "2013-05-28 11:59:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,7 +50,7 @@
  {
   "default": ":Company", 
   "doctype": "DocField", 
-  "fieldname": "cost_center_other_charges", 
+  "fieldname": "cost_center", 
   "fieldtype": "Link", 
   "label": "Cost Center", 
   "oldfieldname": "cost_center_other_charges", 
@@ -85,6 +85,7 @@
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "read_only": 1, 
   "reqd": 0
  }, 
  {
@@ -127,34 +128,6 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "search_index": 1
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_tax_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Total Tax Amount", 
-  "no_copy": 1, 
-  "oldfieldname": "total_tax_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "report_hide": 1
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Total Amount", 
-  "no_copy": 1, 
-  "oldfieldname": "total_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "report_hide": 1
  }, 
  {
   "allow_on_submit": 0, 

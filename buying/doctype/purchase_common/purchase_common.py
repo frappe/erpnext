@@ -69,17 +69,6 @@ class DocType(BuyingController):
 			msgprint(_("Hey there! You need to put at least one item in \
 				the item table."), raise_exception=True)
 
-
-	def get_default_schedule_date( self, obj):
-		for d in getlist( obj.doclist, obj.fname):
-			item = sql("select lead_time_days from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())" % cstr(d.item_code) , as_dict = 1)
-			ltd = item and cint(item[0]['lead_time_days']) or 0
-			if ltd and obj.doc.transaction_date:
-				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Material Request':
-					d.lead_time_date = cstr(add_days( obj.doc.transaction_date, cint(ltd)))
-				if not d.fields.has_key('prevdoc_docname') or (d.fields.has_key('prevdoc_docname') and not d.prevdoc_docname):
-					d.schedule_date =	cstr( add_days( obj.doc.transaction_date, cint(ltd)))
-				
 	# Client Trigger functions
 	#------------------------------------------------------------------------------------------------
 
@@ -448,27 +437,3 @@ class DocType(BuyingController):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
-
-@webnotes.whitelist()
-def get_uom_details(args=None):
-	"""fetches details on change of UOM"""
-	if not args:
-		return {}
-		
-	if isinstance(args, basestring):
-		import json
-		args = json.loads(args)
-
-	uom = webnotes.conn.sql("""select conversion_factor
-		from `tabUOM Conversion Detail` where parent = %s and uom = %s""", 
-		(args['item_code'], args['uom']), as_dict=1)
-
-	if not uom: return {}
-
-	conversion_factor = args.get("conversion_factor") or \
-		flt(uom[0]["conversion_factor"])
-	
-	return {
-		"conversion_factor": conversion_factor,
-		"qty": flt(args["stock_qty"]) / conversion_factor,
-	}

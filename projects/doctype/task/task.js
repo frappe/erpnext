@@ -34,7 +34,7 @@ erpnext.projects.Task = wn.ui.form.Controller.extend({
 		}
 	},
 
-	after_save: function() {
+	validate: function() {
 		this.frm.doc.project && wn.model.remove_from_locals("Project",
 			this.frm.doc.project);
 	},

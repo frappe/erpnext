@@ -1,47 +1,15 @@
-div.outer {
-	padding: 30px;
-	margin: 30px -30px 10px -30px;
-	min-height: 400px;
+h1, h2, h3, h4, h5 {
+	font-weight: bold;
 }
 
-.outer .navbar {
-	margin: -30px -30px 20px -30px;
-}
-
-footer {
-	text-align: left;
-	margin: auto;
-	margin-bottom: 20px;
-}
-
-.navbar-inner {
-	border: 0px;
-	border-bottom: 1px solid #ddd;
-	border-radius: 0px;
-	padding-right: 30px;
-	padding-left: 30px;
-}
-
-p, li {
-	line-height: 1.5em;
-}
-
-.layout-wrapper {
-	box-shadow: none;
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	border-radius: 0px 0px 5px 5px;
-}
-
-.layout-main {
-	min-height: 400px;
-	padding: 30px;
+.content {
+	padding-bottom: 30px;
 }
 
 .missing-image {
 	background-color: #eee;
 	padding: 40px;
-	width: 32px;
+	width: 112px;
 	font-size: 32px;
 	color: #888;
 }
@@ -128,4 +96,16 @@ p, li {
 }
 .avatar-x-large img {
 	width: 100px; 
+}
+
+.carousel-control .icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
 }

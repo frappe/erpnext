@@ -69,12 +69,12 @@ var blog = {
 			b.page_name = encodeURIComponent(b.page_name);
 			
 			$(repl('<div class="row">\
-					<div class="span1">\
+					<div class="col col-lg-1">\
 						<div class="avatar avatar-medium" style="margin-top: 6px;">\
 							<img src="%(avatar)s" />\
 						</div>\
 					</div>\
-					<div class="span11">\
+					<div class="col col-lg-11">\
 						<h4><a href="%(page_name)s">%(title)s</a></h4>\
 						<p>%(content)s</p>\
 						<p style="color: #aaa; font-size: 90%">\
@@ -87,7 +87,7 @@ var blog = {
 		if(!data.length || data.length < 20) {
 			if(blog.start) {
 				$("#next-page").toggle(false)
-					.parent().append("<div class='alert alert-info'>Nothing more to show.</div>");	
+					.parent().append("<div class='text-muted'>Nothing more to show.</div>");	
 			} else {
 				$("#next-page").toggle(false)
 					.parent().append("<div class='alert'>No blogs written yet.</div>");	

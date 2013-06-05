@@ -21,8 +21,8 @@ cur_frm.cscript.fname = "po_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
@@ -39,54 +39,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
 			
 	},
-	
-	onload_post_render: function(doc, dt, dn) {	
-		var me = this;	
-		var callback1 = function(doc, dt, dn) {
-			var callback2 = function(doc, dt, dn) {
-				if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);				
-			}
-			me.update_item_details(doc, dt, dn, callback2);
-		}
-		
-		// TODO: improve this
-		if(this.frm.doc.__islocal) {
-			if (this.frm.fields_dict.price_list_name && this.frm.doc.price_list_name) {
-				this.price_list_name(callback1);
-			} else {
-				callback1(doc, dt, dn);
-			}
-		}
-	}
-	
 });
 
-var new_cscript = new erpnext.buying.PurchaseOrderController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
-
-cur_frm.cscript.onload = function(doc, cdt, cdn) {	
-	// set missing values in parent doc
-	set_missing_values(doc, {
-		fiscal_year: sys_defaults.fiscal_year,
-		conversion_rate: 1,
-		currency: sys_defaults.currency,
-		status: "Draft",
-		transaction_date: get_today(),
-		is_subcontracted: "No"
-	});
-}
-
-cur_frm.cscript.supplier = function(doc,dt,dn) {
-	if (doc.supplier) {
-		get_server_fields('get_default_supplier_address',
-			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function() {
-				cur_frm.refresh();
-			});
-		$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
-	}
-}
+$.extend(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({frm: cur_frm}));
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
@@ -109,10 +65,6 @@ cur_frm.fields_dict.supplier_address.on_new = function(dn) {
 cur_frm.fields_dict.contact_person.on_new = function(dn) {
 	locals['Contact'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
 	locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
-}
-
-cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
-	if(doc.__islocal){ cur_frm.cscript.get_default_schedule_date(doc); }
 }
 
 cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {

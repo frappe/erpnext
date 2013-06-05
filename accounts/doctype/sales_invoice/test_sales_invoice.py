@@ -1,12 +1,226 @@
 import webnotes
-import unittest
+import unittest, json
+from webnotes.utils import flt, cint
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
-		w = webnotes.bean(webnotes.copy_doclist(test_records[0]))
+		w = webnotes.bean(copy=test_records[0])
 		w.insert()
 		w.submit()
 		return w
+		
+	def test_sales_invoice_calculation_base_currency(self):
+		si = webnotes.bean(copy=test_records[2])
+		si.run_method("calculate_taxes_and_totals")
+		si.insert()
+		
+		expected_values = {
+			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
+				"base_ref_rate", "basic_rate", "amount"],
+			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500],
+			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750],
+		}
+		
+		# check if children are saved
+		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+			len(expected_values)-1)
+		
+		# check if item values are calculated
+		for d in si.doclist.get({"parentfield": "entries"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+		
+		# check net total
+		self.assertEquals(si.doc.net_total, 1250)
+		self.assertEquals(si.doc.net_total_export, 1250)
+		
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "total"],
+			"_Test Account Shipping Charges - _TC": [100, 1350],
+			"_Test Account Customs Duty - _TC": [125, 1475],
+			"_Test Account Excise Duty - _TC": [140, 1615],
+			"_Test Account Education Cess - _TC": [2.8, 1617.8],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1619.2],
+			"_Test Account CST - _TC": [32.38, 1651.58],
+			"_Test Account VAT - _TC": [156.25, 1807.83],
+			"_Test Account Discount - _TC": [-180.78, 1627.05]
+		}
+		
+		for d in si.doclist.get({"parentfield": "other_charges"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				
+		self.assertEquals(si.doc.grand_total, 1627.05)
+		self.assertEquals(si.doc.grand_total_export, 1627.05)
+		
+	def test_sales_invoice_calculation_export_currency(self):
+		si = webnotes.bean(copy=test_records[2])
+		si.doc.currency = "USD"
+		si.doc.conversion_rate = 50
+		si.doclist[1].export_rate = 1
+		si.doclist[1].ref_rate = 1
+		si.doclist[2].export_rate = 3
+		si.doclist[2].ref_rate = 3
+		si.run_method("calculate_taxes_and_totals")
+		si.insert()
+		
+		expected_values = {
+			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
+				"base_ref_rate", "basic_rate", "amount"],
+			"_Test Item Home Desktop 100": [1, 0, 1, 10, 50, 50, 500],
+			"_Test Item Home Desktop 200": [3, 0, 3, 15, 150, 150, 750],
+		}
+		
+		# check if children are saved
+		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+			len(expected_values)-1)
+		
+		# check if item values are calculated
+		for d in si.doclist.get({"parentfield": "entries"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+		
+		# check net total
+		self.assertEquals(si.doc.net_total, 1250)
+		self.assertEquals(si.doc.net_total_export, 25)
+		
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "total"],
+			"_Test Account Shipping Charges - _TC": [100, 1350],
+			"_Test Account Customs Duty - _TC": [125, 1475],
+			"_Test Account Excise Duty - _TC": [140, 1615],
+			"_Test Account Education Cess - _TC": [2.8, 1617.8],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1619.2],
+			"_Test Account CST - _TC": [32.38, 1651.58],
+			"_Test Account VAT - _TC": [156.25, 1807.83],
+			"_Test Account Discount - _TC": [-180.78, 1627.05]
+		}
+		
+		for d in si.doclist.get({"parentfield": "other_charges"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				
+		self.assertEquals(si.doc.grand_total, 1627.05)
+		self.assertEquals(si.doc.grand_total_export, 32.54)
+				
+	def test_inclusive_rate_validations(self):
+		si = webnotes.bean(copy=test_records[2])
+		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
+			tax.idx = i+1
+		
+		si.doclist[1].ref_rate = 62.5
+		si.doclist[1].ref_rate = 191
+		for i in [3, 5, 6, 7, 8, 9]:
+			si.doclist[i].included_in_print_rate = 1
+		
+		# tax type "Actual" cannot be inclusive
+		self.assertRaises(webnotes.ValidationError, si.run_method, "calculate_taxes_and_totals")
+		
+		# taxes above included type 'On Previous Row Total' should also be included
+		si.doclist[3].included_in_print_rate = 0
+		self.assertRaises(webnotes.ValidationError, si.run_method, "calculate_taxes_and_totals")
+		
+	def test_sales_invoice_calculation_base_currency_with_tax_inclusive_price(self):
+		# prepare
+		si = webnotes.bean(copy=test_records[3])
+		si.run_method("calculate_taxes_and_totals")
+		si.insert()
+		
+		expected_values = {
+			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
+				"base_ref_rate", "basic_rate", "amount"],
+			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 500],
+			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 750],
+		}
+		
+		# check if children are saved
+		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+			len(expected_values)-1)
+		
+		# check if item values are calculated
+		for d in si.doclist.get({"parentfield": "entries"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+		
+		# check net total
+		self.assertEquals(si.doc.net_total, 1250)
+		self.assertEquals(si.doc.net_total_export, 1578.3)
+		
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "total"],
+			"_Test Account Excise Duty - _TC": [140, 1390],
+			"_Test Account Education Cess - _TC": [2.8, 1392.8],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1394.2],
+			"_Test Account CST - _TC": [27.88, 1422.08],
+			"_Test Account VAT - _TC": [156.25, 1578.33],
+			"_Test Account Customs Duty - _TC": [125, 1703.33],
+			"_Test Account Shipping Charges - _TC": [100, 1803.33],
+			"_Test Account Discount - _TC": [-180.33, 1623]
+		}
+		
+		for d in si.doclist.get({"parentfield": "other_charges"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(flt(d.fields.get(k), 6), expected_values[d.account_head][i])
+		
+		self.assertEquals(si.doc.grand_total, 1623)
+		self.assertEquals(si.doc.grand_total_export, 1623)
+		
+	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
+		# prepare
+		si = webnotes.bean(copy=test_records[3])
+		si.doc.currency = "USD"
+		si.doc.conversion_rate = 50
+		si.doclist[1].ref_rate = 55.56
+		si.doclist[1].adj_rate = 10
+		si.doclist[2].ref_rate = 187.5
+		si.doclist[2].adj_rate = 20
+		si.doclist[9].rate = 5000
+		
+		si.run_method("calculate_taxes_and_totals")
+		si.insert()
+		
+		expected_values = {
+			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
+				"base_ref_rate", "basic_rate", "amount"],
+			"_Test Item Home Desktop 100": [55.56, 10, 50, 500, 2222.11, 1999.9, 19999.0],
+			"_Test Item Home Desktop 200": [187.5, 20, 150, 750, 7375.66, 5900.53, 29502.65],
+		}
+		
+		# check if children are saved
+		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+			len(expected_values)-1)
+		
+		# check if item values are calculated
+		for d in si.doclist.get({"parentfield": "entries"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+		
+		# check net total
+		self.assertEquals(si.doc.net_total, 49501.65)
+		self.assertEquals(si.doc.net_total_export, 1250)
+		
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "total"],
+			"_Test Account Excise Duty - _TC": [5540.22, 55041.87],
+			"_Test Account Education Cess - _TC": [110.81, 55152.68],
+			"_Test Account S&H Education Cess - _TC": [55.4, 55208.08],
+			"_Test Account CST - _TC": [1104.16, 56312.24],
+			"_Test Account VAT - _TC": [6187.71, 62499.95],
+			"_Test Account Customs Duty - _TC": [4950.17, 67450.12],
+			"_Test Account Shipping Charges - _TC": [5000, 72450.12],
+			"_Test Account Discount - _TC": [-7245.01, 65205.11]
+		}
+		
+		for d in si.doclist.get({"parentfield": "other_charges"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(flt(d.fields.get(k), 6), expected_values[d.account_head][i])
+		
+		self.assertEquals(si.doc.grand_total, 65205.11)
+		self.assertEquals(si.doc.grand_total_export, 1304.1)
 
 	def test_outstanding(self):
 		w = self.make()
@@ -103,7 +317,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos[0]["cash_bank_account"] = "_Test Account Bank Account - _TC"
 		pos[0]["paid_amount"] = 600.0
 
-		si = webnotes.bean(pos)
+		si = webnotes.bean(copy=pos)
 		si.insert()
 		si.submit()
 		
@@ -113,7 +327,7 @@ class TestSalesInvoice(unittest.TestCase):
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
-			["_Test Item", "_Test Warehouse", -5.0])
+			["_Test Item", "_Test Warehouse", -1.0])
 		
 		# check gl entries
 		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
@@ -126,11 +340,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
-			[test_records[1][1]["income_account"], 0.0, 500.0],
-			[test_records[1][2]["account_head"], 0.0, 80.0],
-			[test_records[1][3]["account_head"], 0.0, 50.0],
-			[stock_in_hand_account, 0.0, 375.0],
-			[test_records[1][1]["expense_account"], 375.0, 0.0],
+			[pos[1]["income_account"], 0.0, 500.0],
+			[pos[2]["account_head"], 0.0, 80.0],
+			[pos[3]["account_head"], 0.0, 50.0],
+			[stock_in_hand_account, 0.0, 75.0],
+			[pos[1]["expense_account"], 75.0, 0.0],
 			[si.doc.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
@@ -444,7 +658,7 @@ test_records = [
 			"description": "VAT", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 30.0,
+			"rate": 6,
 		}, 
 		{
 			"account_head": "_Test Account Service Tax - _TC", 
@@ -452,7 +666,7 @@ test_records = [
 			"description": "Service Tax", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 31.8,
+			"rate": 6.36,
 		},
 		{
 			"parentfield": "sales_team",
@@ -494,7 +708,7 @@ test_records = [
 			"description": "_Test Item", 
 			"doctype": "Sales Invoice Item", 
 			"parentfield": "entries",
-			"qty": 5.0,
+			"qty": 1.0,
 			"basic_rate": 500.0,
 			"amount": 500.0, 
 			"export_rate": 500.0, 
@@ -509,7 +723,7 @@ test_records = [
 			"description": "VAT", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 80.0,
+			"rate": 16,
 		}, 
 		{
 			"account_head": "_Test Account Service Tax - _TC", 
@@ -517,7 +731,270 @@ test_records = [
 			"description": "Service Tax", 
 			"doctype": "Sales Taxes and Charges", 
 			"parentfield": "other_charges",
-			"tax_amount": 50.0,
+			"rate": 10
 		}
+	],
+	[
+		{
+			"naming_series": "_T-Sales Invoice-",
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"debit_to": "_Test Customer - _TC",
+			"customer": "_Test Customer",
+			"customer_name": "_Test Customer",
+			"doctype": "Sales Invoice", 
+			"due_date": "2013-01-23", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"grand_total_export": 0, 
+			"plc_conversion_rate": 1.0, 
+			"posting_date": "2013-01-23", 
+			"price_list_currency": "INR", 
+			"price_list_name": "_Test Price List", 
+			"territory": "_Test Territory",
+		},
+		# items
+		{
+			"doctype": "Sales Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 100",
+			"item_name": "_Test Item Home Desktop 100",
+			"qty": 10,
+			"ref_rate": 50,
+			"export_rate": 50,
+			"stock_uom": "_Test UOM",
+			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
+			"income_account": "Sales - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		
+		},
+		{
+			"doctype": "Sales Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 200",
+			"item_name": "_Test Item Home Desktop 200",
+			"qty": 5,
+			"ref_rate": 150,
+			"export_rate": 150,
+			"stock_uom": "_Test UOM",
+			"income_account": "Sales - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		
+		},
+		# taxes
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "Actual",
+			"account_head": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Shipping Charges",
+			"rate": 100
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Customs Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Customs Duty",
+			"rate": 10
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Excise Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"rate": 12
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Education Cess",
+			"rate": 2,
+			"row_id": 3
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account S&H Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "S&H Education Cess",
+			"rate": 1,
+			"row_id": 3
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account CST - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "CST",
+			"rate": 2,
+			"row_id": 5
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"rate": 12.5
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account Discount - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Discount",
+			"rate": -10,
+			"row_id": 7
+		},
+	],
+	[
+		{
+			"naming_series": "_T-Sales Invoice-",
+			"company": "_Test Company", 
+			"conversion_rate": 1.0, 
+			"currency": "INR", 
+			"debit_to": "_Test Customer - _TC",
+			"customer": "_Test Customer",
+			"customer_name": "_Test Customer",
+			"doctype": "Sales Invoice", 
+			"due_date": "2013-01-23", 
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"grand_total_export": 0, 
+			"plc_conversion_rate": 1.0, 
+			"posting_date": "2013-01-23", 
+			"price_list_currency": "INR", 
+			"price_list_name": "_Test Price List", 
+			"territory": "_Test Territory",
+		},
+		# items
+		{
+			"doctype": "Sales Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 100",
+			"item_name": "_Test Item Home Desktop 100",
+			"qty": 10,
+			"ref_rate": 62.5,
+			"export_rate": 62.5,
+			"stock_uom": "_Test UOM",
+			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
+			"income_account": "Sales - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		
+		},
+		{
+			"doctype": "Sales Invoice Item",
+			"parentfield": "entries",
+			"item_code": "_Test Item Home Desktop 200",
+			"item_name": "_Test Item Home Desktop 200",
+			"qty": 5,
+			"ref_rate": 190.66,
+			"export_rate": 190.66,
+			"stock_uom": "_Test UOM",
+			"income_account": "Sales - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		
+		},
+		# taxes
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Excise Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"rate": 12,
+			"included_in_print_rate": 1,
+			"idx": 1
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Education Cess",
+			"rate": 2,
+			"row_id": 1,
+			"included_in_print_rate": 1,
+			"idx": 2
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account S&H Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "S&H Education Cess",
+			"rate": 1,
+			"row_id": 1,
+			"included_in_print_rate": 1,
+			"idx": 3
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account CST - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "CST",
+			"rate": 2,
+			"row_id": 3,
+			"included_in_print_rate": 1,
+			"idx": 4
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account VAT - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"rate": 12.5,
+			"included_in_print_rate": 1,
+			"idx": 5
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Customs Duty - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Customs Duty",
+			"rate": 10,
+			"idx": 6
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "Actual",
+			"account_head": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Shipping Charges",
+			"rate": 100,
+			"idx": 7
+		},
+		{
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Total",
+			"account_head": "_Test Account Discount - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Discount",
+			"rate": -10,
+			"row_id": 7,
+			"idx": 8
+		},
 	],
 ]

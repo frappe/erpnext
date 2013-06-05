@@ -11,7 +11,7 @@
 {% set title="Blog" %}
 
 {% block content %}
-<div class="span12">
+<div class="col col-lg-12">
 	<h2 id="blog-title">{{ blog_title }}</h2>
 	{% if blog_introduction %}
 	<p>{{ blog_introduction }}</p>
@@ -25,7 +25,7 @@
 		<!-- blog list will be generated dynamically -->
 	</div>
 	<div style="text-align: center;">
-		<button id="next-page" class="btn" 
+		<button id="next-page" class="btn btn-default" 
 			style="display:none;">More...</button>
 	</div>
 </div>

@@ -21,9 +21,37 @@
 // see ledger
 
 pscript['onload_Accounts Browser'] = function(wrapper){
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
-	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Accounts")
+	wn.ui.make_app_page({
+		parent: wrapper,
+		single_column: true
+	})
+
+	wrapper.appframe.add_module_icon("Accounts");
+
+	var main = $(wrapper).find(".layout-main"),
+		chart_area = $("<div>")
+			.css({"margin-bottom": "15px"})
+			.appendTo(main),
+		help_area = $('<div class="well">\
+		<h4>Quick Help</h4>\
+		<ol>\
+		<li>To add child nodes, explore tree and click on the node under which you \
+			want to add more nodes.\
+		<li>Accounting Entries can be made against leaf nodes, called <b>Ledgers</b>.\
+		 	Entries against <b>Groups</b> are not allowed.\
+		<li>Please do NOT create Account (Ledgers) for Customers and Suppliers. \
+			They are created directly from the Customer / Supplier masters.\
+		<li><b>To create a Bank Account:</b> Go to the appropriate group \
+			(usually Application of Funds > Current Assets > Bank Accounts)\
+			and create a new Account Ledger (by clicking on Add Child) of \
+			type "Bank or Cash"\
+		<li><b>To create a Tax Account:</b> Go to the appropriate group \
+			(usually Source of Funds > Current Liabilities > Taxes and Duties) \
+			and create a new Account Ledger (by clicking on Add Child) of type\
+			 "Tax" and do mention the Tax rate.\
+		</ol>\
+		<p>Please setup your chart of accounts before you start Accounting Entries</p>\
+	</div>').appendTo(main);
 	
 	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
 		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },
@@ -35,13 +63,13 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		}, 'icon-refresh');
 
 	// company-select
-	wrapper.$company_select = $('<select class="accbrowser-company-select"></select>')
+	wrapper.$company_select = wrapper.appframe.add_select("Company", [])
 		.change(function() {
 			var ctype = wn.get_route()[1] || 'Account';
-			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(), wrapper);
+			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(), 
+				chart_area.get(0));
 			pscript.set_title(wrapper, ctype, $(this).val());
 		})
-		.appendTo(wrapper.appframe.$w.find('.appframe-toolbar'));
 		
 	// load up companies
 	wn.call({
@@ -77,7 +105,7 @@ pscript['onshow_Accounts Browser'] = function(wrapper){
 
 erpnext.AccountsChart = Class.extend({
 	init: function(ctype, company, wrapper) {
-		$(wrapper).find('.tree-area').empty();
+		$(wrapper).empty();
 		var me = this;
 		me.ctype = ctype;
 		me.can_create = wn.model.can_create(this.ctype);
@@ -87,7 +115,7 @@ erpnext.AccountsChart = Class.extend({
 		
 		me.company = company;
 		this.tree = new wn.ui.Tree({
-			parent: $(wrapper).find('.tree-area'), 
+			parent: $(wrapper), 
 			label: company,
 			args: {ctype: ctype, comp: company},
 			method: 'accounts.page.accounts_browser.accounts_browser.get_children',

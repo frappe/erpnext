@@ -450,6 +450,7 @@ class TestStockEntry(unittest.TestCase):
 		for d in pi.doclist.get({"parentfield": "entries"}):
 			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
+			
 		for d in pi.doclist.get({"parentfield": "purchase_tax_details"}):
 			d.cost_center = "_Test Cost Center - _TC"
 		

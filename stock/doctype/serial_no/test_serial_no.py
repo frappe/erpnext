@@ -81,8 +81,8 @@ class TestSerialNo(unittest.TestCase):
 		self.assertFalse(gl_entries)
 		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-	
-	
+
+test_dependencies = ["Item"]
 test_records = [
 	[
 		{

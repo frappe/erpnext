@@ -2,78 +2,79 @@
 	"modules": {
 		"Selling": {
 			"link": "selling-home",
-			"color": "#3f4901",
+			"color": "#1abc9c",
 			"icon": "icon-tag",
 			"type": "module"
 		},
 		"Accounts": {
 			"link": "accounts-home",
-			"color": "#025770",
+			"color": "#3498db",
 			"icon": "icon-money",
 			"type": "module"
 		},
 		"Stock": {
 			"type": "module",
 			"link": "stock-home",
-			"color": "#a66a02",
+			"color": "#f39c12",
 			"icon": "icon-truck"
 		},
 		"Buying": {
 			"type": "module",
 			"link": "buying-home",
-			"color": "#8F0222",
+			"color": "#c0392b",
 			"icon": "icon-shopping-cart"
 		},
 		"Support": {
 			"type": "module",
 			"link": "support-home",
-			"color": "#410169",
+			"color": "#2c3e50",
 			"icon": "icon-phone"
 		},
 		"Projects": {
 			"type": "module",
 			"link": "projects-home",
-			"color": "#473b7f",
+			"color": "#8e44ad",
 			"icon": "icon-tasks"
 		},
 		"Manufacturing": {
 			"type": "module",
 			"link": "manufacturing-home",
-			"color": "#590116",
-			"icon": "icon-magic"
+			"color": "#7f8c8d",
+			"icon": "icon-cogs"
 		},
 		"Website": {
 			"type": "module",
 			"link": "website-home",
-			"color": "#968c00",
+			"color": "#16a085",
 			"icon": "icon-globe"
 		},
 		"HR": {
 			"type": "module",
 			"link": "hr-home",
-			"color": "#018d6c",
+			"color": "#2ecc71",
 			"label": "Human Resources",
 			"icon": "icon-group"
 		},
 		"Setup": {
 			"type": "setup",
 			"link": "Setup",
-			"color": "#484848",
+			"color": "#bdc3c7",
 			"icon": "icon-wrench"
 		},
 		"Activity": {
 			"type": "page",
 			"link": "activity",
-			"color": "#633501",
+			"color": "#e67e22",
 			"icon": "icon-play",
 			"label": "Activity"
 		},
-		"Knowledge Base": {
-			"type": "page",
-			"link": "questions",
-			"color": "#01372b",
-			"label": "Knowledge Base",
-			"icon": "icon-question-sign"
+		"Notes": {
+			"type": "list",
+			"doctype": "Note",
+			"link": "List/Note",
+			"color": "#95a5a6",
+			"label": "Notes",
+			"icon": "icon-file-alt"
 		}
 	},
 	"web": {
@@ -126,6 +127,10 @@
 			"profile": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/profile"
+			},
+			"cart": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/cart.html"
 			}
 		},
 		"generators": {

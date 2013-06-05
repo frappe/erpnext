@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-19 11:00:06", 
+  "creation": "2013-05-21 16:16:04", 
   "docstatus": 0, 
-  "modified": "2013-05-07 11:23:56", 
+  "modified": "2013-05-28 12:02:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -101,7 +101,7 @@
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 0
  }, 
  {
@@ -159,35 +159,5 @@
   "print_hide": 1, 
   "read_only": 0, 
   "search_index": 0
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_tax_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Total +Tax", 
-  "no_copy": 1, 
-  "oldfieldname": "total_tax_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 1
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Tax Amount", 
-  "no_copy": 1, 
-  "oldfieldname": "total_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 1
  }
 ]

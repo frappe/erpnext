@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-05-22 15:57:26", 
+  "modified": "2013-05-30 12:23:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -327,14 +325,6 @@
   "read_only": 0
  }, 
  {
-  "description": "If checked, then in POS Sales Invoice, Update Stock gets checked by default", 
-  "doctype": "DocField", 
-  "fieldname": "update_stock", 
-  "fieldtype": "Check", 
-  "label": "Update Stock when using POS Sales Invoice", 
-  "read_only": 0
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "account_info", 
   "fieldtype": "HTML", 
@@ -525,6 +515,11 @@
   "fieldtype": "Data", 
   "label": "SMS Sender Name", 
   "read_only": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"

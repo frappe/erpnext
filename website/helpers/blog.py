@@ -63,15 +63,20 @@ def add_comment(args=None):
 	"""
 	import webnotes
 	import webnotes.utils, markdown2
-	import webnotes.widgets.form.comments	
 	
 	if not args: args = webnotes.form_dict
 	args['comment'] = unicode(markdown2.markdown(args.get('comment') or ''))
+	args['doctype'] = "Comment"
 	
-	comment = webnotes.widgets.form.comments.add_comment(args)
+	page_name = args.get("page_name")
+	if "page_name" in args:
+		del args["page_name"]
+		
+	comment = webnotes.bean(args)
+	comment.insert()
 	
 	# since comments are embedded in the page, clear the web cache
-	webnotes.webutils.clear_cache(args.get('page_name'))
+	webnotes.webutils.clear_cache(page_name)
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'app/website/templates/html/comment.html' }

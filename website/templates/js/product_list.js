@@ -40,7 +40,7 @@ window.render_product_list = function(data) {
 				.replaceWith("<div class='alert'>No products found.</div>");
 		} else {
 			$(".more-btn")
-				.replaceWith("<div class='alert'>Nothing more to show.</div>");
+				.replaceWith("<div class='text-muted'>Nothing more to show.</div>");
 		}
 	} else {
 		$(".more-btn").toggle(true)
