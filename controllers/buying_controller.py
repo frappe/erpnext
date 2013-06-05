@@ -167,7 +167,7 @@ class BuyingController(StockController):
 			for item in self.item_doclist:
 				item.purchase_rate = item.rate
 				del item.fields["rate"]
-				
+		
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
 				del item.fields["item_tax_amount"]
@@ -179,8 +179,9 @@ class BuyingController(StockController):
 			
 			TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		if tax.category in ["Valuation", "Valuation and Total"]:
-			item.item_tax_amount += flt(current_tax_amount, self.precision("item_tax_amount", item))
+		if tax.category in ["Valuation", "Valuation and Total"] and \
+			self.meta.get_field("item_tax_amount", parentfield=self.fname):
+				item.item_tax_amount += flt(current_tax_amount, self.precision("item_tax_amount", item))
 				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
