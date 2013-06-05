@@ -25,7 +25,7 @@
 	top: 0px;
 	left: 0px;
 	right: 0px;
-	bottom: 0px;
+	bottom: 30px;
 	width: 160px;
 	height: 160px;
 	text-align: center;
@@ -48,5 +48,5 @@
 	font-weight: 700;
 	font-family: Helvetica, Arial, sans-serif;
 	position: relative;
-	top: -20%;
+	top: -30px;
 }
