@@ -205,6 +205,14 @@ wn.module_page["Stock"] = [
 				"label":wn._("Requested Items To Be Transferred"),
 				route: "query-report/Requested Items To Be Transferred",
 			},
+			{
+				"label":wn._("Batch-Wise Balance History"),
+				route: "query-report/Batch-Wise Balance History",
+			},
+			{
+				"label":wn._("Warehouse-Wise Stock Balance"),
+				route: "query-report/Warehouse-Wise Stock Balance",
+			},
 		]
 	}
 ]
