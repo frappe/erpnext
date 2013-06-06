@@ -60,3 +60,10 @@ span, div, td, input, textarea, button, select {
 	margin-top: 5px;
 	font-size: 11px;
 }
+
+/* toolbar */
+.toolbar-splash {
+	width: 32px; 
+	height: 32px; 
+	margin: -8px auto;
+}
