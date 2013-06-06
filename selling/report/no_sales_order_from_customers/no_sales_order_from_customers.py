@@ -16,7 +16,6 @@
 import webnotes
 
 def execute(filters=None):
-
 	columns = get_columns() 
 	customers = get_so_details()
 
@@ -25,7 +24,6 @@ def execute(filters=None):
 		if cust[8] >= 60: # days_since_last_order
 			cust.insert(7,get_last_so_amt(cust[0]))
 			data.append(cust)
-
 	return columns, data 
 
 def get_so_details():
@@ -40,19 +38,18 @@ def get_so_details():
 				so.net_total * so.per_delivered/100, 
 				so.net_total)) as 'total_order_considered',
 			max(so.transaction_date) as 'last_sales_order_date', 
-			DATEDIFF(CURDATE(),max(so.transaction_date)) as 'days_since_last_order' 
+			DATEDIFF(CURDATE(), max(so.transaction_date)) as 'days_since_last_order' 
 		from `tabCustomer` cust, `tabSales Order` so  
 		where cust.name = so.customer and so.docstatus = 1
 		group by cust.name
 		order by 'days_since_last_order' desc """,as_list=1)
 
 def get_last_so_amt(customer):
-	return webnotes.conn.sql("""select net_total from `tabSales Order`
-		where customer ='%(customer)s' and docstatus = 1 and 
-		transaction_date = (select max(transaction_date) 
-        					from `tabSales Order` 
-        					where customer = '%(customer)s')
-		"""%{'customer':customer})
+	res =  webnotes.conn.sql("""select net_total from `tabSales Order`
+		where customer ='%(customer)s' and docstatus = 1 order by transaction_date desc 
+		limit 1""" % {'customer':customer})
+
+	return res and res[0][0] or 0
 
 def get_columns():
 	return [
