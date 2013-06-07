@@ -22,8 +22,8 @@ def execute(filters=None):
 	if not filters: filters ={}
 
 	days_since_last_order = filters.get("days_since_last_order")
-	if not days_since_last_order or days_since_last_order <= 0:
-		webnotes.msgprint("Please mention legal value in days since last order field",raise_exception=1)
+	if cint(days_since_last_order) <= 0:
+		webnotes.msgprint("Please mention positive value in 'Days Since Last Order' field",raise_exception=1)
 
 	columns = get_columns() 
 	customers = get_so_details()
