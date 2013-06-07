@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-06-05 15:34:51", 
+  "creation": "2013-06-07 12:27:07", 
   "docstatus": 0, 
-  "modified": "2013-06-05 15:50:30", 
+  "modified": "2013-06-07 12:27:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,12 +10,12 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "ref_doctype": "Item", 
-  "report_name": "Item Reorder Level", 
+  "ref_doctype": "Sales Order", 
+  "report_name": "Customers Not Buying Since Long Time ", 
   "report_type": "Script Report"
  }, 
  {
   "doctype": "Report", 
-  "name": "Item Reorder Level"
+  "name": "Customers Not Buying Since Long Time"
  }
 ]

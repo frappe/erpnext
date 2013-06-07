@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-06-06 19:15:50", 
+  "creation": "2013-06-07 12:47:22", 
   "docstatus": 0, 
-  "modified": "2013-06-06 19:15:51", 
+  "modified": "2013-06-07 13:03:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,12 +10,12 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "ref_doctype": "Sales Order", 
-  "report_name": "No Sales Order from Customers", 
+  "ref_doctype": "Item", 
+  "report_name": "Itemwise Recommended Reorder Level", 
   "report_type": "Script Report"
  }, 
  {
   "doctype": "Report", 
-  "name": "No Sales Order from Customers"
+  "name": "Itemwise Recommended Reorder Level"
  }
 ]

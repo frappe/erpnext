@@ -1,4 +1,4 @@
-wn.query_reports["Item Reorder Level"] = {
+wn.query_reports["Itemwise Recommended Reorder Level"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",

@@ -206,8 +206,8 @@ wn.module_page["Stock"] = [
 				route: "query-report/Requested Items To Be Transferred",
 			},
 			{
-				"label":wn._("Item Reorder Level"),
-				route: "query-report/Item Reorder Level",
+				"label":wn._("Itemwise Recommended Reorder Level"),
+				route: "query-report/Itemwise Recommended Reorder Level",
 				doctype: "Item"
 			},
 		]

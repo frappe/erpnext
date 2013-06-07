@@ -166,8 +166,8 @@ wn.module_page["Selling"] = [
 				route: "query-report/Item-wise Sales History",
 			},
 			{
-				"label":wn._("No Sales Order from Customers (Since 2 months)"),
-				route: "query-report/No Sales Order from Customers",
+				"label":wn._("Customers Not Buying Since Long Time"),
+				route: "query-report/Customers Not Buying Since Long Time",
 				doctype: "Sales Order"
 			},
 

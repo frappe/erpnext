@@ -13,15 +13,24 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import unicode_literals
 import webnotes
+from webnotes.utils import getdate, cint
 
 def execute(filters=None):
+	if not filters: filters ={}
+
+	days_since_last_order = filters.get("days_since_last_order")
+	if not days_since_last_order or days_since_last_order <= 0:
+		webnotes.msgprint("Please mention legal value in days since last order field",raise_exception=1)
+
 	columns = get_columns() 
 	customers = get_so_details()
 
 	data = []
 	for cust in customers:
-		if cust[8] >= 60: # days_since_last_order
+		if cust[8] >= days_since_last_order:
 			cust.insert(7,get_last_so_amt(cust[0]))
 			data.append(cust)
 	return columns, data 

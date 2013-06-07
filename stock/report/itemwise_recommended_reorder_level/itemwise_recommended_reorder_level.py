@@ -61,7 +61,7 @@ def get_item_info():
 def get_consumed_items(condition):
 
 	cn_items = webnotes.conn.sql("""select se_item.item_code, 
-			sum(se_item.actual_qty) as 'consume_qty'
+				sum(se_item.actual_qty) as 'consume_qty'
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1 
 		and ifnull(se_item.t_warehouse, '') = '' %s
