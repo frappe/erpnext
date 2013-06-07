@@ -216,6 +216,12 @@ wn.module_page["Stock"] = [
 			{
 				"label":wn._("Item Prices"),
 				route: "query-report/Item Prices",
+
+			},
+			{
+				"label":wn._("Itemwise Recommended Reorder Level"),
+				route: "query-report/Itemwise Recommended Reorder Level",
+				doctype: "Item"
 			},
 		]
 	}
