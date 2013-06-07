@@ -266,22 +266,27 @@ class DocType:
 				for b in boms:
 					if b[0] == self.doc.name:
 						msgprint("""Recursion Occured => '%s' cannot be '%s' of '%s'.
-							""" % (cstr(b), cstr(d[2]), self.doc.name), raise_exception = 1)
+							""" % (cstr(b[0]), cstr(d[2]), self.doc.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
 	
-	def update_cost_and_exploded_items(self):
-		bom_list = self.traverse_tree()
+	def update_cost_and_exploded_items(self, bom_list=[]):
+		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
 			bom_obj.on_update()
 			
-	def traverse_tree(self):
+		return bom_list
+			
+	def traverse_tree(self, bom_list=[]):
 		def _get_children(bom_no):
 			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 				
-		bom_list, count = [self.doc.name], 0		
+		count = 0
+		if self.doc.name not in bom_list:
+			bom_list.append(self.doc.name)
+		
 		while(count < len(bom_list)):
 			for child_bom in _get_children(bom_list[count]):
 				if child_bom not in bom_list:
@@ -325,52 +330,50 @@ class DocType:
 
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
-		self.cur_exploded_items = []
+		self.cur_exploded_items = {}
 		for d in getlist(self.doclist, 'bom_materials'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
-				self.cur_exploded_items.append({
+				self.add_to_cur_exploded_items(webnotes._dict({
 					'item_code'				: d.item_code, 
 					'description'			: d.description, 
 					'stock_uom'				: d.stock_uom, 
 					'qty'					: flt(d.qty),
-					'rate'					: flt(d.rate), 
-					'amount'				: flt(d.amount),
-					'parent_bom'			: d.parent,
-					'mat_detail_no'			: d.name,
-					'qty_consumed_per_unit' : flt(d.qty_consumed_per_unit)
-				})
+					'rate'					: flt(d.rate),
+				}))
+				
+	def add_to_cur_exploded_items(self, args):
+		if self.cur_exploded_items.get(args.item_code):
+			self.cur_exploded_items[args.item_code]["qty"] += args.qty
+		else:
+			self.cur_exploded_items[args.item_code] = args
 	
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
 		child_fb_items = sql("""select item_code, description, stock_uom, qty, rate, 
-			amount, parent_bom, mat_detail_no, qty_consumed_per_unit 
-			from `tabBOM Explosion Item` where parent = '%s' and docstatus = 1""" %
-			bom_no, as_dict = 1)
+			qty_consumed_per_unit from `tabBOM Explosion Item` 
+			where parent = %s and docstatus = 1""", bom_no, as_dict = 1)
+			
 		for d in child_fb_items:
-			self.cur_exploded_items.append({
+			self.add_to_cur_exploded_items(webnotes._dict({
 				'item_code'				: d['item_code'], 
 				'description'			: d['description'], 
 				'stock_uom'				: d['stock_uom'], 
 				'qty'					: flt(d['qty_consumed_per_unit'])*qty,
-				'rate'					: flt(d['rate']), 
-				'amount'				: flt(d['amount']),
-				'parent_bom'			: d['parent_bom'],
-				'mat_detail_no'			: d['mat_detail_no'],
-				'qty_consumed_per_unit' : flt(d['qty_consumed_per_unit'])*qty/flt(self.doc.quantity)
-
-			})
+				'rate'					: flt(d['rate']),
+			}))
 
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
 		for d in self.cur_exploded_items:
-			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 
-				self.doclist)
-			for i in d.keys():
-				ch.fields[i] = d[i]
+			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', self.doclist)
+			for i in self.cur_exploded_items[d].keys():
+				ch.fields[i] = self.cur_exploded_items[d][i]
+			ch.amount = flt(ch.qty) * flt(ch.rate)
+			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.doc.quantity)
 			ch.docstatus = self.doc.docstatus
 			ch.save(1)
 

@@ -29,9 +29,10 @@ class DocType:
 		self.validate_bom()
 		self.update_new_bom()
 		bom_list = self.get_parent_boms()
+		updated_bom = []
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
-			bom_obj.update_cost_and_exploded_items()
+			updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
 			
 		webnotes.msgprint(_("BOM replaced"))
 

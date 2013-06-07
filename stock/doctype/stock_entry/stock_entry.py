@@ -506,17 +506,13 @@ class DocType(StockController):
 		
 		if self.doc.use_multi_level_bom:
 			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = sql("""select 
-					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,
-					description,stock_uom 
-				from (	select distinct fb.name, fb.description, fb.item_code,
-							fb.qty_consumed_per_unit, fb.stock_uom 
-						from `tabBOM Explosion Item` fb,`tabItem` it 
-						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
-						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 
-						and fb.parent=%s
-					) a
-				group by item_code, stock_uom""" , (qty, self.doc.bom_no), as_dict=1)
+			fl_bom_sa_child_item = sql("""select fb.item_code, 
+				ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, fb.description, fb.stock_uom 
+				from `tabBOM Explosion Item` fb,`tabItem` it 
+				where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+				and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus < 2 
+				and fb.parent=%s group by item_code, stock_uom""", 
+				(qty, self.doc.bom_no), as_dict=1)
 			
 			if fl_bom_sa_child_item:
 				_make_items_dict(fl_bom_sa_child_item)
@@ -524,10 +520,10 @@ class DocType(StockController):
 			# Get all raw materials considering multi level BOM, 
 			# if multi level bom consider childs of Sub-Assembly items
 			fl_bom_sa_items = sql("""select item_code,
-				ifnull(sum(qty_consumed_per_unit), 0) * '%s' as qty,
+				ifnull(sum(qty_consumed_per_unit), 0) *%s as qty,
 				description, stock_uom from `tabBOM Item` 
-				where parent = '%s' and docstatus < 2 
-				group by item_code""" % (qty, self.doc.bom_no), as_dict=1)
+				where parent = %s and docstatus < 2 
+				group by item_code""", (qty, self.doc.bom_no), as_dict=1)
 			
 			if fl_bom_sa_items:
 				_make_items_dict(fl_bom_sa_items)

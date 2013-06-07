@@ -206,6 +206,19 @@ wn.module_page["Stock"] = [
 				route: "query-report/Requested Items To Be Transferred",
 			},
 			{
+				"label":wn._("Batch-Wise Balance History"),
+				route: "query-report/Batch-Wise Balance History",
+			},
+			{
+				"label":wn._("Warehouse-Wise Stock Balance"),
+				route: "query-report/Warehouse-Wise Stock Balance",
+			},
+			{
+				"label":wn._("Item Prices"),
+				route: "query-report/Item Prices",
+
+			},
+			{
 				"label":wn._("Itemwise Recommended Reorder Level"),
 				route: "query-report/Itemwise Recommended Reorder Level",
 				doctype: "Item"
