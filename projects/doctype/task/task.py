@@ -88,6 +88,6 @@ def get_events(start, end, filters=None):
 			"start": start,
 			"end": end,
 			"conditions": conditions
-		}, as_dict=True, update={"allDay": 0}, debug=1)
+		}, as_dict=True, update={"allDay": 0})
 
 	return data
