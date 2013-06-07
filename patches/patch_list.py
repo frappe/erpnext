@@ -258,4 +258,5 @@ patch_list = [
 	"patches.may_2013.p07_move_update_stock_to_pos",
 	"patches.may_2013.p08_change_item_wise_tax",
 	"patches.june_2013.p01_update_bom_exploded_items",
+	"patches.june_2013.p02_update_project_completed",
 ]
