@@ -18,57 +18,14 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, getdate
-from webnotes.model import db_exists
 from webnotes.model.doc import Document
-from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
-
-sql = webnotes.conn.sql
-	
-
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
 	
-	# Get Customer Details along with its primary contact details
-	# ==============================================================
-	def get_customer_details(self):
-		details =sql("select address, territory, customer_group,customer_name from `tabCustomer` where name=%s and docstatus!=2",(self.doc.customer),as_dict=1)
-		if details:
-			ret = {
-				'customer_address'	:	details and details[0]['address'] or '',
-				'territory'			 :	details and details[0]['territory'] or '',
-				'customer_group'		:	details and details[0]['customer_group'] or '',
-	'customer_name'		 :	details and details[0]['customer_name'] or ''
-			}
-			#get primary contact details(this is done separately coz. , if join query used & no primary contact thn it would not be able to fetch customer details)
-			contact_det = sql("select contact_name, phone, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact=1 and docstatus!=2" %(self.doc.customer), as_dict = 1)
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			ret['contact_no'] = contact_det and contact_det[0]['phone'] or ''
-			ret['email_id'] = contact_det and contact_det[0]['email_id'] or ''		
-			return ret
-		else:
-			msgprint("Customer : %s does not exist in system." % (self.doc.customer))
-			raise Exception	
-	
-	# Get customer's contact person details
-	# ==============================================================
-	def get_contact_details(self):
-		contact = sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s' and docstatus != 2" %(self.doc,contact_person,self.doc.customer), as_dict=1)
-		if contact:
-			ret = {
-				'contact_no' : contact and contact[0]['contact_no'] or '',
-				'email_id' : contact and contact[0]['email_id'] or ''
-			}
-			return ret
-		else:
-			msgprint("Contact Person : %s does not exist in the system." % (self.doc,contact_person))
-			raise Exception
-	
-	#calculate gross profit
-	#=============================================
 	def get_gross_profit(self):
 		pft, per_pft =0, 0
 		pft = flt(self.doc.project_value) - flt(self.doc.est_material_cost)
@@ -77,16 +34,15 @@ class DocType:
 		ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
 		return ret
 		
-	# validate
-	#================================================
 	def validate(self):
+		"""validate start date before end date"""
 		if self.doc.project_start_date and self.doc.completion_date:
 			if getdate(self.doc.completion_date) < getdate(self.doc.project_start_date):
 				msgprint("Expected Completion Date can not be less than Project Start Date")
 				raise Exception
 				
 	def on_update(self):
-		# update milestones
+		"""add events for milestones"""
 		webnotes.conn.sql("""delete from tabEvent where ref_type='Project' and ref_name=%s""",
 			self.doc.name)
 		for d in self.doclist:
@@ -103,3 +59,12 @@ class DocType:
 		event.ref_type = 'Project'
 		event.ref_name = self.doc.name
 		event.save(1)
+		
+	def update_percent_complete(self):
+		total = webnotes.conn.sql("""select count(*) from tabTask where project=%s""", 
+			self.doc.name)[0][0]
+		completed = webnotes.conn.sql("""select count(*) from tabTask where
+			project=%s and status='Closed'""", self.doc.name)[0][0]
+		webnotes.conn.set_value("Project", self.doc.name, "percent_complete",
+		 	int(float(completed) / total * 100))
+

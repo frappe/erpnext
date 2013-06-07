@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-06-03 17:03:08", 
+  "modified": "2013-06-07 12:38:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,19 +26,14 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Project", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "Projects User", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -146,19 +141,6 @@
   "search_index": 0
  }, 
  {
-  "description": "Tasks belonging to this Project.", 
-  "doctype": "DocField", 
-  "fieldname": "sb_tasks", 
-  "fieldtype": "Section Break", 
-  "label": "Tasks"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "project_tasks", 
-  "fieldtype": "HTML", 
-  "label": "Project Tasks"
- }, 
- {
   "description": "Important dates and commitments in your project life cycle", 
   "doctype": "DocField", 
   "fieldname": "sb_milestones", 
@@ -195,6 +177,14 @@
   "oldfieldname": "notes", 
   "oldfieldtype": "Text Editor", 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "percent_complete", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "Percent Complete", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -290,6 +280,18 @@
   "search_index": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Projects User", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All"
  }
 ]

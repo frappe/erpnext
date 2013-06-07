@@ -5,7 +5,6 @@ import webnotes
 from webnotes import _
 from webnotes.utils import cstr
 
-from webnotes.widgets.reportview import build_match_conditions
 
 class OverlapError(webnotes.ValidationError): pass
 
@@ -60,6 +59,10 @@ class DocType:
 				
 @webnotes.whitelist()
 def get_events(start, end):
+	from webnotes.widgets.reportview import build_match_conditions
+	if not webnotes.has_permission("Time Log"):
+		webnotes.msgprint(_("No Permission"), raise_exception=1)
+
 	match = build_match_conditions("Time Log")
 	data = webnotes.conn.sql("""select name, from_time, to_time, 
 		activity_type, task, project from `tabTime Log`
