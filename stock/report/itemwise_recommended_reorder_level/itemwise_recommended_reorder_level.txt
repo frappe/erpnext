@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-07 12:47:22", 
+  "docstatus": 0, 
+  "modified": "2013-06-07 13:03:54", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Item", 
+  "report_name": "Itemwise Recommended Reorder Level", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Itemwise Recommended Reorder Level"
+ }
+]
