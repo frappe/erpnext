@@ -170,6 +170,11 @@ wn.module_page["Selling"] = [
 				route: "query-report/Customers Not Buying Since Long Time",
 				doctype: "Sales Order"
 			},
+			{
+				"label":wn._("Quotation Trend"),
+				route: "query-report/Quotation Trends",
+				doctype: "Sales Order"
+			},
 
 		]
 	}
