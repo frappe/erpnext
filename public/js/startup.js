@@ -38,12 +38,6 @@ erpnext.startup.start = function() {
 		// set interval for updates
 		erpnext.startup.set_periodic_updates();
 
-		// border to the body
-		// ------------------
-		$('footer').html('<div class="web-footer erpnext-footer">\
-			<a href="#attributions">Attributions and License</a> | \
-			<a href="#latest-updates"><b>Latest Updates</b></a></div>');
-
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
 			wn.require("app/js/complete_setup.js");
