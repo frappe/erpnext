@@ -309,6 +309,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				delete item["rate"];
 			});
 		}
+		
+		if(!wn.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
+			$.each(this.frm.item_doclist, function(i, item) {
+				delete item["item_tax_amount"];
+			});
+		}
 	},
 	
 	calculate_outstanding_amount: function() {
@@ -326,9 +332,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		// stored for valuation 
 		// 
 		// TODO: rename item_tax_amount to valuation_tax_amount
-		if(["Valuation", "Valuation and Total"].indexOf(tax.category) != -1) {
-			// accumulate only if tax is for Valuation / Valuation and Total
-			item.item_tax_amount += flt(current_tax_amount, precision("item_tax_amount", item));
+		if(["Valuation", "Valuation and Total"].indexOf(tax.category) != -1 &&
+			wn.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
+				// accumulate only if tax is for Valuation / Valuation and Total
+				item.item_tax_amount += flt(current_tax_amount, precision("item_tax_amount", item));
 		}
 	},
 	

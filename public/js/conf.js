@@ -15,8 +15,8 @@ wn.modules_path = 'erpnext';
 
 // add toolbar icon
 $(document).bind('toolbar_setup', function() {
-	$('.navbar-brand').html((wn.boot.website_settings.brand_html || 'erpnext') +
-		' <i class="icon-home icon-white navbar-icon-home" ></i>')
+	$('.navbar-brand').html(wn.boot.website_settings.brand_html || 
+		('<object data="app/images/splash.svg" class="toolbar-splash" type="image/svg+xml"></object>erpnext'))
 	.css('max-width', '200px').css('overflow', 'hidden')
 	.hover(function() {
 		$(this).find('.icon-home').addClass('navbar-icon-home-hover');

@@ -388,6 +388,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
+		set_sales_bom_help(this.frm.doc);
 	},
 	
 	change_form_labels: function(company_currency) {
