@@ -73,6 +73,7 @@ def add_comment(args=None):
 		del args["page_name"]
 		
 	comment = webnotes.bean(args)
+	del comment.doc.fields["cmd"]
 	comment.ignore_permissions = True
 	comment.insert()
 	
