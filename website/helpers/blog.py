@@ -73,6 +73,7 @@ def add_comment(args=None):
 		del args["page_name"]
 		
 	comment = webnotes.bean(args)
+	comment.ignore_permissions = True
 	comment.insert()
 	
 	# since comments are embedded in the page, clear the web cache
