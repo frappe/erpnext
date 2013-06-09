@@ -71,17 +71,18 @@ def add_comment(args=None):
 	page_name = args.get("page_name")
 	if "page_name" in args:
 		del args["page_name"]
+	if "cmd" in args:
+		del args["cmd"]
 		
 	comment = webnotes.bean(args)
-	del comment.doc.fields["cmd"]
 	comment.ignore_permissions = True
 	comment.insert()
 	
 	# since comments are embedded in the page, clear the web cache
 	webnotes.webutils.clear_cache(page_name)
 	
-	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
-	template_args = { 'comment_list': [comment], 'template': 'app/website/templates/html/comment.html' }
+	args['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
+	template_args = { 'comment_list': [args], 'template': 'app/website/templates/html/comment.html' }
 	
 	# get html of comment row
 	comment_html = webnotes.webutils.build_html(template_args)
