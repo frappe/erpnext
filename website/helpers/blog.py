@@ -102,7 +102,7 @@ def add_comment(args=None):
 		subject='New Comment on Blog: ' + blog['title'], 
 		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
 	
-	return comment_html
+	return comment_html.replace("\n", "")
 
 @webnotes.whitelist(allow_guest=True)
 def add_subscriber(name, email_id):
