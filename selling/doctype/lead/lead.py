@@ -65,14 +65,14 @@ class DocType(SellingController):
 		self.check_email_id_is_unique()
 		self.add_calendar_event()
 		
-	def add_calendar_event(self, opts=None):
+	def add_calendar_event(self, opts=None, force=False):
 		super(DocType, self).add_calendar_event({
 			"owner": self.doc.lead_owner,
 			"subject": ('Contact ' + cstr(self.doc.lead_name)),
 			"description": ('Contact ' + cstr(self.doc.lead_name)) + \
 				(self.doc.contact_by and ('. By : ' + cstr(self.doc.contact_by)) or '') + \
 				(self.doc.remark and ('.To Discuss : ' + cstr(self.doc.remark)) or '')
-		})
+		}, force)
 
 	def check_email_id_is_unique(self):
 		if self.doc.email_id:

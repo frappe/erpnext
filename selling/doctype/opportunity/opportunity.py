@@ -93,7 +93,7 @@ class DocType(TransactionBase):
 
 		self.add_calendar_event()
 
-	def add_calendar_event(self, opts=None):
+	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
 			opts = webnotes._dict()
 		
@@ -116,7 +116,7 @@ class DocType(TransactionBase):
 		if self.doc.to_discuss:
 			opts.description += ' To Discuss : ' + cstr(self.doc.to_discuss)
 		
-		super(DocType, self).add_calendar_event(opts)
+		super(DocType, self).add_calendar_event(opts, force)
 
 	def set_last_contact_date(self):
 		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
