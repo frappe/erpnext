@@ -165,6 +165,12 @@ wn.module_page["Selling"] = [
 				"label":wn._("Item-wise Sales History"),
 				route: "query-report/Item-wise Sales History",
 			},
+			{
+				"label":wn._("Customers Not Buying Since Long Time"),
+				route: "query-report/Customers Not Buying Since Long Time",
+				doctype: "Sales Order"
+			},
+
 		]
 	}
 ]
