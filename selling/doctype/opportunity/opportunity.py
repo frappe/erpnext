@@ -17,9 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild
+from webnotes.utils import add_days, cstr, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
@@ -33,6 +31,13 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
+
+		self._prev = webnotes._dict({
+			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+		})
 
 	def onload(self):
 		self.add_communication_list()
@@ -84,48 +89,34 @@ class DocType(TransactionBase):
 	def on_update(self):
 		# Add to calendar
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
-			if self.doc.contact_by:
-				self.add_calendar_event()
 			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-		webnotes.conn.set(self.doc, 'status', 'Draft')
 
-	def add_calendar_event(self):
-		desc=''
-		user_lst =[]
+		self.add_calendar_event()
+
+	def add_calendar_event(self, opts=None, force=False):
+		if not opts:
+			opts = webnotes._dict()
+		
+		opts.description = ""
+		
 		if self.doc.customer:
 			if self.doc.contact_person:
-				desc = 'Contact '+cstr(self.doc.contact_person)
+				opts.description = 'Contact '+cstr(self.doc.contact_person)
 			else:
-				desc = 'Contact customer '+cstr(self.doc.customer)
+				opts.description = 'Contact customer '+cstr(self.doc.customer)
 		elif self.doc.lead:
 			if self.doc.contact_display:
-				desc = 'Contact '+cstr(self.doc.contact_display)
+				opts.description = 'Contact '+cstr(self.doc.contact_display)
 			else:
-				desc = 'Contact lead '+cstr(self.doc.lead)
-		desc = desc+ '. By : ' + cstr(self.doc.contact_by)
+				opts.description = 'Contact lead '+cstr(self.doc.lead)
+				
+		opts.subject = opts.description
+		opts.description += '. By : ' + cstr(self.doc.contact_by)
 		
 		if self.doc.to_discuss:
-			desc = desc+' To Discuss : ' + cstr(self.doc.to_discuss)
+			opts.description += ' To Discuss : ' + cstr(self.doc.to_discuss)
 		
-		ev = Document('Event')
-		ev.description = desc
-		ev.event_date = self.doc.contact_date
-		ev.event_hour = '10:00'
-		ev.event_type = 'Private'
-		ev.ref_type = 'Opportunity'
-		ev.ref_name = self.doc.name
-		ev.save(1)
-		
-		user_lst.append(self.doc.owner)
-		
-		chk = sql("select t1.name from `tabProfile` t1, `tabSales Person` t2 where t2.email_id = t1.name and t2.name=%s",self.doc.contact_by)
-		if chk:
-			user_lst.append(chk[0][0])
-		
-		for d in user_lst:
-			ch = addchild(ev, 'event_individuals', 'Event User')
-			ch.person = d
-			ch.save(1)
+		super(DocType, self).add_calendar_event(opts, force)
 
 	def set_last_contact_date(self):
 		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
@@ -159,6 +150,9 @@ class DocType(TransactionBase):
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_lead_cust()
+		
+		if not self.doc.status:
+			self.doc.status = "Draft"
 
 	def on_submit(self):
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
@@ -180,3 +174,6 @@ class DocType(TransactionBase):
 			webnotes.conn.set(self.doc, 'status', 'Opportunity Lost')
 			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
 			return 'true'
+
+	def on_trash(self):
+		self.delete_events()

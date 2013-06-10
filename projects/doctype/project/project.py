@@ -18,11 +18,10 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, getdate
-from webnotes.model.doc import Document
 from webnotes import msgprint
 
 class DocType:
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
 	
@@ -42,23 +41,7 @@ class DocType:
 				raise Exception
 				
 	def on_update(self):
-		"""add events for milestones"""
-		webnotes.conn.sql("""delete from tabEvent where ref_type='Project' and ref_name=%s""",
-			self.doc.name)
-		for d in self.doclist:
-			if d.doctype=='Project Milestone' and d.docstatus!=2:
-				self.add_calendar_event(d.milestone, d.milestone_date)
-
-	def add_calendar_event(self, milestone, date):
-		""" Add calendar event for task in calendar of Allocated person"""
-		event = Document('Event')
-		event.description = milestone + ' for ' + self.doc.name
-		event.event_date = date
-		event.event_hour =  '10:00'
-		event.event_type = 'Public'
-		event.ref_type = 'Project'
-		event.ref_name = self.doc.name
-		event.save(1)
+		self.add_calendar_event()
 		
 	def update_percent_complete(self):
 		total = webnotes.conn.sql("""select count(*) from tabTask where project=%s""", 
@@ -69,3 +52,28 @@ class DocType:
 			webnotes.conn.set_value("Project", self.doc.name, "percent_complete",
 			 	int(float(completed) / total * 100))
 
+	def add_calendar_event(self):
+		# delete any earlier event for this project
+		self.delete_events()
+		
+		# add events
+		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
+			if milestone.milestone_date:
+				description = (milestone.milestone or "Milestone") + " for " + self.doc.name
+				webnotes.bean({
+					"doctype": "Event",
+					"owner": self.doc.owner,
+					"subject": description,
+					"description": description,
+					"starts_on": milestone.milestone_date + " 10:00:00",
+					"event_type": "Private",
+					"ref_type": self.doc.doctype,
+					"ref_name": self.doc.name
+				}).insert()
+	
+	def on_trash(self):
+		self.delete_events()
+			
+	def delete_events(self):
+		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))

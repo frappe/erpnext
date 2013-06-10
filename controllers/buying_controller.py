@@ -54,7 +54,7 @@ class BuyingController(StockController):
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
-		self.set_taxes()
+		self.set_taxes("Purchase Taxes and Charges", "purchase_tax_details", "purchase_other_charges")
 		
 	def validate_warehouse_belongs_to_company(self):
 		for warehouse, company in webnotes.conn.get_values("Warehouse", 

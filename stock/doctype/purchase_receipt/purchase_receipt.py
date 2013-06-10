@@ -313,12 +313,6 @@ class DocType(BuyingController):
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 	
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-	
-	def get_purchase_tax_details(self):
-		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
-		
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return

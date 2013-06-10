@@ -154,14 +154,6 @@ class DocType(BuyingController):
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-	
-	
-	def get_purchase_tax_details(self):
-		self.doclist =  get_obj('Purchase Common').get_purchase_tax_details(self)
-
-
 	def get_rate1(self,acc):
 		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }

@@ -259,4 +259,6 @@ patch_list = [
 	"patches.may_2013.p08_change_item_wise_tax",
 	"patches.june_2013.p01_update_bom_exploded_items",
 	"patches.june_2013.p02_update_project_completed",
+	"execute:webnotes.delete_doc('DocType', 'System Console')",
+	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 ]
