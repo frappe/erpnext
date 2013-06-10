@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Foundation: Customer",
+	"_label": "Customer Master",
 	"_title_image": "img/customers.png"
 }
 ---
