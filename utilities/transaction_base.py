@@ -271,9 +271,9 @@ class TransactionBase(StatusUpdater):
 		if not self.doc.posting_time:
 			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')
 			
-	def add_calendar_event(self, opts):
+	def add_calendar_event(self, opts, force=False):
 		if self.doc.contact_by != cstr(self._prev.contact_by) or \
-				self.doc.contact_date != cstr(self._prev.contact_date):
+				self.doc.contact_date != cstr(self._prev.contact_date) or force:
 			
 			self.delete_events()
 			self._add_calendar_event(opts)
