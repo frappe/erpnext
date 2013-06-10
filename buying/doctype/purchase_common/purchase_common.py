@@ -387,39 +387,6 @@ class DocType(BuyingController):
 			msgprint("'%s' Not Within The Fiscal Year"%(dn))
 			raise Exception
 
-	def load_default_taxes(self, obj):
-		return self.get_purchase_tax_details(obj, 1)
-	
-	def get_purchase_tax_details(self,obj, default = 0):
-		obj.doclist = self.doc.clear_table(obj.doclist,'purchase_tax_details')
-		
-		if default: add_cond = " and ifnull(t2.is_default,0) = 1"
-		else: add_cond = " and t1.parent = '"+cstr(obj.doc.purchase_other_charges)+"'"
-
-		other_charge = sql("""
-			select t1.*
-			from `tabPurchase Taxes and Charges` t1, `tabPurchase Taxes and Charges Master` t2
-			where t1.parent = t2.name %s
-			order by t1.idx
-		"""% add_cond, as_dict = 1)
-		
-		idx = 0
-		for other in other_charge:
-			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 
-				obj.doclist)
-			d.category = other['category']
-			d.add_deduct_tax = other['add_deduct_tax']
-			d.charge_type = other['charge_type']
-			d.row_id = other['row_id']
-			d.description = other['description']
-			d.account_head = other['account_head']
-			d.rate = flt(other['rate'])
-			d.tax_amount = flt(other['tax_amount'])
-			d.cost_center = other["cost_center"]
-			d.idx = idx
-			idx += 1
-		return obj.doclist
-
 	def get_rate(self, arg, obj):
 		arg = eval(arg)
 		rate = sql("select account_type, tax_rate from `tabAccount` where name = '%s'" %(arg['account_head']), as_dict=1)

@@ -63,12 +63,6 @@ class DocType(BuyingController):
 					d.purchase_ref_rate = d.discount_rate = d.purchase_rate = 0.0
 					d.import_ref_rate = d.import_rate = 0.0
 	
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-	
-	def get_purchase_tax_details(self):
-		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
-
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year( \
 			self.doc.fiscal_year, self.doc.transaction_date, 'Quotation Date')
