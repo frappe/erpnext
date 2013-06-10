@@ -58,17 +58,18 @@ class DocType:
 		
 		# add events
 		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
-			description = milestone.milestone + " for " + self.doc.name
-			webnotes.bean({
-				"doctype": "Event",
-				"owner": self.doc.owner,
-				"subject": description,
-				"description": description,
-				"starts_on": milestone.milestone_date + " 10:00:00",
-				"event_type": "Private",
-				"ref_type": self.doc.doctype,
-				"ref_name": self.doc.name
-			}).insert()
+			if milestone.milestone_date:
+				description = (milestone.milestone or "Milestone") + " for " + self.doc.name
+				webnotes.bean({
+					"doctype": "Event",
+					"owner": self.doc.owner,
+					"subject": description,
+					"description": description,
+					"starts_on": milestone.milestone_date + " 10:00:00",
+					"event_type": "Private",
+					"ref_type": self.doc.doctype,
+					"ref_name": self.doc.name
+				}).insert()
 	
 	def on_trash(self):
 		self.delete_events()
