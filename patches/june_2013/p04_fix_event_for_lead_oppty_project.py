@@ -9,12 +9,7 @@ def execute():
 		for ref_name in webnotes.conn.sql_list("""select ref_name 
 			from `tabEvent` where ref_type=%s and ifnull(starts_on, '')='' """, dt):
 				if webnotes.conn.exists(dt, ref_name):
-					controller = webnotes.get_obj(dt, ref_name)
-					if dt == "Project":
-						controller.add_calendar_event()
-					else:
-						controller.delete_events()
-						controller._add_calendar_event()
+					webnotes.get_obj(dt, ref_name).add_calendar_event()
 				else:
 					# remove events where ref doc doesn't exist
 					webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
