@@ -254,4 +254,5 @@ patch_list = [
 	"patches.may_2013.p05_update_cancelled_gl_entries",
 	"patches.june_2013.p01_update_bom_exploded_items",
 	"execute:webnotes.delete_doc('DocType', 'System Console')",
+	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 ]

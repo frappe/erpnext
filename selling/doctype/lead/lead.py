@@ -29,6 +29,13 @@ class DocType(SellingController):
 		self.doc = doc
 		self.doclist = doclist
 
+		self._prev = webnotes._dict({
+			"contact_date": webnotes.conn.get_value("Lead", self.doc.name, "contact_date") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_by": webnotes.conn.get_value("Lead", self.doc.name, "contact_by") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+		})
+
 	def onload(self):
 		self.add_communication_list()
 
@@ -53,19 +60,19 @@ class DocType(SellingController):
 			if not validate_email_add(self.doc.email_id):
 				msgprint('Please enter valid email id.')
 				raise Exception
-		
-		self._prev = webnotes._dict({
-			"contact_date": webnotes.conn.get_value("Lead", self.doc.name, "contact_date") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": webnotes.conn.get_value("Lead", self.doc.name, "contact_by") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-		})
 				
-	
 	def on_update(self):
-		self.add_calendar_event()
-			
 		self.check_email_id_is_unique()
+		self.add_calendar_event()
+		
+	def add_calendar_event(self, opts=None):
+		super(DocType, self).add_calendar_event({
+			"owner": self.doc.lead_owner,
+			"subject": ('Contact ' + cstr(self.doc.lead_name)),
+			"description": ('Contact ' + cstr(self.doc.lead_name)) + \
+				(self.doc.contact_by and ('. By : ' + cstr(self.doc.contact_by)) or '') + \
+				(self.doc.remark and ('.To Discuss : ' + cstr(self.doc.remark)) or '')
+		})
 
 	def check_email_id_is_unique(self):
 		if self.doc.email_id:
@@ -76,35 +83,6 @@ class DocType(SellingController):
 				items = [e[0] for e in email_list if e[0]!=self.doc.name]
 				webnotes.msgprint(_("""Email Id must be unique, already exists for: """) + \
 					", ".join(items), raise_exception=True)
-		
-	def add_calendar_event(self):
-		if self.doc.contact_by != cstr(self._prev.contact_by) or \
-				self.doc.contact_date != cstr(self._prev.contact_date):
-			# delete any earlier event by this lead
-			for name in webnotes.conn.sql_list("""select name from `tabEvent` 
-				where ref_type="Lead" and ref_name=%s""", self.doc.name):
-					webnotes.delete_doc("Event", name)
-			
-			if self.doc.contact_date:	
-				webnotes.bean([
-					{
-						"doctype": "Event",
-						"owner": self.doc.lead_owner or self.doc.owner,
-						"subject": ('Contact ' + cstr(self.doc.lead_name)),
-						"description": ('Contact ' + cstr(self.doc.lead_name)) + \
-							(self.doc.contact_by and ('. By : ' + cstr(self.doc.contact_by)) or '') + \
-							(self.doc.remark and ('.To Discuss : ' + cstr(self.doc.remark)) or ''),
-						"starts_on": self.doc.contact_date + " 10:00:00",
-						"event_type": "Private",
-						"ref_type": "Lead",
-						"ref_name": self.doc.name
-					},
-					{
-						"doctype": "Event User",
-						"parentfield": "event_individuals",
-						"person": self.doc.contact_by
-					}
-				]).insert()
 
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Sales Email Settings',None,'email_id')
@@ -113,3 +91,5 @@ class DocType(SellingController):
 		webnotes.conn.sql("""update tabCommunication set lead=null where lead=%s""", self.doc.name)
 		webnotes.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)
+		
+		self.delete_events()
