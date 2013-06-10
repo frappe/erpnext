@@ -65,7 +65,7 @@ class DocType:
 			self.doc.name)[0][0]
 		if total:
 			completed = webnotes.conn.sql("""select count(*) from tabTask where
-				project=%s and status='Closed'""", self.doc.name)[0][0]
+				project=%s and status in ('Closed', 'Cancelled')""", self.doc.name)[0][0]
 			webnotes.conn.set_value("Project", self.doc.name, "percent_complete",
 			 	int(float(completed) / total * 100))
 
