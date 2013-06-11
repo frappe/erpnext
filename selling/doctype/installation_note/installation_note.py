@@ -52,7 +52,6 @@ class DocType(TransactionBase):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
-		self.validate_mandatory()
 		self.validate_reference_value()
  
 	def pull_delivery_note_details(self):

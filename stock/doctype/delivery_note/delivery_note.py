@@ -124,7 +124,6 @@ class DocType(SellingController):
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
-		self.validate_mandatory()
 		self.validate_reference_value()
 		self.validate_for_items()
 		self.validate_warehouse()
