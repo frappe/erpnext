@@ -222,7 +222,6 @@ class DocType:
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
-		from accounts.utils import add_cc
 		cc_list = [
 			{
 				'cost_center_name':'Root',
@@ -244,7 +243,10 @@ class DocType:
 			}
 		]
 		for cc in cc_list:
-			add_cc(cc)
+			cc.update({"doctype": "Cost Center"})
+			cc_bean = webnotes.bean(cc)
+			cc_bean.ignore_permissions = True
+			cc_bean.insert()
 			
 		webnotes.conn.set_value("Company", self.doc.name, "cost_center",
 			"Default CC Ledger - " + self.doc.abbr)
