@@ -160,13 +160,13 @@ class DocType:
 	def update_outstanding_amt(self):
 		# get final outstanding amt
 		bal = flt(sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
-			where against_voucher=%s and against_voucher_type=%s 
-			and ifnull(is_cancelled,'No') = 'No'""", 
-			(self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
-		
+			where against_voucher=%s and against_voucher_type=%s and account = %s
+			and ifnull(is_cancelled,'No') = 'No'""", (self.doc.against_voucher, 
+			self.doc.against_voucher_type, self.doc.account))[0][0] or 0.0)
+
 		if self.doc.against_voucher_type == 'Purchase Invoice':
 			bal = -bal
-			
+		
 		elif self.doc.against_voucher_type == "Journal Voucher":
 			against_voucher_amount = flt(webnotes.conn.sql("""select sum(debit) - sum(credit)
 				from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s

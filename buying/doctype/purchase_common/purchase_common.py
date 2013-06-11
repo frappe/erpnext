@@ -432,6 +432,7 @@ class DocType(BuyingController):
 			d.account_head = other['account_head']
 			d.rate = flt(other['rate'])
 			d.tax_amount = flt(other['tax_amount'])
+			d.cost_center = other["cost_center"]
 			d.idx = idx
 			idx += 1
 		return obj.doclist

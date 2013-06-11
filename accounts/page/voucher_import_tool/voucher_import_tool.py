@@ -59,7 +59,7 @@ def upload():
 		if not company_abbr:
 			webnotes.msgprint(_("Company is missing or entered incorrect value"), raise_exception=1)
 		
-		data, start_idx = get_data(rows, company_abbr)
+		data, start_idx = get_data(rows, company_abbr, rows[0][0])
 	except Exception, e:
 		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
 		messages.append("""<p style='color: red'>%s</p>""" % (err_msg or "No message"))
@@ -213,10 +213,11 @@ def get_common_values(rows):
 
 	return common_values
 	
-def get_data(rows, company_abbr):
+def get_data(rows, company_abbr, import_type):
 	start_row = 0
 	data = []
 	start_row_idx = 0
+	accounts = None
 	for i in xrange(len(rows)):
 		r = rows[i]
 		if r[0]:
@@ -257,17 +258,19 @@ def get_data(rows, company_abbr):
 
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1] 
 					if not c.endswith(" - " + company_abbr)]
-				accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
+					
+				if import_type == "Voucher Import: Multiple Accounts":
+					accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
 
-				if not accounts:
-					webnotes.msgprint(_("""No Account found in csv file, 
-						May be company abbreviation is not correct"""), raise_exception=1)
+					if not accounts:
+						webnotes.msgprint(_("""No Account found in csv file, 
+							May be company abbreviation is not correct"""), raise_exception=1)
 
-				if accounts and (len(columns) != rows[i+1].index(accounts[0])):
-					webnotes.msgprint(_("""All account columns should be after \
-						standard columns and on the right.
-						If you entered it properly, next probable reason \
-						could be wrong account name.
-						Please rectify it in the file and try again."""), raise_exception=1)
+					if accounts and (len(columns) != rows[i+1].index(accounts[0])):
+						webnotes.msgprint(_("""All account columns should be after \
+							standard columns and on the right.
+							If you entered it properly, next probable reason \
+							could be wrong account name.
+							Please rectify it in the file and try again."""), raise_exception=1)
 				
 	return data, start_row_idx

@@ -169,6 +169,10 @@ wn.module_page["Selling"] = [
 				"label":wn._("Territory Target Variance (Item Group-Wise)"),
 				route: "query-report/Territory Target Variance (Item Group-Wise)",
 			},
+				"label":wn._("Customers Not Buying Since Long Time"),
+				route: "query-report/Customers Not Buying Since Long Time",
+				doctype: "Sales Order"
+			},
 		]
 	}
 ]
