@@ -1,0 +1,1 @@
+Template for tax structure in sales transactions.
