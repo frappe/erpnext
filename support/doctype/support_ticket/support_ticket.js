@@ -27,8 +27,8 @@ $.extend(cur_frm.cscript, {
 	refresh: function(doc) {
 		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
-		if(!doc.__islocal) {											
-			if(user_roles.indexOf("Support Manager")!==-1) {
+		if(!doc.__islocal) {
+			if(cur_frm.fields_dict.status.get_status()=="Write") {
 				if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
 				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);
 			}

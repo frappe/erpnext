@@ -158,7 +158,6 @@ class DocType(SellingController):
 			"Order Confirmed", "Order Lost", "Cancelled"])
 
 		self.validate_fiscal_year()
-		self.validate_mandatory()
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
