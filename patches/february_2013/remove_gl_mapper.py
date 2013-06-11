@@ -1,4 +1,7 @@
 def execute():
 	import webnotes
-	for mapper in webnotes.conn.sql("""select name from `tabGL Mapper`"""):
-		webnotes.delete_doc("GL Mapper", mapper[0])
+	try:
+		for mapper in webnotes.conn.sql("""select name from `tabGL Mapper`"""):
+			webnotes.delete_doc("GL Mapper", mapper[0])
+	except Exception, e:
+		pass
