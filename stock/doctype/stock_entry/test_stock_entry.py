@@ -226,6 +226,7 @@ class TestStockEntry(unittest.TestCase):
 		si.doc.is_pos = si.doc.update_stock = 1
 		si.doclist[1].warehouse = "_Test Warehouse"
 		si.doclist[1].item_code = item_code
+		si.doclist[1].qty = 5.0
 		si.insert()
 		si.submit()
 		
