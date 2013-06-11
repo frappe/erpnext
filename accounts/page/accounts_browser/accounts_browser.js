@@ -131,7 +131,7 @@ erpnext.AccountsChart = Class.extend({
 		if (wn.model.can_read(this.ctype) !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.open();">Edit</a>');
 		}
-		if (data.expandable) {
+		if (data.expandable && wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
 		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
