@@ -165,6 +165,10 @@ wn.module_page["Selling"] = [
 				"label":wn._("Item-wise Sales History"),
 				route: "query-report/Item-wise Sales History",
 			},
+			{
+				"label":wn._("Territory Target Variance (Item Group-Wise)"),
+				route: "query-report/Territory Target Variance (Item Group-Wise)",
+			},
 		]
 	}
 ]
