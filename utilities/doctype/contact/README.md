@@ -1,0 +1,1 @@
+Contact representing a Customer or Supplier.

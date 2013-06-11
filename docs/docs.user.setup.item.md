@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Foundation: Item",
+	"_label": "Item Master",
 	"_title_image": "img/items.png"
 }
 ---

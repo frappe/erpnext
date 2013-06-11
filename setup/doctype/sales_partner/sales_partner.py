@@ -42,9 +42,6 @@ class DocType:
         if self.doc.fields[d]:
           comp_address += self.doc.fields[d] + "\n"
       self.doc.address = comp_address
-
-  def check_state(self):
-    return "\n" + "\n".join([i[0] for i in sql("select state_name from `tabState` where `tabState`.country='%s' " % self.doc.country)])
     
   def get_contacts(self,nm):
     if nm:

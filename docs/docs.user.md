@@ -3,7 +3,12 @@
 	"_label": "User Guide",
 	"_toc": [
 		"docs.user.intro",
-		"docs.user.setup"
+		"docs.user.setup",
+		"docs.user.ops",
+		"docs.user.website",
+		"docs.user.tools",
+		"docs.user.reports",
+		"docs.user.customize"
 	]
 }
 ---

@@ -38,14 +38,7 @@ class DocType(DocTypeNestedSet):
 			from webnotes.webutils import update_page_name
 			# webpage updates
 			page_name = self.doc.name
-			if webnotes.conn.get_value("Product Settings", None, 
-				"default_product_category")==self.doc.name:
-				page_name = "products"
-				from webnotes.webutils import clear_cache
-				clear_cache()
-				
 			update_page_name(self.doc, page_name)
-			
 			invalidate_cache_for(self.doc.name)
 
 		elif self.doc.page_name:
