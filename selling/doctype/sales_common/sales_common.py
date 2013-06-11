@@ -65,15 +65,6 @@ class DocType(TransactionBase):
 			obj.doc.customer_address = c['contact_address']
 
 
-	# Get customer's primary shipping details
-	# ==============================================================
-	def get_shipping_details(self, obj = ''):
-		det = webnotes.conn.sql("select name, ship_to, shipping_address from `tabShipping Address` where customer = '%s' and docstatus != 2 and ifnull(is_primary_address, 'Yes') = 'Yes'" %(obj.doc.customer), as_dict = 1)
-		obj.doc.ship_det_no = det and det[0]['name'] or ''
-		obj.doc.ship_to = det and det[0]['ship_to'] or ''
-		obj.doc.shipping_address = det and det[0]['shipping_address'] or ''
-
-
 	# get invoice details
 	# ====================
 	def get_invoice_details(self, obj = ''):
