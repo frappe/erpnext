@@ -1,0 +1,1 @@
+Prospective customer / prospect database. List of all prospects that could be source of business.
