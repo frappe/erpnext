@@ -7,8 +7,6 @@ def pre_import():
 	make_modules()
 	make_roles()
 	webnotes.conn.commit()
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper")
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper_detail")
 	
 def make_modules():
 	modules = [

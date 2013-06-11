@@ -140,12 +140,6 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
 
 		
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception, "Validation Error. "
-
-
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:

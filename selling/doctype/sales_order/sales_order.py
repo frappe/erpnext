@@ -93,10 +93,6 @@ class DocType(SellingController):
 			if getdate(self.doc.transaction_date) > getdate(self.doc.delivery_date):
 				msgprint("Expected Delivery Date cannot be before Sales Order Date")
 				raise Exception
-		# amendment date is necessary if document is amended
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
 	
 	def validate_po(self):
 		# validate p.o date v/s delivery date

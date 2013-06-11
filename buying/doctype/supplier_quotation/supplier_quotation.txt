@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-06-05 14:46:30", 
+  "modified": "2013-06-11 16:05:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -586,18 +586,6 @@
   "report_hide": 0
  }, 
  {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1
- }, 
- {
   "description": "Select the relevant company name if you have multiple companies", 
   "doctype": "DocField", 
   "fieldname": "company", 
@@ -638,28 +626,6 @@
   "options": "Print Heading", 
   "print_hide": 1, 
   "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break", 
-  "print_hide": 1, 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "amend": 1, 

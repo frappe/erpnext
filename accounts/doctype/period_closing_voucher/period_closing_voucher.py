@@ -187,7 +187,7 @@ class DocType:
 
 		# Swap Debit & Credit Column and make gl entry
 		for gl in gl_entries:
-			fdict = {'account': gl[0], 'cost_center': '', 'against': '', 'debit': flt(gl[2]), 'credit' : flt(gl[1]), 'remarks': self.doc.cancel_reason, 'voucher_type': self.doc.doctype, 'voucher_no': self.doc.name, 'transaction_date': self.doc.transaction_date, 'posting_date': self.doc.posting_date, 'fiscal_year': self.doc.fiscal_year, 'against_voucher': '', 'against_voucher_type': '', 'company': self.doc.company, 'is_opening': 'No', 'aging_date': 'self.doc.posting_date'}
+			fdict = {'account': gl[0], 'cost_center': '', 'against': '', 'debit': flt(gl[2]), 'credit' : flt(gl[1]), 'remarks': "cancelled", 'voucher_type': self.doc.doctype, 'voucher_no': self.doc.name, 'transaction_date': self.doc.transaction_date, 'posting_date': self.doc.posting_date, 'fiscal_year': self.doc.fiscal_year, 'against_voucher': '', 'against_voucher_type': '', 'company': self.doc.company, 'is_opening': 'No', 'aging_date': 'self.doc.posting_date'}
 			self.save_entry(fdict, is_cancel = 'Yes')
 
 		# Update is_cancelled = 'Yes' to all gl entries for current voucher

@@ -98,13 +98,6 @@ class DocType(SellingController):
 # VALIDATE
 # ==============================================================================================
 	
-	# Amendment date is necessary if document is amended
-	# --------------------------------------------------
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
-
 	# Fiscal Year Validation
 	# ----------------------
 	def validate_fiscal_year(self):

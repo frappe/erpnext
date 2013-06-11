@@ -8,6 +8,3 @@ def execute():
 			"Multi Ledger Report Detail", "Period Control", "Reposting Tool", 
 			"Lease Agreement", "Lease Installment"]:
 		delete_doc("DocType", dt)
-	
-	# remove search criteria
-	delete_doc("Search Criteria", "Trial Balance")

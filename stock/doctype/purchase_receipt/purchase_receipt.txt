@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-06-05 14:45:10", 
+  "modified": "2013-06-11 16:16:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -783,19 +783,6 @@
   "print_hide": 1, 
   "print_width": "50px", 
   "width": "50px"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

@@ -72,11 +72,6 @@ class DocType(TransactionBase):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, self.doc.inst_date, 
 			'Installation Date')
 
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception, "Validation Error. "
-
 	def validate_reference_value(self):
 		mapper = get_obj('DocType Mapper', 'Delivery Note-Installation Note', with_children = 1)
 		mapper.validate_reference_value(self, self.doc.name)
