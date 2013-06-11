@@ -1,0 +1,1 @@
+Deduction details in parent Salary Structure.

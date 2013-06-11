@@ -1,0 +1,1 @@
+Amount claimed by Employee for expense made by the Employee on organization's behalf.
