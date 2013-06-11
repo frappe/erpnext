@@ -19,21 +19,21 @@ wn.query_reports["Quotation Trends"] = {
 			"label": "Group By",
 			"fieldtype": "Select",
 			"options": "Item"+NEWLINE+"Customer",
-			"default": "Customer"
+			"default": ""
 		},
 		{
 			"fieldname":"fiscal_year",
 			"label": "Fiscal Year",
 			"fieldtype": "Link",
 			"options":'Fiscal Year',
-			"default": "Fiscal Year"
+			"default": sys_defaults.fiscal_year
 		},
 		{
 			"fieldname":"company",
 			"label": "Company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": "Company"
+			"default": sys_defaults.company
 		},
 		
 	]
