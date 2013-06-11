@@ -62,11 +62,6 @@ def get_todays_events():
 def get_open_leads():
 	return webnotes.conn.sql("""select count(*) from tabLead 
 		where status='Open'""")[0][0]
-
-def get_unanswered_questions():
-	return len(filter(lambda d: d[0]==0,
-		webnotes.conn.sql("""select (select count(*) from tabAnswer 
-		where tabAnswer.question = tabQuestion.name) as answers from tabQuestion""")))
 	
 @webnotes.whitelist()
 def get_global_status_messages(arg=None):
@@ -76,6 +71,5 @@ def get_global_status_messages(arg=None):
 		'things_todo': get_things_todo(),
 		'todays_events': get_todays_events(),
 		'open_tasks': get_open_tasks(),
-		'unanswered_questions': get_unanswered_questions(),
 		'open_leads': get_open_leads()
 	}
