@@ -135,7 +135,7 @@ def _get_price_list_rate(args, item_bean, meta):
 		"parentfield": "ref_rate_details",
 		"price_list_name": args.price_list_name, 
 		"price_list_currency": args.price_list_currency,
-		"selling": 1})
+		"buying_or_selling": "Selling"})
 	
 	if not base_ref_rate:
 		return {}

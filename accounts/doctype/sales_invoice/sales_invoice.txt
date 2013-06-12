@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-06-05 18:53:03", 
+  "modified": "2013-06-12 15:14:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -38,15 +38,6 @@
  {
   "doctype": "DocType", 
   "name": "Sales Invoice"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "label": "Basic Info", 
-  "oldfieldtype": "Section Break", 
-  "print_hide": 1, 
-  "read_only": 0
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 

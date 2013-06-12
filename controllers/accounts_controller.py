@@ -42,7 +42,7 @@ class AccountsController(TransactionBase):
 			not self.doc.price_list_currency:
 				self.doc.fields.update(get_price_list_currency({
 					"price_list_name": self.doc.price_list_name, 
-					"use_for": buying_or_selling
+					"buying_or_selling": buying_or_selling
 				}))
 				
 	def set_missing_item_details(self, get_item_details):

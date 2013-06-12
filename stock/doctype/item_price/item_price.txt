@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-29 15:18:04", 
+  "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-04-29 19:16:45", 
+  "modified": "2013-06-11 18:27:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,21 +60,18 @@
   "oldfieldname": "ref_currency", 
   "oldfieldtype": "Select", 
   "options": "Currency", 
-  "reqd": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
   "search_index": 1
  }, 
  {
-  "description": "Allow this price in sales related forms", 
+  "default": "Selling", 
   "doctype": "DocField", 
-  "fieldname": "selling", 
-  "fieldtype": "Check", 
-  "label": "Valid For Selling"
- }, 
- {
-  "description": "Allow this price in purchase related forms", 
-  "doctype": "DocField", 
-  "fieldname": "buying", 
-  "fieldtype": "Check", 
-  "label": "Valid For Buying"
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "read_only": 1, 
+  "reqd": 1
  }
 ]

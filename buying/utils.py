@@ -102,7 +102,7 @@ def _get_price_list_rate(args, item_bean, meta):
 			"parentfield": "ref_rate_details", 
 			"price_list_name": args.price_list_name, 
 			"ref_currency": args.price_list_currency,
-			"buying": 1})
+			"buying_or_selling": "Buying"})
 		if price_list_rate:
 			out.import_ref_rate = \
 				flt(price_list_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)

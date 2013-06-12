@@ -34,14 +34,14 @@ def get_price_list_currency(args):
 	"""
 		args = {
 			"price_list_name": "Something",
-			"use_for": "buying" or "selling"
+			"buying_or_selling": "Buying" or "Selling"
 		}
 	"""
 	if isinstance(args, basestring):
 		args = json.loads(args)
 	
 	result = webnotes.conn.sql("""select distinct ref_currency from `tabItem Price`
-		where price_list_name=%s and `%s`=1""" % ("%s", args.get("use_for")),
+		where price_list_name=%s and buying_or_selling=%s""" % ("%s", args.get("buying_or_selling")),
 		(args.get("price_list_name"),))
 	if result and len(result)==1:
 		return {"price_list_currency": result[0][0]}
