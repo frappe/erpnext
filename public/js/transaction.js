@@ -90,14 +90,14 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		this.price_list_currency();
 	},
 	
-	price_list_name: function(use_for) {
+	price_list_name: function(buying_or_selling) {
 		var me = this;
 		if(this.frm.doc.price_list_name) {
 			this.frm.call({
 				method: "setup.utils.get_price_list_currency",
 				args: {args: {
 					price_list_name: this.frm.doc.price_list_name,
-					use_for: use_for
+					buying_or_selling: buying_or_selling
 				}},
 				callback: function(r) {
 					if(!r.exc) {

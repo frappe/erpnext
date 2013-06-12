@@ -260,9 +260,7 @@ class TransactionBase(StatusUpdater):
 		comm_list = webnotes.conn.sql("""select * from tabCommunication 
 			where %s=%s order by modified desc limit 20""" \
 			% (self.doc.doctype.replace(" ", "_").lower(), "%s"),
-			self.doc.name, as_dict=1)
-		
-		[d.update({"doctype":"Communication"}) for d in comm_list]
+			self.doc.name, as_dict=1, update={"doctype":"Communication"})
 		
 		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
 			for d in comm_list]))

@@ -102,7 +102,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	price_list_name: function() {
-		this._super("selling");
+		this._super("Selling");
 	},
 	
 	ref_rate: function(doc, cdt, cdn) {

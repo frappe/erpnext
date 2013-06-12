@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-05-02 14:45:00", 
+  "modified": "2013-06-11 20:00:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,26 @@
   "reqd": 1
  }, 
  {
+  "default": "Selling", 
+  "doctype": "DocField", 
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "use_for_website", 
+  "fieldtype": "Check", 
+  "label": "Use for Website"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
   "default": "1", 
   "doctype": "DocField", 
   "fieldname": "valid_for_all_countries", 
@@ -68,7 +88,7 @@
   "label": "Valid for all countries"
  }, 
  {
-  "description": "A list of Countries, for which, this Price List is valid", 
+  "description": "Or specify a list of Countries, for which, this Price List is valid", 
   "doctype": "DocField", 
   "fieldname": "valid_for_countries", 
   "fieldtype": "Table", 
@@ -79,6 +99,7 @@
   "doctype": "DocField", 
   "fieldname": "item_prices_section", 
   "fieldtype": "Section Break", 
+  "hidden": 0, 
   "label": "Item Prices"
  }, 
  {
@@ -86,6 +107,11 @@
   "fieldname": "item_prices", 
   "fieldtype": "HTML", 
   "label": "Item Prices"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_10", 
+  "fieldtype": "Column Break"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 

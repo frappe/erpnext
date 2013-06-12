@@ -241,7 +241,8 @@ patch_list = [
 	"patches.june_2013.p01_update_bom_exploded_items",
 	"patches.june_2013.p02_update_project_completed",
 	"execute:webnotes.delete_doc('DocType', 'System Console')",
+	"patches.june_2013.p03_buying_selling_for_price_list",
 	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 	"patches.june_2013.p05_remove_unused_doctypes",
-	"patches.june_2013.p06_drop_unused_tables"
+	"patches.june_2013.p06_drop_unused_tables",
 ]
