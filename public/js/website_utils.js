@@ -70,16 +70,17 @@ $(document).ready(function() {
 	// update login
 	var full_name = getCookie("full_name");
 	if(full_name) {
-		$("#user-tools").html(repl('<a href="profile" title="My Profile" id="user-full-name">%(full_name)s</a> | \
-			<a href="account" title="My Account">My Account</a> | \
-			<!--<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> (%(count)s)</a> | -->\
-			<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>', {
-			full_name: full_name,
-			count: getCookie("cart_count") || "0"
-		}));
-		$("#user-tools a").tooltip({"placement":"bottom"});
+		$("#user-tools").addClass("hide");
+		$("#user-tools-post-login").removeClass("hide");
+		$("#user-full-name").text(full_name);
 	}
-})
+	
+	wn.cart.update_display();
+	$("#user-tools a").tooltip({"placement":"bottom"});
+	$("#user-tools-post-login a").tooltip({"placement":"bottom"});
+	
+	$(window).on("storage", function() { wn.cart.update_display(); });
+});
 
 // Utility functions
 
@@ -162,3 +163,43 @@ if (typeof Array.prototype.map !== "function") {
 		return a;
 	};
 }
+
+// shopping cart
+if(!wn.cart) wn.cart = {};
+$.extend(wn.cart, {
+	get_count: function() {
+		return Object.keys(this.get_cart()).length;
+	},
+	
+	add_to_cart: function(itemprop) {
+		var cart = this.get_cart();
+		cart[itemprop.item_code] = $.extend(itemprop, {qty: 1});
+		this.set_cart(cart);
+		console.log(this.get_cart());
+	},
+	
+	remove_from_cart: function(item_code) {
+		var cart = this.get_cart();
+		delete cart[item_code];
+		this.set_cart(cart);
+		console.log(this.get_cart());
+	},
+	
+	get_cart: function() {
+		if( !("localStorage" in window) ) {
+			alert("Your browser seems to be ancient. Please use a modern browser.");
+			throw "ancient browser error";
+		}
+		
+		return JSON.parse(localStorage.getItem("cart")) || {};
+	},
+	
+	set_cart: function(cart) {
+		localStorage.setItem("cart", JSON.stringify(cart));
+		wn.cart.update_display();
+	},
+	
+	update_display: function() {
+		$(".cart-count").text("( " + wn.cart.get_count() + " )");
+	}
+});
