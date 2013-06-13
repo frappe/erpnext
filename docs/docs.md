@@ -12,10 +12,12 @@
 	]
 }
 ---
-<div class="jumbotron">
-	<h1>ERPNext</h1>
-	<p>Open Source Organization Management Platform</p>
-</div>
+<br>
+<br>
+<h1 style="text-align: center">All-in-One Platform to Manage Your Organization.</h1>
+<h3 style="text-align: center; font-weight: normal; color: #888">100% Free and Open Source.</h1>
+<br>
+![Home Screen](img/home.png)
 
 ### Is this for me?
 
