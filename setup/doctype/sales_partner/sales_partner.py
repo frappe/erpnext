@@ -33,6 +33,7 @@ class DocType:
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
+			clear_cache("partners")
 		
 	def get_contacts(self,nm):
 		if nm:
