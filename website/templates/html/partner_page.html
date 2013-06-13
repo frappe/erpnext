@@ -1,0 +1,28 @@
+{% extends "app/website/templates/html/page.html" %}
+
+{% block content %}
+	<div class="col col-lg-12" itemscope itemtype="http://schema.org/Organization">
+		<div class="row">
+			<div class="col col-lg-4">
+				{% if logo -%}
+				<img itemprop="brand" src="{{ logo }}" class="partner-logo" 
+					alt="{{ partner_name }}" title="{{ partner_name }}" />
+				<br><br>
+				{%- endif %}
+				<div>
+					<address>
+						{% if partner_website -%}<p><a href="{{ partner_website }}" 
+							target="_blank">{{ partner_website }}</a></p>{%- endif %}
+						{% if partner_address -%}<p>{{ partner_address }}</p>{%- endif %}
+						{% if phone -%}<p>{{ phone }}</p>{%- endif %}
+						{% if email -%}<p><a href="mailto:{{ email }}">{{ email }}</a></p>{%- endif %}
+					</address>
+				</div>
+			</div>
+			<div class="col col-lg-8">
+				<h3 itemprop="name" style="margin-top: 0px;">{{ partner_name }}</h3>
+				<p>{{ description }}</p>
+			</div>
+		</div>
+	</div>
+{% endblock %}
