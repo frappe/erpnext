@@ -23,8 +23,8 @@ def execute(filters=None):
 	if not filters: filters ={}
 	data = []
 
-	trans = "Quotation"
-	tab = ["tabQuotation","tabQuotation Item"]
+	trans = "Delivery Note"
+	tab = ["tabDelivery Note","tabDelivery Note Item"]
 	ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name = '%s'"%filters.get("fiscal_year"))[0][0]
 	year_start_date = ysd.strftime('%Y-%m-%d')
 	start_month = cint(year_start_date.split('-')[1])
