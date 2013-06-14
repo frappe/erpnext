@@ -173,6 +173,11 @@ wn.module_page["Selling"] = [
 			{
 				"label":wn._("Quotation Trend"),
 				route: "query-report/Quotation Trends",
+				doctype: "Quotation"
+			},
+			{
+				"label":wn._("Sales Order Trend"),
+				route: "query-report/Sales Order Trends",
 				doctype: "Sales Order"
 			},
 

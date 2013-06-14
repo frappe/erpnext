@@ -1,4 +1,4 @@
-var get_filter = function(){
+var get_filters = function(){
 	return [
 		{
 			"fieldname":"period",

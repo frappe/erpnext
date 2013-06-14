@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, add_days, add_months, cstr
 from controllers.trends	import get_columns,get_data
 
 def execute(filters=None):
@@ -25,13 +24,11 @@ def execute(filters=None):
 
 	trans = "Sales Invoice"
 	tab = ["tabSales Invoice","tabSales Invoice Item"]
-	ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name = '%s'"%filters.get("fiscal_year"))[0][0]
-	year_start_date = ysd.strftime('%Y-%m-%d')
-	start_month = cint(year_start_date.split('-')[1])
 
-	columns, query_bon, query_pwc, basedon, grbc, sup_tab = get_columns(filters, year_start_date, start_month, trans)
-	data = get_data(columns,filters, tab, query_bon, query_pwc, basedon, grbc ,sup_tab)
-
+	details = get_columns(filters, trans)
+	data = get_data(filters, tab, details)
+	
 	if data == '':
 		webnotes.msgprint("Data Not Available")
-	return columns, data 
+
+	return details["columns"], data 

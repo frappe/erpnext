@@ -115,6 +115,11 @@ wn.module_page["Buying"] = [
 				"label":wn._("Requested Items To Be Ordered"),
 				route: "query-report/Requested Items To Be Ordered",
 			},
+			{
+				"label":wn._("Purchase Order Trends"),
+				route: "query-report/Purchase Order Trends",
+				doctype: "Purchase Order"
+			},
 		]
 	}
 ]
