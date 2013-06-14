@@ -201,5 +201,13 @@ $.extend(wn.cart, {
 	
 	update_display: function() {
 		$(".cart-count").text("( " + wn.cart.get_count() + " )");
+	},
+	
+	set_value_in_cart: function(item_code, fieldname, value) {
+		var cart = this.get_cart();
+		if(cart[item_code]) {
+			cart[item_code][fieldname] = value;
+			this.set_cart(cart);
+		}
 	}
 });

@@ -41,8 +41,8 @@ def get_price_list_currency(args):
 		args = json.loads(args)
 	
 	result = webnotes.conn.sql("""select distinct ref_currency from `tabItem Price`
-		where price_list_name=%s and buying_or_selling=%s""" % ("%s", args.get("buying_or_selling")),
-		(args.get("price_list_name"),))
+		where price_list_name=%s and buying_or_selling=%s""",
+		(args.get("price_list_name"), args.get("buying_or_selling")))
 	if result and len(result)==1:
 		return {"price_list_currency": result[0][0]}
 	else:

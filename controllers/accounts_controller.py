@@ -17,8 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
-from webnotes.utils import flt, cint
+from webnotes.utils import flt, cint, today
 from setup.utils import get_company_currency, get_price_list_currency
+from accounts.utils import get_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
 
@@ -36,6 +37,13 @@ class AccountsController(TransactionBase):
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 			
+	def set_missing_values(self, for_validate=False):
+		for fieldname in ["posting_date", "transaction_date"]:
+			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = today()
+				if not self.doc.fiscal_year:
+					self.doc.fiscal_year = get_fiscal_year(self.doc.fields[fieldname])[0]
+			
 	def set_price_list_currency(self, buying_or_selling):
 		# TODO - change this, since price list now has only one currency allowed
 		if self.meta.get_field("price_list_name") and self.doc.price_list_name and \
@@ -44,6 +52,14 @@ class AccountsController(TransactionBase):
 					"price_list_name": self.doc.price_list_name, 
 					"buying_or_selling": buying_or_selling
 				}))
+				
+				if not self.doc.plc_conversion_rate:
+					self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Price List", 
+						self.doc.price_list_name, "conversion_rate"))
+						
+				if not self.doc.currency:
+					self.doc.currency = self.doc.price_list_currency
+					self.doc.conversion_rate = self.doc.plc_conversion_rate
 				
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""

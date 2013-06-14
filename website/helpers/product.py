@@ -4,13 +4,13 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import cstr, cint
+from webnotes.utils import cstr, cint, fmt_money
 from webnotes.webutils import build_html, delete_page_cache
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
 	"""get product price / stock info"""
-	price_list = webnotes.conn.get_value("Item", item_code, "website_price_list")
+	price_list = webnotes.conn.get_value("Price List", {"use_for_website": 1})
 	warehouse = webnotes.conn.get_value("Item", item_code, "website_warehouse")
 	if warehouse:
 		in_stock = webnotes.conn.sql("""select actual_qty from tabBin where
@@ -27,13 +27,16 @@ def get_product_info(item_code):
 	price = price and price[0] or None
 	
 	if price:
+		price["formatted_price"] = fmt_money(price["ref_rate"], currency=price["ref_currency"])
+		
 		price["ref_currency"] = not cint(webnotes.conn.get_default("hide_currency_symbol")) \
 			and (webnotes.conn.get_value("Currency", price.ref_currency, "symbol") or price.ref_currency) \
 			or ""
 
 	return {
 		"price": price,
-		"stock": in_stock
+		"stock": in_stock,
+		"uom": webnotes.conn.get_value("Item", item_code, "stock_uom")
 	}
 
 @webnotes.whitelist(allow_guest=True)

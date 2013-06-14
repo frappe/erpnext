@@ -28,11 +28,8 @@ class WrongWarehouseCompany(Exception): pass
 
 class BuyingController(StockController):
 	def onload_post_render(self):
-		self.set_price_list_currency("buying")
-
 		# contact, address, item details
 		self.set_missing_values()
-		
 		self.set_taxes("Purchase Taxes and Charges", "purchase_tax_details", "purchase_other_charges")
 	
 	def validate(self):
@@ -41,6 +38,10 @@ class BuyingController(StockController):
 		self.validate_warehouse_belongs_to_company()
 		
 	def set_missing_values(self, for_validate=False):
+		super(BuyingController, self).set_missing_values(for_validate)
+
+		self.set_price_list_currency("Buying")
+		
 		# set contact and address details for supplier, if they are not mentioned
 		if self.doc.supplier and not (self.doc.contact_person and self.doc.supplier_address):
 			for fieldname, val in self.get_default_address_and_contact("supplier").items():

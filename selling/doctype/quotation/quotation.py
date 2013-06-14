@@ -170,9 +170,6 @@ class DocType(SellingController):
 	def on_update(self):
 		# Set Quotation Status
 		webnotes.conn.set(self.doc, 'status', 'Draft')
-
-		# subject for follow
-		self.doc.subject = '[%(status)s] To %(customer)s worth %(currency)s %(grand_total)s' % self.doc.fields
 	
 	#update enquiry
 	#------------------

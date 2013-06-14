@@ -18,12 +18,9 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
 from webnotes.utils import cint, comma_or
+from webnotes.model.controller import DocListController
 
-
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
-		
+class DocType(DocListController):
 	def onload(self):
 		self.doclist.extend(webnotes.conn.sql("""select * from `tabItem Price` 
 			where price_list_name=%s""", self.doc.name, as_dict=True, update={"doctype": "Item Price"}))

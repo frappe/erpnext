@@ -25,21 +25,41 @@ from controllers.stock_controller import StockController
 
 class SellingController(StockController):
 	def onload_post_render(self):
-		self.set_price_list_currency("selling")
-
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
 		
 		self.set_taxes("Sales Taxes and Charges", "other_charges", "charge")
 			
 	def set_missing_values(self, for_validate=False):
+		super(SellingController, self).set_missing_values(for_validate)
+		
+		self.set_price_list_currency("Selling")
+		
 		# set contact and address details for customer, if they are not mentioned
-		if self.doc.customer and not (self.doc.contact_person and self.doc.customer_address):
-			for fieldname, val in self.get_default_address_and_contact("customer").items():
-				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
-					self.doc.fields[fieldname] = val
+		self.set_missing_lead_customer_details()
 					
 		self.set_missing_item_details(get_item_details)
+		
+	def set_missing_lead_customer_details(self):
+		if self.doc.customer:
+			if not (self.doc.contact_person and self.doc.customer_address):
+				for fieldname, val in self.get_default_address_and_contact("customer").items():
+					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+						self.doc.fields[fieldname] = val
+		
+			customer_fetch = webnotes.conn.get_value("Customer", self.doc.customer,
+				['customer_name', 'customer_group', 'territory'], as_dict=True)
+			for fieldname in ['customer_name', 'customer_group', 'territory']:
+				if not self.doc.fields.get(fieldname):
+					self.doc.fields[fieldname] = customer_fetch[fieldname]
+			
+		elif self.doc.lead:
+			lead_fetch = webnotes.conn.get_value("Lead", self.doc.lead,
+				['company_name', 'lead_name', 'territory'], as_dict=True)
+			if not self.doc.customer_name:
+				self.doc.customer_name = lead_fetch.company_name or lead_fetch.lead_name
+			if not self.doc.territory:
+				self.doc.territory = lead_fetch.territory
 							
 	def get_other_charges(self):
 		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
@@ -241,7 +261,7 @@ class SellingController(StockController):
 				" " + _("should be 100%"), raise_exception=True)
 			
 	def validate_order_type(self):
-		valid_types = ["Sales", "Maintenance"]
+		valid_types = ["Sales", "Maintenance", "Shopping Cart"]
 		if self.doc.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types),
