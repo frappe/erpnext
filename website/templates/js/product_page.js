@@ -28,16 +28,41 @@ $(document).ready(function() {
 				if(data.message.price) {
 					$("<h4>").html(data.message.price.ref_currency + " " 
 						+ data.message.price.ref_rate).appendTo(".item-price");
-					$(".item-price").toggle(true);
+					$(".item-price").removeClass("hide");
 				}
 				if(data.message.stock==0) {
-					$(".item-stock").html("<div class='help'>Not in stock</div>")
+					$(".item-stock").html("<div class='help'>Not in stock</div>");
 				}
 				else if(data.message.stock==1) {
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='icon-check'></i> Available (in stock)</div>")
+						<i class='icon-check'></i> Available (in stock)</div>");
 				}
 			}
 		}
-	})
+	});
+	
+	if(wn.cart.get_cart()[$('[itemscope] [itemprop="name"]').text().trim()]) {
+		$(".item-remove-from-cart").removeClass("hide");
+	} else {
+		$(".item-add-to-cart").removeClass("hide");
+	}
+	
+	$("button.item-add-to-cart").on("click", function() {
+		wn.cart.add_to_cart({
+			url: window.location.href,
+			image: $('[itemscope] [itemprop="image"]').attr("src"),
+			item_code: $('[itemscope] [itemprop="name"]').text().trim(),
+			item_name: $('[itemscope] [itemprop="productID"]').text().trim(),
+			description: $('[itemscope] [itemprop="description"]').html().trim(),
+			price: $('[itemscope] [itemprop="price"]').text().trim()
+		});
+		$(".item-add-to-cart").addClass("hide");
+		$(".item-remove-from-cart").removeClass("hide");
+	});
+	
+	$("button.item-remove-from-cart").on("click", function() {
+		wn.cart.remove_from_cart($('[itemscope] [itemprop="name"]').text().trim());
+		$(".item-add-to-cart").removeClass("hide");
+		$(".item-remove-from-cart").addClass("hide");
+	});
 })

@@ -1,0 +1,17 @@
+{% extends "app/website/templates/html/page.html" %}
+
+{% block javascript %}
+	{% include "app/website/templates/js/cart.js" %}
+{% endblock %}
+
+{% set title="Shopping Cart" %}
+
+{% block content %}
+<div class="col col-lg-12">
+	<h2>Shopping Cart</h2>
+	<hr>
+	<div id="cart-added-items">
+		<!-- list of items in the cart will be generated using javascript -->
+	</div>
+</div>
+{% endblock %}

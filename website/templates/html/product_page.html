@@ -29,14 +29,18 @@
 			</div>
 			<div class="col col-lg-6">
 				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
-				<p class="help">Item Code: {{ name }}</p>
+				<p class="help">Item Code: <span itemprop="productID">{{ name }}</span></p>
 				<h4>Product Description</h4>
 				<div itemprop="description">
 				{{ web_long_description or web_short_description or 
 					"[No description given]" }}
 				</div>
-				<div class="item-price hide"></div>
-				<div class="item-stock"></div>
+				<div class="item-price-info" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+					<div class="item-price hide" itemprop="price"></div>
+					<div class="item-stock" itemprop="availablity"></div>
+					<button class="btn btn-primary item-add-to-cart hide">Add to Cart</button>
+					<button class="btn btn-default item-remove-from-cart hide">Remove from Cart</button>
+				</div>
 			</div>
 		</div>
 		{% if obj.doclist.get({"doctype":"Item Website Specification"}) -%}
