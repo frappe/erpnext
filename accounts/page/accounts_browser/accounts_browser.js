@@ -21,11 +21,12 @@
 // see ledger
 
 pscript['onload_Accounts Browser'] = function(wrapper){
+	console.log($(wrapper).html());
 	wn.ui.make_app_page({
 		parent: wrapper,
 		single_column: true
 	})
-
+	
 	wrapper.appframe.add_module_icon("Accounts");
 
 	var main = $(wrapper).find(".layout-main"),

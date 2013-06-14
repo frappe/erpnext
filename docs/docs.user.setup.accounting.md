@@ -1,7 +1,9 @@
 ---
 {
 	"_label": "Accounting Setup",
-	"_title_image": "img/setup-accounting.png"
+	"_links": [
+		"docs.user.accounts"
+	]
 }
 ---
 ## Chart of Accounts
@@ -22,7 +24,7 @@ As you can see, it is very valuable to you as a business manager to see how well
 
 To edit your Chart of Accounts in ERPNext go to:
 
-> Accounts  > Chart of Accounts 
+> [Accounts](docs.user.accounts.html)  > Chart of Accounts 
 
 Chart of Accounts is a tree view of the names of the Accounts  (Ledgers and Groups) that a Company requires to manage its books of accounts. ERPNext sets up a simple chart of accounts for each Company you create, but you have to modify it according to your needs and legal requirements.
 ￼
