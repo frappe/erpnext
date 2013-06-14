@@ -107,6 +107,7 @@ def get_invoices(filters):
 		from `tabPurchase Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
+	
 def get_invoice_expense_map(invoice_list):
 	expense_details = webnotes.conn.sql("""select parent, expense_head, sum(amount) as amount
 		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_head""" % 

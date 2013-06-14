@@ -28,7 +28,7 @@ def execute(filters=None):
 	details = get_columns(filters, trans)
 	data = get_data(filters, tab, details)
 	
-	if data == '':
-		webnotes.msgprint("Data Not Available")
+	if not data:
+		webnotes.msgprint("Data not found for selected criterias")
 
 	return details["columns"], data 
