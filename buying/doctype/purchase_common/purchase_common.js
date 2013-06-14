@@ -225,8 +225,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		if(this.frm.doc.doctype != "Purchase Invoice") {
 			// hack!
-			wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"] = $.extend({}, 
-				wn.meta.docfield_copy[this.tname][this.frm.doc.name]["purchase_rate"]);
+			var purchase_rate_df = wn.meta.get_docfield(this.tname, "rate", this.frm.doc.name);
+			wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"] = 
+				$.extend({}, purchase_rate_df);
 		}
 		
 		$.each(this.frm.item_doclist, function(i, item) {
@@ -310,10 +311,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		}
 		
-		if(!wn.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
-			$.each(this.frm.item_doclist, function(i, item) {
-				delete item["item_tax_amount"];
-			});
+		if(this.frm.item_doclist.length) {
+			if(!wn.meta.get_docfield(this.frm.item_doclist[0].doctype, "item_tax_amount", this.frm.doctype)) {
+				$.each(this.frm.item_doclist, function(i, item) {
+					delete item["item_tax_amount"];
+				});
+			}
 		}
 	},
 	
