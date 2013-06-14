@@ -56,17 +56,6 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-
-cur_frm.fields_dict.supplier_address.on_new = function(dn) {
-	locals['Address'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
-	locals['Address'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
-	locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
-}
-
 cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabProject`.name FROM `tabProject` \
 		WHERE `tabProject`.status not in ("Completed", "Cancelled") \

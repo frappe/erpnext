@@ -6,6 +6,7 @@
 		"docs.user.setup.strategy",
 		"docs.user.setup.first",
 		"docs.user.setup.accounting",
+		"docs.user.setup.cost_centers",
 		"docs.user.setup.item",
 		"docs.user.setup.customer",
 		"docs.user.setup.supplier",

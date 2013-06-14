@@ -71,17 +71,6 @@ cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc
 	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-cur_frm.fields_dict.supplier_address.on_new = function(dn) {
-	locals['Address'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
-	locals['Address'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
-	locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
-}
-
-
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 	
 	cl = getchildren('Purchase Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);

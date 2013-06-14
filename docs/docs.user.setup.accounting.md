@@ -32,6 +32,8 @@ For each company, Chart of Accounts signifies the way to classify the accounting
 
 Let us understand the main groups of the Chart of Accounts.
 
+![Chart of Accounts: Root Accounts](img/chart-of-accounts.png)
+
 ### Balance Sheet Accounts
 
 The Balance Sheet has Application of Funds (Assets) and Sources of Funds (Liabilities) that signify the net-worth of your company at any given time. When you begin or end a financial period, all the Assets are equal to the Liabilities.
@@ -60,6 +62,8 @@ Accounting Transactions can only be made against Ledger Accounts (not Groups)
 
 > Note: An Account “Ledger” is also sometimes called as Account “Head”.
 
+![Chart of Accounts: Groups and Ledger](img/chart-of-accounts-1.png)
+
 ### Other Account Types
 
 In ERPNext, you can also specify more information when you create a new Account, this is there to help you select that particular account in a scenario like Bank Account or a Tax Account and has no affect on the Chart itself.
@@ -69,6 +73,8 @@ You can also tag if an account represents a Customer, Supplier or Employee in "M
 ### Creating / Editing Accounts
 
 To create new Accounts, explore your Chart of Accounts and click on an Account group under which you want to create the new Account. On the right side, you will see a options to “Edit” or “Add” a new Account.
+
+![Chart of Accounts: New Account](img/chart-of-accounts-2.png)
 
 Option to create will only appear if you click on a Group (folder) type Account.
 
@@ -80,52 +86,3 @@ Typically, you might want to create Accounts for
 - Taxes (VAT, Sales Tax etc based on your country) under Current Liabilities.
 - Types of Sales (for example, Product Sales, Service Sales etc.) under Income.
 - Types of Assets (building, machinery, furniture etc.) under Fixed Assets.
-
----
-
-## Chart of Cost Centers
-
-Your Chart of Accounts is mainly for reporting your information for governmental purposes and less for how you business actually performs. Though you can tweak it a bit to resemble your business.
-￼
-Most businesses have multiple activities like different product lines, market segments, areas of business that share some common overheads but should ideally have their own structure to report whether they are profitable or not. For this purpose, there is an alternate structure, called the Chart of Cost Centers.
-
-You can create a tree of Cost Centers to represent your business better. Each Income / Expense entry is also tagged against a Cost Center. 
-
-For example, if you have two types of sales:
-
-- Walk-in Sales
-- Online Sales
-
-You may not have shipping expenses for your walk-in customers, and no shop-rent for your online customers. If you want to get the profitability of each of these separately, you create the two as Cost Centers and you can mark all sales as either "Walk-in" or "Online" and also all your purchases in the same way.
-
-So when you do your analysis you can get a better idea which side of your business is doing better.  Since ERPNext has option to add multiple Companies, you can create Cost Centers for each Company and manage it separately.
-
-To setup your Chart of Cost Centers go to:
-
-> Accounts > Chart of Cost Centers
-
-Cost centers help you in one more activity, budgeting.
-
-### Budgeting
-
-ERPNext will help you set and manage budgets on your Cost Centers. This is useful when, for example, you are doing online sales and you have a budget for search ads and you want ERPNext to stop or warn you from over spending based on that budget. 
-
-Budgets are also great for planning purposes. When you are making your plans for the next financial year, you would typically target a revenue and based on that you would set your expenses. Setting a budget will ensure that your expenses do not get out of hand at any point based on your plans.
-
-You can define it in the Cost Center. If you have seasonal sales you can also define a budget distribution that the budget will follow.
-￼
-#### Budget Actions
-
-ERPNext allows you to either:
-
-- Stop.
-- Warn or, 
-- Ignore 
-
-if you exceed budgets. 
-
-These can be defined from the Company record.
-
-Even if you choose to “ignore” budget overruns, you will get a wealth of information from the “Budget vs Actual” variance report.
-
-> Note: When you set a budget, it has to be set per Account under the Cost Center. For example if you have a Cost Center “Online Sales”, you can restrict “Advertising Budget” by creating a row with that Account and defining the amount.

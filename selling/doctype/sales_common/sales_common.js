@@ -548,16 +548,6 @@ cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field('batch_no').get_query 
 		}
 	}
 
-cur_frm.fields_dict.customer_address.on_new = function(dn) {
-	locals['Address'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Address'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Contact'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name, address_line1, city FROM tabAddress \
 		WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND \
