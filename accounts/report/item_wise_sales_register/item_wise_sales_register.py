@@ -59,7 +59,7 @@ def get_conditions(filters):
 def get_items(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select si.name, si.posting_date, si.debit_to, si.project_name, 
-		si.customer, si.remarks, si.territory, si_item.item_code, si_item.item_name, 
+		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name, 
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account, 
 		si_item.qty, si_item.basic_rate, si_item.amount
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item 
