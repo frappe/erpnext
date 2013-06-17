@@ -14,13 +14,7 @@ def boot_session(bootinfo):
 	bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo['website_settings'] = webnotes.model.doc.getsingle('Website Settings')
 
-	if webnotes.session['user']=='Guest':
-		bootinfo['website_menus'] = webnotes.conn.sql("""select label, url, custom_page, 
-			parent_label, parentfield
-			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
-		bootinfo['startup_code'] = \
-			webnotes.conn.get_value('Website Settings', None, 'startup_code')
-	else:	
+	if webnotes.session['user']!='Guest':
 		bootinfo['letter_heads'] = get_letter_heads()
 
 		import webnotes.model.doctype
