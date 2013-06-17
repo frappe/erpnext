@@ -19,6 +19,7 @@ import webnotes
 
 from webnotes.utils import flt, getdate
 from webnotes import msgprint
+from utilities.transaction_base import delete_events
 
 class DocType:
 	def __init__(self, doc, doclist=None):
@@ -69,7 +70,7 @@ class DocType:
 
 	def add_calendar_event(self):
 		# delete any earlier event for this project
-		self.delete_events()
+		delete_events(self.doc.doctype, self.doc.name)
 		
 		# add events
 		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
@@ -87,8 +88,4 @@ class DocType:
 				}).insert()
 	
 	def on_trash(self):
-		self.delete_events()
-			
-	def delete_events(self):
-		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
-			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))
+		delete_events(self.doc.doctype, self.doc.name)

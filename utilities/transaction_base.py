@@ -303,3 +303,8 @@ class TransactionBase(DocListController):
 				})
 			
 			webnotes.bean(event_doclist).insert()
+
+
+def delete_events(ref_type, ref_name):
+	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

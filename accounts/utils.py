@@ -125,7 +125,6 @@ def add_ac(args=None):
 	ac.doc.doctype = "Account"
 	ac.doc.old_parent = ""
 	ac.doc.freeze_account = "No"
-	ac.ignore_permissions = 1
 	ac.insert()
 	return ac.doc.name
 
@@ -138,7 +137,6 @@ def add_cc(args=None):
 	cc = webnotes.bean(args)
 	cc.doc.doctype = "Cost Center"
 	cc.doc.old_parent = ""
-	cc.ignore_permissions = 1
 	cc.insert()
 	return cc.doc.name
 

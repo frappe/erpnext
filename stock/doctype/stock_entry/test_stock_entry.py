@@ -21,6 +21,9 @@ class TestStockEntry(unittest.TestCase):
 		st2.insert()
 		st2.submit()
 		
+		from stock.utils import reorder_item
+		reorder_item()
+		
 		mr_name = webnotes.conn.sql("""select parent from `tabMaterial Request Item`
 			where item_code='_Test Item'""")
 			
