@@ -135,21 +135,19 @@ erpnext.hide_naming_series = function() {
 }
 
 erpnext.setup_mousetrap = function() {
-	Mousetrap.bind(["command+g", "ctrl+g"], function() {
+	$(document).keydown("meta+g ctrl+g", function(e) {
 		wn.ui.toolbar.search.show();
 		return false;
 	});
-
-	Mousetrap.bind(["command+s", "ctrl+s"], function() {
-		if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===0)
-			cur_frm.save();
-		else if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===1
-				&& cur_frm.doc.__unsaved)
-			cur_frm.frm_head.appframe.buttons['Update'].click();
+	
+	$(document).keydown("meta+s ctrl+s", function(e) {
+		if(cur_frm) {
+			cur_frm.save_or_update();
+		}
 		else if(wn.container.page.save_action)
 			wn.container.page.save_action();
 		return false;
-	});	
+	})
 }
 
 // start
