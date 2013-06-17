@@ -357,3 +357,6 @@ def validate_currency(args, item, meta=None):
 			get_field_precision(meta.get_field("plc_conversion_rate"), 
 				webnotes._dict({"fields": args})))
 	
+def delete_events(ref_type, ref_name):
+	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

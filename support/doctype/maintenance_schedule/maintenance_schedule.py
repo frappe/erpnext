@@ -26,7 +26,7 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 	
 
-from utilities.transaction_base import TransactionBase
+from utilities.transaction_base import TransactionBase, delete_events
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -327,13 +327,7 @@ class DocType(TransactionBase):
 			if d.serial_no:
 				self.update_amc_date(d.serial_no, '')
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
-		self.delete_events()
+		delete_events(self.doc.doctype, self.doc.name)
 		
 	def on_trash(self):
-		self.delete_events()
-		
-	def delete_events(self):
-		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
-			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))
-		
-
+		delete_events(self.doc.doctype, self.doc.name)
