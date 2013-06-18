@@ -111,7 +111,7 @@ def _get_basic_details(args, item_bean):
 	out = webnotes._dict({
 			"item_code": item.name,
 			"description": item.description_html or item.description,
-			"reserved_warehouse": item.default_warehouse,
+			"reserved_warehouse": item.default_warehouse or args.warehouse or args.reserved_warehouse,
 			"warehouse": item.default_warehouse or args.warehouse,
 			"income_account": item.default_income_account or args.income_account,
 			"expense_account": item.purchase_account or args.expense_account,
