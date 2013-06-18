@@ -30,15 +30,11 @@ erpnext.toolbar.setup = function() {
 	$user.append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
 		'+wn._('Live Chat')+'</a></li>')
 	
-
-	$('.navbar .pull-right').append('\
-		<li><a href="#!messages" title="'+wn._('Unread Messages')
-			+'"><span class="navbar-new-comments"></span></a></li>');
-
 	erpnext.toolbar.set_new_comments();
 }
 
 erpnext.toolbar.set_new_comments = function(new_comments) {
+	return;
 	var navbar_nc = $('.navbar-new-comments');
 	if(cint(new_comments)) {
 		navbar_nc.addClass('navbar-new-comments-true')
