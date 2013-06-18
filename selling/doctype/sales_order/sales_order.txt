@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-24 19:29:08", 
+  "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-06-05 18:59:41", 
+  "modified": "2013-06-18 17:49:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -236,7 +236,7 @@
   "label": "Shipping Address Name", 
   "options": "Address", 
   "print_hide": 1, 
-  "read_only": 1
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -968,27 +968,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "report": 1, 
-  "role": "Sales Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Sales User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "report": 1, 
-  "role": "Maintenance Manager", 
   "submit": 1, 
   "write": 1
  }, 
