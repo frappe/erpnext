@@ -171,6 +171,11 @@ wn.module_page["Selling"] = [
 				doctype: "Sales Order"
 			},
 			{
+				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
+				route: "query-report/Sales Person Target Variance (Item Group-Wise)",
+				doctype: "Sales Order"
+			},
+			{
 				"label":wn._("Customers Not Buying Since Long Time"),
 				route: "query-report/Customers Not Buying Since Long Time",
 				doctype: "Sales Order"

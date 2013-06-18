@@ -252,6 +252,11 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Item-wise Purchase Register",
 				doctype: "Purchase Invoice"
 			},
+			{
+				"label":wn._("Budget Variance Report"),
+				route: "query-report/Budget Variance Report",
+				doctype: "Cost Center"
+			},
 		]
 	}
 ]

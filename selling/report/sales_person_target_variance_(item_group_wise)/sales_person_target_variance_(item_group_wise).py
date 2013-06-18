@@ -26,13 +26,13 @@ def execute(filters=None):
 	
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters)
-	tim_map = get_territory_item_month_map(filters)
+	sim_map = get_salesperson_item_month_map(filters)
 
 	data = []
 
-	for territory, territory_items in tim_map.items():
-		for item_group, monthwise_data in territory_items.items():
-			row = [territory, item_group]
+	for salesperson, salesperson_items in sim_map.items():
+		for item_group, monthwise_data in salesperson_items.items():
+			row = [salesperson, item_group]
 			totals = [0, 0, 0]
 			for relevant_months in period_month_ranges:
 				period_data = [0, 0, 0]
@@ -57,7 +57,7 @@ def get_columns(filters):
 			msgprint(_("Please specify") + ": " + label,
 				raise_exception=True)
 
-	columns = ["Territory:Link/Territory:80", "Item Group:Link/Item Group:80"]
+	columns = ["Sales Person:Link/Sales Person:80", "Item Group:Link/Item Group:80"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
@@ -105,13 +105,13 @@ def get_period_month_ranges(filters):
 	return period_month_ranges
 
 
-#Get territory & item group details
-def get_territory_details(filters):
-	return webnotes.conn.sql("""select t.name, td.item_group, td.target_qty, 
-		td.target_amount, t.distribution_id 
-		from `tabTerritory` t, `tabTarget Detail` td 
-		where td.parent=t.name and td.fiscal_year=%s and 
-		ifnull(t.distribution_id, '')!='' order by t.name""" %
+#Get sales person & item group details
+def get_salesperson_details(filters):
+	return webnotes.conn.sql("""select sp.name, td.item_group, td.target_qty, 
+		td.target_amount, sp.distribution_id 
+		from `tabSales Person` sp, `tabTarget Detail` td 
+		where td.parent=sp.name and td.fiscal_year=%s and 
+		ifnull(sp.distribution_id, '')!='' order by sp.name""" %
 		('%s'), (filters.get("fiscal_year")), as_dict=1)
 
 #Get target distribution details of item group
@@ -141,34 +141,34 @@ def get_achieved_details(filters):
 
 	return achieved_details
 
-def get_territory_item_month_map(filters):
-	territory_details = get_territory_details(filters)
+def get_salesperson_item_month_map(filters):
+	salesperson_details = get_salesperson_details(filters)
 	tdd = get_target_distribution_details(filters)
 	achieved_details = get_achieved_details(filters)
 
-	tim_map = {}
+	sim_map = {}
 
-	for td in territory_details:
+	for sd in salesperson_details:
 		for month in tdd:
-			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
+			sim_map.setdefault(sd.name, {}).setdefault(sd.item_group, {})\
 			.setdefault(month, webnotes._dict({
 				"target": 0.0, "achieved": 0.0, "variance": 0.0
 			}))
 
-			tav_dict = tim_map[td.name][td.item_group][month]
+			tav_dict = sim_map[sd.name][sd.item_group][month]
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = td.target_qty*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == td.item_group:
+					tav_dict.target = sd.target_qty*(tdd[month]["percentage_allocation"]/100)
+					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == sd.item_group:
 						tav_dict.achieved += achieved_details[month]["qty"]
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = td.target_amount*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == td.item_group:
+					tav_dict.target = sd.target_amount*(tdd[month]["percentage_allocation"]/100)
+					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == sd.item_group:
 						tav_dict.achieved += achieved_details[month]["amount"]
 
-	return tim_map
+	return sim_map
 
 def get_year_start_end_date(filters):
 	return webnotes.conn.sql("""select year_start_date, 
