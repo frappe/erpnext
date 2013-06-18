@@ -83,7 +83,7 @@ def get_data(filters, tab, details):
 			#to get distinct value of col specified by group_by in filter
 			row = webnotes.conn.sql("""select DISTINCT(%s) from `%s` t1, `%s` t2 %s
 							where t2.parent = t1.name and t1.company = %s	
-							and t1.fiscal_year = %s 	and t1.docstatus = 1 
+							and t1.fiscal_year = %s  and t1.docstatus = 1 
 							and %s = %s 
 						"""%(sel_col, tab[0], tab[1], details["sup_tab"], "%s", 
 							"%s", details["basedon"], "%s"),
@@ -224,13 +224,13 @@ def basedon_wise_colums_query(based_on, trans):
 		bon = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:120"]
 		query_details = "t1.supplier, t3.supplier_type,"
 		basedon = 't1.supplier'
-		sup_tab = ',`tabSupplier` t3'
+		sup_tab = '`tabSupplier` t3',
 	
 	elif based_on == 'Supplier Type':
 		bon = ["Supplier Type:Link/Supplier Type:120"]
 		query_details = "t3.supplier_type,"
 		basedon = 't3.supplier_type'
-		sup_tab = ',`tabSupplier` t3'
+		sup_tab ='`tabSupplier` t3',
 
 	elif based_on == "Territory":
 		bon = ["Territory:Link/Territory:120"]

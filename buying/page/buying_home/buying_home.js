@@ -120,6 +120,10 @@ wn.module_page["Buying"] = [
 				route: "query-report/Purchase Order Trends",
 				doctype: "Purchase Order"
 			},
+			{
+				"label":wn._("Item-wise Last Purchase Rate"),
+				route: "query-report/Item-wise Last Purchase Rate",
+			}
 		]
 	}
 ]
