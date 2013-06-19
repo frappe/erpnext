@@ -27,15 +27,15 @@ def get_columns(filters, trans):
 		webnotes.msgprint("Plese select different values in 'Based On' and 'Group By'", raise_exception=1)
 
 	else: 
-		bon, query_bon, basedon, sup_tab = basedon_wise_colums_query(filters.get("based_on"), trans)
+		bonc, query_bon, based, sup_tab = basedon_wise_colums_query(filters.get("based_on"), trans)
 		pwc, query_pwc = period_wise_colums_query(filters, trans)
 		grbc = group_wise_column(filters.get("group_by"))
 
-		columns = bon + pwc + ["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"]
+		columns = bonc + pwc + ["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"]
 		if grbc:	
-			columns = bon + grbc + pwc +["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"] 
+			columns = bonc + grbc + pwc +["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"] 
 
-		details = {"query_bon": query_bon, "query_pwc": query_pwc, "columns": columns, "basedon": basedon, 
+		details = {"query_bon": query_bon, "query_pwc": query_pwc, "columns": columns, "basedon": based, 
 			"grbc": grbc, "sup_tab": sup_tab}
 
 	return details
@@ -121,9 +121,8 @@ def period_wise_colums_query(filters, trans):
 
 	query_details = ''
 	pwc = []
-	ysd = webnotes.conn.sql("""select year_start_date from `tabFiscal Year` 
-					where name = '%s' 
-				"""%filters.get("fiscal_year"))[0][0]
+	ysd = webnotes.conn.sql("""select year_start_date from `tabFiscal Year` where name = '%s' 
+		"""%filters.get("fiscal_year"))[0][0]
 
 	year_start_date = ysd.strftime('%Y-%m-%d')
 	start_month = cint(year_start_date.split('-')[1])
@@ -198,56 +197,56 @@ def basedon_wise_colums_query(based_on, trans):
 	if based_on == "Item":
 		bon = ["Item:Link/Item:120", "Item Name:Data:120"]
 		query_details = "t2.item_code, t2.item_name," 
-		basedon = 't2.item_code'
+		based = 't2.item_code'
 
 	elif based_on == "Item Group":
 		bon = ["Item Group:Link/Item Group:120"]
 		query_details = "t2.item_group," 
-		basedon = 't2.item_group'
+		based = 't2.item_group'
 
 	elif based_on == "Customer":
 		bon = ["Customer:Link/Customer:120", "Territory:Link/Territory:120"]
 		query_details = "t1.customer_name, t1.territory, "
-		basedon = 't1.customer_name'
+		based = 't1.customer_name'
 
 	elif based_on == "Customer Group":
 		bon = ["Customer Group:Link/Customer Group"]
 		query_details = "t1.customer_group,"
-		basedon = 't1.customer_group'
+		based = 't1.customer_group'
 	
 	elif based_on == 'Supplier':
 		bon = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:120"]
 		query_details = "t1.supplier, t3.supplier_type,"
-		basedon = 't1.supplier'
+		based = 't1.supplier'
 		sup_tab = '`tabSupplier` t3',
 	
 	elif based_on == 'Supplier Type':
 		bon = ["Supplier Type:Link/Supplier Type:120"]
 		query_details = "t3.supplier_type,"
-		basedon = 't3.supplier_type'
+		based = 't3.supplier_type'
 		sup_tab ='`tabSupplier` t3',
 
 	elif based_on == "Territory":
 		bon = ["Territory:Link/Territory:120"]
 		query_details = "t1.territory,"
-		basedon = 't1.territory'
+		based = 't1.territory'
 
 	elif based_on == "Project":
 
 		if trans in ['Sales Invoice', 'Delivery Note', 'Sales Order']:
 			bon = ["Project:Link/Project:120"]
 			query_details = "t1.project_name,"
-			basedon = 't1.project_name'
+			based = 't1.project_name'
 
 		elif trans in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
 			bon = ["Project:Link/Project:120"]
 			query_details = "t2.project_name,"
-			basedon = 't2.project_name'
+			based = 't2.project_name'
 
 		else:
 			webnotes.msgprint("Information Not Available", raise_exception=1)
 
-	return bon, query_details, basedon, sup_tab
+	return bon, query_details, based, sup_tab
 
 def group_wise_column(group_by):
 	if group_by:
