@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, add_days, add_months, cstr
+from datetime import datetime
 
 def get_columns(filters, trans):
 
@@ -117,7 +118,12 @@ def get_data(filters, tab, details):
 
 	return data
 
+def get_mon(date):
+	"""convert srting formated date into date and retrieve month abbrevation"""
+	return (datetime.strptime(date, '%Y-%m-%d')).strftime("%b")
+
 def period_wise_colums_query(filters, trans):
+	from datetime import datetime
 
 	query_details = ''
 	pwc = []
@@ -154,12 +160,15 @@ def period_wise_colums_query(filters, trans):
 			"""%{"trans": trans_date, "mon_num": cstr(month+1)}
 	
 	elif filters.get("period") == "Quarterly":
-		pwc = ["Q1 (Qty):Float:120", "Q1 (Amt):Currency:120", "Q2 (Qty):Float:120", "Q2 (Amt):Currency:120", 
-		"Q3 (Qty):Float:120", "Q3 (Amt):Currency:120", "Q4 (Qty):Float:120", "Q4 (Amt):Currency:120"]
 
 		first_qsd, second_qsd, third_qsd, fourth_qsd = year_start_date, add_months(year_start_date,3), add_months(year_start_date,6), add_months(year_start_date,9)
 		first_qed, second_qed, third_qed, fourth_qed = add_days(add_months(first_qsd,3),-1), add_days(add_months(second_qsd,3),-1), add_days(add_months(third_qsd,3),-1), add_days(add_months(fourth_qsd,3),-1)
 		bet_dates = [[first_qsd,first_qed],[second_qsd,second_qed],[third_qsd,third_qed],[fourth_qsd,fourth_qed]] 
+		
+		pwc = [get_mon(first_qsd)+"-"+get_mon(first_qed)+" (Qty):Float:120", get_mon(first_qsd)+"-"+get_mon(first_qed)+"(Amt):Currency:120", 
+			get_mon(second_qsd)+"-"+get_mon(second_qed)+" (Qty):Float:120", get_mon(second_qsd)+"-"+get_mon(second_qed)+" (Amt):Currency:120", 
+			get_mon(third_qsd)+"-"+get_mon(third_qed)+" (Qty):Float:120", get_mon(third_qsd)+"-"+get_mon(third_qed)+" (Amt):Currency:120", 
+			get_mon(fourth_qsd)+"-"+get_mon(fourth_qed)+" (Qty):Float:120", get_mon(fourth_qsd)+"-"+get_mon(fourth_qed)+" (Amt):Currency:120"]
 
 		for d in bet_dates:
 			query_details += """
@@ -168,13 +177,14 @@ def period_wise_colums_query(filters, trans):
 			"""%{"trans": trans_date, "sd": d[0],"ed": d[1]}
 
 	elif filters.get("period") == "Half-yearly":
-		pwc = ["Fisrt Half (Qty):Float:120", "Fisrt Half (Amt):Currency:120", "Second Half (Qty):Float:120",
-		 	"Second Half (Amt):Currency:120"]
 
 		first_half_start = year_start_date
 		first_half_end = add_days(add_months(first_half_start,6),-1)
 		second_half_start = add_days(first_half_end,1)
 		second_half_end = add_days(add_months(second_half_start,6),-1)
+
+		pwc = [get_mon(first_half_start)+"-"+get_mon(first_half_end)+"(Qty):Float:120", get_mon(first_half_start)+"-"+get_mon(first_half_end)+" (Amt):Currency:120",
+		 	get_mon(second_half_start)+"-"+get_mon(second_half_end)+" (Qty):Float:120",	get_mon(second_half_start)+"-"+get_mon(second_half_end)+" (Amt):Currency:120"]
 
 		query_details = """ 
 			 	SUM(IF(t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s', t2.qty, NULL)),
