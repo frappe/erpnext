@@ -9,9 +9,21 @@
 {% block content %}
 <div class="col col-lg-12">
 	<h2>Shopping Cart</h2>
-	<hr>
-	<div id="cart-added-items">
-		<!-- list of items in the cart will be generated using javascript -->
+	<div class="progress progress-striped active">
+		<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
+	</div>
+	<div id="cart-container" class="hide">
+		<button class="btn btn-success pull-right" type="button">Place Order</button>
+		<div class="clearfix"></div>
+		<hr>
+		<div id="cart-items">
+		</div>
+		<hr>
+		<div id="cart-taxes">
+		</div>
+		<div id="cart-addresses">
+		</div>
+		<button class="btn btn-success pull-right" type="button">Place Order</button>
 	</div>
 </div>
 {% endblock %}

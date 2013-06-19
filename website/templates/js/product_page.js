@@ -15,55 +15,77 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $(document).ready(function() {
-	$.ajax({
-		method: "GET",
-		url:"server.py",
-		dataType: "json",
-		data: {
-			cmd: "website.helpers.product.get_product_info",
+	var item_code = $('[itemscope] [itemprop="name"]').text().trim();
+	var qty = 0;
+	
+	wn.call({
+		type: "POST",
+		method: "website.helpers.product.get_product_info",
+		args: {
 			item_code: "{{ name }}"
 		},
-		success: function(data) {
-			if(data.message) {
-				if(data.message.price) {
-					$("<h4>")
-						.html(data.message.price.formatted_price + " per " + data.message.uom)
-						.appendTo(".item-price");
-					$(".item-price").removeClass("hide");
-				}
-				if(data.message.stock==0) {
+		callback: function(r) {
+			if(r.message && r.message.price) {
+				$(".item-price")
+					.html(r.message.price.formatted_price + " per " + r.message.uom);
+				
+				if(r.message.stock==0) {
 					$(".item-stock").html("<div class='help'>Not in stock</div>");
 				}
-				else if(data.message.stock==1) {
+				else if(r.message.stock==1) {
 					$(".item-stock").html("<div style='color: green'>\
 						<i class='icon-check'></i> Available (in stock)</div>");
 				}
+				
+				$(".item-price-info").toggle(true);
+				
+				if(r.message.qty) {
+					qty = r.message.qty;
+					toggle_update_cart(qty);
+					$("#item-update-cart input").val(qty);
+				}
 			}
 		}
-	});
+	})
 	
-	if(wn.cart.get_cart()[$('[itemscope] [itemprop="name"]').text().trim()]) {
-		$(".item-remove-from-cart").removeClass("hide");
-	} else {
-		$(".item-add-to-cart").removeClass("hide");
-	}
-	
-	$("button.item-add-to-cart").on("click", function() {
-		wn.cart.add_to_cart({
-			url: window.location.href,
-			image: $('[itemscope] [itemprop="image"]').attr("src"),
-			item_code: $('[itemscope] [itemprop="name"]').text().trim(),
-			item_name: $('[itemscope] [itemprop="productID"]').text().trim(),
-			description: $('[itemscope] [itemprop="description"]').html().trim(),
-			price: $('[itemscope] [itemprop="price"]').text().trim()
+	$("#item-add-to-cart button").on("click", function() {
+		wn.cart.update_cart({
+			item_code: item_code,
+			qty: 1,
+			callback: function(r) {
+				if(!r.exc) {
+					toggle_update_cart(1);
+					qty = 1;
+				}
+			},
+			btn: this, 
 		});
-		$(".item-add-to-cart").addClass("hide");
-		$(".item-remove-from-cart").removeClass("hide");
 	});
 	
-	$("button.item-remove-from-cart").on("click", function() {
-		wn.cart.remove_from_cart($('[itemscope] [itemprop="name"]').text().trim());
-		$(".item-add-to-cart").removeClass("hide");
-		$(".item-remove-from-cart").addClass("hide");
+	$("#item-update-cart button").on("click", function() {
+		wn.cart.update_cart({
+			item_code: item_code,
+			qty: $("#item-update-cart input").val(),
+			btn: this,
+			callback: function(r) {
+				if(r.exc) {
+					$("#item-update-cart input").val(qty);
+				} else {
+					qty = $("#item-update-cart input").val();
+				}
+			},
+		});
 	});
-})
+	
+	if(localStorage && localStorage.getItem("pending_add_to_cart") && full_name) {
+		localStorage.removeItem("pending_add_to_cart");
+		$("#item-add-to-cart button").trigger("click");
+	}
+});
+
+var toggle_update_cart = function(qty) {
+	$("#item-add-to-cart").toggle(qty ? false : true);
+	$("#item-update-cart")
+		.toggle(qty ? true : false)
+		.find("input").val(qty);
+}

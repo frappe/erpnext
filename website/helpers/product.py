@@ -25,18 +25,26 @@ def get_product_info(item_code):
 		(item_code, price_list), as_dict=1) or []
 	
 	price = price and price[0] or None
-	
+	qty = 0
+
 	if price:
 		price["formatted_price"] = fmt_money(price["ref_rate"], currency=price["ref_currency"])
 		
 		price["ref_currency"] = not cint(webnotes.conn.get_default("hide_currency_symbol")) \
 			and (webnotes.conn.get_value("Currency", price.ref_currency, "symbol") or price.ref_currency) \
 			or ""
+		
+		if webnotes.session.user != "Guest":
+			from website.helpers.cart import _get_cart_quotation
+			item = _get_cart_quotation().doclist.get({"item_code": item_code})
+			if item:
+				qty = item[0].qty
 
 	return {
 		"price": price,
 		"stock": in_stock,
-		"uom": webnotes.conn.get_value("Item", item_code, "stock_uom")
+		"uom": webnotes.conn.get_value("Item", item_code, "stock_uom"),
+		"qty": qty
 	}
 
 @webnotes.whitelist(allow_guest=True)

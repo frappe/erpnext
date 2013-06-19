@@ -7,20 +7,13 @@ from webnotes import _, msgprint
 import webnotes.defaults
 from webnotes.utils import today, get_fullname
 
-@webnotes.whitelist()
-def add_to_cart(item_code):
-	update_qty(item_code, 1)
-	
-@webnotes.whitelist()
-def remove_from_cart(item_code):
-	update_qty(item_code, 0)
+class WebsitePriceListMissingError(webnotes.ValidationError): pass
 
 @webnotes.whitelist()
-def update_qty(item_code, qty_to_set):
-	party = get_lead_or_customer()
-	quotation = get_shopping_cart_quotation(party)
+def update_cart(item_code, qty):
+	quotation = _get_cart_quotation()
 	
-	if qty_to_set == 0:
+	if qty == 0:
 		quotation.set_doclist(quotation.doclist.get({"item_code": ["!=", item_code]}))
 	else:
 		quotation_items = quotation.doclist.get({"item_code": item_code})
@@ -29,10 +22,10 @@ def update_qty(item_code, qty_to_set):
 				"doctype": "Quotation Item",
 				"parentfield": "quotation_details",
 				"item_code": item_code,
-				"qty": qty_to_set
+				"qty": qty
 			})
 		else:
-			quotation_items[0].qty = qty_to_set
+			quotation_items[0].qty = qty
 	
 	quotation.ignore_permissions = True
 	quotation.save()
@@ -59,7 +52,16 @@ def get_lead_or_customer():
 		
 		return lead_bean.doc
 		
-def get_shopping_cart_quotation(party):
+
+@webnotes.whitelist()
+def get_cart_quotation():
+	return [d.fields for d in _get_cart_quotation(get_lead_or_customer()).doclist]
+
+
+def _get_cart_quotation(party=None):
+	if not party:
+		party = get_lead_or_customer()
+		
 	quotation = webnotes.conn.get_value("Quotation", 
 		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0})
 	
@@ -104,15 +106,14 @@ def get_price_list_using_geoip():
 			{"use_for_website": 1, "valid_for_all_countries": 1})
 			
 	if not price_list_name:
-		raise Exception, "No website Price List specified"
+		raise WebsitePriceListMissingError, "No website Price List specified"
 	
 	return price_list_name
 
 
 @webnotes.whitelist()
 def checkout():
-	party = get_lead_or_customer()
-	quotation = get_shopping_cart_quotation(party)
+	quotation = _get_cart_quotation()
 	
 	quotation.ignore_permissions = True
 	quotation.submit()
@@ -143,21 +144,21 @@ class TestCart(unittest.TestCase):
 		
 	def test_add_to_cart(self):
 		webnotes.session.user = "test@example.com"
-		add_to_cart("_Test Item")
+		update_cart("_Test Item", 1)
 		
-		quotation = get_shopping_cart_quotation(get_lead_or_customer())
+		quotation = _get_cart_quotation()
 		quotation_items = quotation.doclist.get({"parentfield": "quotation_details", "item_code": "_Test Item"})
 		self.assertTrue(quotation_items)
 		self.assertEquals(quotation_items[0].qty, 1)
 		
 		return quotation
 		
-	def test_update_qty(self):
+	def test_update_cart(self):
 		self.test_add_to_cart()
 
-		update_qty("_Test Item", 5)
+		update_cart("_Test Item", 5)
 		
-		quotation = get_shopping_cart_quotation(get_lead_or_customer())
+		quotation = _get_cart_quotation()
 		quotation_items = quotation.doclist.get({"parentfield": "quotation_details", "item_code": "_Test Item"})
 		self.assertTrue(quotation_items)
 		self.assertEquals(quotation_items[0].qty, 5)
@@ -167,16 +168,16 @@ class TestCart(unittest.TestCase):
 	def test_remove_from_cart(self):
 		quotation0 = self.test_add_to_cart()
 		
-		remove_from_cart("_Test Item")
+		update_cart("_Test Item", 0)
 		
-		quotation = get_shopping_cart_quotation(get_lead_or_customer())
+		quotation = _get_cart_quotation()
 		self.assertEquals(quotation0.doc.name, quotation.doc.name)
 		
 		quotation_items = quotation.doclist.get({"parentfield": "quotation_details", "item_code": "_Test Item"})
 		self.assertEquals(quotation_items, [])
 		
 	def test_checkout(self):
-		quotation = self.test_update_qty()
+		quotation = self.test_update_cart()
 		sales_order = checkout()
 		self.assertEquals(sales_order.doclist.getone({"item_code": "_Test Item"}).prevdoc_docname, quotation.doc.name)
 		

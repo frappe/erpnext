@@ -18,15 +18,45 @@
 
 $(document).ready(function() {
 	// make list of items in the cart
-	wn.cart.render();
-	wn.cart.bind_events();
+	// wn.cart.render();
+	// wn.cart.bind_events();
+	wn.call({
+		method: "website.helpers.cart.get_cart_quotation",
+		args: {
+			_type: "POST"
+		},
+		callback: function(r) {
+			console.log(r);
+			$("#cart-container").removeClass("hide");
+			$(".progress").remove();
+			if(r.exc) {
+				if(r.exc.indexOf("WebsitePriceListMissingError")!==-1) {
+					wn.cart.show_error("Oops!", "Price List not configured.");
+				} else {
+					wn.cart.show_error("Oops!", "Something went wrong.");
+				}
+			} else {
+				if(r.message[0].__islocal) {
+					wn.cart.show_error("Empty :-(", "Go ahead and add something to your cart.");
+				} else {
+					wn.cart.render(r.message);
+				}
+			}
+			
+		}
+	});
 });
 
 // shopping cart
 if(!wn.cart) wn.cart = {};
 $.extend(wn.cart, {
-	render: function() {
-		var $cart_wrapper = $("#cart-added-items").empty();
+	show_error: function(title, text) {
+		$("#cart-container").html('<div class="well"><h4>' + title + '</h4> ' + text + '</div>');
+	},
+	
+	render: function(doclist) {
+		return;
+		var $cart_wrapper = $("#cart-items").empty();
 		if(Object.keys(wn.cart.get_cart()).length) {
 			$('<div class="row">\
 				<div class="col col-lg-9 col-sm-9">\

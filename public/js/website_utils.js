@@ -15,13 +15,14 @@ erpnext.send_message = function(opts) {
 
 wn.call = function(opts) {
 	if(opts.btn) {
-		var $spinner = $('<img src="lib/images/ui/button-load.gif">').appendTo($(opts.btn).parent())
 		$(opts.btn).attr("disabled", "disabled");
 	}
 	
 	if(opts.msg) {
 		$(opts.msg).toggle(false);
 	}
+	
+	if(!opts.args) opts.args = {};
 	
 	// get or post?
 	if(!opts.args._type) {
@@ -48,10 +49,17 @@ wn.call = function(opts) {
 		success: function(data) {
 			if(opts.btn) {
 				$(opts.btn).attr("disabled", false);
-				$spinner.remove();
 			}
 			if(data.exc) {
-				console.log(data.exc);
+				if(opts.btn) {
+					$(opts.btn).addClass("btn-danger");
+					setTimeout(function() { $(opts.btn).removeClass("btn-danger"); }, 1000);
+				}
+			} else{
+				if(opts.btn) {
+					$(opts.btn).addClass("btn-success");
+					setTimeout(function() { $(opts.btn).removeClass("btn-success"); }, 1000);
+				}
 			}
 			if(opts.msg && data.message) {
 				$(opts.msg).html(data.message).toggle(true);
@@ -75,11 +83,8 @@ $(document).ready(function() {
 		$("#user-full-name").text(full_name);
 	}
 	
-	wn.cart.update_display();
 	$("#user-tools a").tooltip({"placement":"bottom"});
 	$("#user-tools-post-login a").tooltip({"placement":"bottom"});
-	
-	$(window).on("storage", function() { wn.cart.update_display(); });
 });
 
 // Utility functions
@@ -99,6 +104,12 @@ function get_url_arg(name) {
 		return "";
 	else
 		return decodeURIComponent(results[1]);		
+}
+
+function make_query_string(obj) {
+	var query_params = [];
+	$.each(obj, function(k, v) { query_params.push(encodeURIComponent(k) + "=" + encodeURIComponent(v)); });
+	return "?" + query_params.join("&");
 }
 
 function repl(s, dict) {
@@ -166,48 +177,30 @@ if (typeof Array.prototype.map !== "function") {
 
 // shopping cart
 if(!wn.cart) wn.cart = {};
+var full_name = getCookie("full_name");
+
 $.extend(wn.cart, {
-	get_count: function() {
-		return Object.keys(this.get_cart()).length;
-	},
-	
-	add_to_cart: function(itemprop) {
-		var cart = this.get_cart();
-		cart[itemprop.item_code] = $.extend(itemprop, {qty: 1});
-		this.set_cart(cart);
-		console.log(this.get_cart());
-	},
-	
-	remove_from_cart: function(item_code) {
-		var cart = this.get_cart();
-		delete cart[item_code];
-		this.set_cart(cart);
-		console.log(this.get_cart());
-	},
-	
-	get_cart: function() {
-		if( !("localStorage" in window) ) {
-			alert("Your browser seems to be ancient. Please use a modern browser.");
-			throw "ancient browser error";
+	update_cart: function(opts) {
+		if(!full_name) {
+			if(localStorage) {
+				localStorage.setItem("last_visited", window.location.pathname.slice(1));
+				localStorage.setItem("pending_add_to_cart", opts.item_code);
+			}
+			window.location.href = "login";
+		} else {
+			wn.call({
+				type: "POST",
+				method: "website.helpers.cart.update_cart",
+				args: {
+					item_code: opts.item_code,
+					qty: opts.qty
+				},
+				btn: opts.btn,
+				callback: function(r) {
+					if(opts.callback)
+						opts.callback(r);
+				}
+			});
 		}
-		
-		return JSON.parse(localStorage.getItem("cart")) || {};
 	},
-	
-	set_cart: function(cart) {
-		localStorage.setItem("cart", JSON.stringify(cart));
-		wn.cart.update_display();
-	},
-	
-	update_display: function() {
-		$(".cart-count").text("( " + wn.cart.get_count() + " )");
-	},
-	
-	set_value_in_cart: function(item_code, fieldname, value) {
-		var cart = this.get_cart();
-		if(cart[item_code]) {
-			cart[item_code][fieldname] = value;
-			this.set_cart(cart);
-		}
-	}
 });

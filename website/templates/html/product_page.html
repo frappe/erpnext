@@ -35,11 +35,20 @@
 				{{ web_long_description or web_short_description or 
 					"[No description given]" }}
 				</div>
-				<div class="item-price-info" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-					<div class="item-price hide" itemprop="price"></div>
-					<div class="item-stock" itemprop="availablity"></div>
-					<button class="btn btn-primary item-add-to-cart hide">Add to Cart</button>
-					<button class="btn btn-default item-remove-from-cart hide">Remove from Cart</button>
+				<div style="min-height: 100px; margin: 10px 0;">
+					<div class="item-price-info" style="display: none;">
+						<h4 class="item-price" itemprop="price"></h4>
+						<div class="item-stock" itemprop="availablity"></div>
+						<div id="item-add-to-cart">
+							<button class="btn btn-primary">Add to Cart</button>
+						</div>
+						<div id="item-update-cart" class="input-group col-lg-6" style="display: none;">
+							<input type="text">
+							<div class="input-group-btn">
+								<button class="btn btn-primary">Update</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
