@@ -193,7 +193,8 @@ $.extend(wn.cart, {
 				method: "website.helpers.cart.update_cart",
 				args: {
 					item_code: opts.item_code,
-					qty: opts.qty
+					qty: opts.qty,
+					with_doclist: opts.with_doclist
 				},
 				btn: opts.btn,
 				callback: function(r) {

@@ -33,6 +33,25 @@ class DocType(DocListController):
 		if self.doc.buying_or_selling not in ["Buying", "Selling"]:
 			msgprint(_(self.meta.get_label("buying_or_selling")) + " " + _("must be one of") + " " +
 				comma_or(["Buying", "Selling"]), raise_exception=True)
+				
+		self.validate_use_for_website()
+		
+	def validate_use_for_website(self):
+		if self.doc.use_for_website:
+			if self.doc.valid_for_all_countries:
+				if webnotes.conn.sql("""select name from `tabPrice List` where use_for_website=1
+					and valid_for_all_countries=1 and name!=%s""", self.doc.name):
+						webnotes.msgprint(_("Error: Another Price List already exists that is used for website and is valid for all countries."), 
+							raise_exception=True)
+				
+			elif self.doclist.get({"parentfield": "valid_for_countries"}):
+				for d in self.doclist.get({"parentfield": "valid_for_countries"}):
+					if webnotes.conn.sql("""select country from `tabPrice List Country` plc, `tabPrice List` pl
+						where plc.parent=pl.name and pl.use_for_website=1 and 
+						ifnull(valid_for_all_countries, 0)=0 and country=%s and pl.name!=%s""", 
+						(d.country, self.doc.name)):
+							webnotes.msgprint(_("Error: Another Price List already exists that is used for website and is valid for country") 
+								+ ": " + d.country, raise_exception=True)
 	
 	def on_trash(self):
 		webnotes.conn.sql("""delete from `tabItem Price` where price_list_name = %s""", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-06-05 19:07:51", 
+  "modified": "2013-06-19 15:55:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -223,7 +223,7 @@
   "label": "Order Type", 
   "oldfieldname": "order_type", 
   "oldfieldtype": "Select", 
-  "options": "\nSales\nMaintenance", 
+  "options": "\nSales\nMaintenance\nShopping Cart", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1, 

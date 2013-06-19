@@ -117,3 +117,13 @@ a {
   margin-top: -10px;
   margin-left: -10px;
 }
+
+.hidden-sm-inline {
+	display: none;
+}
+
+@media (min-width: 768px) {
+	.hidden-sm-inline {
+		display: inline;
+	}
+}

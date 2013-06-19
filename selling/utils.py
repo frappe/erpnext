@@ -134,7 +134,7 @@ def _get_price_list_rate(args, item_bean, meta):
 	base_ref_rate = item_bean.doclist.get({
 		"parentfield": "ref_rate_details",
 		"price_list_name": args.price_list_name, 
-		"price_list_currency": args.price_list_currency,
+		"ref_currency": args.price_list_currency,
 		"buying_or_selling": "Selling"})
 	
 	if not base_ref_rate:

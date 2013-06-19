@@ -3,16 +3,16 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
 import webnotes.defaults
-from webnotes.utils import today, get_fullname
+from webnotes.utils import cint, get_fullname, fmt_money
 
 class WebsitePriceListMissingError(webnotes.ValidationError): pass
 
 @webnotes.whitelist()
-def update_cart(item_code, qty):
+def update_cart(item_code, qty, with_doclist=0):
 	quotation = _get_cart_quotation()
 	
+	qty = cint(qty)
 	if qty == 0:
 		quotation.set_doclist(quotation.doclist.get({"item_code": ["!=", item_code]}))
 	else:
@@ -30,7 +30,10 @@ def update_cart(item_code, qty):
 	quotation.ignore_permissions = True
 	quotation.save()
 	
-	return quotation.doc.name
+	if with_doclist:
+		return decorate_quotation_doclist(quotation.doclist)
+	else:
+		return quotation.doc.name
 	
 def get_lead_or_customer():
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, "customer")
@@ -45,6 +48,8 @@ def get_lead_or_customer():
 			"doctype": "Lead",
 			"email_id": webnotes.session.user,
 			"lead_name": get_fullname(webnotes.session.user),
+			"territory": webnotes.conn.get_value("Shopping Cart Settings", None, "territory") or \
+				"All Territories",
 			"status": "Open" # TODO: set something better???
 		})
 		lead_bean.ignore_permissions = True
@@ -55,8 +60,18 @@ def get_lead_or_customer():
 
 @webnotes.whitelist()
 def get_cart_quotation():
-	return [d.fields for d in _get_cart_quotation(get_lead_or_customer()).doclist]
+	doclist = _get_cart_quotation(get_lead_or_customer()).doclist
+	return decorate_quotation_doclist(doclist)
 
+def decorate_quotation_doclist(doclist):
+	for d in doclist:
+		if d.item_code:
+			d.fields.update(webnotes.conn.get_value("Item", d.item_code, 
+				["website_image", "web_short_description", "page_name"], as_dict=True))
+			d.formatted_rate = fmt_money(d.export_rate, currency=doclist[0].currency)
+			d.formatted_amount = fmt_money(d.export_amount, currency=doclist[0].currency)
+
+	return [d.fields for d in doclist]
 
 def _get_cart_quotation(party=None):
 	if not party:
@@ -71,7 +86,7 @@ def _get_cart_quotation(party=None):
 		qbean = webnotes.bean({
 			"doctype": "Quotation",
 			"naming_series": "QTN-CART-",
-			"quotation_to": "Customer",
+			"quotation_to": party.doctype,
 			"company": webnotes.defaults.get_user_default("company"),
 			"order_type": "Shopping Cart",
 			"status": "Draft",
@@ -97,7 +112,8 @@ def get_price_list_using_geoip():
 		price_list_name = webnotes.conn.sql("""select parent 
 			from `tabPrice List Country` plc
 			where country=%s and exists (select name from `tabPrice List` pl
-				where use_for_website=1 and pl.name = plc.parent)""", country)
+				where use_for_website=1 and ifnull(valid_for_all_countries, 0)=0 and 
+				pl.name = plc.parent)""", country)
 	
 	if price_list_name:
 		price_list_name = price_list_name[0][0]
