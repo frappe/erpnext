@@ -66,13 +66,13 @@ def get_data(filters, tab, details):
 			inc = 1
 
 		data1 = webnotes.conn.sql(""" select %s from `%s` t1, `%s` t2 %s
-						where t2.parent = t1.name and t1.company = %s 
-						and t1.fiscal_year = %s and t1.docstatus = 1 %s 
-						group by %s 
-					""" % (query_details, tab[0], tab[1], details["sup_tab"], "%s", 
-						"%s", cond, details["basedon"]), (filters.get("company"), 
-						filters["fiscal_year"]),
-					as_list=1)
+					where t2.parent = t1.name and t1.company = %s 
+					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+					group by %s 
+				""" % (query_details, tab[0], tab[1], details["sup_tab"], "%s", 
+					"%s", cond, details["basedon"]), (filters.get("company"), 
+					filters["fiscal_year"]),
+			as_list=1)
 
 		for d in range(len(data1)):
 			#to add blanck column
@@ -82,28 +82,23 @@ def get_data(filters, tab, details):
 
 			#to get distinct value of col specified by group_by in filter
 			row = webnotes.conn.sql("""select DISTINCT(%s) from `%s` t1, `%s` t2 %s
-							where t2.parent = t1.name and t1.company = %s	
-							and t1.fiscal_year = %s  and t1.docstatus = 1 
-							and %s = %s 
-						"""%(sel_col, tab[0], tab[1], details["sup_tab"], "%s", 
-							"%s", details["basedon"], "%s"),
-							(filters.get("company"), filters.get("fiscal_year"), 
-							data1[d][0]),
-						as_list=1)
+						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
+						and t1.docstatus = 1 and %s = %s 
+					"""%(sel_col, tab[0], tab[1], details["sup_tab"], "%s", "%s", details["basedon"], "%s"),
+						(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), 
+				as_list=1)
 
 			for i in range(len(row)):
 				des = ['' for q in range(len(details["columns"]))]
 				
 				#get data for each group_by filter 
 				row1 = webnotes.conn.sql(""" select %s , %s from `%s` t1, `%s` t2 %s
-								where t2.parent = t1.name and t1.company = %s 
-								and t1.fiscal_year = %s and t1.docstatus = 1 
-								and %s = %s and %s = %s 
-							"""%(sel_col, details["query_pwc"], tab[0], tab[1], details["sup_tab"], 
-								"%s", "%s", sel_col, "%s", details["basedon"], "%s"), 
-								(filters.get("company"), filters.get("fiscal_year"), row[i][0], 
-								data1[d][0]),
-							as_list=1)
+							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
+							and t1.docstatus = 1 and %s = %s and %s = %s 
+						"""%(sel_col, details["query_pwc"], tab[0], tab[1], details["sup_tab"], 
+							"%s", "%s", sel_col, "%s", details["basedon"], "%s"), 
+							(filters.get("company"), filters.get("fiscal_year"), row[i][0], data1[d][0]),
+					as_list=1)
 
 				des[ind] = row[i]
 				for j in range(1,len(details["columns"])-inc):	
@@ -112,13 +107,13 @@ def get_data(filters, tab, details):
 	else:
 
 		data = webnotes.conn.sql(""" select %s from `%s` t1, `%s` t2 %s
-						where t2.parent = t1.name and t1.company = %s 
-						and t1.fiscal_year = %s and t1.docstatus = 1 
-						%s group by %s	
-					"""%(query_details, tab[0], tab[1], details["sup_tab"], "%s", 
-						"%s", cond,details["basedon"]), (filters.get("company"), 
-						filters.get("fiscal_year")), 
-					as_list=1)
+					where t2.parent = t1.name and t1.company = %s 
+					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+					group by %s	
+				"""%(query_details, tab[0], tab[1], details["sup_tab"], "%s", 
+					"%s", cond,details["basedon"]), (filters.get("company"), 
+					filters.get("fiscal_year")), 
+			as_list=1)
 
 	return data
 
@@ -146,8 +141,8 @@ def period_wise_colums_query(filters, trans):
 			pwc.append(month_name[month]+' (Amt):Currency:120')
 
 			query_details += """
-				Sum(CASE WHEN MONTH(t1.%(trans)s)= %(mon_num)s THEN t2.qty ELSE NULL END),
-				SUM(CASE WHEN MONTH(t1.%(trans)s)= %(mon_num)s THEN t1.grand_total ELSE NULL END),
+				Sum(IF(MONTH(t1.%(trans)s)= %(mon_num)s, t2.qty, NULL)),
+				SUM(IF(MONTH(t1.%(trans)s)= %(mon_num)s, t1.grand_total, NULL)),
 			"""%{"trans": trans_date,"mon_num": cstr(month+1)}
 
 		for month in range(0, start_month-1):
@@ -155,8 +150,8 @@ def period_wise_colums_query(filters, trans):
 			pwc.append(month_name[month]+' (Amt):Currency:120')
 
 			query_details += """
-				Sum(CASE WHEN MONTH(t1.%(trans)s)= %(mon_num)s THEN t2.qty ELSE NULL END),
-				SUM(CASE WHEN MONTH(t1.%(trans)s)= %(mon_num)s THEN t1.grand_total ELSE NULL END),
+				Sum(IF(MONTH(t1.%(trans)s)= %(mon_num)s, t2.qty, NULL)),
+				SUM(IF(MONTH(t1.%(trans)s)= %(mon_num)s, t1.grand_total, NULL)),
 			"""%{"trans": trans_date, "mon_num": cstr(month+1)}
 	
 	elif filters.get("period") == "Quarterly":
@@ -169,8 +164,8 @@ def period_wise_colums_query(filters, trans):
 
 		for d in bet_dates:
 			query_details += """
-				SUM(CASE WHEN t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s' THEN t2.qty ELSE NULL END), 
-				SUM(CASE WHEN t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s' THEN t1.grand_total ELSE NULL END),
+				SUM(IF(t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)), 
+				SUM(IF(t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
 			"""%{"trans": trans_date, "sd": d[0],"ed": d[1]}
 
 	elif filters.get("period") == "Half-yearly":
@@ -183,10 +178,10 @@ def period_wise_colums_query(filters, trans):
 		second_half_end = add_days(add_months(second_half_start,6),-1)
 
 		query_details = """ 
-			 	SUM(CASE WHEN t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s' THEN t2.qty ELSE NULL END),
-			 	SUM(CASE WHEN t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s' THEN t1.grand_total ELSE NULL END), 
-			 	SUM(CASE WHEN t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s' THEN t2.qty ELSE NULL END), 
-			 	SUM(CASE WHEN t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s' THEN t1.grand_total ELSE NULL END),
+			 	SUM(IF(t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s', t2.qty, NULL)),
+			 	SUM(IF(t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s', t1.grand_total, NULL)), 
+			 	SUM(IF(t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s', t2.qty, NULL)), 
+			 	SUM(IF(t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s', t1.grand_total, NULL)),
 			"""%{"trans": trans_date, "fhs": first_half_start, "fhe": first_half_end,"shs": second_half_start, 
 		"she": second_half_end}	 
 	
