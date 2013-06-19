@@ -26,27 +26,27 @@ def execute(filters=None):
 	
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters)
-	# tim_map = get_territory_item_month_map(filters)
+	cam_map = get_costcenter_account_month_map(filters)
 
 	data = []
 
-	# for territory, territory_items in tim_map.items():
-	# 	for item_group, monthwise_data in territory_items.items():
-	# 		row = [territory, item_group]
-	# 		totals = [0, 0, 0]
-	# 		for relevant_months in period_month_ranges:
-	# 			period_data = [0, 0, 0]
-	# 			for month in relevant_months:
-	# 				month_data = monthwise_data.get(month, {})
-	# 				for i, fieldname in enumerate(["target", "achieved", "variance"]):
-	# 					value = flt(month_data.get(fieldname))
-	# 					period_data[i] += value
-	# 					totals[i] += value
-	# 			period_data[2] = period_data[0] - period_data[1]
-	# 			row += period_data
-	# 		totals[2] = totals[0] - totals[1]
-	# 		row += totals
-	# 		data.append(row)
+	for cost_center, cost_center_items in cam_map.items():
+		for account, monthwise_data in cost_center_items.items():
+			row = [cost_center, account]
+			totals = [0, 0, 0]
+			for relevant_months in period_month_ranges:
+				period_data = [0, 0, 0]
+				for month in relevant_months:
+					month_data = monthwise_data.get(month, {})
+					for i, fieldname in enumerate(["target", "actual", "variance"]):
+						value = flt(month_data.get(fieldname))
+						period_data[i] += value
+						totals[i] += value
+				period_data[2] = period_data[0] - period_data[1]
+				row += period_data
+			totals[2] = totals[0] - totals[1]
+			row += totals
+			data.append(row)
 
 	return columns, sorted(data, key=lambda x: (x[0], x[1]))
 	
@@ -57,7 +57,7 @@ def get_columns(filters):
 			msgprint(_("Please specify") + ": " + label,
 				raise_exception=True)
 
-	columns = ["Cost Center:Link/Cost Center:80"]
+	columns = ["Cost Center:Link/Cost Center:100", "Account:Link/Account:100"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
@@ -105,70 +105,60 @@ def get_period_month_ranges(filters):
 	return period_month_ranges
 
 
-#Get cost center details
-def get_costcenter_details(filters):
-	return webnotes.conn.sql("""select t.name, td.item_group, td.target_qty, 
-		td.target_amount, t.distribution_id 
-		from `tabTerritory` t, `tabTarget Detail` td 
-		where td.parent=t.name and td.fiscal_year=%s and 
-		ifnull(t.distribution_id, '')!='' order by t.name""" %
-		('%s'), (filters.get("fiscal_year")), as_dict=1)
+#Get cost center & target details
+def get_costcenter_target_details(filters):
+	return webnotes.conn.sql("""select cc.name, cc.distribution_id, 
+		cc.parent_cost_center, bd.account, bd.budget_allocated 
+		from `tabCost Center` cc, `tabBudget Detail` bd 
+		where bd.parent=cc.name and bd.fiscal_year=%s and 
+		cc.company_name=%s and ifnull(cc.distribution_id, '')!='' 
+		order by cc.name""" % ('%s', '%s'), 
+		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 
-#Get target distribution details of item group
+#Get target distribution details of accounts of cost center
 def get_target_distribution_details(filters):
 	target_details = {}
-	abc = []
+
 	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
-		`tabTerritory` t where bdd.parent=bd.name and t.distribution_id=bd.name and \
-		bd.fiscal_year=%s  """ % ('%s'), (filters.get("fiscal_year")), as_dict=1):
+		`tabCost Center` cc where bdd.parent=bd.name and cc.distribution_id=bd.name and \
+		bd.fiscal_year=%s""" % ('%s'), (filters.get("fiscal_year")), as_dict=1):
 			target_details.setdefault(d.month, d)
 
 	return target_details
 
-#Get achieved details from sales order
-def get_achieved_details(filters):
-	start_date, end_date = get_year_start_end_date(filters)
-	achieved_details = {}
+#Get actual details from gl entry
+def get_actual_details(filters):
+	return webnotes.conn.sql("""select gl.account, gl.debit, gl.credit, 
+		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
+		from `tabGL Entry` gl, `tabBudget Detail` bd 
+		where gl.fiscal_year=%s and company=%s and	is_cancelled='No' 
+		and bd.account=gl.account""" % ('%s', '%s'), 
+		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 
-	for d in webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, \
-		MONTHNAME(so.transaction_date) as month_name \
-		from `tabSales Order Item` soi, `tabSales Order` so \
-		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and \
-		so.transaction_date<=%s""" % ('%s', '%s'), \
-		(start_date, end_date), as_dict=1):
-			achieved_details.setdefault(d.month_name, d)
-
-	return achieved_details
-
-def get_territory_item_month_map(filters):
-	territory_details = get_territory_details(filters)
+def get_costcenter_account_month_map(filters):
+	costcenter_target_details = get_costcenter_target_details(filters)
 	tdd = get_target_distribution_details(filters)
-	achieved_details = get_achieved_details(filters)
+	actual_details = get_actual_details(filters)
 
-	tim_map = {}
+	cam_map = {}
 
-	for td in territory_details:
+	for ccd in costcenter_target_details:
 		for month in tdd:
-			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
+			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "achieved": 0.0, "variance": 0.0
+				"target": 0.0, "actual": 0.0, "variance": 0.0
 			}))
 
-			tav_dict = tim_map[td.name][td.item_group][month]
+			tav_dict = cam_map[ccd.name][ccd.account][month]
+			tav_dict.target = ccd.budget_allocated*(tdd[month]["percentage_allocation"]/100)
 
-			for ad in achieved_details:
-				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = td.target_qty*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == td.item_group:
-						tav_dict.achieved += achieved_details[month]["qty"]
-
-				if (filters["target_on"] == "Amount"):
-					tav_dict.target = td.target_amount*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == td.item_group:
-						tav_dict.achieved += achieved_details[month]["amount"]
-
-	return tim_map
+			for ad in actual_details:
+				if ad.month_name == month and ad.account == ccd.account \
+					and ad.cost_center == ccd.name:
+						tav_dict.actual += ad.debit - ad.credit
+						
+	return cam_map
 
 def get_year_start_end_date(filters):
 	return webnotes.conn.sql("""select year_start_date, 
@@ -176,9 +166,3 @@ def get_year_start_end_date(filters):
 			as year_end_date
 		from `tabFiscal Year`
 		where name=%s""", filters["fiscal_year"])[0]
-
-def get_item_group(item_name):
-	"""Get Item Group of an item"""
-
-	return webnotes.conn.sql_list("select item_group from `tabItem` where name=%s""" %
-		('%s'), (item_name))

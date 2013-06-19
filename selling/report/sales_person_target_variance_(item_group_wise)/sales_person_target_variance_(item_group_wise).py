@@ -117,7 +117,7 @@ def get_salesperson_details(filters):
 #Get target distribution details of item group
 def get_target_distribution_details(filters):
 	target_details = {}
-	abc = []
+	
 	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
 		`tabTerritory` t where bdd.parent=bd.name and t.distribution_id=bd.name and \
@@ -129,17 +129,14 @@ def get_target_distribution_details(filters):
 #Get achieved details from sales order
 def get_achieved_details(filters):
 	start_date, end_date = get_year_start_end_date(filters)
-	achieved_details = {}
-
-	for d in webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, \
-		MONTHNAME(so.transaction_date) as month_name \
-		from `tabSales Order Item` soi, `tabSales Order` so \
-		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and \
-		so.transaction_date<=%s""" % ('%s', '%s'), \
-		(start_date, end_date), as_dict=1):
-			achieved_details.setdefault(d.month_name, d)
-
-	return achieved_details
+	
+	return webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
+		st.sales_person, MONTHNAME(so.transaction_date) as month_name 
+		from `tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st 
+		where soi.parent=so.name and so.docstatus=1 and 
+		st.parent=so.name and so.transaction_date>=%s and 
+		so.transaction_date<=%s""" % ('%s', '%s'), 
+		(start_date, end_date), as_dict=1)
 
 def get_salesperson_item_month_map(filters):
 	salesperson_details = get_salesperson_details(filters)
@@ -160,13 +157,15 @@ def get_salesperson_item_month_map(filters):
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
 					tav_dict.target = sd.target_qty*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == sd.item_group:
-						tav_dict.achieved += achieved_details[month]["qty"]
+					if ad.month_name == month and ''.join(get_item_group(ad.item_code)) == sd.item_group \
+						and ad.sales_person == sd.name:
+							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
 					tav_dict.target = sd.target_amount*(tdd[month]["percentage_allocation"]/100)
-					if ad == month and ''.join(get_item_group(achieved_details[month]["item_code"])) == sd.item_group:
-						tav_dict.achieved += achieved_details[month]["amount"]
+					if ad.month_name == month and ''.join(get_item_group(ad.item_code)) == sd.item_group \
+						and ad.sales_person == sd.name:
+							tav_dict.achieved += ad.amount
 
 	return sim_map
 
