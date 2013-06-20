@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 14:48:34", 
+  "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:14:58", 
+  "modified": "2013-06-18 17:49:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "parent": "Sales Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1
  }, 
  {
@@ -202,7 +203,7 @@
   "label": "Shipping Address Name", 
   "options": "Address", 
   "print_hide": 1, 
-  "read_only": 1
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -951,103 +952,32 @@
   "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Sales Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 0, 
   "report": 1, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Maintenance Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "Maintenance Manager", 
-  "submit": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "report": 1, 
   "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "Maintenance User", 
-  "submit": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Accounts User"
  }, 
  {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "permlevel": 0, 
   "role": "Customer"
  }
 ]
