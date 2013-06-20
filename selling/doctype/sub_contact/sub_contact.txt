@@ -1,0 +1,59 @@
+[
+ {
+  "creation": "2013-06-20 09:35:44", 
+  "docstatus": 0, 
+  "modified": "2013-06-20 09:35:44", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldtype": "Data", 
+  "name": "__common__", 
+  "parent": "Sub Contact", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sub Contact", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Administrator", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sub Contact"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cont_name", 
+  "label": "Contact Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "adr", 
+  "label": "Address"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ph_no", 
+  "label": "Phone Number"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

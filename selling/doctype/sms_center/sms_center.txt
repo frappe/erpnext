@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:22", 
+  "creation": "2013-04-25 10:29:33", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:24", 
+  "modified": "2013-06-20 14:32:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,7 +37,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "System Manager", 
   "submit": 0, 
   "write": 1
@@ -57,7 +57,7 @@
   "fieldname": "send_to", 
   "fieldtype": "Select", 
   "label": "Send To", 
-  "options": "\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person"
+  "options": "link:Contact List"
  }, 
  {
   "depends_on": "eval:doc.send_to=='All Customer Contact'", 
@@ -124,6 +124,22 @@
   "fieldtype": "Button", 
   "label": "Send SMS", 
   "options": "send_sms"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "a", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "v", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upd", 
+  "fieldtype": "Button", 
+  "label": "Upload"
  }, 
  {
   "doctype": "DocPerm"

@@ -1,0 +1,49 @@
+[
+ {
+  "creation": "2013-06-20 09:37:11", 
+  "docstatus": 0, 
+  "modified": "2013-06-20 12:02:12", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cont_data", 
+  "fieldtype": "Table", 
+  "label": "Contact Data", 
+  "name": "__common__", 
+  "options": "Sub Contact", 
+  "parent": "Contact List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Contact List", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Administrator", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Contact List"
+ }, 
+ {
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

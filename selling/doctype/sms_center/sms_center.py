@@ -34,6 +34,7 @@ class DocType:
       
   def create_receiver_list(self):
     rec, where_clause = '', ''
+    
     if self.doc.send_to == 'All Customer Contact':
       where_clause = self.doc.customer and " and customer = '%s'" % self.doc.customer or " and ifnull(is_customer, 0) = 1"
     if self.doc.send_to == 'All Supplier Contact':
@@ -50,7 +51,8 @@ class DocType:
       rec = sql("select t1.employee_name, t2.cell_number from `tabEmployee` t1, `tabEmployee Profile` t2 where t2.employee = t1.name and t1.status = 'Active' and t1.docstatus != 2 and ifnull(t2.cell_number,'')!='' %s" % where_clause)
     elif self.doc.send_to == 'All Sales Person':
       rec = sql("select sales_person_name, mobile_no from `tabSales Person` where docstatus != 2 and ifnull(mobile_no,'')!=''")
-
+    else:
+      rec=sql("select cont_name,ph_no from `tabSub Contact` where parent='"+self.doc.send_to+"'")
     rec_list = ''
     for d in rec:
       rec_list += d[0] + ' - ' + d[1] + '\n'
@@ -60,10 +62,10 @@ class DocType:
     receiver_nos = []
     for d in self.doc.receiver_list.split('\n'):
       receiver_no = d
-      if '-' in d:
-        receiver_no = receiver_no.split('-')[1]
-      if receiver_no.strip():
-        receiver_nos.append(cstr(receiver_no).strip())
+      #if '-' in d:
+      #  receiver_no = receiver_no.split('-')[1]
+      #if receiver_no.strip():
+      receiver_nos.append(cstr(receiver_no))
     return receiver_nos
 
   def send_sms(self):
@@ -71,5 +73,13 @@ class DocType:
       msgprint("Please enter message before sending")
     else:
       receiver_list = self.get_receiver_nos()
+      
+      for z in range(0,len(receiver_list)-1):
+        a=cstr(receiver_list[z]).split('-')
+	d1="Hi "+cstr(a[0])+" "+self.doc.message
+	msgprint(d1)
+	
+      '''
       if receiver_list:
         msgprint(get_obj('SMS Control', 'SMS Control').send_sms(receiver_list, cstr(self.doc.message)))
+      '''

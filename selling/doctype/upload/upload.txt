@@ -1,0 +1,74 @@
+[
+ {
+  "creation": "2013-06-20 08:31:58", 
+  "docstatus": 0, 
+  "modified": "2013-06-20 08:44:26", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 0, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 1, 
+  "issingle": 1, 
+  "max_attachments": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Upload", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Upload", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Administrator", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Upload"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "nam", 
+  "fieldtype": "Data", 
+  "label": "Name"
+ }, 
+ {
+  "description": "Type of document to rename.", 
+  "doctype": "DocField", 
+  "fieldname": "select_doctype", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Select DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_html", 
+  "fieldtype": "HTML", 
+  "label": "Upload HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rename_log", 
+  "fieldtype": "HTML", 
+  "label": "Rename Log"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]
