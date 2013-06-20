@@ -159,11 +159,21 @@ wn.module_page["Selling"] = [
 			},
 			{
 				"label":wn._("Sales Person-wise Transaction Summary"),
-				route: "query-report/Sales Person-wise Transaction Summary",
+				route: "query-report/Sales Person-wise Transaction Summary"
 			},
 			{
 				"label":wn._("Item-wise Sales History"),
-				route: "query-report/Item-wise Sales History",
+				route: "query-report/Item-wise Sales History"
+			},
+			{
+				"label":wn._("Territory Target Variance (Item Group-Wise)"),
+				route: "query-report/Territory Target Variance (Item Group-Wise)",
+				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
+				route: "query-report/Sales Person Target Variance (Item Group-Wise)",
+				doctype: "Sales Order"
 			},
 			{
 				"label":wn._("Customers Not Buying Since Long Time"),
@@ -180,7 +190,6 @@ wn.module_page["Selling"] = [
 				route: "query-report/Sales Order Trends",
 				doctype: "Sales Order"
 			},
-
 		]
 	}
 ]

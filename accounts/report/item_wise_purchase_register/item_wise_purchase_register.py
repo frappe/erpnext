@@ -23,7 +23,6 @@ def execute(filters=None):
 	columns = get_columns()
 	item_list = get_items(filters)
 	aii_account_map = get_aii_accounts()
-	webnotes.errprint(aii_account_map)
 	data = []
 	for d in item_list:
 		expense_head = d.expense_head or aii_account_map.get(d.company)
