@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-13 18:45:01", 
+  "docstatus": 0, 
+  "modified": "2013-06-13 18:45:01", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Purchase Order", 
+  "report_name": "Purchase Order Trends", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Purchase Order Trends"
+ }
+]
