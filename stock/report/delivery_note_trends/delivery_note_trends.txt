@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-13 18:42:11", 
+  "docstatus": 0, 
+  "modified": "2013-06-13 18:42:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Delivery Note", 
+  "report_name": "Delivery Note Trends", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Delivery Note Trends"
+ }
+]

@@ -155,7 +155,7 @@ for r in res:
 		for d in range(len(colnames) - cr):
 			r.append(flt(main_det[0][d]))
 		out.append(r)
-		
+
 		if group_by:
 			flag = 1
 			# check for root nodes
@@ -167,7 +167,7 @@ for r in res:
 
 			if flag == 1:	
 				det = [x[0] for x in sql("SELECT DISTINCT %s FROM %s where %s" % (sel_col, add_tab, add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))]
-
+				
 				for des in range(len(det)):
 					t_row = ['' for i in range(len(colnames))]
 					t_row[col_idx[group_by]] = cstr(det[des])
