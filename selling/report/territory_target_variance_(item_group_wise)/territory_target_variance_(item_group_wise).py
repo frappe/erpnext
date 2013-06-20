@@ -20,6 +20,7 @@ import calendar
 from webnotes import _, msgprint
 from webnotes.utils import flt
 import time
+from accounts.utils import get_fiscal_year
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -54,8 +55,7 @@ def get_columns(filters):
 	for fieldname in ["fiscal_year", "period", "target_on"]:
 		if not filters.get(fieldname):
 			label = (" ".join(fieldname.split("_"))).title()
-			msgprint(_("Please specify") + ": " + label,
-				raise_exception=True)
+			msgprint(_("Please specify") + ": " + label, raise_exception=True)
 
 	columns = ["Territory:Link/Territory:80", "Item Group:Link/Item Group:80"]
 
@@ -72,8 +72,8 @@ def get_columns(filters):
 
 def get_period_date_ranges(filters):
 	from dateutil.relativedelta import relativedelta
-
-	year_start_date, year_end_date = get_year_start_end_date(filters)
+	year_start_date, year_end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
+	
 
 	increment = {
 		"Monthly": 1,
@@ -111,8 +111,8 @@ def get_territory_details(filters):
 		td.target_amount, t.distribution_id 
 		from `tabTerritory` t, `tabTarget Detail` td 
 		where td.parent=t.name and td.fiscal_year=%s and 
-		ifnull(t.distribution_id, '')!='' order by t.name""" %
-		('%s'), (filters.get("fiscal_year")), as_dict=1)
+		ifnull(t.distribution_id, '')!='' order by t.name""", 
+		filters.get("fiscal_year"), as_dict=1)
 
 #Get target distribution details of item group
 def get_target_distribution_details(filters):
@@ -128,7 +128,7 @@ def get_target_distribution_details(filters):
 
 #Get achieved details from sales order
 def get_achieved_details(filters):
-	start_date, end_date = get_year_start_end_date(filters)
+	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
 	return webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
 		so.territory, MONTHNAME(so.transaction_date) as month_name 
@@ -148,35 +148,26 @@ def get_territory_item_month_map(filters):
 		for month in tdd:
 			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "achieved": 0.0, "variance": 0.0
+				"target": 0.0, "achieved": 0.0
 			}))
 
 			tav_dict = tim_map[td.name][td.item_group][month]
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = td.target_qty*(tdd[month]["percentage_allocation"]/100)
-					if ad.month_name == month and ''.join(get_item_group(ad.item_code)) == td.item_group \
+					tav_dict.target = flt(td.target_qty) * (tdd[month]["percentage_allocation"]/100)
+					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = td.target_amount*(tdd[month]["percentage_allocation"]/100)
-					if ad.month_name == month and ''.join(get_item_group(ad.item_code)) == td.item_group \
+					tav_dict.target = flt(td.target_amount) * \
+						(tdd[month]["percentage_allocation"]/100)
+					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.amount
 
 	return tim_map
 
-def get_year_start_end_date(filters):
-	return webnotes.conn.sql("""select year_start_date, 
-		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
-			as year_end_date
-		from `tabFiscal Year`
-		where name=%s""", filters["fiscal_year"])[0]
-
 def get_item_group(item_name):
-	"""Get Item Group of an item"""
-
-	return webnotes.conn.sql_list("select item_group from `tabItem` where name=%s""" %
-		('%s'), (item_name))
+	return webnotes.conn.get_value("Item", item_name, "item_group")
