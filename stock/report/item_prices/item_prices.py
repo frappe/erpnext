@@ -69,10 +69,11 @@ def get_price_list():
 		from `tabItem Price` where docstatus<2""", as_dict=1)
 
 	for j in price_list:
-		if j.selling:
-			rate.setdefault(j.parent, {}).setdefault("selling", []).append(j.price)
-		if j.buying:
-			rate.setdefault(j.parent, {}).setdefault("buying", []).append(j.price)
+		if j.price:
+			if j.selling:
+				rate.setdefault(j.parent, {}).setdefault("selling", []).append(j.price)
+			if j.buying:
+				rate.setdefault(j.parent, {}).setdefault("buying", []).append(j.price)
 
 	item_rate_map = {}
 	

@@ -54,16 +54,7 @@ class BuyingController(StockController):
 					raise_exception=WrongWarehouseCompany)
 
 	def validate_stock_or_nonstock_items(self):
-		items = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
-		if self.stock_items:
-			nonstock_items = list(set(items) - set(self.stock_items))
-			if nonstock_items:
-				webnotes.msgprint(_("Stock and non-stock items can not be entered in the same ") + 
-					self.doc.doctype + _(""". You should make separate documents for them.
-					Stock Items: """) + ", ".join(self.stock_items) + _("""
-					Non-stock Items: """) + ", ".join(nonstock_items), raise_exception=1)
-				
-		elif items and not self.stock_items:
+		if not self.stock_items:
 			tax_for_valuation = [d.account_head for d in 
 				self.doclist.get({"parentfield": "purchase_tax_details"}) 
 				if d.category in ["Valuation", "Valuation and Total"]]

@@ -257,6 +257,16 @@ wn.module_page["Accounts"] = [
 				route: "query-report/Budget Variance Report",
 				doctype: "Cost Center"
 			},
+			{
+				"label":wn._("Purchase Invoice Trends"),
+				route: "query-report/Purchase Invoice Trends",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Sales Invoice Trends"),
+				route: "query-report/Sales Invoice Trends",
+				doctype: "Sales Invoice"
+			},
 		]
 	}
 ]
