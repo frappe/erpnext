@@ -74,7 +74,6 @@ def get_data(filters, tab, details):
 					"%s", cond, details["basedon"]), (filters.get("company"), 
 					filters["fiscal_year"]),
 			as_list=1)
-
 		for d in range(len(data1)):
 			#to add blanck column
 			dt = data1[d]
@@ -88,11 +87,10 @@ def get_data(filters, tab, details):
 					"""%(sel_col, tab[0], tab[1], details["sup_tab"], "%s", "%s", details["basedon"], "%s"),
 						(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), 
 				as_list=1)
-
 			for i in range(len(row)):
 				des = ['' for q in range(len(details["columns"]))]
 				
-				#get data for each group_by filter 
+				#get data for group_by filter 
 				row1 = webnotes.conn.sql(""" select %s , %s from `%s` t1, `%s` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 							and t1.docstatus = 1 and %s = %s and %s = %s 
@@ -100,7 +98,6 @@ def get_data(filters, tab, details):
 							"%s", "%s", sel_col, "%s", details["basedon"], "%s"), 
 							(filters.get("company"), filters.get("fiscal_year"), row[i][0], data1[d][0]),
 					as_list=1)
-
 				des[ind] = row[i]
 				for j in range(1,len(details["columns"])-inc):	
 					des[j+inc] = row1[0][j]
@@ -123,7 +120,6 @@ def get_mon(date):
 	return (datetime.strptime(date, '%Y-%m-%d')).strftime("%b")
 
 def period_wise_colums_query(filters, trans):
-	from datetime import datetime
 
 	query_details = ''
 	pwc = []
@@ -161,8 +157,12 @@ def period_wise_colums_query(filters, trans):
 	
 	elif filters.get("period") == "Quarterly":
 
-		first_qsd, second_qsd, third_qsd, fourth_qsd = year_start_date, add_months(year_start_date,3), add_months(year_start_date,6), add_months(year_start_date,9)
-		first_qed, second_qed, third_qed, fourth_qed = add_days(add_months(first_qsd,3),-1), add_days(add_months(second_qsd,3),-1), add_days(add_months(third_qsd,3),-1), add_days(add_months(fourth_qsd,3),-1)
+		first_qsd, second_qsd = year_start_date, add_months(year_start_date,3)
+		third_qsd, fourth_qsd = add_months(year_start_date,6), add_months(year_start_date,9)
+
+		first_qed, second_qed = add_days(add_months(first_qsd,3),-1), add_days(add_months(second_qsd,3),-1)
+		third_qed, fourth_qed = add_days(add_months(third_qsd,3),-1), add_days(add_months(fourth_qsd,3),-1)
+
 		bet_dates = [[first_qsd,first_qed],[second_qsd,second_qed],[third_qsd,third_qed],[fourth_qsd,fourth_qed]] 
 		
 		pwc = [get_mon(first_qsd)+"-"+get_mon(first_qed)+" (Qty):Float:120", get_mon(first_qsd)+"-"+get_mon(first_qed)+"(Amt):Currency:120", 
