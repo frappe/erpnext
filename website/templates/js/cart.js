@@ -51,7 +51,6 @@ $.extend(wn.cart, {
 	bind_events: function() {
 		// bind update button
 		$(document).on("click", ".item-update-cart button", function() {
-			console.log("click!");
 			var item_code = $(this).attr("data-item-code");
 			wn.cart.update_cart({
 				item_code: item_code,
@@ -84,7 +83,7 @@ $.extend(wn.cart, {
 					'{% include "app/website/templates/html/product_missing_image.html" %}';
 					
 				if(!doc.web_short_description) doc.web_short_description = doc.description;
-					
+				
 				$(repl('<div class="row">\
 					<div class="col col-lg-9 col-sm-9">\
 						<div class="row">\
@@ -101,8 +100,7 @@ $.extend(wn.cart, {
 								data-item-code="%(item_code)s">\
 							<div class="input-group-btn">\
 								<button class="btn btn-primary" data-item-code="%(item_code)s">\
-									<i class="icon-shopping-cart"></i>\
-									<span class="hidden-sm-inline"> Update</span></button>\
+									<i class="icon-ok"></i></button>\
 							</div>\
 						</div>\
 						<p style="margin-top: 10px;">at %(formatted_rate)s</p>\
@@ -112,6 +110,8 @@ $.extend(wn.cart, {
 				
 			}
 		});
+		
+		
 		
 		return;
 		
