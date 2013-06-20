@@ -101,7 +101,7 @@ def get_valuation_rate():
 	val_rate_map = {}
 	
 	for d in webnotes.conn.sql("""select item_code, avg(valuation_rate) as val_rate
-		from tabBin group by item_code""", as_dict=1):
+		from tabBin where actual_qty > 0 group by item_code""", as_dict=1):
 			val_rate_map.setdefault(d.item_code, d.val_rate)
 
 	return val_rate_map
