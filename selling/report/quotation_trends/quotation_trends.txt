@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-06-07 16:01:16", 
+  "docstatus": 0, 
+  "modified": "2013-06-12 16:31:23", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 0, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Quotation", 
+  "report_name": "Quotation Trends", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Quotation Trends"
+ }
+]
