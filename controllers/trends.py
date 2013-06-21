@@ -89,9 +89,10 @@ def get_data(filters, conditions):
 			row = webnotes.conn.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 						and t1.docstatus = 1 and %s = %s 
-					"""%(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s", "%s",
-				 	conditions["group_by"], "%s"),	(filters.get("company"), filters.get("fiscal_year"), 
-				 	data1[d][0]), as_list=1)
+					""" % 
+					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], 
+						"%s", "%s", conditions["group_by"], "%s"),
+					(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
 				des = ['' for q in range(len(conditions["columns"]))]
@@ -100,9 +101,12 @@ def get_data(filters, conditions):
 				row1 = webnotes.conn.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 							and t1.docstatus = 1 and %s = %s and %s = %s 
-						""" % (sel_col, conditions["period_wise_select"], conditions["trans"],  conditions["trans"], 
-						conditions["addl_tables"], "%s", "%s", sel_col, "%s", conditions["group_by"], "%s"), 
-						(filters.get("company"), filters.get("fiscal_year"), row[i][0], data1[d][0]), as_list=1)
+						""" % 
+						(sel_col, conditions["period_wise_select"], conditions["trans"], 
+						 	conditions["trans"], conditions["addl_tables"], "%s", "%s", sel_col, 
+							"%s", conditions["group_by"], "%s"), 
+						(filters.get("company"), filters.get("fiscal_year"), row[i][0], 
+							data1[d][0]), as_list=1)
 
 				des[ind] = row[i]
 				for j in range(1,len(conditions["columns"])-inc):	
@@ -110,14 +114,14 @@ def get_data(filters, conditions):
 					
 				data.append(des)
 	else:
-		webnotes.errprint(["hii", conditions["addl_tables"]])
 		data = webnotes.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s 
 					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
 					group by %s	
-				"""%(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"], "%s", 
-					"%s", cond,conditions["group_by"]), (filters.get("company"), 
-					filters.get("fiscal_year")), as_list=1)
+				""" % 
+				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"], 
+					"%s", "%s", cond,conditions["group_by"]), 
+				(filters.get("company"), filters.get("fiscal_year")), as_list=1)
 
 	return data
 
@@ -139,7 +143,8 @@ def period_wise_colums_query(filters, trans):
 			get_period_wise_columns(dt, filters.get("period"), pwc)
 			query_details = get_period_wise_query(dt, trans_date, query_details)
 	else:
-		pwc = [filters.get("fiscal_year")+" (Qty):Float:120", filters.get("fiscal_year")+" (Amt):Currency:120"]
+		pwc = [filters.get("fiscal_year") + " (Qty):Float:120", 
+			filters.get("fiscal_year") + " (Amt):Currency:120"]
 		query_details = " SUM(t2.qty), SUM(t1.grand_total),"
 
 	query_details += 'SUM(t2.qty), SUM(t1.grand_total)'
@@ -154,10 +159,9 @@ def get_period_wise_columns(bet_dates, period, pwc):
 			get_mon(bet_dates[0]) + "-" + get_mon(bet_dates[1]) + " (Amt):Currency:120"]
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-
 	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)), 
 					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
-				"""%{"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
+				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
 def get_period_date_ranges(period, fiscal_year):
