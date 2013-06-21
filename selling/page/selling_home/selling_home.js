@@ -190,6 +190,10 @@ wn.module_page["Selling"] = [
 				route: "query-report/Sales Order Trends",
 				doctype: "Sales Order"
 			},
+			{
+				"label":wn._("Pending SO Items For Purchase Request"),
+				route: "query-report/Pending SO Items For Purchase Request"
+			},
 		]
 	}
 ]

@@ -35,7 +35,7 @@ def get_columns(filters, trans):
 			["Total(Qty):Float:120", "Total(Amt):Currency:120"] 
 
 	conditions = {"based_on_select": based_on_details["based_on_select"], "period_wise_select": period_select, 
-		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans, 
+		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans,
 		"addl_tables": based_on_details["addl_tables"]}
 
 	return conditions
@@ -72,8 +72,8 @@ def get_data(filters, conditions):
 		else :
 			inc = 1
 		data1 = webnotes.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
-					where t2.parent = t1.name and t1.company = %s 
-					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
+					t1.docstatus = 1 %s 
 					group by %s 
 				""" % (query_details,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s", 
 					"%s", cond, conditions["group_by"]), (filters.get("company"), 
@@ -115,8 +115,8 @@ def get_data(filters, conditions):
 				data.append(des)
 	else:
 		data = webnotes.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
-					where t2.parent = t1.name and t1.company = %s 
-					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
+					t1.docstatus = 1 %s 
 					group by %s	
 				""" % 
 				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"], 
