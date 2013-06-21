@@ -1,13 +1,6 @@
 ---
 {
-	"_label": "Inventory",
-	"_toc": [
-		"docs.user.ops.inventory.purchase_receipt",
-		"docs.user.ops.inventory.delivery_note",
-		"docs.user.ops.inventory.stock_entry",
-		"docs.user.ops.inventory.sub_contracting",
-		"docs.user.ops.inventory.serialized"
-	]
+	"_label": "Stock / Inventory"
 }
 ---
 For most small business that deal in physical goods, a large part of their net worth is invested in the stock in hand. 
