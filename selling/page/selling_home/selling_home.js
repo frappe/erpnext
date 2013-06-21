@@ -167,12 +167,12 @@ wn.module_page["Selling"] = [
 			},
 			{
 				"label":wn._("Territory Target Variance (Item Group-Wise)"),
-				route: "query-report/Territory Target Variance (Item Group-Wise)",
+				route: "query-report/Territory Target Variance Item Group-Wise",
 				doctype: "Sales Order"
 			},
 			{
 				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
-				route: "query-report/Sales Person Target Variance (Item Group-Wise)",
+				route: "query-report/Sales Person Target Variance Item Group-Wise",
 				doctype: "Sales Order"
 			},
 			{
