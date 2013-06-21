@@ -70,7 +70,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	},
 	
 	company: function() {
-		if(this.frm.doc.company) {
+		if(this.frm.doc.company && this.frm.fields_dict.currency) {
 			var me = this;
 			var company_currency = this.get_company_currency();
 			$.each(["currency", "price_list_currency"], function(i, fieldname) {
@@ -87,6 +87,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	},
 	
 	currency: function() {
+		if(this.frm.doc.currency === this.get_company_currency())
+			this.frm.set_value("conversion_rate", 1.0);
+		
 		this.price_list_currency();
 	},
 	

@@ -1,14 +1,14 @@
 [
  {
-  "creation": "2013-01-29 19:25:41", 
+  "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:57", 
+  "modified": "2013-06-20 11:23:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
-  "allow_rename": 1, 
+  "allow_rename": 0, 
   "autoname": "field:serial_no", 
   "description": "Distinct unit of an Item", 
   "doctype": "DocType", 
@@ -31,7 +31,9 @@
   "parent": "Serial No", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -43,12 +45,14 @@
   "fieldname": "details", 
   "fieldtype": "Section Break", 
   "label": "Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "default": "In Store", 
@@ -75,6 +79,7 @@
   "no_copy": 1, 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -88,13 +93,15 @@
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
   "options": "Item", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -146,12 +153,14 @@
   "doctype": "DocField", 
   "fieldname": "purchase_details", 
   "fieldtype": "Section Break", 
-  "label": "Purchase Details"
+  "label": "Purchase Details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -160,7 +169,8 @@
   "fieldtype": "Select", 
   "label": "Purchase Document Type", 
   "no_copy": 1, 
-  "options": "\nPurchase Receipt\nStock Entry"
+  "options": "\nPurchase Receipt\nStock Entry", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -168,7 +178,8 @@
   "fieldtype": "Data", 
   "hidden": 0, 
   "label": "Purchase Document No", 
-  "no_copy": 1
+  "no_copy": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -179,6 +190,7 @@
   "no_copy": 1, 
   "oldfieldname": "purchase_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 0
  }, 
@@ -188,6 +200,7 @@
   "fieldtype": "Time", 
   "label": "Incoming Time", 
   "no_copy": 1, 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -200,6 +213,7 @@
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -207,6 +221,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -220,6 +235,7 @@
   "oldfieldname": "warehouse", 
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
+  "read_only": 0, 
   "reqd": 0, 
   "search_index": 1
  }, 
@@ -230,7 +246,8 @@
   "in_filter": 1, 
   "label": "Supplier", 
   "no_copy": 1, 
-  "options": "Supplier"
+  "options": "Supplier", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -254,12 +271,14 @@
   "fieldname": "delivery_details", 
   "fieldtype": "Section Break", 
   "label": "Delivery Details", 
-  "oldfieldtype": "Column Break"
+  "oldfieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -318,12 +337,14 @@
   "oldfieldname": "is_cancelled", 
   "oldfieldtype": "Select", 
   "options": "\nYes\nNo", 
+  "read_only": 0, 
   "report_hide": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break5", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -378,12 +399,14 @@
   "doctype": "DocField", 
   "fieldname": "warranty_amc_details", 
   "fieldtype": "Section Break", 
-  "label": "Warranty / AMC Details"
+  "label": "Warranty / AMC Details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break6", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -396,6 +419,7 @@
   "oldfieldname": "maintenance_status", 
   "oldfieldtype": "Select", 
   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
+  "read_only": 0, 
   "search_index": 1, 
   "width": "150px"
  }, 
@@ -406,12 +430,14 @@
   "label": "Warranty Period (Days)", 
   "oldfieldname": "warranty_period", 
   "oldfieldtype": "Int", 
+  "read_only": 0, 
   "width": "150px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break7", 
   "fieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -422,6 +448,7 @@
   "label": "Warranty Expiry Date", 
   "oldfieldname": "warranty_expiry_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "width": "150px"
  }, 
  {
@@ -432,6 +459,7 @@
   "label": "AMC Expiry Date", 
   "oldfieldname": "amc_expiry_date", 
   "oldfieldtype": "Date", 
+  "read_only": 0, 
   "search_index": 0, 
   "width": "150px"
  }, 
@@ -439,13 +467,15 @@
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "label": "More Info"
+  "label": "More Info", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "serial_no_details", 
   "fieldtype": "Text Editor", 
-  "label": "Serial No Details"
+  "label": "Serial No Details", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -454,6 +484,7 @@
   "in_filter": 1, 
   "label": "Company", 
   "options": "link:Company", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -464,6 +495,7 @@
   "in_filter": 1, 
   "label": "Fiscal Year", 
   "options": "link:Fiscal Year", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -488,53 +520,9 @@
   "report_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "System Manager", 
   "write": 1
  }, 
@@ -542,8 +530,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material Master Manager", 
   "write": 1
  }, 
@@ -552,17 +538,15 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "System Manager"
+  "role": "Material Manager", 
+  "write": 0
  }, 
  {
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "Sales Master Manager"
+  "role": "Material User", 
+  "write": 0
  }
 ]
