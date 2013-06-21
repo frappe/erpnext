@@ -52,14 +52,16 @@ class AccountsController(TransactionBase):
 					"price_list_name": self.doc.price_list_name, 
 					"buying_or_selling": buying_or_selling
 				}))
-				
-				if not self.doc.plc_conversion_rate:
-					self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Price List", 
-						self.doc.price_list_name, "conversion_rate"))
+
+				if self.doc.price_list_currency:
+					if not self.doc.plc_conversion_rate:
+						exchange = self.doc.price_list_currency + "-" + get_company_currency(self.doc.company)
+						self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
+							exchange, "exchange_rate"))
 						
-				if not self.doc.currency:
-					self.doc.currency = self.doc.price_list_currency
-					self.doc.conversion_rate = self.doc.plc_conversion_rate
+					if not self.doc.currency:
+						self.doc.currency = self.doc.price_list_currency
+						self.doc.conversion_rate = self.doc.plc_conversion_rate
 				
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""

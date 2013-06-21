@@ -76,9 +76,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			$.each(["currency", "price_list_currency"], function(i, fieldname) {
 				if(!me.doc[fieldname]) {
 					me.frm.set_value(fieldname, company_currency);
+					me[fieldname]();
 				}
 			});
-			this.price_list_currency();
 		}
 	},
 	
@@ -87,10 +87,33 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	},
 	
 	currency: function() {
-		if(this.frm.doc.currency === this.get_company_currency())
-			this.frm.set_value("conversion_rate", 1.0);
+		var me = this;
+		this.set_dynamic_labels();
 		
-		this.price_list_currency();
+		var company_currency = this.get_company_currency();
+		if(this.frm.doc.currency !== company_currency) {
+			this.get_exchange_rate(this.frm.doc.currency, company_currency, 
+				function(exchange_rate) {
+					if(exchange_rate) {
+						me.frm.set_value("conversion_rate", exchange_rate);
+						me.conversion_rate();
+					}
+				});
+		} else {
+			this.conversion_rate();		
+		}
+	},
+	
+	conversion_rate: function() {
+		if(this.frm.doc.currency === this.get_company_currency() &&
+			this.frm.doc.conversion_rate !== 1.0) {
+				this.frm.set_value("conversion_rate", 1.0);
+		} else if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
+				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
+		}
+		
+		this.calculate_taxes_and_totals();
 	},
 	
 	price_list_name: function(buying_or_selling) {
@@ -98,7 +121,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		if(this.frm.doc.price_list_name) {
 			this.frm.call({
 				method: "setup.utils.get_price_list_currency",
-				args: {args: {
+				args: { args: {
 					price_list_name: this.frm.doc.price_list_name,
 					buying_or_selling: buying_or_selling
 				}},
@@ -111,26 +134,38 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		}
 	},
 	
+	get_exchange_rate: function(from_currency, to_currency, callback) {
+		var exchange_name = from_currency + "-" + to_currency;
+		wn.model.with_doc("Currency Exchange", exchange_name, function(name) {
+			var exchange_doc = wn.model.get_doc("Currency Exchange", exchange_name);
+			callback(exchange_doc ? flt(exchange_doc.exchange_rate)) : 0);
+		});
+	},
+	
 	price_list_currency: function() {
-		// What TODO? should we make price list system non-mandatory?
-		this.frm.toggle_reqd("plc_conversion_rate",
-			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
-		
-		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
-			this.frm.set_value("plc_conversion_rate", 1.0);
-		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
-			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
-		}
 		this.set_dynamic_labels();
+		
+		var company_currency = this.get_company_currency();
+		if(this.frm.doc.price_list_currency !== company_currency) {
+			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency, 
+				function(exchange_rate) {
+					if(exchange_rate) {
+						me.frm.set_value("price_list_currency", exchange_rate);
+						me.plc_conversion_rate();
+					}
+				});
+		} else {
+			this.plc_conversion_rate();
+		}
 	},
 	
 	plc_conversion_rate: function() {
-		this.price_list_currency();
-	},
-	
-	conversion_rate: function() {
-		this.price_list_currency();
-		this.calculate_taxes_and_totals();
+		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
+			this.frm.set_value("plc_conversion_rate", 1.0);
+		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
+			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
+			this.calculate_taxes_and_totals();
+		}
 	},
 	
 	qty: function(doc, cdt, cdn) {
@@ -151,6 +186,16 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			refresh_field("row_id", tax.name, tax.parentfield);
 			throw e;
 		}
+	},
+	
+	set_dynamic_labels: function() {
+		// What TODO? should we make price list system non-mandatory?
+		this.frm.toggle_reqd("plc_conversion_rate",
+			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
+			
+		var company_currency = this.get_company_currency();
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
 	},
 	
 	recalculate: function() {
