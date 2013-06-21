@@ -2,6 +2,7 @@
 {
 	"_label": "Developer API",
 	"_toc": [
+		"docs.dev.install",
 		"docs.dev.quickstart",
 		"docs.dev.framework",
 		"docs.dev.modules"

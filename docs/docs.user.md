@@ -8,7 +8,11 @@ This manual covers all the major processes in setting up and using ERPNext. The 
 Contents
 
 1. [Introduction](docs.user.intro.html)
-	1. [Installation](docs.user.install.html)
+	1. [Open Source](docs.user.intro.open_source.html)
+	1. [Ways to get started](docs.user.intro.try.html)
+	1. [Installation](docs.dev.install.html)
+		1. [Pre-requisites for Red Hat Systems](docs.dev.install.red_hat.html)
+		1. [Pre-requisites for Debain Systems](docs.dev.install.debian.html)
 	1. [Getting Help](docs.user.help.html)
 1. Implementation
 	1. [Before you Start](docs.user.setup.before.html)

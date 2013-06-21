@@ -4,8 +4,6 @@
 	"_title_image": "img/before-we-start.png"
 }
 ---
-## Before We Start
-
 We have seem dozens of ERP implementations over the past few years and we realize that successful implementations are a lot about intangibles and attitude. 
 
 > The Benefits come Later
