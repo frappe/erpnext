@@ -57,8 +57,7 @@ def get_columns(filters):
 	for fieldname in ["fiscal_year", "period", "target_on"]:
 		if not filters.get(fieldname):
 			label = (" ".join(fieldname.split("_"))).title()
-			msgprint(_("Please specify") + ": " + label,
-				raise_exception=True)
+			msgprint(_("Please specify") + ": " + label, raise_exception=True)
 
 	columns = ["Territory:Link/Territory:80", "Item Group:Link/Item Group:80"]
 
@@ -96,7 +95,7 @@ def get_target_distribution_details(filters):
 
 #Get achieved details from sales order
 def get_achieved_details(filters):
-	start_date, end_date = get_fiscal_year(filters)[1:]
+	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
 	return webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
 		so.territory, MONTHNAME(so.transaction_date) as month_name 
@@ -116,20 +115,22 @@ def get_territory_item_month_map(filters):
 		for month in tdd:
 			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "achieved": 0.0, "variance": 0.0
+				"target": 0.0, "achieved": 0.0
 			}))
 
 			tav_dict = tim_map[td.name][td.item_group][month]
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(td.target_qty)*(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(td.target_qty) * \
+						(tdd[month]["percentage_allocation"]/100)
 					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = flt(td.target_amount)*(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(td.target_amount) * \
+						(tdd[month]["percentage_allocation"]/100)
 					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.amount
@@ -137,4 +138,4 @@ def get_territory_item_month_map(filters):
 	return tim_map
 
 def get_item_group(item_name):
-	return webnotes.conn.get_value("Item", item_name, item_group)
+	return webnotes.conn.get_value("Item", item_name, "item_group")

@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from controllers.trends	import get_columns,get_data
+from controllers.trends	import get_columns, get_data
 
 def execute(filters=None):
 	if not filters: filters ={}
@@ -27,8 +27,5 @@ def execute(filters=None):
 
 	details = get_columns(filters, trans)
 	data = get_data(filters, tab, details)
-	
-	if not data:
-		webnotes.msgprint("Data not found for selected criterias")
 
 	return details["columns"], data 

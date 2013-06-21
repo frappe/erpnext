@@ -39,7 +39,7 @@ def execute(filters=None):
 			pl.get(item, {}).get("selling"), 
 			pl.get(item, {}).get("buying"), 
 			flt(bom_rate.get(item, 0), precision), 
-			flt(item_map[item]["standard_rate"])
+			flt(item_map[item]["standard_rate"], precision)
 		])
 	
 	return columns, data
@@ -142,8 +142,9 @@ def get_valuation_rate():
 
 	item_val_rate_map = {}
 	
-	for d in webnotes.conn.sql("""select item_code, avg(valuation_rate) as val_rate
-		from tabBin group by item_code""", as_dict=1):
-			item_val_rate_map.setdefault(d.item_code, flt(d.val_rate))
+	for d in webnotes.conn.sql("""select item_code, 
+		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate
+		from tabBin where actual_qty > 0 group by item_code""", as_dict=1):
+			item_val_rate_map.setdefault(d.item_code, d.val_rate)
 
 	return item_val_rate_map

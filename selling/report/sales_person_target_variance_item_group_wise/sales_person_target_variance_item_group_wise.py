@@ -96,7 +96,7 @@ def get_target_distribution_details(filters):
 
 #Get achieved details from sales order
 def get_achieved_details(filters):
-	start_date, end_date = get_fiscal_year(filters)[1:]
+	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 	
 	return webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
 		st.sales_person, MONTHNAME(so.transaction_date) as month_name 
@@ -117,20 +117,22 @@ def get_salesperson_item_month_map(filters):
 		for month in tdd:
 			sim_map.setdefault(sd.name, {}).setdefault(sd.item_group, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "achieved": 0.0, "variance": 0.0
+				"target": 0.0, "achieved": 0.0
 			}))
 
 			tav_dict = sim_map[sd.name][sd.item_group][month]
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(sd.target_qty)*(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(sd.target_qty) * \
+						(tdd[month]["percentage_allocation"]/100)
 					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
 						and ad.sales_person == sd.name:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = flt(sd.target_amount)*(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(sd.target_amount) * \
+						(tdd[month]["percentage_allocation"]/100)
 					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
 						and ad.sales_person == sd.name:
 							tav_dict.achieved += ad.amount
@@ -138,4 +140,4 @@ def get_salesperson_item_month_map(filters):
 	return sim_map
 
 def get_item_group(item_name):
-	return webnotes.conn.get_value("Item", item_name, item_group)
+	return webnotes.conn.get_value("Item", item_name, "item_group")

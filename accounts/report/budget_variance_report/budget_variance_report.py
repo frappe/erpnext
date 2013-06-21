@@ -115,11 +115,12 @@ def get_costcenter_account_month_map(filters):
 		for month in tdd:
 			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "actual": 0.0, "variance": 0.0
+				"target": 0.0, "actual": 0.0
 			}))
 
 			tav_dict = cam_map[ccd.name][ccd.account][month]
-			tav_dict.target = flt(ccd.budget_allocated)*(tdd[month]["percentage_allocation"]/100)
+			tav_dict.target = flt(ccd.budget_allocated) * \
+				(tdd[month]["percentage_allocation"]/100)
 
 			for ad in actual_details:
 				if ad.month_name == month and ad.account == ccd.account \
