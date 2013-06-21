@@ -69,10 +69,11 @@ def get_price_list():
 		from `tabItem Price` where docstatus<2""", as_dict=1)
 
 	for j in price_list:
-		if j.selling:
-			rate.setdefault(j.parent, {}).setdefault("selling", []).append(j.price)
-		if j.buying:
-			rate.setdefault(j.parent, {}).setdefault("buying", []).append(j.price)
+		if j.price:
+			if j.selling:
+				rate.setdefault(j.parent, {}).setdefault("selling", []).append(j.price)
+			if j.buying:
+				rate.setdefault(j.parent, {}).setdefault("buying", []).append(j.price)
 
 	item_rate_map = {}
 	
@@ -99,8 +100,9 @@ def get_valuation_rate():
 
 	val_rate_map = {}
 	
-	for d in webnotes.conn.sql("""select item_code, avg(valuation_rate) as val_rate
-		from tabBin group by item_code""", as_dict=1):
+	for d in webnotes.conn.sql("""select item_code, 
+		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate
+		from tabBin where actual_qty > 0 group by item_code""", as_dict=1):
 			val_rate_map.setdefault(d.item_code, d.val_rate)
 
 	return val_rate_map

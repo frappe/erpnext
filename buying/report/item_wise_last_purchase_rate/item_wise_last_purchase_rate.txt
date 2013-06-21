@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-06-18 11:24:36", 
+  "docstatus": 0, 
+  "modified": "2013-06-18 15:28:57", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select * from (select \n    result.item_code as \"Item Code:Link/Item:120\",\n    result.item_name as \"Item Name::120\",\n    result.description as \"Description::150\",\n    result.posting_date as \"Date::150\",\n    result.purchase_ref_rate as \"Price List Rate::180\", \n    result.discount_rate as \"Discount::120\", \n    result.purchase_rate as \"Rate::120\"\nfrom (\n    (select \n        po_item.item_code,\n        po_item.item_name,\n        po_item.description,\n        po.transaction_date as posting_date,\n        po_item.purchase_ref_rate, \n        po_item.discount_rate, \n        po_item.purchase_rate\n    from `tabPurchase Order` po, `tabPurchase Order Item` po_item\n    where po.name = po_item.parent and po.docstatus = 1)\n    union\n    (select \n        pr_item.item_code,\n        pr_item.item_name,\n        pr_item.description,\n        pr.posting_date,\n        pr_item.purchase_ref_rate,\n        pr_item.discount_rate,\n        pr_item.purchase_rate\n    from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item\n    where pr.name = pr_item.parent and pr.docstatus = 1)\n) result\norder by result.item_code asc, result.posting_date desc) result_wrapper\ngroup by `Item Code:Link/Item:120`\n", 
+  "ref_doctype": "Purchase Order", 
+  "report_name": "Item-wise Last Purchase Rate", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Last Purchase Rate"
+ }
+]

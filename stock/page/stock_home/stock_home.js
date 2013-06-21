@@ -223,6 +223,16 @@ wn.module_page["Stock"] = [
 				route: "query-report/Itemwise Recommended Reorder Level",
 				doctype: "Item"
 			},
+			{
+				"label":wn._("Delivery Note Trends"),
+				route: "query-report/Delivery Note Trends",
+				doctype: "Delivery Note"
+			},
+			{
+				"label":wn._("Purchase Receipt Trends"),
+				route: "query-report/Purchase Receipt Trends",
+				doctype: "Purchase Receipt"
+			},
 		]
 	}
 ]
