@@ -21,11 +21,8 @@ from controllers.trends	import get_columns, get_data
 def execute(filters=None):
 	if not filters: filters ={}
 	data = []
-
 	trans = "Quotation"
-	tab = ["tabQuotation","tabQuotation Item"]
+	conditions = get_columns(filters, trans)
+	data = get_data(filters, conditions)
 
-	details = get_columns(filters, trans)
-	data = get_data(filters, tab, details)
-
-	return details["columns"], data 
+	return conditions["columns"], data 
