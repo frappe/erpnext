@@ -1,11 +1,6 @@
 ---
 {
-	"_label": "Buying",
-	"_toc": [
-		"docs.user.ops.buying.material_request",
-		"docs.user.ops.buying.supplier_quotation",
-		"docs.user.ops.buying.purchase_order"
-	]
+	"_label": "Buying"
 }
 ---
 If your business involves physical goods, buying is on of your core business activities. Your suppliers are as important as your customers and they must be provided with as much accurate information as possible.

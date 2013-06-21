@@ -1,12 +1,6 @@
 ---
 {
-	"_label": "Customize ERPNext",
-	"_toc": [
-		"docs.user.customize.modules",
-		"docs.user.customize.custom_field",
-		"docs.user.customize.custom_form",
-		"docs.user.customize.print_format"
-	]
+	"_label": "Customize ERPNext"
 }
 ---
 ERPNext offers many tools to customize the system.

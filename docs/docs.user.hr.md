@@ -1,14 +1,6 @@
 ---
 {
-	"_label": "Human Resource Management",
-	"_toc": [
-		"docs.user.ops.hr.setup",
-		"docs.user.ops.hr.employee",
-		"docs.user.ops.hr.leave",
-		"docs.user.ops.hr.expense_claim",
-		"docs.user.ops.hr.payroll",
-		"docs.user.ops.hr.appraisal"
-	]
+	"_label": "Human Resource Management"
 }
 ---
 The Human Resources (HR) Module covers the processes linked to administering a team of co-workers. Most common among this is processing payroll by using the Salary Manager to generate Salary Slips. Most countries have complex tax rules stating what expenses can the company made on behalf of Employees and also expect the company to deduct taxes and social security from their payroll.

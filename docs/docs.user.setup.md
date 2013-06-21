@@ -1,23 +1,6 @@
 ---
 {
-	"_label": "Setting Up",
-	"_toc": [
-		"docs.user.setup.before",
-		"docs.user.setup.strategy",
-		"docs.user.setup.first",
-		"docs.user.setup.accounting",
-		"docs.user.setup.cost_centers",
-		"docs.user.setup.item",
-		"docs.user.setup.customer",
-		"docs.user.setup.supplier",
-		"docs.user.setup.taxes",
-		"docs.user.setup.series",
-		"docs.user.setup.email",
-		"docs.user.setup.permissions",
-		"docs.user.setup.letter_head",
-		"docs.user.setup.data_import",
-		"docs.user.setup.opening"
-	]
+	"_label": "Setting Up"
 }
 ---
 Setting up an ERP system is like starting your business all over again, but in the virtual
