@@ -75,12 +75,17 @@ $.extend(erpnext.complete_setup, {
 			if(!data) return;
 			$(this).set_working();
 			$c_obj('Setup Control','setup_account',data,function(r, rt){
-				sys_defaults = r.message;
-				user_fullname = r.message.user_fullname;
-				wn.boot.user_info[user].fullname = user_fullname;
-				d.hide();
-				$('header').toggle(true);
-				wn.container.wntoolbar.set_user_name();
+				if(!r.exc) {
+					sys_defaults = r.message;
+					user_fullname = r.message.user_fullname;
+					wn.boot.user_info[user].fullname = user_fullname;
+					d.hide();
+					$('header').toggle(true);
+					wn.container.wntoolbar.set_user_name();
+					
+					setTimeout(function() { window.location.reload(); }, 3000);
+				}
+				
 			});
 		};
 		
