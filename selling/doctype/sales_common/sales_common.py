@@ -457,7 +457,7 @@ class StatusUpdater:
 
 		if not tolerance:
 			if self.global_tolerance == None:
-				self.global_tolerance = flt(webnotes.conn.get_value('Global Defaults',None,'tolerance') or 0)
+				self.global_tolerance = flt(webnotes.conn.get_value('Stock Settings',None,'tolerance') or 0)
 			tolerance = self.global_tolerance
 		
 		self.tolerance[item_code] = tolerance

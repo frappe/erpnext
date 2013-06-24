@@ -307,7 +307,7 @@ class DocType(BuyingController):
 		tolerance = flt(webnotes.conn.get_value('Item',item_code,'tolerance') or 0)
 		
 		if not(tolerance):
-			tolerance = flt(webnotes.conn.get_value('Global Defaults',None,'tolerance') or 0)
+			tolerance = flt(webnotes.conn.get_value('Stock Settings',None,'tolerance') or 0)
 
 		if is_submit:
 			qty = qty + flt(curr_qty)

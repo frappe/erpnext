@@ -201,7 +201,7 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	if not hasattr(webnotes, "auto_indent"):
-		webnotes.auto_indent = webnotes.conn.get_value('Global Defaults', None, 'auto_indent')
+		webnotes.auto_indent = webnotes.conn.get_value('Stock Settings', None, 'auto_indent')
 
 	if webnotes.auto_indent:
 		material_requests = {}
@@ -297,7 +297,7 @@ def create_material_request(material_requests):
 
 	if mr_list:
 		if not hasattr(webnotes, "reorder_email_notify"):
-			webnotes.reorder_email_notify = webnotes.conn.get_value('Global Defaults', None, 
+			webnotes.reorder_email_notify = webnotes.conn.get_value('Stock Settings', None, 
 				'reorder_email_notify')
 			
 		if(webnotes.reorder_email_notify):

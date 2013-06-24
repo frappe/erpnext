@@ -135,9 +135,9 @@ class DocType:
 			except authorized person
 		"""
 		if not adv_adj:
-			acc_frozen_upto = webnotes.conn.get_value('Global Defaults', None, 'acc_frozen_upto')
+			acc_frozen_upto = webnotes.conn.get_value('Accounts Settings', None, 'acc_frozen_upto')
 			if acc_frozen_upto:
-				bde_auth_role = webnotes.conn.get_value( 'Global Defaults', None,'bde_auth_role')
+				bde_auth_role = webnotes.conn.get_value( 'Accounts Settings', None,'bde_auth_role')
 				if getdate(self.doc.posting_date) <= getdate(acc_frozen_upto) \
 						and not bde_auth_role in webnotes.user.get_roles():
 					msgprint(_("You are not authorized to do/modify back dated entries before ") + 

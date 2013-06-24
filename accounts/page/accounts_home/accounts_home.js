@@ -85,6 +85,12 @@ wn.module_page["Accounts"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Accounts Settings"),
+				"route": "Form/Accounts Settings",
+				"doctype":"Accounts Settings",
+				"description": "Settings for Accounts"
+			},
+			{
 				"label": wn._("Sales Taxes and Charges Master"),
 				"doctype":"Sales Taxes and Charges Master",
 				"description": wn._("Tax Template for Sales")

@@ -240,8 +240,7 @@ class DocType:
 			cc_bean.ignore_permissions = True
 			cc_bean.insert()
 			
-		webnotes.conn.set_value("Company", self.doc.name, "cost_center",
-			"Main - " + self.doc.abbr)
+		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
 			
 	def on_update(self):
 		self.set_letter_head()

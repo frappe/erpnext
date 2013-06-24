@@ -11,7 +11,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.sql("""delete from `tabMaterial Request`""")
 		self._clear_stock()
 		
-		webnotes.conn.set_value("Global Defaults", None, "auto_indent", True)
+		webnotes.conn.set_value("Stock Settings", None, "auto_indent", True)
 
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.insert()

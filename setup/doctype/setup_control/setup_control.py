@@ -69,7 +69,6 @@ class DocType:
 			'current_fiscal_year':curr_fiscal_year,
 			'default_currency': args.get('currency'),
 			'default_company':args.get('company_name'),
-			'default_valuation_method':'FIFO',
 			'default_stock_uom':'Nos',
 			'date_format': webnotes.conn.get_value("Country", 
 				args.get("country"), "date_format"),
@@ -84,6 +83,16 @@ class DocType:
 
 		# Set 
 		self.set_defaults(def_args)
+		
+		webnotes.conn.set_value("Accounts Settings", None, "auto_inventory_accounting", 1)
+		webnotes.conn.set_default("auto_inventory_accounting", 1)
+
+		stock_settings = webnotes.bean("Stock Settings")
+		stock_settings.doc.item_naming_by = "Item Code"
+		stock_settings.doc.valuation_method = "FIFO"
+		stock_settings.doc.stock_uom = "Nos"
+		stock_settings.doc.auto_indent = 1
+		stock_settings.save()
 		
 		cp_args = {}
 		for k in ['industry', 'country', 'timezone', 'company_name']:

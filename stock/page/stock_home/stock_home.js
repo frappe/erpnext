@@ -102,6 +102,12 @@ wn.module_page["Stock"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Stock Settings"),
+				"route": "Form/Stock Settings",
+				"doctype":"Stock Settings",
+				"description": "Settings for Stock"
+			},
+			{
 				"route":"Sales Browser/Item Group",
 				"label": wn._("Item Group"),
 				"description": wn._("Item classification.")

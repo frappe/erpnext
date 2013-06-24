@@ -147,7 +147,7 @@ class DocType:
 
 	def get_authorized_user(self):
 		# Check logged-in user is authorized
-		if webnotes.conn.get_value('Global Defaults', None, 'credit_controller') \
+		if webnotes.conn.get_value('Accounts Settings', None, 'credit_controller') \
 				in webnotes.user.get_roles():
 			return 1
 			

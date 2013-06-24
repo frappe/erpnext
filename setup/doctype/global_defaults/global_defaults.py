@@ -29,38 +29,24 @@ keydict = {
 	'hide_currency_symbol':'hide_currency_symbol',
 	'price_list_name': 'default_price_list',
 	'price_list_currency': 'default_price_list_currency',
-	'item_group': 'default_item_group',
 	'customer_group': 'default_customer_group',
 	'cust_master_name': 'cust_master_name', 
-	"item_naming_by": "item_naming_by",
 	'supplier_type': 'default_supplier_type',
 	'supp_master_name': 'supp_master_name', 
 	'territory': 'default_territory',
-	'stock_uom': 'default_stock_uom',
-	'valuation_method': 'default_valuation_method',
 	'date_format': 'date_format',
 	'number_format': 'number_format',
 	'float_precision': 'float_precision',
 	'account_url':'account_url',
-	'allow_negative_stock' : 'allow_negative_stock',
 	'maintain_same_rate' : 'maintain_same_rate',
 	'session_expiry': 'session_expiry',
-	'disable_rounded_total': 'disable_rounded_total',
-	"auto_inventory_accounting": "auto_inventory_accounting",
+	'disable_rounded_total': 'disable_rounded_total'
 }
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
-	def validate(self):
-		previous_auto_inventory_accounting = cint(webnotes.conn.get_value("Global Defaults", None,
-			"auto_inventory_accounting"))
-		if cint(self.doc.auto_inventory_accounting) != previous_auto_inventory_accounting:
-			from accounts.utils import create_stock_in_hand_jv
-			create_stock_in_hand_jv(reverse = \
-				cint(self.doc.auto_inventory_accounting) < previous_auto_inventory_accounting)
-
 	def on_update(self):
 		"""update defaults"""
 		self.validate_session_expiry()
