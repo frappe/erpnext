@@ -137,11 +137,6 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Analytics"),
 				page: "sales-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Sales Order"
-			},
 		]
 	},
 	{
@@ -189,6 +184,10 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Order Trend"),
 				route: "query-report/Sales Order Trends",
 				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Pending SO Items For Purchase Request"),
+				route: "query-report/Pending SO Items For Purchase Request"
 			},
 		]
 	}

@@ -4,7 +4,7 @@ var get_filters = function(){
 			"fieldname":"period",
 			"label": "Period",
 			"fieldtype": "Select",
-			"options": ["Monthly", "Quarterly", "Half-yearly", "Yearly"].join("\n"),
+			"options": ["Monthly", "Quarterly", "Half-Yearly", "Yearly"].join("\n"),
 			"default": "Monthly"
 		},
 		{

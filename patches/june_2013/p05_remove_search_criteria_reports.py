@@ -16,13 +16,9 @@
 
 from __future__ import unicode_literals
 import webnotes
-from controllers.trends	import get_columns,get_data
 
-def execute(filters=None):
-	if not filters: filters ={}
-	data = []
-	trans = "Sales Order"
-	conditions = get_columns(filters, trans)
-	data = get_data(filters, conditions)
-	
-	return conditions["columns"], data 
+def execute():
+	try:
+		webnotes.conn.sql("""delete from `tabSearch Criteria` where ifnull(standard, 'No') = 'Yes'""")
+	except Exception, e:
+		pass

@@ -22,23 +22,23 @@ from webnotes import _
 def get_columns(filters, trans):
 	validate_filters(filters)
 	
-	# based_on_cols, based_on_select, based_on_group_by, addl_tables
-	bonc, query_bon, based, sup_tab = basedon_wise_colums_query(filters.get("based_on"), trans)
-	# period_cols, period_select
-	pwc, query_pwc = period_wise_colums_query(filters, trans)
-	
-	# group_by_cols
-	grbc = group_wise_column(filters.get("group_by"))
+	# get conditions for based_on filter cond
+	based_on_details = based_wise_colums_query(filters.get("based_on"), trans)
+	# get conditions for periodic filter cond
+	period_cols, period_select = period_wise_colums_query(filters, trans)
+	# get conditions for grouping filter cond
+	group_by_cols = group_wise_column(filters.get("group_by"))
 
-	columns = bonc + pwc + ["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"]
-	if grbc:	
-		columns = bonc + grbc + pwc +["TOTAL(Qty):Float:120", "TOTAL(Amt):Currency:120"] 
+	columns = based_on_details["based_on_cols"] + period_cols + ["Total(Qty):Float:120", "Total(Amt):Currency:120"]
+	if group_by_cols:	
+		columns = based_on_details["based_on_cols"] + group_by_cols + period_cols + \
+			["Total(Qty):Float:120", "Total(Amt):Currency:120"] 
 
-	# conditions
-	details = {"query_bon": query_bon, "query_pwc": query_pwc, "columns": columns, 
-		"basedon": based, "grbc": grbc, "sup_tab": sup_tab}
+	conditions = {"based_on_select": based_on_details["based_on_select"], "period_wise_select": period_select, 
+		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans,
+		"addl_tables": based_on_details["addl_tables"]}
 
-	return details
+	return conditions
 
 def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
@@ -48,17 +48,17 @@ def validate_filters(filters):
 	if filters.get("based_on") == filters.get("group_by"):
 		webnotes.msgprint("'Based On' and 'Group By' can not be same", raise_exception=1)
 
-def get_data(filters, tab, details):
+def get_data(filters, conditions):
 	data = []
 	inc, cond= '',''
-	query_details =  details["query_bon"] + details["query_pwc"]
+	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
 	
-	if details["query_bon"] in ["t1.project_name,", "t2.project_name,"]:
-		cond = 'and '+ details["query_bon"][:-1] +' IS Not NULL'
+	if conditions["based_on_select"] in ["t1.project_name,", "t2.project_name,"]:
+		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
 
 	if filters.get("group_by"):
 		sel_col = ''
-		ind = details["columns"].index(details["grbc"][0])
+		ind = conditions["columns"].index(conditions["grbc"][0])
 
 		if filters.get("group_by") == 'Item':
 			sel_col = 't2.item_code'
@@ -71,15 +71,13 @@ def get_data(filters, tab, details):
 			inc = 2
 		else :
 			inc = 1
-
-		data1 = webnotes.conn.sql(""" select %s from `%s` t1, `%s` t2 %s
-					where t2.parent = t1.name and t1.company = %s 
-					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+		data1 = webnotes.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
+					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
+					t1.docstatus = 1 %s 
 					group by %s 
-				""" % (query_details, tab[0], tab[1], details["sup_tab"], "%s", 
-					"%s", cond, details["basedon"]), (filters.get("company"), 
-					filters["fiscal_year"]),
-			as_list=1)
+				""" % (query_details,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s", 
+					"%s", cond, conditions["group_by"]), (filters.get("company"), 
+					filters["fiscal_year"]),as_list=1)
 
 		for d in range(len(data1)):
 			#to add blanck column
@@ -88,39 +86,42 @@ def get_data(filters, tab, details):
 			data.append(dt)
 
 			#to get distinct value of col specified by group_by in filter
-			row = webnotes.conn.sql("""select DISTINCT(%s) from `%s` t1, `%s` t2 %s
+			row = webnotes.conn.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 						and t1.docstatus = 1 and %s = %s 
-					"""%(sel_col, tab[0], tab[1], details["sup_tab"], "%s", "%s", details["basedon"], "%s"),
-						(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), 
-				as_list=1)
+					""" % 
+					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], 
+						"%s", "%s", conditions["group_by"], "%s"),
+					(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
-				des = ['' for q in range(len(details["columns"]))]
+				des = ['' for q in range(len(conditions["columns"]))]
 				
-				#get data for each group_by filter 
-				row1 = webnotes.conn.sql(""" select %s , %s from `%s` t1, `%s` t2 %s
+				#get data for group_by filter 
+				row1 = webnotes.conn.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 							and t1.docstatus = 1 and %s = %s and %s = %s 
-						""" % (sel_col, details["query_pwc"], tab[0], tab[1], details["sup_tab"], 
-							"%s", "%s", sel_col, "%s", details["basedon"], "%s"), 
-							(filters.get("company"), filters.get("fiscal_year"), 
-							row[i][0], data1[d][0]), as_list=1)
+						""" % 
+						(sel_col, conditions["period_wise_select"], conditions["trans"], 
+						 	conditions["trans"], conditions["addl_tables"], "%s", "%s", sel_col, 
+							"%s", conditions["group_by"], "%s"), 
+						(filters.get("company"), filters.get("fiscal_year"), row[i][0], 
+							data1[d][0]), as_list=1)
 
 				des[ind] = row[i]
-				for j in range(1,len(details["columns"])-inc):	
+				for j in range(1,len(conditions["columns"])-inc):	
 					des[j+inc] = row1[0][j]
 					
 				data.append(des)
 	else:
-		data = webnotes.conn.sql(""" select %s from `%s` t1, `%s` t2 %s
-					where t2.parent = t1.name and t1.company = %s 
-					and t1.fiscal_year = %s and t1.docstatus = 1 %s 
+		data = webnotes.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
+					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
+					t1.docstatus = 1 %s 
 					group by %s	
-				"""%(query_details, tab[0], tab[1], details["sup_tab"], "%s", 
-					"%s", cond,details["basedon"]), (filters.get("company"), 
-					filters.get("fiscal_year")), 
-			as_list=1)
+				""" % 
+				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"], 
+					"%s", "%s", cond,conditions["group_by"]), 
+				(filters.get("company"), filters.get("fiscal_year")), as_list=1)
 
 	return data
 
@@ -130,126 +131,132 @@ def get_mon(dt):
 def period_wise_colums_query(filters, trans):
 	query_details = ''
 	pwc = []
-	ysd = webnotes.conn.get_value("Fiscal year", filters.get("fiscal_year"), "year_start_date")
+	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
 
 	if trans in ['Purchase Receipt', 'Delivery Note', 'Purchase Invoice', 'Sales Invoice']:
 		trans_date = 'posting_date'
 	else:
 		trans_date = 'transaction_date'
-
-	if filters.get("period") == "Monthly":
-		month_name = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-		for month_idx in range(ysd.month-1,len(month_name)) + range(0, ysd.month-1):
-			query_details = get_monthly_conditions(month_name, month_idx, trans_date, 
-				pwc, query_details)
 	
-	elif filters.get("period") == "Quarterly":
-
-		first_qsd, second_qsd, third_qsd, fourth_qsd = ysd, add_months(ysd,3), add_months(ysd,6), add_months(ysd,9)
-		first_qed, second_qed, third_qed, fourth_qed = add_days(add_months(first_qsd,3),-1), add_days(add_months(second_qsd,3),-1), add_days(add_months(third_qsd,3),-1), add_days(add_months(fourth_qsd,3),-1)
-		bet_dates = [[first_qsd,first_qed],[second_qsd,second_qed],[third_qsd,third_qed],[fourth_qsd,fourth_qed]] 
-		
-		pwc = [get_mon(first_qsd)+"-"+get_mon(first_qed)+" (Qty):Float:120", get_mon(first_qsd)+"-"+get_mon(first_qed)+"(Amt):Currency:120", 
-			get_mon(second_qsd)+"-"+get_mon(second_qed)+" (Qty):Float:120", get_mon(second_qsd)+"-"+get_mon(second_qed)+" (Amt):Currency:120", 
-			get_mon(third_qsd)+"-"+get_mon(third_qed)+" (Qty):Float:120", get_mon(third_qsd)+"-"+get_mon(third_qed)+" (Amt):Currency:120", 
-			get_mon(fourth_qsd)+"-"+get_mon(fourth_qed)+" (Qty):Float:120", get_mon(fourth_qsd)+"-"+get_mon(fourth_qed)+" (Amt):Currency:120"]
-
-		for d in bet_dates:
-			query_details += """
-				SUM(IF(t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)), 
-				SUM(IF(t1.%(trans)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
-			"""%{"trans": trans_date, "sd": d[0],"ed": d[1]}
-
-	elif filters.get("period") == "Half-yearly":
-
-		first_half_start = ysd
-		first_half_end = add_days(add_months(first_half_start,6),-1)
-		second_half_start = add_days(first_half_end,1)
-		second_half_end = add_days(add_months(second_half_start,6),-1)
-
-		pwc = [get_mon(first_half_start)+"-"+get_mon(first_half_end)+"(Qty):Float:120", get_mon(first_half_start)+"-"+get_mon(first_half_end)+" (Amt):Currency:120",
-		 	get_mon(second_half_start)+"-"+get_mon(second_half_end)+" (Qty):Float:120",	get_mon(second_half_start)+"-"+get_mon(second_half_end)+" (Amt):Currency:120"]
-
-		query_details = """ 
-			 	SUM(IF(t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s', t2.qty, NULL)),
-			 	SUM(IF(t1.%(trans)s BETWEEN '%(fhs)s' AND '%(fhe)s', t1.grand_total, NULL)), 
-			 	SUM(IF(t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s', t2.qty, NULL)), 
-			 	SUM(IF(t1.%(trans)s BETWEEN '%(shs)s' AND '%(she)s', t1.grand_total, NULL)),
-			"""%{"trans": trans_date, "fhs": first_half_start, "fhe": first_half_end,"shs": second_half_start, 
-		"she": second_half_end}	 
-	
+	if filters.get("period") != 'Yearly':
+		for dt in bet_dates:
+			get_period_wise_columns(dt, filters.get("period"), pwc)
+			query_details = get_period_wise_query(dt, trans_date, query_details)
 	else:
-		pwc = [filters.get("fiscal_year")+" (Qty):Float:120", filters.get("fiscal_year")+" (Amt):Currency:120"]
+		pwc = [filters.get("fiscal_year") + " (Qty):Float:120", 
+			filters.get("fiscal_year") + " (Amt):Currency:120"]
 		query_details = " SUM(t2.qty), SUM(t1.grand_total),"
 
 	query_details += 'SUM(t2.qty), SUM(t1.grand_total)'
 	return pwc, query_details
-	
-def get_monthly_conditions(month_list, month_idx, trans_date, pwc, query_details):
-	pwc += [month_list[month_idx] + ' (Qty):Float:120', 
-		month_list[month_idx] + ' (Amt):Currency:120']
 
-	query_details += """
-		Sum(IF(MONTH(t1.%(trans_date)s)= %(mon_num)s, t2.qty, NULL)),
-		SUM(IF(MONTH(t1.%(trans_date)s)= %(mon_num)s, t1.grand_total, NULL)),
-	""" % {"trans_date": trans_date, "mon_num": cstr(month_idx+1)}
-	
+def get_period_wise_columns(bet_dates, period, pwc):
+	if period == 'Monthly':
+		pwc += [get_mon(bet_dates[0]) + " (Qty):Float:120", 
+			get_mon(bet_dates[0]) + " (Amt):Currency:120"]
+	else:
+		pwc += [get_mon(bet_dates[0]) + "-" + get_mon(bet_dates[1]) + " (Qty):Float:120", 
+			get_mon(bet_dates[0]) + "-" + get_mon(bet_dates[1]) + " (Amt):Currency:120"]
+
+def get_period_wise_query(bet_dates, trans_date, query_details):
+	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)), 
+					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
+				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
-def basedon_wise_colums_query(based_on, trans):
-	sup_tab = ''
+def get_period_date_ranges(period, fiscal_year):
+  from dateutil.relativedelta import relativedelta
 
+  year_start_date = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
+  increment = {
+    "Monthly": 1,
+    "Quarterly": 3,
+    "Half-Yearly": 6,
+    "Yearly": 12
+  }.get(period)
+
+  period_date_ranges = []
+  for i in xrange(1, 13, increment): 
+    period_end_date = year_start_date + relativedelta(months=increment, days=-1)
+    period_date_ranges.append([year_start_date, period_end_date])
+    year_start_date = period_end_date + relativedelta(days=1)
+
+  return period_date_ranges
+
+def get_period_month_ranges(period, fiscal_year):
+	from dateutil.relativedelta import relativedelta
+	period_month_ranges = []
+
+	for start_date, end_date in get_period_date_ranges(period, fiscal_year):
+		months_in_this_period = []
+		while start_date <= end_date:
+			months_in_this_period.append(start_date.strftime("%B"))
+			start_date += relativedelta(months=1)
+		period_month_ranges.append(months_in_this_period)
+
+	return period_month_ranges
+
+def based_wise_colums_query(based_on, trans):
+	based_on_details = {}
+
+	# based_on_cols, based_on_select, based_on_group_by, addl_tables
 	if based_on == "Item":
-		bon = ["Item:Link/Item:120", "Item Name:Data:120"]
-		query_details = "t2.item_code, t2.item_name," 
-		based = 't2.item_code'
+		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
+		based_on_details["based_on_select"] = "t2.item_code, t2.item_name," 
+		based_on_details["based_on_group_by"] = 't2.item_code'
+		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Item Group":
-		bon = ["Item Group:Link/Item Group:120"]
-		query_details = "t2.item_group," 
-		based = 't2.item_group'
+		based_on_details["based_on_cols"] = ["Item Group:Link/Item Group:120"]
+		based_on_details["based_on_select"] = "t2.item_group," 
+		based_on_details["based_on_group_by"] = 't2.item_group'
+		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Customer":
-		bon = ["Customer:Link/Customer:120", "Territory:Link/Territory:120"]
-		query_details = "t1.customer_name, t1.territory, "
-		based = 't1.customer_name'
+		based_on_details["based_on_cols"] = ["Customer:Link/Customer:120", "Territory:Link/Territory:120"]
+		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
+		based_on_details["based_on_group_by"] = 't1.customer_name'
+		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Customer Group":
-		bon = ["Customer Group:Link/Customer Group"]
-		query_details = "t1.customer_group,"
-		based = 't1.customer_group'
-	
+		based_on_details["based_on_cols"] = ["Customer Group:Link/Customer Group"]
+		based_on_details["based_on_select"] = "t1.customer_group,"
+		based_on_details["based_on_group_by"] = 't1.customer_group'
+		based_on_details["addl_tables"] = ''
+
 	elif based_on == 'Supplier':
-		bon = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:120"]
-		query_details = "t1.supplier, t3.supplier_type,"
-		based = 't1.supplier'
-		sup_tab = '`tabSupplier` t3',
+		based_on_details["based_on_cols"] = ["Supplier:Link/Supplier:120", "Supplier Type:Link/Supplier Type:140"]
+		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_type,"
+		based_on_details["based_on_group_by"] = 't1.supplier'
+		based_on_details["addl_tables"] = ',`tabSupplier` t3'
 	
 	elif based_on == 'Supplier Type':
-		bon = ["Supplier Type:Link/Supplier Type:120"]
-		query_details = "t3.supplier_type,"
-		based = 't3.supplier_type'
-		sup_tab ='`tabSupplier` t3',
+		based_on_details["based_on_cols"] = ["Supplier Type:Link/Supplier Type:140"]
+		based_on_details["based_on_select"] = "t3.supplier_type,"
+		based_on_details["based_on_group_by"] = 't3.supplier_type'
+		based_on_details["addl_tables"] =',`tabSupplier` t3'
 
 	elif based_on == "Territory":
-		bon = ["Territory:Link/Territory:120"]
-		query_details = "t1.territory,"
-		based = 't1.territory'
+		based_on_details["based_on_cols"] = ["Territory:Link/Territory:120"]
+		based_on_details["based_on_select"] = "t1.territory,"
+		based_on_details["based_on_group_by"] = 't1.territory'
+		based_on_details["addl_tables"] = ''
 
 	elif based_on == "Project":
 		if trans in ['Sales Invoice', 'Delivery Note', 'Sales Order']:
-			bon = ["Project:Link/Project:120"]
-			query_details = "t1.project_name,"
-			based = 't1.project_name'
+			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
+			based_on_details["based_on_select"] = "t1.project_name,"
+			based_on_details["based_on_group_by"] = 't1.project_name'
+			based_on_details["addl_tables"] = ''
 		elif trans in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
-			bon = ["Project:Link/Project:120"]
-			query_details = "t2.project_name,"
-			based = 't2.project_name'
+			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
+			based_on_details["based_on_select"] = "t2.project_name,"
+			based_on_details["based_on_group_by"] = 't2.project_name'
+			based_on_details["addl_tables"] = ''
 		else:
 			webnotes.msgprint("Project-wise data is not available for Quotation", raise_exception=1)
 
-	return bon, query_details, based, sup_tab
+	return based_on_details
 
 def group_wise_column(group_by):
 	if group_by:
