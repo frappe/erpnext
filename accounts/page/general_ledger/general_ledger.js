@@ -63,15 +63,6 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					open_btn: true,
 					doctype: "dataContext.voucher_type"
 				}},
-			{id: "against_voucher_type", name: "Against Voucher Type", 
-				field: "against_voucher_type", width: 120},
-			{id: "against_voucher", name: "Against Voucher", 
-				field: "against_voucher", width: 160,
-				link_formatter: {
-					filter_input: "against_voucher",
-					open_btn: true,
-					doctype: "dataContext.against_voucher_type"
-				}},
 			{id: "remarks", name: "Remarks", field: "remarks", width: 200,
 				formatter: this.text_formatter},
 				
@@ -224,8 +215,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				
 				if(!grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]) {
 					grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no] = {
-						entries: [],
-						totals: me.make_summary_row("Totals", item.voucher_no)
+						row: {},
+						totals: {"debit": 0, "credit": 0}
 					}
 				}
 				
@@ -256,8 +247,10 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					out.push(item);
 					grouped_ledgers[item.account].entries.push(item);
 					
-					grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]
-						.entries.push(item);
+					if(grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no].row){
+						grouped_ledgers[item.account].
+							entries_group_by_voucher[item.voucher_no].row = item;
+					}
 				}
 			}
 		});
@@ -329,14 +322,12 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			if(grouped_ledgers[account].entries.length) {
 				$.each(Object.keys(grouped_ledgers[account].entries_group_by_voucher).sort(),
 				 	function(j, voucher) {
-						if(grouped_ledgers[account].entries_group_by_voucher[voucher]
-							.entries.length) {
-							out = out.concat(grouped_ledgers[account]
-								.entries_group_by_voucher[voucher].entries)
-								.concat([
-									grouped_ledgers[account].entries_group_by_voucher[voucher]
-									.totals, {id: "_blank" + j, _no_format: true, 
-									debit: "", credit: ""}]);
+						voucher_dict = grouped_ledgers[account].entries_group_by_voucher[voucher];
+						if(voucher_dict.totals.debit || voucher_dict.totals.credit) {
+							voucher_dict.row.debit = voucher_dict.totals.debit;
+							voucher_dict.row.credit = voucher_dict.totals.credit;
+							voucher_dict.row.id = "entry" + voucher
+							out = out.concat(voucher_dict.row);
 						}
 				});
 			}
