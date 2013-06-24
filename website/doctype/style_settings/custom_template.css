@@ -66,8 +66,9 @@ div.web-footer, div.web-footer a {
 }
 
 /* Bootstrap Navbar */
-.navbar-inverse .navbar-inner {
+.navbar-inverse {
 	box-shadow: none;
+	border-radius: 0px;
     background-color: #{{ doc.top_bar_background or "444444"}};
     background-repeat: repeat-x;
 	background-image: none;
@@ -78,9 +79,9 @@ div.web-footer, div.web-footer a {
 	{%- endif %}
 }
 
-.navbar-inverse .brand,
-.navbar-inverse .brand:hover,
-.navbar-inverse .brand:focus,
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-brand:focus,
 .navbar-inverse .nav > li > a {
   color: #{{ doc.top_bar_foreground or "fffffff"}};
   text-shadow: none;
@@ -117,8 +118,8 @@ div.web-footer, div.web-footer a {
   color: #{{ doc.top_bar_foreground or "fffffff"}};
 }
 
-.navbar-fixed-top .navbar-inner,
-.navbar-static-top .navbar-inner {
+.navbar-fixed-top,
+.navbar-static-top {
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
           box-shadow: none;
@@ -188,14 +189,6 @@ div.web-footer, div.web-footer a {
 
 .breadcrumb > li {
   text-shadow: none;
-}
-
-.breadcrumb > li > .divider {
-  color: #{{ doc.page_text }};
-}
-
-.breadcrumb > .active {
-  color: #{{ doc.page_text }};
 }
 
 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-02-20 19:11:03", 
+  "modified": "2013-06-11 16:16:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -159,19 +159,6 @@
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 0, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
   "print_hide": 1, 
   "read_only": 1
  }, 

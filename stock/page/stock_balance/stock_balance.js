@@ -26,7 +26,7 @@ wn.pages['stock-balance'].onload = function(wrapper) {
 	new erpnext.StockBalance(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Stock")
+	wrapper.appframe.add_module_icon("Stock")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 

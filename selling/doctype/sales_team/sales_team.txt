@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:53", 
+  "creation": "2013-04-19 13:30:51", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:31", 
+  "modified": "2013-05-21 17:04:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,6 +42,7 @@
   "doctype": "DocField", 
   "fieldname": "sales_designation", 
   "fieldtype": "Data", 
+  "hidden": 0, 
   "label": "Designation", 
   "oldfieldname": "sales_designation", 
   "oldfieldtype": "Data", 
@@ -63,7 +64,7 @@
   "doctype": "DocField", 
   "fieldname": "allocated_percentage", 
   "fieldtype": "Float", 
-  "label": "Allocated (%)", 
+  "label": "Contribution (%)", 
   "oldfieldname": "allocated_percentage", 
   "oldfieldtype": "Currency", 
   "print_width": "100px", 
@@ -74,11 +75,12 @@
   "doctype": "DocField", 
   "fieldname": "allocated_amount", 
   "fieldtype": "Currency", 
-  "label": "Allocated Amount", 
+  "label": "Contribution to Net Total", 
   "oldfieldname": "allocated_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_width": "120px", 
+  "read_only": 1, 
   "reqd": 0, 
   "width": "120px"
  }, 

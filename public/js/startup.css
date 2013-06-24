@@ -4,7 +4,6 @@ h1, h2, h3, h4, h5 {
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 13px;
 }
 
 span, div, td, input, textarea, button, select {
@@ -18,28 +17,6 @@ span, div, td, input, textarea, button, select {
 .erpnext-footer {
 	margin: 11px auto;
 	text-align: center;
-}
-
-.navbar-new-comments {
-	margin: -3px 0px;
-	padding: 2px;
-	min-width: 20px;
-	text-align: center;
-	display: inline-block;
-	border-radius: 2px;
-	color: #999999;
-	background-color: #333131;
-}
-
-.navbar-new-comments:hover,
-.navbar-new-comments:active,
-.navbar-new-comments:focus {
-	color: #fff;
-}
-
-.navbar-new-comments-true {
-	color: #fff;
-	background-color: #B00D07;
 }
 
 /*extra size menus for recent*/
@@ -60,4 +37,11 @@ span, div, td, input, textarea, button, select {
 .show-all-reports {
 	margin-top: 5px;
 	font-size: 11px;
+}
+
+/* toolbar */
+.toolbar-splash {
+	width: 32px; 
+	height: 32px; 
+	margin: -11px auto;
 }

@@ -69,17 +69,6 @@ class DocType(BuyingController):
 			msgprint(_("Hey there! You need to put at least one item in \
 				the item table."), raise_exception=True)
 
-
-	def get_default_schedule_date( self, obj):
-		for d in getlist( obj.doclist, obj.fname):
-			item = sql("select lead_time_days from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())" % cstr(d.item_code) , as_dict = 1)
-			ltd = item and cint(item[0]['lead_time_days']) or 0
-			if ltd and obj.doc.transaction_date:
-				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Material Request':
-					d.lead_time_date = cstr(add_days( obj.doc.transaction_date, cint(ltd)))
-				if not d.fields.has_key('prevdoc_docname') or (d.fields.has_key('prevdoc_docname') and not d.prevdoc_docname):
-					d.schedule_date =	cstr( add_days( obj.doc.transaction_date, cint(ltd)))
-				
 	# Client Trigger functions
 	#------------------------------------------------------------------------------------------------
 
@@ -99,13 +88,6 @@ class DocType(BuyingController):
 			msgprint("Supplier : %s does not exists" % (name))
 			raise Exception
 	
-	# Get TERMS AND CONDITIONS
-	# =======================================================================================
-	def get_tc_details(self,obj):
-		r = sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
-		if r: obj.doc.terms = r[0][0]
-
-
 	# Get Available Qty at Warehouse
 	def get_bin_details( self, arg = ''):
 		arg = eval(arg)
@@ -214,10 +196,11 @@ class DocType(BuyingController):
 					msgprint("Please check Item %s is not present in %s %s ." % (d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
 					raise Exception
 				
-				# Check if Warehouse has been modified.
-				if not cstr(data[0]['warehouse']) == cstr(d.warehouse):
-					msgprint("Please check warehouse %s of Item %s which is not present in %s %s ." % \
-						(d.warehouse, d.item_code, d.prevdoc_doctype, d.prevdoc_docname), raise_exception=True)
+				if cstr(data[0]['warehouse']) and \
+						not cstr(data[0]['warehouse']) == cstr(d.warehouse):
+					msgprint("""Please check warehouse %s of Item %s 
+						which is not present in %s %s""" % (d.warehouse, d.item_code, 
+						d.prevdoc_doctype, d.prevdoc_docname), raise_exception=1)
 				
 				#	Check if UOM has been modified.
 				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Material Request':
@@ -405,39 +388,6 @@ class DocType(BuyingController):
 			msgprint("'%s' Not Within The Fiscal Year"%(dn))
 			raise Exception
 
-	def load_default_taxes(self, obj):
-		return self.get_purchase_tax_details(obj, 1)
-	
-	def get_purchase_tax_details(self,obj, default = 0):
-		obj.doclist = self.doc.clear_table(obj.doclist,'purchase_tax_details')
-		
-		if default: add_cond = " and ifnull(t2.is_default,0) = 1"
-		else: add_cond = " and t1.parent = '"+cstr(obj.doc.purchase_other_charges)+"'"
-
-		other_charge = sql("""
-			select t1.*
-			from `tabPurchase Taxes and Charges` t1, `tabPurchase Taxes and Charges Master` t2
-			where t1.parent = t2.name %s
-			order by t1.idx
-		"""% add_cond, as_dict = 1)
-		
-		idx = 0
-		for other in other_charge:
-			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 
-				obj.doclist)
-			d.category = other['category']
-			d.add_deduct_tax = other['add_deduct_tax']
-			d.charge_type = other['charge_type']
-			d.row_id = other['row_id']
-			d.description = other['description']
-			d.account_head = other['account_head']
-			d.rate = flt(other['rate'])
-			d.tax_amount = flt(other['tax_amount'])
-			d.cost_center = other["cost_center"]
-			d.idx = idx
-			idx += 1
-		return obj.doclist
-
 	def get_rate(self, arg, obj):
 		arg = eval(arg)
 		rate = sql("select account_type, tax_rate from `tabAccount` where name = '%s'" %(arg['account_head']), as_dict=1)
@@ -450,27 +400,3 @@ class DocType(BuyingController):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
-
-@webnotes.whitelist()
-def get_uom_details(args=None):
-	"""fetches details on change of UOM"""
-	if not args:
-		return {}
-		
-	if isinstance(args, basestring):
-		import json
-		args = json.loads(args)
-
-	uom = webnotes.conn.sql("""select conversion_factor
-		from `tabUOM Conversion Detail` where parent = %s and uom = %s""", 
-		(args['item_code'], args['uom']), as_dict=1)
-
-	if not uom: return {}
-
-	conversion_factor = args.get("conversion_factor") or \
-		flt(uom[0]["conversion_factor"])
-	
-	return {
-		"conversion_factor": conversion_factor,
-		"qty": flt(args["stock_qty"]) / conversion_factor,
-	}

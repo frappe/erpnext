@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="span12" itemscope itemtype="http://schema.org/BlogPost">
+<div class="col col-lg-12" itemscope itemtype="http://schema.org/BlogPost">
 	<h2 itemprop="name headline">{{ title }}</h2>
 
 	<!-- begin blog content -->
@@ -37,7 +37,7 @@
 		
 		{% include 'app/website/templates/html/comment.html' %}
 	</div>
-	<div><button class="btn add-comment">{{ texts.add_comment }}</button></div>
+	<div><button class="btn btn-default add-comment">{{ texts.add_comment }}</button></div>
 	<div style="display: none; margin-top: 10px;" 
 		id="comment-form">
 		<div class="alert" style="display:none;"></div>

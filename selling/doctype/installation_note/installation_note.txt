@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-05-09 14:43:28", 
+  "modified": "2013-06-11 16:16:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -230,18 +230,6 @@
   "read_only": 1
  }, 
  {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
@@ -249,18 +237,6 @@
   "oldfieldname": "remarks", 
   "oldfieldtype": "Small Text", 
   "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

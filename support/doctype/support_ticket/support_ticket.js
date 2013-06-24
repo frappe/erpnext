@@ -19,17 +19,19 @@ cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
-				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
 				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
 		}
+		
+		if(doc.description)
+			doc.description = wn.utils.escape_script_and_style(doc.description);
 	},
 	
 	refresh: function(doc) {
 		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
-		if(!doc.__islocal) {											
-			if(user_roles.indexOf("Support Manager")!==-1) {
+		if(!doc.__islocal) {
+			if(cur_frm.fields_dict.status.get_status()=="Write") {
 				if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
 				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);
 			}

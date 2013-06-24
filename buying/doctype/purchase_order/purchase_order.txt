@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 16:01:24", 
+  "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:37:11", 
+  "modified": "2013-06-11 16:05:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,9 @@
   "parent": "Purchase Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -65,43 +67,48 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Name", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -533,17 +540,7 @@
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "options": "get_tc_details"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1
+  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
@@ -554,6 +551,7 @@
   "oldfieldtype": "Text Editor"
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
@@ -648,18 +646,6 @@
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 0
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 0, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1
  }, 
  {
   "description": "Select the relevant company name if you have multiple companies", 
@@ -769,19 +755,6 @@
   "print_hide": 1
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
   "description": "Required raw materials issued to the supplier for producing a sub - contracted item.", 
   "doctype": "DocField", 
   "fieldname": "raw_material_details", 
@@ -808,33 +781,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
   "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Purchase Manager", 
   "submit": 0, 
   "write": 0
  }, 
@@ -843,8 +790,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -854,28 +799,13 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "match": "", 
-  "permlevel": 1, 
-  "role": "All", 
-  "submit": 0
- }, 
- {
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Supplier"
  }
 ]

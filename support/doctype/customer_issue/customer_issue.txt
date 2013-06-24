@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-28 17:54:09", 
+  "modified": "2013-06-11 16:16:33", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -400,18 +400,6 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "width": "100px"
  }, 
  {
   "amend": 1, 

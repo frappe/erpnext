@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, getdate, cint
+from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -34,6 +34,22 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Delivery Note Item'
 		self.fname = 'delivery_note_details'
+		self.status_updater = [{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_delivered',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'prevdoc_docname',
+			'status_field': 'delivery_status',
+			'keyword': 'Delivered'
+		}]
+		
+	def set_customer_defaults(self):
+		self.get_default_customer_shipping_address()
 
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
@@ -75,28 +91,6 @@ class DocType(SellingController):
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {
-						'item_code':doc.fields.get('item_code'),
-						'expense_account':doc.fields.get('expense_account'), 
-						'cost_center': doc.fields.get('cost_center'), 
-						'warehouse': doc.fields.get('warehouse')};
-					ret = obj.get_item_defaults(arg)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]					
-
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
@@ -105,24 +99,8 @@ class DocType(SellingController):
 		"""Re-calculates Basic Rate & amount based on Price List Selected"""
 		get_obj('Sales Common').get_adj_percent(self)
 
-
-	def get_actual_qty(self,args):
-		"""Get Actual Qty of item in warehouse selected"""
-		return get_obj('Sales Common').get_available_qty(eval(args))
-
-
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
-
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-
-	def get_other_charges(self):
-		"""Pull details from Sales Taxes and Charges Master"""
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
-
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
@@ -146,13 +124,11 @@ class DocType(SellingController):
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
-		self.validate_mandatory()
 		self.validate_reference_value()
 		self.validate_for_items()
 		self.validate_warehouse()
 		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
-		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.check_conversion_rate(self)
 
 		# Set actual qty for each item in selected warehouse
@@ -163,12 +139,6 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
 
 		
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception, "Validation Error. "
-
-
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
@@ -261,8 +231,8 @@ class DocType(SellingController):
 		sl_obj.update_serial_record(self, 'delivery_note_details', is_submit = 1, is_incoming = 0)
 		sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
 		
-		# update delivered qty in sales order
-		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		# update delivered qty in sales order	
+		self.update_prevdoc_status()
 		
 		# create stock ledger entry
 		self.update_stock_ledger(update_stock = 1)
@@ -309,7 +279,8 @@ class DocType(SellingController):
 		sl.update_serial_record(self, 'delivery_note_details', is_submit = 0, is_incoming = 0)
 		sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
 		
-		sales_com_obj.update_prevdoc_detail(0,self)
+		self.update_prevdoc_status()
+		
 		self.update_stock_ledger(update_stock = -1)
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()

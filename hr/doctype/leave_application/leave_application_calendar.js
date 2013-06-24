@@ -1,4 +1,4 @@
-wn.views.calendar["Leave Application"] = wn.views.Calendar.extend({
+wn.views.calendar["Leave Application"] = {
 	field_map: {
 		"start": "from_date",
 		"end": "to_date",
@@ -14,4 +14,4 @@ wn.views.calendar["Leave Application"] = wn.views.Calendar.extend({
 		}
 	},
 	get_events_method: "hr.doctype.leave_application.leave_application.get_events"
-})
+}

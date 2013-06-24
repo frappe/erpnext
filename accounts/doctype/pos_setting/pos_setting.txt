@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-09 13:16:11", 
+  "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-05-23 12:52:09", 
+  "modified": "2013-05-30 12:09:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -18,8 +18,7 @@
   "parent": "POS Setting", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read_only": 0
+  "permlevel": 0
  }, 
  {
   "doctype": "DocPerm", 
@@ -44,7 +43,8 @@
   "label": "User", 
   "oldfieldname": "user", 
   "oldfieldtype": "Link", 
-  "options": "Profile"
+  "options": "Profile", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -54,6 +54,7 @@
   "oldfieldname": "territory", 
   "oldfieldtype": "Link", 
   "options": "Territory", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -64,6 +65,7 @@
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -74,6 +76,7 @@
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
   "options": "Currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -84,6 +87,7 @@
   "label": "Conversion Rate", 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -94,6 +98,7 @@
   "oldfieldname": "price_list_name", 
   "oldfieldtype": "Select", 
   "options": "link:Price List", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -105,13 +110,24 @@
   "oldfieldname": "company", 
   "oldfieldtype": "Link", 
   "options": "Company", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break"
+  "oldfieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "default": "1", 
+  "description": "Create Stock Ledger Entries when you submit a Sales Invoice", 
+  "doctype": "DocField", 
+  "fieldname": "update_stock", 
+  "fieldtype": "Check", 
+  "label": "Update Stock", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -121,6 +137,7 @@
   "oldfieldname": "customer_account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -131,6 +148,7 @@
   "oldfieldname": "cash_bank_account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -141,6 +159,7 @@
   "oldfieldname": "income_account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -152,6 +171,7 @@
   "label": "Expense Account", 
   "options": "Account", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -162,6 +182,7 @@
   "oldfieldname": "warehouse", 
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -172,6 +193,7 @@
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -181,7 +203,8 @@
   "label": "Charge", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
-  "options": "Sales Taxes and Charges Master"
+  "options": "Sales Taxes and Charges Master", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -191,7 +214,8 @@
   "oldfieldname": "letter_head", 
   "oldfieldtype": "Select", 
   "options": "link:Letter Head", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -200,7 +224,8 @@
   "label": "Terms and Conditions", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
-  "options": "Terms and Conditions"
+  "options": "Terms and Conditions", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -210,17 +235,10 @@
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Select", 
-  "options": "link:Print Heading"
+  "options": "link:Print Heading", 
+  "read_only": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager", 

@@ -122,16 +122,6 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-cur_frm.fields_dict.customer_address.on_new = function(dn) {
-	locals['Address'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Address'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Contact'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name, address_line1, city FROM tabAddress \
 		WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND \

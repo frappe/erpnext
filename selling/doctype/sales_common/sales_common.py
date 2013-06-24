@@ -28,23 +28,6 @@ get_value = webnotes.conn.get_value
 
 from utilities.transaction_base import TransactionBase
 
-
-@webnotes.whitelist()
-def get_comp_base_currency(arg=None):
-	""" get default currency of company"""
-	res = webnotes.conn.sql("""select default_currency from `tabCompany`
-			where name = %s""", webnotes.form_dict.get('company'))
-	return res and res[0][0] or None
-
-@webnotes.whitelist()
-def get_price_list_currency(arg=None):
-	""" Get all currency in which price list is maintained"""
-	plc = webnotes.conn.sql("select distinct ref_currency from `tabItem Price` where price_list_name = %s", webnotes.form_dict['price_list'])
-	plc = [d[0] for d in plc]
-	base_currency = get_comp_base_currency(webnotes.form_dict['company'])
-	return plc, base_currency
-
-
 class DocType(TransactionBase):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
@@ -65,26 +48,6 @@ class DocType(TransactionBase):
 
 		self.msg = []
 
-
-	# Get Sales Person Details
-	# ==========================
-	
-	# TODO: To be deprecated if not in use
-	def get_sales_person_details(self, obj):
-		if obj.doc.doctype != 'Quotation':
-			obj.doclist = obj.doc.clear_table(obj.doclist,'sales_team')
-			idx = 0
-			for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % obj.doc.customer):
-				ch = addchild(obj.doc, 'sales_team', 'Sales Team', obj.doclist)
-				ch.sales_person = d and cstr(d[0]) or ''
-				ch.allocated_percentage = d and flt(d[1]) or 0
-				ch.allocated_amount = d and flt(d[2]) or 0
-				ch.incentives = d and flt(d[3]) or 0
-				ch.idx = idx
-				idx += 1
-		return obj.doclist
-
-
 	# Get customer's contact person details
 	# ==============================================================
 	def get_contact_details(self, obj = '', primary = 0):
@@ -102,204 +65,13 @@ class DocType(TransactionBase):
 			obj.doc.customer_address = c['contact_address']
 
 
-	# Get customer's primary shipping details
-	# ==============================================================
-	def get_shipping_details(self, obj = ''):
-		det = webnotes.conn.sql("select name, ship_to, shipping_address from `tabShipping Address` where customer = '%s' and docstatus != 2 and ifnull(is_primary_address, 'Yes') = 'Yes'" %(obj.doc.customer), as_dict = 1)
-		obj.doc.ship_det_no = det and det[0]['name'] or ''
-		obj.doc.ship_to = det and det[0]['ship_to'] or ''
-		obj.doc.shipping_address = det and det[0]['shipping_address'] or ''
-
-
 	# get invoice details
 	# ====================
 	def get_invoice_details(self, obj = ''):
 		if obj.doc.company:
 			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + webnotes.conn.get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
-
-	
-	
-	# Get Item Details
-	# ===============================================================
-	def get_item_details(self, args, obj):
-		import json
-		if not obj.doc.price_list_name:
-			msgprint("Please Select Price List before selecting Items", raise_exception=True)
-		item = webnotes.conn.sql("""select description, item_name, brand, item_group, stock_uom, 
-			default_warehouse, default_income_account, default_sales_cost_center, 
-			purchase_account, description_html, barcode from `tabItem` 
-			where name = %s and (ifnull(end_of_life,'')='' or end_of_life >	now() 
-			or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' 
-			or is_service_item = 'Yes')""", args['item_code'], as_dict=1)
-		
-		tax = webnotes.conn.sql("""select tax_type, tax_rate from `tabItem Tax` 
-			where parent = %s""", args['item_code'])
-		t = {}
-		for x in tax: t[x[0]] = flt(x[1])
-		ret = {
-			'description': item and item[0]['description_html'] or \
-				item[0]['description'],
-			'barcode': item and item[0]['barcode'] or '',
-			'item_group': item and item[0]['item_group'] or '',
-			'item_name': item and item[0]['item_name'] or '',
-			'brand': item and item[0]['brand'] or '',
-			'stock_uom': item and item[0]['stock_uom'] or '',
-			'reserved_warehouse': item and item[0]['default_warehouse'] or '',
-			'warehouse': item and item[0]['default_warehouse'] or \
-				args.get('warehouse'),
-			'income_account': item and item[0]['default_income_account'] or \
-				args.get('income_account'),
-			'expense_account': item and item[0]['purchase_account'] or \
-			 	args.get('expense_account'),
-			'cost_center': item and item[0]['default_sales_cost_center'] or \
-				args.get('cost_center'),
-			# this is done coz if item once fetched is fetched again than its qty shld be reset to 1
-			'qty': 1.00, 
-			'adj_rate': 0,
-			'amount': 0,
-			'export_amount': 0,
-			'item_tax_rate': json.dumps(t),
-			'batch_no': ''
-		}
-		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
-			base_ref_rate =	self.get_ref_rate(args['item_code'], obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
-			ret['ref_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
-			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
-			ret['base_ref_rate'] = flt(base_ref_rate)
-			ret['basic_rate'] = flt(base_ref_rate)
-		
-		if ret['warehouse'] or ret['reserved_warehouse']:
 			
-			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
-			ret.update(av_qty)
-			
-		# get customer code for given item from Item Customer Detail
-		customer_item_code_row = webnotes.conn.sql("""\
-			select ref_code from `tabItem Customer Detail`
-			where parent = %s and customer_name = %s""",
-			(args['item_code'], obj.doc.customer))
-		if customer_item_code_row and customer_item_code_row[0][0]:
-			ret['customer_item_code'] = customer_item_code_row[0][0]
-
-		return ret
-
-
-	def get_item_defaults(self, args):
-		item = webnotes.conn.sql("""select default_warehouse, default_income_account, 
-			default_sales_cost_center, purchase_account from `tabItem` where name = %s 
-			and (ifnull(end_of_life,'') = '' or end_of_life > now() or end_of_life = '0000-00-00') 
-			and (is_sales_item = 'Yes' or is_service_item = 'Yes') """, 
-			(args['item_code']), as_dict=1)
-		ret = {
-			'reserved_warehouse': item and item[0]['default_warehouse'] or '',
-			'warehouse': item and item[0]['default_warehouse'] or args.get('warehouse'),
-			'income_account': item and item[0]['default_income_account'] or \
-				args.get('income_account'),
-			'expense_account': item and item[0]['purchase_account'] or args.get('expense_account'),
-			'cost_center': item and item[0]['default_sales_cost_center'] or args.get('cost_center'),
-		}
-
-		return ret
-
-	def get_available_qty(self,args):
-		tot_avail_qty = webnotes.conn.sql("select projected_qty, actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
-			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
-		}
-		return ret
-
-	
-	# ***************** Get Ref rate as entered in Item Master ********************
-	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
-		ref_rate = webnotes.conn.sql("select ref_rate from `tabItem Price` where parent = %s and price_list_name = %s and ref_currency = %s and selling=1", 
-		(item_code, price_list_name, price_list_currency))
-		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
-		return base_ref_rate
-
-	def get_barcode_details(self, barcode):
-		item = webnotes.conn.sql("select name, end_of_life, is_sales_item, is_service_item \
-			from `tabItem` where barcode = %s", barcode, as_dict=1)
-		ret = {}
-		if not item:
-			msgprint("""No item found for this barcode: %s. 
-				May be barcode not updated in item master. Please check""" % barcode)
-		elif item[0]['end_of_life'] and getdate(cstr(item[0]['end_of_life'])) < nowdate():
-			msgprint("Item: %s has been expired. Please check 'End of Life' field in item master" % item[0]['name'])
-		elif item[0]['is_sales_item'] == 'No' and item[0]['is_service_item'] == 'No':
-			msgprint("Item: %s is not a sales or service item" % item[0]['name'])
-		elif len(item) > 1:
-			msgprint("There are multiple item for this barcode. \nPlease select item code manually")
-		else:
-			ret = {'item_code': item and item[0]['name'] or ''}
-			
-		return ret
-
-		
-	# ****** Re-cancellculates Basic Rate & amount based on Price List Selected ******
-	def get_adj_percent(self, obj): 
-		for d in getlist(obj.doclist, obj.fname):
-			base_ref_rate = self.get_ref_rate(d.item_code, obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
-			d.adj_rate = 0
-			d.ref_rate = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
-			d.basic_rate = flt(base_ref_rate)
-			d.base_ref_rate = flt(base_ref_rate)
-			d.export_rate = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
-			d.amount = flt(d.qty)*flt(base_ref_rate)
-			d.export_amount = flt(d.qty)*flt(base_ref_rate)/flt(obj.doc.conversion_rate)
-
-
-	# Load Default Taxes
-	# ====================
-	def load_default_taxes(self, obj):
-		if cstr(obj.doc.charge):
-			return self.get_other_charges(obj)
-		else:
-			return self.get_other_charges(obj, 1)
-
-		
-	# Get other charges from Master
-	# =================================================================================
-	def get_other_charges(self,obj, default=0):
-		obj.doclist = obj.doc.clear_table(obj.doclist, 'other_charges')
-		if not getlist(obj.doclist, 'other_charges'):
-			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
-			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
-			idx = 0
-			other_charge = webnotes.conn.sql("""\
-				select t1.*
-				from
-					`tabSales Taxes and Charges` t1,
-					`tabSales Taxes and Charges Master` t2
-				where
-					t1.parent = t2.name and
-					t2.company = '%s' and
-					%s
-				order by t1.idx""" % (obj.doc.company, add_cond), as_dict=1)
-			from webnotes.model import default_fields
-			for other in other_charge:
-				# remove default fields like parent, parenttype etc.
-				# from query results
-				for field in default_fields:
-					if field in other: del other[field]
-
-				d = addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges',
-					obj.doclist)
-				d.fields.update(other)
-				d.rate = flt(d.rate)
-				d.tax_amount = flt(d.tax_rate)
-				d.included_in_print_rate = cint(d.included_in_print_rate)
-				d.idx = idx
-				idx += 1
-		return obj.doclist
-			
-	# Get TERMS AND CONDITIONS
-	# =======================================================================================
-	def get_tc_details(self,obj):
-		r = webnotes.conn.sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
-		if r: obj.doc.terms = r[0][0]
-
 #---------------------------------------- Get Tax Details -------------------------------#
 	def get_tax_details(self, item_code, obj):
 		import json
@@ -329,23 +101,6 @@ class DocType(TransactionBase):
 		}
 		return ret
 		
-	# Get Commission rate
-	# =======================================================================
-	def get_comm_rate(self, sales_partner, obj):
-
-		comm_rate = webnotes.conn.sql("select commission_rate from `tabSales Partner` where name = '%s' and docstatus != 2" %(sales_partner), as_dict=1)
-		if comm_rate:
-			total_comm = flt(comm_rate[0]['commission_rate']) * flt(obj.doc.net_total) / 100
-			ret = {
-				'commission_rate'		 :	comm_rate and flt(comm_rate[0]['commission_rate']) or 0,
-				'total_commission'		:	flt(total_comm)
-			}
-			return ret
-		else:
-			msgprint("Business Associate : %s does not exist in the system." % (sales_partner))
-			raise Exception
-
-	
 	# To verify whether rate entered in details table does not exceed max discount %
 	# =======================================================================================
 	def validate_max_discount(self,obj, detail_table):
@@ -354,16 +109,6 @@ class DocType(TransactionBase):
 			if discount and discount[0]['max_discount'] and (flt(d.adj_rate)>flt(discount[0]['max_discount'])):
 				msgprint("You cannot give more than " + cstr(discount[0]['max_discount']) + " % discount on Item Code : "+cstr(d.item_code))
 				raise Exception
-
-
-	# Get sum of allocated % of sales person (it should be 100%)
-	# ========================================================================
-	# it indicates % contribution of sales person in sales
-	def get_allocated_sum(self,obj):
-		sales_team_list = obj.doclist.get({"parentfield": "sales_team"})
-		total_allocation = sum([flt(d.allocated_percentage) for d in sales_team_list])
-		if sales_team_list and total_allocation != 100.0:
-			msgprint("Total Allocated % of Sales Persons should be 100%", raise_exception=True)
 			
 	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
 	# ===========================================================================

@@ -1,0 +1,1 @@
+Attributions for software libraries / images used in ERPNext.

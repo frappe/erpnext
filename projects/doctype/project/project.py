@@ -26,29 +26,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 	
-	# Get Customer Details along with its primary contact details
-	# ==============================================================
-	def get_customer_details(self):
-		details =webnotes.conn.sql("select address, territory, customer_group,customer_name from `tabCustomer` where name=%s and docstatus!=2",(self.doc.customer),as_dict=1)
-		if details:
-			ret = {
-				'customer_address'	:	details and details[0]['address'] or '',
-				'territory'			 :	details and details[0]['territory'] or '',
-				'customer_group'		:	details and details[0]['customer_group'] or '',
-	'customer_name'		 :	details and details[0]['customer_name'] or ''
-			}
-			#get primary contact details(this is done separately coz. , if join query used & no primary contact thn it would not be able to fetch customer details)
-			contact_det = webnotes.conn.sql("select contact_name, phone, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact=1 and docstatus!=2" %(self.doc.customer), as_dict = 1)
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			ret['contact_no'] = contact_det and contact_det[0]['phone'] or ''
-			ret['email_id'] = contact_det and contact_det[0]['email_id'] or ''		
-			return ret
-		else:
-			msgprint("Customer : %s does not exist in system." % (self.doc.customer))
-			raise Exception	
-		
-	#calculate gross profit
-	#=============================================
 	def get_gross_profit(self):
 		pft, per_pft =0, 0
 		pft = flt(self.doc.project_value) - flt(self.doc.est_material_cost)
@@ -57,9 +34,8 @@ class DocType:
 		ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
 		return ret
 		
-	# validate
-	#================================================
 	def validate(self):
+		"""validate start date before end date"""
 		if self.doc.project_start_date and self.doc.completion_date:
 			if getdate(self.doc.completion_date) < getdate(self.doc.project_start_date):
 				msgprint("Expected Completion Date can not be less than Project Start Date")
@@ -67,6 +43,15 @@ class DocType:
 				
 	def on_update(self):
 		self.add_calendar_event()
+		
+	def update_percent_complete(self):
+		total = webnotes.conn.sql("""select count(*) from tabTask where project=%s""", 
+			self.doc.name)[0][0]
+		if total:
+			completed = webnotes.conn.sql("""select count(*) from tabTask where
+				project=%s and status in ('Closed', 'Cancelled')""", self.doc.name)[0][0]
+			webnotes.conn.set_value("Project", self.doc.name, "percent_complete",
+			 	int(float(completed) / total * 100))
 
 	def add_calendar_event(self):
 		# delete any earlier event for this project

@@ -20,84 +20,36 @@ cur_frm.cscript.fname = "delivery_note_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
-wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/selling/doctype/sales_common/sales_common.js');
 
-// ONLOAD
-// ================================================================================================
-cur_frm.cscript.onload = function(doc, dt, dn) {
-	cur_frm.cscript.manage_rounded_total();
-	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-	if(!doc.transaction_date) set_multiple(dt,dn,{transaction_date:get_today()});
-	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-	if(doc.__islocal && doc.customer) cur_frm.cscript.customer(doc,dt,dn,onload=true);
-	if(!doc.price_list_currency) {
-		set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate:1});
-	}
+wn.provide("erpnext.stock");
+erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
+	refresh: function(doc, dt, dn) {
+		this._super();
 		
-	if(doc.__islocal){
-		hide_field(['customer_address', 'contact_person', 'customer_name', 
-			'address_display', 'contact_display', 'contact_mobile', 
-			'contact_email', 'territory', 'customer_group']);
-	}	
-}
+		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
+	
+		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
 
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	// defined in sales_common.js
-	var callback = function(doc, dt, dn) {
-		if(doc.__islocal) cur_frm.cscript.update_item_details(doc, dt, dn);
+		if (doc.docstatus==1) cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+
+		if(doc.docstatus==0 && !doc.__islocal) {
+			cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
+		}
+	
+		set_print_hide(doc, dt, dn);
+	
+		// unhide expense_account and cost_center is auto_inventory_accounting enabled
+		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
 	}
+});
 
-	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
-} 
-
-// REFRESH
-// ================================================================================================
-cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	cur_frm.clear_custom_buttons();
-	erpnext.hide_naming_series();
-	
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
-
- 
-	if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
-	
-	if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
-
-	if (doc.docstatus==1) cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-
-	if(doc.docstatus==0 && !doc.__islocal) {
-		cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
-	}
-	
-	cur_frm.toggle_display("contact_info", doc.customer);
-	
-	set_print_hide(doc, cdt, cdn);
-	
-	// unhide expense_account and cost_center is auto_inventory_accounting enabled
-	var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
-	cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
-	cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
-}
-
-
-//customer
-cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
-	cur_frm.toggle_display("contact_info", doc.customer);
-	
-	var pl = doc.price_list_name;
-	var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			if(doc.customer)
-			 	unhide_field(['customer_address','contact_person','territory','customer_group']);
-			cur_frm.refresh();
-			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn); 
-	} 
-	var args = onload ? 'onload':''
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name),
-	 	'get_default_customer_shipping_address', args, callback);
-}
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new erpnext.stock.DeliveryNoteController({frm: cur_frm}));
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
@@ -157,28 +109,12 @@ cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
 	return repl('SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "%(company)s" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_delivered,0) < 99.99 and %(cond)s `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50', {company:doc.company,cond:cond})
 }
 
-
-cur_frm.cscript.delivery_type = function(doc, cdt, cdn) {
-	if (doc.delivery_type = 'Sample') cfn_set_fields(doc, cdt, cdn);
-}
-
 cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.serial_no) {
 		 get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
 	}
 }
-
-
-cur_frm.cscript.warehouse = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (! d.item_code) {alert("please enter item code first"); return};
-	if (d.warehouse) {
-		arg = "{'item_code':'" + d.item_code + "','warehouse':'" + d.warehouse +"'}";
-		get_server_fields('get_actual_qty',arg,'delivery_note_details',doc,cdt,cdn,1);
-	}
-}
-
 
 cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 	return 'SELECT DISTINCT `tabSupplier`.`name` FROM `tabSupplier` WHERE `tabSupplier`.supplier_type = "transporter" AND `tabSupplier`.docstatus != 2 AND `tabSupplier`.%(key)s LIKE "%s" ORDER BY `tabSupplier`.`name` LIMIT 50';

@@ -17,22 +17,19 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
-from webnotes.utils import cint
+from webnotes.utils import comma_or
+from webnotes.model.controller import DocListController
 
-
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
-		
+class DocType(DocListController):
 	def onload(self):
 		self.doclist.extend(webnotes.conn.sql("""select * from `tabItem Price` 
 			where price_list_name=%s""", self.doc.name, as_dict=True, update={"doctype": "Item Price"}))
 	
 	def validate(self):
-		if not (cint(self.doc.valid_for_all_countries) or len(self.doclist.get({"parentfield": "valid_for_countries"}))):
-			msgprint(_("""Please check "Valid For All Countries" or \
-				enter atlease one row in the "Countries" table."""), raise_exception=True)
-	
+		if self.doc.buying_or_selling not in ["Buying", "Selling"]:
+			msgprint(_(self.meta.get_label("buying_or_selling")) + " " + _("must be one of") + " " +
+				comma_or(["Buying", "Selling"]), raise_exception=True)
+				
 	def on_trash(self):
 		webnotes.conn.sql("""delete from `tabItem Price` where price_list_name = %s""", 
 			self.doc.name)

@@ -54,7 +54,8 @@ test_records = [
 		"inspection_required": "No",
 		"is_pro_applicable": "No",
 		"is_sub_contracted_item": "No",
-		"stock_uom": "_Test UOM"
+		"stock_uom": "_Test UOM",
+		"default_warehouse": "_Test Warehouse"
 	}, {
 		"doctype": "Item Reorder",
 		"parentfield": "item_reorder",
@@ -66,7 +67,8 @@ test_records = [
 		"parentfield": "ref_rate_details",
 		"price_list_name": "_Test Price List",
 		"ref_rate": 100,
-		"ref_currency": "INR"
+		"ref_currency": "INR",
+		"buying_or_selling": "Selling"
 	}
 	],
 	[{

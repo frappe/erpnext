@@ -1,0 +1,1 @@
+Stock balances on a particular day, per warehouse.

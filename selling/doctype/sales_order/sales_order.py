@@ -58,22 +58,6 @@ class DocType(SellingController):
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
-					ret = obj.get_item_defaults(arg)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]					
-
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
 
@@ -82,15 +66,6 @@ class DocType(SellingController):
 	
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
- 
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
 
 	def check_maintenance_schedule(self):
 		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
@@ -118,10 +93,6 @@ class DocType(SellingController):
 			if getdate(self.doc.transaction_date) > getdate(self.doc.delivery_date):
 				msgprint("Expected Delivery Date cannot be before Sales Order Date")
 				raise Exception
-		# amendment date is necessary if document is amended
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
 	
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -194,6 +165,8 @@ class DocType(SellingController):
 						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
 
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		#validate delivery date
 		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")
@@ -226,7 +199,6 @@ class DocType(SellingController):
 		sales_com_obj.check_conversion_rate(self)
 
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
-		sales_com_obj.get_allocated_sum(self)
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 		
 		if not self.doc.status:

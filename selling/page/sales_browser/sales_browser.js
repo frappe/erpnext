@@ -15,13 +15,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_Sales Browser'] = function(wrapper){
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
-	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Selling")
+	wn.ui.make_app_page({
+		parent: wrapper,
+	})
+	
+	wrapper.appframe.add_module_icon("Selling")
 	
 	wrapper.appframe.add_button('Refresh', function() {  
 			wrapper.make_tree();
 		}, 'icon-refresh');
+
+
+	$(wrapper)
+		.find(".layout-side-section")
+		.html('<div class="text-muted">Click on a link to get options to expand \
+		 	get options Add / Edit / Delete.</div>')
 
 	wrapper.make_tree = function() {
 		var ctype = wn.get_route()[1] || 'Territory';
@@ -30,7 +38,13 @@ pscript['onload_Sales Browser'] = function(wrapper){
 			args: {ctype: ctype},
 			callback: function(r) {
 				var root = r.message[0]["value"];
-				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, wrapper);
+				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, 
+					$(wrapper)
+						.find(".layout-main-section")
+						.css({
+							"min-height": "300px",
+							"padding-bottom": "25px"
+						}));
 			}
 		});
 	}
@@ -50,12 +64,12 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 };
 
 erpnext.SalesChart = Class.extend({
-	init: function(ctype, root, wrapper) {
-		$(wrapper).find('.tree-area').empty();
+	init: function(ctype, root, parent) {
+		$(parent).empty();
 		var me = this;
 		me.ctype = ctype;
 		this.tree = new wn.ui.Tree({
-			parent: $(wrapper).find('.tree-area'), 
+			parent: $(parent), 
 			label: root,
 			args: {ctype: ctype},
 			method: 'selling.page.sales_browser.sales_browser.get_children',

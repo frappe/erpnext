@@ -16,12 +16,13 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import load_json, cstr, flt, now_datetime
 from webnotes.model.doc import addchild
 
-from webnotes.model.controller import DocListController
+from controllers.status_updater import StatusUpdater
 
-class TransactionBase(DocListController):
+class TransactionBase(StatusUpdater):
 	def get_default_address_and_contact(self, party_type):
 		"""get a dict of default field values of address and contact for a given party type
 			party_type can be one of: customer, supplier"""
@@ -191,7 +192,8 @@ class TransactionBase(DocListController):
 	# Get Supplier Default Primary Address - first load
 	# -----------------------
 	def get_default_supplier_address(self, args):
-		args = load_json(args)
+		if isinstance(args, basestring):
+			args = load_json(args)
 		address_text, address_name = self.get_address_text(supplier=args['supplier'])
 		ret = {
 			'supplier_address' : address_name,
@@ -258,9 +260,7 @@ class TransactionBase(DocListController):
 		comm_list = webnotes.conn.sql("""select * from tabCommunication 
 			where %s=%s order by modified desc limit 20""" \
 			% (self.doc.doctype.replace(" ", "_").lower(), "%s"),
-			self.doc.name, as_dict=1)
-		
-		[d.update({"doctype":"Communication"}) for d in comm_list]
+			self.doc.name, as_dict=1, update={"doctype":"Communication"})
 		
 		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
 			for d in comm_list]))
@@ -303,8 +303,60 @@ class TransactionBase(DocListController):
 				})
 			
 			webnotes.bean(event_doclist).insert()
+	
+def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
+	"""common validation for currency and price list currency"""
+	if conversion_rate == 0:
+		msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
+	
+	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
+	
+	# parenthesis for 'OR' are necessary as we want it to evaluate as 
+	# mandatory valid condition and (1st optional valid condition 
+	# 	or 2nd optional valid condition)
+	valid_conversion_rate = (conversion_rate and 
+		((currency == company_currency and conversion_rate == 1.00)
+			or (currency != company_currency and conversion_rate != 1.00)))
 
-
+	if not valid_conversion_rate:
+		msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
+			+ ("1 %s = [?] %s" % (currency, company_currency)),
+			raise_exception=True)
+			
+def validate_item_fetch(args, item):
+	from stock.utils import validate_end_of_life
+	validate_end_of_life(item.name, item.end_of_life)
+	
+	# validate company
+	if not args.company:
+		msgprint(_("Please specify Company"), raise_exception=True)
+	
+def validate_currency(args, item, meta=None):
+	from webnotes.model.meta import get_field_precision
+	if not meta:
+		meta = webnotes.get_doctype(args.doctype)
+		
+	# validate conversion rate
+	if meta.get_field("currency"):
+		validate_conversion_rate(args.currency, args.conversion_rate, 
+			meta.get_label("conversion_rate"), args.company)
+		
+		# round it
+		args.conversion_rate = flt(args.conversion_rate, 
+			get_field_precision(meta.get_field("conversion_rate"), 
+				webnotes._dict({"fields": args})))
+	
+	# validate price list conversion rate
+	if meta.get_field("price_list_currency") and args.price_list_name and \
+		args.price_list_currency:
+		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate, 
+			meta.get_label("plc_conversion_rate"), args.company)
+		
+		# round it
+		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
+			get_field_precision(meta.get_field("plc_conversion_rate"), 
+				webnotes._dict({"fields": args})))
+	
 def delete_events(ref_type, ref_name):
 	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

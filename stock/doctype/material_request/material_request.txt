@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-02-25 15:38:02", 
+  "modified": "2013-06-11 16:16:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,12 +26,19 @@
   "permlevel": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Material Request", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -72,7 +79,7 @@
   "oldfieldtype": "Section Break"
  }, 
  {
-  "allow_on_submit": 1, 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "indent_details", 
   "fieldtype": "Table", 
@@ -262,19 +269,6 @@
   "width": "150px"
  }, 
  {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "width": "100px"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
@@ -311,8 +305,7 @@
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "options": "get_tc_details"
+  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
@@ -332,89 +325,19 @@
   "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Purchase Manager", 
-  "submit": 0, 
-  "write": 0
+  "role": "Purchase Manager"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Purchase Manager", 
-  "submit": 1, 
-  "write": 1
+  "role": "Material Manager"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "submit": 0, 
-  "write": 0
+  "role": "Material User"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Purchase User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Purchase User", 
-  "submit": 0
+  "role": "Purchase User"
  }
 ]

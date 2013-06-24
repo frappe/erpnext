@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import getdate, flt, add_days
 import json
 
@@ -29,7 +30,11 @@ def get_item_details(args):
 			"warehouse": None,
 			"supplier": None,
 			"transaction_date": None,
-			"conversion_rate": 1.0
+			"conversion_rate": 1.0,
+			"price_list_name": None,
+			"price_list_currency": None,
+			"plc_conversion_rate": 1.0,
+			"is_subcontracted": "Yes" / "No"
 		}
 	"""
 	if isinstance(args, basestring):
@@ -37,86 +42,102 @@ def get_item_details(args):
 		
 	args = webnotes._dict(args)
 	
-	item_wrapper = webnotes.bean("Item", args.item_code)
-	item = item_wrapper.doc
+	item_bean = webnotes.bean("Item", args.item_code)
+	item = item_bean.doc
 	
-	from stock.utils import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life)
+	_validate_item_details(args, item)
 	
-	# fetch basic values
-	out = webnotes._dict()
-	out.update({
-		"item_name": item.item_name,
-		"item_group": item.item_group,
-		"brand": item.brand,
-		"description": item.description,
-		"qty": 0,
-		"stock_uom": item.stock_uom,
-		"uom": item.stock_uom,
-		"conversion_factor": 1.0,
-		"warehouse": args.warehouse or item.default_warehouse,
-		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-			item_wrapper.doclist.get({"parentfield": "item_tax"})))),
-		"batch_no": None,
-		"expense_head": item.purchase_account,
-		"cost_center": item.cost_center
-	})
+	out = _get_basic_details(args, item_bean)
 	
-	if args.supplier:
-		item_supplier = item_wrapper.doclist.get({"parentfield": "item_supplier_details",
-			"supplier": args.supplier})
-		if item_supplier:
-			out["supplier_part_no"] = item_supplier[0].supplier_part_no
+	out.supplier_part_no = _get_supplier_part_no(args, item_bean)
 	
 	if out.warehouse:
-		out.projected_qty = webnotes.conn.get_value("Bin", {"item_code": item.name, 
-			"warehouse": out.warehouse}, "projected_qty")
+		out.projected_qty = get_projected_qty(item.name, out.warehouse)
 	
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
 			item.lead_time_days)
 			
-	# set zero
-	out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
-		out.import_ref_rate = out.import_rate = 0.0
+	meta = webnotes.get_doctype(args.doctype)
 	
-	if args.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt", 
-			"Supplier Quotation"]:
-		# try fetching from price list
-		if args.price_list_name and args.price_list_currency:
-			rates_as_per_price_list = get_rates_as_per_price_list(args, item_wrapper.doclist)
-			if rates_as_per_price_list:
-				out.update(rates_as_per_price_list)
-		
-		# if not found, fetch from last purchase transaction
-		if not out.purchase_rate:
-			last_purchase = get_last_purchase_details(item.name, args.docname, args.conversion_rate)
-			if last_purchase:
-				out.update(last_purchase)
-			
+	if meta.get_field("currency"):
+		out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
+			out.import_ref_rate = out.import_rate = 0.0
+		out.update(_get_price_list_rate(args, item_bean, meta))
+	
+	if args.doctype == "Material Request":
+		out.min_order_qty = flt(item.min_order_qty)
+	
 	return out
-
-def get_rates_as_per_price_list(args, item_doclist=None):
-	if not item_doclist:
-		item_doclist = webnotes.bean("Item", args.item_code).doclist
 	
-	result = item_doclist.get({"parentfield": "ref_rate_details", 
-		"price_list_name": args.price_list_name, "ref_currency": args.price_list_currency,
-		"buying": 1})
+def _get_basic_details(args, item_bean):
+	item = item_bean.doc
+	
+	out = webnotes._dict({
+		"description": item.description_html or item.description,
+		"qty": 0.0,
+		"uom": item.stock_uom,
+		"conversion_factor": 1.0,
+		"warehouse": args.warehouse or item.default_warehouse,
+		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
+			item_bean.doclist.get({"parentfield": "item_tax"})))),
+		"batch_no": None,
+		"expense_head": item.purchase_account,
+		"cost_center": item.cost_center
+	})
+	
+	for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
+		out[fieldname] = item.fields.get(fieldname)
+	
+	return out
+	
+def _get_price_list_rate(args, item_bean, meta):
+	from utilities.transaction_base import validate_currency
+	item = item_bean.doc
+	out = webnotes._dict()
+	
+	# try fetching from price list
+	if args.price_list_name and args.price_list_currency:
+		price_list_rate = item_bean.doclist.get({
+			"parentfield": "ref_rate_details", 
+			"price_list_name": args.price_list_name, 
+			"ref_currency": args.price_list_currency,
+			"buying_or_selling": "Buying"})
+		if price_list_rate:
+			out.import_ref_rate = \
+				flt(price_list_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)
 		
-	if result:
-		purchase_ref_rate = flt(result[0].ref_rate) * flt(args.plc_conversion_rate)
-		conversion_rate = flt(args.conversion_rate) or 1.0
-		return webnotes._dict({
-			"purchase_ref_rate": purchase_ref_rate,
-			"purchase_rate": purchase_ref_rate,
-			"rate": purchase_ref_rate,
-			"discount_rate": 0,
-			"import_ref_rate": purchase_ref_rate / conversion_rate,
-			"import_rate": purchase_ref_rate / conversion_rate
-		})
-	else:
-		return webnotes._dict()
+	# if not found, fetch from last purchase transaction
+	if not out.import_ref_rate:
+		last_purchase = get_last_purchase_details(item.name, args.docname, args.conversion_rate)
+		if last_purchase:
+			out.update(last_purchase)
+	
+	if out.import_ref_rate or out.import_rate:
+		validate_currency(args, item, meta)
+	
+	return out
+	
+def _get_supplier_part_no(args, item_bean):
+	item_supplier = item_bean.doclist.get({"parentfield": "item_supplier_details",
+		"supplier": args.supplier})
+	
+	return item_supplier and item_supplier[0].supplier_part_no or None
+
+def _validate_item_details(args, item):
+	from utilities.transaction_base import validate_item_fetch
+	validate_item_fetch(args, item)
+	
+	# validate if purchase item or subcontracted item
+	if item.is_purchase_item != "Yes":
+		msgprint(_("Item") + (" %s: " % item.name) + _("not a purchase item"),
+			raise_exception=True)
+	
+	if args.is_subcontracted == "Yes" and item.is_sub_contracted_item != "Yes":
+		msgprint(_("Item") + (" %s: " % item.name) + 
+			_("not a sub-contracted item.") +
+			_("Please select a sub-contracted item or do not sub-contract the transaction."), 
+			raise_exception=True)
 
 def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
@@ -178,3 +199,13 @@ def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 	})
 	
 	return out
+	
+@webnotes.whitelist()
+def get_conversion_factor(item_code, uom):
+	return {"conversion_factor": webnotes.conn.get_value("UOM Conversion Detail",
+		{"parent": item_code, "uom": uom})}
+		
+@webnotes.whitelist()
+def get_projected_qty(item_code, warehouse):
+	return webnotes.conn.get_value("Bin", {"item_code": item_code, 
+			"warehouse": warehouse}, "projected_qty")

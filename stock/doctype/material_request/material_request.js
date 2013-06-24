@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "Material Request Item";
 cur_frm.cscript.fname = "indent_details";
 
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc) {
@@ -48,43 +48,20 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			cur_frm.toggle_display("sales_order_no", false);
 			cur_frm.fields_dict.indent_details.grid.set_column_disp("sales_order_no", false);
 		}
+	},
+	
+	validate_company_and_party: function(party_field) {
+		return true;
+	},
+	
+	calculate_taxes_and_totals: function() {
+		return;
 	}
 });
 
-var new_cscript = new erpnext.buying.MaterialRequestController({frm: cur_frm});
-
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new_cscript);
-
+$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 	
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
-	if (!doc.status) doc.status = 'Draft';
-
-	// defined in purchase_common.js
-	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
-};
-
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	// second call
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_item_defaults(doc);
-	}	
-};
-
-cur_frm.cscript.get_item_defaults = function(doc) {
-		var ch = getchildren( 'Material Request Item', doc.name, 'indent_details');
-		if (flt(ch.length) > 0){
-			$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_defaults', '', function(r, rt) {refresh_field('indent_details'); });
-		}
-};
-
-cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_default_schedule_date(doc);
-	}
-};
-
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))

@@ -8,7 +8,7 @@ wn.pages['support-analytics'].onload = function(wrapper) {
 	new erpnext.SupportAnalytics(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Support")
+	wrapper.appframe.add_module_icon("Support")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 

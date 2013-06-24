@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-05-22 15:48:27", 
+  "modified": "2013-06-13 16:17:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -808,16 +808,6 @@
   "doctype": "DocField", 
   "fieldname": "cb72", 
   "fieldtype": "Column Break", 
-  "read_only": 0
- }, 
- {
-  "depends_on": "show_in_website", 
-  "description": "Show Price in Website (if set)", 
-  "doctype": "DocField", 
-  "fieldname": "website_price_list", 
-  "fieldtype": "Link", 
-  "label": "Website Price List", 
-  "options": "Price List", 
   "read_only": 0
  }, 
  {

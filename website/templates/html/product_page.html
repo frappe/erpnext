@@ -11,9 +11,9 @@
 {% block content %}
 	{% include 'app/website/templates/html/product_search_box.html' %}
 	{% include 'app/website/templates/html/product_breadcrumbs.html' %}
-	<div class="span12 product-page-content" itemscope itemtype="http://schema.org/Product">
+	<div class="col col-lg-12 product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="span6">
+			<div class="col col-lg-6">
 				{% if slideshow %}
 					{% include "app/website/templates/html/slideshow.html" %}
 				{% else %}
@@ -27,21 +27,36 @@
 					{% endif %}
 				{% endif %}
 			</div>
-			<div class="span6">
+			<div class="col col-lg-6">
 				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
-				<p class="help">Item Code: {{ name }}</p>
+				<p class="help">Item Code: <span itemprop="productID">{{ name }}</span></p>
 				<h4>Product Description</h4>
 				<div itemprop="description">
 				{{ web_long_description or web_short_description or 
 					"[No description given]" }}
 				</div>
-				<div class="item-price hide"></div>
-				<div class="item-stock"></div>
+				<div style="min-height: 100px; margin: 10px 0;">
+					<div class="item-price-info" style="display: none;">
+						<h4 class="item-price" itemprop="price"></h4>
+						<div class="item-stock" itemprop="availablity"></div>
+						<div id="item-add-to-cart">
+							<button class="btn btn-primary">
+								<i class="icon-shopping-cart"></i> Add to Cart</button>
+						</div>
+						<div id="item-update-cart" class="input-group col-lg-4" style="display: none;">
+							<input type="text">
+							<div class="input-group-btn">
+								<button class="btn btn-primary">
+									<i class="icon-ok"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		{% if obj.doclist.get({"doctype":"Item Website Specification"}) -%}
 		<div class="row" style="margin-top: 20px">
-			<div class="span12">
+			<div class="col col-lg-12">
 				<h4>Specifications</h4>
 				<table class="table table-bordered" style="width: 100%">
 				{% for d in obj.doclist.get(

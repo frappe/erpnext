@@ -1,0 +1,1 @@
+Detail of Items received in parent Purchase Receipt.

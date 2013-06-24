@@ -64,7 +64,6 @@ class DocType:
 
 		# enable default currency
 		webnotes.conn.set_value("Currency", args.get("currency"), "enabled", 1)
-
 		
 		def_args = {
 			'current_fiscal_year':curr_fiscal_year,
@@ -91,6 +90,8 @@ class DocType:
 			cp_args[k] = args[k]
 		
 		self.set_cp_defaults(**cp_args)
+		
+		create_territories()
 
 		self.create_feed_and_todo()
 		
@@ -102,9 +103,10 @@ class DocType:
 		import webnotes.utils
 		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
 				and (" " + args.get('last_name')) or '')
+				
 		webnotes.conn.commit()
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
-
+		
 	def create_feed_and_todo(self):
 		"""update activty feed and create todo for creation of item, customer, vendor"""
 		import home
@@ -246,3 +248,18 @@ def add_all_roles_to(name):
 			d = profile.addchild("userroles", "UserRole")
 			d.role = role[0]
 			d.insert()
+			
+def create_territories():
+	"""create two default territories, one for home country and one named Rest of the World"""
+	from setup.utils import get_root_of
+	country = webnotes.conn.get_value("Control Panel", None, "country")
+	root_territory = get_root_of("Territory")
+	for name in (country, "Rest Of The World"):
+		if not webnotes.conn.exists("Territory", name):
+			webnotes.bean({
+				"doctype": "Territory",
+				"territory_name": name,
+				"parent_territory": root_territory,
+				"is_group": "No"
+			}).insert()
+		

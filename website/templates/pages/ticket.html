@@ -3,7 +3,7 @@
 {% set title=doc.name %}
 
 {% block content %}
-<div class="span12">
+<div class="col col-lg-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a> <span class="divider">/</span></li>
     	<li><a href="account">My Account</a> <span class="divider">/</span></li>
@@ -14,13 +14,13 @@
 	<hr>
 	{%- if doc.status -%}
 	<div class="row">
-		<div class="span2">
+		<div class="col col-lg-2">
 			<div class="label">{{ doc.status }}</div>
 		</div>
-		<div class="span7">
+		<div class="col col-lg-7">
 			{{ doc.subject }}
 		</div>
-		<div class="span3">
+		<div class="col col-lg-3">
 			{{ utils.formatdate(doc.transaction_date) }}
 		</div>
 	</div>

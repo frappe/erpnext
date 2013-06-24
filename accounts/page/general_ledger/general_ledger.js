@@ -24,7 +24,7 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 	erpnext.general_ledger = new erpnext.GeneralLedger(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Accounts")
+	wrapper.appframe.add_module_icon("Accounts")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 
 }

@@ -1,0 +1,1 @@
+Item packed in parent Delivery Note. If shipped Items are of type Sales BOM, then this table contains the exploded list of Items shipped.

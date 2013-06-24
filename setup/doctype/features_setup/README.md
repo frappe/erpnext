@@ -1,0 +1,1 @@
+Settings for enabling / disabling certain features that will result in smaller forms.

@@ -33,6 +33,28 @@ class DocType(BuyingController):
 		self.doc, self.doclist = d, dl 
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
+		self.status_updater = [{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'po_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Purchase Order',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'import_amount',
+			'source_field': 'import_amount',
+			'percent_join_field': 'purchase_order',
+		},
+		{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Receipt Item',
+			'join_field': 'pr_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Purchase Receipt',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'import_amount',
+			'source_field': 'import_amount',
+			'percent_join_field': 'purchase_receipt',
+		}]
 		
 	def validate(self):
 		super(DocType, self).validate()
@@ -91,6 +113,11 @@ class DocType(BuyingController):
 			msgprint("%s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
 		return ret
 		
+	def set_supplier_defaults(self):
+		self.doc.fields.update(self.get_cust())
+		self.doc.fields.update(self.get_credit_to())
+		super(DocType, self).set_supplier_defaults()
+		
 	def get_cust(self):
 		ret = {}
 		if self.doc.credit_to:
@@ -100,31 +127,6 @@ class DocType(BuyingController):
 			
 		return ret
 		
-	def get_default_values(self, args):
-		if isinstance(args, basestring):
-			import json
-			args = json.loads(args)
-		
-		out = webnotes._dict()
-		
-		item = webnotes.conn.sql("""select name, purchase_account, cost_center,
-			is_stock_item from `tabItem` where name=%s""", args.get("item_code"), as_dict=1)
-		
-		if item and item[0]:
-			item = item[0]
-			
-			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) and \
-				item.is_stock_item == "Yes":
-					# unset expense head for stock item and auto inventory accounting
-					out.expense_head = out.cost_center = None
-			else:
-				if not args.get("expense_head"):
-					out.expense_head = item.purchase_account
-				if not args.get("cost_center"):
-					out.cost_center = item.cost_center
-		
-		return out
-			
 	def pull_details(self):
 		if self.doc.purchase_receipt_main:
 			self.validate_duplicate_docname('purchase_receipt')
@@ -151,14 +153,6 @@ class DocType(BuyingController):
 		
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-	
-	
-	def get_purchase_tax_details(self):
-		self.doclist =  get_obj('Purchase Common').get_purchase_tax_details(self)
-
 
 	def get_rate1(self,acc):
 		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
@@ -411,8 +405,8 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 				
 		self.update_against_document_in_jv()
-		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
-
+		
+		self.update_prevdoc_status()
 
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries
@@ -466,8 +460,9 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_inventory_accounting = True
 					
-					valuation_amt = (flt(item.amount) + flt(item.item_tax_amount) + 
-						flt(item.rm_supp_cost))
+					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
+						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
+						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)))
 					
 					gl_entries.append(
 						self.get_gl_dict({
@@ -522,7 +517,8 @@ class DocType(BuyingController):
 	def on_cancel(self):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
-		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
+		
+		self.update_prevdoc_status()
 		
 		self.make_cancel_gl_entries()
 		

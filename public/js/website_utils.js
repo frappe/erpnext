@@ -15,13 +15,14 @@ erpnext.send_message = function(opts) {
 
 wn.call = function(opts) {
 	if(opts.btn) {
-		var $spinner = $('<img src="lib/images/ui/button-load.gif">').appendTo($(opts.btn).parent())
 		$(opts.btn).attr("disabled", "disabled");
 	}
 	
 	if(opts.msg) {
 		$(opts.msg).toggle(false);
 	}
+	
+	if(!opts.args) opts.args = {};
 	
 	// get or post?
 	if(!opts.args._type) {
@@ -48,10 +49,17 @@ wn.call = function(opts) {
 		success: function(data) {
 			if(opts.btn) {
 				$(opts.btn).attr("disabled", false);
-				$spinner.remove();
 			}
 			if(data.exc) {
-				console.log(data.exc);
+				if(opts.btn) {
+					$(opts.btn).addClass("btn-danger");
+					setTimeout(function() { $(opts.btn).removeClass("btn-danger"); }, 1000);
+				}
+			} else{
+				if(opts.btn) {
+					$(opts.btn).addClass("btn-success");
+					setTimeout(function() { $(opts.btn).removeClass("btn-success"); }, 1000);
+				}
 			}
 			if(opts.msg && data.message) {
 				$(opts.msg).html(data.message).toggle(true);
@@ -70,16 +78,14 @@ $(document).ready(function() {
 	// update login
 	var full_name = getCookie("full_name");
 	if(full_name) {
-		$("#user-tools").html(repl('<a href="profile" title="My Profile" id="user-full-name">%(full_name)s</a> | \
-			<a href="account" title="My Account">My Account</a> | \
-			<!--<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> (%(count)s)</a> | -->\
-			<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>', {
-			full_name: full_name,
-			count: getCookie("cart_count") || "0"
-		}));
-		$("#user-tools a").tooltip({"placement":"bottom"});
+		$("#user-tools").addClass("hide");
+		$("#user-tools-post-login").removeClass("hide");
+		$("#user-full-name").text(full_name);
 	}
-})
+	
+	$("#user-tools a").tooltip({"placement":"bottom"});
+	$("#user-tools-post-login a").tooltip({"placement":"bottom"});
+});
 
 // Utility functions
 
@@ -98,6 +104,12 @@ function get_url_arg(name) {
 		return "";
 	else
 		return decodeURIComponent(results[1]);		
+}
+
+function make_query_string(obj) {
+	var query_params = [];
+	$.each(obj, function(k, v) { query_params.push(encodeURIComponent(k) + "=" + encodeURIComponent(v)); });
+	return "?" + query_params.join("&");
 }
 
 function repl(s, dict) {
@@ -162,3 +174,34 @@ if (typeof Array.prototype.map !== "function") {
 		return a;
 	};
 }
+
+// shopping cart
+if(!wn.cart) wn.cart = {};
+var full_name = getCookie("full_name");
+
+$.extend(wn.cart, {
+	update_cart: function(opts) {
+		if(!full_name) {
+			if(localStorage) {
+				localStorage.setItem("last_visited", window.location.pathname.slice(1));
+				localStorage.setItem("pending_add_to_cart", opts.item_code);
+			}
+			window.location.href = "login";
+		} else {
+			wn.call({
+				type: "POST",
+				method: "website.helpers.cart.update_cart",
+				args: {
+					item_code: opts.item_code,
+					qty: opts.qty,
+					with_doclist: opts.with_doclist
+				},
+				btn: opts.btn,
+				callback: function(r) {
+					if(opts.callback)
+						opts.callback(r);
+				}
+			});
+		}
+	},
+});
