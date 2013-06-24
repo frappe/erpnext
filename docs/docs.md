@@ -9,7 +9,8 @@
 		"docs.community",
 		"docs.blog",
 		"docs.about"
-	]
+	],
+	"_no_toc": 1
 }
 ---
 <br>

@@ -1,6 +1,7 @@
 ---
 {
-	"_label": "Download ERPNext"
+	"_label": "Download ERPNext",
+	"_icon": "download"
 }
 ---
 ### Download a pre-installed Virtual Box Image

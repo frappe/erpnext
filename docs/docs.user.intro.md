@@ -1,14 +1,21 @@
 ---
 {
 	"_label": "Introduction",
-	"_title_image": "img/why-erpnext.png"
+	"_toc": [
+		"docs.user.intro.open_source",
+		"docs.user.intro.try",
+		"docs.dev.install",
+		"docs.user.help"
+	]
 }
 ---
 ## What is an ERP and why should I care?
 
-Small business are not so different from large ones. They contain most of the complexities of a large business but with many more constraints. Small businesses have to communicate with customers, do accounts, pay taxes, do payroll, manage timelines, deliver quality, answer questions and keep everyone happy just like large businesses.
+(If you are already convinced you need an all-in-one system for your organization, you can skip this.)
 
-And to it *efficiently*.
+If you are running a small business that has some employees, you understand its hard to manage the dynamic nature of doing businesses. You are already using software like Accounting, and may be some other one to manage your inventory and sales (or CRM). An ERP brings all of that together in one place.
+
+Small business are not so different from large ones. They contain most of the complexities of a large business but with many more constraints. Small businesses have to communicate with customers, do accounts, pay taxes, do payroll, manage timelines, deliver quality, answer questions and keep everyone happy just like large businesses.
 
 Large businesses have the advantage of using advanced data systems to manage their process efficiently. Small businesses typically struggle to keep things organized. They are often using a mix of apps like spreadsheets, accounting software, web CRM etc to manage but not everyone is on the same page. An ERP changes that.
 

@@ -1,13 +1,11 @@
 ---
 {
-	"_label": "Accounting Setup",
+	"_label": "Chart of Accounts",
 	"_links": [
 		"docs.user.accounts"
 	]
 }
 ---
-## Chart of Accounts
-
 The Chart of Accounts forms the blueprint of your organization. The overall structure of your Chart of Accounts is based on a system of double entry accounting that has become a standard all over the world to quantify how a company is doing financially. 
 
 The Chart of Accounts helps you answer:

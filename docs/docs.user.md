@@ -1,6 +1,23 @@
 ---
 {
-	"_label": "User Guide"
+	"_label": "User Guide",
+	"_toc": [
+		"docs.user.intro",
+		"docs.user.implement",
+		"docs.user.setup",
+		"docs.user.selling",
+		"docs.user.buying",
+		"docs.user.stock",
+		"docs.user.accounting",
+		"docs.user.hr",
+		"docs.user.mfg",
+		"docs.user.support",
+		"docs.user.projects",
+		"docs.user.website",
+		"docs.user.tools",
+		"docs.user.customize"
+	],
+	"_no_toc": 1
 }
 ---
 This manual covers all the major processes in setting up and using ERPNext. The manual is written in a way that the user can manage a self-implementation of the ERP. We recommend that the manual be read first before starting implementation.
@@ -10,13 +27,10 @@ Contents
 1. [Introduction](docs.user.intro.html)
 	1. [Open Source](docs.user.intro.open_source.html)
 	1. [Ways to get started](docs.user.intro.try.html)
-	1. [Installation](docs.dev.install.html)
-		1. [Pre-requisites for Red Hat Systems](docs.dev.install.red_hat.html)
-		1. [Pre-requisites for Debain Systems](docs.dev.install.debian.html)
 	1. [Getting Help](docs.user.help.html)
-1. Implementation
-	1. [Before you Start](docs.user.setup.before.html)
-	1. [Implementation Strategy](docs.user.setup.strategy.html)
+1. [Implementation](docs.user.implement.html)
+	1. [Implementation Strategy](docs.user.implement.strategy.html)
+	1. [Concepts](docs.user.implement.concepts.html)
 1. [Setup](docs.user.setup.html)
 	1. [First Login](docs.user.setup.first.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
@@ -70,7 +84,7 @@ Contents
 	1. [Material Issue](docs.user.stock.material_issue.html)
 	1. [Sales Return](docs.user.stock.sales_return.html)
 	1. [Purchase Return](docs.user.stock.sales_return.html)
-1. [Accounting](docs,user.accounting.html)
+1. [Accounting](docs.user.accounting.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)
 	1. [Sales Invoice](docs.user.accounts.sales_invoice.html)
@@ -93,7 +107,7 @@ Contents
 	1. [Bill of Materials](docs.user.mfg.bom.html)
 	1. [Production Planning](docs.user.mfg.planning.html)
 	1. [Production Order](docs.user.mfg.production_order.html)
-1. [Customer Support and Maintenance](docs.user.mfg.html)
+1. [Customer Support and Maintenance](docs.user.support.html)
 	1. [Support Ticket](docs.user.support.support_ticket.html)
 	1. [Customer Issue](docs.user.support.customer_issue.html)
 	1. [Maintenance Schedule](docs.user.support.maintenance_schedule.html)

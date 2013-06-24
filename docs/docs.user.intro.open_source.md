@@ -3,9 +3,9 @@
 	"_label": "Open Source"
 }
 ---
-What Open Source means is that there is no license on the software. The source code is open for anyone to understand, extend or improve and it is free!
+The source code in an Open Source software is open for anyone to understand, extend or improve. And it is free!
 
-A non-software business might think why does Open Source matter, because they will pay some service provider to help them manage their ERP. The way it matters is that:
+Advantages of an Open Source software are:
 
 1. You can choose to change your service provider anytime.
 1. You can host the application anywhere, including your own server so you have complete ownership and privacy of the data.

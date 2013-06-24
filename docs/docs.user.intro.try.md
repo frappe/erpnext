@@ -13,7 +13,7 @@ If you just want to check out the user interface and **feel** the application, j
 
 ### 2. Get a Free 30 day Trial at ERPNext.com
 
-If you like the feel and want to setup your own company, you can try a 30 day free trial (on credit card details required) at ERPNext.com
+If you like the feel and want to setup your own company, you can try a 30 day free trial (no credit card details required) at ERPNext.com
 
 ERPNext.com is managed by the organization (Web Notes) that publishes ERPNext and you can do a trial run with your own account by [signing up on the website](https://erpnext.com/pricing-and-signup).
 

@@ -6,7 +6,6 @@
 	]
 }
 ---
-## Chart of Cost Centers
 
 Your Chart of Accounts is mainly for reporting your information for governmental purposes and less for how you business actually performs. Though you can tweak it a bit to resemble your business.
 ￼
@@ -22,6 +21,8 @@ For example, if you have two types of sales:
 You may not have shipping expenses for your walk-in customers, and no shop-rent for your online customers. If you want to get the profitability of each of these separately, you create the two as Cost Centers and you can mark all sales as either "Walk-in" or "Online" and also all your purchases in the same way.
 
 So when you do your analysis you can get a better idea which side of your business is doing better.  Since ERPNext has option to add multiple Companies, you can create Cost Centers for each Company and manage it separately.
+
+### Chart of Cost Centers
 
 To setup your Chart of Cost Centers go to:
 
