@@ -326,7 +326,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 						if(voucher_dict.totals.debit || voucher_dict.totals.credit) {
 							voucher_dict.row.debit = voucher_dict.totals.debit;
 							voucher_dict.row.credit = voucher_dict.totals.credit;
-							voucher_dict.row.id = "entry" + voucher
+							voucher_dict.row.id = "entry_grouped_by_" + voucher
 							out = out.concat(voucher_dict.row);
 						}
 				});

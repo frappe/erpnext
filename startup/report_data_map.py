@@ -72,7 +72,7 @@ data_map = {
 	},
 	"Item Group": {
 		"columns": ["name", "parent_item_group"],
-		"conditions": ["docstatus < 2"],
+		# "conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Brand": {
