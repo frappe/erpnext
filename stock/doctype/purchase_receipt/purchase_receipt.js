@@ -103,7 +103,7 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 // -----------------
 cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
 	$c_obj(make_doclist(dt,dn),'get_po_details','', function(r,rt) { 
-		cur_frm.refresh();
+		cur_frm.refresh_fields();
 	});
 }
 

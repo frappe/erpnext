@@ -112,7 +112,7 @@ cur_frm.cscript.get_items = function(doc,dt,dn) {
 			if(doc.sales_order_no) {					
 				unhide_field(['customer_address','contact_person','territory','customer_group']);														
 			}			
-			cur_frm.refresh();
+			cur_frm.refresh_fields();
 		}
 	} 
  $c_obj(make_doclist(doc.doctype, doc.name),'pull_sales_order_details','',callback); 

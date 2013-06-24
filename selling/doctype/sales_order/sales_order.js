@@ -140,7 +140,7 @@ cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 					'contact_person', 'territory', 'customer_group']);
 				if(doc.customer) get_server_fields('get_shipping_address', doc.customer, '', doc, dt, dn, 0);
 			}			
-			cur_frm.refresh();
+			cur_frm.refresh_fields();
 		}
 	} 
 

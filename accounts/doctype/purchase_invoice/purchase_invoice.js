@@ -166,7 +166,7 @@ cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address', 'contact_person']);				
-		cur_frm.refresh();
+		cur_frm.refresh_fields();
 	}
 	$c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
