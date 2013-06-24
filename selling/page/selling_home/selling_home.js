@@ -137,11 +137,6 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Analytics"),
 				page: "sales-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Sales Order"
-			},
 		]
 	},
 	{
