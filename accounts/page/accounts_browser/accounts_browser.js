@@ -117,7 +117,7 @@ erpnext.AccountsChart = Class.extend({
 		me.company = company;
 		this.tree = new wn.ui.Tree({
 			parent: $(wrapper), 
-			label: company,
+			label: ctype==="Account" ? "Accounts" : "Cost Centers",
 			args: {ctype: ctype, comp: company},
 			method: 'accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {

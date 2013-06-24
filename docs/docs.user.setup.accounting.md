@@ -1,6 +1,7 @@
 ---
 {
 	"_label": "Chart of Accounts",
+	"_icon": "sitemap",
 	"_links": [
 		"docs.user.accounts"
 	]

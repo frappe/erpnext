@@ -57,7 +57,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		dn = webnotes.bean(copy=test_records[0])
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
-		dn.doclist[1].cost_center = "Auto Inventory Accounting - _TC"
+		dn.doclist[1].cost_center = "Main - _TC"
 
 		stock_in_hand_account = webnotes.conn.get_value("Company", dn.doc.company, 
 			"stock_in_hand_account")

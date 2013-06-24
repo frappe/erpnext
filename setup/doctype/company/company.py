@@ -214,33 +214,25 @@ class DocType:
 				webnotes.conn.set(self.doc, "expenses_included_in_valuation", 
 					"Expenses Included In Valuation - " + self.doc.abbr)
 		
-		if not self.doc.stock_adjustment_cost_center and webnotes.conn.exists("Cost Center", 
-			"Auto Inventory Accounting - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", 
-					"Auto Inventory Accounting - " + self.doc.abbr)
+		if not self.doc.stock_adjustment_cost_center:
+				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)
 	
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
 		cc_list = [
 			{
-				'cost_center_name':'Root',
+				'cost_center_name': self.doc.name,
 				'company_name':self.doc.name,
 				'group_or_ledger':'Group',
 				'parent_cost_center':''
 			}, 
 			{
-				'cost_center_name':'Default CC Ledger', 
+				'cost_center_name':'Main', 
 				'company_name':self.doc.name,
 				'group_or_ledger':'Ledger',
-				'parent_cost_center':'Root - ' + self.doc.abbr
+				'parent_cost_center':self.doc.name + ' - ' + self.doc.abbr
 			},
-			{
-				'cost_center_name': 'Auto Inventory Accounting', 
-				'company_name': self.doc.name,
-				'group_or_ledger': 'Ledger',
-				'parent_cost_center': 'Root - ' + self.doc.abbr
-			}
 		]
 		for cc in cc_list:
 			cc.update({"doctype": "Cost Center"})
@@ -249,7 +241,7 @@ class DocType:
 			cc_bean.insert()
 			
 		webnotes.conn.set_value("Company", self.doc.name, "cost_center",
-			"Default CC Ledger - " + self.doc.abbr)
+			"Main - " + self.doc.abbr)
 			
 	def on_update(self):
 		self.set_letter_head()
@@ -259,7 +251,7 @@ class DocType:
 			self.create_default_accounts()
 		
 		if not webnotes.conn.sql("""select name from `tabCost Center` 
-			where cost_center_name = 'Root' and company_name = %s""", self.doc.name):
+			where cost_center_name = 'All Units' and company_name = %s""", self.doc.name):
 			self.create_default_cost_center()
 			
 		self.set_default_accounts()

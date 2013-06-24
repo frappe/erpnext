@@ -1,6 +1,7 @@
 ---
 {
 	"_label": "Cost Centers and Budgeting",
+	"_icon": "sitemap",
 	"_links": [
 		"docs.user.accounts"
 	]

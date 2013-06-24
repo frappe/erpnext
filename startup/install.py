@@ -127,11 +127,10 @@ def import_defaults():
 		
 		# territory
 		{'doctype': 'Territory', 'territory_name': 'All Territories', 'is_group': 'Yes', 'name': 'All Territories', 'parent_territory': ''},
-		{'doctype': 'Territory', 'territory_name': 'Default', 'is_group': 'No', 'name': 'Default', 'parent_territory': 'All Territories'},
 			
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': 'All Customer Groups', 'is_group': 'Yes', 	'name': 'All Customer Groups', 'parent_customer_group': ''},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Default Customer Group', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Default', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
 			
 		# supplier type
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
