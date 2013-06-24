@@ -1,26 +1,25 @@
 [
  {
-  "creation": "2013-04-29 18:24:32", 
+  "creation": "2013-06-20 16:00:18", 
   "docstatus": 0, 
-  "modified": "2013-04-29 18:24:32", 
+  "modified": "2013-06-20 16:01:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "PLCNTRY-.#####", 
   "doctype": "DocType", 
   "istable": 1, 
-  "module": "Setup", 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "country", 
+  "fieldname": "price_list", 
   "fieldtype": "Link", 
-  "label": "Country", 
+  "label": "Price List", 
   "name": "__common__", 
-  "options": "Country", 
-  "parent": "Price List Country", 
+  "options": "Price List", 
+  "parent": "Shopping Cart Price List", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -28,7 +27,7 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "Price List Country"
+  "name": "Shopping Cart Price List"
  }, 
  {
   "doctype": "DocField"

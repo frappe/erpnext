@@ -384,10 +384,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	set_dynamic_labels: function() {
-		var company_currency = this.get_company_currency();
-		
-		this.change_form_labels(company_currency);
-		this.change_grid_labels(company_currency);
+		this._super();
 		set_sales_bom_help(this.frm.doc);
 	},
 	

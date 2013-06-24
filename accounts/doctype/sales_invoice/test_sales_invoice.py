@@ -269,7 +269,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_gl_entry_without_aii(self):
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 		
-		si = webnotes.bean(webnotes.copy_doclist(test_records[1]))
+		si = webnotes.bean(copy=test_records[1])
 		si.insert()
 		si.submit()
 		
@@ -711,7 +711,7 @@ test_records = [
 			"qty": 1.0,
 			"basic_rate": 500.0,
 			"amount": 500.0, 
-			"export_rate": 500.0, 
+			"ref_rate": 500.0, 
 			"export_amount": 500.0, 
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",

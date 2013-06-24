@@ -1,1 +1,0 @@
-Countries where parent Price List is valid.

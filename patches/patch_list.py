@@ -226,7 +226,6 @@ patch_list = [
 	"execute:webnotes.reset_perms('File Data')",
 	"patches.april_2013.p07_update_file_data_2",
 	"patches.april_2013.rebuild_sales_browser",
-	"patches.april_2013.p08_price_list_country",
 	"patches.may_2013.p01_selling_net_total_export",
 	"patches.may_2013.repost_stock_for_no_posting_time",
 	"patches.may_2013.p01_conversion_factor_and_aii",
@@ -245,4 +244,5 @@ patch_list = [
 	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 	"patches.june_2013.p05_remove_unused_doctypes",
 	"patches.june_2013.p06_drop_unused_tables",
+	"patches.june_2013.p08_shopping_cart_settings",
 ]

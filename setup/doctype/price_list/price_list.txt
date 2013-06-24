@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-06-19 15:24:23", 
+  "modified": "2013-06-20 12:53:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,13 +61,6 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "conversion_rate", 
-  "fieldtype": "Float", 
-  "label": "Conversion Rate", 
-  "reqd": 1
- }, 
- {
   "default": "Selling", 
   "doctype": "DocField", 
   "fieldname": "buying_or_selling", 
@@ -78,29 +71,17 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "use_for_website", 
-  "fieldtype": "Check", 
-  "label": "Use for Website"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "column_break_3", 
   "fieldtype": "Column Break"
  }, 
  {
-  "default": "1", 
+  "description": "Specify a list of Territories, for which, this Price List is valid", 
   "doctype": "DocField", 
-  "fieldname": "valid_for_all_countries", 
-  "fieldtype": "Check", 
-  "label": "Valid for all countries"
- }, 
- {
-  "description": "Or specify a list of Countries, for which, this Price List is valid", 
-  "doctype": "DocField", 
-  "fieldname": "valid_for_countries", 
+  "fieldname": "valid_for_territories", 
   "fieldtype": "Table", 
-  "label": "Valid for the following countries", 
-  "options": "Price List Country"
+  "label": "Valid for Territories", 
+  "options": "For Territory", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
