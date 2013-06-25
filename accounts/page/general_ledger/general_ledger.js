@@ -232,7 +232,6 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 
 					grouped_ledgers[item.account].totals.debit += item.debit;
 					grouped_ledgers[item.account].totals.credit += item.credit;
-					
 					grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]
 						.totals.debit += item.debit;
 					grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]
@@ -248,8 +247,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					grouped_ledgers[item.account].entries.push(item);
 					
 					if(grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no].row){
-						grouped_ledgers[item.account].
-							entries_group_by_voucher[item.voucher_no].row = item;
+						grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]
+							.row = jQuery.extend({}, item);
 					}
 				}
 			}
@@ -321,7 +320,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		$.each(Object.keys(grouped_ledgers).sort(), function(i, account) {
 			if(grouped_ledgers[account].entries.length) {
 				$.each(Object.keys(grouped_ledgers[account].entries_group_by_voucher).sort(),
-				 	function(j, voucher) {
+				 	function(j, voucher) {						
 						voucher_dict = grouped_ledgers[account].entries_group_by_voucher[voucher];
 						if(voucher_dict.totals.debit || voucher_dict.totals.credit) {
 							voucher_dict.row.debit = voucher_dict.totals.debit;
