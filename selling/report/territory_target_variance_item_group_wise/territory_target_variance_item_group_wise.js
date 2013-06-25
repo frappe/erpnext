@@ -1,4 +1,4 @@
-wn.query_reports["Sales Person Target Variance (Item Group-Wise)"] = {
+wn.query_reports["Territory Target Variance Item Group-Wise"] = {
 	"filters": [
 		{
 			fieldname: "fiscal_year",
