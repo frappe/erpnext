@@ -8,7 +8,6 @@ def execute():
 	
 	webnotes.conn.commit()
 	
-	webnotes.reload_doc('core', 'doctype', 'search_criteria')
 	webnotes.reload_doc('core', 'doctype', 'report')
 
 	webnotes.conn.begin()
