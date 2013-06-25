@@ -1,0 +1,971 @@
+{
+ "name": "Plan de Cuentas Uruguay - Template", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [], 
+      "name": "Capital Autorizado a Suscribir"
+     }, 
+     {
+      "children": [], 
+      "name": "Capital suscripto"
+     }
+    ], 
+    "name": "ORDEN PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Dividendos a Pagar", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "children": [], 
+            "name": "Irae a Pagar"
+           }, 
+           {
+            "children": [], 
+            "name": "Irae Anticipo a Pagar"
+           }, 
+           {
+            "children": [], 
+            "name": "Irae del Ejercicio"
+           }
+          ], 
+          "name": "DGI IRAE"
+         }, 
+         {
+          "children": [], 
+          "name": "Otras deudas", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "children": [], 
+            "name": "Icosa del Ejercicio"
+           }, 
+           {
+            "children": [], 
+            "name": "Icosa a Pagar"
+           }, 
+           {
+            "children": [], 
+            "name": "Icosa Anticipo a Pagar"
+           }
+          ], 
+          "name": "DGI ICOSA"
+         }, 
+         {
+          "children": [
+           {
+            "children": [], 
+            "name": "Patrimonio Anticipo a Pagar"
+           }, 
+           {
+            "children": [], 
+            "name": "Patrimonio a Pagar"
+           }, 
+           {
+            "children": [], 
+            "name": "Patrimonio del Ejercicio"
+           }
+          ], 
+          "name": "DGI PATRIMONIO"
+         }, 
+         {
+          "children": [], 
+          "name": "Casa Matriz, Empresas Controlantes,", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Acreedores por Cargas Sociales", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Saldos Acreedores Cuentas Directores", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Cobros Anticipados", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Controladas/Vinculadas", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Sueldos y Jornales a pagar", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Acreedores fiscales", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "DEUDAS DIVERSAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Documentos a pagar MN a pagar ds/Financieras", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Ints. a vencer ds/Financieras", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Obligaciones", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Prestamos Bancarios", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Documentos a pagar ME a pagar ds/Financieras", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "DEUDAS FINANCIERAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Irpf Retenido"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Retenido"
+         }, 
+         {
+          "children": [], 
+          "name": "Bps"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Ventas M\u00ednima"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva a Pagar"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Ventas B\u00e1sica"
+         }
+        ], 
+        "name": "DGI IVA x VENTAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Intereses a vencer ds/Comerciales"
+         }, 
+         {
+          "children": [], 
+          "name": "Deuds. Contratos de Cambio Import."
+         }, 
+         {
+          "children": [], 
+          "name": "Acreedores Varios (def)"
+         }, 
+         {
+          "children": [], 
+          "name": "Documentos a Pagar ds/Comerciales"
+         }, 
+         {
+          "children": [], 
+          "name": "Proveedores de Plaza"
+         }, 
+         {
+          "children": [], 
+          "name": "Proveedores por Importaciones"
+         }
+        ], 
+        "name": "DEUDAS COMERCIALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Responsabilidad frente a terceros", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "PREVISIONES"
+       }
+      ], 
+      "name": "PASIVO CORRIENTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Deudas Comerciales", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "DEUDAS COMERCIALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Deudas Diversas", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "DEUDAS DIVERSAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Previsiones No Corrientes", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "PREVISIONES NO CORRIENTES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Deudas Financieras", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "DEUDAS FINANCIERAS"
+       }
+      ], 
+      "name": "PASIVO NO CORRIENTE"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Capital Integrado"
+         }
+        ], 
+        "name": "CAPITAL"
+       }, 
+       {
+        "children": [], 
+        "name": "APORTES A CAPITALIZAR"
+       }
+      ], 
+      "name": "APORTE DE PROPIETARIOS/SOCIOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Revaluaciones fiscales"
+         }, 
+         {
+          "children": [], 
+          "name": "Revaluaciones voluntarias"
+         }
+        ], 
+        "name": "AJUSTES PATRIMONIO (H)"
+       }
+      ], 
+      "name": "AJUSTES AL PATRIMONIO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Resultados del ejercicio"
+         }, 
+         {
+          "children": [], 
+          "name": "Dividendos provisorios"
+         }
+        ], 
+        "name": "RESULTADOS ACUMULADOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "P\u00e9rdidas y Ganancias"
+         }, 
+         {
+          "children": [], 
+          "name": "Reservas Legales"
+         }, 
+         {
+          "children": [], 
+          "name": "Reservas Voluntarias"
+         }
+        ], 
+        "name": "RESERVAS"
+       }
+      ], 
+      "name": "GANANCIAS RETENIDAS"
+     }
+    ], 
+    "name": "PATRIMONIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Amort.Ac.Vehiculos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Amort.Ac.Inmuebles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Amort.Ac.Mueb.y Utiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Amort.Ac.Maq.y Herram.", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Veh\u00edculos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Muebles y \u00datiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Maquinas y Herramientas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Inmuebles", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "BIENES DE USO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Valores orig. y revaluados s/anexo", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Depositos Bancarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Menos: Amort. Acum.", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Prevision para Desvalorizaciones", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Inmuebles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Intereses percibidos por adelantado", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Titulos y Acciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INVERSIONES A LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Bienes de cambio no corrientes", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "BIENES DE CAMBIO NO CORRIENTES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Cr\u00e9ditos a Largo Plazo", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "CREDITOS A LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Amortizaciones Acumuladas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Patentes, marcas y licencias", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Gastos de investigacion", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INTANGIBLES"
+       }
+      ], 
+      "name": "ACTIVO NO CORRIENTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Controladas / Vinculadas"
+         }, 
+         {
+          "children": [], 
+          "name": "Depositos en Garantia"
+         }, 
+         {
+          "children": [], 
+          "name": "Saldos Deudor de ctas de Directores"
+         }, 
+         {
+          "children": [], 
+          "name": "Anticipos a Proveedores"
+         }, 
+         {
+          "children": [], 
+          "name": "Casa Matriz, Empresas Controlantes"
+         }, 
+         {
+          "children": [], 
+          "name": "Pagos adelantados"
+         }
+        ], 
+        "name": "OTROS CREDITOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Prevision para Deudores Incobrables", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Ingresos diferidos", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Patrimonio Anticipo"
+         }, 
+         {
+          "children": [], 
+          "name": "Icosa Anticipo"
+         }, 
+         {
+          "children": [], 
+          "name": "Ingresos percibidos por adelantado", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Irae Anticipo"
+         }, 
+         {
+          "children": [], 
+          "name": "Diversos"
+         }
+        ], 
+        "name": "DGI ANTICIPOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Iva Importaci\u00f3n"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Compras M\u00ednima"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Anticipo Importaci\u00f3n"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Pagos"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Retenciones"
+         }, 
+         {
+          "children": [], 
+          "name": "Iva Compras B\u00e1sica"
+         }
+        ], 
+        "name": "DGI IVA x COMPRAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Previsi\u00f3n para desvalorizaciones"
+         }, 
+         {
+          "children": [], 
+          "name": "Dep\u00f3sitos Bancarios"
+         }, 
+         {
+          "children": [], 
+          "name": "Intereses percibidos por adelantado"
+         }, 
+         {
+          "children": [], 
+          "name": "Valores P\u00fablicos"
+         }
+        ], 
+        "name": "INVERSIONES TEMPORARIAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Caja Moneda Nacional"
+         }, 
+         {
+          "children": [], 
+          "name": "Caja Moneda Extranjera"
+         }, 
+         {
+          "children": [], 
+          "name": "Banco Cuenta Corriente ME"
+         }, 
+         {
+          "children": [], 
+          "name": "Banco Cuenta Corriente"
+         }, 
+         {
+          "children": [], 
+          "name": "Movimientos Banco (def)"
+         }
+        ], 
+        "name": "DISPONIBILIDADES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Deudores Varios (def)"
+         }, 
+         {
+          "children": [], 
+          "name": "Deudores Simples Plaza"
+         }, 
+         {
+          "children": [], 
+          "name": "Cheques en Cartera ME"
+         }, 
+         {
+          "children": [], 
+          "name": "Documentos a Cobrar ME"
+         }, 
+         {
+          "children": [], 
+          "name": "Intereses percibidos por adelantado"
+         }, 
+         {
+          "children": [], 
+          "name": "Cheques en Cartera MN"
+         }, 
+         {
+          "children": [], 
+          "name": "Ingresos diferidos"
+         }, 
+         {
+          "children": [], 
+          "name": "Documentos a Cobrar MN"
+         }, 
+         {
+          "children": [], 
+          "name": "Deudores por Exportaciones"
+         }, 
+         {
+          "children": [], 
+          "name": "Prevision para Deudores Incobrables"
+         }, 
+         {
+          "children": [], 
+          "name": "Prevision p/dtos y Bonificaciones"
+         }
+        ], 
+        "name": "CREDITOS POR VENTAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Productos en Proceso", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Mercaderia de Reventa", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Prevision p/desvalorizaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Materiales y Suministros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Importaciones en tramite", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Productos Terminados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Materias Primas", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "BIENES DE CAMBIO"
+       }
+      ], 
+      "name": "ACTIVO CORRIENTE"
+     }
+    ], 
+    "name": "ACTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [], 
+      "name": "Suscriptores de acciones"
+     }, 
+     {
+      "children": [], 
+      "name": "Acciones a Emitir"
+     }
+    ], 
+    "name": "ORDEN ACTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Ventas extraordinarias", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "VENTAS EXTRAORDINARIAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Ventas Tasa B\u00e1sica", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [], 
+        "name": "Ventas por Exportaciones", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [], 
+        "name": "Ventas Tasa M\u00ednima", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [], 
+        "name": "Ventas Exentas", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "VENTAS ORDINARIAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Diferencias de Cambio ganadas", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [], 
+        "name": "Descuentos Obtenidos", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [], 
+        "name": "Intereses ganados", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "INGRESOS FINANCIEROS"
+     }, 
+     {
+      "children": [], 
+      "name": "Ingresos Operativos (def)", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "GANANCIAS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Intereses y Gastos Bancarios", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Descuentos Concedidos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Diferencias de Cambio perdidas", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Multas y Recargos Fiscales", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "GASTOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Papeler\u00eda", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Cargas Sociales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Sueldos y Jornales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Combustible", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Fletes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Publicidad", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Energ\u00eda El\u00e9ctrica y Aguas Corrientes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Representaci\u00f3n", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Comunicaciones y Servicios Telef\u00f3nicos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Alquileres", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Servicios Contratados", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Honorarios Profesionales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Mantenimiento Veh\u00edculos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Seguros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Gastos Varios (def)", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "GASTOS DE ADMINISTRACION Y VENTAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Costos de lo vendido", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Costo de Venta de Bienes de Uso", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [], 
+        "name": "Costo de Mercader\u00edas", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "COSTO DE LO VENDIDO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "IVA ventas 10%"
+         }, 
+         {
+          "children": [], 
+          "name": "IVA ventas 22%"
+         }
+        ], 
+        "name": "IVA x VENTAS"
+       }, 
+       {
+        "children": [], 
+        "name": "Contribuciones", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [], 
+        "name": "Retenciones", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [], 
+        "name": "Otros", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "OBLIGACIONES TRIBUTARIAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [], 
+        "name": "Amortizaciones", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AMORTIZACIONES"
+     }
+    ], 
+    "name": "PERDIDAS"
+   }
+  ], 
+  "name": "Uruguay - Plan de Cuentas"
+ }
+}

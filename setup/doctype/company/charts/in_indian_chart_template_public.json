@@ -1,0 +1,364 @@
+{
+ "name": "India - Chart of Accounts for Public Ltd", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Payroll Dept. Telephone", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Payroll Dept. Supplies", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Payroll Dept. Payroll Taxes", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Payroll Dept. Salaries", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Payroll Dept. Expenses", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "COGS - Division #3, Product Line 110", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "COGS - Division #2, Product Line 015", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "COGS - Division #1, Product Line 022", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "COGS - Division #1, Product Line 010", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Cost of Goods Sold", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Loss on Sale of Assets", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Non-Operating Expenses and Losses", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Marketing Dept. Supplies", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Marketing Dept. Salaries", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Marketing Dept. Telephone", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [], 
+          "name": "Marketing Dept. Payroll Taxes", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Marketing Expenses", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Gain on Sale of Assets", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Non-Operating Revenue and Gains", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Sales - Division #1, Product Line 010", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Sales - Division #1, Product Line 022", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Sales - Division #3, Product Line 110", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [], 
+          "name": "Sales - Division #2, Product Line 015", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Operating Revenues", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Income", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Profit And Loss"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Equipment", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Accumulated Depreciation - Equipment", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Accumulated Depreciation - Vehicles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Buildings", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Accumulated Depreciation - Buildings", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Vehicles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Land", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Property, Plant, and Equipment", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Tax Receivable", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Inventory", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Cash - Regular Checking"
+         }, 
+         {
+          "children": [], 
+          "name": "Petty Cash Fund"
+         }, 
+         {
+          "children": [], 
+          "name": "Allowance for Doubtful Accounts", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Supplies", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [], 
+          "name": "Cash - Payroll Checking"
+         }, 
+         {
+          "children": [], 
+          "name": "Accounts Receivable"
+         }, 
+         {
+          "children": [], 
+          "name": "Prepaid Insurance", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Current Assets", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Assets", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Discount on Bonds Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Mortgage Loan Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Bonds Payable", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Long-term Liabilities", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Reserve and Surplus Account", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "children": [], 
+            "name": "VAT Payable", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [], 
+            "name": "Exice Duty Payable", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [], 
+            "name": "Service Tax Payable", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [], 
+            "name": "Sales Tax Payable", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Tax payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Interest Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Accounts Payable"
+         }, 
+         {
+          "children": [], 
+          "name": "Notes Payable - Credit Line #2", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Notes Payable - Credit Line #1", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Unearned Revenues", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Wages Payable", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Current Liabilities", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "children": [], 
+          "name": "Common Stock, No Par", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Retained Earnings", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [], 
+          "name": "Treasury Stock", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Stockholders' Equity", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Liabilities", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Balance Sheet"
+   }
+  ], 
+  "name": "Public Firm Chart of Account"
+ }
+}
