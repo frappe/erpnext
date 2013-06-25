@@ -460,7 +460,7 @@ class DocType(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:	
-			if webnotes.conn.get_value('Global Defaults', 'Global Defaults', dic[i]) == 'Yes':
+			if webnotes.conn.get_single_value('Selling Settings', dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
 					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:

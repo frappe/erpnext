@@ -95,8 +95,7 @@ class DocType(BuyingController):
 			Please enter a valid Challan No.", raise_exception=1)
 
 	def po_required(self):
-		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'po_required'")
-		if res and res[0][0]== 'Yes':
+		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'purchase_receipt_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)

@@ -104,7 +104,7 @@ class DocType(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		if webnotes.conn.get_value('Global Defaults', 'Global Defaults', 'so_required') == 'Yes':
+		if webnotes.conn.get_single_value("Selling Settings", 'so_required') == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
