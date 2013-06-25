@@ -24,7 +24,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
-	
+  
 # ----------
 
 class DocType:
@@ -45,17 +45,16 @@ class DocType:
     elif self.doc.send_to == 'All Lead (Open)':
       rec = sql("select lead_name, mobile_no from tabLead where ifnull(mobile_no,'')!='' and docstatus != 2 and status = 'Open'")
     elif self.doc.send_to == 'All Employee (Active)':
-      where_clause = self.doc.department and " and t1.department = '%s'" % self.doc.department or ""
-      where_clause += self.doc.branch and " and t1.branch = '%s'" % self.doc.branch or ""
-      rec = sql("select t1.employee_name, t2.cell_number from `tabEmployee` t1, `tabEmployee Profile` t2 where t2.employee = t1.name and t1.status = 'Active' and t1.docstatus != 2 and ifnull(t2.cell_number,'')!='' %s" % where_clause)
+      where_clause = self.doc.department and " and department = '%s'" % self.doc.department or ""
+      where_clause += self.doc.branch and " and branch = '%s'" % self.doc.branch or ""
+      rec = sql("select employee_name, cell_number from `tabEmployee` where status = 'Active' and docstatus < 2 and ifnull(cell_number,'')!='' %s" % where_clause)
     elif self.doc.send_to == 'All Sales Person':
       rec = sql("select sales_person_name, mobile_no from `tabSales Person` where docstatus != 2 and ifnull(mobile_no,'')!=''")
-
     rec_list = ''
     for d in rec:
       rec_list += d[0] + ' - ' + d[1] + '\n'
     self.doc.receiver_list = rec_list
-
+    webnotes.errprint(rec_list)
   def get_receiver_nos(self):
     receiver_nos = []
     for d in self.doc.receiver_list.split('\n'):
