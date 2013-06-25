@@ -16,18 +16,20 @@
 
 from __future__ import unicode_literals
 import webnotes
-import calendar
 from webnotes import _, msgprint
 from webnotes.utils import flt
 import time
 from accounts.utils import get_fiscal_year
+from controllers.trends import get_period_date_ranges, get_period_month_ranges
 
 def execute(filters=None):
 	if not filters: filters = {}
 	
 	columns = get_columns(filters)
-	period_month_ranges = get_period_month_ranges(filters)
+	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	tim_map = get_territory_item_month_map(filters)
+
+	precision = webnotes.conn.get_value("Global Defaults", None, "float_precision") or 2
 
 	data = []
 
@@ -40,7 +42,7 @@ def execute(filters=None):
 				for month in relevant_months:
 					month_data = monthwise_data.get(month, {})
 					for i, fieldname in enumerate(["target", "achieved", "variance"]):
-						value = flt(month_data.get(fieldname))
+						value = flt(month_data.get(fieldname), precision)
 						period_data[i] += value
 						totals[i] += value
 				period_data[2] = period_data[0] - period_data[1]
@@ -61,7 +63,7 @@ def get_columns(filters):
 
 	group_months = False if filters["period"] == "Monthly" else True
 
-	for from_date, to_date in get_period_date_ranges(filters):
+	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
 		for label in ["Target (%s)", "Achieved (%s)", "Variance (%s)"]:
 			if group_months:
 				columns.append(label % (from_date.strftime("%b") + " - " + to_date.strftime("%b")))				
@@ -70,41 +72,6 @@ def get_columns(filters):
 
 	return columns + ["Total Target::80", "Total Achieved::80", "Total Variance::80"]
 
-def get_period_date_ranges(filters):
-	from dateutil.relativedelta import relativedelta
-	year_start_date, year_end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-	
-
-	increment = {
-		"Monthly": 1,
-		"Quarterly": 3,
-		"Half-Yearly": 6,
-		"Yearly": 12
-	}.get(filters["period"])
-
-	period_date_ranges = []
-	for i in xrange(1, 13, increment): 
-		period_end_date = year_start_date + relativedelta(months=increment,
-			days=-1)
-		period_date_ranges.append([year_start_date, period_end_date])
-		year_start_date = period_end_date + relativedelta(days=1)
-
-	return period_date_ranges
-
-def get_period_month_ranges(filters):
-	from dateutil.relativedelta import relativedelta
-	period_month_ranges = []
-
-	for start_date, end_date in get_period_date_ranges(filters):
-		months_in_this_period = []
-		while start_date <= end_date:
-			months_in_this_period.append(start_date.strftime("%B"))
-			start_date += relativedelta(months=1)
-		period_month_ranges.append(months_in_this_period)
-
-	return period_month_ranges
-
-
 #Get territory & item group details
 def get_territory_details(filters):
 	return webnotes.conn.sql("""select t.name, td.item_group, td.target_qty, 
@@ -112,7 +79,7 @@ def get_territory_details(filters):
 		from `tabTerritory` t, `tabTarget Detail` td 
 		where td.parent=t.name and td.fiscal_year=%s and 
 		ifnull(t.distribution_id, '')!='' order by t.name""", 
-		filters.get("fiscal_year"), as_dict=1)
+		(filters["fiscal_year"]), as_dict=1)
 
 #Get target distribution details of item group
 def get_target_distribution_details(filters):
@@ -121,7 +88,7 @@ def get_target_distribution_details(filters):
 	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
 		`tabTerritory` t where bdd.parent=bd.name and t.distribution_id=bd.name and \
-		bd.fiscal_year=%s""" % ('%s'), (filters.get("fiscal_year")), as_dict=1):
+		bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.month, d)
 
 	return target_details
@@ -155,7 +122,8 @@ def get_territory_item_month_map(filters):
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(td.target_qty) * (tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(td.target_qty) * \
+						(tdd[month]["percentage_allocation"]/100)
 					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.qty

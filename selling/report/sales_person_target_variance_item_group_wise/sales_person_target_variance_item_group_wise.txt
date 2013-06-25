@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-21 12:14:15", 
+  "docstatus": 0, 
+  "modified": "2013-06-21 12:14:15", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Sales Order", 
+  "report_name": "Sales Person Target Variance Item Group-Wise", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Sales Person Target Variance Item Group-Wise"
+ }
+]
