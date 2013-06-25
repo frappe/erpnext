@@ -319,10 +319,11 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var out = []
 		$.each(Object.keys(grouped_ledgers).sort(), function(i, account) {
 			if(grouped_ledgers[account].entries.length) {
-				$.each(Object.keys(grouped_ledgers[account].entries_group_by_voucher).sort(),
+				$.each(Object.keys(grouped_ledgers[account].entries_group_by_voucher),
 				 	function(j, voucher) {						
 						voucher_dict = grouped_ledgers[account].entries_group_by_voucher[voucher];
-						if(voucher_dict.totals.debit || voucher_dict.totals.credit) {
+						if(voucher_dict && 
+								(voucher_dict.totals.debit || voucher_dict.totals.credit)) {
 							voucher_dict.row.debit = voucher_dict.totals.debit;
 							voucher_dict.row.credit = voucher_dict.totals.credit;
 							voucher_dict.row.id = "entry_grouped_by_" + voucher
