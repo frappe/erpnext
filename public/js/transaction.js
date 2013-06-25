@@ -138,7 +138,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		var exchange_name = from_currency + "-" + to_currency;
 		wn.model.with_doc("Currency Exchange", exchange_name, function(name) {
 			var exchange_doc = wn.model.get_doc("Currency Exchange", exchange_name);
-			callback(exchange_doc ? flt(exchange_doc.exchange_rate)) : 0);
+			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
 		});
 	},
 	
