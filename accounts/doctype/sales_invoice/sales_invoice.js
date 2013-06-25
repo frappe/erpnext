@@ -275,7 +275,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) {
 		unhide_field(['customer_address','contact_person', 'territory','customer_group']);
-		cur_frm.refresh();
+		cur_frm.refresh_fields();
 	}
 	get_server_fields('pull_details','','',doc, dt, dn,1,callback);
 }

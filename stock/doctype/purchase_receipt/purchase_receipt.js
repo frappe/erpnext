@@ -102,11 +102,9 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 // Get Purchase Order Button
 // -----------------
 cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
-	var callback = function(r,rt) { 
-		//unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);				
-		refresh_many(['supplier','supplier_address','contact_person', 'supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email', 'purchase_receipt_details', 'purchase_tax_details']);
-	}
-	$c_obj(make_doclist(dt,dn),'get_po_details','',callback);
+	$c_obj(make_doclist(dt,dn),'get_po_details','',function(r,rt) { 
+		cur_frm.refresh_fields();
+	});
 }
 
 

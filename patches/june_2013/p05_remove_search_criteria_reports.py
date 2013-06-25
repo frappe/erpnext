@@ -15,20 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-out=[]
-qty,amt,bill_amt=0,0,0
+import webnotes
 
-for r in res:
-  qty += flt(r[col_idx['Quantity']])
-  amt += flt(r[col_idx['Amount*']])
-  bill_amt += flt(r[col_idx['Billed Amt']])
-  out.append(r)
-
-
-#Add the totals row
-l_row = ['' for i in range(len(colnames))]
-l_row[col_idx['Item Name']] = '<b>TOTALS</b>'
-l_row[col_idx['Quantity']] = qty
-l_row[col_idx['Amount*']] = amt
-l_row[col_idx['Billed Amt']] = bill_amt
-out.append(l_row)
+def execute():
+	webnotes.conn.sql("""delete from `tabSearch Criteria` where ifnull(standard, 'No') = 'Yes'""")

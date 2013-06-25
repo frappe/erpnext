@@ -47,8 +47,8 @@ data_map = {
 		"order_by": "lft"
 	},
 	"GL Entry": {
-		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", "is_opening",
-			"company", "voucher_type", "voucher_no", "remarks"],
+		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", 
+			"is_opening", "company", "voucher_type", "voucher_no", "remarks"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, account",
 		"links": {
@@ -72,7 +72,7 @@ data_map = {
 	},
 	"Item Group": {
 		"columns": ["name", "parent_item_group"],
-		"conditions": ["docstatus < 2"],
+		# "conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Brand": {
