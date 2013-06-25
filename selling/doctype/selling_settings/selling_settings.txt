@@ -1,0 +1,93 @@
+[
+ {
+  "creation": "2013-06-25 10:25:16", 
+  "docstatus": 0, 
+  "modified": "2013-06-25 10:52:35", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Settings for Selling Module", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "issingle": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Selling Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Selling Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Selling Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cust_master_name", 
+  "fieldtype": "Select", 
+  "label": "Customer Naming By", 
+  "options": "Customer Name\nNaming Series"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Manage Customer Groups</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Default Customer Group", 
+  "options": "Customer Group"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Territory</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Default Territory", 
+  "options": "Territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Link", 
+  "label": "Default Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_5", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "so_required", 
+  "fieldtype": "Select", 
+  "label": "Sales Order Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dn_required", 
+  "fieldtype": "Select", 
+  "label": "Delivery Note Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]
