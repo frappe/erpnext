@@ -13,7 +13,7 @@ wn.module_page["HR"] = [
 			},
 			{
 				label: wn._("Expense Claim"),
-				description: wn._("Claims for expenses made on behalf of the organization."),
+				description: wn._("Claims for company expense."),
 				doctype:"Expense Claim"
 			},
 			{
@@ -33,7 +33,7 @@ wn.module_page["HR"] = [
 			},
 			{
 				label: wn._("Job Applicant"),
-				description: wn._("Applicant for a Job (extracted from jobs email)."),
+				description: wn._("Applicant for a Job."),
 				doctype:"Job Applicant"
 			},
 		]
@@ -175,7 +175,7 @@ wn.module_page["HR"] = [
 			},
 			{
 				"label":wn._("Employee Information"),
-				route: "Report2/Employee/Employee Information"
+				route: "Report/Employee/Employee Information"
 			},
 			{
 				"label":wn._("Monthly Salary Register"),

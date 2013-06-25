@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 14:48:29", 
+  "creation": "2013-03-07 11:55:06", 
   "docstatus": 0, 
-  "modified": "2013-02-13 11:29:18", 
+  "modified": "2013-06-11 12:10:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -123,9 +124,8 @@
  {
   "doctype": "DocField", 
   "fieldname": "state", 
-  "fieldtype": "Link", 
+  "fieldtype": "Data", 
   "label": "State", 
-  "options": "State", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -166,7 +166,6 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts User", 
   "write": 1
  }, 
@@ -174,7 +173,6 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "report": 1, 
   "role": "Accounts Manager", 
   "write": 1
  }, 
@@ -183,7 +181,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "role": "All"
  }

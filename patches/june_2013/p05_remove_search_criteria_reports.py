@@ -18,4 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
-	webnotes.conn.sql("""delete from `tabSearch Criteria` where ifnull(standard, 'No') = 'Yes'""")
+	try:
+		webnotes.conn.sql("""delete from `tabSearch Criteria` where ifnull(standard, 'No') = 'Yes'""")
+	except Exception, e:
+		pass

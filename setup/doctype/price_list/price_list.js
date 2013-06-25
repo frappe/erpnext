@@ -21,6 +21,7 @@ cur_frm.cscript.onload = function() {
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.set_intro("");
 	if(doc.__islocal) {
+		cur_frm.toggle_display("item_prices_section", false);
 		cur_frm.set_intro("Save this list to begin.");
 		return;
 	} else {
@@ -41,16 +42,12 @@ cur_frm.cscript.show_item_prices = function() {
 		<thead><tr>\
 			<th>' + wn._("Item Code") + '</th>\
 			<th>' + wn._("Price") + '</th>\
-			<th>' + wn._("Valid For Selling") + '</th>\
-			<th>' + wn._("Valid For Buying") + '</th>\
 		</tr></thead>\
 		<tbody>'
 		+ $.map(item_price.sort(function(a, b) { return a.parent.localeCompare(b.parent); }), function(d) {
 			return '<tr>'
-				+ '<td>' + d.parent + '</td>'
+				+ '<td><a href="#Form/Item/' + encodeURIComponent(d.parent) +'">' + d.parent + '</a></td>'
 				+ '<td style="text-align: right;">' + format_currency(d.ref_rate, d.ref_currency) + '</td>'
-				+ '<td>' + (cint(d.selling) ? '<i class="icon-check"></i>' : "") + '</td>'
-				+ '<td>' + (cint(d.buying) ? '<i class="icon-check"></i>' : "") + '</td>'
 				+ '</tr>'
 		}).join("\n")
 		+ '</tbody>\

@@ -14,13 +14,7 @@ def boot_session(bootinfo):
 	bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo['website_settings'] = webnotes.model.doc.getsingle('Website Settings')
 
-	if webnotes.session['user']=='Guest':
-		bootinfo['website_menus'] = webnotes.conn.sql("""select label, url, custom_page, 
-			parent_label, parentfield
-			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
-		bootinfo['startup_code'] = \
-			webnotes.conn.get_value('Website Settings', None, 'startup_code')
-	else:	
+	if webnotes.session['user']!='Guest':
 		bootinfo['letter_heads'] = get_letter_heads()
 
 		import webnotes.model.doctype
@@ -36,9 +30,8 @@ def boot_session(bootinfo):
 		for key in ['max_users', 'expires_on', 'max_space', 'status', 'developer_mode']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
-		bootinfo['docs'] += webnotes.conn.sql("""select name, default_currency, cost_center,
-			cost_center as 'cost_center_other_charges' from `tabCompany`""", 
-			as_dict=1, update={"doctype":":Company"})
+		bootinfo['docs'] += webnotes.conn.sql("""select name, default_currency, cost_center
+            from `tabCompany`""", as_dict=1, update={"doctype":":Company"})
 			
 def get_letter_heads():
 	"""load letter heads with startup"""

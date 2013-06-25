@@ -24,7 +24,7 @@ wn.pages['purchase-analytics'].onload = function(wrapper) {
 	new erpnext.PurchaseAnalytics(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Buying")
+	wrapper.appframe.add_module_icon("Buying")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 
@@ -49,7 +49,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 				item_key: "supplier",
 				parent_field: "parent_supplier_type", 
 				formatter: function(item) {
-					// return repl('<a href="#Report2/stock-invoices/customer=%(enc_value)s">%(value)s</a>', {
+					// return repl('<a href="#Report/stock-invoices/customer=%(enc_value)s">%(value)s</a>', {
 					// 		value: item.name,
 					// 		enc_value: encodeURIComponent(item.name)
 					// 	});

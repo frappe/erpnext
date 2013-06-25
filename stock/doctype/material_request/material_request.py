@@ -17,9 +17,6 @@ class DocType(BuyingController):
 		self.tname = 'Material Request Item'
 		self.fname = 'indent_details'
 
-	def get_default_schedule_date(self):
-		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
-	
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
@@ -30,21 +27,11 @@ class DocType(BuyingController):
 		self.check_if_already_pulled()
 		if self.doc.sales_order_no:
 			get_obj('DocType Mapper', 'Sales Order-Material Request', with_children=1).dt_map('Sales Order', 'Material Request', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Material Request'],['Sales Order Item', 'Material Request Item']]")
-			self.get_item_defaults()
 		else:
 			msgprint("Please select Sales Order whose details need to pull")
 
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
-
-
-	# Get item's other details
-	#- ------------------------
-	def get_item_defaults(self):
-		self.get_default_schedule_date()
-		for d in getlist(self.doclist, 'indent_details'):
-			det = webnotes.conn.sql("select min_order_qty from tabItem where name = '%s'" % d.item_code)
-			d.min_order_qty = det and flt(det[0][0]) or 0
 
 	# Validate so items
 	# ----------------------------
@@ -77,11 +64,6 @@ class DocType(BuyingController):
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Material Request Date')
 
-	# GET TERMS & CONDITIONS
-	#-----------------------------
-	def get_tc_details(self):
-		return get_obj('Purchase Common').get_tc_details(self)
-		
 	# Validate Schedule Date
 	#--------------------------------
 	def validate_schedule_date(self):

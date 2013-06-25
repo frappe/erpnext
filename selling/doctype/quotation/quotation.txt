@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-22 12:10:46", 
+  "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-05-22 16:54:07", 
+  "modified": "2013-06-19 15:55:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -78,6 +78,7 @@
   "reqd": 1
  }, 
  {
+  "depends_on": "eval:doc.quotation_to == \"Customer\"", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
@@ -92,6 +93,7 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "eval:doc.quotation_to == \"Lead\"", 
   "doctype": "DocField", 
   "fieldname": "lead", 
   "fieldtype": "Link", 
@@ -105,19 +107,21 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_filter": 0, 
   "label": "Address", 
   "oldfieldname": "customer_address", 
@@ -128,29 +132,32 @@
   "search_index": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_filter": 0, 
   "label": "Contact", 
   "print_hide": 0, 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "print_hide": 0, 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -162,6 +169,34 @@
   "oldfieldtype": "Column Break", 
   "read_only": 0, 
   "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies.", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 0, 
+  "width": "150px"
  }, 
  {
   "default": "Today", 
@@ -188,7 +223,7 @@
   "label": "Order Type", 
   "oldfieldname": "order_type", 
   "oldfieldtype": "Select", 
-  "options": "\nSales\nMaintenance", 
+  "options": "\nSales\nMaintenance\nShopping Cart", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1, 
@@ -196,105 +231,47 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "items", 
-  "fieldtype": "Section Break", 
-  "label": "Items", 
-  "oldfieldtype": "Section Break", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "search_index": 0
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "quotation_details", 
-  "fieldtype": "Table", 
-  "label": "Quotation Items", 
-  "oldfieldname": "quotation_details", 
-  "oldfieldtype": "Table", 
-  "options": "Quotation Item", 
-  "read_only": 0, 
-  "width": "40px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sec_break23", 
-  "fieldtype": "Section Break", 
-  "options": "Simple", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break34", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "label": "Net Total*", 
-  "no_copy": 0, 
-  "oldfieldname": "net_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 0, 
-  "read_only": 1, 
-  "reqd": 0, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break35", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "description": "To create Quotation against Opportunity, Select Opportunity No. and click on 'Pull Opportunity Details' ", 
-  "doctype": "DocField", 
-  "fieldname": "enq_no", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_filter": 1, 
-  "label": "Opportunity No", 
-  "no_copy": 0, 
-  "oldfieldname": "enq_no", 
-  "oldfieldtype": "Link", 
-  "options": "Opportunity", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "report_hide": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_enquiry_detail", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Pull Opportunity Detail", 
-  "no_copy": 0, 
-  "oldfieldtype": "Button", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "report_hide": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "label": "Price List and Currency", 
   "read_only": 0
+ }, 
+ {
+  "description": "Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.", 
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Currency", 
+  "oldfieldname": "currency", 
+  "oldfieldtype": "Select", 
+  "options": "Currency", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 0, 
+  "width": "100px"
+ }, 
+ {
+  "default": "1.00", 
+  "description": "Rate at which customer's currency is converted to company's base currency", 
+  "doctype": "DocField", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "label": "Conversion Rate", 
+  "oldfieldname": "conversion_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
  }, 
  {
   "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
@@ -335,40 +312,100 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break2", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "search_index": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "quotation_details", 
+  "fieldtype": "Table", 
+  "label": "Quotation Items", 
+  "oldfieldname": "quotation_details", 
+  "oldfieldtype": "Table", 
+  "options": "Quotation Item", 
+  "read_only": 0, 
+  "reqd": 1, 
+  "width": "40px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sec_break23", 
+  "fieldtype": "Section Break", 
+  "options": "Simple", 
+  "read_only": 0
+ }, 
+ {
+  "description": "To create Quotation against Opportunity, Select Opportunity No. and click on 'Pull Opportunity Details' ", 
+  "doctype": "DocField", 
+  "fieldname": "enq_no", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Opportunity No", 
+  "no_copy": 0, 
+  "oldfieldname": "enq_no", 
+  "oldfieldtype": "Link", 
+  "options": "Opportunity", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "report_hide": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pull_enquiry_detail", 
+  "fieldtype": "Button", 
+  "hidden": 0, 
+  "label": "Pull Opportunity Detail", 
+  "no_copy": 0, 
+  "oldfieldtype": "Button", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break34", 
   "fieldtype": "Column Break", 
   "read_only": 0, 
   "width": "50%"
  }, 
  {
-  "description": "Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.", 
   "doctype": "DocField", 
-  "fieldname": "currency", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Currency", 
-  "oldfieldname": "currency", 
-  "oldfieldtype": "Select", 
-  "options": "Currency", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Export)", 
+  "options": "currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total*", 
+  "no_copy": 0, 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 0, 
+  "read_only": 1, 
+  "reqd": 0, 
   "width": "100px"
  }, 
  {
-  "default": "1.00", 
-  "description": "Rate at which customer's currency is converted to company's base currency", 
   "doctype": "DocField", 
-  "fieldname": "conversion_rate", 
-  "fieldtype": "Float", 
-  "label": "Conversion Rate", 
-  "oldfieldname": "conversion_rate", 
-  "oldfieldtype": "Currency", 
+  "fieldname": "recalculate_values", 
+  "fieldtype": "Button", 
+  "label": "Re-Calculate Values", 
+  "oldfieldtype": "Button", 
   "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "width": "100px"
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -392,6 +429,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_34", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "get_charges", 
   "fieldtype": "Button", 
   "hidden": 0, 
@@ -399,6 +441,11 @@
   "oldfieldtype": "Button", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_36", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -412,18 +459,32 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "calculate_charges", 
-  "fieldtype": "Button", 
-  "label": "Calculate Taxes and Charges", 
-  "oldfieldtype": "Button", 
+  "fieldname": "other_charges_calculation", 
+  "fieldtype": "HTML", 
+  "label": "Taxes and Charges Calculation", 
+  "oldfieldtype": "HTML", 
   "print_hide": 1, 
   "read_only": 0
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "section_break_39", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total (Export)", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "other_charges_total", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Total*", 
+  "label": "Taxes and Charges Total", 
   "oldfieldname": "other_charges_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -432,10 +493,15 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "other_charges_calculation", 
-  "fieldtype": "HTML", 
-  "label": "Taxes and Charges Calculation", 
-  "oldfieldtype": "HTML", 
+  "fieldname": "column_break_42", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "calculate_charges", 
+  "fieldtype": "Button", 
+  "label": "Calculate Taxes and Charges", 
+  "oldfieldtype": "Button", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -447,55 +513,6 @@
   "oldfieldtype": "Section Break", 
   "print_hide": 1, 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "grand_total", 
-  "fieldtype": "Currency", 
-  "label": "Grand Total*", 
-  "no_copy": 0, 
-  "oldfieldname": "grand_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 0, 
-  "width": "200px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "rounded_total", 
-  "fieldtype": "Currency", 
-  "label": "Rounded Total", 
-  "no_copy": 0, 
-  "oldfieldname": "rounded_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "width": "200px"
- }, 
- {
-  "description": "In Words will be visible once you save the Quotation.", 
-  "doctype": "DocField", 
-  "fieldname": "in_words", 
-  "fieldtype": "Data", 
-  "label": "In Words", 
-  "no_copy": 0, 
-  "oldfieldname": "in_words", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "width": "200px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
@@ -539,6 +556,55 @@
   "width": "200px"
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "label": "Grand Total*", 
+  "no_copy": 0, 
+  "oldfieldname": "grand_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "label": "Rounded Total", 
+  "no_copy": 0, 
+  "oldfieldname": "rounded_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "200px"
+ }, 
+ {
+  "description": "In Words will be visible once you save the Quotation.", 
+  "doctype": "DocField", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "label": "In Words", 
+  "no_copy": 0, 
+  "oldfieldname": "in_words", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "200px"
+ }, 
+ {
   "description": "Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template", 
   "doctype": "DocField", 
   "fieldname": "terms_section_break", 
@@ -562,22 +628,21 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_54", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
   "label": "Get Terms and Conditions", 
   "oldfieldtype": "Button", 
-  "options": "get_tc_details", 
   "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1, 
-  "read_only": 0
+  "fieldname": "section_break_56", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -596,6 +661,36 @@
   "read_only": 0
  }, 
  {
+  "description": "Will be fetched from Customer", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer Group", 
+  "oldfieldname": "customer_group", 
+  "oldfieldtype": "Link", 
+  "options": "Customer Group", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "col_break98", 
   "fieldtype": "Column Break", 
@@ -628,41 +723,6 @@
   "reqd": 0
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "col_break99", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "description": "Will be fetched from Customer", 
-  "doctype": "DocField", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_filter": 1, 
-  "label": "Territory", 
-  "options": "Territory", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_group", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Customer Group", 
-  "oldfieldname": "customer_group", 
-  "oldfieldtype": "Link", 
-  "options": "Customer Group", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
   "description": "Filling in additional information about the Quotation will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
@@ -673,32 +733,18 @@
   "read_only": 0
  }, 
  {
-  "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "fieldname": "letter_head", 
-  "fieldtype": "Select", 
-  "label": "Letter Head", 
-  "oldfieldname": "letter_head", 
-  "oldfieldtype": "Select", 
-  "options": "link:Letter Head", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "description": "Select the relevant company name if you have multiple companies.", 
-  "doctype": "DocField", 
-  "fieldname": "company", 
+  "fieldname": "campaign", 
   "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
+  "hidden": 0, 
+  "label": "Campaign", 
+  "no_copy": 0, 
+  "oldfieldname": "campaign", 
   "oldfieldtype": "Link", 
-  "options": "Company", 
+  "options": "Campaign", 
   "print_hide": 1, 
   "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 0, 
-  "width": "150px"
+  "report_hide": 0
  }, 
  {
   "doctype": "DocField", 
@@ -713,6 +759,70 @@
   "print_hide": 1, 
   "read_only": 0, 
   "report_hide": 0
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "default": "Draft", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "order_lost_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Quotation Lost Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "order_lost_reason", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Select Print Heading", 
+  "no_copy": 1, 
+  "oldfieldname": "select_print_heading", 
+  "oldfieldtype": "Link", 
+  "options": "Print Heading", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -743,97 +853,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "allow_on_submit": 0, 
-  "default": "Draft", 
-  "doctype": "DocField", 
-  "fieldname": "status", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Status", 
-  "no_copy": 1, 
-  "oldfieldname": "status", 
-  "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "campaign", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Campaign", 
-  "no_copy": 0, 
-  "oldfieldname": "campaign", 
-  "oldfieldtype": "Link", 
-  "options": "Campaign", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 0
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "order_lost_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Quotation Lost Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "order_lost_reason", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "select_print_heading", 
-  "fieldtype": "Link", 
-  "label": "Select Print Heading", 
-  "no_copy": 1, 
-  "oldfieldname": "select_print_heading", 
-  "oldfieldtype": "Link", 
-  "options": "Print Heading", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amended_from", 
-  "fieldtype": "Data", 
-  "label": "Amended From", 
-  "no_copy": 1, 
-  "oldfieldname": "amended_from", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "width": "150px"
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
   "oldfieldtype": "Section Break", 
@@ -854,14 +873,13 @@
   "width": "40px"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1, 
-  "read_only": 0
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "amend": 1, 
@@ -873,17 +891,13 @@
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Customer"
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Sales Manager", 
-  "submit": 1, 
-  "write": 1
+  "role": "Customer", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 

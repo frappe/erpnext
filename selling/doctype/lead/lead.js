@@ -50,7 +50,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	}
 
 	if(in_list(user_roles,'System Manager')) {
-		cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
+		cur_frm.footer.help_area.innerHTML = '<hr>\
 			<p><a href="#Form/Sales Email Settings">Sales Email Settings</a><br>\
 			<span class="help">Automatically extract Leads from a mail box e.g. "sales@example.com"</span></p>';
 	}

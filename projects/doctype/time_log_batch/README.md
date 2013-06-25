@@ -1,0 +1,1 @@
+Group of Time Logs that can be batched for billing.

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 
 from webnotes.utils import getdate, today
 from webnotes.model import db_exists
@@ -59,4 +59,35 @@ class DocType:
 			
 		if self.doc.status=="Closed" and status != "Closed" and not self.doc.act_end_date:
 			self.doc.act_end_date = today()
-		
+			
+	def on_update(self):
+		"""update percent complete in project"""
+		if self.doc.project:
+			webnotes.bean("Project", self.doc.project).controller.update_percent_complete()
+
+@webnotes.whitelist()
+def get_events(start, end, filters=None):
+	from webnotes.widgets.reportview import build_match_conditions
+	if not webnotes.has_permission("Task"):
+		webnotes.msgprint(_("No Permission"), raise_exception=1)
+
+	conditions = build_match_conditions("Task")
+	conditions and (" and " + conditions) or ""
+	
+	if filters:
+		filters = json.loads(filters)
+		for key in filters:
+			if filters[key]:
+				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	
+	data = webnotes.conn.sql("""select name, exp_start_date, exp_end_date, 
+		subject, status, project from `tabTask`
+		where ((exp_start_date between '%(start)s' and '%(end)s') \
+			or (exp_end_date between '%(start)s' and '%(end)s'))
+		%(conditions)s""" % {
+			"start": start,
+			"end": end,
+			"conditions": conditions
+		}, as_dict=True, update={"allDay": 0})
+
+	return data

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-29 19:25:50", 
+  "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-02-22 11:06:22", 
+  "modified": "2013-06-07 12:38:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,13 +25,15 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Project", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "read": 1, 
-  "role": "Projects User"
+  "report": 1, 
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -159,19 +161,6 @@
   "search_index": 0
  }, 
  {
-  "description": "Tasks belonging to this Project.", 
-  "doctype": "DocField", 
-  "fieldname": "sb_tasks", 
-  "fieldtype": "Section Break", 
-  "label": "Tasks"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "project_tasks", 
-  "fieldtype": "HTML", 
-  "label": "Project Tasks"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
@@ -188,6 +177,14 @@
   "oldfieldname": "notes", 
   "oldfieldtype": "Text Editor", 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "percent_complete", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "Percent Complete", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -283,38 +280,18 @@
   "search_index": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Trash Reason", 
-  "no_copy": 0, 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1, 
-  "search_index": 0
- }, 
- {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "report": 1, 
-  "submit": 0, 
+  "role": "Projects User", 
   "write": 1
  }, 
  {
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "role": "All"
  }
 ]

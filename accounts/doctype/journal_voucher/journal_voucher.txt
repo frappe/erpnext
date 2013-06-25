@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-04-05 11:10:35", 
+  "modified": "2013-06-11 16:04:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -456,29 +456,6 @@
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Link", 
   "options": "Journal Voucher", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
   "print_hide": 1, 
   "read_only": 1
  }, 

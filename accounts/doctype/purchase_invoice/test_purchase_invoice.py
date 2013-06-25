@@ -24,6 +24,7 @@ from webnotes.utils import cint
 import webnotes.defaults
 
 test_dependencies = ["Item", "Cost Center"]
+test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_without_auto_inventory_accounting(self):
@@ -119,25 +120,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		wrapper.insert()
 		wrapper.load_from_db()
 		
-		self.assertEqual(wrapper.doclist[0].net_total, 1250)
-		
-		# tax amounts
-		expected_values = [
-			["_Test Account Shipping Charges - _TC", 100, 1350],
-			["_Test Account Customs Duty - _TC", 125, 1350],
-			["_Test Account Excise Duty - _TC", 140, 1490],
-			["_Test Account Education Cess - _TC", 2.8, 1492.8],
-			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
-			["_Test Account CST - _TC", 29.88, 1524.08],
-			["_Test Account VAT - _TC", 156.25, 1680.33],
-			["_Test Account Discount - _TC", 168.03, 1512.30],
-		]
-		
-		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
-			self.assertEqual(tax.account_head, expected_values[i][0])
-			self.assertEqual(tax.tax_amount, expected_values[i][1])
-			self.assertEqual(tax.total, expected_values[i][2])
-
 		expected_values = [
 			["_Test Item Home Desktop 100", 90, 59],
 			["_Test Item Home Desktop 200", 135, 177]
@@ -147,13 +129,41 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 			
+		self.assertEqual(wrapper.doclist[0].net_total, 1250)
+		
+		# tax amounts
+		expected_values = [
+			["_Test Account Shipping Charges - _TC", 100, 1350],
+			["_Test Account Customs Duty - _TC", 125, 1350],
+			["_Test Account Excise Duty - _TC", 140, 1490],
+			["_Test Account Education Cess - _TC", 2.8, 1492.8],
+			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
+			["_Test Account CST - _TC", 29.88, 1524.08],
+			["_Test Account VAT - _TC", 156.25, 1680.33],
+			["_Test Account Discount - _TC", 168.03, 1512.30],
+		]
+		
+		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
+			self.assertEqual(tax.account_head, expected_values[i][0])
+			self.assertEqual(tax.tax_amount, expected_values[i][1])
+			self.assertEqual(tax.total, expected_values[i][2])
+			
 	def test_purchase_invoice_with_subcontracted_item(self):
 		wrapper = webnotes.bean(copy=test_records[0])
 		wrapper.doclist[1].item_code = "_Test FG Item"
 		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.load_from_db()
-
+		
+		expected_values = [
+			["_Test FG Item", 90, 7059],
+			["_Test Item Home Desktop 200", 135, 177]
+		]
+		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
+			self.assertEqual(item.item_code, expected_values[i][0])
+			self.assertEqual(item.item_tax_amount, expected_values[i][1])
+			self.assertEqual(item.valuation_rate, expected_values[i][2])
+		
 		self.assertEqual(wrapper.doclist[0].net_total, 1250)
 
 		# tax amounts
@@ -172,15 +182,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
-
-		expected_values = [
-			["_Test FG Item", 90, 7059],
-			["_Test Item Home Desktop 200", 135, 177]
-		]
-		for i, item in enumerate(wrapper.doclist.get({"parentfield": "entries"})):
-			self.assertEqual(item.item_code, expected_values[i][0])
-			self.assertEqual(item.item_tax_amount, expected_values[i][1])
-			self.assertEqual(item.valuation_rate, expected_values[i][2])
 			
 	def test_purchase_invoice_with_advance(self):
 		from accounts.doctype.journal_voucher.test_journal_voucher \

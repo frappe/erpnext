@@ -35,9 +35,9 @@ class DocType(DocTypeNestedSet):
 		if not self.doc.group_or_ledger:
 			msgprint("Please select Group or Ledger value", raise_exception=1)
 			
-		if self.doc.cost_center_name != 'Root' and not self.doc.parent_cost_center:
+		if self.doc.cost_center_name != self.doc.company_name and not self.doc.parent_cost_center:
 			msgprint("Please enter parent cost center", raise_exception=1)
-		elif self.doc.cost_center_name == "Root" and self.doc.parent_cost_center:
+		elif self.doc.cost_center_name == self.doc.company_name and self.doc.parent_cost_center:
 			msgprint(_("Root cannot have a parent cost center"), raise_exception=1)
 		
 	def convert_group_to_ledger(self):

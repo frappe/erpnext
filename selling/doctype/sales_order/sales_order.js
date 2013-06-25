@@ -26,105 +26,54 @@ wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
-
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	cur_frm.cscript.manage_rounded_total();
-	
-	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
-	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
-	if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
-	// load default charges
-	
-	if(doc.__islocal && !doc.customer){
-		hide_field(['customer_address','contact_person', 'customer_name', 
-			'address_display', 'contact_display', 'contact_mobile', 
-			'contact_email', 'territory',  'customer_group']);
-	}
-}
-
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	var callback = function(doc, cdt, cdn) {
-		if(doc.__islocal) {
-			// defined in sales_common.js
-			cur_frm.cscript.update_item_details(doc, cdt, cdn);
-		}
-	}
-	
-	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
-
-}
-
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.clear_custom_buttons();
-	erpnext.hide_naming_series();
-
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
-	
-	cur_frm.toggle_display("contact_info", doc.customer);
-	
-	if(doc.docstatus==1) {
-		if(doc.status != 'Stopped') {
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-			// delivery note
-			if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
-				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
+	refresh: function(doc, dt, dn) {
+		this._super();
+		
+		if(doc.docstatus==1) {
+			if(doc.status != 'Stopped') {
+				cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+				// delivery note
+				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
+					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 			
-			// maintenance
-			if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
-				cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
-				cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
+				// maintenance
+				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
+					cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
+					cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
+				}
+
+				// indent
+				if(!doc.order_type || (doc.order_type == 'Sales'))
+					cur_frm.add_custom_button('Make ' + wn._('Material Request'), cur_frm.cscript['Make Material Request']);
+			
+				// sales invoice
+				if(flt(doc.per_billed, 2) < 100)
+					cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
+			
+				// stop
+				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
+					cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
+			} else {	
+				// un-stop
+				cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 			}
-
-			// indent
-			if(!doc.order_type || (doc.order_type == 'Sales'))
-				cur_frm.add_custom_button('Make ' + wn._('Material Request'), cur_frm.cscript['Make Material Request']);
-			
-			// sales invoice
-			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
-			
-			// stop
-			if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-				cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
-		} else {	
-			// un-stop
-			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 		}
-	}
 	
-	cur_frm.cscript.order_type(doc);
-}
-
-cur_frm.cscript.order_type = function(doc) {
-	if(doc.order_type == "Sales") {
-		cur_frm.toggle_reqd("delivery_date", 1);
-	} else {
-		cur_frm.toggle_reqd("delivery_date", 0);
-	}
-}
-
-//customer
-cur_frm.cscript.customer = function(doc,dt,dn) {
-	cur_frm.toggle_display("contact_info", doc.customer);
+		this.order_type(doc);
+	},
 	
-	var pl = doc.price_list_name;
-	var callback = function(r,rt) {
-		var callback2  = function(r, rt) {
-			if(doc.customer) 
-				unhide_field(['customer_address', 'contact_person', 'territory','customer_group']);
-			cur_frm.refresh();
-			
-			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn);
+	order_type: function() {
+		this.frm.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
+	},
+	
+	reserved_warehouse: function(doc, cdt, cdn) {
+		this.warehouse(doc, cdt, cdn);
+	},
+});
 
-		}
-		var doc = locals[cur_frm.doctype][cur_frm.docname];
-		get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0, callback2);
-			
-	}	 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
-		'get_default_customer_address', '', callback);
-}
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
@@ -201,15 +150,6 @@ cur_frm.fields_dict['quotation_no'].get_query = function(doc) {
 			and `tabQuotation`.status != "Order Lost" \
 			and %(cond)s `tabQuotation`.%(key)s LIKE "%s" \
 			ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
-}
-
-
-cur_frm.cscript.reserved_warehouse = function(doc, cdt , cdn) {
-	var d = locals[cdt][cdn];
-	if (d.reserved_warehouse) {
-		arg = "{'item_code':'" + d.item_code + "','warehouse':'" + d.reserved_warehouse +"'}";
-		get_server_fields('get_available_qty',arg,'sales_order_details',doc,cdt,cdn,1);
-	}
 }
 
 //----------- make maintenance schedule----------

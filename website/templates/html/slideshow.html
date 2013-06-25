@@ -1,6 +1,17 @@
 {% if slideshow %}
 {{ slideshow_header }}
-<div id="myCarousel" class="carousel slide">
+
+
+<div id="the-carousel" class="carousel slide">
+	<!-- Indicators -->
+	<ol class="carousel-indicators">
+		{% for slide in obj.slides %}
+			<li data-target="#the-carousel" data-slide-to="0" 
+				{%- if loop.index==0 %}class="active"{% endif %}></li>
+		{% endfor %}
+	</ol>
+	
+	<!-- Wrapper for slides -->
 	<div class="carousel-inner">
 		{% for slide in obj.slides %}
 		<div class="{% if slide.idx==1 %}active {% endif %}item">
@@ -14,10 +25,15 @@
 		</div>
 		{% endfor %}
 	</div>
-	<a class="carousel-control left" href="#myCarousel"
-		data-slide="prev">&lsaquo;</a>
-	<a class="carousel-control right" href="#myCarousel" 
-		data-slide="next">&rsaquo;</a>
-	</div>
-	<script>$(".carousel").carousel();</script>
+
+	<!-- Controls -->
+	<a class="left carousel-control" href="#the-carousel" data-slide="prev">
+		<span class="icon icon-chevron-left"></span>
+	</a>
+	<a class="right carousel-control" href="#the-carousel" data-slide="next">
+		<span class="icon icon-chevron-right"></span>
+	</a>
+</div>
+
+<script>$(".carousel").carousel();</script>
 {% endif %}

@@ -34,18 +34,7 @@ def update_template_args(page_name, args):
 						t['child_items'] = []
 					t['child_items'].append(d)
 					break
-	
-	if top_items and ("products" in [d.url.split(".")[0] for d in top_items if d.url]):
-		# product categories
-		products = webnotes.conn.sql("""select t1.item_group as label, 
-			t2.page_name as url,
-			ifnull(t1.indent,0) as indent
-			from `tabWebsite Product Category` t1, `tabItem Group` t2 
-			where t1.item_group = t2.name
-			and ifnull(t2.show_in_website,0)=1 order by t1.idx""", as_dict=1)
-		products_item = filter(lambda d: d.url and d.url.split(".")[0]=="products", top_items)[0]			
-		products_item.child_items = products
-		
+			
 	ret = webnotes._dict({
 		'top_bar_items': top_items,
 		'footer_items': webnotes.conn.sql("""\

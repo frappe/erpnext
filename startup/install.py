@@ -7,8 +7,6 @@ def pre_import():
 	make_modules()
 	make_roles()
 	webnotes.conn.commit()
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper")
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper_detail")
 	
 def make_modules():
 	modules = [
@@ -129,18 +127,19 @@ def import_defaults():
 		
 		# territory
 		{'doctype': 'Territory', 'territory_name': 'All Territories', 'is_group': 'Yes', 'name': 'All Territories', 'parent_territory': ''},
-		{'doctype': 'Territory', 'territory_name': 'Default', 'is_group': 'No', 'name': 'Default', 'parent_territory': 'All Territories'},
 			
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': 'All Customer Groups', 'is_group': 'Yes', 	'name': 'All Customer Groups', 'parent_customer_group': ''},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Default Customer Group', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Default', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
 			
 		# supplier type
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
 		
 		# Price List
-		{'doctype': 'Price List', 'name': 'Default Price List', 'price_list_name': 'Default Price List'},
-		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard'},
+		{'doctype': 'Price List', 'name': 'Default Price List', 'price_list_name': 'Default Price List',
+			"buying_or_selling": "Selling"},
+		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard',
+			"buying_or_selling": "Selling"},
 				
 		# warehouse type
 		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
@@ -176,6 +175,6 @@ def import_defaults():
 	]
 	
 	for r in records:
-		doc = webnotes.doc(r)
-		doc.insert()
+		bean = webnotes.bean(r)
+		bean.insert()
 	

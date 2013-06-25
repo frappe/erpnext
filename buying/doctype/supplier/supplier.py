@@ -57,9 +57,6 @@ class DocType(TransactionBase):
 
 		# update credit days and limit in account
 		self.update_credit_days_limit()
-
-	def check_state(self):
-		return "\n" + "\n".join([i[0] for i in sql("select state_name from `tabState` where `tabState`.country='%s' " % self.doc.country)])
 	
 	def get_payables_group(self):
 		g = sql("select payables_group from tabCompany where name=%s", self.doc.company)

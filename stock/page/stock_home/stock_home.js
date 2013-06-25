@@ -8,17 +8,17 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				label: wn._("Material Request"),
-				description: wn._("Request Material for Transfer or Purchase."),
+				description: wn._("Requests for items."),
 				doctype:"Material Request"
 			},
 			{
 				label: wn._("Stock Entry"),
-				description: wn._("Transfer stock from one warehouse to another."),
+				description: wn._("Record item movement."),
 				doctype:"Stock Entry"
 			},
 			{
 				label: wn._("Delivery Note"),
-				description: wn._("Delivery (shipment) to customers."),
+				description: wn._("Shipments to customers."),
 				doctype:"Delivery Note"
 			},
 			{
@@ -102,6 +102,12 @@ wn.module_page["Stock"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Stock Settings"),
+				"route": "Form/Stock Settings",
+				"doctype":"Stock Settings",
+				"description": "Settings for Stock"
+			},
+			{
 				"route":"Sales Browser/Item Group",
 				"label": wn._("Item Group"),
 				"description": wn._("Item classification.")
@@ -164,7 +170,7 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				route: "Report2/Stock Ledger Entry/Stock Ledger",
+				route: "Report/Stock Ledger Entry/Stock Ledger",
 				doctype: "Stock Ledger Entry"
 			},
 			{
@@ -179,17 +185,17 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Serial No Service Contract Expiry"),
-				route: "Report2/Serial No/Serial No Service Contract Expiry",
+				route: "Report/Serial No/Serial No Service Contract Expiry",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Status"),
-				route: "Report2/Serial No/Serial No Status",
+				route: "Report/Serial No/Serial No Status",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Warranty Expiry"),
-				route: "Report2/Serial No/Serial No Warranty Expiry",
+				route: "Report/Serial No/Serial No Warranty Expiry",
 				doctype: "Serial No"
 			},
 			{

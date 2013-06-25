@@ -2,13 +2,13 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-05-02 14:45:00", 
+  "modified": "2013-06-20 12:53:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
-  "allow_copy": 1, 
+  "allow_copy": 0, 
   "allow_email": 1, 
   "allow_print": 1, 
   "autoname": "field:price_list_name", 
@@ -61,24 +61,33 @@
   "reqd": 1
  }, 
  {
-  "default": "1", 
+  "default": "Selling", 
   "doctype": "DocField", 
-  "fieldname": "valid_for_all_countries", 
-  "fieldtype": "Check", 
-  "label": "Valid for all countries"
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "reqd": 1
  }, 
  {
-  "description": "A list of Countries, for which, this Price List is valid", 
   "doctype": "DocField", 
-  "fieldname": "valid_for_countries", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Specify a list of Territories, for which, this Price List is valid", 
+  "doctype": "DocField", 
+  "fieldname": "valid_for_territories", 
   "fieldtype": "Table", 
-  "label": "Valid for the following countries", 
-  "options": "Price List Country"
+  "label": "Valid for Territories", 
+  "options": "For Territory", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "item_prices_section", 
   "fieldtype": "Section Break", 
+  "hidden": 0, 
   "label": "Item Prices"
  }, 
  {
@@ -86,6 +95,11 @@
   "fieldname": "item_prices", 
   "fieldtype": "HTML", 
   "label": "Item Prices"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_10", 
+  "fieldtype": "Column Break"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 

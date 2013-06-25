@@ -1,4 +1,4 @@
-wn.views.calendar["Time Log"] = wn.views.Calendar.extend({
+wn.views.calendar["Time Log"] = {
 	field_map: {
 		"start": "from_time",
 		"end": "to_time",
@@ -7,4 +7,4 @@ wn.views.calendar["Time Log"] = wn.views.Calendar.extend({
 		"allDay": "allDay"
 	},
 	get_events_method: "projects.doctype.time_log.time_log.get_events"
-})
+}

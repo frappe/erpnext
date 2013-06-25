@@ -92,7 +92,7 @@ def get_source_data(filters):
 		timestamp(si.posting_date, si.posting_time) as posting_datetime
 		from `tabSales Invoice` si, `tabSales Invoice Item` item
 		where item.parent = si.name and si.docstatus = 1 %s
-		and si.is_pos = 1 and si.update_stock = 1
+		and si.update_stock = 1
 		order by si.posting_date desc, si.posting_time desc""" % (conditions,), filters, as_dict=1)
 	
 	source = delivery_note_items + sales_invoice_items

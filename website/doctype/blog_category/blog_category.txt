@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-08 09:41:11", 
   "docstatus": 0, 
-  "modified": "2013-03-08 09:41:11", 
+  "modified": "2013-06-18 18:36:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,17 +26,13 @@
   "reqd": 1
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Blog Category", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1, 
-  "role": "Website Manager", 
-  "write": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -46,6 +42,14 @@
   "doctype": "DocField"
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Website Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Blogger"
  }
 ]

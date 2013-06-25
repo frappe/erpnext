@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-04-10 11:49:11", 
+  "modified": "2013-06-14 16:20:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -345,6 +345,13 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Default Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "hidden": 1, 
@@ -425,17 +432,6 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

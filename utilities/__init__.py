@@ -19,42 +19,6 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import cint, comma_or
 
-@webnotes.whitelist()
-def get_sc_list(arg=None):
-	"""return list of reports for the given module module"""
-	limit_start = webnotes.form_dict.get("limit_start")
-	limit_page_length = webnotes.form_dict.get("limit_page_length")
-	module = webnotes.form_dict.get("module")
-	
-	webnotes.response['values'] = webnotes.conn.sql("""
-		select distinct criteria_name, doc_type, parent_doc_type
-		from `tabSearch Criteria` 
-		where module=%s 
-			and docstatus in (0, NULL)
-			and ifnull(disabled, 0) = 0 
-			order by criteria_name 
-			limit %s, %s""" % \
-		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)
-
-@webnotes.whitelist()
-def get_report_list():
-	"""return list on new style reports for modules"""
-	limit_start = webnotes.form_dict.get("limit_start")
-	limit_page_length = webnotes.form_dict.get("limit_page_length")
-	module = webnotes.form_dict.get("module")
-	
-	webnotes.response['values'] = webnotes.conn.sql("""
-		select distinct tabReport.name, tabReport.ref_doctype, 
-			if(ifnull(tabReport.query, '')!='', 1, 0) as is_query_report
-		from `tabReport`, `tabDocType`
-		where tabDocType.module=%s
-			and tabDocType.name = tabReport.ref_doctype
-			and tabReport.docstatus in (0, NULL)
-			and ifnull(tabReport.disabled,0) != 1
-			order by tabReport.name 
-			limit %s, %s""" % \
-		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)
-
 def validate_status(status, options):
 	if status not in options:
 		msgprint(_("Status must be one of ") + comma_or(options), raise_exception=True)

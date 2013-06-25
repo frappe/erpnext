@@ -13,7 +13,7 @@ wn.module_page["Buying"] = [
 			},
 			{
 				label: wn._("Supplier Quotation"),
-				description: wn._("Track Quotations received from Suppliers."),
+				description: wn._("Quotations received from Suppliers."),
 				doctype:"Supplier Quotation"
 			},
 			{

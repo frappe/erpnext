@@ -95,33 +95,9 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	# Load Default Charges
-	# ----------------------------------------------------------
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	# Pull details from other charges master (Get Sales Taxes and Charges Master)
-	# ----------------------------------------------------------
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)	
-	
-		 
-# GET TERMS AND CONDITIONS
-# ====================================================================================
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-		
 # VALIDATE
 # ==============================================================================================
 	
-	# Amendment date is necessary if document is amended
-	# --------------------------------------------------
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
-
 	# Fiscal Year Validation
 	# ----------------------
 	def validate_fiscal_year(self):
@@ -142,6 +118,8 @@ class DocType(SellingController):
 	#do not allow sales item in maintenance quotation and service item in sales quotation
 	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
 				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)
@@ -180,7 +158,6 @@ class DocType(SellingController):
 			"Order Confirmed", "Order Lost", "Cancelled"])
 
 		self.validate_fiscal_year()
-		self.validate_mandatory()
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
@@ -193,9 +170,6 @@ class DocType(SellingController):
 	def on_update(self):
 		# Set Quotation Status
 		webnotes.conn.set(self.doc, 'status', 'Draft')
-
-		# subject for follow
-		self.doc.subject = '[%(status)s] To %(customer)s worth %(currency)s %(grand_total)s' % self.doc.fields
 	
 	#update enquiry
 	#------------------

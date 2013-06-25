@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-04-02 16:28:08", 
+  "modified": "2013-06-11 16:03:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -428,22 +428,6 @@
   "print_hide": 1, 
   "read_only": 1, 
   "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "width": "150px"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 

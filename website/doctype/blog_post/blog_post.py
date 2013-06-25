@@ -41,29 +41,6 @@ class DocType:
 		webnotes.webutils.update_page_name(self.doc, self.doc.title)
 		webnotes.webutils.delete_page_cache("writers")
 
-	def send_emails(self):
-		"""send emails to subscribers"""
-		if self.doc.email_sent:
-			webnotes.msgprint("""Blog Subscribers already updated""", raise_exception=1)
-		
-		from webnotes.utils.email_lib.bulk import send
-		import webnotes.utils
-		
-		# get leads that are subscribed to the blog
-		recipients = [e[0] for e in webnotes.conn.sql("""select distinct email_id from 
-			tabLead where ifnull(blog_subscriber,0)=1""")]
-
-		# make heading as link
-		content = '<h2><a href="%s/%s.html">%s</a></h2>\n\n%s' % (webnotes.utils.get_request_site_address(),
-			self.doc.page_name, self.doc.title, self.doc.content)
-
-		# send the blog
-		send(recipients = recipients, doctype='Lead', email_field='email_id',
-			subject=self.doc.title, message = content)
-		
-		webnotes.conn.set(self.doc, 'email_sent', 1)
-		webnotes.msgprint("""Scheduled to send to %s subscribers""" % len(recipients))
-
 	def prepare_template_args(self):
 		import webnotes.utils
 		

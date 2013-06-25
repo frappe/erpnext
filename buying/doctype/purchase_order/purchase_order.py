@@ -65,10 +65,6 @@ class DocType(BuyingController):
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
-
-	def get_default_schedule_date(self):
-		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
-		
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'PO Date')
 
@@ -101,16 +97,11 @@ class DocType(BuyingController):
 				"""[['Supplier Quotation', 'Purchase Order'],
 				['Supplier Quotation Item', 'Purchase Order Item'],
 				['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]""")
-			self.get_default_schedule_date()
 			for d in getlist(self.doclist, 'po_details'):
 				if d.prevdoc_detail_docname and not d.schedule_date:
 					d.schedule_date = webnotes.conn.get_value("Material Request Item",
 							d.prevdoc_detail_docname, "schedule_date")
 	
-	def get_tc_details(self):
-		"""get terms & conditions"""
-		return get_obj('Purchase Common').get_tc_details(self)
-
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
 		
@@ -233,10 +224,4 @@ class DocType(BuyingController):
 		pass
 		
 	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)	
-	
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-
-	def get_purchase_tax_details(self):
-		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
+		return get_obj('Purchase Common').get_rate(arg,self)

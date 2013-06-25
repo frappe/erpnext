@@ -1,0 +1,50 @@
+[
+ {
+  "creation": "2013-06-20 15:40:29", 
+  "docstatus": 0, 
+  "modified": "2013-06-20 15:40:29", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "description": "Specify Exchange Rate to convert one currency into another", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Currency Exchange", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Currency Exchange"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_currency", 
+  "fieldtype": "Link", 
+  "label": "From Currency", 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_currency", 
+  "fieldtype": "Link", 
+  "label": "To Currency", 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "exchange_rate", 
+  "fieldtype": "Float", 
+  "label": "Exchange Rate"
+ }
+]

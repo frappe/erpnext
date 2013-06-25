@@ -33,15 +33,20 @@ class DocType(BuyingController):
 		self.tname = 'Purchase Receipt Item'
 		self.fname = 'purchase_receipt_details'
 		self.count = 0
+		self.status_updater = [{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'received_qty',
+			'target_parent_dt': 'Purchase Order',
+			'target_parent_field': 'per_received',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'prevdoc_docname',
+		}]
 
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
-
-	# GET TERMS & CONDITIONS
-	# =====================================================================================
-	def get_tc_details(self):
-		return get_obj('Purchase Common').get_tc_details(self)
-
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
@@ -243,8 +248,7 @@ class DocType(BuyingController):
 		# Set status as Submitted
 		webnotes.conn.set(self.doc,'status', 'Submitted')
 
-		# Update Previous Doc i.e. update pending_qty and Status accordingly
-		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
+		self.update_prevdoc_status()
 
 		# Update Serial Record
 		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 1, is_incoming = 1)
@@ -285,8 +289,7 @@ class DocType(BuyingController):
 		# 4.Update Bin
 		self.update_stock(is_submit = 0)
 
-		# 5.Update Material Requests Pending Qty and accordingly it's Status
-		pc_obj.update_prevdoc_detail(self, is_submit = 0)
+		self.update_prevdoc_status()
 
 		# 6. Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, 0)
@@ -310,12 +313,6 @@ class DocType(BuyingController):
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 	
-	def load_default_taxes(self):
-		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
-	
-	def get_purchase_tax_details(self):
-		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
-		
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return

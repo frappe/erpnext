@@ -25,7 +25,7 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Stock")
+	wrapper.appframe.add_module_icon("Stock")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 

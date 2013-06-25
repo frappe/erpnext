@@ -65,10 +65,6 @@ class DocType:
 			msgprint("[Stock Update] Ignored %s since it is not a stock item" 
 				% args.get("item_code"))
 
-	def check_state(self):
-		return "\n" + "\n".join([i[0] for i in sql("""
-			select state_name from `tabState` where country=%s""", self.doc.country)])
-
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)

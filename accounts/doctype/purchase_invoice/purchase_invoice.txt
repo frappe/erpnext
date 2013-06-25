@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-07 13:50:30", 
+  "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-05-13 11:12:56", 
+  "modified": "2013-06-11 16:16:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -89,10 +89,11 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Name", 
   "oldfieldname": "supplier_name", 
@@ -100,34 +101,38 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -392,6 +397,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
@@ -399,7 +405,6 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "eval:doc.supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_address", 
   "fieldtype": "Link", 
@@ -415,7 +420,6 @@
   "width": "50%"
  }, 
  {
-  "depends_on": "eval:doc.supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
@@ -670,6 +674,32 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Terms and Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Select Terms and Conditions", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_terms", 
+  "fieldtype": "Button", 
+  "label": "Get Terms and Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "label": "Terms and Conditions1"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
@@ -784,18 +814,6 @@
   "print_hide": 1, 
   "read_only": 0, 
   "search_index": 1
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

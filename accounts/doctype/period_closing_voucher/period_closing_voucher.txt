@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:50", 
+  "modified": "2013-06-11 16:04:45", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
@@ -87,16 +87,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "label": "Company", 
@@ -137,17 +127,6 @@
   "oldfieldname": "remarks", 
   "oldfieldtype": "Small Text", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Cancel Reason", 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "search_index": 0
  }, 
  {
   "doctype": "DocPerm", 

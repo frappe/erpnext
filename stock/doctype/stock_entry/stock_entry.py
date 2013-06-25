@@ -285,11 +285,10 @@ class DocType(StockController):
 					+ _("Status should be Submitted"), raise_exception=webnotes.InvalidStatusError)
 			
 			# update stock check
-			if ref.doclist[0].doctype == "Sales Invoice" and (cint(ref.doclist[0].is_pos) != 1 \
-				or cint(ref.doclist[0].update_stock) != 1):
-					webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
-						+ _("Is POS and Update Stock should be checked."), 
-						raise_exception=NotUpdateStockError)
+			if ref.doclist[0].doctype == "Sales Invoice" and cint(ref.doclist[0].update_stock) != 1:
+				webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
+					+ _("Update Stock should be checked."), 
+					raise_exception=NotUpdateStockError)
 			
 			# posting date check
 			ref_posting_datetime = "%s %s" % (cstr(ref.doclist[0].posting_date), 
@@ -680,7 +679,7 @@ def get_production_order_details(production_order):
 def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 	conditions = ""
 	if doctype == "Sales Invoice":
-		conditions = "and is_pos=1 and update_stock=1"
+		conditions = "and update_stock=1"
 	
 	return webnotes.conn.sql("""select name, customer, customer_name
 		from `tab%s` where docstatus = 1

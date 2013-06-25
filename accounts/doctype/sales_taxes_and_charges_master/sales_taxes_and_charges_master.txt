@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:09", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:23", 
+  "modified": "2013-06-20 16:49:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,14 +55,9 @@
   "label": "Default"
  }, 
  {
-  "description": "* Will be calculated in the transaction.", 
   "doctype": "DocField", 
-  "fieldname": "other_charges", 
-  "fieldtype": "Table", 
-  "label": "Sales Taxes and Charges Master", 
-  "oldfieldname": "other_charges", 
-  "oldfieldtype": "Table", 
-  "options": "Sales Taxes and Charges"
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -75,6 +70,30 @@
   "options": "Company", 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_5", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "* Will be calculated in the transaction.", 
+  "doctype": "DocField", 
+  "fieldname": "other_charges", 
+  "fieldtype": "Table", 
+  "label": "Sales Taxes and Charges Master", 
+  "oldfieldname": "other_charges", 
+  "oldfieldtype": "Table", 
+  "options": "Sales Taxes and Charges"
+ }, 
+ {
+  "description": "Specify a list of Territories, for which, this Taxes Master is valid", 
+  "doctype": "DocField", 
+  "fieldname": "valid_for_territories", 
+  "fieldtype": "Table", 
+  "label": "Valid for Territories", 
+  "options": "For Territory", 
+  "reqd": 1
  }, 
  {
   "amend": 0, 
