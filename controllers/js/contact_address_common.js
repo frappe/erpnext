@@ -15,12 +15,16 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 				var refdoc = wn.model.get_doc(last_route[1], last_route[2]);
 				cur_frm.set_value("customer", refdoc.customer || refdoc.name);
 				cur_frm.set_value("customer_name", refdoc.customer_name);
+				if(cur_frm.doc.doctype==="Address")
+					cur_frm.set_value("address_title", cur_frm.doc.customer)
 			}
 			if(["Supplier", "Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 				.indexOf(last_route[1])!==-1) {
-				var customer = wn.model.get_doc(last_route[1], last_route[2]);
+				var refdoc = wn.model.get_doc(last_route[1], last_route[2]);
 				cur_frm.set_value("supplier", refdoc.supplier || refdoc.name);
 				cur_frm.set_value("supplier_name", refdoc.supplier_name);
+				if(cur_frm.doc.doctype==="Address")
+					cur_frm.set_value("address_title", cur_frm.doc.supplier)
 			}
 		}
 	}

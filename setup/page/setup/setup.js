@@ -73,11 +73,6 @@ wn.pages['Setup'].onload = function(wrapper) {
 					+'</div>')
 				.appendTo(row);
 
-			if(dependency) 
-				col.addClass("col-offset-1");
-			else
-				$('<div class="col col-lg-1"></div>').appendTo(row);
-
 			col.find(".badge")
 				.css({
 					"background-color": (item.count ? "green" : "orange"),
@@ -89,13 +84,18 @@ wn.pages['Setup'].onload = function(wrapper) {
 			if(item.count)
 				completed += 1;
 		}
+
+		if(dependency) 
+			col.addClass("col-offset-1");
+		else
+			$('<div class="col col-lg-1"></div>').appendTo(row);
 			
 		if(item.doctype) {
 			col.find(".badge")
 				.attr("data-doctype", item.doctype)
 				.css({"cursor": "pointer"})
 				.click(function() {
-					wn.set_route("List", $(this).attr("data-doctype"))
+					wn.set_route(item.tree || "List", $(this).attr("data-doctype"))
 				})
 		}
 		

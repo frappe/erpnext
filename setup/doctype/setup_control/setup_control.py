@@ -119,7 +119,7 @@ class DocType:
 		stock_settings.save()
 		
 		selling_settings = webnotes.bean("Selling Settings")
-		selling_settings.cust_master_name = "Customer Name"
+		selling_settings.doc.cust_master_name = "Customer Name"
 		selling_settings.doc.so_required = "No"
 		selling_settings.doc.dn_required = "No"
 		selling_settings.save()
