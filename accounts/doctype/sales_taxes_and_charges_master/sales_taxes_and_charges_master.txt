@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:09", 
   "docstatus": 0, 
-  "modified": "2013-06-20 16:49:12", 
+  "modified": "2013-06-25 12:06:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,8 +30,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -101,7 +100,12 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User", 
+  "submit": 0, 
   "write": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }, 
  {
   "amend": 0, 
@@ -109,13 +113,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
+  "submit": 0, 
   "write": 1
  }, 
  {
@@ -124,6 +122,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
+  "submit": 0, 
   "write": 1
  }
 ]

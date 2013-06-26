@@ -1,15 +1,15 @@
 [
  {
-  "creation": "2013-02-22 01:28:03", 
+  "creation": "2013-05-23 16:55:51", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:30", 
+  "modified": "2013-06-26 13:45:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "DocType", 
   "istable": 1, 
-  "module": "Stock", 
+  "module": "Selling", 
   "name": "__common__"
  }, 
  {
