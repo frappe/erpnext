@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:29", 
+  "creation": "2013-06-20 11:53:21", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:23", 
+  "modified": "2013-06-25 16:43:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,7 +11,7 @@
   "doctype": "DocType", 
   "document_type": "Master", 
   "is_submittable": 0, 
-  "module": "Stock", 
+  "module": "Selling", 
   "name": "__common__"
  }, 
  {
@@ -23,7 +23,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Sales BOM", 
@@ -74,6 +73,7 @@
   "reqd": 1
  }, 
  {
+  "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -81,6 +81,7 @@
   "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
@@ -88,6 +89,7 @@
   "write": 0
  }, 
  {
+  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 

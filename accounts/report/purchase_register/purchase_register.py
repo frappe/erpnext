@@ -38,11 +38,12 @@ def execute(filters=None):
 	data = []
 	for inv in invoice_list:
 		# invoice details
-		purchase_order = ", ".join(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", []))
-		purchase_receipt = ", ".join(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", []))
+		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
+		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
+
 		row = [inv.name, inv.posting_date, inv.supplier, inv.credit_to, 
 			account_map.get(inv.credit_to), inv.project_name, inv.bill_no, inv.bill_date, 
-			inv.remarks, purchase_order, purchase_receipt]
+			inv.remarks, ", ".join(purchase_order), ", ".join(purchase_receipt)]
 		
 		# map expense values
 		for expense_acc in expense_accounts:
@@ -55,8 +56,9 @@ def execute(filters=None):
 		for tax_acc in tax_accounts:
 			row.append(invoice_tax_map.get(inv.name, {}).get(tax_acc))
 
-		# total tax, grand total
-		row += [inv.total_tax, inv.grand_total]
+		# total tax, grand total, outstanding amount & rounded total
+		row += [inv.other_charges_total, inv.grand_total, flt(inv.grand_total, 2), \
+			inv.outstanding_amount]
 		data.append(row)
 	
 	return columns, data
@@ -85,7 +87,8 @@ def get_columns(invoice_list):
 	
 	columns = columns + [(account + ":Currency:120") for account in expense_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
-		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"]
+		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
+		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
 	return columns, expense_accounts, tax_accounts
 
@@ -102,9 +105,11 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, posting_date, credit_to, project_name, supplier, 
-		bill_no, bill_date, remarks, net_total, total_tax, grand_total 
-		from `tabPurchase Invoice` where docstatus = 1 %s 
+	return webnotes.conn.sql("""select pi.name, pi.posting_date, pi.credit_to, 
+		pii.project_name, pi.supplier, pi.bill_no, pi.bill_date, pi.remarks, pi.net_total, 
+		pi.total_tax, pi.grand_total, pi.outstanding_amount 
+		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii 
+		where pii.parent = pi.name and pi.docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
 	
