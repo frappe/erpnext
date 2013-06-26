@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, getdate, now, nowdate
+from webnotes.utils import cint, cstr, getdate, now, nowdate, get_defaults
 from webnotes.model.doc import Document, addchild
 from webnotes.model.code import get_obj
 from webnotes import session, form, msgprint
@@ -26,16 +26,31 @@ class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 	
-	# Account Setup
-	# ---------------
 	def setup_account(self, args):
 		import webnotes, json
 		args = json.loads(args)
 		webnotes.conn.begin()
 
-		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
-		#webnotes.msgprint(self.get_fy_details(args.get('fy_start')))
+		self.update_profile_name(args)
+		add_all_roles_to(webnotes.session.user)
+		self.create_fiscal_year_and_company(args)
+		self.set_defaults(args)
+		create_territories()
+		self.create_price_lists(args)
+		self.create_feed_and_todo()
+		self.create_email_digest()
 
+		webnotes.clear_cache()
+		msgprint("Company setup is complete. This page will be refreshed in a moment.")
+		webnotes.conn.commit()
+
+		return {
+			'sys_defaults': get_defaults(), 
+			'user_fullname': (args.get('first_name') or '') + (args.get('last_name')
+					and (" " + args.get('last_name')) or '')
+		}
+	
+	def update_profile_name(self, args):
 		args['name'] = webnotes.session.get('user')
 
 		# Update Profile
@@ -44,39 +59,54 @@ class DocType:
 			UPDATE `tabProfile` SET first_name=%(first_name)s,
 			last_name=%(last_name)s
 			WHERE name=%(name)s AND docstatus<2""", args)
-			
-		
+	
+	def create_fiscal_year_and_company(self, args):
+		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
 		# Fiscal Year
-		master_dict = {'Fiscal Year':{
+		webnotes.bean([{
+			"doctype":"Fiscal Year",
 			'year': curr_fiscal_year,
 			'year_start_date': fy_start_date,
-		}}
-		self.create_records(master_dict)
-		
+		}]).insert()
 		
 		# Company
-		master_dict = {'Company': {
+		webnotes.bean([{
+			"doctype":"Company",
 			'company_name':args.get('company_name'),
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency')
-		}}
-		self.create_records(master_dict)
-
+		}]).insert()
+		
+		self.curr_fiscal_year = curr_fiscal_year
+	
+	def create_price_lists(self, args):
+		webnotes.bean({
+			'doctype': 'Price List', 
+			'price_list_name': 'Standard Selling',
+			"buying_or_selling": "Selling",
+			"currency": args["currency"]
+		}).insert(),
+		webnotes.bean({
+			'doctype': 'Price List', 
+			'price_list_name': 'Standard Buying',
+			"buying_or_selling": "Buying",
+			"currency": args["currency"]
+		}).insert(),
+	
+	def set_defaults(self, args):
 		# enable default currency
 		webnotes.conn.set_value("Currency", args.get("currency"), "enabled", 1)
 		
-		def_args = {
-			'current_fiscal_year':curr_fiscal_year,
+		global_defaults = webnotes.bean("Global Defaults", "Global Defaults")
+		global_defaults.doc.fields.update({
+			'current_fiscal_year': self.curr_fiscal_year,
 			'default_currency': args.get('currency'),
 			'default_company':args.get('company_name'),
-			'date_format': webnotes.conn.get_value("Country", 
-				args.get("country"), "date_format"),
+			'date_format': webnotes.conn.get_value("Country", args.get("country"), "date_format"),
 			'emp_created_by':'Naming Series',
 			"float_precision": 4
-		}
-
-		# Set 
-		self.set_defaults(def_args)
+		})
+		global_defaults.save()
 		
 		webnotes.conn.set_value("Accounts Settings", None, "auto_inventory_accounting", 1)
 		webnotes.conn.set_default("auto_inventory_accounting", 1)
@@ -100,29 +130,20 @@ class DocType:
 		buying_settings.doc.pr_required = "No"
 		buying_settings.doc.maintain_same_rate = 1
 		buying_settings.save()
-		
-		cp_args = {}
+
+		notification_control = webnotes.bean("Notification Control")
+		notification_control.doc.quotation = 1
+		notification_control.doc.sales_invoice = 1
+		notification_control.doc.purchase_order = 1
+		notification_control.save()
+
+		# control panel
+		cp = webnotes.doc("Control Panel", "Control Panel")
 		for k in ['industry', 'country', 'timezone', 'company_name']:
-			cp_args[k] = args[k]
-		
-		self.set_cp_defaults(**cp_args)
-		
-		create_territories()
-
-		self.create_feed_and_todo()
-		
-		self.create_email_digest()
-
-		webnotes.clear_cache()
-		msgprint("Company setup is complete. This page will be refreshed in a moment.")
-		
-		import webnotes.utils
-		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
-				and (" " + args.get('last_name')) or '')
-				
-		webnotes.conn.commit()
-		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
-		
+			cp.fields[k] = args[k]
+			
+		cp.save()
+			
 	def create_feed_and_todo(self):
 		"""update activty feed and create todo for creation of item, customer, vendor"""
 		import home
@@ -131,24 +152,9 @@ class DocType:
 			To Do List</a>' + '"</i>', '#6B24B3')
 
 		d = Document('ToDo')
-		d.description = 'Create your first Customer'
+		d.description = '<a href="#Setup">Complete ERPNext Setup</a>'
 		d.priority = 'High'
 		d.date = nowdate()
-		d.reference_type = 'Customer'
-		d.save(1)
-
-		d = Document('ToDo')
-		d.description = 'Create your first Item'
-		d.priority = 'High'
-		d.date = nowdate()
-		d.reference_type = 'Item'
-		d.save(1)
-
-		d = Document('ToDo')
-		d.description = 'Create your first Supplier'
-		d.priority = 'High'
-		d.date = nowdate()
-		d.reference_type = 'Supplier'
 		d.save(1)
 
 	def create_email_digest(self):
@@ -206,42 +212,7 @@ class DocType:
 			fy = cstr(curr_year) + '-' + cstr(curr_year+1)
 			abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
 		return fy, stdt, abbr
-
-
-	def create_records(self, master_dict):
-		for d in master_dict.keys():
-			rec = Document(d)
-			for fn in master_dict[d].keys():
-				rec.fields[fn] = master_dict[d][fn]
-				
-			rec_obj = get_obj(doc=rec)
-			rec_obj.doc.save(1)
-			if hasattr(rec_obj, 'on_update'):
-				rec_obj.on_update()
-
-
-	# Set System Defaults
-	# --------------------
-	def set_defaults(self, def_args):
-		ma_obj = get_obj('Global Defaults','Global Defaults')
-		for d in def_args.keys():
-			ma_obj.doc.fields[d] = def_args[d]
-		ma_obj.doc.save()
-		ma_obj.on_update()
-
-
-	# Set Control Panel Defaults
-	# --------------------------
-	def set_cp_defaults(self, industry, country, timezone, company_name):
-		cp = Document('Control Panel','Control Panel')
-		cp.company_name = company_name
-		cp.industry = industry
-		cp.time_zone = timezone
-		cp.country = country
-		cp.save()
 			
-	# Create Profile
-	# --------------
 	def create_profile(self, user_email, user_fname, user_lname, pwd=None):
 		pr = Document('Profile')
 		pr.first_name = user_fname
@@ -261,7 +232,7 @@ def add_all_roles_to(name):
 	profile = webnotes.doc("Profile", name)
 	for role in webnotes.conn.sql("""select name from tabRole"""):
 		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
-			d = profile.addchild("userroles", "UserRole")
+			d = profile.addchild("user_roles", "UserRole")
 			d.role = role[0]
 			d.insert()
 			

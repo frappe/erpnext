@@ -36,11 +36,18 @@ erpnext.startup.start = function() {
 		erpnext.toolbar.setup();
 		
 		// complete registration
-		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
+		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete==='No')) { 
 			wn.require("app/js/complete_setup.js");
 			erpnext.complete_setup.show(); 
-		}
-		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
+		} else if(!wn.boot.customer_count) {
+			if(wn.get_route()[0]!=="Setup") {
+				msgprint("<a class='btn btn-success' href='#Setup'>" 
+					+ wn._("Proceed to Setup") + "</a>\
+					<br><br><p class='text-muted'>"+
+					wn._("This message goes away after you create your first customer.")+
+					"</p>", wn._("Welcome"));
+			}
+		} else if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
 			var today = dateutil.str_to_obj(wn.boot.server_date);
 			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
 			var diff = dateutil.get_diff(expires_on, today);

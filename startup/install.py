@@ -135,13 +135,7 @@ def import_defaults():
 			
 		# supplier type
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
-		
-		# Price List
-		{'doctype': 'Price List', 'name': 'Default Price List', 'price_list_name': 'Default Price List',
-			"buying_or_selling": "Selling"},
-		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard',
-			"buying_or_selling": "Selling"},
-				
+
 		# warehouse type
 		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
 		{'doctype': 'Warehouse Type', 'name': 'Fixed Asset', 'warehouse_type': 'Fixed Asset'},
