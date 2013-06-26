@@ -1,0 +1,365 @@
+{
+ "name": "Plantilla de cuentas de Honduras (sencilla)", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos de Ventas", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos de Ventas"
+         }
+        ], 
+        "name": "Gastos de Ventas"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos no Deducibles", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos no Deducibles"
+         }
+        ], 
+        "name": "Gastos no Deducibles"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos de Administraci\u00f3n", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos de Administraci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Otros Gastos de Operaci\u00f3n", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Otros Gastos de Operaci\u00f3n"
+         }
+        ], 
+        "name": "Gastos de Operaci\u00f3n"
+       }
+      ], 
+      "name": "Gastos"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Costos de Ventas", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Costos de Ventas"
+         }
+        ], 
+        "name": "Costos"
+       }
+      ], 
+      "name": "Egresos"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Intereses", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Otros Gastos Financieros", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Otros Gastos y Productos Financieros"
+         }
+        ], 
+        "name": "Otros Gastos y Productos Financieros"
+       }
+      ], 
+      "name": "Otros Gastos y Productos Financieros"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Descuentos Sobre Ventas", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Ventas", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "Ventas Netas"
+         }
+        ], 
+        "name": "Ventas"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Otros Ingresos", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "Otros Ingresos"
+         }
+        ], 
+        "name": "Otros Ingresos"
+       }
+      ], 
+      "name": "Ingresos"
+     }
+    ], 
+    "name": "Estado de Resultados"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "ISV por Pagar", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "ISV por Pagar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cuentas y Documentos por Pagar", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Cuentas y Documentos por Pagar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Impuestos", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Impuestos"
+         }
+        ], 
+        "name": "Pasivo Corto Plazo"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Anticipos", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Cr\u00e9ditos Diferidos"
+         }
+        ], 
+        "name": "Cr\u00e9ditos Diferidos"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Provisi\u00f3n para Indemnizaciones", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Provisi\u00f3n para Indemnizaciones"
+         }
+        ], 
+        "name": "Pasivo a Largo Plazo"
+       }
+      ], 
+      "name": "Pasivo"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Reservas", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Perdidas y Ganancias", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Capital Autorizado, Suscr\u00edto y Pagado", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Patrimonio de los Accionistas"
+         }
+        ], 
+        "name": "Patrimonio de los Accionistas"
+       }
+      ], 
+      "name": "Patrimonio"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inventario"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ISV por Cobrar", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Retenciones de ISV recibidas", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "ISV por Cobrar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Prestamos al Personal", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cuentas por Cobrar Empresas Afilidas", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cuentas por Cobrar Generales", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Otras Cuentas por Cobrar", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Cuentas y Documentos por Cobrar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja Chica", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Caja y Bancos"
+         }
+        ], 
+        "name": "Activo Corriente"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Propiedad, Planta y Equipo", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Propiedad, Planta y Equipo"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Depreciaciones Acumuladas", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Depreciaciones Acumuladas"
+         }
+        ], 
+        "name": "No Corriente"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos de Organizaci\u00f3n", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Gastos de Organizaci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gastos por Amortizar", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Gastos por Amortizar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gastos Anticipados", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Gastos Anticipados"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Otros Activos", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Otros Activos"
+         }
+        ], 
+        "name": "Diferido"
+       }
+      ], 
+      "name": "Activo"
+     }
+    ], 
+    "name": "Balance General"
+   }
+  ], 
+  "name": "Plan contable de Honduras (sencillo)"
+ }
+}

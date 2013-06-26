@@ -69,16 +69,10 @@ class DocType:
 			'current_fiscal_year':curr_fiscal_year,
 			'default_currency': args.get('currency'),
 			'default_company':args.get('company_name'),
-			'default_stock_uom':'Nos',
 			'date_format': webnotes.conn.get_value("Country", 
 				args.get("country"), "date_format"),
-			'so_required':'No',
-			'dn_required':'No',
-			'po_required':'No',
-			'pr_required':'No',
 			'emp_created_by':'Naming Series',
-			'cust_master_name':'Customer Name', 
-			'supp_master_name':'Supplier Name'
+			"float_precision": 4
 		}
 
 		# Set 
@@ -93,6 +87,19 @@ class DocType:
 		stock_settings.doc.stock_uom = "Nos"
 		stock_settings.doc.auto_indent = 1
 		stock_settings.save()
+		
+		selling_settings = webnotes.bean("Selling Settings")
+		selling_settings.cust_master_name = "Customer Name"
+		selling_settings.doc.so_required = "No"
+		selling_settings.doc.dn_required = "No"
+		selling_settings.save()
+
+		buying_settings = webnotes.bean("Buying Settings")
+		buying_settings.doc.supp_master_name = "Supplier Name"
+		buying_settings.doc.po_required = "No"
+		buying_settings.doc.pr_required = "No"
+		buying_settings.doc.maintain_same_rate = 1
+		buying_settings.save()
 		
 		cp_args = {}
 		for k in ['industry', 'country', 'timezone', 'company_name']:

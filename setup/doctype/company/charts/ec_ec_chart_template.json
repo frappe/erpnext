@@ -1,0 +1,11 @@
+{
+ "name": "Ecuador - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "name": "CUENTAS DE ORDEN"
+   }
+  ], 
+  "name": "PLAN DE CTAS. ECUADOR"
+ }
+}

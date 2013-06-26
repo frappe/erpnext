@@ -1,0 +1,399 @@
+{
+ "name": "Canada - Chart of Accounts for english-speaking provinces", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "OTHER NON-OPERATING INCOMES"
+       }, 
+       {
+        "name": "INTERESTS"
+       }
+      ], 
+      "name": "NON-OPERATING INCOMES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inside Sales", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "International Sales", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Non-Harmonized Provinces Sales", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Harmonized Provinces Sales", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "OTHER OPERATING INCOMES"
+       }
+      ], 
+      "name": "OPERATING INCOMES"
+     }
+    ], 
+    "name": "INCOMES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PREPAID EXPENSES"
+       }, 
+       {
+        "name": "INVESTMENTS HELD FOR TRADING"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
+         }, 
+         {
+          "name": "Customers Account"
+         }
+        ], 
+        "name": "ACCOUNTS RECEIVABLES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Stock In Hand", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Stock Delivered But Not Billed", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "STOCKS"
+       }, 
+       {
+        "name": "TREASURY OR TREASURY EQUIVALENTS"
+       }, 
+       {
+        "name": "CASH"
+       }, 
+       {
+        "name": "CERTIFICATES OF DEPOSITS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "GST receivable"
+         }, 
+         {
+          "name": "PST/QST receivable"
+         }, 
+         {
+          "name": "HST receivable"
+         }
+        ], 
+        "name": "TAXES RECEIVABLES"
+       }
+      ], 
+      "name": "CURRENT ASSETS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INVESTMENTS AVAILABLE FOR SALE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACCUMULATED DEPRECIATIONS"
+         }
+        ], 
+        "name": "TANGIBLE ASSETS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PATENTS, TRADEMARKS AND COPYRIGHTS"
+         }
+        ], 
+        "name": "INTANGIBLE ASSETS"
+       }
+      ], 
+      "name": "NON-CURRENT ASSETS"
+     }
+    ], 
+    "name": "ASSETS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "TRANSLATION ADJUSTMENTS"
+     }, 
+     {
+      "name": "CONTRIBUTED SURPLUS"
+     }, 
+     {
+      "name": "RETAINED EARNINGS"
+     }, 
+     {
+      "name": "PREMIUMS"
+     }, 
+     {
+      "name": "SHARE CAPITAL"
+     }, 
+     {
+      "name": "DIVIDENDS"
+     }
+    ], 
+    "name": "EQUITY"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "DEFERRED TAXES"
+       }, 
+       {
+        "name": "NON-CURRENT FINANCIAL DEBTS"
+       }, 
+       {
+        "name": "OTHER NON-CURRENT LIABILITIES"
+       }, 
+       {
+        "name": "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES"
+       }
+      ], 
+      "name": "NON-CURRENT LIABILITIES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Stock Received But Not Billed", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
+       }, 
+       {
+        "name": "CURRENT FINANCIAL DEBTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Suppliers Account"
+         }
+        ], 
+        "name": "ACCOUNTS PAYABLES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Health Services Fund to pay", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Labour Health and Safety to pay", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Annuities - Employees Contribution", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Annuities - Employer Contribution", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "ANNUITIES TO PAY"
+           }, 
+           {
+            "children": [
+             {
+              "name": "PAP - Employer Contribution", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "PAP - Employee Contribution", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "PARENTAL INSURANCE PLAN TO PAY"
+           }, 
+           {
+            "name": "Provincial Income Tax", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Labour Standards to pay", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "PROVINCIAL REVENU AGENCY"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "EI - Employees Contribution", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "EI - Employer Contribution", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "EMPLOYMENT INSURANCE TO PAY"
+           }, 
+           {
+            "name": "Federal Income Tax", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "CANADIAN REVENU AGENCY"
+         }
+        ], 
+        "name": "LABOUR TAXES TO PAY"
+       }, 
+       {
+        "children": [
+         {
+          "name": "HST to pay"
+         }, 
+         {
+          "name": "GST to pay"
+         }, 
+         {
+          "name": "PST/QST to pay"
+         }
+        ], 
+        "name": "TAXES PAYABLES"
+       }, 
+       {
+        "name": "STOCK LIABILITIES"
+       }, 
+       {
+        "name": "OTHER ACCOUNTS PAYABLES"
+       }
+      ], 
+      "name": "CURRENT LIABILITIES"
+     }
+    ], 
+    "name": "LIABILITIES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "OTHER NON-OPERATING EXPENSES"
+       }, 
+       {
+        "name": "INTERESTS EXPENSES"
+       }
+      ], 
+      "name": "NON-OPERATING EXPENSES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "RESEARCH AND DEVELOPMENT EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Salaries, wages and commissions", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Labour Health and Safety", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Annuities", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Labour Standards", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Provincial Income Tax", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Parental Insurance", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Holidays", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Federal Income Tax", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Employment Insurance", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Health Services Fund", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "LABOUR EXPENSES"
+       }, 
+       {
+        "name": "SALES EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Purchases in non-harmonized provinces", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "International Purchases", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Inside Purchases", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Purchases in harmonized provinces", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "COST OF GOODS SOLD"
+       }, 
+       {
+        "name": "OTHER OPERATING EXPENSES"
+       }, 
+       {
+        "name": "GENERAL EXPENSES"
+       }
+      ], 
+      "name": "OPERATING EXPENSES"
+     }
+    ], 
+    "name": "EXPENSES"
+   }
+  ], 
+  "name": "Account Chart CA EN", 
+  "parent_id": null
+ }
+}

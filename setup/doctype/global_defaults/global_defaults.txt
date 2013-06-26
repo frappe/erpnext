@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-06-24 17:07:55", 
+  "modified": "2013-06-25 11:20:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,8 +24,7 @@
   "parent": "Global Defaults", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read_only": 0
+  "permlevel": 0
  }, 
  {
   "amend": 0, 
@@ -49,72 +48,49 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "general", 
+  "fieldname": "date_and_number_settings", 
   "fieldtype": "Section Break", 
-  "label": "General"
- }, 
- {
-  "description": "Session Expiry in Hours e.g. 06:00", 
-  "doctype": "DocField", 
-  "fieldname": "session_expiry", 
-  "fieldtype": "Data", 
-  "label": "Session Expiry"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_3", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "description": "For Server Side Print Formats", 
-  "doctype": "DocField", 
-  "fieldname": "print_style", 
-  "fieldtype": "Select", 
-  "label": "Print Format Style", 
-  "options": "Standard\nClassic\nModern\nSpartan"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Section Break", 
-  "label": "Company"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_company", 
-  "fieldtype": "Link", 
-  "label": "Default Company", 
-  "options": "Company", 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "current_fiscal_year", 
-  "fieldtype": "Link", 
-  "label": "Current Fiscal Year", 
-  "options": "Fiscal Year", 
-  "reqd": 1
+  "label": "Date and Number Settings"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "date_format", 
   "fieldtype": "Select", 
   "label": "Date Format", 
-  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy"
+  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy", 
+  "read_only": 0
  }, 
  {
+  "default": "This is the default number format. For currencies, please set the number format in the currency master.", 
   "doctype": "DocField", 
-  "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "description": "Do not show any symbol like $ etc next to currencies.", 
-  "doctype": "DocField", 
-  "fieldname": "hide_currency_symbol", 
+  "fieldname": "number_format", 
   "fieldtype": "Select", 
-  "label": "Hide Currency Symbol", 
-  "options": "\nNo\nYes"
+  "label": "Number Format", 
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
+  "doctype": "DocField", 
+  "fieldname": "float_precision", 
+  "fieldtype": "Select", 
+  "label": "Float Precision", 
+  "options": "\n2\n3\n4\n5\n6", 
+  "read_only": 0
+ }, 
+ {
+  "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
+  "doctype": "DocField", 
+  "fieldname": "disable_rounded_total", 
+  "fieldtype": "Check", 
+  "label": "Disable Rounded Total", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Currency Settings"
  }, 
  {
   "default": "INR", 
@@ -123,164 +99,87 @@
   "fieldtype": "Link", 
   "label": "Default Currency", 
   "options": "Currency", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
-  "default": "This is the default number format. For currencies, please set the number format in the currency master.", 
+  "description": "Do not show any symbol like $ etc next to currencies.", 
   "doctype": "DocField", 
-  "fieldname": "number_format", 
+  "fieldname": "hide_currency_symbol", 
   "fieldtype": "Select", 
-  "label": "Number Format", 
-  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
- }, 
- {
-  "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
-  "doctype": "DocField", 
-  "fieldname": "float_precision", 
-  "fieldtype": "Select", 
-  "label": "Float Precision", 
-  "options": "\n2\n3\n4\n5\n6"
+  "label": "Hide Currency Symbol", 
+  "options": "\nNo\nYes", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "selling", 
+  "fieldname": "company", 
   "fieldtype": "Section Break", 
-  "label": "Selling"
- }, 
- {
-  "default": "Customer Name", 
-  "doctype": "DocField", 
-  "fieldname": "cust_master_name", 
-  "fieldtype": "Select", 
-  "label": "Customer Master created by ", 
-  "options": "Customer Name\nNaming Series"
+  "label": "Company Settings", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "default_customer_group", 
+  "fieldname": "default_company", 
   "fieldtype": "Link", 
-  "label": "Default Customer Group", 
-  "options": "Customer Group"
+  "label": "Default Company", 
+  "options": "Company", 
+  "read_only": 0, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "cghelp", 
-  "fieldtype": "HTML", 
-  "label": "CGHelp", 
-  "options": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_territory", 
+  "fieldname": "current_fiscal_year", 
   "fieldtype": "Link", 
-  "label": "Default Territory", 
-  "options": "Territory"
+  "label": "Current Fiscal Year", 
+  "options": "Fiscal Year", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "territoryhelp", 
-  "fieldtype": "HTML", 
-  "label": "TerritoryHelp", 
-  "options": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_price_list", 
-  "fieldtype": "Link", 
-  "label": "Default Price List", 
-  "options": "Price List"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_price_list_currency", 
-  "fieldtype": "Link", 
-  "label": "Default Price List Currency", 
-  "options": "Currency"
- }, 
- {
-  "default": "No", 
-  "doctype": "DocField", 
-  "fieldname": "so_required", 
-  "fieldtype": "Select", 
-  "label": "Sales Order Required", 
-  "options": "No\nYes"
- }, 
- {
-  "default": "No", 
-  "doctype": "DocField", 
-  "fieldname": "dn_required", 
-  "fieldtype": "Select", 
-  "label": "Delivery Note Required", 
-  "options": "No\nYes"
- }, 
- {
-  "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
-  "doctype": "DocField", 
-  "fieldname": "disable_rounded_total", 
-  "fieldtype": "Check", 
-  "label": "Disable Rounded Total"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "buying", 
+  "fieldname": "system", 
   "fieldtype": "Section Break", 
-  "label": "Buying"
+  "label": "System Settings", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Session Expiry in Hours e.g. 06:00", 
+  "doctype": "DocField", 
+  "fieldname": "session_expiry", 
+  "fieldtype": "Data", 
+  "label": "Session Expiry", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "default_supplier_type", 
-  "fieldtype": "Link", 
-  "label": "Default Supplier Type", 
-  "options": "Supplier Type"
- }, 
- {
-  "default": "Supplier Name", 
-  "doctype": "DocField", 
-  "fieldname": "supp_master_name", 
-  "fieldtype": "Select", 
-  "label": "Supplier Master created by ", 
-  "options": "Supplier Name\nNaming Series"
+  "fieldname": "sms_sender_name", 
+  "fieldtype": "Data", 
+  "label": "SMS Sender Name", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break6", 
+  "fieldname": "column_break_3", 
   "fieldtype": "Column Break", 
-  "width": "50%"
+  "read_only": 0
  }, 
  {
-  "default": "No", 
+  "description": "For Server Side Print Formats", 
   "doctype": "DocField", 
-  "fieldname": "po_required", 
+  "fieldname": "print_style", 
   "fieldtype": "Select", 
-  "label": "Purchase Order Required", 
-  "options": "No\nYes"
- }, 
- {
-  "default": "No", 
-  "doctype": "DocField", 
-  "fieldname": "pr_required", 
-  "fieldtype": "Select", 
-  "label": "Purchase Receipt Required", 
-  "options": "No\nYes"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "maintain_same_rate", 
-  "fieldtype": "Check", 
-  "label": "Maintain same rate throughout purchase cycle"
+  "label": "Print Format Style", 
+  "options": "Standard\nClassic\nModern\nSpartan", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "hr", 
   "fieldtype": "Section Break", 
   "label": "HR", 
-  "options": "<div style=\"padding-top: 8px;\" class=\"columnHeading\">HR</div>"
+  "options": "<div style=\"padding-top: 8px;\" class=\"columnHeading\">HR</div>", 
+  "read_only": 0
  }, 
  {
   "description": "Employee record is created using selected field. ", 
@@ -288,19 +187,8 @@
   "fieldname": "emp_created_by", 
   "fieldtype": "Select", 
   "label": "Employee Records to be created by ", 
-  "options": "Naming Series\nEmployee Number"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "system", 
-  "fieldtype": "Section Break", 
-  "label": "System"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sms_sender_name", 
-  "fieldtype": "Data", 
-  "label": "SMS Sender Name"
+  "options": "Naming Series\nEmployee Number", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocPerm"

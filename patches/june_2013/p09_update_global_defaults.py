@@ -10,7 +10,11 @@ def execute():
 		"reorder_email_notify": "Stock Settings",
 		"tolerance": "Stock Settings",
 		"stock_frozen_upto": "Stock Settings",
-		"stock_auth_role": "Stock Settings"
+		"stock_auth_role": "Stock Settings",
+		"so_required": "Selling Settings",
+		"dn_required": "Selling Settings",
+		"po_required": "Selling Settings",
+		"pr_required": "Selling Settings"
 	}
 	
 	from_defaults = {
@@ -18,7 +22,14 @@ def execute():
 		"item_naming_by": "Stock Settings",
 		"stock_uom": "Stock Settings",
 		"valuation_method": "Stock Settings",
-		"allow_negative_stock": "Stock Settings"
+		"allow_negative_stock": "Stock Settings",
+		"cust_master_name": "Selling Settings",
+		"customer_group": "Selling Settings",
+		"territory": "Selling Settings",
+		"price_list_name": "Selling Settings",
+		"supplier_type": "Buying Settings",
+		"supp_master_name": "Buying Settings",
+		"maintain_same_rate": "Buying Settings"
 	}
 
 	for key in from_global_defaults:

@@ -1,0 +1,1126 @@
+{
+ "name": "India - Chart of Accounts for Private Ltd/Partnership", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Loss on Sale of Assets", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Non-Operating Expenses and Losses", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Produits finis", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "PRODUITS FINIS", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rebuts", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "D\u00e9chets", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Travaux en cours", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Produits en cours de fabrication", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Produits semi-ouvr\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Travaux en association momentan\u00e9e", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "EN COURS DE FABRICATION", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Product Sales", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Imprim\u00e9s et fournitures de bureau", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Fournitures de services sociaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Emballages r\u00e9cup\u00e9rables", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Emballages perdus", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Emballages commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Mati\u00e8res d'approvisionnement", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Energie, charbon, coke, Mazout, essence, propane", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Produits d'entretien", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Fournitures diverses et petit outillage", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Service Revenues", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Operating Revenue Accounts", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Interest Revenues", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Gain on Sale of Assets", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Non-Operating Revenue and Gains", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "B\u00e9n\u00e9fice pris en compte", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "COMMANDES EN COURS D'EXECUTION", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acomptes vers\u00e9s", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "ACOMPTES VERSES SUR ACHATS POUR STOCKS", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "R\u00e9ductions de valeurs act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Immeuble B", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Immeuble A", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Immeubles construits en vue de leur revente", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Immeuble A", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Immeuble B", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMEUBLES DESTINES A LA VENTE", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Groupe B", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Groupe A", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Valeur d'acquisition", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "MARCHANDISES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Rent Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Supplies Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Revenus des actions", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Revenus des obligations", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Revenus des cr\u00e9ances \u00e0 plus d'un an", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "Depreciation Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Salaries Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es"
+         }, 
+         {
+          "name": "Wages Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Montants non appel\u00e9s"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caisse principale"
+           }
+          ], 
+          "name": "Utilities Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Loyers divers", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Charges locatives", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Advertising Expense", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Telephone Expense", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Operating Expense Accounts", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Expense", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Profit And Loss"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Plus-values act\u00e9es sur terrains", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortissements sur frais d'acquisition", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "R\u00e9ductions de valeur sur terrains", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Amortissements et r\u00e9ductions de valeur", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Terrains", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Frais d'acquisition sur terrains", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Wages Payable", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Co\u00fbt des frais de restructuration", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur frais de restructuration", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Frais de restructuration", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Amortissements sur agios sur emprunts et frais d'\u00e9mission d'emprunts", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Agios sur emprunts et frais d'\u00e9mission d'emprunts", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Frais d'\u00e9mission d'emprunts et primes de remboursement", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Amortissements sur frais de constitution et d'augmentation de capital", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Frais de constitution et d'augmentation de capital", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Frais de constitution et d'augmentation de capital", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Amortissements sur int\u00e9r\u00eats intercalaires", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Int\u00e9r\u00eats intercalaires", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Int\u00e9r\u00eats intercalaires", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres frais d'\u00e9tablissement", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur autres frais d'\u00e9tablissement", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Autres frais d'\u00e9tablissement", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Plus-values act\u00e9es sur mat\u00e9riel de bureau et service social", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Plus-values act\u00e9es sur mobilier", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortissements sur mobilier", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Amortissements sur mat\u00e9riel de bureau et service social", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Amortissements", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mobilier oeuvres sociales", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Mobilier des autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Mobilier des b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Mobilier des b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Mobilier", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Des b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Des b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Des autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Des oeuvres sociales", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Mat\u00e9riel de bureau et de service social", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Unearned Revenues", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Reserve and Surplus Account", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Installation de conditionnement d'air", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation de chauffage", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation de chargement", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation d'\u00e9lectricit\u00e9", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation d'eau", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation de gaz", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installation de vapeur", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Interest Payable", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Frais de recherche et de mise au point", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur frais de recherche et de mise au point", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es sur frais de recherche et de mise au point", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Notes Payable", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Exice Duty Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Sales Tax Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Service Tax Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "VAT Payable", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Tax payable", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Accounts Payable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Constructions", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Terrains", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements et r\u00e9ductions de valeur sur terrains et constructions en leasing", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values sur emphyt\u00e9ose, leasing et droits similaires : terrains et constructions", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Mortgage Loan Payable", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Liabilities", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Montants transf\u00e9r\u00e9s aux r\u00e9sultats", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "SUBSIDES EN CAPITAL", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perte report\u00e9e", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "BENEFICE (PERTE) REPORTE(E)", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acomptes re\u00e7us sur commandes", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Autres emprunts", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Banque B", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Banque A", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Promesses", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Banque A", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Banque B", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Dettes en compte", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Banque A", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Banque B", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Cr\u00e9dits d'acceptation", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Etablissements de cr\u00e9dit", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dettes sur droits r\u00e9els sur immeubles", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Dettes de location-financement de biens immobiliers", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Dettes de location-financement de biens mobiliers", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Dettes de location-financement et assimil\u00e9s", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Non convertibles", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Convertibles", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Emprunts obligataires non subordonn\u00e9s", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dettes envers les coparticipants des associations momentan\u00e9es et en participation", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Autres entreprises avec lesquelles il existe un lien de participation", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Autres dettes diverses", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Administrateurs, g\u00e9rants, associ\u00e9s", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Entreprises li\u00e9es", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Rentes viag\u00e8res capitalis\u00e9es", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Dettes diverses", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "DETTES A PLUS D'UN AN", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Provisions pour grosses r\u00e9parations et gros entretiens", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour s\u00fbret\u00e9s personnelles ou r\u00e9elles constitu\u00e9es \u00e0 l'appui de dettes et d'engagements de tiers", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour engagements relatifs \u00e0 l'acquisition ou \u00e0 la cession d'immobilisations", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour ex\u00e9cution de commandes pass\u00e9es ou re\u00e7ues", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour positions et march\u00e9s \u00e0 terme en devises ou positions et march\u00e9s \u00e0 terme en marchandises", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour charges fiscales", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour autres risques et charges", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Provisions pour garanties techniques attach\u00e9es aux ventes et prestations d\u00e9j\u00e0 effectu\u00e9es par l'entreprise", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Pour risques divers ", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Provision pour d\u00e9part de personnel", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Provision pour charge de liquidation", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Pour propre assureur", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Pour risques inh\u00e9rents aux op\u00e9rations de cr\u00e9dits \u00e0 moyen ou long terme", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Pour litiges en cours", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Pour amendes, doubles droits, p\u00e9nalit\u00e9s", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Provisions pour autres risques et charges", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "PROVISIONS POUR RISQUES ET CHARGES", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "PRIMES D'EMISSION", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Fournisseurs C.E.E.", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Fournisseurs belges", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Fournisseurs importation", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "Fournisseurs ordinaires", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Entreprises li\u00e9es", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Entreprises avec lesquelles il existe un lien de participation", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "Entreprises apparent\u00e9es", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Effets \u00e0 payer", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Entreprises avec lesquelles il existe un lien de participation", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Entreprises li\u00e9es", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "Entreprises apparent\u00e9es", 
+            "root_type": "Liability"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Fournisseurs importation", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Fournisseurs belges", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "Fournisseurs C.E.E.", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "Fournisseurs ordinaires", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Fournisseurs : dettes en compte", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Buildings", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Non convertibles", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Convertibles", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Land", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Accumulated Depreciation - Buildings", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Prepaid Insurance", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Merchandise Inventory", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reprises de r\u00e9ductions de valeur", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Plus-values de r\u00e9\u00e9valuation", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Accounts Receivable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Capital amorti", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Capital non amorti", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Capital souscrit ou capital personnel", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Cash"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Op\u00e9rations courantes", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Imp\u00f4ts personnels", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "R\u00e9mun\u00e9rations et autres avantages", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Compte de l'exploitant", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Supplies", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Accumulated Depreciation - Equipment", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipment", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Tax Receivable", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Assets", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "R\u00e9serve pour renouvellement des immobilisations", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "R\u00e9serve pour r\u00e9gularisation de dividendes", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "R\u00e9serve pour installations en faveur du personnel  1333 R\u00e9serves libres", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "R\u00e9serves disponibles", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "R\u00e9serves immunis\u00e9es", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres r\u00e9serves indisponibles", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "R\u00e9serve pour actions propres", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "R\u00e9serves indisponibles", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "R\u00e9serve l\u00e9gale", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "RESERVES", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Reprises de r\u00e9ductions de valeur", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Plus-values de r\u00e9\u00e9valuation", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Plus-values de r\u00e9\u00e9valuation sur immobilisations financi\u00e8res", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Plus-values de r\u00e9\u00e9valuation sur stocks", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Reprises de r\u00e9ductions de valeur sur placements de tr\u00e9sorerie", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Plus-values de r\u00e9\u00e9valuation", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Reprises de r\u00e9ductions de valeur", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Plus-values de r\u00e9\u00e9valuation sur immobilisations corporelles", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "PLUS-VALUES DE REEVALUATION", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "COMPTES DE LIAISON DES ETABLISSEMENTS ET SUCCURSALES", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Balance Sheet"
+   }
+  ], 
+  "name": "Partnership/Private Firm Chart of Account"
+ }
+}

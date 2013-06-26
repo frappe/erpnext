@@ -27,18 +27,10 @@ keydict = {
 	'company': 'default_company',
 	'currency': 'default_currency',
 	'hide_currency_symbol':'hide_currency_symbol',
-	'price_list_name': 'default_price_list',
-	'price_list_currency': 'default_price_list_currency',
-	'customer_group': 'default_customer_group',
-	'cust_master_name': 'cust_master_name', 
-	'supplier_type': 'default_supplier_type',
-	'supp_master_name': 'supp_master_name', 
-	'territory': 'default_territory',
 	'date_format': 'date_format',
 	'number_format': 'number_format',
 	'float_precision': 'float_precision',
 	'account_url':'account_url',
-	'maintain_same_rate' : 'maintain_same_rate',
 	'session_expiry': 'session_expiry',
 	'disable_rounded_total': 'disable_rounded_total'
 }
