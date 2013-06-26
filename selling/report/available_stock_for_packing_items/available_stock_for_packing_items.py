@@ -16,33 +16,33 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
+from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
 	
 	columns = get_columns()
-	item_warehouse_quantity_map = get_item_warehouse_quantity_map()
+	iwq_map = get_item_warehouse_quantity_map()
+	item_map = get_item_details()
 
-	data = []
-	for item, warehouse in item_warehouse_quantity_map.items():
-		item_details = get_item_details(item)[0]
+	data = []	
+	for sbom, warehouse in iwq_map.items():
 		total = 0
 		total_qty = 0
+		
 		for wh, item_qty in warehouse.items():
 			total += 1
-			row = [item, item_details.item_name, item_details.description, \
-			item_details.stock_uom, wh]
-			for quantity in item_qty.items():
-				max_qty = []
-				max_qty.append(quantity[1])
-			max_qty = min(max_qty)
-			total_qty += cint(max_qty.qty)
-			row += [max_qty.qty]
-			data.append(row)
-			if (total == len(warehouse)):
-				row = ["", "", "Total", "", "", total_qty]
+			row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description, 
+				item_map.get(sbom).stock_uom, wh]
+			available_qty = min(item_qty.values())
+			total_qty += flt(available_qty)
+			row += [available_qty]
+			
+			if available_qty:
 				data.append(row)
+				if (total == len(warehouse)):
+					row = ["", "", "Total", "", "", total_qty]
+					data.append(row)
 
 	return columns, data
 	
@@ -52,38 +52,41 @@ def get_columns():
 
 	return columns
 
-def get_sales_bom():
-	return webnotes.conn.sql("""select name from `tabSales BOM`""",	as_dict=1)
+def get_sales_bom_items():
+	sbom_item_map = {}
+	for sbom in webnotes.conn.sql("""select parent, item_code, qty from `tabSales BOM Item` 
+		where docstatus < 2""", as_dict=1):
+			sbom_item_map.setdefault(sbom.parent, {}).setdefault(sbom.item_code, sbom.qty)
+			
+	return sbom_item_map
 
-def get_sales_bom_items(item):
-	return webnotes.conn.sql("""select parent, item_code, qty from `tabSales BOM Item` 
-		where parent=%s""", (item), as_dict=1)
+def get_item_details():
+	item_map = {}
+	for item in webnotes.conn.sql("""select name, item_name, description, stock_uom 
+		from `tabItem`""", as_dict=1):
+			item_map.setdefault(item.name, item)
+			
+	return item_map
 
-def get_item_details(item):
-	return webnotes.conn.sql("""select name, item_name, description, stock_uom 
-		from `tabItem` where name=%s""", (item), as_dict=1)
-
-def get_item_warehouse_quantity(item):
-	return webnotes.conn.sql("""select item_code, warehouse, actual_qty from `tabBin` 
-		where item_code=%s""", (item), as_dict=1)
+def get_item_warehouse_quantity():
+	iwq_map = {}
+	bin = webnotes.conn.sql("""select item_code, warehouse, actual_qty from `tabBin` 
+		where actual_qty > 0""")
+	for item, wh, qty in bin:
+		iwq_map.setdefault(item, {}).setdefault(wh, qty)
+		
+	return iwq_map
 
 def get_item_warehouse_quantity_map():
-	iwq_map = {}
+	sbom_map = {}
+	iwq_map = get_item_warehouse_quantity()
+	sbom_item_map = get_sales_bom_items()
+	
+	for sbom, sbom_items in sbom_item_map.items():
+		for item, child_qty in sbom_items.items():
+			for wh, qty in iwq_map.get(item, {}).items():
+				avail_qty = flt(qty) / flt(child_qty)
+				sbom_map.setdefault(sbom, {}).setdefault(wh, {}) \
+					.setdefault(item, avail_qty)
 
-	sales_bom = get_sales_bom()
-
-	for item in sales_bom:
-		child_item = get_sales_bom_items(item.name)
-		for child in child_item:
-			item_warehouse_quantity = get_item_warehouse_quantity(child.item_code)
-			for iwq in item_warehouse_quantity:
-				iwq_map.setdefault(item.name, {}).setdefault(iwq.warehouse, {}).\
-				setdefault(child.item_code, webnotes._dict({
-					"qty" : 0
-				}))
-
-				q_dict = iwq_map[item.name][iwq.warehouse][child.item_code]
-				
-				q_dict.qty = cint(iwq.actual_qty / child.qty)
-
-	return iwq_map
+	return sbom_map
