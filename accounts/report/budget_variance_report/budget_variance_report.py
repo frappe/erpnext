@@ -16,17 +16,20 @@
 
 from __future__ import unicode_literals
 import webnotes
-import calendar
 from webnotes import _, msgprint
 from webnotes.utils import flt
 import time
+from accounts.utils import get_fiscal_year
+from controllers.trends import get_period_date_ranges, get_period_month_ranges
 
 def execute(filters=None):
 	if not filters: filters = {}
 	
 	columns = get_columns(filters)
-	period_month_ranges = get_period_month_ranges(filters)
+	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	cam_map = get_costcenter_account_month_map(filters)
+
+	precision = webnotes.conn.get_value("Global Defaults", None, "float_precision") or 2
 
 	data = []
 
@@ -39,7 +42,7 @@ def execute(filters=None):
 				for month in relevant_months:
 					month_data = monthwise_data.get(month, {})
 					for i, fieldname in enumerate(["target", "actual", "variance"]):
-						value = flt(month_data.get(fieldname))
+						value = flt(month_data.get(fieldname), precision)
 						period_data[i] += value
 						totals[i] += value
 				period_data[2] = period_data[0] - period_data[1]
@@ -61,7 +64,7 @@ def get_columns(filters):
 
 	group_months = False if filters["period"] == "Monthly" else True
 
-	for from_date, to_date in get_period_date_ranges(filters):
+	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
 		for label in ["Target (%s)", "Actual (%s)", "Variance (%s)"]:
 			if group_months:
 				columns.append(label % (from_date.strftime("%b") + " - " + to_date.strftime("%b")))				
@@ -69,41 +72,6 @@ def get_columns(filters):
 				columns.append(label % from_date.strftime("%b"))
 
 	return columns + ["Total Target::80", "Total Actual::80", "Total Variance::80"]
-
-def get_period_date_ranges(filters):
-	from dateutil.relativedelta import relativedelta
-
-	year_start_date, year_end_date = get_year_start_end_date(filters)
-
-	increment = {
-		"Monthly": 1,
-		"Quarterly": 3,
-		"Half-Yearly": 6,
-		"Yearly": 12
-	}.get(filters["period"])
-
-	period_date_ranges = []
-	for i in xrange(1, 13, increment): 
-		period_end_date = year_start_date + relativedelta(months=increment,
-			days=-1)
-		period_date_ranges.append([year_start_date, period_end_date])
-		year_start_date = period_end_date + relativedelta(days=1)
-
-	return period_date_ranges
-
-def get_period_month_ranges(filters):
-	from dateutil.relativedelta import relativedelta
-	period_month_ranges = []
-
-	for start_date, end_date in get_period_date_ranges(filters):
-		months_in_this_period = []
-		while start_date <= end_date:
-			months_in_this_period.append(start_date.strftime("%B"))
-			start_date += relativedelta(months=1)
-		period_month_ranges.append(months_in_this_period)
-
-	return period_month_ranges
-
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
@@ -122,7 +90,7 @@ def get_target_distribution_details(filters):
 	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
 		`tabCost Center` cc where bdd.parent=bd.name and cc.distribution_id=bd.name and \
-		bd.fiscal_year=%s""" % ('%s'), (filters.get("fiscal_year")), as_dict=1):
+		bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.month, d)
 
 	return target_details
@@ -147,11 +115,12 @@ def get_costcenter_account_month_map(filters):
 		for month in tdd:
 			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
 			.setdefault(month, webnotes._dict({
-				"target": 0.0, "actual": 0.0, "variance": 0.0
+				"target": 0.0, "actual": 0.0
 			}))
 
 			tav_dict = cam_map[ccd.name][ccd.account][month]
-			tav_dict.target = ccd.budget_allocated*(tdd[month]["percentage_allocation"]/100)
+			tav_dict.target = flt(ccd.budget_allocated) * \
+				(tdd[month]["percentage_allocation"]/100)
 
 			for ad in actual_details:
 				if ad.month_name == month and ad.account == ccd.account \
@@ -159,10 +128,3 @@ def get_costcenter_account_month_map(filters):
 						tav_dict.actual += ad.debit - ad.credit
 						
 	return cam_map
-
-def get_year_start_end_date(filters):
-	return webnotes.conn.sql("""select year_start_date, 
-		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
-			as year_end_date
-		from `tabFiscal Year`
-		where name=%s""", filters["fiscal_year"])[0]

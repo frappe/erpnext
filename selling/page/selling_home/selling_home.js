@@ -173,13 +173,11 @@ wn.module_page["Selling"] = [
 			},
 			{
 				"label":wn._("Territory Target Variance (Item Group-Wise)"),
-				route: "query-report/Territory Target Variance (Item Group-Wise)",
-				doctype: "Sales Order"
+				route: "query-report/Territory Target Variance Item Group-Wise"
 			},
 			{
 				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
-				route: "query-report/Sales Person Target Variance (Item Group-Wise)",
-				doctype: "Sales Order"
+				route: "query-report/Sales Person Target Variance Item Group-Wise"
 			},
 			{
 				"label":wn._("Customers Not Buying Since Long Time"),
@@ -195,6 +193,10 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Order Trend"),
 				route: "query-report/Sales Order Trends",
 				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Available Stock for Packing Items"),
+				route: "query-report/Available Stock for Packing Items",
 			},
 			{
 				"label":wn._("Pending SO Items For Purchase Request"),
