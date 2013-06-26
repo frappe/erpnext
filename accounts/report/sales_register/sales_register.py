@@ -39,12 +39,12 @@ def execute(filters=None):
 	data = []
 	for inv in invoice_list:
 		# invoice details
-		sales_order = ", ".join(invoice_so_dn_map.get(inv.name, {}).get("sales_order", []))
-		delivery_note = ", ".join(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", []))
+		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
+		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
 		row = [inv.name, inv.posting_date, inv.customer, inv.debit_to, 
 			account_map.get(inv.debit_to), customer_map.get(inv.customer), inv.project_name, 
-			inv.remarks, sales_order, delivery_note]
+			inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 		
 		# map income values
 		for income_acc in income_accounts:
@@ -57,8 +57,8 @@ def execute(filters=None):
 		for tax_acc in tax_accounts:
 			row.append(invoice_tax_map.get(inv.name, {}).get(tax_acc))
 
-		# total tax, grand total
-		row += [inv.other_charges_total, inv.grand_total]
+		# total tax, grand total, outstanding amount & rounded total
+		row += [inv.other_charges_total, inv.grand_total, inv.rounded_total, inv.outstanding_amount]
 
 		data.append(row)
 	
@@ -88,7 +88,8 @@ def get_columns(invoice_list):
 	
 	columns = columns + [(account + ":Currency:120") for account in income_accounts] + \
 		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
-		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"]
+		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
+		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
 	return columns, income_accounts, tax_accounts
 
@@ -106,7 +107,8 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
-		remarks, net_total, other_charges_total, grand_total from `tabSales Invoice` 
+		remarks, net_total, other_charges_total, grand_total, rounded_total, 
+		outstanding_amount from `tabSales Invoice` 
 		where docstatus = 1 %s order by posting_date desc, name desc""" % 
 		conditions, filters, as_dict=1)
 	
