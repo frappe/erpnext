@@ -11,7 +11,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos de Ventas", 
             "root_type": "Expense"
            }
@@ -26,7 +25,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos no Deducibles", 
             "root_type": "Expense"
            }
@@ -41,7 +39,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos de Administraci\u00f3n", 
             "root_type": "Expense"
            }
@@ -51,7 +48,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Otros Gastos de Operaci\u00f3n", 
             "root_type": "Expense"
            }
@@ -71,7 +67,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Costos de Ventas", 
             "root_type": "Expense"
            }
@@ -91,12 +86,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Intereses", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Otros Gastos Financieros", 
             "root_type": "Expense"
            }
@@ -116,12 +109,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Descuentos Sobre Ventas", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Ventas", 
             "root_type": "Income"
            }
@@ -136,7 +127,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Otros Ingresos", 
             "root_type": "Income"
            }
@@ -161,7 +151,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "ISV por Pagar", 
             "root_type": "Liability"
            }
@@ -171,7 +160,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Cuentas y Documentos por Pagar", 
             "root_type": "Liability"
            }
@@ -181,7 +169,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Impuestos", 
             "root_type": "Liability"
            }
@@ -196,7 +183,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Anticipos", 
             "root_type": "Liability"
            }
@@ -211,7 +197,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Provisi\u00f3n para Indemnizaciones", 
             "root_type": "Liability"
            }
@@ -231,17 +216,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Reservas", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Perdidas y Ganancias", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Capital Autorizado, Suscr\u00edto y Pagado", 
             "root_type": "Asset"
            }
@@ -259,18 +241,15 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Inventario"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "ISV por Cobrar", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Retenciones de ISV recibidas", 
             "root_type": "Asset"
            }
@@ -280,22 +259,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Prestamos al Personal", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cuentas por Cobrar Empresas Afilidas", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cuentas por Cobrar Generales", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Otras Cuentas por Cobrar", 
             "root_type": "Asset"
            }
@@ -305,7 +280,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Caja Chica", 
             "root_type": "Asset"
            }
@@ -320,7 +294,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Propiedad, Planta y Equipo", 
             "root_type": "Asset"
            }
@@ -330,7 +303,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Depreciaciones Acumuladas", 
             "root_type": "Asset"
            }
@@ -345,7 +317,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos de Organizaci\u00f3n", 
             "root_type": "Asset"
            }
@@ -355,7 +326,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos por Amortizar", 
             "root_type": "Asset"
            }
@@ -365,7 +335,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Gastos Anticipados", 
             "root_type": "Asset"
            }
@@ -375,7 +344,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Otros Activos", 
             "root_type": "Asset"
            }

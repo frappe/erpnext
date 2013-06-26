@@ -7,7 +7,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Loss on Sale of Assets", 
         "root_type": "Expense"
        }
@@ -18,14 +17,12 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Produits finis", 
           "root_type": "Asset"
          }
@@ -40,39 +37,32 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Rebuts", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "D\u00e9chets", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Travaux en cours", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Produits en cours de fabrication", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Produits semi-ouvr\u00e9s", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Travaux en association momentan\u00e9e", 
           "root_type": "Asset"
          }
@@ -87,43 +77,36 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Valeur d'acquisition", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Product Sales", 
           "root_type": "Income"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Imprim\u00e9s et fournitures de bureau", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Fournitures de services sociaux", 
             "root_type": "Asset"
            }, 
            {
             "children": [
              {
-              "children": [], 
               "name": "Emballages r\u00e9cup\u00e9rables", 
               "root_type": "Asset"
              }, 
              {
-              "children": [], 
               "name": "Emballages perdus", 
               "root_type": "Asset"
              }
@@ -132,22 +115,18 @@
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Mati\u00e8res d'approvisionnement", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Energie, charbon, coke, Mazout, essence, propane", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Produits d'entretien", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Fournitures diverses et petit outillage", 
             "root_type": "Asset"
            }
@@ -156,7 +135,6 @@
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es", 
           "root_type": "Asset"
          }
@@ -167,12 +145,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Interest Revenues", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Gain on Sale of Assets", 
           "root_type": "Income"
          }
@@ -187,17 +163,14 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "B\u00e9n\u00e9fice pris en compte", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Valeur d'acquisition", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }
@@ -208,12 +181,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Acomptes vers\u00e9s", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }
@@ -224,19 +195,16 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeurs act\u00e9es", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Immeuble B", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Immeuble A", 
           "root_type": "Asset"
          }
@@ -247,12 +215,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Immeuble A", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Immeuble B", 
           "root_type": "Asset"
          }
@@ -267,19 +233,16 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Groupe B", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Groupe A", 
           "root_type": "Asset"
          }
@@ -296,29 +259,24 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Rent Expense", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Supplies Expense", 
           "root_type": "Expense"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Revenus des actions", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Revenus des obligations", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Revenus des cr\u00e9ances \u00e0 plus d'un an", 
             "root_type": "Income"
            }
@@ -327,27 +285,22 @@
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Salaries Expense", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es"
          }, 
          {
-          "children": [], 
           "name": "Wages Expense", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Montants non appel\u00e9s"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Caisse principale"
            }
           ], 
@@ -357,12 +310,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Loyers divers", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Charges locatives", 
             "root_type": "Expense"
            }
@@ -371,7 +322,6 @@
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Telephone Expense", 
           "root_type": "Expense"
          }
@@ -393,19 +343,16 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es sur terrains", 
           "root_type": "Asset"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Amortissements sur frais d'acquisition", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "R\u00e9ductions de valeur sur terrains", 
             "root_type": "Asset"
            }
@@ -414,12 +361,10 @@
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Terrains", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Frais d'acquisition sur terrains", 
           "root_type": "Asset"
          }
@@ -430,12 +375,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Co\u00fbt des frais de restructuration", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur frais de restructuration", 
           "root_type": "Asset"
          }
@@ -446,12 +389,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Amortissements sur agios sur emprunts et frais d'\u00e9mission d'emprunts", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Agios sur emprunts et frais d'\u00e9mission d'emprunts", 
           "root_type": "Asset"
          }
@@ -462,12 +403,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Amortissements sur frais de constitution et d'augmentation de capital", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Frais de constitution et d'augmentation de capital", 
           "root_type": "Asset"
          }
@@ -478,12 +417,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Amortissements sur int\u00e9r\u00eats intercalaires", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Int\u00e9r\u00eats intercalaires", 
           "root_type": "Asset"
          }
@@ -494,12 +431,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres frais d'\u00e9tablissement", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur autres frais d'\u00e9tablissement", 
           "root_type": "Asset"
          }
@@ -512,12 +447,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Plus-values act\u00e9es sur mat\u00e9riel de bureau et service social", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Plus-values act\u00e9es sur mobilier", 
             "root_type": "Asset"
            }
@@ -528,12 +461,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Amortissements sur mobilier", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Amortissements sur mat\u00e9riel de bureau et service social", 
             "root_type": "Asset"
            }
@@ -544,22 +475,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Mobilier oeuvres sociales", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Mobilier des autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Mobilier des b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Mobilier des b\u00e2timents industriels", 
             "root_type": "Asset"
            }
@@ -570,22 +497,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Des b\u00e2timents industriels", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Des b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Des autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Des oeuvres sociales", 
             "root_type": "Asset"
            }
@@ -598,44 +521,36 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Reserve and Surplus Account", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Installation de conditionnement d'air", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation de chauffage", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation de chargement", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation d'\u00e9lectricit\u00e9", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation d'eau", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation de gaz", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installation de vapeur", 
           "root_type": "Asset"
          }
@@ -646,17 +561,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Frais de recherche et de mise au point", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur frais de recherche et de mise au point", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es sur frais de recherche et de mise au point", 
           "root_type": "Asset"
          }
@@ -667,22 +579,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Exice Duty Payable", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Sales Tax Payable", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Service Tax Payable", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "VAT Payable", 
           "root_type": "Liability"
          }
@@ -691,28 +599,23 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Accounts Payable"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Constructions", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Terrains", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements et r\u00e9ductions de valeur sur terrains et constructions en leasing", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values sur emphyt\u00e9ose, leasing et droits similaires : terrains et constructions", 
           "root_type": "Asset"
          }
@@ -727,7 +630,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Montants transf\u00e9r\u00e9s aux r\u00e9sultats", 
         "root_type": "Liability"
        }
@@ -738,7 +640,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perte report\u00e9e", 
         "root_type": "Liability"
        }
@@ -749,12 +650,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Acomptes re\u00e7us sur commandes", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Autres emprunts", 
         "root_type": "Liability"
        }, 
@@ -763,12 +662,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Banque B", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Banque A", 
             "root_type": "Liability"
            }
@@ -779,12 +676,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Banque A", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Banque B", 
             "root_type": "Liability"
            }
@@ -795,12 +690,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Banque A", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Banque B", 
             "root_type": "Liability"
            }
@@ -815,17 +708,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dettes sur droits r\u00e9els sur immeubles", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Dettes de location-financement de biens immobiliers", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Dettes de location-financement de biens mobiliers", 
           "root_type": "Liability"
          }
@@ -836,12 +726,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Non convertibles", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Convertibles", 
           "root_type": "Liability"
          }
@@ -852,32 +740,26 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dettes envers les coparticipants des associations momentan\u00e9es et en participation", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Autres entreprises avec lesquelles il existe un lien de participation", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Autres dettes diverses", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs, g\u00e9rants, associ\u00e9s", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Entreprises li\u00e9es", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Rentes viag\u00e8res capitalis\u00e9es", 
           "root_type": "Liability"
          }
@@ -892,79 +774,64 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Provisions pour grosses r\u00e9parations et gros entretiens", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour s\u00fbret\u00e9s personnelles ou r\u00e9elles constitu\u00e9es \u00e0 l'appui de dettes et d'engagements de tiers", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour engagements relatifs \u00e0 l'acquisition ou \u00e0 la cession d'immobilisations", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour ex\u00e9cution de commandes pass\u00e9es ou re\u00e7ues", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour positions et march\u00e9s \u00e0 terme en devises ou positions et march\u00e9s \u00e0 terme en marchandises", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour charges fiscales", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour autres risques et charges", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour garanties techniques attach\u00e9es aux ventes et prestations d\u00e9j\u00e0 effectu\u00e9es par l'entreprise", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Pour risques divers ", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Provision pour d\u00e9part de personnel", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Provision pour charge de liquidation", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Pour propre assureur", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Pour risques inh\u00e9rents aux op\u00e9rations de cr\u00e9dits \u00e0 moyen ou long terme", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Pour litiges en cours", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Pour amendes, doubles droits, p\u00e9nalit\u00e9s", 
           "root_type": "Liability"
          }
@@ -977,7 +844,6 @@
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "PRIMES D'EMISSION", 
       "root_type": "Liability"
      }, 
@@ -990,17 +856,14 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "Fournisseurs C.E.E.", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Fournisseurs belges", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Fournisseurs importation", 
               "root_type": "Liability"
              }
@@ -1011,12 +874,10 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "Entreprises li\u00e9es", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Entreprises avec lesquelles il existe un lien de participation", 
               "root_type": "Liability"
              }
@@ -1033,12 +894,10 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "Entreprises avec lesquelles il existe un lien de participation", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Entreprises li\u00e9es", 
               "root_type": "Liability"
              }
@@ -1049,17 +908,14 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "Fournisseurs importation", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Fournisseurs belges", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Fournisseurs C.E.E.", 
               "root_type": "Liability"
              }
@@ -1078,12 +934,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Non convertibles", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Convertibles", 
           "root_type": "Liability"
          }
@@ -1092,29 +946,24 @@
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Accumulated Depreciation - Buildings", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Prepaid Insurance", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Merchandise Inventory", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Reprises de r\u00e9ductions de valeur", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Plus-values de r\u00e9\u00e9valuation", 
           "root_type": "Liability"
          }
@@ -1124,12 +973,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Capital amorti", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Capital non amorti", 
           "root_type": "Liability"
          }
@@ -1138,23 +985,19 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Cash"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Op\u00e9rations courantes", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4ts personnels", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9mun\u00e9rations et autres avantages", 
           "root_type": "Liability"
          }
@@ -1163,22 +1006,18 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Supplies", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Accumulated Depreciation - Equipment", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Equipment", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Tax Receivable", 
         "root_type": "Asset"
        }
@@ -1191,17 +1030,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9serve pour renouvellement des immobilisations", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9serve pour r\u00e9gularisation de dividendes", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9serve pour installations en faveur du personnel  1333 R\u00e9serves libres", 
           "root_type": "Liability"
          }
@@ -1210,19 +1046,16 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9serves immunis\u00e9es", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres r\u00e9serves indisponibles", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9serve pour actions propres", 
           "root_type": "Liability"
          }
@@ -1231,7 +1064,6 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9serve l\u00e9gale", 
         "root_type": "Liability"
        }
@@ -1244,12 +1076,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Reprises de r\u00e9ductions de valeur", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Plus-values de r\u00e9\u00e9valuation", 
           "root_type": "Liability"
          }
@@ -1258,24 +1088,20 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Plus-values de r\u00e9\u00e9valuation sur stocks", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Reprises de r\u00e9ductions de valeur sur placements de tr\u00e9sorerie", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Plus-values de r\u00e9\u00e9valuation", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Reprises de r\u00e9ductions de valeur", 
           "root_type": "Liability"
          }
@@ -1288,7 +1114,6 @@
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "COMPTES DE LIAISON DES ETABLISSEMENTS ET SUCCURSALES", 
       "root_type": "Liability"
      }

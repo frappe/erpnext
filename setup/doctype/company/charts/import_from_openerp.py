@@ -43,12 +43,18 @@ def make_charts():
 			chartfile.write(json.dumps(chart, indent=1, sort_keys=True))
 
 def make_trees():
+	"""build tree hierarchy"""
 	print "making trees..."
 	for id in accounts.keys():
 		account = accounts[id]
 		if account.get("parent_id") and accounts[account["parent_id"]]:
 			accounts[account["parent_id"]]["children"].append(account)
 			del account["parent_id"]
+
+	# remove empty children
+	for id in accounts.keys():
+		if "children" in accounts[id] and not accounts[id].get("children"):
+			del accounts[id]["children"]
 
 def make_maps():
 	"""make maps for `charts` and `accounts`"""

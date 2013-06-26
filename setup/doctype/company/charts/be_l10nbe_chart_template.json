@@ -3,77 +3,59 @@
  "root": {
   "children": [
    {
-    "children": [], 
     "name": "INDIRECTE KOSTEN"
    }, 
    {
     "children": [
      {
-      "children": [], 
       "name": "Kantoorbenodigdheden"
      }, 
      {
-      "children": [], 
       "name": "Emballage"
      }, 
      {
-      "children": [], 
       "name": "Hulpstoffen 1"
      }, 
      {
-      "children": [], 
       "name": "Grondstoffen 2"
      }, 
      {
-      "children": [], 
       "name": "Goederen onderweg"
      }, 
      {
-      "children": [], 
       "name": "Goederen 1"
      }, 
      {
-      "children": [], 
       "name": "Hulpstoffen 2"
      }, 
      {
-      "children": [], 
       "name": "Gereed product 1"
      }, 
      {
-      "children": [], 
       "name": "Gereed product 2"
      }, 
      {
-      "children": [], 
       "name": "Onderhanden werk"
      }, 
      {
-      "children": [], 
       "name": "Zegels"
      }, 
      {
-      "children": [], 
       "name": "Goederen 2"
      }, 
      {
-      "children": [], 
       "name": "Goederen in consignatie"
      }, 
      {
-      "children": [], 
       "name": "Verpakkingsmateriaal"
      }, 
      {
-      "children": [], 
       "name": "Grondstoffen 1"
      }, 
      {
-      "children": [], 
       "name": "Halffabrikaten 2"
      }, 
      {
-      "children": [], 
       "name": "Halffabrikaten 1"
      }
     ], 
@@ -84,157 +66,126 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Btw te vorderen overig", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Premie WIR", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Af te dragen Btw-verlegd", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw oude jaren", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw te vorderen hoog", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw af te dragen laag", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Overige te betalen posten", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vooruit ontvangen bedr.", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw-afdracht", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Energiekosten", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Accountantskosten", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Telefoon/telefax", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Termijnen onderh. werk", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Rekening-courant inkoopvereniging", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Loonheffing", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Afdracht loonheffing", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vennootschapsbelasting", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw te vorderen laag", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw af te dragen hoog", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Te vorderen Btw-verlegd", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Btw af te dragen overig", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Investeringsaftrek", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Dividendbelasting", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Sociale lasten", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Pensioenpremies", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vakantiegeld", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vakantiedagen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vakantiezegels", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Rente", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Dividend", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Tanti\u00e8mes", 
         "root_type": "Liability"
        }
@@ -244,37 +195,30 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Vooruitbetaalde kosten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Te ontvangen ziekengeld", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Overige vorderingen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Dubieuze debiteuren", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Rekening-courant directie", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Voorziening dubieuze debiteuren", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Voorschotten personeel", 
         "root_type": "Asset"
        }
@@ -284,51 +228,40 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "BIZNER bank"
        }, 
        {
-        "children": [], 
         "name": "Kleine kas"
        }, 
        {
-        "children": [], 
         "name": "ABN-AMRO bank"
        }, 
        {
-        "children": [], 
         "name": "Bankbetaalkaarten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Effecten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Kas  valuta"
        }, 
        {
-        "children": [], 
         "name": "Kruisposten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Kas"
        }, 
        {
-        "children": [], 
         "name": "RABO bank"
        }, 
        {
-        "children": [], 
         "name": "Girobetaalkaarten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Postbank"
        }
       ], 
@@ -342,52 +275,42 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Afschrijving Vrachtauto's", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Aanhangwagens", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Personenauto's", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Heftrucks", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Aanhangwagens", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Vrachtauto's", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Personenauto's", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Rijwielen en bromfietsen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Rijwielen en bromfietsen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Heftrucks", 
         "root_type": "Asset"
        }
@@ -399,72 +322,58 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Aanschafwaarde Gereedschappen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Fabrieksinventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Bedrijfsinventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Magazijninventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Gereedschappen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Kantine-inventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Fabrieksinventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Magazijninventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Kantoorinventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Kantoormachines", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Kantoormachines", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Kantine-inventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Kantoorinventaris", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Bedrijfsinventaris", 
           "root_type": "Asset"
          }
@@ -474,52 +383,42 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Afschrijving Machines 4", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Machines 2", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Machines 5", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Machines 3", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Machines 4", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Machines 1", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aanschafwaarde Machines 2", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Machines 5", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Machines 3", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Afschrijving Machines 1", 
           "root_type": "Asset"
          }
@@ -534,62 +433,50 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Financieringskosten huurkoop", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Waarborgsommen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken u/g 2", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken u/g 1", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken u/g 3", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Leningen u/g 1", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Leningen u/g 3", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Leningen u/g 2", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Leningen u/g 5", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Leningen u/g 4", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Vorderingen op deelnemingen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Financieringskosten", 
           "root_type": "Asset"
          }
@@ -599,17 +486,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Meerderheidsdeelnemingen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Minderheidsdeelnemingen", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Aandeel inkoopcombinatie", 
           "root_type": "Asset"
          }
@@ -624,37 +508,30 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Hypotheek o/g 5", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Lease-verplichtingen", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Huurkoopverplichtingen", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheek o/g 1", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheek o/g 2", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheek o/g 4", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheek o/g 3", 
           "root_type": "Liability"
          }
@@ -664,67 +541,54 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Rekening-courant directie", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken o/g 1", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken o/g 3", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken o/g 5", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Lease-verplichtingen", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Huurkoopverplichtingen", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken o/g 2", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Hypotheken o/g 4", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Leningen o/g 5", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Leningen o/g 2", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Leningen o/g 1", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Leningen o/g 3", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Leningen o/g 4", 
           "root_type": "Liability"
          }
@@ -737,87 +601,70 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Afschrijving Ontwikkelingskosten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Octrooien", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Goodwill", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Auteursrechten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Vergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Aanloopkosten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Licenties", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Tonnagevergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Drankvergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Vergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Auteursrechten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Drankvergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Tonnagevergunningen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Goodwill", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Octrooien", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Aanloopkosten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Ontwikkelingskosten", 
         "root_type": "Asset"
        }
@@ -827,102 +674,82 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Aanschafwaarde Gebouwen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Verbouwingen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Landerijen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Grondverbetering", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Pachtersinvesteringen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Bedrijfsgebouwen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Woon-winkelhuis", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Woon-winkelhuis", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Winkels", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Parkeerplaats", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Grondverbetering", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Ondergrond gebouwen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Bedrijfsgebouwen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Aanloopkosten", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Gebouwen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving Winkels", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Pachtersinvesteringen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Parkeerplaats", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Verbouwingen", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Aanschafwaarde Aanloopkosten", 
         "root_type": "Asset"
        }
@@ -932,92 +759,74 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Overige persoonlijke verplichtingen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Giften", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Buitengewone lasten", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Inkomstenbelasting", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vermogensbelasting", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Wettelijke reserves", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Overige reserves", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Aandelenkapitaal", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Overige priv\u00e9-uitgaven", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Huishoudgeld", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Premie lijfrenteverzekeringen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Premie volksverzekeringen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Assuranties", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Priv\u00e9-opnamen/stortingen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Kapitaal", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "WAO en ziekengeldverzekeringen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Priv\u00e9-gebruik", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Premie volksverzekeringen", 
         "root_type": "Liability"
        }
@@ -1027,57 +836,46 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Pens.voorz. eigen beheer", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Stamrechtverplichtingen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Backservice pensioenverpl.", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Pensioenverplichtingen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Egalisatierekening WIR", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Vervangingsreserve", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Garantieverplichtingen", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Egalisatieres. grootonderh.", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Assurantie eigen risico", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Latente belastingverpl.", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Voorziening deelnemingen", 
         "root_type": "Liability"
        }
@@ -1090,46 +888,37 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Opbrengsten deelnemingen", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verlies verkoop deelnem.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Vpb bijzonder resultaat", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Winst", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Memoriaal"
      }, 
      {
-      "children": [], 
       "name": "Winst bij verkoop deelnem.", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Reorganisatiekosten", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Vpb normaal resultaat", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Voorz. Verlies deelnem.", 
       "root_type": "Expense"
      }
@@ -1139,7 +928,6 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Income"
      }
     ], 
@@ -1150,19 +938,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Tanti\u00e8mes de l'exercice"
        }, 
        {
-        "children": [], 
         "name": "Autres allocataires"
        }, 
        {
-        "children": [], 
         "name": "Dividendes et tanti\u00e8mes d'exercices ant\u00e9rieurs"
        }, 
        {
-        "children": [], 
         "name": "Dividendes de l'exercice"
        }
       ], 
@@ -1171,25 +955,20 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es"
        }, 
        {
-        "children": [], 
         "name": "Compensation clients"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres entreprises avec lesquelles il existe un lien de participation"
          }, 
          {
-          "children": [], 
           "name": "Entreprises li\u00e9es"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs et g\u00e9rants de l'entreprise"
          }
         ], 
@@ -1198,15 +977,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Entreprises li\u00e9es"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs et g\u00e9rants d'entreprise"
          }, 
          {
-          "children": [], 
           "name": "Autres entreprises avec lesquelles il existe un lien de participation"
          }
         ], 
@@ -1215,15 +991,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Effets \u00e0 l'escompte"
          }, 
          {
-          "children": [], 
           "name": "Effets \u00e0 l'encaissement"
          }, 
          {
-          "children": [], 
           "name": "Effets \u00e0 recevoir"
          }
         ], 
@@ -1232,30 +1005,24 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Cr\u00e9ances r\u00e9sultant de livraisons de biens"
          }, 
          {
-          "children": [], 
           "name": "Rabais, remises, ristournes \u00e0 accorder et autres notes de cr\u00e9dit \u00e0 \u00e9tablir"
          }
         ], 
         "name": "Clients"
        }, 
        {
-        "children": [], 
         "name": "Cr\u00e9ances douteuses"
        }, 
        {
-        "children": [], 
         "name": "Acomptes vers\u00e9s"
        }, 
        {
-        "children": [], 
         "name": "Clients : retenues sur garanties"
        }, 
        {
-        "children": [], 
         "name": "Produits \u00e0 recevoir"
        }
       ], 
@@ -1264,31 +1031,24 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Acomptes re\u00e7us d'autres tiers \u00e0 moins d'un an"
        }, 
        {
-        "children": [], 
         "name": "Participation du personnel \u00e0 payer"
        }, 
        {
-        "children": [], 
         "name": "Actionnaires - capital \u00e0 rembourser"
        }, 
        {
-        "children": [], 
         "name": "Obligations et coupons \u00e9chus"
        }, 
        {
-        "children": [], 
         "name": "Emballages et mat\u00e9riel consign\u00e9s"
        }, 
        {
-        "children": [], 
         "name": "Autres dettes diverses"
        }, 
        {
-        "children": [], 
         "name": "Cautionnements re\u00e7us en num\u00e9raires"
        }
       ], 
@@ -1297,7 +1057,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Charges \u00e0 reporter"
        }, 
        {
@@ -1305,15 +1064,12 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Autres produits d'exploitation"
            }, 
            {
-            "children": [], 
             "name": "Commissions \u00e0 obtenir"
            }, 
            {
-            "children": [], 
             "name": "Ristournes, rabais \u00e0 obtenir"
            }
           ], 
@@ -1322,11 +1078,9 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Int\u00e9r\u00eats courus et non \u00e9chus sur pr\u00eats et d\u00e9bits"
            }, 
            {
-            "children": [], 
             "name": "Autres produits financiers"
            }
           ], 
@@ -1336,17 +1090,14 @@
         "name": "Produits acquis"
        }, 
        {
-        "children": [], 
         "name": "Charges \u00e0 imputer"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Produits d'exploitation \u00e0 reporter"
          }, 
          {
-          "children": [], 
           "name": "Produits financiers \u00e0 reporter"
          }
         ], 
@@ -1355,15 +1106,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Compte de r\u00e9partition p\u00e9riodique des charges"
          }, 
          {
-          "children": [], 
           "name": "Compte d'attente"
          }, 
          {
-          "children": [], 
           "name": "Transferts d'exercice"
          }
         ], 
@@ -1373,17 +1121,14 @@
       "name": "COMPTES DE REGULARISATION ET COMPTES D'ATTENTE"
      }, 
      {
-      "children": [], 
       "name": "ACOMPTES RECUS SUR COMMANDES"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Acomptes re\u00e7us"
        }, 
        {
-        "children": [], 
         "name": "Factures \u00e0 recevoir"
        }, 
        {
@@ -1391,15 +1136,12 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Fournisseurs importation"
            }, 
            {
-            "children": [], 
             "name": "Fournisseurs CEE"
            }, 
            {
-            "children": [], 
             "name": "Fournisseurs belges"
            }
           ], 
@@ -1408,11 +1150,9 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Entreprises li\u00e9es"
            }, 
            {
-            "children": [], 
             "name": "Entreprises avec lesquelles il existe un lien de participation"
            }
           ], 
@@ -1424,34 +1164,28 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dettes envers les coparticipants"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Fournisseurs CEE"
            }, 
            {
-            "children": [], 
             "name": "Fournisseurs importation"
            }, 
            {
-            "children": [], 
             "name": "Fournisseurs belges"
            }
           ], 
           "name": "Fournisseurs ordinaires"
          }, 
          {
-          "children": [], 
           "name": "Fournisseurs - retenues de garanties"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Entreprises avec lesquelles il existe un lien de participation"
            }
           ], 
@@ -1461,7 +1195,6 @@
         "name": "Fournisseurs"
        }, 
        {
-        "children": [], 
         "name": "Compensations fournisseurs"
        }
       ], 
@@ -1472,23 +1205,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "1er trimestre"
          }, 
          {
-          "children": [], 
           "name": "Arri\u00e9r\u00e9s"
          }, 
          {
-          "children": [], 
           "name": "3\u00e8me trimestre"
          }, 
          {
-          "children": [], 
           "name": "2\u00e8me trimestre"
          }, 
          {
-          "children": [], 
           "name": "4\u00e8me trimestre"
          }
         ], 
@@ -1497,19 +1225,15 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Employ\u00e9s"
          }, 
          {
-          "children": [], 
           "name": "Ouvriers"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs, g\u00e9rants et commissaires"
          }, 
          {
-          "children": [], 
           "name": "Direction"
          }
         ], 
@@ -1518,15 +1242,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Ouvriers"
          }, 
          {
-          "children": [], 
           "name": "Employ\u00e9s"
          }, 
          {
-          "children": [], 
           "name": "Direction"
          }
         ], 
@@ -1535,15 +1256,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "\u00e0 4507 Autres imp\u00f4ts en Belgique"
          }, 
          {
-          "children": [], 
           "name": "\u00e0 4504 Imp\u00f4ts sur le r\u00e9sultat"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4ts \u00e0 l'\u00e9tranger"
          }
         ], 
@@ -1552,27 +1270,21 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "T.V.A. \u00e0 payer - Import"
          }, 
          {
-          "children": [], 
           "name": "T.V.A. \u00e0 payer - Cocontractant"
          }, 
          {
-          "children": [], 
           "name": "T.V.A. \u00e0 payer - Intra-communautaire"
          }, 
          {
-          "children": [], 
           "name": "T.V.A. \u00e0 payer"
          }, 
          {
-          "children": [], 
           "name": "Compte courant administration T.V.A."
          }, 
          {
-          "children": [], 
           "name": "Taxe d'\u00e9galisation due"
          }
         ], 
@@ -1581,32 +1293,26 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres imp\u00f4ts sur le r\u00e9sultat"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Autres imp\u00f4ts et taxes \u00e0 payer"
            }, 
            {
-            "children": [], 
             "name": "Imp\u00f4ts provinciaux \u00e0 payer"
            }, 
            {
-            "children": [], 
             "name": "Imp\u00f4ts communaux \u00e0 payer"
            }, 
            {
-            "children": [], 
             "name": "Pr\u00e9compte immobilier"
            }
           ], 
           "name": "Autres imp\u00f4ts et taxes en Belgique"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4ts et taxes \u00e0 l'\u00e9tranger"
          }
         ], 
@@ -1615,23 +1321,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres pr\u00e9comptes retenus"
          }, 
          {
-          "children": [], 
           "name": "Pr\u00e9compte professionnel retenu sur r\u00e9mun\u00e9rations"
          }, 
          {
-          "children": [], 
           "name": "Pr\u00e9compte professionnel retenu sur tanti\u00e8mes"
          }, 
          {
-          "children": [], 
           "name": "Pr\u00e9compte mobilier retenu sur dividendes attribu\u00e9s"
          }, 
          {
-          "children": [], 
           "name": "Pr\u00e9compte mobilier retenu sur int\u00e9r\u00eats pay\u00e9s"
          }
         ], 
@@ -1640,44 +1341,35 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dettes et provisions sociales diverses"
          }, 
          {
-          "children": [], 
           "name": "Caisse d'assurances sociales pour travailleurs ind\u00e9pendants"
          }, 
          {
-          "children": [], 
           "name": "Oppositions sur r\u00e9mun\u00e9rations"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Assurance groupe "
            }, 
            {
-            "children": [], 
             "name": "Assurances individuelles"
            }, 
            {
-            "children": [], 
             "name": "Assurance loi"
            }, 
            {
-            "children": [], 
             "name": "Assurance salaire garanti "
            }
           ], 
           "name": "Assurances relatives au personnel"
          }, 
          {
-          "children": [], 
           "name": "Provision pour gratifications de fin d'ann\u00e9e"
          }, 
          {
-          "children": [], 
           "name": "D\u00e9parts de personnel"
          }
         ], 
@@ -1691,11 +1383,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Non convertibles"
          }, 
          {
-          "children": [], 
           "name": "Convertibles"
          }
         ], 
@@ -1704,11 +1394,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Non convertibles"
          }, 
          {
-          "children": [], 
           "name": "Convertibles"
          }
         ], 
@@ -1717,15 +1405,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Cr\u00e9dits d'acceptation"
          }, 
          {
-          "children": [], 
           "name": "Promesses"
          }, 
          {
-          "children": [], 
           "name": "Dettes en compte"
          }
         ], 
@@ -1734,11 +1419,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Financement de biens immobiliers"
          }, 
          {
-          "children": [], 
           "name": "Financement de biens mobiliers"
          }
         ], 
@@ -1747,40 +1430,32 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Effets \u00e0 payer"
          }, 
          {
-          "children": [], 
           "name": "Fournisseurs"
          }
         ], 
         "name": "Dettes commerciales"
        }, 
        {
-        "children": [], 
         "name": "Autres emprunts"
        }, 
        {
-        "children": [], 
         "name": "Cautionnements re\u00e7us en num\u00e9raires"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Entreprises avec lesquelles il existe un lien de participation"
          }, 
          {
-          "children": [], 
           "name": "Entreprises li\u00e9es"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs, g\u00e9rants, associ\u00e9s"
          }, 
          {
-          "children": [], 
           "name": "Autres dettes"
          }
         ], 
@@ -1792,23 +1467,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Etablissements de cr\u00e9dit. Cr\u00e9dits d'acceptation"
        }, 
        {
-        "children": [], 
         "name": "Etablissements de cr\u00e9dit. Promesses"
        }, 
        {
-        "children": [], 
         "name": "Etablissements de cr\u00e9dit. Dettes en compte courant"
        }, 
        {
-        "children": [], 
         "name": "Etablissements de cr\u00e9dit. Emprunts en compte \u00e0 terme fixe"
        }, 
        {
-        "children": [], 
         "name": "Autres emprunts"
        }
       ], 
@@ -1817,21 +1487,17 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Cautionnements vers\u00e9s en num\u00e9raires"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Actionnaires d\u00e9faillants"
          }, 
          {
-          "children": [], 
           "name": "Appels de fonds"
          }
         ], 
@@ -1840,15 +1506,12 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "T.V.A D\u00e9ductible"
          }, 
          {
-          "children": [], 
           "name": "Compte courant administration T.V.A."
          }, 
          {
-          "children": [], 
           "name": "Taxe d'\u00e9galisation due"
          }
         ], 
@@ -1857,72 +1520,58 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Imp\u00f4ts \u00e9trangers"
          }, 
          {
-          "children": [], 
           "name": "\u00e0 4127 Autres imp\u00f4ts belges"
          }, 
          {
-          "children": [], 
           "name": "\u00e0 4124 Imp\u00f4ts belges sur le r\u00e9sultat"
          }
         ], 
         "name": "Imp\u00f4ts et versements fiscaux \u00e0 r\u00e9cup\u00e9rer"
        }, 
        {
-        "children": [], 
         "name": "Produits \u00e0 recevoir"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Rabais, ristournes, remises \u00e0 obtenir et autres avoirs non encore re\u00e7us"
          }, 
          {
-          "children": [], 
           "name": "Compte courant des administrateurs et g\u00e9rants"
          }, 
          {
-          "children": [], 
           "name": "Compte courant des associ\u00e9s en S.P.R.L."
          }, 
          {
-          "children": [], 
           "name": "Avances et pr\u00eats au personnel"
          }, 
          {
-          "children": [], 
           "name": "Associ\u00e9s"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Autres cr\u00e9ances"
            }, 
            {
-            "children": [], 
             "name": "Subsides \u00e0 recevoir"
            }
           ], 
           "name": "Etat et \u00e9tablissements publics"
          }, 
          {
-          "children": [], 
           "name": "Emballages et mat\u00e9riel \u00e0 rendre"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances sur soci\u00e9t\u00e9s apparent\u00e9es"
          }
         ], 
         "name": "Cr\u00e9ances diverses"
        }, 
        {
-        "children": [], 
         "name": "Cr\u00e9ances douteuses"
        }
       ], 
@@ -1936,27 +1585,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perte \u00e0 reporter", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Pr\u00e9l\u00e8vement sur les r\u00e9serves", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Pr\u00e9l\u00e8vement sur le capital et les primes d'\u00e9mission", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "B\u00e9n\u00e9fice report\u00e9 de l'exercice pr\u00e9c\u00e9dent", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Intervention d'associ\u00e9s", 
         "root_type": "Income"
        }
@@ -1966,24 +1610,20 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9gularisations d'imp\u00f4ts estim\u00e9s", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9gularisations d'imp\u00f4ts dus ou vers\u00e9s", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Reprises de provisions fiscales", 
           "root_type": "Income"
          }
@@ -1996,24 +1636,20 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Reprises de provisions pour risques et charges exceptionnelles", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur immobilisations financi\u00e8res", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations incorporelles", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations corporelles", 
           "root_type": "Income"
          }
@@ -2021,24 +1657,20 @@
         "name": "Plus-values sur r\u00e9alisation d'actifs immobilis\u00e9s"
        }, 
        {
-        "children": [], 
         "name": "Reprises de r\u00e9ductions de valeur sur immobilisations financi\u00e8res", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Autres produits exceptionnels", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur immobilisations corporelles", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations incorporelles", 
           "root_type": "Income"
          }
@@ -2051,37 +1683,30 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Escomptes obtenus", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produits des autres cr\u00e9ances", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Ecarts de conversion des devises", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Diff\u00e9rences de change", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Subsides en capital et en int\u00e9r\u00eats", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Plus-values sur r\u00e9alisations d'actifs circulants", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produits des actifs circulants", 
         "root_type": "Income"
        }
@@ -2091,19 +1716,16 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Locations diverses \u00e0 caract\u00e8re professionnel", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Bonis sur reprises d'emballages consign\u00e9s", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Bonis sur travaux en associations momentan\u00e9es", 
           "root_type": "Income"
          }
@@ -2111,42 +1733,34 @@
         "name": "Produits divers"
        }, 
        {
-        "children": [], 
         "name": "Commissions et courtages", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Redevances pour brevets et licences", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Prestations de services", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Revenus des immeubles affect\u00e9s aux activit\u00e9s non professionnelles", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Subsides d'exploitation et montants compensatoires", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Plus-values sur r\u00e9alisations courantes d'immobilisations corporelles", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Plus-values sur r\u00e9alisations de cr\u00e9ances commerciales", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produits de services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel", 
         "root_type": "Income"
        }
@@ -2156,22 +1770,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "En immobilisations corporelles", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "En immobilisations en cours", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "En frais d'\u00e9tablissement", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "En immobilisations incorporelles", 
         "root_type": "Income"
        }
@@ -2181,12 +1791,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Des produits finis", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Des en cours de fabrication", 
         "root_type": "Income"
        }, 
@@ -2195,12 +1803,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur travaux en cours des associations momentan\u00e9es", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Sur commandes en cours d'ex\u00e9cution", 
             "root_type": "Income"
            }
@@ -2210,12 +1816,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Co\u00fbt des commandes en cours d'ex\u00e9cution", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Co\u00fbt des travaux en cours des associations momentan\u00e9es", 
             "root_type": "Income"
            }
@@ -2226,7 +1830,6 @@
         "name": "Des commandes en cours d'ex\u00e9cution"
        }, 
        {
-        "children": [], 
         "name": "Des immeubles construits destin\u00e9s \u00e0 la vente", 
         "root_type": "Income"
        }
@@ -2236,24 +1839,20 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Ventes d'emballages r\u00e9cup\u00e9rables", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Ventes dans les pays membres de la C.E.E.", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ventes en Belgique", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ventes \u00e0 l'exportation", 
           "root_type": "Income"
          }
@@ -2261,19 +1860,16 @@
         "name": "Ventes de marchandises"
        }, 
        {
-        "children": [], 
         "name": "P\u00e9nalit\u00e9s et d\u00e9dits obtenus par l'entreprise", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Ventes \u00e0 l'exportation", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ventes dans les pays membres de la C.E.E.", 
           "root_type": "Income"
          }
@@ -2283,17 +1879,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Ventes \u00e0 l'exportation", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ventes dans les pays membres de la C.E.E.", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ventes en Belgique", 
           "root_type": "Income"
          }
@@ -2301,24 +1894,20 @@
         "name": "Ventes de d\u00e9chets et rebuts"
        }, 
        {
-        "children": [], 
         "name": "Facturations des travaux en cours", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Prestations de services dans les pays membres de la C.E.E.", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Prestations de services en vue de l'exportation", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Prestations de services en Belgique", 
           "root_type": "Income"
          }
@@ -2328,27 +1917,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur prestations de services", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur ventes de produits finis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur ventes de marchandises", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sur ventes de d\u00e9chets et rebuts", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Mali sur travaux factur\u00e9s aux associations momentan\u00e9es", 
           "root_type": "Income"
          }
@@ -2364,157 +1948,126 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Inkoopbonussen", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Toevoeging voorz. incour. handelsgoed.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkoop import buiten EU hoog", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkoop import buiten EU overig", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen BTW verlegd", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen EU laag tarief", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen EU overig", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkoop import buiten EU laag", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Invoerkosten", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkoopkosten", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen EU hoog tarief", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Betalingskort. crediteuren", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen overig", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Garantiekosten", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen hoog", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Toevoeging garantieverpl.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Tegenrekening inkoop", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Onttrekking uitgev.garantie", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Voorz. Incourourant grondst.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Kostprijs omzet grondstoffen", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Toev. Voorz. incour. grondst.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Kosten inkoopvereniging", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Kostprijs omzet handelsgoederen", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Voorz.incour. handelsgoed.", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkoopprovisie", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkomende vrachten", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Hulpmaterialen", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Uitbesteed werk", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Priv\u00e9-gebruik goederen", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen laag", 
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Inkopen nul", 
       "root_type": "Expense"
      }
@@ -2526,42 +2079,34 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Brandstoffen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige vervoerskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud personenauto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud vrachtauto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Leasing auto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Assuranties auto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Priv\u00e9-gebruik auto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Wegenbelasting", 
         "root_type": "Expense"
        }
@@ -2571,42 +2116,34 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Overige rentebaten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente hypotheek", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente leasecontracten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige rentelasten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente lening o/g", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente lening u/g", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente bankkrediet", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rente huurkoopcontracten", 
         "root_type": "Expense"
        }
@@ -2616,162 +2153,130 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Vrachtauto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Tonnagevergunningen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Drankvergunningen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Auteursrechten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Octrooien", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Goodwill", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kantoorinventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kantoormachines", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Gebouwen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bedrijfsgebouwen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Woon-winkelhuis", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Winkels", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Gereedschappen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kantine-inventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bedrijfsinventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Magazijninventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Machines", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Heftrucks", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Aanhangwagens", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rijwielen en bromfietsen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Vergunningen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Licenties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Aanloopkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Ontwikkelingskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Personenauto's", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Pachtersinvestering", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Aankoopkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Parkeerplaats", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Grondverbetering", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Voorraadverschillen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Fabrieksinventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Verbouwingen", 
         "root_type": "Expense"
        }
@@ -2781,67 +2286,54 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Betaalde schadevergoed.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Nadelige koersverschillen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kosten omzetbelasting", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Boekverlies vaste activa", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "K.O. regeling OB", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige lasten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kasverschillen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Boekwinst van vaste activa", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kosten loonbelasting", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Naheffing bedrijfsver.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige baten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Ontvangen schadevergoed.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Voordelige koersverschil.", 
         "root_type": "Expense"
        }
@@ -2851,82 +2343,66 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Reis en verblijfkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Representatiekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kascorrecties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Exportkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Beurskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Websitekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Provisie", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Etalagekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Veilingkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Reclame", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Advertenties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Verpakkingsmateriaal", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige verkoopkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Afschrijving dubieuze deb.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Relatiegeschenken", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Uitgaande vrachten", 
         "root_type": "Expense"
        }
@@ -2936,37 +2412,30 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Juridische kosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bankkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige algemene kosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Advieskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Assuranties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Toev. Ass. eigen risico", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Accountantskosten", 
         "root_type": "Expense"
        }
@@ -2976,182 +2445,146 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Uitkering ziekengeld", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige uitkeringen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Loonwerk", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Thuiswerkers", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Managementvergoedingen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Gratificaties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Wervingskosten personeel", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Opleidingskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bedrijfskleding", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Geschenken personeel", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Toevoeging pensioenverpl.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Sociale lasten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Tanti\u00e8mes", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Provisie", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Gereedschapsgeld", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Reiskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Congressen, seminars en symposia", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Oprenting stamrechtverpl.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Toev. Backservice pens.verpl.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Inhouding pensioenpremies", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Pensioenpremies", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Inhouding sociale lasten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Belastingvrije uitkeringen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bedrijfskleding", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kantinekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Rijwielvergoeding", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Autokostenvergoeding", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Vergoeding studiekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Bijzondere beloningen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Uitzendkrachten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige kostenverg.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige personeelskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Vakantiebonnen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Vakantiegeld", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Lonen en salarissen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overhevelingstoeslag", 
         "root_type": "Expense"
        }
@@ -3161,62 +2594,50 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Energiekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Schoonmaakkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Pacht", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Huur", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Ontvangen huren", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Huurwaarde woongedeelte", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Groot onderhoud onr. Goed", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Overige huisvestingskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Assurantie onroerend goed", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Toevoeging egalisatieres. Groot onderhoud", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Belastingen onr. Goed", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud onroerend goed", 
         "root_type": "Expense"
        }
@@ -3226,62 +2647,50 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Overige bedrijfskosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Ophalen/vervoer afval", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Huur inventaris", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Energie (krachtstroom)", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Leasing invent.operational", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Hulpmaterialen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Assuranties", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Huur machines", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Leasing mach. operational", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Gereedschappen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud machines", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud inventaris", 
         "root_type": "Expense"
        }
@@ -3291,47 +2700,38 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Overige kantoorkosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Huur kantoorapparatuur", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Kantoorbenodigdh./drukw.", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Contributies/abonnementen", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Administratiekosten", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Porti", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Internetaansluiting", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Telefoon/telefax", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Onderhoud kantoorinvent.", 
         "root_type": "Expense"
        }
@@ -3344,27 +2744,21 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Account Payable"
      }, 
      {
-      "children": [], 
       "name": "Uninvoiced Receipts"
      }, 
      {
-      "children": [], 
       "name": "Loans"
      }, 
      {
-      "children": [], 
       "name": "Withholding Tax"
      }, 
      {
-      "children": [], 
       "name": "Accrued Expenses"
      }, 
      {
-      "children": [], 
       "name": "Output VAT"
      }
     ], 
@@ -3373,27 +2767,21 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Salary"
      }, 
      {
-      "children": [], 
       "name": "Rent"
      }, 
      {
-      "children": [], 
       "name": "Cost of goods sold"
      }, 
      {
-      "children": [], 
       "name": "Office Expenses"
      }, 
      {
-      "children": [], 
       "name": "Income tax expenses"
      }, 
      {
-      "children": [], 
       "name": "Interest expenses"
      }
     ], 
@@ -3402,111 +2790,84 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Inkopen binnen EU laag"
      }, 
      {
-      "children": [], 
       "name": "Tussenrek. autom. loonbetalingen"
      }, 
      {
-      "children": [], 
       "name": "Inkopen binnen EU hoog"
      }, 
      {
-      "children": [], 
       "name": "Inkopen binnen EU overig"
      }, 
      {
-      "children": [], 
       "name": "Betaalwijze contant"
      }, 
      {
-      "children": [], 
       "name": "Tussenrek. autom. betalingen"
      }, 
      {
-      "children": [], 
       "name": "Inkopen buiten EU overig"
      }, 
      {
-      "children": [], 
       "name": "Inkopen Nederland hoog"
      }, 
      {
-      "children": [], 
       "name": "Betaalwijze chipknip"
      }, 
      {
-      "children": [], 
       "name": "Tussenrekening chipknip"
      }, 
      {
-      "children": [], 
       "name": "Vraagposten"
      }, 
      {
-      "children": [], 
       "name": "Tussenrekening correcties"
      }, 
      {
-      "children": [], 
       "name": "Netto lonen"
      }, 
      {
-      "children": [], 
       "name": "Inkopen buiten EU hoog"
      }, 
      {
-      "children": [], 
       "name": "Inkopen buiten EU laag"
      }, 
      {
-      "children": [], 
       "name": "Tussenrek. cadeaubonbetalingen"
      }, 
      {
-      "children": [], 
       "name": "Betaalwijze cadeaubonnen"
      }, 
      {
-      "children": [], 
       "name": "Inkopen Nederland overig"
      }, 
      {
-      "children": [], 
       "name": "Inkopen Nederland laag"
      }, 
      {
-      "children": [], 
       "name": "Inkopen Nederland verlegd"
      }, 
      {
-      "children": [], 
       "name": "Betaalwijze pin"
      }, 
      {
-      "children": [], 
       "name": "Tussenrekening pin"
      }, 
      {
-      "children": [], 
       "name": "Kassa 2"
      }, 
      {
-      "children": [], 
       "name": "Kassa 1"
      }, 
      {
-      "children": [], 
       "name": "Inkopen Nederland onbelast"
      }, 
      {
-      "children": [], 
       "name": "Tussenrekening balans"
      }, 
      {
-      "children": [], 
       "name": "Tegenrekening Inkopen"
      }
     ], 
@@ -3515,19 +2876,15 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Capital Stock"
      }, 
      {
-      "children": [], 
       "name": "Dividends"
      }, 
      {
-      "children": [], 
       "name": "Income Summary"
      }, 
      {
-      "children": [], 
       "name": "Retained Earnings"
      }
     ], 
@@ -3536,44 +2893,36 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "TRANSFERTS AUX RESERVES IMMUNISEES", 
       "root_type": "Expense"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Autres allocataires", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9mun\u00e9ration du capital", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Administrateurs ou g\u00e9rants", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Dotation aux autres r\u00e9serves", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "B\u00e9n\u00e9fice \u00e0 reporter", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Perte report\u00e9e de l'exercice pr\u00e9c\u00e9dent", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Dotation \u00e0 la r\u00e9serve l\u00e9gale", 
         "root_type": "Expense"
        }
@@ -3587,12 +2936,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Taxe sur le personnel occup\u00e9", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Taxe sur la force motrice", 
             "root_type": "Expense"
            }
@@ -3600,14 +2947,12 @@
           "name": "Imp\u00f4ts provinciaux et communaux"
          }, 
          {
-          "children": [], 
           "name": "Taxes diverses", 
           "root_type": "Expense"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Taxes sur autos et camions", 
             "root_type": "Expense"
            }
@@ -3617,17 +2962,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Timbres fiscaux pris en charge par la firme", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Droits d'enregistrement", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "T.V.A. non d\u00e9ductible", 
             "root_type": "Expense"
            }
@@ -3638,22 +2980,18 @@
         "name": "Charges fiscales d'exploitation"
        }, 
        {
-        "children": [], 
         "name": "\u00e0 648 Charges d'exploitations diverses", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Charges d'exploitation port\u00e9es \u00e0 l'actif au titre de restructuration", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Moins-values sur r\u00e9alisations courantes d'immobilisations corporelles", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Moins-values sur r\u00e9alisations de cr\u00e9ances commerciales", 
         "root_type": "Expense"
        }
@@ -3663,49 +3001,40 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Charges exceptionnelles transf\u00e9r\u00e9es \u00e0 l'actif en frais de restructuration", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Autres charges exceptionnelles", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Diff\u00e9rence de charge", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "P\u00e9nalit\u00e9s et amendes diverses", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur immeubles acquis ou construits en vue de la revente", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations corporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations incorporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations financi\u00e8res", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations d\u00e9tenues en location-financement et droits similaires", 
           "root_type": "Expense"
          }
@@ -3713,29 +3042,24 @@
         "name": "Moins-values sur r\u00e9alisation d'actifs immobilis\u00e9s"
        }, 
        {
-        "children": [], 
         "name": "Provisions pour risques et charges exceptionnels", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur sur immobilisations financi\u00e8res", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur frais d'\u00e9tablissement", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations incorporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur immobilisations corporelles", 
           "root_type": "Expense"
          }
@@ -3750,17 +3074,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Exc\u00e9dent de versements d'imp\u00f4ts et pr\u00e9comptes port\u00e9 \u00e0 l'actif", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4ts et pr\u00e9comptes dus ou vers\u00e9s", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Charges fiscales estim\u00e9es", 
           "root_type": "Expense"
          }
@@ -3770,17 +3091,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Provisions fiscales constitu\u00e9es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Suppl\u00e9ments d'imp\u00f4ts dus ou vers\u00e9s", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Suppl\u00e9ments d'imp\u00f4ts estim\u00e9s", 
           "root_type": "Expense"
          }
@@ -3788,12 +3106,10 @@
         "name": "Imp\u00f4ts belges sur le r\u00e9sultat d'exercices ant\u00e9rieurs"
        }, 
        {
-        "children": [], 
         "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat de l'exercice", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat d'exercices ant\u00e9rieurs", 
         "root_type": "Expense"
        }
@@ -3803,34 +3119,28 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Achats de fournitures", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Achats de marchandises", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "De fournitures", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "De mati\u00e8res premi\u00e8res", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "D'immeubles destin\u00e9s \u00e0 la vente", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "De marchandises", 
           "root_type": "Expense"
          }
@@ -3838,22 +3148,18 @@
         "name": "Variations de stocks"
        }, 
        {
-        "children": [], 
         "name": "Remises, ristournes et rabais obtenus sur achats", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Sous-traitances g\u00e9n\u00e9rales", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Achats de services, travaux et \u00e9tudes", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Achats d'immeubles destin\u00e9s \u00e0 la revente", 
         "root_type": "Expense"
        }
@@ -3863,54 +3169,44 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Personnel int\u00e9rimaire et personnes mises \u00e0 la disposition  de l'entreprise", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9mun\u00e9rations, primes pour assurances extral\u00e9gales", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Documentation", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Missions et r\u00e9ceptions", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Cadeaux \u00e0 la client\u00e8le", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Primes", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Foires et expositions", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Echantillons", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Catalogues et imprim\u00e9s", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Annonces et insertions", 
           "root_type": "Expense"
          }
@@ -3920,17 +3216,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Sous-traitants pour activit\u00e9s propres", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sous-traitants d'associations momentan\u00e9es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Quote-part b\u00e9n\u00e9ficiaire des coparticipants", 
           "root_type": "Expense"
          }
@@ -3940,29 +3233,24 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Imprim\u00e9s et fournitures de bureau", 
           "root_type": "Expense"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "T\u00e9l\u00e9grammes", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "T\u00e9l\u00e9phone", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "T\u00e9lex et t\u00e9l\u00e9fax", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Frais postaux", 
             "root_type": "Expense"
            }
@@ -3972,22 +3260,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Vapeur", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Eau", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Electricit\u00e9", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Gaz", 
             "root_type": "Expense"
            }
@@ -3995,7 +3279,6 @@
           "name": "Eau, gaz, \u00e9lectricit\u00e9, vapeur"
          }, 
          {
-          "children": [], 
           "name": "Livres, biblioth\u00e8que", 
           "root_type": "Expense"
          }
@@ -4005,39 +3288,32 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Personnel int\u00e9rimaire", 
           "root_type": "Expense"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Publications l\u00e9gales", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Honoraires d'avocats, d'experts, etc ...", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Commissions aux tiers", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Dons, lib\u00e9ralit\u00e9s, ...", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Cotisations aux groupements professionnels", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Frais de contentieux", 
             "root_type": "Expense"
            }
@@ -4047,12 +3323,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Transports de personnel", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Voyages, d\u00e9placements, repr\u00e9sentations", 
             "root_type": "Expense"
            }
@@ -4062,12 +3336,10 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Autres redevances", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Redevances pour brevets, licences, marques, accessoires", 
             "root_type": "Expense"
            }
@@ -4077,27 +3349,22 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Assurance incendie", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurance vol", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurance autos", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurance cr\u00e9dit", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurances frais g\u00e9n\u00e9raux", 
             "root_type": "Expense"
            }
@@ -4108,7 +3375,6 @@
         "name": "R\u00e9tributions de tiers"
        }, 
        {
-        "children": [], 
         "name": "Entretien et r\u00e9paration", 
         "root_type": "Expense"
        }
@@ -4122,17 +3388,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Salaire hebdomadaire garanti", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Jours f\u00e9ri\u00e9s pay\u00e9s", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Allocations familiales compl\u00e9mentaires", 
             "root_type": "Expense"
            }
@@ -4142,17 +3405,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Assurances individuelles", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurances loi, responsabilit\u00e9 civile, chemin du travail", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Assurance salaire garanti", 
             "root_type": "Expense"
            }
@@ -4162,17 +3422,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Allocations familiales compl\u00e9mentaires pour non salari\u00e9s", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Lois sociales pour ind\u00e9pendants", 
             "root_type": "Expense"
            }, 
            {
-            "children": [], 
             "name": "Divers", 
             "root_type": "Expense"
            }
@@ -4183,19 +3440,16 @@
         "name": "Autres frais de personnel"
        }, 
        {
-        "children": [], 
         "name": "Primes patronales pour assurances extral\u00e9gales", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur appointements et commissions", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sur salaires", 
           "root_type": "Expense"
          }
@@ -4205,27 +3459,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Administrateurs ou g\u00e9rants", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Personnel de direction", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Employ\u00e9s", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Autres membres du personnel", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Ouvriers", 
           "root_type": "Expense"
          }
@@ -4235,12 +3484,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Utilisations et reprises", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }
@@ -4250,12 +3497,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Personnel", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Administrateurs et g\u00e9rants", 
           "root_type": "Expense"
          }
@@ -4270,27 +3515,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dotations aux r\u00e9ductions de valeur sur immobilisations corporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations aux r\u00e9ductions de valeur sur immobilisations incorporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations aux amortissements sur immobilisations incorporelles", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations aux amortissements sur frais d'\u00e9tablissement", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations aux amortissements sur immobilisations corporelles", 
           "root_type": "Expense"
          }
@@ -4300,12 +3540,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Reprises", 
           "root_type": "Expense"
          }
@@ -4315,12 +3553,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Reprises", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }
@@ -4330,12 +3566,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Reprises", 
           "root_type": "Expense"
          }
@@ -4345,12 +3579,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Reprises", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }
@@ -4360,12 +3592,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Utilisations et reprises", 
           "root_type": "Expense"
          }
@@ -4375,12 +3605,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Utilisations et reprises", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations", 
           "root_type": "Expense"
          }
@@ -4390,12 +3618,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Dotations ", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Utilisations et reprises", 
           "root_type": "Expense"
          }
@@ -4408,39 +3634,32 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Frais de vente des titres", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Moins-values sur r\u00e9alisation d'actifs circulants", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Charges d'escompte de cr\u00e9ances", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres charges de dettes", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Amortissements des agios et frais d'\u00e9mission d'emprunts", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Int\u00e9r\u00eats, commissions et frais aff\u00e9rents aux dettes", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Int\u00e9r\u00eats intercalaires port\u00e9s \u00e0 l'actif", 
           "root_type": "Expense"
          }
@@ -4450,12 +3669,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Reprises", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Dotations ", 
           "root_type": "Expense"
          }
@@ -4463,22 +3680,18 @@
         "name": "R\u00e9ductions de valeur sur actifs circulants"
        }, 
        {
-        "children": [], 
         "name": "Frais de banques, de ch\u00e8ques postaux", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Commissions sur ouvertures de cr\u00e9dit, cautions, avals", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Diff\u00e9rences de change", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Ecarts de conversion des devises", 
         "root_type": "Expense"
        }
@@ -4489,113 +3702,91 @@
     "name": "CLASSE 6. - CHARGES"
    }, 
    {
-    "children": [], 
     "name": "FABRIKAGEREKENINGEN"
    }, 
    {
     "children": [
      {
-      "children": [], 
       "name": "Verkopen Handel 0% niet-EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen Fabric. 0% niet-EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten fabric. 0% niet-EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten fabricage hoog", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten fabricage overig", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten fabricage 0% EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen fabricage overig", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen fabric. 0 % EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen fabricage laag", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen fabricage hoog", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten handel 0% EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten handel hoog tarief", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen handel laag", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten handel 0% niet-EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verleende Kredietbep. fabricage", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verleende Kredietbep. handel", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten handel laag tarief", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen handel 0% EU", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Diensten fabricage laag", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen handel hoog", 
       "root_type": "Income"
      }, 
      {
-      "children": [], 
       "name": "Verkopen handel overig", 
       "root_type": "Income"
      }
@@ -4609,17 +3800,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Amortissements sur goodwill", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Co\u00fbt d'acquisition", 
           "root_type": "Asset"
          }
@@ -4628,24 +3816,20 @@
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Acomptes vers\u00e9s", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Concessions, brevets, licences, savoir-faire, marques, etc...", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es sur concessions, brevets, etc...", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur concessions, brevets, etc...", 
           "root_type": "Asset"
          }
@@ -4662,17 +3846,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Valeur d'acquisition", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es", 
           "root_type": "Asset"
          }
@@ -4685,27 +3866,22 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Frais d'acquisition des terrains \u00e0 b\u00e2tir", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Voies de transport et ouvrages d'art", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "B\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "B\u00e2timents industriels", 
             "root_type": "Asset"
            }
@@ -4716,22 +3892,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur voies de transport et ouvrages d'art", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents industriels", 
             "root_type": "Asset"
            }
@@ -4742,27 +3914,22 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur b\u00e2timents industriels", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur voies de transport et ouvrages d'art", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur frais d'acquisition des terrains b\u00e2tis", 
             "root_type": "Asset"
            }
@@ -4777,64 +3944,52 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Voies de transport et ouvrages d'art", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Autres b\u00e2timents d'exploitation", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "B\u00e2timents administratifs et commerciaux", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "B\u00e2timents industriels", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Frais d'acquisition sur constructions", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Constructions sur sol d'autrui", 
           "root_type": "Asset"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents industriels", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur constructions sur sol d'autrui", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur voies de transport et ouvrages d'art", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur frais d'acquisition sur constructions", 
             "root_type": "Asset"
            }
@@ -4845,22 +4000,18 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur autres b\u00e2timents d'exploitation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur voies de transport et ouvrages d'art", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents industriels", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur b\u00e2timents administratifs et commerciaux", 
             "root_type": "Asset"
            }
@@ -4881,12 +4032,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Division A", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Division B", 
           "root_type": "Asset"
          }
@@ -4897,12 +4046,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Division A", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Division B", 
           "root_type": "Asset"
          }
@@ -4913,17 +4060,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur outillage", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Sur machines", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Sur installations", 
           "root_type": "Asset"
          }
@@ -4934,17 +4078,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Sur outillage", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Sur installations", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Sur machines", 
           "root_type": "Asset"
          }
@@ -4963,27 +4104,22 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel ferroviaire", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Amortissements sur mat\u00e9riel automobile", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel naval", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel fluvial", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel a\u00e9rien", 
             "root_type": "Asset"
            }
@@ -4994,27 +4130,22 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel naval", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Plus-values sur mat\u00e9riel automobile", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel ferroviaire", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel a\u00e9rien", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Idem sur mat\u00e9riel fluvial", 
             "root_type": "Asset"
            }
@@ -5023,19 +4154,16 @@
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mat\u00e9riel ferroviaire", 
           "root_type": "Asset"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Voitures", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Camions", 
             "root_type": "Asset"
            }
@@ -5044,17 +4172,14 @@
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mat\u00e9riel naval", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mat\u00e9riel fluvial", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mat\u00e9riel a\u00e9rien", 
           "root_type": "Asset"
          }
@@ -5071,27 +4196,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es sur installations, machines et outillage pris en leasing", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur installations, machines et outillage pris en leasing", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Installations", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Machines", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Outillage", 
           "root_type": "Asset"
          }
@@ -5102,22 +4222,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Mat\u00e9riel roulant", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mobilier", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur mobilier et mat\u00e9riel roulant en leasing", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es sur mobilier et mat\u00e9riel roulant en leasing", 
           "root_type": "Asset"
          }
@@ -5134,27 +4250,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Amortissements sur emballages r\u00e9cup\u00e9rables", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur mat\u00e9riel d'emballage", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur r\u00e9serve immobili\u00e8re", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur maison d'habitation", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Amortissements sur frais d'am\u00e9nagement des locaux pris en location", 
           "root_type": "Asset"
          }
@@ -5163,27 +4274,22 @@
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Plus-values act\u00e9es sur autres immobilisations corporelles", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9riel d'emballage", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9serve immobili\u00e8re", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Maison d'habitation", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Emballages r\u00e9cup\u00e9rables", 
         "root_type": "Asset"
        }
@@ -5196,27 +4302,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Effets \u00e0 recevoir", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances en compte", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Titres \u00e0 revenu fixe", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances douteuses", 
           "root_type": "Asset"
          }
@@ -5227,22 +4328,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Valeur d'acquisition", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Montants non appel\u00e9s", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es", 
           "root_type": "Asset"
          }
@@ -5253,27 +4350,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Cr\u00e9ances douteuses", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Effets \u00e0 recevoir", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances en compte", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Titres \u00e0 revenu fixes", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeurs act\u00e9es", 
           "root_type": "Asset"
          }
@@ -5284,22 +4376,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Valeur d'acquisition", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Montants non appel\u00e9s", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeurs act\u00e9es", 
           "root_type": "Asset"
          }
@@ -5310,27 +4398,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Titres \u00e0 revenu fixe", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Effets \u00e0 recevoir", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances en compte", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances douteuses", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeurs act\u00e9es", 
           "root_type": "Asset"
          }
@@ -5341,22 +4424,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Plus-values act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeurs act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Valeur d'acquisition", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Montants non appel\u00e9s", 
           "root_type": "Asset"
          }
@@ -5367,27 +4446,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Autres cautionnements vers\u00e9s en num\u00e9raires", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Electricit\u00e9", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "T\u00e9l\u00e9phone, t\u00e9lefax, t\u00e9lex", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Gaz", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Eau", 
           "root_type": "Asset"
          }
@@ -5404,22 +4478,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Installations, machines et outillage", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Constructions", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Mobilier et mat\u00e9riel roulant", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Autres immobilisations corporelles", 
           "root_type": "Asset"
          }
@@ -5428,7 +4498,6 @@
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Avances et acomptes vers\u00e9s sur immobilisations en cours", 
         "root_type": "Asset"
        }
@@ -5441,24 +4510,20 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Cr\u00e9ances entreprises avec lesquelles il existe un lien de participation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cr\u00e9ances entreprises li\u00e9es", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cr\u00e9ances autres d\u00e9biteurs", 
             "root_type": "Asset"
            }
@@ -5469,17 +4534,14 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur entreprises li\u00e9es", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur autres d\u00e9biteurs", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
             "root_type": "Asset"
            }
@@ -5488,12 +4550,10 @@
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances r\u00e9sultant de la cession d'immobilisations donn\u00e9es en leasing", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances douteuses", 
           "root_type": "Asset"
          }
@@ -5504,49 +4564,40 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "R\u00e9ductions de valeur act\u00e9es", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Cr\u00e9ances douteuses", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Acomptes vers\u00e9s", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Retenues sur garanties", 
           "root_type": "Asset"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur clients exportation hors C.E.E.", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur clients C.E.E.", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur clients Belgique", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur entreprises li\u00e9es", 
             "root_type": "Asset"
            }
@@ -5557,32 +4608,26 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur clients Belgique", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur clients C.E.E.", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cr\u00e9ances en compte sur entreprises li\u00e9es", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Sur clients exportation hors C.E.E.", 
             "root_type": "Asset"
            }, 
            {
-            "children": [], 
             "name": "Cr\u00e9ances sur les coparticipants", 
             "root_type": "Asset"
            }
@@ -5607,19 +4652,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "D'un mois au plus"
        }, 
        {
-        "children": [], 
         "name": "De plus d'un mois et \u00e0 un an au plus"
        }, 
        {
-        "children": [], 
         "name": "De plus d'un an"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es"
        }
       ], 
@@ -5628,11 +4669,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Valeur d'acquisition"
        }, 
        {
-        "children": [], 
         "name": "R\u00e9ductions de valeur act\u00e9es"
        }
       ], 
@@ -5641,20 +4680,17 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Comptes ouverts aupr\u00e8s des divers \u00e9tablissements"
        }
       ], 
       "name": "ETABLISSEMENTS DE CREDIT."
      }, 
      {
-      "children": [], 
       "name": "VIREMENTS INTERNES"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Coupons \u00e0 encaisser"
        }
       ], 
@@ -5663,7 +4699,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Caisses - timbres"
        }
       ], 
@@ -5672,7 +4707,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Ch\u00e8ques \u00e9mis"
        }
       ], 
@@ -5686,11 +4720,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Petty Cash"
        }, 
        {
-        "children": [], 
         "name": "Cash at Bank"
        }
       ], 
@@ -5699,7 +4731,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Accumulated Depreciation - Equipment"
        }
       ], 
@@ -5708,30 +4739,24 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Accumulated Depreciation - Building"
        }
       ], 
       "name": "Building"
      }, 
      {
-      "children": [], 
       "name": "Account Receivable"
      }, 
      {
-      "children": [], 
       "name": "Outstanding Cheques"
      }, 
      {
-      "children": [], 
       "name": "Input VAT"
      }, 
      {
-      "children": [], 
       "name": "Withholding Income Tax"
      }, 
      {
-      "children": [], 
       "name": "Inventory"
      }
     ], 

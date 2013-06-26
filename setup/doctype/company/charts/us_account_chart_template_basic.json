@@ -5,19 +5,15 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Proceeds from Sale of Assets"
      }, 
      {
-      "children": [], 
       "name": "Interest Income"
      }, 
      {
-      "children": [], 
       "name": "Finance Charge Income"
      }, 
      {
-      "children": [], 
       "name": "Insurance Proceeds Received"
      }
     ], 
@@ -28,11 +24,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Furniture and Equipment"
        }, 
        {
-        "children": [], 
         "name": "Accumulated Depreciation"
        }
       ], 
@@ -43,18 +37,15 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Account Receivable"
          }
         ], 
         "name": "Receivable"
        }, 
        {
-        "children": [], 
         "name": "Client Trust Account"
        }, 
        {
-        "children": [], 
         "name": "Cash or Cash Equivalents"
        }
       ], 
@@ -63,19 +54,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Filing Fees"
        }, 
        {
-        "children": [], 
         "name": "Expert Witness Fees"
        }, 
        {
-        "children": [], 
         "name": "Advanced Client Costs"
        }, 
        {
-        "children": [], 
         "name": "Court Costs"
        }
       ], 
@@ -84,7 +71,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Security Deposits Asset"
        }
       ], 
@@ -98,19 +84,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Retained Earnings"
        }, 
        {
-        "children": [], 
         "name": "Opening Balance Equity"
        }, 
        {
-        "children": [], 
         "name": "Capital Stock"
        }, 
        {
-        "children": [], 
         "name": "Dividends Paid"
        }
       ], 
@@ -121,19 +103,15 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Sales Tax Payable"
          }, 
          {
-          "children": [], 
           "name": "Use Tax Payable"
          }, 
          {
-          "children": [], 
           "name": "Customer Deposits Received"
          }, 
          {
-          "children": [], 
           "name": "Payroll Liabilities"
          }
         ], 
@@ -144,7 +122,6 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Account Payable"
            }
           ], 
@@ -162,59 +139,45 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Freight and Shipping Costs"
      }, 
      {
-      "children": [], 
       "name": "Commissions Paid"
      }, 
      {
-      "children": [], 
       "name": "Purchase Discounts"
      }, 
      {
-      "children": [], 
       "name": "Subcontractors Expense"
      }, 
      {
-      "children": [], 
       "name": "Job Materials Purchased"
      }, 
      {
-      "children": [], 
       "name": "Equipment Rental for Jobs"
      }, 
      {
-      "children": [], 
       "name": "Media Purchased for Clients"
      }, 
      {
-      "children": [], 
       "name": "Tools and Small Equipment"
      }, 
      {
-      "children": [], 
       "name": "Subcontracted Services"
      }, 
      {
-      "children": [], 
       "name": "Purchases - Resale Items"
      }, 
      {
-      "children": [], 
       "name": "Commissions Paid"
      }, 
      {
-      "children": [], 
       "name": "Other Job Related Costs"
      }, 
      {
-      "children": [], 
       "name": "Merchant Account Fees"
      }, 
      {
-      "children": [], 
       "name": "Merchant Account Fees"
      }
     ], 
@@ -223,184 +186,140 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Office Supplies"
      }, 
      {
-      "children": [], 
       "name": "Rent Expense"
      }, 
      {
-      "children": [], 
       "name": "Postage and Delivery"
      }, 
      {
-      "children": [], 
       "name": "Dues and Subscriptions"
      }, 
      {
-      "children": [], 
       "name": "Printing and Reproduction"
      }, 
      {
-      "children": [], 
       "name": "Janitorial Expense"
      }, 
      {
-      "children": [], 
       "name": "Freight and Trucking"
      }, 
      {
-      "children": [], 
       "name": "Payroll Expenses"
      }, 
      {
-      "children": [], 
       "name": "Bank Service Charges"
      }, 
      {
-      "children": [], 
       "name": "Computer and Internet Expenses"
      }, 
      {
-      "children": [], 
       "name": "Small Tools and Equipment"
      }, 
      {
-      "children": [], 
       "name": "Car and Truck Expenses"
      }, 
      {
-      "children": [], 
       "name": "Interest Expense"
      }, 
      {
-      "children": [], 
       "name": "Taxes - Property"
      }, 
      {
-      "children": [], 
       "name": "Custom Hire and Contract Labor"
      }, 
      {
-      "children": [], 
       "name": "Gasoline, Fuel and Oil"
      }, 
      {
-      "children": [], 
       "name": "Advertising and Promotion"
      }, 
      {
-      "children": [], 
       "name": "Utilities"
      }, 
      {
-      "children": [], 
       "name": "Telephone Expense"
      }, 
      {
-      "children": [], 
       "name": "Marketing Expense"
      }, 
      {
-      "children": [], 
       "name": "Business Licenses and Permits"
      }, 
      {
-      "children": [], 
       "name": "Continuing Education"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Life and Disability Insurance"
        }, 
        {
-        "children": [], 
         "name": "Worker's Compensation"
        }, 
        {
-        "children": [], 
         "name": "Health Insurance"
        }, 
        {
-        "children": [], 
         "name": "General Liability Insurance"
        }, 
        {
-        "children": [], 
         "name": "Professional Liability"
        }
       ], 
       "name": "Insurance Expense"
      }, 
      {
-      "children": [], 
       "name": "Seeds and Plants Purchased"
      }, 
      {
-      "children": [], 
       "name": "Automobile Expense"
      }, 
      {
-      "children": [], 
       "name": "Equipment Rental"
      }, 
      {
-      "children": [], 
       "name": "Uniforms"
      }, 
      {
-      "children": [], 
       "name": "Storage and Warehousing"
      }, 
      {
-      "children": [], 
       "name": "Chemicals Purchased"
      }, 
      {
-      "children": [], 
       "name": "Miscellaneous Expense"
      }, 
      {
-      "children": [], 
       "name": "Fertilizers and Lime"
      }, 
      {
-      "children": [], 
       "name": "Repairs and Maintenance"
      }, 
      {
-      "children": [], 
       "name": "Depreciation Expense"
      }, 
      {
-      "children": [], 
       "name": "Feed Purchased"
      }, 
      {
-      "children": [], 
       "name": "Meals and Entertainment"
      }, 
      {
-      "children": [], 
       "name": "Veterinary, Breeding, Medicine"
      }, 
      {
-      "children": [], 
       "name": "Professional Fees"
      }, 
      {
-      "children": [], 
       "name": "Conservation Expenses"
      }, 
      {
-      "children": [], 
       "name": "Charitable Contributions"
      }, 
      {
-      "children": [], 
       "name": "Travel Expense"
      }
     ], 
@@ -409,87 +328,66 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "Farmers Market Sales"
      }, 
      {
-      "children": [], 
       "name": "Shipping and Delivery Income"
      }, 
      {
-      "children": [], 
       "name": "Livestock Sales"
      }, 
      {
-      "children": [], 
       "name": "Commodity Credit Loans"
      }, 
      {
-      "children": [], 
       "name": "Cooperative Distributions"
      }, 
      {
-      "children": [], 
       "name": "Rental Income"
      }, 
      {
-      "children": [], 
       "name": "Crop Insurance Proceeds"
      }, 
      {
-      "children": [], 
       "name": "Crop Sales"
      }, 
      {
-      "children": [], 
       "name": "Commission income"
      }, 
      {
-      "children": [], 
       "name": "Legal Fee Income"
      }, 
      {
-      "children": [], 
       "name": "Service Income"
      }, 
      {
-      "children": [], 
       "name": "Job Income"
      }, 
      {
-      "children": [], 
       "name": "Administrative Fees"
      }, 
      {
-      "children": [], 
       "name": "Sales"
      }, 
      {
-      "children": [], 
       "name": "Fuel Tax Credits and Other Inc."
      }, 
      {
-      "children": [], 
       "name": "Sales Discounts"
      }, 
      {
-      "children": [], 
       "name": "Sales Discounts"
      }, 
      {
-      "children": [], 
       "name": "Sales"
      }, 
      {
-      "children": [], 
       "name": "Settlement Income"
      }, 
      {
-      "children": [], 
       "name": "Custom Hire Income"
      }, 
      {
-      "children": [], 
       "name": "Agricultural Program Payments"
      }
     ], 

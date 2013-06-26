@@ -7,11 +7,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "INT\u00c9R\u00caTS"
        }, 
        {
-        "children": [], 
         "name": "AUTRES PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION"
        }
       ], 
@@ -20,26 +18,21 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "AUTRES PRODUITS D'EXPLOITATION"
        }, 
        {
-        "children": [], 
         "name": "Ventes avec des provinces non-harmonis\u00e9es", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Ventes", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Ventes avec des provinces harmonis\u00e9es", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Ventes \u00e0 l'\u00e9tranger", 
         "root_type": "Income"
        }
@@ -54,28 +47,23 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "FRAIS SUR VENTE"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Achats dans des provinces harmonis\u00e9es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Achats dans des provinces non-harmonis\u00e9es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Achats \u00e0 l'\u00e9tranger", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Achats", 
           "root_type": "Expense"
          }
@@ -83,66 +71,53 @@
         "name": "CO\u00dbT DES PRODUITS VENDUS"
        }, 
        {
-        "children": [], 
         "name": "AUTRES FRAIS D'EXPLOITATION"
        }, 
        {
-        "children": [], 
         "name": "FRAIS G\u00c9N\u00c9RAUX"
        }, 
        {
-        "children": [], 
         "name": "FRAIS DE RECHERCHE ET D\u00c9VELOPPEMENT"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Vacances", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4t f\u00e9d\u00e9ral", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Assurance Emploi", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Fonds des services de sant\u00e9", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Assurance parentale", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sant\u00e9 et s\u00e9curit\u00e9 au travail", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Salaires", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Rentes", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Imp\u00f4t provincial", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Normes du travail", 
           "root_type": "Expense"
          }
@@ -155,11 +130,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "INT\u00c9R\u00caTS D\u00c9BITEURS"
        }, 
        {
-        "children": [], 
         "name": "AUTRES FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION"
        }
       ], 
@@ -175,20 +148,17 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS"
          }
         ], 
         "name": "IMMOBILISATIONS INCORPORELLES"
        }, 
        {
-        "children": [], 
         "name": "PLACEMENTS DISPONIBLES \u00c0 LA VENTE"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "AMORTISSEMENTS CUMUL\u00c9S"
          }
         ], 
@@ -202,12 +172,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Stock", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Stock exp\u00e9di\u00e9 non-factur\u00e9", 
           "root_type": "Asset"
          }
@@ -215,31 +183,25 @@
         "name": "STOCKS"
        }, 
        {
-        "children": [], 
         "name": "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE"
        }, 
        {
-        "children": [], 
         "name": "ENCAISSE"
        }, 
        {
-        "children": [], 
         "name": "CERTIFICATS DE D\u00c9P\u00d4TS"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "TVP/TVQ \u00e0 recevoir", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "TVH \u00e0 recevoir", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "TPS \u00e0 recevoir", 
           "root_type": "Asset"
          }
@@ -247,21 +209,17 @@
         "name": "IMP\u00d4TS \u00c0 RECEVOIR"
        }, 
        {
-        "children": [], 
         "name": "FRAIS PAY\u00c9S D'AVANCE"
        }, 
        {
-        "children": [], 
         "name": "PLACEMENTS D\u00c9TENUS \u00c0 DES FINS DE TRANSACTION"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "PROVISION POUR CR\u00c9ANCES DOUTEUSES"
          }, 
          {
-          "children": [], 
           "name": "Comptes clients"
          }
         ], 
@@ -276,31 +234,24 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL"
      }, 
      {
-      "children": [], 
       "name": "B\u00c9N\u00c9FICES NON R\u00c9PARTIS"
      }, 
      {
-      "children": [], 
       "name": "PRIMES"
      }, 
      {
-      "children": [], 
       "name": "CAPITAL-ACTIONS"
      }, 
      {
-      "children": [], 
       "name": "\u00c9CARTS DE CONVERSION"
      }, 
      {
-      "children": [], 
       "name": "SURPLUS D'APPORT"
      }, 
      {
-      "children": [], 
       "name": "DIVIDENDES"
      }
     ], 
@@ -313,17 +264,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "TPS \u00e0 payer", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "TVH \u00e0 payer", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "TVP/TVQ \u00e0 payer", 
           "root_type": "Liability"
          }
@@ -333,7 +281,6 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Stock re\u00e7u non factur\u00e9", 
           "root_type": "Liability"
          }
@@ -341,21 +288,17 @@
         "name": "PASSIFS DE STOCK"
        }, 
        {
-        "children": [], 
         "name": "AUTRES COMPTES CR\u00c9DITEURS"
        }, 
        {
-        "children": [], 
         "name": "PASSIFS LI\u00c9S AUX ACTIFS D\u00c9TENUS EN VUE DE LEUR CESSION"
        }, 
        {
-        "children": [], 
         "name": "DETTES FINANCI\u00c8RES COURANTES"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Comptes fournisseurs"
          }
         ], 
@@ -366,19 +309,16 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Imp\u00f4t f\u00e9d\u00e9ral sur les revenus", 
             "root_type": "Liability"
            }, 
            {
             "children": [
              {
-              "children": [], 
               "name": "AE - Contribution de l'employeur", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "AE - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }
@@ -393,12 +333,10 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "Rentes - Contribution de l'employeur", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Rentes - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }
@@ -406,24 +344,20 @@
             "name": "RENTES \u00c0 PAYER"
            }, 
            {
-            "children": [], 
             "name": "Normes du Travail \u00e0 payer", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Imp\u00f4t provincial sur les revenus", 
             "root_type": "Liability"
            }, 
            {
             "children": [
              {
-              "children": [], 
               "name": "AP - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "AP - Contribution de l'employeur", 
               "root_type": "Liability"
              }
@@ -431,12 +365,10 @@
             "name": "ASSURANCE PARENTALE \u00c0 PAYER"
            }, 
            {
-            "children": [], 
             "name": "Fond des Services de Sant\u00e9 \u00e0 payer", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer", 
             "root_type": "Liability"
            }
@@ -452,19 +384,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "IMP\u00d4TS DIFF\u00c9R\u00c9S"
        }, 
        {
-        "children": [], 
         "name": "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI"
        }, 
        {
-        "children": [], 
         "name": "DETTES FINANCI\u00c8RES NON-COURANTES"
        }, 
        {
-        "children": [], 
         "name": "AUTRES PASSIFS NON-COURANTS"
        }
       ], 

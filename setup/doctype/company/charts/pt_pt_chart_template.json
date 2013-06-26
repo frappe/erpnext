@@ -7,19 +7,16 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Resultado l\u00edquido", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Imposto estimado para o per\u00edodo", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Imposto diferido", 
           "root_type": "Liability"
          }
@@ -28,7 +25,6 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Resultado antes de impostos", 
         "root_type": "Liability"
        }
@@ -37,7 +33,6 @@
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "Dividendos antecipados", 
       "root_type": "Liability"
      }
@@ -49,27 +44,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Deprecia\u00e7\u00f5es acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Terrenos e recursos naturais", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Outras propriedades de investimento", 
         "root_type": "Asset"
        }
@@ -80,47 +70,38 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Terrenos e recursos naturais", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Equipamento administrativo", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Equipamento de transporte", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Equipamento b\u00e1sico", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Equipamentos biol\u00f3gicos", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Deprecia\u00e7\u00f5es acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Outros activos fixos tang\u00edveis", 
         "root_type": "Asset"
        }
@@ -131,19 +112,16 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Detidos at\u00e9 \u00e0 maturidade", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Ac\u00e7\u00f5es da sgm (6500x1,00)", 
           "root_type": "Asset"
          }
@@ -154,12 +132,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Empr\u00e9stimos concedidos", 
           "root_type": "Asset"
          }
@@ -170,17 +146,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Empr\u00e9stimos concedidos", 
           "root_type": "Asset"
          }
@@ -191,17 +164,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Empr\u00e9stimos concedidos", 
           "root_type": "Asset"
          }
@@ -212,17 +182,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Empr\u00e9stimos concedidos", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
           "root_type": "Asset"
          }
@@ -237,7 +204,6 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }
@@ -248,32 +214,26 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Activos intang\u00edveis em curso", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Activos fixos tang\u00edveis em curso", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Propriedades de investimento em curso", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Investimentos financeiros em curso", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Adiantamentos por conta de investimentos", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }
@@ -284,37 +244,30 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Outros activos intang\u00edveis", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Goodwill", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Projectos de desenvolvimento", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Programas de computador", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Deprecia\u00e7\u00f5es acumuladas", 
         "root_type": "Asset"
        }, 
        {
-        "children": [], 
         "name": "Propriedade industrial", 
         "root_type": "Asset"
        }
@@ -332,11 +285,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Activos financeiros"
          }, 
          {
-          "children": [], 
           "name": "Passivos financeiros"
          }
         ], 
@@ -345,11 +296,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Potencialmente desfavor\u00e1veis"
          }, 
          {
-          "children": [], 
           "name": "Potencialmente favor\u00e1veis"
          }
         ], 
@@ -358,11 +307,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros activos financeiros"
          }, 
          {
-          "children": [], 
           "name": "Outros passivos financeiros"
          }
         ], 
@@ -372,15 +319,12 @@
       "name": "Outros instrumentos financeiros"
      }, 
      {
-      "children": [], 
       "name": "Caixa"
      }, 
      {
-      "children": [], 
       "name": "Dep\u00f3sitos \u00e0 ordem"
      }, 
      {
-      "children": [], 
       "name": "Outros dep\u00f3sitos banc\u00e1rios"
      }
     ], 
@@ -391,17 +335,14 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mercadorias em tr\u00e2nsito", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mercadorias em poder de terceiros", 
         "root_type": "Expense"
        }
@@ -410,39 +351,32 @@
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Produtos e trabalhos em curso", 
       "root_type": "Expense"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Activos biol\u00f3gicos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Produtos e trabalhos em curso", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Produtos acabados e interm\u00e9dios", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mercadorias", 
         "root_type": "Expense"
        }
@@ -451,39 +385,32 @@
       "root_type": "Expense"
      }, 
      {
-      "children": [], 
       "name": "Adiantamentos por conta de compras", 
       "root_type": "Expense"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias subsidi\u00e1rias", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Embalagens", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Materiais diversos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias em tr\u00e2nsito", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias primas", 
         "root_type": "Expense"
        }
@@ -494,27 +421,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Devolu\u00e7\u00f5es de compras", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Descontos e abatimentos em compras", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Activos biol\u00f3gicos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mercadorias", 
         "root_type": "Expense"
        }
@@ -525,12 +447,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Produtos em poder de terceiros", 
         "root_type": "Expense"
        }
@@ -541,17 +461,14 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Subprodutos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Desperd\u00edcios, res\u00edduos e refugos", 
         "root_type": "Expense"
        }
@@ -564,12 +481,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Animais", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Plantas", 
           "root_type": "Expense"
          }
@@ -580,12 +495,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Plantas", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Animais", 
           "root_type": "Expense"
          }
@@ -607,42 +520,34 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros servi\u00e7os", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Limpeza, higiene e conforto", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Contencioso e notariado", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Royalties", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Seguros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Rendas e alugueres", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Comunica\u00e7\u00e3o", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Despesas de representa\u00e7\u00e3o", 
           "root_type": "Expense"
          }
@@ -651,29 +556,24 @@
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Subcontratos", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Electricidade", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Combust\u00edveis", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "\u00c1gua", 
           "root_type": "Expense"
          }
@@ -684,22 +584,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Transporte de pessoal", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Transportes de mercadorias", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Desloca\u00e7\u00f5es e estadas", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros", 
           "root_type": "Expense"
          }
@@ -710,37 +606,30 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Publicidade e propaganda", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Conserva\u00e7\u00e3o e repara\u00e7\u00e3o", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Comiss\u00f5es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Honor\u00e1rios", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Vigil\u00e2ncia e seguran\u00e7a", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Trabalhos especializados", 
           "root_type": "Expense"
          }
@@ -751,27 +640,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Livros de documenta\u00e7\u00e3o t\u00e9cnica", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Material de escrit\u00f3rio", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Artigos de oferta", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Ferramentas e utens\u00edlios de desgaste r\u00e1pido", 
           "root_type": "Expense"
          }
@@ -786,17 +670,14 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Mercadorias", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Activos biol\u00f3gicos (compras)", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
         "root_type": "Expense"
        }
@@ -807,49 +688,40 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Gastos de ac\u00e7\u00e3o social", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Seguros de acidentes no trabalho e doen\u00e7as profissionais", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Encargos sobre remunera\u00e7\u00f5es", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Indemniza\u00e7\u00f5es", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Outros gastos com o pessoal", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Remunera\u00e7\u00f5es dos \u00f3rg\u00e3os sociais", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Remunera\u00e7\u00f5es do pessoal", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Pr\u00e9mios para pens\u00f5es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros benef\u00edcios", 
           "root_type": "Expense"
          }
@@ -864,44 +736,36 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Em activos n\u00e3o correntes detidos para venda", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em activos fixos tang\u00edveis", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em propriedades de investimento", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em investimentos em curso", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em invent\u00e1rios", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em investimentos financeiros", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros devedores", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Clientes", 
           "root_type": "Expense"
          }
@@ -910,7 +774,6 @@
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em activos intang\u00edveis", 
         "root_type": "Expense"
        }
@@ -921,17 +784,14 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Activos fixos tang\u00edveis", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Activos intang\u00edveis", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Propriedades de investimento", 
         "root_type": "Expense"
        }
@@ -942,42 +802,34 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Impostos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Contratos onerosos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Garantias a clientes", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Reestrutura\u00e7\u00e3o", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Outras provis\u00f5es", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Processos judiciais em curso", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias ambientais", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
         "root_type": "Expense"
        }
@@ -988,22 +840,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Em activos biol\u00f3gicos", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em instrumentos financeiros", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em investimentos financeiros", 
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Em propriedades de investimento", 
         "root_type": "Expense"
        }
@@ -1016,12 +864,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros juros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Juros de financiamento obtidos", 
           "root_type": "Expense"
          }
@@ -1032,12 +878,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outras", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Relativos a financiamentos obtidos", 
           "root_type": "Expense"
          }
@@ -1048,12 +892,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Relativos a financiamentos obtidos", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros", 
           "root_type": "Expense"
          }
@@ -1070,17 +912,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Taxas", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Impostos directos", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Impostos indirectos", 
           "root_type": "Expense"
          }
@@ -1091,27 +930,22 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Gastos em propriedades de investimento", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Abates", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sinistros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros gastos e perdas", 
           "root_type": "Expense"
          }
@@ -1122,17 +956,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outras perdas", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Quebras", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Sinistros", 
           "root_type": "Expense"
          }
@@ -1143,22 +974,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros gastos e perdas", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Cobertura de preju\u00edzos", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Expense"
          }
@@ -1167,44 +994,36 @@
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "D\u00edvidas incobr\u00e1veis", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Ofertas e amostras de invent\u00e1rios", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Quotiza\u00e7\u00f5es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros n\u00e3o especificados", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Donativos", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Perdas em instrumentos financeiros", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Insufici\u00eancia da estimativa para impostos", 
           "root_type": "Expense"
          }
@@ -1213,24 +1032,20 @@
         "root_type": "Expense"
        }, 
        {
-        "children": [], 
         "name": "Descontos de pronto pagamento concedidos", 
         "root_type": "Expense"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Cobertura de preju\u00edzos", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Outros gastos e perdas", 
           "root_type": "Expense"
          }
@@ -1252,32 +1067,26 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Desempenho de cargos sociais noutras empresas", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Estudos, projectos e assist\u00eancia tecnol\u00f3gica", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Aluguer de equipamento", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Servi\u00e7os sociais", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outros rendimentos suplementares", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Royalties", 
           "root_type": "Income"
          }
@@ -1288,22 +1097,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros rendimentos e ganhos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Rendas e outros rendimentos em propriedades de investimento", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sinistros", 
           "root_type": "Income"
          }
@@ -1314,17 +1119,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Diferen\u00e7as de c\u00e2mbio favor\u00e1veis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outros rendimentos e ganhos", 
           "root_type": "Income"
          }
@@ -1335,17 +1137,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Aliena\u00e7\u00f5es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outros rendimentos e ganhos", 
           "root_type": "Income"
          }
@@ -1354,29 +1153,24 @@
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Recupera\u00e7\u00e3o de d\u00edvidas a receber", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Descontos de pronto pagamento obtidos", 
         "root_type": "Income"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Sinistros", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Sobras", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outros ganhos", 
           "root_type": "Income"
          }
@@ -1387,32 +1181,26 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Ganhos em outros instrumentos financeiros", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Restitui\u00e7\u00e3o de impostos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outros n\u00e3o especificados", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Excesso da estimativa para impostos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Imputa\u00e7\u00e3o de subs\u00eddios para investimentos", 
           "root_type": "Income"
          }
@@ -1429,34 +1217,28 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Em activos fixos tang\u00edveis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em propriedades de investimento", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em activos intang\u00edveis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em investimentos em curso", 
           "root_type": "Income"
          }, 
          {
           "children": [
            {
-            "children": [], 
             "name": "Outros devedores", 
             "root_type": "Income"
            }, 
            {
-            "children": [], 
             "name": "Clientes", 
             "root_type": "Income"
            }
@@ -1465,17 +1247,14 @@
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em invent\u00e1rios", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em investimentos financeiros", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Em activos n\u00e3o correntes detidos para venda", 
           "root_type": "Income"
          }
@@ -1486,17 +1265,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Activos intang\u00edveis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Activos fixos tang\u00edveis", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Propriedades de investimento", 
           "root_type": "Income"
          }
@@ -1507,42 +1283,34 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Impostos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Acidentes no trabalho e doen\u00e7as profissionais", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Outras provis\u00f5es", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Processos judiciais em curso", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Garantias a clientes", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Reestrutura\u00e7\u00e3o", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Contratos onerosos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "Mat\u00e9rias ambientais", 
           "root_type": "Income"
          }
@@ -1557,22 +1325,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Em activos biol\u00f3gicos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Em investimentos financeiros", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Em propriedades de investimento", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Em instrumentos financeiros", 
         "root_type": "Income"
        }
@@ -1583,37 +1347,30 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Mercadoria", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Activos biol\u00f3gicos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produtos acabados e interm\u00e9dios", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Descontos e abatimentos em vendas", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Iva das vendas com imposto inclu\u00eddo", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Devolu\u00e7\u00f5es de vendas", 
         "root_type": "Income"
        }
@@ -1624,27 +1381,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Servi\u00e7os secund\u00e1rios", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Iva dos servi\u00e7os com imposto inclu\u00eddo", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Servi\u00e7o a", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Servi\u00e7o b", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Descontos e abatimentos", 
         "root_type": "Income"
        }
@@ -1655,22 +1407,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Activos biol\u00f3gicos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produtos e trabalhos em curso", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Produtos acabados e interm\u00e9dios", 
         "root_type": "Income"
        }
@@ -1681,22 +1429,18 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Activos por gastos diferidos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Activos intang\u00edveis", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Activos fixos tang\u00edveis", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Propriedades de investimento", 
         "root_type": "Income"
        }
@@ -1709,22 +1453,18 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outras", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De subsidi\u00e1rias", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De associadas e empreendimentos conjuntos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
           "root_type": "Income"
          }
@@ -1735,32 +1475,26 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "De outras aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De financiamentos concedidos a associadas e emp. conjun", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De dep\u00f3sitos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De outros financiamentos obtidos", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De financiamentos concedidos a subsidi\u00e1rias", 
           "root_type": "Income"
          }, 
          {
-          "children": [], 
           "name": "De financiamentos obtidos", 
           "root_type": "Income"
          }
@@ -1769,7 +1503,6 @@
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Outros rendimentos similares", 
         "root_type": "Income"
        }
@@ -1780,12 +1513,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Subs\u00eddios do estado e outros entes p\u00fablicos", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Subs\u00eddios de outras entidades", 
         "root_type": "Income"
        }
@@ -1801,42 +1532,34 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Lucros dispon\u00edveis", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Empr\u00e9stimos concedidos empresa m\u00e3e", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Accionistas c. subscri\u00e7\u00e3o", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Quotas n\u00e3o liberadas", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Adiantamentos por conta de lucros", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Resultados atribu\u00eddos", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outras opera\u00e7\u00f5es", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Liability"
        }
@@ -1847,64 +1570,52 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Tributos das autarquias locais", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outras tributa\u00e7\u00f5es", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Reten\u00e7\u00e3o de impostos sobre rendimentos", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Iva a recuperar", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva apuramento", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva liquida\u00e7\u00f5es oficiosas", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva reembolsos pedidos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva dedut\u00edvel", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva suportado", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva a pagar", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva regulariza\u00e7\u00f5es", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Iva liquidado", 
           "root_type": "Liability"
          }
@@ -1913,17 +1624,14 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Imposto sobre o rendimento", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outros impostos", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Contribui\u00e7\u00f5es para a seguran\u00e7a social", 
         "root_type": "Liability"
        }
@@ -1934,42 +1642,34 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Impostos", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Contratos onerosos", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Processos judiciais em curso", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outras provis\u00f5es", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Garantias a clientes", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Mat\u00e9rias ambientais", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Reestrutura\u00e7\u00e3o", 
         "root_type": "Liability"
        }
@@ -1980,12 +1680,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Rendimentos a reconhecer", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Gastos a reconhecer", 
         "root_type": "Liability"
        }
@@ -1996,66 +1694,52 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Adiantamentos de clientes"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Clientes empresas associadas"
          }, 
          {
-          "children": [], 
           "name": "Clientes gerais"
          }, 
          {
-          "children": [], 
           "name": "Clientes empresas subsidi\u00e1rias"
          }, 
          {
-          "children": [], 
           "name": "Clientes empresa m\u00e3e"
          }, 
          {
-          "children": [], 
           "name": "Clientes empreendimentos conjuntos"
          }, 
          {
-          "children": [], 
           "name": "Clientes outras partes relacionadas"
          }
         ], 
         "name": "Clientes c/c"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Clientes gerais"
          }, 
          {
-          "children": [], 
           "name": "Clientes empresa m\u00e3e"
          }, 
          {
-          "children": [], 
           "name": "Clientes empresas subsidi\u00e1rias"
          }, 
          {
-          "children": [], 
           "name": "Clientes outras partes relacionadas"
          }, 
          {
-          "children": [], 
           "name": "Clientes empresas associadas"
          }, 
          {
-          "children": [], 
           "name": "Clientes empreendimentos conjuntos"
          }
         ], 
@@ -2069,11 +1753,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Com o pessoal"
          }, 
          {
-          "children": [], 
           "name": "Com os \u00f3rg\u00e3os sociais"
          }
         ], 
@@ -2082,11 +1764,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Aos \u00f3rg\u00e3os sociais"
          }, 
          {
-          "children": [], 
           "name": "Ao pessoal"
          }
         ], 
@@ -2095,11 +1775,9 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Ao pessoal"
          }, 
          {
-          "children": [], 
           "name": "Aos \u00f3rg\u00e3os sociais"
          }
         ], 
@@ -2108,18 +1786,15 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Do pessoal"
          }, 
          {
-          "children": [], 
           "name": "Dos \u00f3rg\u00e3os sociais"
          }
         ], 
         "name": "Cau\u00e7\u00f5es"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas"
        }
       ], 
@@ -2130,68 +1805,53 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Fornecedores gerais"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresas subsidi\u00e1rias"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores outras partes relacionadas"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empreendimentos conjuntos"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresa m\u00e3e"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresas associadas"
          }
         ], 
         "name": "Fornecedores c/c"
        }, 
        {
-        "children": [], 
         "name": "Adiantamentos a fornecedores"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas"
        }, 
        {
-        "children": [], 
         "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Fornecedores outras partes relacionadas"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empreendimentos conjuntos"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresas subsidi\u00e1rias"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresa m\u00e3e"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores gerais"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores empresas associadas"
          }
         ], 
@@ -2205,17 +1865,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Empr\u00e9stimos banc\u00e1rios", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Loca\u00e7\u00f5es financeiras", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Descobertos banc\u00e1rios", 
           "root_type": "Liability"
          }
@@ -2226,12 +1883,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Outros participantes suprimentos e outros m\u00fatuos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Empresa m\u00e3e suprimentos e outros m\u00fatuos", 
           "root_type": "Liability"
          }
@@ -2242,7 +1897,6 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Empr\u00e9stimos por obriga\u00e7\u00f5es", 
           "root_type": "Liability"
          }
@@ -2251,12 +1905,10 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outros financiadores", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Subsidi\u00e1rias, associadas e empreendimentos conjuntos", 
         "root_type": "Liability"
        }
@@ -2267,39 +1919,32 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Outros devedores e credores", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Perdas por imparidade acumuladas", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Credores por subscri\u00e7\u00f5es n\u00e3o liberadas", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Benef\u00edcios p\u00f3s emprego", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Adiantamentos a fornecedores de investimentos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Fornecedores de investimentos contas gerais", 
           "root_type": "Liability"
          }
@@ -2310,12 +1955,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Credores por acr\u00e9scimos de gastos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Devedores por acr\u00e9scimo de rendimentos", 
           "root_type": "Liability"
          }
@@ -2324,19 +1967,16 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Adiantamentos por conta de vendas", 
         "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Activos por impostos diferidos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Passivos por impostos diferidos", 
           "root_type": "Liability"
          }
@@ -2358,12 +1998,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Antes de imposto sobre o rendimento", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Impostos diferidos", 
           "root_type": "Liability"
          }
@@ -2374,12 +2012,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Impostos diferidos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Antes de imposto sobre o rendimento", 
           "root_type": "Liability"
          }
@@ -2394,27 +2030,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Doa\u00e7\u00f5es", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Ajustamentos por impostos diferidos", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Subs\u00eddios", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outras", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Diferen\u00e7as de convers\u00e3o de demonstra\u00e7\u00f5es financeiras", 
         "root_type": "Liability"
        }
@@ -2423,29 +2054,24 @@
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "Outros instrumentos de capital pr\u00f3prio", 
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "Resultados transitados", 
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "Capital", 
       "root_type": "Liability"
      }, 
      {
       "children": [
        {
-        "children": [], 
         "name": "Outras reservas", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Reservas legais", 
         "root_type": "Liability"
        }
@@ -2458,17 +2084,14 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Lucros n\u00e3o atribu\u00eddos", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Decorrentes de outras varia\u00e7\u00f5es nos capitais pr\u00f3prios d", 
           "root_type": "Liability"
          }, 
          {
-          "children": [], 
           "name": "Ajustamentos de transi\u00e7\u00e3o", 
           "root_type": "Liability"
          }
@@ -2477,7 +2100,6 @@
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Outros", 
         "root_type": "Liability"
        }
@@ -2488,12 +2110,10 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Descontos e pr\u00e9mios", 
         "root_type": "Liability"
        }, 
        {
-        "children": [], 
         "name": "Valor nominal", 
         "root_type": "Liability"
        }
@@ -2502,7 +2122,6 @@
       "root_type": "Liability"
      }, 
      {
-      "children": [], 
       "name": "Pr\u00e9mios de emiss\u00e3o", 
       "root_type": "Liability"
      }

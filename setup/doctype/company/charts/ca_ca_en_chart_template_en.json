@@ -7,11 +7,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "OTHER NON-OPERATING INCOMES"
        }, 
        {
-        "children": [], 
         "name": "INTERESTS"
        }
       ], 
@@ -20,27 +18,22 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "Inside Sales", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "International Sales", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Non-Harmonized Provinces Sales", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "Harmonized Provinces Sales", 
         "root_type": "Income"
        }, 
        {
-        "children": [], 
         "name": "OTHER OPERATING INCOMES"
        }
       ], 
@@ -54,21 +47,17 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "PREPAID EXPENSES"
        }, 
        {
-        "children": [], 
         "name": "INVESTMENTS HELD FOR TRADING"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
          }, 
          {
-          "children": [], 
           "name": "Customers Account"
          }
         ], 
@@ -77,12 +66,10 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Stock In Hand", 
           "root_type": "Asset"
          }, 
          {
-          "children": [], 
           "name": "Stock Delivered But Not Billed", 
           "root_type": "Asset"
          }
@@ -90,29 +77,23 @@
         "name": "STOCKS"
        }, 
        {
-        "children": [], 
         "name": "TREASURY OR TREASURY EQUIVALENTS"
        }, 
        {
-        "children": [], 
         "name": "CASH"
        }, 
        {
-        "children": [], 
         "name": "CERTIFICATES OF DEPOSITS"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "GST receivable"
          }, 
          {
-          "children": [], 
           "name": "PST/QST receivable"
          }, 
          {
-          "children": [], 
           "name": "HST receivable"
          }
         ], 
@@ -124,13 +105,11 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "INVESTMENTS AVAILABLE FOR SALE"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "ACCUMULATED DEPRECIATIONS"
          }
         ], 
@@ -139,7 +118,6 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "PATENTS, TRADEMARKS AND COPYRIGHTS"
          }
         ], 
@@ -154,27 +132,21 @@
    {
     "children": [
      {
-      "children": [], 
       "name": "TRANSLATION ADJUSTMENTS"
      }, 
      {
-      "children": [], 
       "name": "CONTRIBUTED SURPLUS"
      }, 
      {
-      "children": [], 
       "name": "RETAINED EARNINGS"
      }, 
      {
-      "children": [], 
       "name": "PREMIUMS"
      }, 
      {
-      "children": [], 
       "name": "SHARE CAPITAL"
      }, 
      {
-      "children": [], 
       "name": "DIVIDENDS"
      }
     ], 
@@ -185,19 +157,15 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "DEFERRED TAXES"
        }, 
        {
-        "children": [], 
         "name": "NON-CURRENT FINANCIAL DEBTS"
        }, 
        {
-        "children": [], 
         "name": "OTHER NON-CURRENT LIABILITIES"
        }, 
        {
-        "children": [], 
         "name": "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES"
        }
       ], 
@@ -208,7 +176,6 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "Stock Received But Not Billed", 
           "root_type": "Liability"
          }
@@ -216,13 +183,11 @@
         "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
        }, 
        {
-        "children": [], 
         "name": "CURRENT FINANCIAL DEBTS"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Suppliers Account"
          }
         ], 
@@ -233,24 +198,20 @@
          {
           "children": [
            {
-            "children": [], 
             "name": "Health Services Fund to pay", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Labour Health and Safety to pay", 
             "root_type": "Liability"
            }, 
            {
             "children": [
              {
-              "children": [], 
               "name": "Annuities - Employees Contribution", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "Annuities - Employer Contribution", 
               "root_type": "Liability"
              }
@@ -260,12 +221,10 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "PAP - Employer Contribution", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "PAP - Employee Contribution", 
               "root_type": "Liability"
              }
@@ -273,12 +232,10 @@
             "name": "PARENTAL INSURANCE PLAN TO PAY"
            }, 
            {
-            "children": [], 
             "name": "Provincial Income Tax", 
             "root_type": "Liability"
            }, 
            {
-            "children": [], 
             "name": "Labour Standards to pay", 
             "root_type": "Liability"
            }
@@ -290,12 +247,10 @@
            {
             "children": [
              {
-              "children": [], 
               "name": "EI - Employees Contribution", 
               "root_type": "Liability"
              }, 
              {
-              "children": [], 
               "name": "EI - Employer Contribution", 
               "root_type": "Liability"
              }
@@ -303,7 +258,6 @@
             "name": "EMPLOYMENT INSURANCE TO PAY"
            }, 
            {
-            "children": [], 
             "name": "Federal Income Tax", 
             "root_type": "Liability"
            }
@@ -316,26 +270,21 @@
        {
         "children": [
          {
-          "children": [], 
           "name": "HST to pay"
          }, 
          {
-          "children": [], 
           "name": "GST to pay"
          }, 
          {
-          "children": [], 
           "name": "PST/QST to pay"
          }
         ], 
         "name": "TAXES PAYABLES"
        }, 
        {
-        "children": [], 
         "name": "STOCK LIABILITIES"
        }, 
        {
-        "children": [], 
         "name": "OTHER ACCOUNTS PAYABLES"
        }
       ], 
@@ -349,11 +298,9 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "OTHER NON-OPERATING EXPENSES"
        }, 
        {
-        "children": [], 
         "name": "INTERESTS EXPENSES"
        }
       ], 
@@ -362,58 +309,47 @@
      {
       "children": [
        {
-        "children": [], 
         "name": "RESEARCH AND DEVELOPMENT EXPENSES"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Salaries, wages and commissions", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Labour Health and Safety", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Annuities", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Labour Standards", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Provincial Income Tax", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Parental Insurance", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Holidays", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Federal Income Tax", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Employment Insurance", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Health Services Fund", 
           "root_type": "Expense"
          }
@@ -421,28 +357,23 @@
         "name": "LABOUR EXPENSES"
        }, 
        {
-        "children": [], 
         "name": "SALES EXPENSES"
        }, 
        {
         "children": [
          {
-          "children": [], 
           "name": "Purchases in non-harmonized provinces", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "International Purchases", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Inside Purchases", 
           "root_type": "Expense"
          }, 
          {
-          "children": [], 
           "name": "Purchases in harmonized provinces", 
           "root_type": "Expense"
          }
@@ -450,11 +381,9 @@
         "name": "COST OF GOODS SOLD"
        }, 
        {
-        "children": [], 
         "name": "OTHER OPERATING EXPENSES"
        }, 
        {
-        "children": [], 
         "name": "GENERAL EXPENSES"
        }
       ], 
