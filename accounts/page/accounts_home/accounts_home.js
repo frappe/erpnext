@@ -101,6 +101,11 @@ wn.module_page["Accounts"] = [
 				"description": wn._("Tax Template for Purchase")
 			},
 			{
+				"label": wn._("Shipping Rules"),
+				"doctype":"Shipping Rule",
+				"description": wn._("Rules to calculate shipping amount for a sale")
+			},
+			{
 				"label": wn._("Point-of-Sale Setting"),
 				"doctype":"POS Setting",
 				"description": "User settings for Point-of-sale (POS)"

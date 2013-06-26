@@ -64,6 +64,11 @@ wn.module_page["Selling"] = [
 				doctype:"Sales Taxes and Charges Master"
 			},
 			{
+				label: wn._("Shipping Rules"),
+				description: wn._("Rules to calculate shipping amount for a sale"),
+				doctype:"Shipping Rule"
+			},
+			{
 				label: wn._("Price List"),
 				description: wn._("Mupltiple Item prices."),
 				doctype:"Price List"
