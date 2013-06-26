@@ -247,4 +247,5 @@ patch_list = [
 	"patches.june_2013.p06_drop_unused_tables",
 	"patches.june_2013.p08_shopping_cart_settings",
 	"patches.june_2013.p05_remove_search_criteria_reports",
+	"patches.june_2013.p09_update_global_defaults",
 ]

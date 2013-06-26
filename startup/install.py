@@ -42,6 +42,7 @@ def make_roles():
 
 def post_import():
 	webnotes.conn.begin()
+
 	# feature setup
 	import_defaults()
 	import_country_and_currency()

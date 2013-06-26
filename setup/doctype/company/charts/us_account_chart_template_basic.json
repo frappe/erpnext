@@ -1,0 +1,400 @@
+{
+ "name": "Basic Chart of Account", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Proceeds from Sale of Assets"
+     }, 
+     {
+      "name": "Interest Income"
+     }, 
+     {
+      "name": "Finance Charge Income"
+     }, 
+     {
+      "name": "Insurance Proceeds Received"
+     }
+    ], 
+    "name": "Other Income"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Furniture and Equipment"
+       }, 
+       {
+        "name": "Accumulated Depreciation"
+       }
+      ], 
+      "name": "Fixed Assets"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Account Receivable"
+         }
+        ], 
+        "name": "Receivable"
+       }, 
+       {
+        "name": "Client Trust Account"
+       }, 
+       {
+        "name": "Cash or Cash Equivalents"
+       }
+      ], 
+      "name": "Current Assets"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Filing Fees"
+       }, 
+       {
+        "name": "Expert Witness Fees"
+       }, 
+       {
+        "name": "Advanced Client Costs"
+       }, 
+       {
+        "name": "Court Costs"
+       }
+      ], 
+      "name": "Other Current Assets"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Security Deposits Asset"
+       }
+      ], 
+      "name": "Other Assets"
+     }
+    ], 
+    "name": "Assets"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Retained Earnings"
+       }, 
+       {
+        "name": "Opening Balance Equity"
+       }, 
+       {
+        "name": "Capital Stock"
+       }, 
+       {
+        "name": "Dividends Paid"
+       }
+      ], 
+      "name": "Equity"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Sales Tax Payable"
+         }, 
+         {
+          "name": "Use Tax Payable"
+         }, 
+         {
+          "name": "Customer Deposits Received"
+         }, 
+         {
+          "name": "Payroll Liabilities"
+         }
+        ], 
+        "name": "Other Current Liabilities"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Account Payable"
+           }
+          ], 
+          "name": "Payable"
+         }
+        ], 
+        "name": "Current Liabilities"
+       }
+      ], 
+      "name": "Liabilities"
+     }
+    ], 
+    "name": "Liabilities and Equity"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Freight and Shipping Costs"
+     }, 
+     {
+      "name": "Commissions Paid"
+     }, 
+     {
+      "name": "Purchase Discounts"
+     }, 
+     {
+      "name": "Subcontractors Expense"
+     }, 
+     {
+      "name": "Job Materials Purchased"
+     }, 
+     {
+      "name": "Equipment Rental for Jobs"
+     }, 
+     {
+      "name": "Media Purchased for Clients"
+     }, 
+     {
+      "name": "Tools and Small Equipment"
+     }, 
+     {
+      "name": "Subcontracted Services"
+     }, 
+     {
+      "name": "Purchases - Resale Items"
+     }, 
+     {
+      "name": "Commissions Paid"
+     }, 
+     {
+      "name": "Other Job Related Costs"
+     }, 
+     {
+      "name": "Merchant Account Fees"
+     }, 
+     {
+      "name": "Merchant Account Fees"
+     }
+    ], 
+    "name": "Cost of Goods Sold"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Office Supplies"
+     }, 
+     {
+      "name": "Rent Expense"
+     }, 
+     {
+      "name": "Postage and Delivery"
+     }, 
+     {
+      "name": "Dues and Subscriptions"
+     }, 
+     {
+      "name": "Printing and Reproduction"
+     }, 
+     {
+      "name": "Janitorial Expense"
+     }, 
+     {
+      "name": "Freight and Trucking"
+     }, 
+     {
+      "name": "Payroll Expenses"
+     }, 
+     {
+      "name": "Bank Service Charges"
+     }, 
+     {
+      "name": "Computer and Internet Expenses"
+     }, 
+     {
+      "name": "Small Tools and Equipment"
+     }, 
+     {
+      "name": "Car and Truck Expenses"
+     }, 
+     {
+      "name": "Interest Expense"
+     }, 
+     {
+      "name": "Taxes - Property"
+     }, 
+     {
+      "name": "Custom Hire and Contract Labor"
+     }, 
+     {
+      "name": "Gasoline, Fuel and Oil"
+     }, 
+     {
+      "name": "Advertising and Promotion"
+     }, 
+     {
+      "name": "Utilities"
+     }, 
+     {
+      "name": "Telephone Expense"
+     }, 
+     {
+      "name": "Marketing Expense"
+     }, 
+     {
+      "name": "Business Licenses and Permits"
+     }, 
+     {
+      "name": "Continuing Education"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Life and Disability Insurance"
+       }, 
+       {
+        "name": "Worker's Compensation"
+       }, 
+       {
+        "name": "Health Insurance"
+       }, 
+       {
+        "name": "General Liability Insurance"
+       }, 
+       {
+        "name": "Professional Liability"
+       }
+      ], 
+      "name": "Insurance Expense"
+     }, 
+     {
+      "name": "Seeds and Plants Purchased"
+     }, 
+     {
+      "name": "Automobile Expense"
+     }, 
+     {
+      "name": "Equipment Rental"
+     }, 
+     {
+      "name": "Uniforms"
+     }, 
+     {
+      "name": "Storage and Warehousing"
+     }, 
+     {
+      "name": "Chemicals Purchased"
+     }, 
+     {
+      "name": "Miscellaneous Expense"
+     }, 
+     {
+      "name": "Fertilizers and Lime"
+     }, 
+     {
+      "name": "Repairs and Maintenance"
+     }, 
+     {
+      "name": "Depreciation Expense"
+     }, 
+     {
+      "name": "Feed Purchased"
+     }, 
+     {
+      "name": "Meals and Entertainment"
+     }, 
+     {
+      "name": "Veterinary, Breeding, Medicine"
+     }, 
+     {
+      "name": "Professional Fees"
+     }, 
+     {
+      "name": "Conservation Expenses"
+     }, 
+     {
+      "name": "Charitable Contributions"
+     }, 
+     {
+      "name": "Travel Expense"
+     }
+    ], 
+    "name": "Expenses"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Farmers Market Sales"
+     }, 
+     {
+      "name": "Shipping and Delivery Income"
+     }, 
+     {
+      "name": "Livestock Sales"
+     }, 
+     {
+      "name": "Commodity Credit Loans"
+     }, 
+     {
+      "name": "Cooperative Distributions"
+     }, 
+     {
+      "name": "Rental Income"
+     }, 
+     {
+      "name": "Crop Insurance Proceeds"
+     }, 
+     {
+      "name": "Crop Sales"
+     }, 
+     {
+      "name": "Commission income"
+     }, 
+     {
+      "name": "Legal Fee Income"
+     }, 
+     {
+      "name": "Service Income"
+     }, 
+     {
+      "name": "Job Income"
+     }, 
+     {
+      "name": "Administrative Fees"
+     }, 
+     {
+      "name": "Sales"
+     }, 
+     {
+      "name": "Fuel Tax Credits and Other Inc."
+     }, 
+     {
+      "name": "Sales Discounts"
+     }, 
+     {
+      "name": "Sales Discounts"
+     }, 
+     {
+      "name": "Sales"
+     }, 
+     {
+      "name": "Settlement Income"
+     }, 
+     {
+      "name": "Custom Hire Income"
+     }, 
+     {
+      "name": "Agricultural Program Payments"
+     }
+    ], 
+    "name": "Income"
+   }
+  ], 
+  "name": "Basic", 
+  "parent_id": ""
+ }
+}

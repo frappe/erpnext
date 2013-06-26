@@ -1,0 +1,2426 @@
+{
+ "name": "Polska - Plan kont", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "5500 bis 5590 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb 20 % VSt/20 % USt", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb 10 % VSt/10 % USt", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "5400 bis 5490 Verbrauch von Betriebsstoffen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf sonstige bezogene Herstellungsleistungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "5100 bis 5190 Verbrauch an Rohstoffen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "5300 bis 5390 Verbrauch von Hilfsstoffen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "5700 bis 5790 Sonstige bezogene Herstellungsleistungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Wareneinkauf 20 %", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 10 % USt", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 20 % USt", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "5200 bis 5290 Verbrauch von bezogenen Fertig- und Einzelteilen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "5600 bis 5690 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf Materialaufwand", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Summe Wareneinsatz"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Rezerwa z tytu\u0142u odroczonego podatku dochodowego"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rezerwa d\u0142ugoterminowa na \u015bwiadczenia emerytalne i podobne"
+         }, 
+         {
+          "name": "Rezerwa kr\u00f3tkoterminowa na \u015bwiadczenia emerytalne i podobne"
+         }
+        ], 
+        "name": "Rezerwa na \u015bwiadczenia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Pozosta\u0142e rezerwy kr\u00f3tkoterminowe"
+         }, 
+         {
+          "name": "Pozosta\u0142e rezerwy d\u0142ugoterminowe"
+         }
+        ], 
+        "name": "Pozosta\u0142e rezerwy"
+       }
+      ], 
+      "name": "Rezerwy"
+     }, 
+     {
+      "name": "Kapita\u0142 podstawowy"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inne rozliczenia mi\u0119dzyokresowe d\u0142ugoterminowe"
+         }, 
+         {
+          "name": "Inne rozliczenia mi\u0119dzyokresowe kr\u00f3tkoterminowe"
+         }
+        ], 
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
+       }, 
+       {
+        "name": "Ujemna warto\u015b\u0107 firmy"
+       }
+      ], 
+      "name": "Rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Zak\u0142adowy fundusz rehabilitacji os\u00f3b niepe\u0142nosprawnych"
+         }, 
+         {
+          "name": "Fundusz nagr\u00f3d"
+         }, 
+         {
+          "name": "Fundusz na remont zasob\u00f3w mieszkaniowych"
+         }
+        ], 
+        "name": "Inne fundusze specjalne"
+       }
+      ], 
+      "name": "Fundusze specjalne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Podatek dochodowy od os\u00f3b prawnych"
+       }, 
+       {
+        "name": "Inne obowi\u0105zkowe obci\u0105\u017cenia wyniku finansowego"
+       }
+      ], 
+      "name": "Podatek dochodowy i inne obowi\u0105zkowe obci\u0105\u017cenia wyniku finansowego"
+     }, 
+     {
+      "name": "Rozliczenia wyniku finansowego"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kapita\u0142 rezerwowy"
+       }, 
+       {
+        "name": "Kapita\u0142 zapasowy"
+       }, 
+       {
+        "name": "Kapita\u0142y wydzielone w jednostce statutowej i zak\u0142adach (oddzia\u0142ach) samodzielnie sporz\u0105dzaj\u0105cych bilans"
+       }, 
+       {
+        "name": "Kapita\u0142 z aktualizacji wyceny"
+       }
+      ], 
+      "name": "Pozosta\u0142e kapita\u0142y i fundusze"
+     }, 
+     {
+      "name": "Wynik finansowy"
+     }
+    ], 
+    "name": "Kapita\u0142y w\u0142asne i wynik finansowy"
+   }, 
+   {
+    "children": [
+     {
+      "name": "8600 bis 8690 Aufl\u00f6sung unversteuerten R\u00fccklagen"
+     }, 
+     {
+      "name": "Gewinabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen"
+     }, 
+     {
+      "name": "8100 bis 8130 Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "nicht ausgenutzte Lieferantenskonti", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von Wertpapieren des Umlaufverm\u00f6gens", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von Beteiligungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8700 bis 8740 Aufl\u00f6sung von Kapitalr\u00fccklagen"
+     }, 
+     {
+      "name": "8260 bis 8270 Aufwendungen aus sonst. Fiananzanlagen und aus Wertpapieren des Umlaufverm\u00f6gens", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "8450 bis 8490 Au\u00dferordentliche Aufwendungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Buchwert abgegangener sonstiger Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8220 bis 8250 Aufwendungen aus Beteiligungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8800 bis 8890 Zuweisung von unversteuerten R\u00fccklagen"
+     }, 
+     {
+      "name": "8050 bis 8090 Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8280 bis 8340 Zinsen und \u00e4hnliche Aufwendungem", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "8750 bis 8790 Aufl\u00f6sung von Gewinnr\u00fccklagen"
+     }, 
+     {
+      "name": "Buchwert abgegangener Beteiligungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8500 bis 8590 Steuern vom Einkommen und vom Ertrag"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von sonstigen Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Buchwert abgegangener Wertpapiere des Umlaufverm\u00f6gens", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8400 bis 8440 Au\u00dferordentliche Ertr\u00e4ge", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Wertpapieren des Umlaufverm\u00f6gens", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "8000 bis 8040 Ertr\u00e4ge aus Beteiligungen", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Summe Finanzertr\u00e4ge und Aufwendungen"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Hebezeuge und Montageanlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Aufwendungen f\u00fcs das Ingangssetzen u. Erweitern eines Betriebes", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anlagen im Bau", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Vorrichtungen, Formen und Modelle", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Maschinenwerkzeuge", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Wohn- und Sozialgeb\u00e4ude auf eigenem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Wohn- und Sozialgeb\u00e4ude auf fremdem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Marken, Warenzeichen und Musterschutzrechte", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit nicht im Erzeugungsprozess verwendet", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Grundst\u00fcckseinrichtunten auf fremdem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Patentrechte und Lizenzen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgeb\u00e4uden", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anteile an verbundenen Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Beteiligungen an angeschlossenen (assoziierten) Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "B\u00fcromaschinen, EDV - Anlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Gesch\u00e4fts(Firmen)wert", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Ausleihungen an  verbundene Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Beheizungs- und Beleuchtungsanlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Sonstige Ausleihungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Andere Betriebs- und Gesch\u00e4ftsausstattung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anteile an Personengesellschaften ohne Beteiligungscharakter", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Antriebsmaschinen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "LKW", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Transportanlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "920 bis 930 Festverzinsliche Wertpapiere des Anlageverm\u00f6gens", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Genossenschaften ohne Beteiligungscharakter", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Bebaute Grundst\u00fccke (Grundwert)", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit im Erzeugerprozess verwendet", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "940 bis 970 Sonstige Finanzanlagen, Wertrechte", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Andere Erzeugungshilfsmittel", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Allgemeine Werkzeuge und Handwerkzeuge", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf eigenem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf fremdem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Datenverarbeitungsprogramme", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Grundst\u00fcckseinrichtunten auf eigenem Grund", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Konzessionen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Sonstige Beteiligungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Bauliche Investitionen in fremden (gepachteten) Betriebs- und Gesch\u00e4ftsgeb\u00e4uden", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Beteiligungen an Gemeinschaftunternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "44 bis 49 Sonstige Maschinen und maschinelle Anlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "PKW", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pacht- und Mietrechte", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Ausleihungen an  verbundene Unternehmen, mit denen ein Beteiligungsverh\u00e4lnis besteht", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Nachrichten- und Kontrollanlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anteile an Kapitalgesellschaften ohne Beteiligungscharakter", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Fertigungsmaschinen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Gebinde", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Energieversorgungsanlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Andere Bef\u00f6rderungsmittel", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Grundst\u00fccksgleiche Rechte", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anteile an Investmentfonds", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Unbebaute Grundst\u00fccke", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Summe Kontoklasse 0 Anlageverm\u00f6gen"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego"
+       }, 
+       {
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
+       }
+      ], 
+      "name": "Pozosta\u0142e rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Produkty gotowe w magazynie", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Produkty gotowe poza jednostk\u0105", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Produkty gotowe"
+       }, 
+       {
+        "name": "P\u00f3\u0142produkty", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Produkty i p\u00f3\u0142produkty"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Czynne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+       }, 
+       {
+        "name": "Bierne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+       }
+      ], 
+      "name": "Rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w produkt\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w"
+     }
+    ], 
+    "name": "Produkty i rozliczenia mi\u0119dzyokresowe"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Amortyzacja", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Pozosta\u0142e koszty rodzajowe", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Pozosta\u0142e \u015bwiadczenia", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Odpisy na zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych lub \u015bwiadczenia urlopowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sk\u0142adki na ubezpieczenia spo\u0142eczne, FP, FG\u015aP", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Ubezpieczenia spo\u0142eczne i inne \u015bwiadczenia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Podatek od nieruchomo\u015bci", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Op\u0142aty s\u0105dowe, prawnicze i notarialne", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Koncesje", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Pozosta\u0142e podatki i op\u0142aty", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Op\u0142aty i prowizje bankowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Podatek akcyzowy", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Op\u0142aty skarbowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "VAT niepodlegaj\u0105cy odliczeniu", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Podatek od \u015brodk\u00f3w transportowych", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Podatki i op\u0142aty"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Wynagrodzenia os\u00f3b dora\u017anie zatrudnionych", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Wynagrodzenia pracownik\u00f3w", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Wynagrodzenia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Zu\u017cycie paliwa do \u015brodk\u00f3w transportu", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Zu\u017cycie innych materia\u0142\u00f3w", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Zu\u017cycie surowc\u00f3w do wytwarzania produkt\u00f3w", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Zu\u017cycie materia\u0142\u00f3w biurowych", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Zu\u017cycie energii", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Zu\u017cycie materia\u0142\u00f3w i energii"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Us\u0142ugi celne", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Us\u0142ugi graficzne i drukarskie", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Us\u0142ugi telekomunikacyjne", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Us\u0142ugi kurierskie i transportowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Us\u0142ugi remontowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Pozosta\u0142e us\u0142ugi", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Us\u0142ugi pocztowe", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Analizy sanitarne", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Us\u0142ugi obce"
+       }
+      ], 
+      "name": "Koszty wed\u0142ug rodzaj\u00f3w"
+     }, 
+     {
+      "name": "\u015awiadczenia na rzecz pracownik\u00f3w", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszty zgromadzone", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszty nie wliczane do warto\u015bci sprzeda\u017cy", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Przypadaj\u0105ce na przysz\u0142e okresy", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Nie podlegaj\u0105ce rozliczeniu w czasie", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Rozliczenie koszt\u00f3w"
+     }
+    ], 
+    "name": "Koszty wed\u0142ug rodzaj\u00f3w i ich rozliczenie"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c produkt\u00f3w na kraj", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c produkt\u00f3w na eksport", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c us\u0142ug na kraj", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c us\u0142ug na eksport", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Sprzeda\u017c produkt\u00f3w"
+     }, 
+     {
+      "name": "Straty nadzwyczajne", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Otrzymane dotacje", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Przychody z us\u0142ug socjalnych", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Przychody ze zbycia niefinansowych aktyw\u00f3w trwa\u0142ych", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Inne pozosta\u0142e przychody operacyjne", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Przychody ze wzrostu warto\u015bci niefinansowych aktyw\u00f3w trwa\u0142ych", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Pozosta\u0142e przychody operacyjne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c wysy\u0142kowa towar\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c detaliczna towar\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c hurtowa towar\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Prowizja komisowa", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Sprzeda\u017c towar\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy detalicznej", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy wysy\u0142kowej", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy hurtowej", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Prowizja komisowa", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w cenach zakupu"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszt wytworzenia wyrob\u00f3w gotowych wydanych do w\u0142asnych sklep\u00f3w", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt wytworzenia produkt\u00f3w uznanych za niedobory", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt wytworzenia \u015bwiadcze\u0144 na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt wytworzenia zako\u0144czonych prac rozwojowych", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszt obrot\u00f3w wewn\u0119trznych"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na eksport", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na kraj", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na kraj", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na eksport", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty sprzedanych produkt\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszt wyrob\u00f3w w\u0142asnej produkcji wydanych do w\u0142asnych sklep\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "\u015awiadczenia na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Koszt niedobor\u00f3w produkt\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Obroty wewn\u0119trzne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 sprzedanych inwestycji", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci inwestycji-koszty", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ujemne r\u00f3\u017cnice kursu walut", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Pozosta\u0142e koszty finansowe", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Odsetki zap\u0142acone", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kwoty nale\u017cne z tytu\u0142u dywidend", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Otrzymane odsetki", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Aktualizacja warto\u015bci inwestycji-przychody", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Przychody ze zbycia inwestycji", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Kwoty nale\u017cne ze sprzeda\u017cy aktyw\u00f3w finansowych", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Dodatnie r\u00f3\u017cnice kursu walut", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Pozosta\u0142e przychody finansowe", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Przychody finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych odpad\u00f3w", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych materia\u0142\u00f3w", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych opakowa\u0144", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Warto\u015b\u0107 sprzedanych materia\u0142\u00f3w i opakowa\u0144"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inne pozosta\u0142e koszty operacyjne", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci aktyw\u00f3w niefinansowych", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Dotacje przekazane", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych niefinansowych aktyw\u00f3w trwa\u0142ych", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Pozosta\u0142e koszty operacyjne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c odpad\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c materia\u0142\u00f3w", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Sprzeda\u017c opakowa\u0144", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Sprzeda\u017c materia\u0142\u00f3w i opakowa\u0144"
+     }, 
+     {
+      "name": "Zyski nadzwyczajne", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Przychody i koszty zwi\u0105zane z ich osi\u0105gni\u0119ciem"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Zobowi\u0105zania warunkowe"
+       }, 
+       {
+        "name": "Weksle obce dyskontowane lub indosowane"
+       }, 
+       {
+        "name": "Nale\u017cno\u015bci warunkowe"
+       }
+      ], 
+      "name": "Rozrachunki pozabilansowe"
+     }, 
+     {
+      "name": "Rozrachunki z odbiorcami"
+     }, 
+     {
+      "name": "Odpisy aktualizuj\u0105ce rozrachunki"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pozosta\u0142e rozrachunki z urz\u0119dem skarbowym"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rozliczenie nale\u017cnego VAT-7%"
+         }, 
+         {
+          "name": "Rozliczenie nale\u017cnego VAT-22%"
+         }, 
+         {
+          "name": "Rozliczenie nale\u017cnego VAT-0%"
+         }
+        ], 
+        "name": "Rozrachunki z urz\u0119dem skarbowym z tytu\u0142u VAT nale\u017cnego"
+       }, 
+       {
+        "name": "Rozrachunki publicznoprawne z PFRON"
+       }, 
+       {
+        "name": "Rozrachunki publicznoprawne z urz\u0119dem celnym"
+       }, 
+       {
+        "name": "Pozosta\u0142e rozrachunki publicznoprawne"
+       }, 
+       {
+        "name": "Rozrachunki z urz\u0119dem skarbowym z tytu\u0142u VAT"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rozliczenie naliczonego VAT-22%"
+         }, 
+         {
+          "name": "Rozliczenie naliczonego VAT-0%"
+         }, 
+         {
+          "name": "Rozliczenie naliczonego VAT-7%"
+         }
+        ], 
+        "name": "VAT naliczony i jego rozliczenie"
+       }, 
+       {
+        "name": "Rozrachunki publicznoprawne z ZUS"
+       }, 
+       {
+        "name": "Rozrachunki publicznoprawne z urz\u0119dem miasta/gminy"
+       }
+      ], 
+      "name": "Rozrachunki publicznoprawne"
+     }, 
+     {
+      "name": "Rozrachunki z dostawcami"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Rozrachunki z tytu\u0142u po\u017cyczek udzielonych pracownikom"
+       }, 
+       {
+        "name": "Inne rozrachunki z pracownikami"
+       }, 
+       {
+        "name": "Rozrachunki z tytu\u0142u wynagrodze\u0144"
+       }
+      ], 
+      "name": "Rozrachunki z pracownikami"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Rozrachunki wewn\u0105trzzak\u0142adowe"
+       }, 
+       {
+        "name": "Rozrachunki z tytu\u0142u dop\u0142at i zwrotu dop\u0142at"
+       }, 
+       {
+        "name": "Pozosta\u0142e rozrachunki"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Po\u017cyczki otrzymane"
+         }, 
+         {
+          "name": "Po\u017cyczki udzielone"
+         }
+        ], 
+        "name": "Po\u017cyczki"
+       }, 
+       {
+        "name": "Rozrachunki z tytu\u0142u dywidend"
+       }, 
+       {
+        "name": "Nale\u017cno\u015bci dochodzone na drodze s\u0105dowej"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rozliczenie nadwy\u017cek"
+         }, 
+         {
+          "name": "Rozliczenie niedobor\u00f3w"
+         }
+        ], 
+        "name": "Rozliczenie niedobor\u00f3w i nadwy\u017cek"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rozrachunki z tytu\u0142u wk\u0142ad\u00f3w niepieni\u0119\u017cnych na kapita\u0142 zak\u0142adowy"
+         }, 
+         {
+          "name": "Rozrachunki z tytu\u0142u umorzenia udzia\u0142\u00f3w w\u0142asnych"
+         }, 
+         {
+          "name": "Rozrachunki z tytu\u0142u podwy\u017cszenia kapita\u0142u ze \u015brodk\u00f3w w\u0142asnych sp\u00f3\u0142ki"
+         }, 
+         {
+          "name": "Rozrachunki z tytu\u0142u wp\u0142at na kapita\u0142 zak\u0142adowy"
+         }
+        ], 
+        "name": "Rozrachunki zwi\u0105zane z kapita\u0142em zak\u0142adowym"
+       }
+      ], 
+      "name": "Pozosta\u0142e rozrachunki"
+     }
+    ], 
+    "name": "Rozrachunki i roszczenia"
+   }, 
+   {
+    "children": [
+     {
+      "name": "3900 bis 3990 Passive Rechnungsabgrenzungsposten", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3040 bis 3090 Sonstige R\u00fcckstellungen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen EU", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Umsatzsteuer aus i.g. Lieferungen 20%"
+     }, 
+     {
+      "name": "Umsatzsteuer aus i.g. Lieferungen 10%"
+     }, 
+     {
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen Inland", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Verrechnung Finanzamt"
+     }, 
+     {
+      "name": "3110 bis 3170 Verbindlichkeiten gegen\u00fcber Kredidinstituten", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3380 bis 3390 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Erhaltene Anzahlungenauf Bestellungen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "R\u00fcckstellungen f\u00fcr Pensionen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3700 bis 3890 \u00dcbrige sonstige Verbindlichkeiten", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen sonst. Ausland", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Umsatzsteuer aus i.g. Erwerb 20%"
+     }, 
+     {
+      "name": "Umsatzsteuer", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Umsatzsteuer aus i.g. Erwerb 10%"
+     }, 
+     {
+      "name": "USt. \u00a719 /art (reverse charge)"
+     }, 
+     {
+      "name": "Umsatzsteuer Zahllast"
+     }, 
+     {
+      "name": "Anleihen (einschlie\u00dflich konvertibler)", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Verbindlichkeiten gegen\u00fcber Gesellschaften", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3600 bis 3690 Verbindlichkeiten im Rahmen der sozialen Sicherheit", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3180 bis 3190 Verbindlichkeiten gegen\u00fcber Finanzinstituten", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3400 bis 3470 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "3020 bis 3030 Steuerr\u00fcckstellungen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "R\u00fcckstellungen f\u00fcr Abfertigung", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Summe Fremdkapital"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Koszty sprzeda\u017cy wyrob\u00f3w", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszty utrzymania punkt\u00f3w sprzeda\u017cy detalicznej", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci podstawowej-handlowej"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Straty zwi\u0105zane z wykonaniem d\u0142ugotrwa\u0142ych us\u0142ug", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rozliczone koszty dzia\u0142alno\u015bci", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszty nie zako\u0144czonych d\u0142ugotrwa\u0142ych us\u0142ug", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszty utrzymania hurtowni", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci podstawowej-produkcyjnej"
+     }, 
+     {
+      "name": "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u015awiadczenia us\u0142ug na potrzeby reprezentacji i reklamy", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Koszty zarz\u0105dzania jednostk\u0105", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty zarz\u0105du"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u015awiadczenia us\u0142ug transportowych", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Pozosta\u0142e koszty", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci pomocniczej"
+     }
+    ], 
+    "name": "Koszty wed\u0142ug typ\u00f3w dzia\u0142alno\u015bci i ich rozliczenie"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Erl\u00f6se 20 %", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4630 bis 4650 Ertr\u00e4ge aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 20 % USt", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4400 bis 4490 Erl\u00f6sschm\u00e4lerungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se i.g. Lieferungen (stfr)", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4500 bis 4570 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4660 bis 4670 Ertr\u00e4ge aus der Zuschreibung zum Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se 0 % Ausfuhrlieferungen/Drittl\u00e4nder", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4580 bis 4590 andere aktivierte Eigenleistungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se 10 %", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4600 bis 4620 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 10 % USt", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4800 bis 4990 \u00dcbrige betriebliche Ertr\u00e4ge", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "4700 bis 4790 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Summe Betriebliche Ertr\u00e4ge"
+   }, 
+   {
+    "children": [
+     {
+      "name": "7100 bis 7190 Sonstige Steuern"
+     }, 
+     {
+      "name": "7650 bis 7680 Werbung und Repr\u00e4sentationen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7480 bis 7490 Lizenzaufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7700 bis 7740 Versicherungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Verwaltungskosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7200 bis 7290 Instandhaltung u. Reinigung durh Dritte, Entsorgung, Beleuchtung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Abschreibungen auf aktivierte Aufwendungen f\u00fcr das Ingangs. u. Erweitern des Betriebes", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7610 bis 7620 Druckerzeugnisse und Vervielf\u00e4ltigungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Fachliteratur und Zeitungen ", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7380 bis 7390 Nachrichtenaufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Spenden und Trinkgelder", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7320 bis 7330 Kfz - Aufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7840 bis 7880 Verschiedene betriebliche Aufwendungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7300 bis 7310 Transporte durch Dritte", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Spesen des Geldverkehrs", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Buchwert abgegangener Anlagen, ausgenommen Finanzanlagen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7360 bis 7370 Tag- und N\u00e4chtigungsgelder", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7580 bis 7590 Aufsichtsratsverg\u00fctungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Aus- und Fortbildung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7800 bis 7810 Schadensf\u00e4lle", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7340 bis 7350 Reise- und Fahraufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7750 bis 7760 Beratungs- und Pr\u00fcfungsaufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7500 bis 7530 Aufwand f\u00fcr beigestelltes Personal", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Sonstige betrieblichen Aufwendungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Vertriebskosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7010 bis 7080 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7540 bis 7570 Provisionen an Dritte", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "B\u00fcromaterial und Drucksorten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7910 bis 7950 Aufwandsstellenrechung der Hersteller", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Abschreibungen vom Umlaufverm\u00f6gen, soweit diese die im Unternehmen \u00fcblichen Abschreibungen \u00fcbersteigen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf sonstige betriebliche Aufwendungen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "7400 bis 7430 Miet- und Pachtaufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "7440 bis 7470 Leasingaufwand", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Mitgliedsbeitr\u00e4ge", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Verluste aus dem Abgang vom Anlageverm\u00f6gen, ausgenommen Finanzanlagen", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Summe Abschreibungen und Aufwendungen"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Postwertzeichen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Unterschiedsbetrag zur gebotenen Pensionsr\u00fcckstellung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2750 bis 2770 Kassenbest\u00e4nde in Fremdw\u00e4hrung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2250 bis 2270 Forderungen gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2200 bis 2220 Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2000 bis 2007 Forderungen aus Lief. und Leist. Inland", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Besitzwechsel ...", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Eingeforderte aber noch nicht eingezahlte Einlagen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Eigene Anteile (Wertpapiere)", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Sonstige Anteile", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2100 bis 2120 Forderungen aus Lief. und Leist. EU", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Schecks in Inlandsw\u00e4hrung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Vorsteuer \u00a719/Art 19 ( reverse charge ) "
+     }, 
+     {
+      "name": "Vorsteuer aus ig. Erwerb 10%"
+     }, 
+     {
+      "name": "Vorsteuer", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Steuerabgrenzung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Disagio", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Wertberichtigungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Unterschiedsbetrag gem. Abschnitt XII Pensionskassengesetz", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Kassenbestand", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Aktive Rechnungsabrenzungsposten", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Stempelmarken", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Wertberichtigungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2150 bis 2170 Forderungen aus Lief. und Leist. Ausland", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Anteile an verbundenen Unternehmen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Bank / Guthaben bei Kreditinstituten", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2630 bis 2670 Sonstige Wertpapiere", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "2300 bis 2460 Sonstige Forderungen und Verm\u00f6gensgegenst\u00e4nde", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Einfuhrumsatzsteuer (bezahlt)", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Summe Umlaufverm\u00f6gen"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Nieruchomo\u015bci", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Warto\u015bci niematerialne i prawne", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Inwestycje w nieruchomo\u015bci i prawa"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inne warto\u015bci niematerialne i prawne", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Koszty zako\u0144czonych prac rozwojowych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Nabyta warto\u015b\u0107 firmy", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Zaliczki na warto\u015bci niematerialne i prawne", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Warto\u015bci niematerialne i prawne"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe innych \u015brodk\u00f3w trwa\u0142ych", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe warto\u015bci grunt\u00f3w i prawa wieczystego u\u017cytkowania grunt\u00f3w", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe \u015brodk\u00f3w transportu", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe ulepsze\u0144 obcych \u015brodk\u00f3w trwa\u0142ych", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe urz\u0105dze\u0144 technicznych i maszyn", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe budynk\u00f3w, lokali i obiekt\u00f3w in\u017cynierii l\u0105dowej i wodnej", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe \u015brodk\u00f3w trwa\u0142ych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe innych warto\u015bci niematerialnych i prawnych", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe warto\u015bci firmy", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe zako\u0144czonych prac rozwojowych", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe warto\u015bci niematerialnych i prawnych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe inwestycji w warto\u015bci niematerialne i prawne", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci i prawa"
+       }
+      ], 
+      "name": "Odpisy umorzeniowe \u015brodk\u00f3w trwa\u0142ych oraz warto\u015bci niematerialnych i prawnych"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Zaliczki na \u015brodki trwa\u0142e w budowie", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Nak\u0142ady na budow\u0119 \u015brodka trwa\u0142ego", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Ulepszenia \u015brodka trwa\u0142ego", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Ulepszenia obcych \u015brodk\u00f3w trwa\u0142ych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Inwestycje budowy \u015brodka trwa\u0142ego", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "\u015arodki trwa\u0142e w budowie"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inne \u015brodki trwa\u0142e", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Budynki, lokale i obiekty in\u017cynierii l\u0105dowej i wodnej", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "\u015arodki transportu", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Grunty w\u0142asne i prawa wieczystego u\u017cytkowania grunt\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Urz\u0105dzenia techniczne i maszyny", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "\u015arodki Trwa\u0142e"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inne rozliczenia mi\u0119dzyokresowe", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "D\u0142ugoterminowe rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Od pozosta\u0142ych jednostek", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Od jednostek powi\u0105zanych", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Nale\u017cno\u015bci d\u0142ugoterminowe"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inne papiery warto\u015bciowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "W jednostkach powi\u0105zanych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "W pozosta\u0142ych jednostkach"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Inne inwestycje d\u0142ugoterminowe"
+       }
+      ], 
+      "name": "D\u0142ugoterminowe aktywa finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odpisy aktualizuj\u0105ce udzielone po\u017cyczki d\u0142ugoterminowe", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce udzia\u0142y i akcje w obcych jednostkach", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce lokaty", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
+     }
+    ], 
+    "name": "Aktywa Trwa\u0142e"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Bilanzgewinn (-verlust )", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Er\u00f6ffnungsbilanz"
+     }, 
+     {
+      "name": "9700 bis 9790 Einlagen stiller Gesellschafter "
+     }, 
+     {
+      "name": "9300 bis 9380 Gewinnr\u00fccklagen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "9900 bis 9999 Evidenzkonten"
+     }, 
+     {
+      "name": "9000 bis 9180 Gezeichnetes bzw. gewidmetes Kapital", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "nicht eingeforderte ausstehende Einlagen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "9600 bis 9690 Privat und Verrechnungskonten bei Einzelunternehmen und Personengesellschaften"
+     }, 
+     {
+      "name": "Schlussbilanz"
+     }, 
+     {
+      "name": "9200 bis 9290 Kapitalr\u00fccklagen", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Gewinn- und Verlustrechnung"
+     }, 
+     {
+      "name": "9400 bis 9590 Bewertungsreserven uns sonst. unversteuerte R\u00fccklagen", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Summe Eigenkapital R\u00fccklagen Abschlusskonten"
+   }, 
+   {
+    "children": [
+     {
+      "name": "1000 bis 1090 Bezugsverrechnung", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1900 bis 1990 Wertberichtigungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1200 bis 1290 Bezogene Teile", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1700 bis 1790 Noch nicht abgerechenbare Leistungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "geleistete Anzahlungen", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1100 bis 1190 Rohstoffe", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1600 bis 1690 Waren", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1350 bis 1390 Betriebsstoffe", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1500 bis 1590 Fertige Erzeugniss", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1300 bis 1340 Hilfsstoffe", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "1400 bis 1490 Unfertige Erzeugniss", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Summe Vorr\u00e4te"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Materia\u0142y", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Opakowania", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Materia\u0142y w przerobie", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Materia\u0142y i opakowania"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Towary poza jednostk\u0105", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Towary w detalu", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Towary w zak\u0142adach gastronomicznych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Towary w hurcie", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Nieruchomo\u015bci i prawa maj\u0105tkowe przeznaczone do obrotu", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Towary skupu", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Towary"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odchylenia od cen ewidencyjnych opakowa\u0144", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w materia\u0142\u00f3w i towar\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w hurcie", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w zak\u0142adach gastronomicznych", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w detalu", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w skupu", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Odchylenia od cen ewidencyjnych towar\u00f3w"
+       }
+      ], 
+      "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w i towar\u00f3w"
+     }, 
+     {
+      "name": "Zapasy obce", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Niedobory, szkody i nadwy\u017cki w transporcie", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rozliczenie zakupu sk\u0142adnik\u00f3w aktyw\u00f3w trwa\u0142ych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rozliczenie zakupu towar\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Op\u0142aty manipulacyjne policzone przez Urz\u0105d Celny", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rozliczenie warto\u015bci materia\u0142\u00f3w i towar\u00f3w w drodze", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rozliczenie zakupu materia\u0142\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Reklamacje faktur dostawc\u00f3w", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rozliczenie zakupu us\u0142ug obcych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Warto\u015bci dostaw niefakturowanych", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Rozliczenie zakupu"
+     }
+    ], 
+    "name": "Materia\u0142y i towary"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Kr\u00f3tkoterminowe aktywa finansowe w pozosta\u0142ych jednostkach"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Udzielone po\u017cyczki", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Kr\u00f3tkoterminowe aktywa finansowe w jednostkach powi\u0105zanych"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce kr\u00f3tkoterminowe aktywa finansowe", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Kr\u00f3tkoterminowe aktywa finansowe"
+     }, 
+     {
+      "name": "Inne \u015brodki pieni\u0119\u017cne", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "Inne inwestycje kr\u00f3tkoterminowe", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kasa krajowych \u015brodk\u00f3w pieni\u0119\u017cnych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Kasa zagranicznych \u015brodk\u00f3w pieni\u0119\u017cnych", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "\u015arodki pieni\u0119\u017cne w kasie"
+     }, 
+     {
+      "name": "Inne aktywa pieni\u0119\u017cne", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Rachunek bankowy wyodr\u0119bnionych \u015brodk\u00f3w pieni\u0119\u017cnych ZF\u015aS", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Rachunek bankowy akretytywy", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Rachunek bankowy lokat terminowych", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Inne rachunki bankowe"
+       }, 
+       {
+        "name": "Rachunki kredyt\u00f3w bankowych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rachunek \u015brodk\u00f3w wyodr\u0119bnionych i zablokowanych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rachunek \u015brodk\u00f3w walutowych", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "\u015arodki pieni\u0119\u017cne w drodze", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rachunek bie\u017c\u0105cy", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Rachunki i kredyty bankowe"
+     }, 
+     {
+      "name": "Kr\u00f3tkoterminowe rozliczenia mi\u0119dzyokresowe", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "\u015arodki pieni\u0119\u017cne, rachunki bankowe oraz inne kr\u00f3tkoterminowe aktywa finansowe"
+   }, 
+   {
+    "children": [
+     {
+      "name": "6400 bis 6440 Aufwendungen f\u00fcr Abfertigungen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6200 bis 6390 Geh\u00e4lter", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6560 bis 6590 Gesetzlicher Sozialaufwand Angestellte", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6500 bis 6550 Gesetzlicher Sozialaufwand Arbeiter", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6660 bis 6690 Gehaltsabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6600 bis 6650 Lohnabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6450 bis 6490 Aufwendungen f\u00fcr Altersversorgung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6000 bis 6190 L\u00f6hne", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "6700 bis 6890 Sonstige Sozialaufwendungen", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Summe Personalaufwand"
+   }
+  ], 
+  "name": "Plan kont"
+ }
+}

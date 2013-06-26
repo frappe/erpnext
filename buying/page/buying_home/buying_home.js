@@ -54,6 +54,12 @@ wn.module_page["Buying"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Buying Settings"),
+				"route": "Form/Buying Settings",
+				"doctype":"Buying Settings",
+				"description": "Settings for Buying Module"
+			},
+			{
 				"label": wn._("Purchase Taxes and Charges Master"),
 				"doctype":"Purchase Taxes and Charges Master",
 				"description": wn._("Tax Template for Purchase")

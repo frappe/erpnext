@@ -59,6 +59,12 @@ wn.module_page["Selling"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Selling Settings"),
+				"route": "Form/Selling Settings",
+				"doctype":"Selling Settings",
+				"description": "Settings for Selling Module"
+			},
+			{
 				label: wn._("Sales Taxes and Charges Master"),
 				description: wn._("Sales taxes template."),
 				doctype:"Sales Taxes and Charges Master"

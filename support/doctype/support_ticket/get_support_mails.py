@@ -47,7 +47,7 @@ class SupportMailbox(POP3Mailbox):
 			ticket = webnotes.bean([{
 				"doctype":"Support Ticket",
 				"description": mail.content,
-				"subject": mail.mail["Subject"],
+				"subject": mail.subject,
 				"raised_by": mail.from_email,
 				"content_type": mail.content_type,
 				"status": "Open",
