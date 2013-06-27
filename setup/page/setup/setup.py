@@ -115,6 +115,7 @@ items = [
 		"title": "Printing",
 		"icon": "icon-print"
 	},
+	{ "doctype": "Terms and Conditions" },
 	{ "doctype": "Letter Head" },
 	{ "doctype": "Print Heading" },
 	{ "doctype": "Print Format", "filter": {"standard": "No"} },
