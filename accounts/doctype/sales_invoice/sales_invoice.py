@@ -149,7 +149,7 @@ class DocType(SellingController):
 				ret = get_obj('Sales Common').get_item_details(item.fields, self)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield="entries") and \
-						not item.fields.get(fieldname):
+						item.fields.get(fieldname) is None:
 							item.fields[fieldname] = value
 		
 		# fetch pos details, if they are not fetched
