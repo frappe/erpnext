@@ -154,8 +154,6 @@ def get_invoice_po_pr_map(invoice_list):
 		if d.project_name:
 			invoice_po_pr_map.setdefault(d.parent, webnotes._dict()).setdefault(
 				"project_name", []).append(d.project_name)
-
-	webnotes.errprint(invoice_po_pr_map)
 				
 	return invoice_po_pr_map
 	
