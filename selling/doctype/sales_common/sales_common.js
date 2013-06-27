@@ -368,7 +368,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	get_charges: function() {
+	charge: function() {
 		var me = this;
 		if(this.frm.doc.charge) {
 			this.frm.call({
