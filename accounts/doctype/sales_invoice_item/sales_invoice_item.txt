@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-19 11:00:07", 
+  "creation": "2013-06-04 11:02:19", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:06:15", 
+  "modified": "2013-06-26 14:33:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -243,7 +243,8 @@
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Small Text", 
   "print_hide": 0, 
-  "read_only": 0
+  "read_only": 0, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
