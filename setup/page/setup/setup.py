@@ -147,11 +147,6 @@ items = [
 	{ 
 		"doctype": "Email Digest",
 	},
-	{ 
-		"doctype": "SMS Settings", 
-		"single": 1,
-	 	"query": "select count(*) from tabSingles where doctype='SMS Settings' and field='sms_gateway_url'"
-	},
 	{
 		"type": "Section",
 		"title": "Opening Accounts and Stock",
@@ -200,6 +195,11 @@ items = [
 		and field in ('quotation', 'sales_order', 'sales_invoice', 'purchase_order', 'purchase_receipt', 'expense_claim', 'delivery_note')"""},
 
 	{ "doctype": "File Data", "title": "Uploaded File Attachments" },
+	{ 
+		"doctype": "SMS Settings", 
+		"single": 1,
+	 	"query": "select count(*) from tabSingles where doctype='SMS Settings' and field='sms_gateway_url'"
+	},
 
 	{ "title": "Data Import", 
 		"route": "data-import-tool", "type": "Link", "icon": "icon-upload" },
