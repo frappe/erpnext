@@ -38,6 +38,8 @@ items = [
 			{"doctype":"UOM"}, 
 			{"doctype":"Brand"},
 			{"doctype":"Price List"}, 
+			{ "title": "Stock Settings", 
+				"route": "Form/Stock Settings", "type": "Link", "icon": "icon-cog" },
 		],
 	},
 	{
@@ -48,6 +50,8 @@ items = [
 			{"doctype":"Sales Person", "tree": "Sales Browser"}, 
 			{"doctype":"Contact"}, 
 			{"doctype":"Address"}, 
+			{ "title": "Selling Settings", 
+				"route": "Form/Selling Settings", "type": "Link", "icon": "icon-cog" },
 		]
 	},
 	{
@@ -56,6 +60,8 @@ items = [
 			{"doctype":"Supplier Type"}, 
 			{"doctype":"Contact"}, 
 			{"doctype":"Address"}, 
+			{ "title": "Buying Settings", 
+				"route": "Form/Buying Settings", "type": "Link", "icon": "icon-cog" },
 		]
 	},
 	{
@@ -109,6 +115,7 @@ items = [
 		"title": "Printing",
 		"icon": "icon-print"
 	},
+	{ "doctype": "Terms and Conditions" },
 	{ "doctype": "Letter Head" },
 	{ "doctype": "Print Heading" },
 	{ "doctype": "Print Format", "filter": {"standard": "No"} },

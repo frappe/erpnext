@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-06-13 16:17:42", 
+  "modified": "2013-06-26 21:39:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -838,6 +838,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "copy_from_item_group", 
   "fieldtype": "Button", 
