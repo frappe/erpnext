@@ -27,7 +27,7 @@ def delete_transactions():
 		'Maintenance Schedule', 'Leave Application', 'Leave Allocation', 'Lead', 'Journal Voucher', 
 		'Installation Note', 'Material Request', 'GL Entry', 'Expense Claim', 'Opportunity', 
 		'Delivery Note', 'Customer Issue', 'Bin', 'Authorization Rule', 'Attendance', 'C-Form', 
-		'Appraisal', 'Installation Note', 'Communication']
+		'Appraisal', 'Installation Note', 'Communication', "Supplier Quotation"]
 	for d in trans:
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
