@@ -21,11 +21,7 @@ from controllers.trends	import get_columns,get_data
 def execute(filters=None):
 	if not filters: filters ={}
 	data = []
-	trans = "Purchase Receipt"
-	conditions = get_columns(filters, trans)
-	data = get_data(filters, tab, conditions)
-	
-	if not data :
-		webnotes.msgprint("Data not found for selected criterias")
+	conditions = get_columns(filters, "Purchase Receipt")
+	data = get_data(filters, conditions)
 
 	return conditions["columns"], data  
