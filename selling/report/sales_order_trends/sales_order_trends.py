@@ -21,8 +21,7 @@ from controllers.trends	import get_columns,get_data
 def execute(filters=None):
 	if not filters: filters ={}
 	data = []
-	trans = "Sales Order"
-	conditions = get_columns(filters, trans)
+	conditions = get_columns(filters, "Sales Order")
 	data = get_data(filters, conditions)
 	
 	return conditions["columns"], data 
