@@ -271,7 +271,7 @@ def create_territories():
 	country = webnotes.conn.get_value("Control Panel", None, "country")
 	root_territory = get_root_of("Territory")
 	for name in (country, "Rest Of The World"):
-		if not webnotes.conn.exists("Territory", name):
+		if name and not webnotes.conn.exists("Territory", name):
 			webnotes.bean({
 				"doctype": "Territory",
 				"territory_name": name,
