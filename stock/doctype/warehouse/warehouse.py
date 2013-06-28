@@ -42,7 +42,7 @@ class DocType:
 			bin_wrapper.ignore_permissions = 1
 			bin_wrapper.insert()
 			
-			bin_obj = bin_wrapper.make_obj()
+			bin_obj = bin_wrapper.make_controller()
 		else:
 			bin_obj = get_obj('Bin', bin)
 		return bin_obj

@@ -45,9 +45,12 @@ class DocType(StockController):
 			return
 			
 		data = json.loads(self.doc.reconciliation_json)
+		
+		# strip out extra columns (if any)
+		data = [row[:4] for row in data]
+		
 		if self.head_row not in data:
-			msgprint(_("""Hey! You seem to be using the wrong template. \
-				Click on 'Download Template' button to get the correct template."""),
+			msgprint(_("""Wrong Template: Unable to find head row."""),
 				raise_exception=1)
 		
 		# remove the help part and save the json
