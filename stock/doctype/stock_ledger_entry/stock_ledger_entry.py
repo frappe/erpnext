@@ -120,3 +120,12 @@ class DocType(DocListController):
 		if not self.doc.posting_time or self.doc.posting_time == '00:0':
 			self.doc.posting_time = '00:00'
 			
+	def on_doctype_update(self):
+		webnotes.msgprint(webnotes.conn.sql("""show index from `tabStock Ledger Entry` 
+			where Key_name="posting_sort_index" """))
+		if not webnotes.conn.sql("""show index from `tabStock Ledger Entry` 
+			where Key_name="posting_sort_index" """):
+			webnotes.conn.commit()
+			webnotes.conn.sql("""alter table `tabStock Ledger Entry` 
+				add index posting_sort_index(posting_date, posting_time, name)""")
+			webnotes.conn.begin()

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:18", 
+  "modified": "2013-06-27 11:30:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -92,6 +92,7 @@
   "reqd": 1
  }, 
  {
+  "description": "See \"Rate Of Materials Based On\" in Costing Section", 
   "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
