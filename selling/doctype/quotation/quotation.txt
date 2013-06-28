@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-06-27 11:31:49", 
+  "modified": "2013-06-28 12:47:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -689,6 +689,24 @@
   "read_only": 0, 
   "reqd": 0, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address_name", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "label": "Shipping Address Name", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Shipping Address", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "depends_on": "customer", 
