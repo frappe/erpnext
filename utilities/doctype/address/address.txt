@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-06-28 17:06:32", 
+  "modified": "2013-07-01 15:56:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -59,7 +59,7 @@
   "fieldname": "address_title", 
   "fieldtype": "Data", 
   "label": "Address Title", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

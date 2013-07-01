@@ -93,6 +93,19 @@ items = [
 	{ "doctype": "Purchase Taxes and Charges Master" },
 	{
 		"type": "Section",
+		"title": "Opening Accounts and Stock",
+		"icon": "icon-eye-open"
+	},
+	{ "doctype": "Stock Reconciliation" },
+	{ 
+		"doctype": "Journal Voucher",
+		"title": "Opening Accounting Entries",
+		"filter": {
+			"is_opening": "Yes"
+		}
+	},
+	{
+		"type": "Section",
 		"title": "Human Resource",
 		"icon": "icon-group"
 	},
@@ -147,19 +160,6 @@ items = [
 	},
 	{ 
 		"doctype": "Email Digest",
-	},
-	{
-		"type": "Section",
-		"title": "Opening Accounts and Stock",
-		"icon": "icon-eye-open"
-	},
-	{ "doctype": "Stock Reconciliation" },
-	{ 
-		"doctype": "Journal Voucher",
-		"title": "Opening Accounting Entries",
-		"filter": {
-			"is_opening": "Yes"
-		}
 	},
 	{
 		"type": "Section",
@@ -244,8 +244,8 @@ def set_count(item):
 	elif "filter" in item:
 		key = item["filter"].keys()[0]
 		item["count"] = webnotes.conn.sql("""select count(*) from `tab%s` where
-			%s = %s""" % (item["doctype"], key, "%s"),
+			%s = %s and docstatus < 2""" % (item["doctype"], key, "%s"),
 			item["filter"][key])[0][0]
 	elif "doctype" in item:
-		item["count"] = webnotes.conn.sql("select count(*) from `tab%s`" \
+		item["count"] = webnotes.conn.sql("select count(*) from `tab%s` where docstatus<2" \
 			% item["doctype"])[0][0]

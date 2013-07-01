@@ -4,6 +4,7 @@
 wn.module_page["Buying"] = [
 	{
 		title: wn._("Documents"),
+		top: true,
 		icon: "icon-copy",
 		items: [
 			{
