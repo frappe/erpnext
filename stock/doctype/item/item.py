@@ -280,8 +280,14 @@ class DocType(DocListController):
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 
-	def on_rename(self,newdn,olddn, merge=False):
+	def on_rename(self, newdn, olddn, merge=False):
 		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
+			
+		if merge:
+			from stock.stock_ledger import update_entries_after
+			for wh in webnotes.conn.sql("""select warehouse from `tabBin` 
+				where item_code=%s""", newdn):
+					update_entries_after({"item_code": newdn, "warehouse": wh})
