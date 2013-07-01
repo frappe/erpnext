@@ -139,10 +139,21 @@ cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
+
+	if(wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length!===0 // too late
+		|| !doc.company) // too early
+		return;
 	
-	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type) 
-		&& doc.company
-		&& wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length==0) {
+	var update_jv_details = function(doc, r) {
+		$.each(r.message, function(i, d) {
+			var jvdetail = wn.model.add_child(doc, "Journal Voucher Detail", "entries");
+			jvdetail.account = d.account;
+			jvdetail.balance = d.balance;
+		});
+		refresh_field("entries");
+	}
+	
+	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
 		wn.call({
 			type: "GET",
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
@@ -152,12 +163,24 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			},
 			callback: function(r) {
 				if(r.message) {
-					var jvdetail = wn.model.add_child(doc, "Journal Voucher Detail", "entries");
-					jvdetail.account = r.message.account;
-					// this is a data field????
-					jvdetail.balance = format_currency(r.message.balance);
-					refresh_field("entries");
+					update_jv_details(doc, r);
 				}
+			}
+		})
+	} else if(doc.voucher_type=="Opening Entry") {
+		wn.call({
+			type:"GET",
+			method: "accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
+			args: {
+				"company": doc.company
+			},
+			callback: function(r) {
+				wn.model.clear_table("Journal Voucher Detail", "Journal Voucher", 
+					doc.name, "entries");
+				if(r.message) {
+					update_jv_details(doc, r);
+				}
+				cur_frm.set_value("is_opening", "Yes")
 			}
 		})
 	}

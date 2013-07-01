@@ -61,13 +61,20 @@ class DocType:
 			WHERE name=%(name)s AND docstatus<2""", args)
 	
 	def create_fiscal_year_and_company(self, args):
-		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
-		# Fiscal Year
+		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'), True)
 		webnotes.bean([{
 			"doctype":"Fiscal Year",
 			'year': curr_fiscal_year,
 			'year_start_date': fy_start_date,
 		}]).insert()
+
+		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
+		webnotes.bean([{
+			"doctype":"Fiscal Year",
+			'year': curr_fiscal_year,
+			'year_start_date': fy_start_date,
+		}]).insert()
+
 		
 		# Company
 		webnotes.bean([{
@@ -198,13 +205,15 @@ class DocType:
 		
 	# Get Fiscal year Details
 	# ------------------------
-	def get_fy_details(self, fy_start):
+	def get_fy_details(self, fy_start, last_year=False):
 		st = {'1st Jan':'01-01','1st Apr':'04-01','1st Jul':'07-01', '1st Oct': '10-01'}
 		curr_year = getdate(nowdate()).year
+		if last_year:
+			curr_year = curr_year - 1
 		if cint(getdate(nowdate()).month) < cint((st[fy_start].split('-'))[0]):
 			curr_year = getdate(nowdate()).year - 1
 		stdt = cstr(curr_year)+'-'+cstr(st[fy_start])
-		#eddt = sql("select DATE_FORMAT(DATE_SUB(DATE_ADD('%s', INTERVAL 1 YEAR), INTERVAL 1 DAY),'%%d-%%m-%%Y')" % (stdt.split('-')[2]+ '-' + stdt.split('-')[1] + '-' + stdt.split('-')[0]))
+
 		if(fy_start == '1st Jan'):
 			fy = cstr(getdate(nowdate()).year)
 			abbr = cstr(fy)[-2:]

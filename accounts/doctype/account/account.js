@@ -82,7 +82,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 // -----------------------------------------
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button('Chart of Accounts', 
-		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-list')
+		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button('Convert to Ledger', 
