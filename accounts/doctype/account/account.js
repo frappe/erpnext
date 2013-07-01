@@ -92,7 +92,12 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 			
 		cur_frm.add_custom_button('View Ledger', function() {
-			wn.set_route("general-ledger", "account=" + doc.name);
+			wn.route_options = {
+				"account": doc.name,
+				"from_date": sys_defaults.year_start_date,
+				"to_date": sys_defaults.year_end_date
+			};
+			wn.set_route("general-ledger");
 		});
 	}
 }

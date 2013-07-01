@@ -23,7 +23,14 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) { 
-		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+		cur_frm.add_custom_button('View Ledger', function() {
+			wn.route_options = {
+				"voucher_no": doc.name,
+				"from_date": doc.posting_date,
+				"to_date": doc.posting_date,
+			};
+			wn.set_route("general-ledger");
+		});
 	}
 }
 
@@ -130,11 +137,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	else
 		cur_frm.pformat.print_heading = "Journal Voucher";
 }
-
-cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
-	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);	
-}
-
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
