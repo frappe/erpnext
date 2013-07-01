@@ -190,33 +190,23 @@ class DocType:
 				self.doc.letter_head = header
 
 	def set_default_accounts(self):
-		if not self.doc.receivables_group and webnotes.conn.exists('Account', 
-			'Accounts Receivable - ' + self.doc.abbr):
-				webnotes.conn.set(self.doc, 'receivables_group', 'Accounts Receivable - ' + 
-					self.doc.abbr)
-					
-		if not self.doc.payables_group and webnotes.conn.exists('Account', 
-			'Accounts Payable - ' + self.doc.abbr):
-				webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - ' + self.doc.abbr)
-								
-		if not self.doc.stock_received_but_not_billed and webnotes.conn.exists("Account", 
-			"Stock Received But Not Billed - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "stock_received_but_not_billed", 
-					"Stock Received But Not Billed - " + self.doc.abbr)
+		accounts = {
+			"receivables_group": "Accounts Receivable",
+			"payables_group": "Accounts Payable",
+			"stock_received_but_not_billed": "Stock Received But Not Billed",
+			"stock_in_hand_account": "Stock In Hand",
+			"stock_adjustment_account": "Stock Adjustment",
+			"expenses_included_in_valuation": "Expenses Included In Valuation"
+		}
 		
-		if not self.doc.stock_adjustment_account and webnotes.conn.exists("Account", 
-			"Stock Adjustment - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "stock_adjustment_account", "Stock Adjustment - " + 
-					self.doc.abbr)
-					
-		if not self.doc.expenses_included_in_valuation and webnotes.conn.exists("Account", 
-			"Expenses Included In Valuation - " + self.doc.abbr):
-				webnotes.conn.set(self.doc, "expenses_included_in_valuation", 
-					"Expenses Included In Valuation - " + self.doc.abbr)
-		
+		for a in accounts:
+			account_name = accounts[a] + " - " + self.doc.abbr
+			if not self.doc.fields[a] and webnotes.conn.exists("Account", account_name):
+				webnotes.conn.set(self.doc, account_name)
+
 		if not self.doc.stock_adjustment_cost_center:
 				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)
-	
+
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
@@ -249,8 +239,7 @@ class DocType:
 			where company=%s and docstatus<2 limit 1""", self.doc.name):
 			self.create_default_accounts()
 		
-		if not webnotes.conn.sql("""select name from `tabCost Center` 
-			where cost_center_name = 'All Units' and company_name = %s""", self.doc.name):
+		if not self.doc.cost_center:
 			self.create_default_cost_center()
 			
 		self.set_default_accounts()

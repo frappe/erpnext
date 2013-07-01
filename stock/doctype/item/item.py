@@ -32,7 +32,7 @@ class DocType(DocListController):
 			from webnotes.model.doc import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
 		elif not self.doc.item_code:
-			msgprint(_("Item Code is mandatory"), raise_exception=1)
+			msgprint(_("Item Code (item_code) is mandatory because Item naming is not sequential."), raise_exception=1)
 			
 		self.doc.name = self.doc.item_code
 			

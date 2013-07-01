@@ -49,7 +49,7 @@ def execute():
 			for key in custom_map["Timesheet Detail"]:
 				tl.doc.fields[key] = tsd.fields.get(key)
 			
-			tl.make_obj()
+			tl.make_controller()
 			tl.controller.set_status()
 			tl.controller.calculate_total_hours()
 			tl.doc.insert()

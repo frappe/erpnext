@@ -27,6 +27,9 @@ wn.require("app/js/transaction.js");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
+		
+		if(this.frm.fields_dict.shipping_address_name && this.frm.fields_dict.customer_address)
+			this.frm.fields_dict.shipping_address_name.get_query = this.frm.fields_dict['customer_address'].get_query;
 	},
 	
 	onload: function() {
@@ -368,7 +371,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	get_charges: function() {
+	charge: function() {
 		var me = this;
 		if(this.frm.doc.charge) {
 			this.frm.call({
@@ -476,6 +479,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 	},
 	
+	shipping_address_name: function () {
+		var me = this;
+		if(this.frm.doc.shipping_address_name) {
+			wn.model.with_doc("Address", this.frm.doc.shipping_address_name, function(name) {
+				var address = wn.model.get_doc("Address", name);
+			
+				var out = $.map(["address_line1", "address_line2", "city"], 
+					function(f) { return address[f]; });
+
+				var state_pincode = $.map(["state", "pincode"], function(f) { return address[f]; }).join(" ");
+				if(state_pincode) out.push(state_pincode);
+			
+				if(address["country"]) out.push(address["country"]);
+			
+				out.concat($.map([["Phone:", address["phone"]], ["Fax:", address["fax"]]], 
+					function(val) { return val[1] ? val.join(" ") : null; }));
+			
+				me.frm.set_value("shipping_address", out.join("\n"));
+			});
+		}
+	}
 });
 
 // to save previous state of cur_frm.cscript

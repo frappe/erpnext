@@ -170,21 +170,30 @@ class TransactionBase(StatusUpdater):
 		
 	# Get Lead Details
 	# -----------------------
-	def get_lead_details(self, name):		
-		details = webnotes.conn.sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, phone, mobile_no, email_id, company_name from `tabLead` where name = '%s'" %(name), as_dict = 1)		
-		
-		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
-		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','contact_no')]
-		address_display = ''.join([a[0]+extract(a[1]) for a in address_fields if extract(a[1])])
-		if address_display.startswith('\n'): address_display = address_display[1:]
+	def get_lead_details(self, name):
+		details = webnotes.conn.sql("""select name, lead_name, address_line1, address_line2, city, country, state, pincode
+			from `tabAddress` where lead=%s""", name, as_dict=True)
+		lead = webnotes.conn.get_value("Lead", name, 
+			["territory", "phone", "mobile_no", "email_id", "company_name", "lead_name"], as_dict=True) or {}
+
+		address_display = ""
+		if details:
+			details = details[0]
+			for separator, fieldname in (('','address_line1'), ('\n','address_line2'), ('\n','city'), 
+				(' ','pincode'), ('\n','state'), ('\n','country'), ('\nPhone: ', 'phone')):
+					if details.get(fieldname):
+						address_display += separator + details.get(fieldname)
+
+		if address_display.startswith('\n'):
+			address_display = address_display[1:]
 		
 		ret = {
-			'contact_display' : extract('lead_name'),
+			'contact_display' : lead.get('lead_name'),
 			'address_display' : address_display,
-			'territory' : extract('territory'),
-			'contact_mobile' : extract('mobile_no'),
-			'contact_email' : extract('email_id'),
-			'customer_name' : extract('company_name') or extract('lead_name')
+			'territory' : lead.get('territory'),
+			'contact_mobile' : lead.get('mobile_no'),
+			'contact_email' : lead.get('email_id'),
+			'customer_name' : lead.get('company_name') or lead.get('lead_name')
 		}
 		return ret
 		

@@ -62,49 +62,6 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.validate_values()
 
-	def create_customer_address(self):
-		addr_flds = [self.doc.address_line1, self.doc.address_line2, self.doc.city, self.doc.state, self.doc.country, self.doc.pincode]
-		address_line = "\n".join(filter(lambda x : (x!='' and x!=None),addr_flds))
-
-		if self.doc.phone_1:
-			address_line = address_line + "\n" + "Phone: " + cstr(self.doc.phone_1)
-		if self.doc.email_id:
-			address_line = address_line + "\n" + "E-mail: " + cstr(self.doc.email_id)
-		webnotes.conn.set(self.doc,'address', address_line)
-		
-		telephone = "(O): " + cstr(self.doc.phone_1) +"\n"+ cstr(self.doc.phone_2) + "\n" + "(M): " +	"\n" + "(fax): " + cstr(self.doc.fax_1)
-		webnotes.conn.set(self.doc,'telephone',telephone)
-
-	def create_p_contact(self,nm,phn_no,email_id,mob_no,fax,cont_addr):
-		c1 = Document('Contact')
-		c1.first_name = nm
-		c1.contact_name = nm
-		c1.contact_no = phn_no
-		c1.email_id = email_id
-		c1.mobile_no = mob_no
-		c1.fax = fax
-		c1.contact_address = cont_addr
-		c1.is_primary_contact = 'Yes'
-		c1.is_customer =1
-		c1.customer = self.doc.name
-		c1.customer_name = self.doc.customer_name
-		c1.customer_address = self.doc.address
-		c1.customer_group = self.doc.customer_group
-		c1.save(1)
-
-	def create_customer_contact(self):
-		contact = sql("select distinct name from `tabContact` where customer_name=%s", (self.doc.customer_name))
-		contact = contact and contact[0][0] or ''
-		if not contact:
-			# create primary contact for individual customer 
-			if self.doc.customer_type == 'Individual':
-				self.create_p_contact(self.doc.customer_name,self.doc.phone_1,self.doc.email_id,'',self.doc.fax_1,self.doc.address)
-		
-			# create primary contact for lead
-			elif self.doc.lead_name:
-				c_detail = sql("select lead_name, company_name, contact_no, mobile_no, email_id, fax, address from `tabLead` where name =%s", self.doc.lead_name, as_dict=1)
-				self.create_p_contact(c_detail and c_detail[0]['lead_name'] or '', c_detail and c_detail[0]['contact_no'] or '', c_detail and c_detail[0]['email_id'] or '', c_detail and c_detail[0]['mobile_no'] or '', c_detail and c_detail[0]['fax'] or '', c_detail and c_detail[0]['address'] or '')
-
 	def update_lead_status(self):
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
@@ -139,31 +96,16 @@ class DocType(TransactionBase):
 
 	def create_lead_address_contact(self):
 		if self.doc.lead_name:
-			details = sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, phone, mobile_no, fax, email_id from `tabLead` where name = '%s'" %(self.doc.lead_name), as_dict = 1)
-			d = Document('Address') 
-			d.address_line1 = details[0]['address_line1'] 
-			d.address_line2 = details[0]['address_line2']
-			d.city = details[0]['city']
-			d.country = details[0]['country']
-			d.pincode = details[0]['pincode']
-			d.state = details[0]['state']
-			d.fax = details[0]['fax']
-			d.email_id = details[0]['email_id']
-			d.phone = details[0]['phone']
-			d.customer = self.doc.name
-			d.customer_name = self.doc.customer_name
-			d.is_primary_address = 1
-			d.address_type = 'Office'
-			try:
-				d.save(1)
-			except NameError, e:
-				pass
-				
+			if not webnotes.conn.get_value("Address", {"lead": self.doc.lead_name, "customer": self.doc.customer}):
+				webnotes.conn.sql("""update `tabAddress` set customer=%s, customer_name=%s where lead=%s""", 
+					(self.doc.name, self.doc.customer_name, self.doc.lead_name))
+
+			lead = webnotes.conn.get_value("Lead", self.doc.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
 			c = Document('Contact') 
-			c.first_name = details[0]['lead_name'] 
-			c.email_id = details[0]['email_id']
-			c.phone = details[0]['phone']
-			c.mobile_no = details[0]['mobile_no']
+			c.first_name = lead.lead_name 
+			c.email_id = lead.email_id
+			c.phone = lead.phone
+			c.mobile_no = lead.mobile_no
 			c.customer = self.doc.name
 			c.customer_name = self.doc.customer_name
 			c.is_primary_contact = 1

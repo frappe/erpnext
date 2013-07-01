@@ -44,9 +44,9 @@ var set_operation_no = function(doc) {
 		var op = op_table[i].operation_no;
 		if (op && !inList(operations, op)) operations.push(op);
 	}
-	
-	cur_frm.fields_dict["bom_materials"].grid.get_field("operation_no")
-		.df.options = operations.join("\n");
+		
+	wn.meta.get_docfield("BOM Item", "operation_no", 
+		cur_frm.docname).options = operations.join("\n");
 	
 	$.each(getchildren("BOM Item", doc.name, "bom_materials"), function(i, v) {
 		if(!inList(operations, cstr(v.operation_no))) v.operation_no = null;

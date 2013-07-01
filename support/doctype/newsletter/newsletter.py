@@ -19,7 +19,6 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.utils
 from webnotes.utils import cstr
-from webnotes.model.doc import Document
 from webnotes import _
 
 class DocType():
@@ -73,8 +72,7 @@ class DocType():
 		elif self.doc.email_list:
 			email_list = [cstr(email).strip() for email in self.doc.email_list.split(",")]
 			for email in email_list:
-				if not webnotes.conn.exists({"doctype": "Lead", "email_id": email}):
-					create_lead(email)
+				create_lead(email)
 					
 			self.send_to_doctype = "Lead"
 			return email_list
@@ -116,15 +114,20 @@ def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
 	real_name, email_id = parseaddr(email_id)
-	lead = Document("Lead")
-	lead.fields["__islocal"] = 1
-	lead.lead_name = real_name or email_id
-	lead.email_id = email_id
-	lead.status = "Contacted"
-	lead.naming_series = lead_naming_series or get_lead_naming_series()
-	lead.company = webnotes.conn.get_default("company")
-	lead.source = "Email"
-	lead.save()
+	
+	if webnotes.conn.get_value("Lead", {"email_id": email_id}):
+		return
+	
+	lead = webnotes.bean({
+		"doctype": "Lead",
+		"email_id": email_id,
+		"lead_name": real_name or email_id,
+		"status": "Contacted",
+		"naming_series": lead_naming_series or get_lead_naming_series(),
+		"company": webnotes.conn.get_default("company"),
+		"source": "Email"
+	})
+	lead.insert()
 	
 def get_lead_naming_series():
 	"""gets lead's default naming series"""

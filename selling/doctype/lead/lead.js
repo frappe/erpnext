@@ -14,78 +14,79 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-// Module CRM
-
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/setup/doctype/contact_control/contact_control.js');
 
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(user =='Guest'){
-		hide_field(['status', 'naming_series', 'order_lost_reason',
-	'customer', 'rating', 'fax', 'website', 'territory',
-	'address_line1', 'address_line2', 'city', 'state',
-	'country', 'pincode', 'address', 'lead_owner', 'market_segment',
-	'industry', 'campaign_name', 'interested_in', 'company',
-	'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date',
-	'contact_date_ref', 'to_discuss', 'more_info', 'follow_up',
-	'communication_history', 'cc_to', 'subject', 'message', 'lead_attachment_detail',
-	'Create Customer', 'Create Opportunity', 'transaction_date', 'type', 'source']);
-		doc.source = 'Website';
-	}
-	if(!doc.status) set_multiple(dt,dn,{status:'Open'});
-
-	if (!doc.date){ 
-		doc.date = date.obj_to_str(new Date());
-	}
-	// set naming series
-	if(user=='Guest') doc.naming_series = 'WebLead';
+wn.provide("erpnext");
+erpnext.LeadController = wn.ui.form.Controller.extend({
+	setup: function() {
+		this.frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+	},
 	
-	cur_frm.add_fetch('customer', 'customer_name', 'company_name');
-	
-	if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
-		cur_frm.fields_dict.lead_owner.get_query = erpnext.utils.profile_query;
-	}
-
-	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
-		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
-	}
-
-	if(in_list(user_roles,'System Manager')) {
-		cur_frm.footer.help_area.innerHTML = '<hr>\
-			<p><a href="#Form/Sales Email Settings">Sales Email Settings</a><br>\
-			<span class="help">Automatically extract Leads from a mail box e.g. "sales@example.com"</span></p>';
-	}
-}
-
-cur_frm.cscript.refresh_custom_buttons = function(doc) {
-	cur_frm.clear_custom_buttons();
-	if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
-		if (doc.source != 'Existing Customer') {
-			cur_frm.add_custom_button('Create Customer',
-				cur_frm.cscript['Create Customer']);
+	onload: function() {
+		if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
+			cur_frm.fields_dict.lead_owner.get_query = erpnext.utils.profile_query;
 		}
-		cur_frm.add_custom_button('Create Opportunity',
-			cur_frm.cscript['Create Opportunity']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+
+		if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
+			cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
+		}
+
+		if(in_list(user_roles,'System Manager')) {
+			cur_frm.footer.help_area.innerHTML = '<hr>\
+				<p><a href="#Form/Sales Email Settings">Sales Email Settings</a><br>\
+				<span class="help">Automatically extract Leads from a mail box e.g. "sales@example.com"</span></p>';
+		}
+	},
+	
+	refresh: function() {
+		erpnext.hide_naming_series();
+		this.frm.clear_custom_buttons();
+		
+		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
+		if(!this.frm.doc.__islocal && !this.frm.__is_customer) {
+			this.frm.add_custom_button("Create Customer", this.frm.cscript['Create Customer']);
+			this.frm.add_custom_button("Create Opportunity", this.frm.cscript['Create Opportunity']);
+			this.frm.add_custom_button("Send SMS", this.frm.cscript.send_sms);
+		}
+		
+		cur_frm.communication_view = new wn.views.CommunicationList({
+			list: wn.model.get("Communication", {"lead": this.frm.doc.name}),
+			parent: this.frm.fields_dict.communication_html.wrapper,
+			doc: this.frm.doc,
+			recipients: this.frm.doc.email_id
+		});
+		
+		if(!this.frm.doc.__islocal) {
+			this.make_address_list();
+		}
+	},
+	
+	make_address_list: function() {
+		var me = this;
+		if(!this.frm.address_list) {
+			this.frm.address_list = new wn.ui.Listing({
+				parent: this.frm.fields_dict['address_html'].wrapper,
+				page_length: 5,
+				new_doctype: "Address",
+				get_query: function() {
+					return 'select name, address_type, address_line1, address_line2, \
+					city, state, country, pincode, fax, email_id, phone, \
+					is_primary_address, is_shipping_address from tabAddress \
+					where lead="'+me.frm.doc.name+'" and docstatus != 2 \
+					order by is_primary_address, is_shipping_address desc'
+				},
+				as_dict: 1,
+				no_results_message: 'No addresses created',
+				render_row: this.render_address_row,
+			});
+			// note: render_address_row is defined in contact_control.js
+		}
+		this.frm.address_list.run();
 	}
-}
+});
 
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.cscript.refresh_custom_buttons(doc);
-	erpnext.hide_naming_series();
-
-	cur_frm.communication_view = new wn.views.CommunicationList({
-		list: wn.model.get("Communication", {"lead": doc.name}),
-		parent: cur_frm.fields_dict.communication_html.wrapper,
-		doc: doc,
-		recipients: doc.email_id
-	})
-}
-
-
-
-cur_frm.cscript.status = function(doc, cdt, cdn){
-	cur_frm.cscript.refresh(doc, cdt, cdn);
-}
+$.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
 
 cur_frm.cscript['Create Customer'] = function(){
 	var doc = cur_frm.doc;
@@ -148,10 +149,3 @@ cur_frm.cscript['Create Opportunity'] = function(){
 		}
 	);
 }
-
-//get query select Territory
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s" ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
-}
-
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

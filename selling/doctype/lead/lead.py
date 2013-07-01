@@ -38,6 +38,9 @@ class DocType(SellingController):
 
 	def onload(self):
 		self.add_communication_list()
+		customer = webnotes.conn.get_value("Customer", {"lead_name": self.doc.name})
+		if customer:
+			self.doc.fields["__is_customer"] = customer
 
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Replied')

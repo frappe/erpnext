@@ -351,4 +351,4 @@ def fix_total_debit_credit():
 			webnotes.conn.sql("""update `tabGL Entry` set %s = %s + %s
 				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
-				(d.diff, d.voucher_type, d.voucher_no), debug=1)
+				(d.diff, d.voucher_type, d.voucher_no))

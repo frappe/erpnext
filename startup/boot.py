@@ -22,8 +22,12 @@ def boot_session(bootinfo):
 			"Notification Control").get_values()
 				
 		# if no company, show a dialog box to create a new company
-		bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
-			tabCompany limit 1""") and 'Yes' or 'No'
+		bootinfo["customer_count"] = webnotes.conn.sql("""select count(*) from tabCustomer""")[0][0]
+
+		if not bootinfo["customer_count"]:
+			bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
+				tabCompany limit 1""") and 'Yes' or 'No'
+		
 		
 		# load subscription info
 		import conf
