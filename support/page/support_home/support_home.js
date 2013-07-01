@@ -3,7 +3,8 @@
 
 wn.module_page["Support"] = [
 	{
-		title: wn._("Documents"),
+		title: wn._("Top"),
+		top: true,
 		icon: "icon-copy",
 		items: [
 			{
@@ -16,6 +17,13 @@ wn.module_page["Support"] = [
 				description: wn._("Customer Issue against Serial No."),
 				doctype:"Customer Issue"
 			},
+		]
+	},
+
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
 			{
 				label: wn._("Maintenance Schedule"),
 				description: wn._("Plan for maintenance visits."),

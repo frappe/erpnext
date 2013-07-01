@@ -3,9 +3,15 @@
 
 wn.module_page["HR"] = [
 	{
-		title: wn._("Documents"),
+		title: wn._("Top"),
+		top: true,
 		icon: "icon-copy",
 		items: [
+			{
+				label: wn._("Employee"),
+				description: wn._("Employee records."),
+				doctype:"Employee"
+			},
 			{
 				label: wn._("Leave Application"),
 				description: wn._("Applications for leave."),
@@ -16,6 +22,17 @@ wn.module_page["HR"] = [
 				description: wn._("Claims for company expense."),
 				doctype:"Expense Claim"
 			},
+			{
+				label: wn._("Job Applicant"),
+				description: wn._("Applicant for a Job."),
+				doctype:"Job Applicant"
+			},
+		]
+	},
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
 			{
 				label: wn._("Attendance"),
 				description: wn._("Attendance record."),
@@ -30,22 +47,6 @@ wn.module_page["HR"] = [
 				label: wn._("Appraisal"),
 				description: wn._("Performance appraisal."),
 				doctype:"Appraisal"
-			},
-			{
-				label: wn._("Job Applicant"),
-				description: wn._("Applicant for a Job."),
-				doctype:"Job Applicant"
-			},
-		]
-	},
-	{
-		title: wn._("Masters"),
-		icon: "icon-book",
-		items: [
-			{
-				label: wn._("Employee"),
-				description: wn._("Employee records."),
-				doctype:"Employee"
 			},
 		]
 	},

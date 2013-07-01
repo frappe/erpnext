@@ -25,6 +25,7 @@ from webnotes import msgprint, _
 from webnotes.model.controller import DocListController
 
 class PriceListCurrencyMismatch(Exception): pass
+class WarehouseNotSet(Exception): pass
 
 class DocType(DocListController):
 	def autoname(self):
@@ -39,7 +40,8 @@ class DocType(DocListController):
 	def validate(self):
 		if not self.doc.stock_uom:
 			msgprint(_("Please enter Default Unit of Measure"), raise_exception=1)
-			
+		
+		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
 		self.validate_conversion_factor()
 		self.add_default_uom_in_conversion_factor_table()
@@ -60,6 +62,11 @@ class DocType(DocListController):
 		self.validate_name_with_item_group()
 		self.update_website()
 
+	def check_warehouse_is_set_for_stock_item(self):
+		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
+			webnotes.msgprint(_("Default Warehouse is mandatory for Stock Item."),
+				raise_exception=WarehouseNotSet)
+			
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.doclist.get({"parentfield": "uom_conversion_details"})]
 		if self.doc.stock_uom not in uom_conv_list:

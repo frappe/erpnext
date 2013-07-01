@@ -352,11 +352,20 @@ def get_default_bank_cash_account(company, voucher_type):
 	account = webnotes.conn.get_value("Company", company,
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 	if account:
-		return {
+		return [{
 			"account": account,
 			"balance": get_balance_on(account)
-		}
+		}]
 
+@webnotes.whitelist()
+def get_opening_accounts(company):
+	"""get all balance sheet accounts for opening entry"""
+	from accounts.utils import get_balance_on
+	accounts = webnotes.conn.sql_list("""select name from tabAccount 
+		where group_or_ledger='Ledger' and is_pl_account='No' and company=%s""", company)
+	
+	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
+	
 def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
 		from `tabPurchase Invoice` where credit_to = %s and docstatus = 1 

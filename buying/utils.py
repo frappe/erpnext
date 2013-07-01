@@ -51,6 +51,9 @@ def get_item_details(args):
 	
 	out.supplier_part_no = _get_supplier_part_no(args, item_bean)
 	
+	if not out.warehouse:
+		out.warehouse = item_bean.doc.default_warehouse
+	
 	if out.warehouse:
 		out.projected_qty = get_projected_qty(item.name, out.warehouse)
 	

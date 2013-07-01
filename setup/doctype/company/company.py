@@ -201,8 +201,8 @@ class DocType:
 		
 		for a in accounts:
 			account_name = accounts[a] + " - " + self.doc.abbr
-			if not self.doc.fields[a] and webnotes.conn.exists("Account", account_name):
-				webnotes.conn.set(self.doc, account_name)
+			if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
+				webnotes.conn.set(self.doc, a, account_name)
 
 		if not self.doc.stock_adjustment_cost_center:
 				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)

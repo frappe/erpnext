@@ -45,7 +45,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		cur_frm.cscript.is_opening(doc, dt, dn);
 
 		if(doc.docstatus==1) {
-			cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+			cur_frm.add_custom_button('View Ledger', function() {
+				wn.route_options = {
+					"voucher_no": doc.name,
+					"from_date": doc.posting_date,
+					"to_date": doc.posting_date,
+				};
+				wn.set_route("general-ledger");
+			});
+
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
 			if(doc.is_pos==1 && doc.update_stock!=1)
@@ -380,11 +388,6 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	loaddoc('Journal Voucher', jv.name);
 }
 
-
-/****************** Get Accounting Entry *****************/
-cur_frm.cscript.view_ledger_entry = function(){	
-	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
-}
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_invoice)) {

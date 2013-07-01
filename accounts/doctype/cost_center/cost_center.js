@@ -28,6 +28,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
+	
+	cur_frm.add_custom_button('Chart of Cost Centers', 
+		function() { wn.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
 //Account filtering for cost center

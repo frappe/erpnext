@@ -3,8 +3,9 @@
 
 wn.module_page["Projects"] = [
 	{
-		title: wn._("Documents"),
+		title: wn._("Top"),
 		icon: "icon-copy",
+		top: true,
 		items: [
 			{
 				label: wn._("Task"),
@@ -21,6 +22,12 @@ wn.module_page["Projects"] = [
 				description: wn._("Time Log for tasks."),
 				doctype:"Time Log"
 			},
+		]
+	},
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
 			{
 				label: wn._("Time Log Batch"),
 				description: wn._("Batch Time Logs for billing."),
