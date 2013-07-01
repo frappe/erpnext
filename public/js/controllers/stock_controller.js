@@ -20,13 +20,12 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 	show_stock_ledger: function() {
 		var me = this;
 		this.frm.add_custom_button("Show Stock Ledger", function() {
-			var args = {
-				voucher_no: cur_frm.doc.name,
-				from_date: wn.datetime.str_to_user(cur_frm.doc.posting_date),
-				to_date: wn.datetime.str_to_user(cur_frm.doc.posting_date)
-			};	
-			wn.set_route('stock-ledger', 
-				$.map(args, function(val, key) { return key+"="+val; }).join("&&"));
+			wn.route_options = {
+				voucher_no: me.frm.doc.name,
+				from_date: cur_frm.doc.posting_date,
+				to_date: cur_frm.doc.posting_date
+			};
+			wn.set_route('stock-ledger');
 		}, "icon-bar-chart");
 	}
 });
