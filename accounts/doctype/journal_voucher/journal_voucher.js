@@ -140,7 +140,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
 
-	if(wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length!===0 // too late
+	if(wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length!==0 // too late
 		|| !doc.company) // too early
 		return;
 	
