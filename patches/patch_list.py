@@ -247,5 +247,8 @@ patch_list = [
 	"patches.june_2013.p06_drop_unused_tables",
 	"patches.june_2013.p08_shopping_cart_settings",
 	"patches.june_2013.p05_remove_search_criteria_reports",
+	"patches.june_2013.p07_taxes_price_list_for_territory",
+	"patches.june_2013.p08_shopping_cart_settings",
 	"patches.june_2013.p09_update_global_defaults",
+	"patches.june_2013.p10_lead_address",
 ]

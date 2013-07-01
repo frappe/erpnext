@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-06-05 19:22:52", 
+  "modified": "2013-06-27 11:33:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -449,7 +449,7 @@
   "doctype": "DocField", 
   "fieldname": "charge", 
   "fieldtype": "Link", 
-  "label": "Taxes and Charges", 
+  "label": "Apply Taxes and Charges Master", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
@@ -463,10 +463,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_charges", 
-  "fieldtype": "Button", 
-  "label": "Get Taxes and Charges", 
+  "fieldname": "shipping_rule", 
+  "fieldtype": "Link", 
+  "label": "Apply Shipping Rule", 
   "oldfieldtype": "Button", 
+  "options": "Shipping Rule", 
   "print_hide": 1, 
   "read_only": 0
  }, 

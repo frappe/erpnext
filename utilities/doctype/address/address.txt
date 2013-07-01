@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:24:45", 
+  "modified": "2013-06-28 17:06:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,11 +46,11 @@
   "label": "Address Details"
  }, 
  {
-  "description": "e.g. Office, Billing, Shipping", 
   "doctype": "DocField", 
   "fieldname": "address_type", 
-  "fieldtype": "Data", 
+  "fieldtype": "Select", 
   "label": "Address Type", 
+  "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nOther", 
   "reqd": 1
  }, 
  {
@@ -145,7 +145,7 @@
   "doctype": "DocField", 
   "fieldname": "is_primary_address", 
   "fieldtype": "Check", 
-  "label": "Is Primary Address"
+  "label": "Preferred Billing Address"
  }, 
  {
   "default": "0", 
@@ -154,7 +154,7 @@
   "fieldname": "is_shipping_address", 
   "fieldtype": "Check", 
   "in_list_view": 1, 
-  "label": "Is Shipping Address"
+  "label": "Preferred Shipping Address"
  }, 
  {
   "doctype": "DocField", 
@@ -206,6 +206,27 @@
   "fieldtype": "Link", 
   "label": "Sales Partner", 
   "options": "Sales Partner"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_22", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
+  "doctype": "DocField", 
+  "fieldname": "lead", 
+  "fieldtype": "Link", 
+  "label": "Lead", 
+  "options": "Lead"
+ }, 
+ {
+  "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
+  "doctype": "DocField", 
+  "fieldname": "lead_name", 
+  "fieldtype": "Data", 
+  "label": "Lead Name", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocPerm", 

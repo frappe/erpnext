@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-06-14 16:20:17", 
+  "modified": "2013-06-28 15:08:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -164,8 +164,32 @@
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info", 
+  "label": "Address & Contact", 
   "oldfieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "address_desc", 
+  "fieldtype": "HTML", 
+  "hidden": 0, 
+  "label": "Address Desc", 
+  "options": "<em>Addresses will appear only when you save the lead</em>", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_html", 
+  "fieldtype": "HTML", 
+  "hidden": 0, 
+  "label": "Address HTML", 
+  "print_hide": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -217,70 +241,6 @@
   "oldfieldname": "territory", 
   "oldfieldtype": "Link", 
   "options": "Territory", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break2", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "address_line1", 
-  "fieldtype": "Data", 
-  "label": "Address Line 1", 
-  "oldfieldname": "address_line1", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "address_line2", 
-  "fieldtype": "Data", 
-  "label": "Address Line 2", 
-  "oldfieldname": "address_line2", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "city", 
-  "fieldtype": "Data", 
-  "label": "City", 
-  "oldfieldname": "city", 
-  "oldfieldtype": "Select", 
-  "print_hide": 1, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "country", 
-  "fieldtype": "Select", 
-  "label": "Country", 
-  "oldfieldname": "country", 
-  "oldfieldtype": "Select", 
-  "options": "link:Country", 
-  "print_hide": 1, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "state", 
-  "fieldtype": "Data", 
-  "label": "State", 
-  "oldfieldname": "state", 
-  "oldfieldtype": "Select", 
-  "options": "Suggest", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pincode", 
-  "fieldtype": "Data", 
-  "label": "Pin Code", 
-  "oldfieldname": "pincode", 
-  "oldfieldtype": "Data", 
   "print_hide": 1
  }, 
  {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-06-19 15:55:15", 
+  "modified": "2013-06-28 12:47:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -420,7 +420,7 @@
   "fieldname": "charge", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Sales Taxes and Charges", 
+  "label": "Apply Taxes and Charges Master", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
@@ -434,11 +434,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_charges", 
-  "fieldtype": "Button", 
+  "fieldname": "shipping_rule", 
+  "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Get Taxes and Charges", 
+  "label": "Apply Shipping Rule", 
   "oldfieldtype": "Button", 
+  "options": "Shipping Rule", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -688,6 +689,24 @@
   "read_only": 0, 
   "reqd": 0, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address_name", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "label": "Shipping Address Name", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Shipping Address", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "depends_on": "customer", 

@@ -59,8 +59,8 @@ cur_frm.cscript.render_address_row = function(wrapper, data) {
 	// prepare data
 	data.fullname = data.address_type;
 	data.primary = '';
-	if (data.is_primary_address) data.primary += ' [Primary]';
-	if (data.is_shipping_address) data.primary += ' [Shipping]';
+	if (data.is_primary_address) data.primary += ' [Preferred for Billing]';
+	if (data.is_shipping_address) data.primary += ' [Preferred for Shipping]';
 	
 	// prepare address
 	var address = [];
