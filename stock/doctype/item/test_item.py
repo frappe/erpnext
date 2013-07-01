@@ -35,6 +35,13 @@ class TestItem(unittest.TestCase):
 		item_price = item.doclist.get({"doctype": "Item Price"})[0].ref_currency="USD"
 		self.assertRaises(PriceListCurrencyMismatch, item.insert)
 
+	def test_default_warehouse(self):
+		from stock.doctype.item.item import WarehouseNotSet
+		item = webnotes.bean(copy=test_records[0])
+		item.doc.is_stock_item = "Yes"
+		item.doc.default_warehouse = None
+		self.assertRaises(WarehouseNotSet, item.insert)
+		
 
 test_records = [
 	[{
@@ -77,6 +84,7 @@ test_records = [
 		"item_name": "_Test Item Home Desktop 100",
 		"description": "_Test Item Home Desktop 100",
 		"item_group": "_Test Item Group Desktops",
+		"default_warehouse": "_Test Warehouse",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -101,6 +109,7 @@ test_records = [
 		"item_name": "_Test Item Home Desktop 200",
 		"description": "_Test Item Home Desktop 200",
 		"item_group": "_Test Item Group Desktops",
+		"default_warehouse": "_Test Warehouse",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -140,6 +149,7 @@ test_records = [
 		"description": "_Test FG Item",
 		"item_group": "_Test Item Group Desktops",
 		"is_stock_item": "Yes",
+		"default_warehouse": "_Test Warehouse",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
 		"has_serial_no": "No",
@@ -178,6 +188,7 @@ test_records = [
 		"description": "_Test Serialized Item",
 		"item_group": "_Test Item Group Desktops",
 		"is_stock_item": "Yes",
+		"default_warehouse": "_Test Warehouse",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
 		"has_serial_no": "Yes",
