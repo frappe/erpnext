@@ -1,10 +1,10 @@
 {% extends "app/website/templates/html/page.html" %}
 
-{% set title="Sales Partners" %}
+{% set title="Partners" %}
 
 {% block content %}
 	<div class="col col-lg-12">
-		<h2 id="blog-title">Partners</h2>
+		<h2 id="blog-title">{{ title }}</h2>
 		<hr>
 		{% for partner_info in partners %}
 		<div class="row">

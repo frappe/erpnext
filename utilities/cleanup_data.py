@@ -20,14 +20,16 @@ import webnotes
 def delete_transactions():
 	print "Deleting transactions..."
 
-	trans = ['Timesheet', 'Task', 'Support Ticket', 'Stock Reconciliation', 'Stock Ledger Entry', 
+	trans = ['Task', 'Support Ticket', 'Stock Reconciliation', 'Stock Ledger Entry', 
 		'Stock Entry', 'Sales Order', 'Salary Slip','Sales Invoice', 'Quotation', 
 		'Quality Inspection', 'Purchase Receipt', 'Purchase Order', 'Production Order', 
 		'POS Setting', 'Period Closing Voucher', 'Purchase Invoice', 'Maintenance Visit', 
 		'Maintenance Schedule', 'Leave Application', 'Leave Allocation', 'Lead', 'Journal Voucher', 
 		'Installation Note', 'Material Request', 'GL Entry', 'Expense Claim', 'Opportunity', 
 		'Delivery Note', 'Customer Issue', 'Bin', 'Authorization Rule', 'Attendance', 'C-Form', 
-		'Appraisal', 'Installation Note', 'Communication']
+		'Appraisal', 'Installation Note', 'Communication', "Supplier Quotation", "Newsletter", 
+		"Job Applicant", "Web Page", "Website Slideshow", "Blog Post", "Blog Category", "Blogger", 
+		"Time Log", "Time Log Batch", "Workflow"]
 	for d in trans:
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
@@ -66,6 +68,7 @@ def delete_masters():
 		'Item Group': ['All Item Groups', 'Default'], 
 		'Item': '',
 		'Holiday List': '',
+		'Activity Type': '',
 		'Grade': '',
 		'Feed': '',
 		'Expense Claim Type': ['Travel', 'Medical', 'Calls', 'Food', 'Others'],

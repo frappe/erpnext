@@ -312,6 +312,20 @@ class TransactionBase(StatusUpdater):
 				})
 			
 			webnotes.bean(event_doclist).insert()
+			
+			
+def get_address_display(address_dict):
+	meta = webnotes.get_doctype("Address")
+	address_sequence = (("", "address_line1"), ("\n", "address_line2"), ("\n", "city"),
+		("\n", "state"), ("\n" + meta.get_label("pincode") + ": ", "pincode"), ("\n", "country"),
+		("\n" + meta.get_label("phone") + ": ", "phone"), ("\n" + meta.get_label("fax") + ": ", "fax"))
+	
+	address_display = ""
+	for separator, fieldname in address_sequence:
+		if address_dict.get(fieldname):
+			address_display += separator + address_dict.get(fieldname)
+			
+	return address_display
 	
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""

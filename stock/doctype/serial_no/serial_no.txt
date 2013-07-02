@@ -2,13 +2,13 @@
  {
   "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-06-20 11:23:01", 
+  "modified": "2013-07-02 12:07:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
-  "allow_rename": 0, 
+  "allow_rename": 1, 
   "autoname": "field:serial_no", 
   "description": "Distinct unit of an Item", 
   "doctype": "DocType", 

@@ -35,11 +35,12 @@ class DocType:
   def create_receiver_list(self):
     rec, where_clause = '', ''
     if self.doc.send_to == 'All Customer Contact':
-      where_clause = self.doc.customer and " and customer = '%s'" % self.doc.customer or " and ifnull(is_customer, 0) = 1"
+      where_clause = self.doc.customer and " and customer = '%s'" % self.doc.customer or " and ifnull(customer, '') != ''"
     if self.doc.send_to == 'All Supplier Contact':
-      where_clause = self.doc.supplier and " and ifnull(is_supplier, 0) = 1 and supplier = '%s'" % self.doc.supplier or " and ifnull(is_supplier, 0) = 1"
+      where_clause = self.doc.supplier and " and ifnull(is_supplier, 0) = 1 and supplier = '%s'" % self.doc.supplier or " and ifnull(supplier, '') != ''"
     if self.doc.send_to == 'All Sales Partner Contact':
-      where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_aprtner = '%s'" % self.doc.sales_partner or " and ifnull(is_sales_partner, 0) = 1"
+      where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % self.doc.sales_partner or " and ifnull(sales_partner, '') != ''"
+
     if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
       rec = sql("select CONCAT(ifnull(first_name,''),'',ifnull(last_name,'')), mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and docstatus != 2 %s" % where_clause)
     elif self.doc.send_to == 'All Lead (Open)':
