@@ -42,7 +42,14 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 			this.frm.add_custom_button('Make Payment Entry', this.make_bank_voucher);
 
 		if(doc.docstatus==1) { 
-			this.frm.add_custom_button('View Ledger', this.view_ledger_entry);
+			cur_frm.add_custom_button('View Ledger', function() {
+				wn.route_options = {
+					"voucher_no": doc.name,
+					"from_date": doc.posting_date,
+					"to_date": doc.posting_date,
+				};
+				wn.set_route("general-ledger");
+			});
 		}
 		
 		this.is_opening(doc);
@@ -226,8 +233,4 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	}
 	else
 		cur_frm.pformat.print_heading = "Purchase Invoice";
-}
-
-cur_frm.cscript.view_ledger_entry = function(){
-	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:05:18", 
+  "modified": "2013-07-01 13:53:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -74,11 +74,12 @@
  {
   "doctype": "DocField", 
   "fieldname": "balance", 
-  "fieldtype": "Data", 
+  "fieldtype": "Currency", 
   "label": "Account Balance", 
   "no_copy": 1, 
   "oldfieldname": "balance", 
   "oldfieldtype": "Data", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

@@ -48,8 +48,6 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
-						"is_pl_account": "Yes",
-						"debit_or_credit": "Debit",
 						"company": me.frm.doc.company
 					}
 				}

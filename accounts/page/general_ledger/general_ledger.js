@@ -22,10 +22,7 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 	});
 	
 	erpnext.general_ledger = new erpnext.GeneralLedger(wrapper);
-	
-	wrapper.appframe.add_home_breadcrumb()
 	wrapper.appframe.add_module_icon("Accounts")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 
 }
 
@@ -110,7 +107,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		// filter accounts options by company
 		this.filter_inputs.company.change(function() {
 			me.setup_account_filter(this);
-			me.set_route()
+			me.refresh()
 		});
 		
 		this.filter_inputs.account.change(function() {
@@ -220,13 +217,15 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					}
 				}
 				
-				if(date < from_date || item.is_opening=="Yes") {
+				if(!me.voucher_no && (date < from_date || item.is_opening=="Yes")) {
 					opening.debit += item.debit;
 					opening.credit += item.credit;
 
 					grouped_ledgers[item.account].opening.debit += item.debit;
 					grouped_ledgers[item.account].opening.credit += item.credit;
+
 				} else if(date <= to_date) {
+
 					totals.debit += item.debit;
 					totals.credit += item.credit;
 
@@ -242,7 +241,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");
 				}
 
-				if(me.apply_filters(item) && item.is_opening=="No") {
+				if(me.apply_filters(item) && (me.voucher_no || item.is_opening=="No")) {
 					out.push(item);
 					grouped_ledgers[item.account].entries.push(item);
 					

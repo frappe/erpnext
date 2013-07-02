@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:04:20", 
+  "modified": "2013-06-28 14:27:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -68,7 +68,7 @@
   "label": "Voucher Type", 
   "oldfieldname": "voucher_type", 
   "oldfieldtype": "Select", 
-  "options": "\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher", 
+  "options": "\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher\nOpening Entry", 
   "print_hide": 0, 
   "read_only": 0, 
   "search_index": 1

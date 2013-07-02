@@ -9,11 +9,11 @@ wn.pages['voucher-import-tool'].onload = function(wrapper) {
 		<p class="help">Import multiple accounting entries via CSV (spreadsheet) file:</p>\
 		<h3>1. Download Template</h3><br>\
 		<div style="padding-left: 30px;">\
-			<button class="btn btn-download-two-accounts">Download</button>\
+			<button class="btn btn-default btn-download-two-accounts">Download</button>\
 			<p class="help">Import multiple vouchers with one debit and one credit entry</p>\
 		</div>\
 		<div style="padding-left: 30px;">\
-			<button class="btn btn-download-multiple-accounts">Download</button>\
+			<button class="btn btn-default btn-download-multiple-accounts">Download</button>\
 			<p class="help">Import multiple vouchers with multiple accounts</p>\
 		</div>\
 		<hr>\
