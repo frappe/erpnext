@@ -174,3 +174,24 @@ class DocType(TransactionBase):
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
 			master_type = 'Customer' where master_name = %s""", (new,old))
+
+@webnotes.whitelist()
+def get_dashboard_info(customer):
+	if not webnotes.has_permission("Customer", customer):
+		webnotes.msgprint("No Permission", raise_exception=True)
+	
+	out = {}
+	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		out[doctype] = webnotes.conn.get_value(doctype, 
+			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
+	
+	billing = webnotes.conn.sql("""select sum(grand_total), sum(outstanding_amount) 
+		from `tabSales Invoice` 
+		where customer=%s 
+			and docstatus = 1
+			and fiscal_year = %s""", (customer, webnotes.conn.get_default("fiscal_year")))
+	
+	out["total_billing"] = billing[0][0]
+	out["total_unpaid"] = billing[0][1]
+	
+	return out

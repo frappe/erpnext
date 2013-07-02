@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:17:31", 
+  "modified": "2013-07-02 11:56:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -108,6 +108,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "wip_warehouse", 
+  "fieldtype": "Link", 
+  "label": "Work-in-Progress Warehouse", 
+  "options": "Warehouse", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
@@ -171,6 +179,13 @@
   "label": "Sales Order", 
   "options": "Sales Order", 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Item Description", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:03:41", 
+  "modified": "2013-07-02 17:22:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,6 +42,12 @@
  {
   "doctype": "DocType", 
   "name": "Opportunity"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_section", 
+  "fieldtype": "Section Break", 
+  "label": "From"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 

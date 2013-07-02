@@ -34,11 +34,21 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 // ===============================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
-	if(!doc.enquiry_from) hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
-	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
-	if(!doc.date) doc.transaction_date = date.obj_to_str(new Date());
-	if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
-	if(!doc.fiscal_year && sys_defaults.fiscal_year) set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
+	if(!doc.enquiry_from && doc.customer)
+		doc.enquiry_from = "Customer";
+	if(!doc.enquiry_from && doc.lead)
+		doc.enquiry_from = "Lead";
+
+	if(!doc.enquiry_from) 
+		hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+	if(!doc.status) 
+		set_multiple(cdt,cdn,{status:'Draft'});
+	if(!doc.date) 
+		doc.transaction_date = date.obj_to_str(new Date());
+	if(!doc.company && sys_defaults.company) 
+		set_multiple(cdt,cdn,{company:sys_defaults.company});
+	if(!doc.fiscal_year && sys_defaults.fiscal_year) 
+		set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
 	
 	if(doc.enquiry_from) {
 		if(doc.enquiry_from == 'Customer') {
@@ -61,6 +71,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
 	}
+	
+	if(doc.customer && !doc.customer_name) cur_frm.cscript.customer(doc);
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
