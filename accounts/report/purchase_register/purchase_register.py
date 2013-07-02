@@ -40,9 +40,10 @@ def execute(filters=None):
 		# invoice details
 		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
+		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
 
 		row = [inv.name, inv.posting_date, inv.supplier, inv.credit_to, 
-			account_map.get(inv.credit_to), inv.project_name, inv.bill_no, inv.bill_date, 
+			account_map.get(inv.credit_to), ", ".join(project_name), inv.bill_no, inv.bill_date, 
 			inv.remarks, ", ".join(purchase_order), ", ".join(purchase_receipt)]
 		
 		# map expense values
@@ -105,11 +106,10 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select pi.name, pi.posting_date, pi.credit_to, 
-		pii.project_name, pi.supplier, pi.bill_no, pi.bill_date, pi.remarks, pi.net_total, 
-		pi.total_tax, pi.grand_total, pi.outstanding_amount 
-		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii 
-		where pii.parent = pi.name and pi.docstatus = 1 %s 
+	return webnotes.conn.sql("""select name, posting_date, credit_to, 
+		supplier, bill_no, bill_date, remarks, net_total, 
+		total_tax, grand_total, outstanding_amount 
+		from `tabPurchase Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
 	
@@ -138,8 +138,8 @@ def get_invoice_tax_map(invoice_list):
 	return invoice_tax_map
 	
 def get_invoice_po_pr_map(invoice_list):
-	pi_items = webnotes.conn.sql("""select parent, purchase_order, purchase_receipt
-		from `tabPurchase Invoice Item` where parent in (%s) 
+	pi_items = webnotes.conn.sql("""select parent, purchase_order, purchase_receipt, 
+		project_name from `tabPurchase Invoice Item` where parent in (%s) 
 		and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
@@ -151,6 +151,9 @@ def get_invoice_po_pr_map(invoice_list):
 		if d.purchase_receipt:
 			invoice_po_pr_map.setdefault(d.parent, webnotes._dict()).setdefault(
 				"purchase_receipt", []).append(d.purchase_receipt)
+		if d.project_name:
+			invoice_po_pr_map.setdefault(d.parent, webnotes._dict()).setdefault(
+				"project_name", []).append(d.project_name)
 				
 	return invoice_po_pr_map
 	

@@ -147,7 +147,7 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
     d.account_head = '';
   }
   else if(d.account_head && d.charge_type) {
-    arg = "{'charge_type' : '" + d.charge_type +"', 'account_head' : '" + d.account_head + "'}";
+    arg = "{'charge_type' : '" + d.charge_type + "', 'account_head' : '" + d.account_head + "'}";
     get_server_fields('get_rate', arg, 'purchase_tax_details', doc, cdt, cdn, 1);
   }
   refresh_field('account_head',d.name,'purchase_tax_details');
