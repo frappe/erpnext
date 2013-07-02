@@ -10,7 +10,7 @@ erpnext.send_message = function(opts) {
 		method: "website.helpers.contact.send_message",
 		args: opts,
 		callback: opts.callback
-	})
+	});
 }
 
 wn.call = function(opts) {

@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="col col-lg-12">
-	<h2><i class="icon-shopping-cart"></i> Shopping Cart</h2>
+	<h2><i class="icon-shopping-cart"></i> {{ title }}</h2>
 	<div class="progress progress-striped active">
 		<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
 	</div>
@@ -20,17 +20,35 @@
 			<div class="col col-lg-9 col-sm-9">
 				<div class="row">
 					<div class="col col-lg-3"></div>
-					<div class="col col-lg-9"><strong>Item Details</strong></div>
+					<div class="col col-lg-9"><h4>Item Details</h4></div>
 				</div>
 			</div>
-			<div class="col col-lg-3 col-sm-3"><strong>Qty</strong></div>
+			<div class="col col-lg-3 col-sm-3"><h4>Qty</h4></div>
 		</div><hr>
 		<div id="cart-items">
 		</div>
-		<hr>
 		<div id="cart-taxes">
 		</div>
+		<hr>
 		<div id="cart-addresses">
+			<div class="row">
+				<div class="col col-lg-6">
+					<h4>Shipping Address</h4>
+					<div id="cart-shipping-address" class="accordion" 
+						data-fieldname="shipping_address_name"></div>
+					<button class="btn btn-default" type="button" id="cart-add-shipping-address">
+						<span class="icon icon-plus"></span> New Address</button>
+				</div>
+				<div class="col col-lg-6">
+					<h4>Billing Address</h4>
+					<div id="cart-billing-address" class="accordion"
+						data-fieldname="customer_address"></div>
+					<button class="btn btn-default" type="button" id="cart-add-billing-address">
+						<span class="icon icon-plus"></span> New Address</button>
+				</div>
+				
+			</div>
+			<hr>
 		</div>
 		<button class="btn btn-success pull-right" type="button">Place Order</button>
 	</div>

@@ -9,6 +9,19 @@ from webnotes.utils import cint, get_fullname, fmt_money
 class WebsitePriceListMissingError(webnotes.ValidationError): pass
 
 @webnotes.whitelist()
+def get_cart_quotation(doclist=None):
+	party = get_lead_or_customer()
+	
+	if not doclist:
+		doclist = _get_cart_quotation(party).doclist
+	
+	return {
+		"doclist": decorate_quotation_doclist(doclist),
+		"addresses": [{"name": address.name, "display": address.display} 
+			for address in get_address_docs(party)]
+	}
+
+@webnotes.whitelist()
 def update_cart(item_code, qty, with_doclist=0):
 	quotation = _get_cart_quotation()
 	
@@ -31,9 +44,79 @@ def update_cart(item_code, qty, with_doclist=0):
 	quotation.save()
 	
 	if with_doclist:
-		return decorate_quotation_doclist(quotation.doclist)
+		return get_cart_quotation(quotation.doclist)
 	else:
 		return quotation.doc.name
+		
+@webnotes.whitelist()
+def update_cart_address(address_fieldname, address_name):
+	from utilities.transaction_base import get_address_display
+	
+	quotation = _get_cart_quotation()
+	address_display = get_address_display(webnotes.doc("Address", address_name).fields)
+	
+	if address_fieldname == "shipping_address_name":
+		quotation.doc.shipping_address_name = address_name
+		quotation.doc.shipping_address = address_display
+		
+		if not quotation.doc.customer_address:
+			address_fieldname == "customer_address"
+	
+	if address_fieldname == "customer_address":
+		quotation.doc.customer_address = address_name
+		quotation.doc.address_display = address_display
+		
+	
+	quotation.ignore_permissions = True
+	quotation.save()
+		
+	return get_cart_quotation(quotation.doclist)
+
+@webnotes.whitelist()
+def get_addresses():
+	return [d.fields for d in get_address_docs()]
+	
+@webnotes.whitelist()
+def save_address(fields, address_fieldname=None):
+	party = get_lead_or_customer()
+	fields = webnotes.load_json(fields)
+	
+	if fields.get("name"):
+		bean = webnotes.bean("Address", fields.get("name"))
+	else:
+		bean = webnotes.bean({"doctype": "Address", "__islocal": 1})
+	
+	bean.doc.fields.update(fields)
+	
+	party_fieldname = party.doctype.lower()
+	bean.doc.fields.update({
+		party_fieldname: party.name,
+		(party_fieldname + "_name"): party.fields[party_fieldname + "_name"]
+	})
+	bean.ignore_permissions = True
+	bean.save()
+	
+	if address_fieldname:
+		update_cart_address(address_fieldname, bean.doc.name)
+	
+	return bean.doc.name
+	
+def get_address_docs(party=None):
+	from webnotes.model.doclist import objectify
+	from utilities.transaction_base import get_address_display
+	
+	if not party:
+		party = get_lead_or_customer()
+		
+	address_docs = objectify(webnotes.conn.sql("""select * from `tabAddress`
+		where `%s`=%s order by name""" % (party.doctype.lower(), "%s"), party.name, 
+		as_dict=True, update={"doctype": "Address"}))
+	
+	for address in address_docs:
+		address.display = get_address_display(address.fields)
+		address.display = (address.display).replace("\n", "<br>\n")
+		
+	return address_docs
 	
 def get_lead_or_customer():
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, "customer")
@@ -56,12 +139,6 @@ def get_lead_or_customer():
 		lead_bean.insert()
 		
 		return lead_bean.doc
-		
-
-@webnotes.whitelist()
-def get_cart_quotation():
-	doclist = _get_cart_quotation(get_lead_or_customer()).doclist
-	return decorate_quotation_doclist(doclist)
 
 def decorate_quotation_doclist(doclist):
 	for d in doclist:

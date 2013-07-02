@@ -127,3 +127,7 @@ a {
 		display: inline;
 	}
 }
+
+.accordion-heading, .accordion-inner {
+	padding-left: 10px;
+}
