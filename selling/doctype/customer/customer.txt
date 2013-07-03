@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-06-11 14:27:57", 
+  "modified": "2013-07-03 10:26:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -43,6 +43,7 @@
   "fieldtype": "Section Break", 
   "label": "Basic Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-user", 
   "permlevel": 0, 
   "reqd": 0
  }, 
@@ -142,6 +143,7 @@
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
   "label": "Address & Contacts", 
+  "options": "icon-map-marker", 
   "permlevel": 0
  }, 
  {
@@ -190,6 +192,8 @@
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments", 
   "permlevel": 0
  }, 
  {
@@ -205,6 +209,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "permlevel": 0
  }, 
  {
@@ -295,6 +300,7 @@
   "fieldtype": "Section Break", 
   "label": "Sales Team", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
   "permlevel": 0
  }, 
  {
