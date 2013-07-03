@@ -40,8 +40,18 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	},
 	
 	refresh: function() {
+		var doc = this.frm.doc;
 		erpnext.hide_naming_series();
 		this.frm.clear_custom_buttons();
+		
+		this.frm.dashboard.reset(doc);
+		if(!doc.__islocal) {
+			if(doc.status=="Converted") {
+				this.frm.dashboard.set_headline_alert(wn._("Converted"), "alert-success", "icon-ok-sign");
+			} else {
+				this.frm.dashboard.set_headline_alert(wn._(doc.status), "alert-info", "icon-exclamation-sign");
+			}
+		}
 		
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
 		if(!this.frm.doc.__islocal && !this.frm.__is_customer) {

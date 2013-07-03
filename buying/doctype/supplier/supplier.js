@@ -21,7 +21,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 }
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
-	cur_frm.cscript.setup_dashboard(doc);
+	cur_frm.cscript.make_dashboard(doc);
 	if(sys_defaults.supp_master_name == 'Supplier Name')
 		hide_field('naming_series');
 	else
@@ -44,19 +44,17 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
   }
 }
 
-cur_frm.cscript.setup_dashboard = function(doc) {
-	cur_frm.layout.dashboard.empty().toggle(doc.__islocal ? false : true);
+cur_frm.cscript.make_dashboard = function(doc) {
+	cur_frm.dashboard.wrapper.empty().toggle(doc.__islocal ? false : true);
 	if(doc.__islocal) 
 		return;
-	var headline = $('<div class="form-headline col col-lg-12">\
-		<span class="text-muted">Loading...</span></div>')
-		.appendTo(cur_frm.layout.dashboard);
+	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
 	
-	cur_frm.layout.add_doctype_badge("Supplier Quotation", "supplier");
-	cur_frm.layout.add_doctype_badge("Purchase Order", "supplier");
-	cur_frm.layout.add_doctype_badge("Purchase Receipt", "supplier");
-	cur_frm.layout.add_doctype_badge("Purchase Invoice", "supplier");
-	
+	cur_frm.dashboard.add_doctype_badge("Supplier Quotation", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Order", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Receipt", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Invoice", "supplier");
+
 	wn.call({
 		type: "GET",
 		method:"buying.doctype.supplier.supplier.get_dashboard_info",
@@ -64,15 +62,17 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 			supplier: cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.layout.dashboard.find(".form-headline")
-				.html(wn._("Total Billing This Year: ") + "<b>" 
-					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
-					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" + 
-				 		format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) + '</b></span>');
-			cur_frm.layout.set_badge_count(r.message);
+			cur_frm.dashboard.set_headline(
+				wn._("Total Billing This Year: ") + "<b>" 
+				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+				+ '</b></span>');
+			cur_frm.dashboard.set_badge_count(r.message);
 		}
 	})
 }
+
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
