@@ -120,6 +120,14 @@
 			"tickets": {
 				"template": "app/website/templates/pages/tickets"
 			},
+			"address": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/address",
+				"args_method": "utilities.doctype.address.address.get_website_args"
+			},
+			"addresses": {
+				"template": "app/website/templates/pages/addresses"
+			},
 			"writers": {
 				"template": "app/website/templates/pages/writers",
 				"args_method": "website.helpers.blog.get_writers_args"

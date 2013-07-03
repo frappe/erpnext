@@ -32,6 +32,7 @@ cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
+	cur_frm.layout.clear_dashboard();
 	if(sys_defaults.cust_master_name == 'Customer Name')
 		hide_field('naming_series');
 	else
@@ -39,7 +40,8 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);
-	}else{
+	}else{		
+		cur_frm.cscript.setup_dashboard(doc);
 		unhide_field(['address_html','contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
@@ -51,6 +53,35 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 			doc: doc,
 		});
 	}
+}
+
+cur_frm.cscript.setup_dashboard = function(doc) {
+	cur_frm.layout.dashboard.toggle(true);
+	var headline = $('<div class="form-headline col col-lg-12">\
+		<span class="text-muted">Loading...</span></div>')
+		.appendTo(cur_frm.layout.dashboard);
+	
+	cur_frm.layout.add_doctype_badge(wn._("Opportunities"), "Opportunity", "customer");
+	cur_frm.layout.add_doctype_badge(wn._("Quotations"), "Quotation", "customer");
+	cur_frm.layout.add_doctype_badge(wn._("Sales Orders"), "Sales Order", "customer");
+	cur_frm.layout.add_doctype_badge(wn._("Delivery Notes"), "Delivery Note", "customer");
+	cur_frm.layout.add_doctype_badge(wn._("Sales Invoices"), "Sales Invoice", "customer");
+	
+	wn.call({
+		type: "GET",
+		method:"selling.doctype.customer.customer.get_dashboard_info",
+		args: {
+			customer: cur_frm.doc.name
+		},
+		callback: function(r) {
+			cur_frm.layout.dashboard.find(".form-headline")
+				.html(wn._("Total Billing This Year: ") + "<b>" 
+					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" + 
+				 		format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) + '</b></span>');
+			cur_frm.layout.set_badge_count(r.message);
+		}
+	})
 }
 
 cur_frm.cscript.make_address = function() {

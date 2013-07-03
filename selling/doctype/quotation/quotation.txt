@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-06-28 12:47:10", 
+  "modified": "2013-07-02 16:49:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,6 +41,12 @@
  {
   "doctype": "DocType", 
   "name": "Quotation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer"
  }, 
  {
   "doctype": "DocField", 

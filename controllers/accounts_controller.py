@@ -71,7 +71,7 @@ class AccountsController(TransactionBase):
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \
-						not item.fields.get(fieldname):
+						item.fields.get(fieldname) is None:
 							item.fields[fieldname] = value
 							
 	def set_taxes(self, tax_doctype, tax_parentfield, tax_master_field):

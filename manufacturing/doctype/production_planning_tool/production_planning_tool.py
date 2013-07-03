@@ -210,7 +210,6 @@ class DocType:
 				"wip_warehouse"		: "",
 				"fg_warehouse"		: "",
 				"status"			: "Draft",
-				"fiscal_year"		: webnotes.conn.get_default("fiscal_year")
 			}
 		return bom_dict, item_dict
 		

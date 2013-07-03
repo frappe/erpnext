@@ -26,8 +26,16 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
+	onload: function(doc, dt, dn) {
+		this._super(doc, dt, dn);
+		if(doc.customer && !doc.quotation_to)
+			doc.quotation_to = "Customer";
+		else if(doc.lead && !doc.quotation_to)
+			doc.quotation_to = "Lead";
+	
+	},
 	refresh: function(doc, dt, dn) {
-		this._super();
+		this._super(doc, dt, dn);
 		
 		if(doc.docstatus == 1 && doc.status!='Order Lost') {
 			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);

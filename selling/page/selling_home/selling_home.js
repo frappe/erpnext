@@ -8,6 +8,11 @@ wn.module_page["Selling"] = [
 		icon: "icon-copy",
 		items: [
 			{
+				label: wn._("Customer"),
+				description: wn._("Customer database."),
+				doctype:"Customer"
+			},
+			{
 				label: wn._("Lead"),
 				description: wn._("Database of potential customers."),
 				doctype:"Lead"
@@ -33,11 +38,6 @@ wn.module_page["Selling"] = [
 		title: wn._("Masters"),
 		icon: "icon-book",
 		items: [
-			{
-				label: wn._("Customer"),
-				description: wn._("Customer database."),
-				doctype:"Customer"
-			},
 			{
 				label: wn._("Contact"),
 				description: wn._("All Contacts."),
