@@ -43,8 +43,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
 			} else if(doc.status==="Order Lost") {
 				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-			} else {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-info", "icon-exclamation-sign");
 			}
 		}
 		

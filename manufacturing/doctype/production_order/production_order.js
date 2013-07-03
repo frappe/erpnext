@@ -20,20 +20,19 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
+	cur_frm.dashboard.reset();
 	erpnext.hide_naming_series();
 	cur_frm.set_intro("");
 	cfn_set_fields(doc, dt, dn);
+
 	if(doc.docstatus===0 && !doc.__islocal) {
 		cur_frm.set_intro("Submit this Production Order for further processing.");
 	} else if(doc.docstatus===1) {
+		var percent = flt(doc.produced_qty) / doc.qty * 100;
+		cur_frm.dashboard.add_progress(cint(percent) + "% " + wn._("Complete"));
+
 		if(doc.status === "Stopped") {
-			cur_frm.set_intro("This Production Order is Stopped.");
-		} else {
-			if(doc.produced_qty == doc.qty) {
-				cur_frm.set_intro("This Production Order is Completed.");
-			} else {
-				cur_frm.set_intro("This Production Order is in progress.");
-			}
+			cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
 		}
 	}
 }
@@ -88,6 +87,12 @@ cur_frm.cscript.make_se = function(doc, purpose) {
 	var se = wn.model.get_new_doc("Stock Entry");
 	se.purpose = purpose;
 	se.production_order = doc.name;
+	if(purpose==="Material Transfer") {
+		se.to_warehouse = doc.wip_warehouse;
+	} else {
+		se.from_warehouse = doc.wip_warehouse;
+		se.to_warehouse = doc.fg_warehouse;
+	}
 	se.company = doc.company;
 	se.fg_completed_qty = doc.qty - doc.produced_qty;
 	se.bom_no = doc.bom_no;

@@ -6,6 +6,11 @@ import webnotes, unittest
 from webnotes.utils import flt
 
 class TestStockEntry(unittest.TestCase):
+	def tearDown(self):
+		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		if hasattr(self, "old_default_company"):
+			webnotes.conn.set_default("company", self.old_default_company)
+
 	def test_auto_material_request(self):
 		webnotes.conn.sql("""delete from `tabMaterial Request Item`""")
 		webnotes.conn.sql("""delete from `tabMaterial Request`""")
@@ -72,8 +77,6 @@ class TestStockEntry(unittest.TestCase):
 				["Stock Adjustment - _TC", 5000.0, 0.0]
 			])
 		)
-		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
 
 	def test_material_issue_gl_entry(self):
 		self._clear_stock()
@@ -115,9 +118,6 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		webnotes.conn.set_default("company", self.old_default_company)
-		
 	def test_material_transfer_gl_entry(self):
 		self._clear_stock()
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
@@ -149,10 +149,7 @@ class TestStockEntry(unittest.TestCase):
 		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type = 'Stock Entry' and voucher_no=%s""", mtn.doc.name)
 		self.assertFalse(gl_entries)
-		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		webnotes.conn.set_default("company", self.old_default_company)
-	
+			
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		# check stock ledger entries
 		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` where voucher_type = %s 
