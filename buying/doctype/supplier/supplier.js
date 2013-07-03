@@ -21,15 +21,16 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 }
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
-  if(sys_defaults.supp_master_name == 'Supplier Name')
-    hide_field('naming_series');
-  else
-    unhide_field('naming_series'); 
+	cur_frm.cscript.make_dashboard(doc);
+	if(sys_defaults.supp_master_name == 'Supplier Name')
+		hide_field('naming_series');
+	else
+		unhide_field('naming_series'); 
     
-  if(doc.__islocal){
+	if(doc.__islocal){
     	hide_field(['address_html','contact_html']); 
-   }
-  else{
+	}
+	else{
 	  	unhide_field(['address_html','contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
@@ -42,6 +43,36 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		})		
   }
 }
+
+cur_frm.cscript.make_dashboard = function(doc) {
+	cur_frm.dashboard.wrapper.empty().toggle(doc.__islocal ? false : true);
+	if(doc.__islocal) 
+		return;
+	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
+	
+	cur_frm.dashboard.add_doctype_badge("Supplier Quotation", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Order", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Receipt", "supplier");
+	cur_frm.dashboard.add_doctype_badge("Purchase Invoice", "supplier");
+
+	wn.call({
+		type: "GET",
+		method:"buying.doctype.supplier.supplier.get_dashboard_info",
+		args: {
+			supplier: cur_frm.doc.name
+		},
+		callback: function(r) {
+			cur_frm.dashboard.set_headline(
+				wn._("Total Billing This Year: ") + "<b>" 
+				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+				+ '</b></span>');
+			cur_frm.dashboard.set_badge_count(r.message);
+		}
+	})
+}
+
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {

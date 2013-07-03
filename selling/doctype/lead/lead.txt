@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-06-28 15:08:26", 
+  "modified": "2013-07-03 10:22:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -39,6 +39,13 @@
  {
   "doctype": "DocType", 
   "name": "Lead"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lead_details", 
+  "fieldtype": "Section Break", 
+  "label": "Lead Details", 
+  "options": "icon-user"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -149,7 +156,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "communication_history", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments"
  }, 
  {
   "allow_on_submit": 0, 
@@ -165,7 +174,8 @@
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
   "label": "Address & Contact", 
-  "oldfieldtype": "Column Break"
+  "oldfieldtype": "Column Break", 
+  "options": "icon-map-marker"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
@@ -248,7 +258,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 

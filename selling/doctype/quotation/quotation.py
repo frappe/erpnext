@@ -191,7 +191,7 @@ class DocType(SellingController):
 	
 	# declare as order lost
 	#-------------------------
-	def declare_order_lost(self,arg):
+	def declare_order_lost(self, arg):
 		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")

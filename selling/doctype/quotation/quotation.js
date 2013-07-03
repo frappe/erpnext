@@ -36,10 +36,23 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
+
+		cur_frm.dashboard.reset(doc);
+		if(!doc.__islocal) {
+			if(doc.status=="Converted" || doc.status=="Order Confirmed") {
+				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
+			} else if(doc.status==="Order Lost") {
+				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
+			} else {
+				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-info", "icon-exclamation-sign");
+			}
+		}
 		
-		if(doc.docstatus == 1 && doc.status!='Order Lost') {
+		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
 			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
-			cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
+			if(doc.status!=="Order Confirmed") {
+				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
+			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 		}
 
@@ -150,51 +163,35 @@ cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 // declare order lost
 //-------------------------
 cur_frm.cscript['Declare Order Lost'] = function(){
-	var qtn_lost_dialog;
+	var dialog = new wn.ui.Dialog({
+		title: "Set as Lost",
+		fields: [
+			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+				"reqd": 1 },
+			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+		]
+	});
 
-	set_qtn_lost_dialog = function(){
-		qtn_lost_dialog = new Dialog(400,400,'Add Quotation Lost Reason');
-		qtn_lost_dialog.make_body([
-			['HTML', 'Message', '<div class="comment">Please add quotation lost reason</div>'],
-			['Text', 'Quotation Lost Reason'],
-			['HTML', 'Response', '<div class = "comment" id="update_quotation_dialog_response"></div>'],
-			['HTML', 'Add Reason', '<div></div>']
-		]);
-
-		var add_reason_btn1 = $a($i(qtn_lost_dialog.widgets['Add Reason']), 'button', 'button');
-		add_reason_btn1.innerHTML = 'Add';
-		add_reason_btn1.onclick = function(){ qtn_lost_dialog.add(); }
-
-		var add_reason_btn2 = $a($i(qtn_lost_dialog.widgets['Add Reason']), 'button', 'button');
-		add_reason_btn2.innerHTML = 'Cancel';
-		$y(add_reason_btn2,{marginLeft:'4px'});
-		add_reason_btn2.onclick = function(){ qtn_lost_dialog.hide();}
-
-		qtn_lost_dialog.onshow = function() {
-			qtn_lost_dialog.widgets['Quotation Lost Reason'].value = '';
-			$i('update_quotation_dialog_response').innerHTML = '';
-		}
-
-		qtn_lost_dialog.add = function() {
-			// sending...
-			$i('update_quotation_dialog_response').innerHTML = 'Processing...';
-			var arg =	strip(qtn_lost_dialog.widgets['Quotation Lost Reason'].value);
-			var call_back = function(r,rt) {
-				if(r.message == 'true'){
-					$i('update_quotation_dialog_response').innerHTML = 'Done';
-					qtn_lost_dialog.hide();
-					cur_frm.refresh();
+	dialog.fields_dict.update.$input.click(function() {
+		args = dialog.get_values();
+		if(!args) return;
+		cur_frm.call({
+			method: "declare_order_lost",
+			doc: cur_frm.doc,
+			args: args.reason,
+			callback: function(r) {
+				if(r.exc) {
+					msgprint("There were errors.");
+					return;
 				}
-			}
-			if(arg) $c_obj(make_doclist(cur_frm.doc.doctype, cur_frm.doc.name),'declare_order_lost',arg,call_back);
-			else msgprint("Please add Quotation lost reason");
-		}
-	}
-
-	if(!qtn_lost_dialog){
-		set_qtn_lost_dialog();
-	}
-	qtn_lost_dialog.show();
+				dialog.hide();
+				cur_frm.refresh();
+			},
+			btn: this
+		})
+	});
+	dialog.show();
+	
 }
 
 //================ Last Quoted Price and Last Sold Price suggestion ======================

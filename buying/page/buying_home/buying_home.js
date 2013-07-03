@@ -8,6 +8,11 @@ wn.module_page["Buying"] = [
 		icon: "icon-copy",
 		items: [
 			{
+				label: wn._("Supplier"),
+				description: wn._("Supplier database."),
+				doctype:"Supplier"
+			},
+			{
 				label: wn._("Material Request"),
 				description: wn._("Request for purchase."),
 				doctype:"Material Request"
@@ -28,11 +33,6 @@ wn.module_page["Buying"] = [
 		title: wn._("Masters"),
 		icon: "icon-book",
 		items: [
-		{
-			label: wn._("Supplier"),
-			description: wn._("Supplier database."),
-			doctype:"Supplier"
-		},
 		{
 			label: wn._("Contact"),
 			description: wn._("All Contacts."),
