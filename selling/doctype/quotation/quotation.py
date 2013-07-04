@@ -154,8 +154,11 @@ class DocType(SellingController):
 		super(DocType, self).validate()
 		
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
-			"Order Confirmed", "Order Lost", "Cancelled"])
+		if not self.doc.status:
+			self.doc.status = "Draft"
+		else:
+			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
+				"Order Confirmed", "Order Lost", "Cancelled"])
 
 		self.validate_fiscal_year()
 		self.set_last_contact_date()
@@ -191,7 +194,7 @@ class DocType(SellingController):
 	
 	# declare as order lost
 	#-------------------------
-	def declare_order_lost(self,arg):
+	def declare_order_lost(self, arg):
 		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
@@ -247,3 +250,37 @@ class DocType(SellingController):
 		sql("delete from `tabCommunication Log` where parent = '%s'"%self.doc.name)
 		for d in getlist(self.doclist, 'follow_up'):
 			d.save()
+
+@webnotes.whitelist()
+def make_sales_order(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	if target_doclist:
+		target_doclist = json.loads(target_doclist)
+
+	doclist = get_mapped_doclist("Quotation", source_name, {
+			"Quotation": {
+				"doctype": "Sales Order", 
+				"field_map": {
+					"name": "quotation_no", 
+					"transaction_date": "quotation_date"
+				},
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Quotation Item": {
+				"doctype": "Sales Order Item", 
+				"field_map": {
+					"parent": "prevdoc_docname"
+				}
+			}, 
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+			}, 
+			"Sales Team": {
+				"doctype": "Sales Team",
+			}
+		}, target_doclist)
+		
+	return [d.fields for d in doclist]

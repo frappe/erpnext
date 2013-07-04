@@ -96,3 +96,36 @@ class DocType(SellingController):
 			self.doc.name)
 		
 		self.delete_events()
+
+@webnotes.whitelist()
+def make_customer(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+		
+	doclist = get_mapped_doclist("Lead", source_name, 
+		{"Lead": {
+			"doctype": "Customer",
+			"field_map": {
+				"name": "lead_name",
+				"company_name": "customer_name",
+				"contact_no": "phone_1",
+				"fax": "fax_1"
+			}
+		}}, target_doclist)
+		
+	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_opportunity(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+		
+	doclist = get_mapped_doclist("Lead", source_name, 
+		{"Lead": {
+			"doctype": "Opportunity",
+			"field_map": {
+				"campaign_name": "campaign",
+				"doctype": "enquiry_from",
+				"name": "lead",
+			}
+		}}, target_doclist)
+		
+	return [d.fields for d in doclist]

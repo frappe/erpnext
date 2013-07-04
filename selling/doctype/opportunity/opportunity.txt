@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:03:41", 
+  "modified": "2013-07-03 10:29:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,6 +42,13 @@
  {
   "doctype": "DocType", 
   "name": "Opportunity"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_section", 
+  "fieldtype": "Section Break", 
+  "label": "From", 
+  "options": "icon-user"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -138,6 +145,7 @@
   "fieldtype": "Section Break", 
   "label": "Items", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
   "read_only": 0
  }, 
  {
@@ -156,7 +164,9 @@
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
+  "label": "Communication History", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-comments", 
   "read_only": 0
  }, 
  {
@@ -174,6 +184,7 @@
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
   "label": "Contact Info", 
+  "options": "icon-bullhorn", 
   "read_only": 0
  }, 
  {
@@ -278,6 +289,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "read_only": 0
  }, 
  {

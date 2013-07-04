@@ -29,9 +29,16 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
+		this.frm.dashboard.reset();
 		
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
+				
+				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Delivered"), 
+					doc.per_delivered);
+				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Billed"), 
+					doc.per_billed);
+
 				cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
@@ -56,6 +63,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
 			} else {	
 				// un-stop
+				cur_frm.dashboard.set_headline_alert("Stopped", "alert-danger", "icon-stop");
 				cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 			}
 		}
@@ -187,40 +195,18 @@ cur_frm.cscript.make_maintenance_visit = function() {
 }
 
 cur_frm.cscript['Make Material Request'] = function() {
-	var doc = cur_frm.doc;
-	if (doc.docstatus == 1) { 
-	n = wn.model.make_new_doc_and_get_name("Material Request");
-	$c('dt_map', args={
-					'docs':wn.model.compress([locals["Material Request"][n]]),
-					'from_doctype':'Sales Order',
-					'to_doctype':'Material Request',
-					'from_docname':doc.name,
-		'from_to_list':"[['Sales Order', 'Material Request'], ['Sales Order Item', 'Material Request Item']]"
-	}
-	, function(r,rt) {
-		loaddoc("Material Request", n);
-		}
-		);
-	}
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.sales_order.sales_order.make_material_request",
+		source_name: cur_frm.doc.name
+	})
 }
 
 
 cur_frm.cscript['Make Delivery Note'] = function() {
-	var doc = cur_frm.doc;
-	if (doc.docstatus == 1) { 
-	n = wn.model.make_new_doc_and_get_name("Delivery Note");
-	$c('dt_map', args={
-					'docs':wn.model.compress([locals["Delivery Note"][n]]),
-					'from_doctype':'Sales Order',
-					'to_doctype':'Delivery Note',
-					'from_docname':doc.name,
-		'from_to_list':"[['Sales Order', 'Delivery Note'], ['Sales Order Item', 'Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
-	}
-	, function(r,rt) {
-		loaddoc("Delivery Note", n);
-		}
-		);
-	}
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+		source_name: cur_frm.doc.name
+	})
 }
 
 

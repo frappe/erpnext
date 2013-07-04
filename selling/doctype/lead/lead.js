@@ -40,8 +40,18 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	},
 	
 	refresh: function() {
+		var doc = this.frm.doc;
 		erpnext.hide_naming_series();
 		this.frm.clear_custom_buttons();
+		
+		this.frm.dashboard.reset(doc);
+		if(!doc.__islocal) {
+			if(doc.status=="Converted") {
+				this.frm.dashboard.set_headline_alert(wn._("Converted"), "alert-success", "icon-ok-sign");
+			} else {
+				this.frm.dashboard.set_headline_alert(wn._(doc.status), "alert-info", "icon-exclamation-sign");
+			}
+		}
 		
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
 		if(!this.frm.doc.__islocal && !this.frm.__is_customer) {
@@ -89,63 +99,15 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
 
 cur_frm.cscript['Create Customer'] = function(){
-	var doc = cur_frm.doc;
-	$c('runserverobj',args={ 'method':'check_status', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
-		function(r,rt){
-			if(r.message == 'Converted'){
-				msgprint("This lead is already converted to customer");
-			}
-			else{
-				n = wn.model.make_new_doc_and_get_name("Customer");
-				$c('dt_map', args={
-					'docs':wn.model.compress([locals["Customer"][n]]),
-					'from_doctype':'Lead',
-					'to_doctype':'Customer',
-					'from_docname':doc.name,
-					'from_to_list':"[['Lead', 'Customer']]"
-				}, 
-				function(r,rt) {
-					wn.model.with_doctype("Customer", function() {
-						var customer = wn.model.get_doc("Customer", n);
-						var customer_copy = $.extend({}, customer);
-
-						var updated = wn.model.set_default_values(customer_copy);
-						$.each(updated, function(i, f) {
-							if(!customer[f]) customer[f] = customer_copy[f];
-						});
-					
-						loaddoc("Customer", n);
-					});
-				}
-				);
-			}
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.lead.lead.make_customer",
+		source_name: cur_frm.doc.name
+	})
 }
 
-// Create New Opportunity
-// ===============================================================
 cur_frm.cscript['Create Opportunity'] = function(){
-	var doc = cur_frm.doc;
-	$c('runserverobj',args={ 'method':'check_status', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
-		function(r,rt){
-			if(r.message == 'Converted'){
-				msgprint("This lead is now converted to customer. Please create enquiry on behalf of customer");
-			}
-			else{
-				n = wn.model.make_new_doc_and_get_name("Opportunity");
-				$c('dt_map', args={
-					'docs':wn.model.compress([locals["Opportunity"][n]]),
-					'from_doctype':'Lead',
-					'to_doctype':'Opportunity',
-					'from_docname':doc.name,
-					'from_to_list':"[['Lead', 'Opportunity']]"
-				}
-				, function(r,rt) {
-						loaddoc("Opportunity", n);
-					}
-				);
-			}
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.lead.lead.make_opportunity",
+		source_name: cur_frm.doc.name
+	})
 }

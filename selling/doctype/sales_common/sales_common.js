@@ -105,6 +105,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.toggle_rounded_total();
 	},
 	
+	refresh: function(doc) {
+		this.frm.toggle_display("customer_name", 
+			(this.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
+		this._super();
+	},
+	
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer || this.frm.doc.debit_to) {

@@ -24,6 +24,16 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	refresh: function(doc) {
 		this._super();
 		
+		// dashboard
+		cur_frm.dashboard.reset();
+		if(doc.docstatus===1) {
+			if(doc.status==="Stopped") {
+				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop")
+			}
+			cur_frm.dashboard.add_progress(cint(doc.per_ordered) + "% " 
+				+ wn._("Fulfilled"), cint(doc.per_ordered));
+		}
+		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
 			if(doc.material_request_type === "Purchase")
 				cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
@@ -92,13 +102,19 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 };
 
 cur_frm.cscript['Make Purchase Order'] = function() {
-	cur_frm.map([["Material Request", "Purchase Order"], ["Material Request Item", "Purchase Order Item"]]);
+	cur_frm.map([
+		["Material Request", "Purchase Order"], 
+		["Material Request Item", "Purchase Order Item"]]);
 };
 
 cur_frm.cscript.make_supplier_quotation = function() {
-	cur_frm.map([["Material Request", "Supplier Quotation"], ["Material Request Item", "Supplier Quotation Item"]]);
+	cur_frm.map([
+		["Material Request", "Supplier Quotation"], 
+		["Material Request Item", "Supplier Quotation Item"]]);
 };
 
 cur_frm.cscript.make_stock_entry = function() {
-	cur_frm.map([["Material Request", "Stock Entry"], ["Material Request Item", "Stock Entry Detail"]]);
+	cur_frm.map([
+		["Material Request", "Stock Entry"], 
+		["Material Request Item", "Stock Entry Detail"]]);
 };

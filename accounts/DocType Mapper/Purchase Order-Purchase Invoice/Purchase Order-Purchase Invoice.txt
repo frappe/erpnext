@@ -1,122 +1,122 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2010-08-08 17:09:35", 
+  "docstatus": 0, 
+  "modified": "2013-07-03 18:00:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-04-03 12:49:50"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Purchase Order-Purchase Invoice", 
   "doctype": "Table Mapper Detail", 
-  "parenttype": "DocType Mapper", 
-  "parentfield": "table_mapper_details"
- }, 
- {
   "name": "__common__", 
   "parent": "Purchase Order-Purchase Invoice", 
-  "doctype": "Field Mapper Detail", 
-  "parenttype": "DocType Mapper", 
-  "parentfield": "field_mapper_details"
+  "parentfield": "table_mapper_details", 
+  "parenttype": "DocType Mapper"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
   "name": "__common__", 
-  "to_doctype": "Purchase Invoice", 
-  "module": "Accounts", 
+  "parent": "Purchase Order-Purchase Invoice", 
+  "parentfield": "field_mapper_details", 
+  "parenttype": "DocType Mapper"
+ }, 
+ {
   "doctype": "DocType Mapper", 
+  "from_doctype": "Purchase Order", 
+  "module": "Accounts", 
+  "name": "__common__", 
   "ref_doc_submitted": 1, 
-  "from_doctype": "Purchase Order"
+  "to_doctype": "Purchase Invoice"
  }, 
  {
-  "name": "Purchase Order-Purchase Invoice", 
-  "doctype": "DocType Mapper"
+  "doctype": "DocType Mapper", 
+  "name": "Purchase Order-Purchase Invoice"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval: (flt(obj.amount) - flt(obj.billed_amt)) / obj.purchase_rate", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "qty", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "eval: flt(obj.qty) - flt(obj.billed_qty)"
+  "to_field": "qty"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "purchase_rate", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "rate", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "purchase_rate"
+  "to_field": "rate"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval: flt(obj.amount) - flt(obj.billed_amt)", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "amount", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.purchase_rate)"
+  "to_field": "amount"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "eval: (flt(obj.amount) - flt(obj.billed_amt)) / flt(obj.conversion_rate)", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "import_amount", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.import_rate)"
+  "to_field": "import_amount"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "parent", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "purchase_order", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "parent"
+  "to_field": "purchase_order"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "name", 
   "map": "Yes", 
   "match_id": 1, 
-  "to_field": "po_detail", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "name"
+  "to_field": "po_detail"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "naming_series", 
   "map": "No", 
   "match_id": 0, 
-  "to_field": "naming_series", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "naming_series"
+  "to_field": "naming_series"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "total_tax", 
   "map": "Yes", 
   "match_id": 0, 
-  "to_field": "total_tax", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "total_tax"
+  "to_field": "total_tax"
  }, 
  {
+  "doctype": "Field Mapper Detail", 
+  "from_field": "conversion_rate", 
   "map": "Yes", 
   "match_id": 0, 
-  "to_field": "conversion_rate", 
-  "doctype": "Field Mapper Detail", 
-  "from_field": "conversion_rate"
+  "to_field": "conversion_rate"
  }, 
  {
-  "match_id": 0, 
   "doctype": "Table Mapper Detail", 
   "from_table": "Purchase Order", 
+  "match_id": 0, 
   "to_table": "Purchase Invoice", 
   "validation_logic": "docstatus =1"
  }, 
  {
-  "match_id": 1, 
-  "to_field": "entries", 
   "doctype": "Table Mapper Detail", 
   "from_field": "po_details", 
   "from_table": "Purchase Order Item", 
+  "match_id": 1, 
+  "to_field": "entries", 
   "to_table": "Purchase Invoice Item", 
-  "validation_logic": "ifnull(billed_qty,0)  < qty and docstatus = 1"
+  "validation_logic": "ifnull(billed_amt,0)  < amount and docstatus = 1"
  }, 
  {
-  "match_id": 2, 
-  "to_field": "purchase_tax_details", 
   "doctype": "Table Mapper Detail", 
   "from_field": "purchase_tax_details", 
   "from_table": "Purchase Taxes and Charges", 
+  "match_id": 2, 
+  "to_field": "purchase_tax_details", 
   "to_table": "Purchase Taxes and Charges", 
   "validation_logic": "docstatus =1"
  }

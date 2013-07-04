@@ -204,7 +204,7 @@ class DocType(DocListController):
 			
 			if vals and ((self.doc.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
 				vals.has_serial_no != self.doc.has_serial_no or 
-				vals.valuation_method != self.doc.valuation_method):
+				cstr(vals.valuation_method) != cstr(self.doc.valuation_method)):
 					if self.check_if_sle_exists() == "exists":
 						webnotes.msgprint(_("As there are existing stock transactions for this \
 							item, you can not change the values of 'Has Serial No', \

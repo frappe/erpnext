@@ -60,19 +60,6 @@ class DocType(SellingController):
 		"""Get Commission rate of Sales Partner"""
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-
-	def pull_sales_order_details(self):
-		self.validate_prev_docname()
-		self.doclist = self.doc.clear_table(self.doclist,'other_charges')
-
-		if self.doc.sales_order_no:
-			get_obj('DocType Mapper', 'Sales Order-Delivery Note').dt_map('Sales Order', 'Delivery Note', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Delivery Note'],['Sales Order Item', 'Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]")
-		else:
-			msgprint("Please select Sales Order No. whose details need to be pulled")
-
-		return cstr(self.doc.sales_order_no)
-
-
 	def validate_prev_docname(self):
 		"""Validates that Sales Order is not pulled twice"""
 		for d in getlist(self.doclist, 'delivery_note_details'):

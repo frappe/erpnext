@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-06-28 12:47:10", 
+  "modified": "2013-07-04 10:56:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,6 +41,13 @@
  {
   "doctype": "DocType", 
   "name": "Quotation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -107,21 +114,19 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "hidden": 0, 
+  "hidden": 1, 
   "in_list_view": 1, 
   "label": "Customer Name", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "in_filter": 0, 
   "label": "Address", 
   "oldfieldname": "customer_address", 
@@ -132,32 +137,29 @@
   "search_index": 0
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "in_filter": 0, 
   "label": "Contact", 
   "print_hide": 0, 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Mobile No", 
   "print_hide": 0, 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -234,6 +236,7 @@
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "label": "Price List and Currency", 
+  "options": "icon-tag", 
   "read_only": 0
  }, 
  {
@@ -316,6 +319,7 @@
   "fieldtype": "Section Break", 
   "label": "Items", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
   "print_hide": 0, 
   "read_only": 0, 
   "search_index": 0
@@ -337,7 +341,6 @@
   "doctype": "DocField", 
   "fieldname": "sec_break23", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "read_only": 0
  }, 
  {
@@ -413,6 +416,7 @@
   "fieldtype": "Section Break", 
   "label": "Taxes", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -512,6 +516,7 @@
   "fieldtype": "Section Break", 
   "label": "Totals", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -612,6 +617,7 @@
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-legal", 
   "print_hide": 0, 
   "read_only": 0
  }, 
@@ -659,6 +665,7 @@
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
   "label": "Contact Info", 
+  "options": "icon-bullhorn", 
   "read_only": 0
  }, 
  {
@@ -748,6 +755,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -874,8 +882,9 @@
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
+  "label": "Communication History", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple", 
+  "options": "icon-comments", 
   "print_hide": 1, 
   "read_only": 0
  }, 

@@ -57,17 +57,10 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 
 
 cur_frm.cscript.get_items = function(doc,dt,dn) {
-	var callback = function(r,rt){
-		var doc = locals[cur_frm.doctype][cur_frm.docname];					
-		if(r.message){							
-			doc.sales_order_no = r.message;			
-			if(doc.sales_order_no) {					
-				unhide_field(['customer_address','contact_person','territory','customer_group']);														
-			}			
-			cur_frm.refresh_fields();
-		}
-	} 
- $c_obj(make_doclist(doc.doctype, doc.name),'pull_sales_order_details','',callback); 
+	wn.model.map_current_doc({
+		method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+		source_name: cur_frm.doc.sales_order_no,
+	})
 }
 
 

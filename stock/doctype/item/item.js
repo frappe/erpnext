@@ -21,6 +21,8 @@ cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
+	cur_frm.cscript.make_dashboard()
+
 	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
 		&& doc.__islocal)
 	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
@@ -34,6 +36,12 @@ cur_frm.cscript.refresh = function(doc) {
 		}
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
 	}
+}
+
+cur_frm.cscript.make_dashboard = function() {
+	cur_frm.dashboard.reset();
+	if(doc.__islocal) 
+		return;
 }
 
 cur_frm.cscript.item_code = function(doc) {

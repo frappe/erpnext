@@ -42,9 +42,18 @@ $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
+
+	cur_frm.dashboard.reset(doc);
+	if(!doc.__islocal) {
+		if(doc.status=="Converted" || doc.status=="Order Confirmed") {
+			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
+		} else if(doc.status=="Opportunity Lost") {
+			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
+		}
+	}
 	
 	cur_frm.clear_custom_buttons();
-	if(doc.docstatus == 1) {
+	if(doc.docstatus === 1 && doc.status!=="Opportunity Lost") {
 		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript['Create Quotation']);
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
@@ -58,11 +67,21 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 // ===============================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
-	if(!doc.enquiry_from) hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
-	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
-	if(!doc.date) doc.transaction_date = date.obj_to_str(new Date());
-	if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
-	if(!doc.fiscal_year && sys_defaults.fiscal_year) set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
+	if(!doc.enquiry_from && doc.customer)
+		doc.enquiry_from = "Customer";
+	if(!doc.enquiry_from && doc.lead)
+		doc.enquiry_from = "Lead";
+
+	if(!doc.enquiry_from) 
+		hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+	if(!doc.status) 
+		set_multiple(cdt,cdn,{status:'Draft'});
+	if(!doc.date) 
+		doc.transaction_date = date.obj_to_str(new Date());
+	if(!doc.company && sys_defaults.company) 
+		set_multiple(cdt,cdn,{company:sys_defaults.company});
+	if(!doc.fiscal_year && sys_defaults.fiscal_year) 
+		set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
 	
 	if(doc.enquiry_from) {
 		if(doc.enquiry_from == 'Customer') {
@@ -85,6 +104,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
 	}
+	
+	if(doc.customer && !doc.customer_name) cur_frm.cscript.customer(doc);
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
@@ -196,56 +217,35 @@ cur_frm.cscript['Create Quotation'] = function(){
 // declare enquiry	lost
 //-------------------------
 cur_frm.cscript['Declare Opportunity Lost'] = function(){
-	var e_lost_dialog;
+	var dialog = new wn.ui.Dialog({
+		title: "Set as Lost",
+		fields: [
+			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+				"reqd": 1 },
+			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+		]
+	});
 
-	set_e_lost_dialog = function(){
-		e_lost_dialog = new Dialog(400,150,'Add Opportunity Lost Reason');
-		e_lost_dialog.make_body([
-			['HTML', 'Message', '<div class="comment">Please add enquiry lost reason</div>'],
-			['Text', 'Opportunity Lost Reason'],
-			['HTML', 'Response', '<div class = "comment" id="update_enquiry_dialog_response"></div>'],
-			['HTML', 'Add Reason', '<div></div>']
-		]);
-		
-		var add_reason_btn1 = $a($i(e_lost_dialog.widgets['Add Reason']), 'button', 'button');
-		add_reason_btn1.innerHTML = 'Add';
-		add_reason_btn1.onclick = function(){ e_lost_dialog.add(); }
-		
-		var add_reason_btn2 = $a($i(e_lost_dialog.widgets['Add Reason']), 'button', 'button');
-		add_reason_btn2.innerHTML = 'Cancel';
-		$y(add_reason_btn2,{marginLeft:'4px'});
-		add_reason_btn2.onclick = function(){ e_lost_dialog.hide();}
-		
-		e_lost_dialog.onshow = function() {
-			e_lost_dialog.widgets['Opportunity Lost Reason'].value = '';
-			$i('update_enquiry_dialog_response').innerHTML = '';
-		}
-		
-		e_lost_dialog.add = function() {
-			// sending...
-			$i('update_enquiry_dialog_response').innerHTML = 'Processing...';
-			var arg =	strip(e_lost_dialog.widgets['Opportunity Lost Reason'].value);
-			var call_back = function(r,rt) { 
-				if(r.message == 'true'){
-					$i('update_enquiry_dialog_response').innerHTML = 'Done';
-					e_lost_dialog.hide();
-					cur_frm.refresh();
+	dialog.fields_dict.update.$input.click(function() {
+		args = dialog.get_values();
+		if(!args) return;
+		cur_frm.call({
+			doc: cur_frm.doc,
+			method: "declare_enquiry_lost",
+			args: args.reason,
+			callback: function(r) {
+				if(r.exc) {
+					msgprint("There were errors.");
+					return;
 				}
-			}
-			if(arg) {
-				$c_obj(make_doclist(cur_frm.doc.doctype, cur_frm.doc.name),'declare_enquiry_lost',arg,call_back);
-			}
-			else{
-				msgprint("Please add enquiry lost reason");
-			}
-			
-		}
-	}	
+				dialog.hide();
+				cur_frm.refresh();
+			},
+			btn: this
+		})
+	});
+	dialog.show();
 	
-	if(!e_lost_dialog){
-		set_e_lost_dialog();
-	}	
-	e_lost_dialog.show();
 }
 
 //get query select Territory

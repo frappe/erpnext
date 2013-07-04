@@ -63,7 +63,8 @@ class DocType:
 	def on_update(self):
 		"""update percent complete in project"""
 		if self.doc.project:
-			webnotes.bean("Project", self.doc.project).controller.update_percent_complete()
+			project = webnotes.bean("Project", self.doc.project)
+			project.run_method("update_percent_complete")
 
 @webnotes.whitelist()
 def get_events(start, end, filters=None):
