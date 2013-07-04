@@ -73,17 +73,16 @@ class SellingController(StockController):
 				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
 					shipping_amount = condition.shipping_amount
 					break
-					
-			if shipping_amount:
-				self.doclist.append({
-					"doctype": "Sales Taxes and Charges",
-					"parentfield": "other_charges",
-					"charge_type": "Actual",
-					"account_head": shipping_rule.doc.account,
-					"cost_center": shipping_rule.doc.cost_center,
-					"description": shipping_rule.doc.label,
-					"rate": shipping_amount
-				})
+			
+			self.doclist.append({
+				"doctype": "Sales Taxes and Charges",
+				"parentfield": "other_charges",
+				"charge_type": "Actual",
+				"account_head": shipping_rule.doc.account,
+				"cost_center": shipping_rule.doc.cost_center,
+				"description": shipping_rule.doc.label,
+				"rate": shipping_amount
+			})
 		
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words

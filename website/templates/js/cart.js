@@ -38,7 +38,6 @@ $(document).ready(function() {
 			} else {
 				wn.cart.render(r.message);
 			}
-			
 		}
 	});
 });
@@ -81,9 +80,10 @@ $.extend(wn.cart, {
 	render: function(out) {
 		var doclist = out.doclist;
 		var addresses = out.addresses;
-
+		
 		var $cart_items = $("#cart-items").empty();
 		var $cart_taxes = $("#cart-taxes").empty();
+		var $cart_totals = $("#cart-totals").empty();
 		var $cart_billing_address = $("#cart-billing-address").empty();
 		var $cart_shipping_address = $("#cart-shipping-address").empty();
 		
@@ -94,10 +94,37 @@ $.extend(wn.cart, {
 			return;
 		}
 		
+		var shipping_rule_added = false;
+		var taxes_exist = false;
+		var shipping_rule_labels = $.map(out.shipping_rules, function(rule) { return rule[1]; });
 		$.each(doclist, function(i, doc) {
 			if(doc.doctype === "Quotation Item") {
 				wn.cart.render_item_row($cart_items, doc);
+			} else if (doc.doctype === "Sales Taxes and Charges") {
+				if(out.shipping_rules && out.shipping_rules.length && 
+					shipping_rule_labels.indexOf(doc.description)!==-1) {
+						shipping_rule_added = true;
+						wn.cart.render_tax_row($cart_taxes, doc, out.shipping_rules);
+				} else {
+					wn.cart.render_tax_row($cart_taxes, doc);
+				}
+				
+				taxes_exist = true;
 			}
+		});
+		
+		if(out.shipping_rules && out.shipping_rules.length && !shipping_rule_added) {
+			wn.cart.render_tax_row($cart_taxes, {description: "", formatted_tax_amount: ""},
+				out.shipping_rules);
+			taxes_exist = true;
+		}
+		
+		if(taxes_exist)
+			$('<hr>').appendTo($cart_taxes);
+			
+		wn.cart.render_tax_row($cart_totals, {
+			description: "<strong>Total</strong>", 
+			formatted_tax_amount: "<strong>" + doclist[0].formatted_grand_total_export + "</strong>"
 		});
 		
 		if(!(addresses && addresses.length)) {
@@ -125,10 +152,10 @@ $.extend(wn.cart, {
 					</div>\
 				</div>\
 			</div>\
-			<div class="col col-lg-3 col-sm-3">\
+			<div class="col col-lg-3 col-sm-3 text-right">\
 				<div class="input-group item-update-cart">\
 					<input type="text" placeholder="Qty" value="%(qty)s" \
-						data-item-code="%(item_code)s">\
+						data-item-code="%(item_code)s" class="text-right">\
 					<div class="input-group-btn">\
 						<button class="btn btn-primary" data-item-code="%(item_code)s">\
 							<i class="icon-ok"></i></button>\
@@ -138,6 +165,53 @@ $.extend(wn.cart, {
 				<small class="text-muted" style="margin-top: 10px;">= %(formatted_amount)s</small>\
 			</div>\
 		</div><hr>', doc)).appendTo($cart_items);
+	},
+	
+	render_tax_row: function($cart_taxes, doc, shipping_rules) {
+		var shipping_selector;
+		if(shipping_rules) {
+			shipping_selector = '<select>' + $.map(shipping_rules, function(rule) { 
+					return '<option value="' + rule[0] + '">' + rule[1] + '</option>' }).join("\n") + 
+				'</select>';
+		}
+		
+		var $tax_row = $(repl('<div class="row">\
+			<div class="col col-lg-9 col-sm-9">\
+				<div class="row">\
+					<div class="col col-lg-9 col-offset-3">' +
+					(shipping_selector || '<p>%(description)s</p>') +
+					'</div>\
+				</div>\
+			</div>\
+			<div class="col col-lg-3 col-sm-3 text-right">\
+				<p' + (shipping_selector ? ' style="margin-top: 5px;"' : "") + '>%(formatted_tax_amount)s</p>\
+			</div>\
+		</div>', doc)).appendTo($cart_taxes);
+		
+		if(shipping_selector) {
+			$tax_row.find('select option').each(function(i, opt) {
+				if($(opt).html() == doc.description) {
+					$(opt).attr("selected", "selected");
+				}
+			});
+			$tax_row.find('select').on("change", function() {
+				wn.cart.apply_shipping_rule($(this).val(), this);
+			});
+		}
+	},
+	
+	apply_shipping_rule: function(rule, btn) {
+		wn.call({
+			btn: btn,
+			type: "POST",
+			method: "website.helpers.cart.apply_shipping_rule",
+			args: { shipping_rule: rule },
+			callback: function(r) {
+				if(!r.exc) {
+					wn.cart.render(r.message);
+				}
+			}
+		});
 	},
 	
 	render_address: function($address_wrapper, addresses, address_name) {

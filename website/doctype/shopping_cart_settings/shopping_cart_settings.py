@@ -63,12 +63,15 @@ class DocType(DocListController):
 			# if list against each territory has more than one element, raise exception
 			territory_name = webnotes.conn.sql("""select `territory`, `parent` 
 				from `tabFor Territory`
-				where `parenttype`=%s and `parent` in (%s) """ %
+				where `parenttype`=%s and `parent` in (%s)""" %
 				("%s", ", ".join(["%s"]*len(names))), tuple([parenttype] + names))
 		
 			for territory, name in territory_name:
 				territory_name_map.setdefault(territory, []).append(name)
-			
+				
+				if len(territory_name_map[territory]) > 1:
+					territory_name_map[territory].sort(key=lambda val: names.index(val))
+		
 		return territory_name_map
 					
 	def validate_exchange_rates_exist(self):
@@ -101,24 +104,26 @@ class DocType(DocListController):
 		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
 		
 		if territory_name_map.get(territory):
-			name = territory_name_map.get(territory)[0]
+			name = territory_name_map.get(territory)
 		else:
 			territory_ancestry = self.get_territory_ancestry(territory)
 			for ancestor in territory_ancestry:
 				if territory_name_map.get(ancestor):
-					name = territory_name_map.get(ancestor)[0]
+					name = territory_name_map.get(ancestor)
 					break
 		
 		return name
 				
 	def get_price_list(self, billing_territory):
-		return self.get_name_from_territory(billing_territory, "price_lists", "price_list")
+		price_list = self.get_name_from_territory(billing_territory, "price_lists", "price_list")
+		return price_list and price_list[0] or None
 		
 	def get_tax_master(self, billing_territory):
-		return self.get_name_from_territory(billing_territory, "sales_taxes_and_charges_masters", 
+		tax_master = self.get_name_from_territory(billing_territory, "sales_taxes_and_charges_masters", 
 			"sales_taxes_and_charges_master")
+		return tax_master and tax_master[0] or None
 		
-	def get_shipping_rule(self, shipping_territory):
+	def get_shipping_rules(self, shipping_territory):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
 		
 	def get_territory_ancestry(self, territory):

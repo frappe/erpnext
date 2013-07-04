@@ -58,7 +58,7 @@ class DocType(DocListController):
 				then condition y can only be like 50 to 99 or 301 to 400
 				hence, non-overlapping condition = (x1 <= x2 < y1 <= y2) or (y1 <= y2 < x1 <= x2)
 			"""
-			separate = (x1 <= x2 < y1 <= y2) or (y1 <= y2 < x1 <= x2)
+			separate = (x1 <= x2 <= y1 <= y2) or (y1 <= y2 <= x1 <= x2)
 			return (not separate)
 		
 		overlaps = []

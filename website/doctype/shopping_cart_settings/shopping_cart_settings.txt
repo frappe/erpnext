@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-07-03 21:00:00", 
+  "modified": "2013-07-03 21:01:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -69,7 +69,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "shopping_cart_shipping_rules", 
+  "fieldname": "shipping_rules", 
   "fieldtype": "Table", 
   "label": "Shopping Cart Shipping Rules", 
   "options": "Shopping Cart Shipping Rule", 
