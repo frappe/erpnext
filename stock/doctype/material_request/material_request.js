@@ -102,13 +102,19 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 };
 
 cur_frm.cscript['Make Purchase Order'] = function() {
-	cur_frm.map([["Material Request", "Purchase Order"], ["Material Request Item", "Purchase Order Item"]]);
+	cur_frm.map([
+		["Material Request", "Purchase Order"], 
+		["Material Request Item", "Purchase Order Item"]]);
 };
 
 cur_frm.cscript.make_supplier_quotation = function() {
-	cur_frm.map([["Material Request", "Supplier Quotation"], ["Material Request Item", "Supplier Quotation Item"]]);
+	cur_frm.map([
+		["Material Request", "Supplier Quotation"], 
+		["Material Request Item", "Supplier Quotation Item"]]);
 };
 
 cur_frm.cscript.make_stock_entry = function() {
-	cur_frm.map([["Material Request", "Stock Entry"], ["Material Request Item", "Stock Entry Detail"]]);
+	cur_frm.map([
+		["Material Request", "Stock Entry"], 
+		["Material Request Item", "Stock Entry Detail"]]);
 };

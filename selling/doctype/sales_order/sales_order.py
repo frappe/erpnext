@@ -405,4 +405,45 @@ def make_material_request(source_name, target_doclist=None):
 	}, target_doclist, postprocess)
 	
 	return [d.fields for d in doclist]
+
+@webnotes.whitelist()
+def make_delivery_note(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
 	
+	def update_item(obj, target):
+		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
+		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
+		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Delivery Note", 
+			"field_map": {
+				"name": "sales_order_no", 
+				"shipping_address": "address_display", 
+				"shipping_address_name": "customer_address", 
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Delivery Note Item", 
+			"field_map": {
+				"export_rate": "export_rate", 
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"reserved_warehouse": "warehouse"
+			},
+			"postprocess": update_item
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team", 
+		}
+	}, target_doclist)
+	
+	return [d.fields for d in doclist]
