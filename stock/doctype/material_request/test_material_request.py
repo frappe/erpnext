@@ -6,6 +6,21 @@ import webnotes, unittest
 from webnotes.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
+	def test_make_purchase_order(self):
+		from stock.doctype.material_request.material_request import make_purchase_order
+
+		mr = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_purchase_order, 
+			mr.doc.name)
+
+		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr.submit()
+		po = make_purchase_order(mr.doc.name)
+		
+		self.assertEquals(po[0]["doctype"], "Purchase Order")
+		self.assertEquals(len(po), len(mr.doclist))
+	
 	def _test_expected(self, doclist, expected_values):
 		for i, expected in enumerate(expected_values):
 			for fieldname, val in expected.items():

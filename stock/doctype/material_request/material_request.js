@@ -102,10 +102,11 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 };
 
 cur_frm.cscript['Make Purchase Order'] = function() {
-	cur_frm.map([
-		["Material Request", "Purchase Order"], 
-		["Material Request Item", "Purchase Order Item"]]);
-};
+	wn.model.open_mapped_doc({
+		method: "stock.doctype.material_request.material_request.make_purchase_order",
+		source_name: cur_frm.doc.name
+	})
+}
 
 cur_frm.cscript.make_supplier_quotation = function() {
 	cur_frm.map([

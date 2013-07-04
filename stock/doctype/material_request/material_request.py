@@ -240,3 +240,35 @@ def _update_requested_qty(controller, mr_obj, mr_items):
 			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
 			"posting_date": controller.doc.posting_date,
 		})
+
+
+
+@webnotes.whitelist()
+def make_purchase_order(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+
+	def update_item(obj, target):
+		target.conversion_factor = 1
+		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
+
+	doclist = get_mapped_doclist("Material Request", source_name, 	{
+		"Material Request": {
+			"doctype": "Purchase Order", 
+			"validation": {
+				"docstatus": ["=", 1],
+				"material_request_type": ["=", "Purchase"]
+			}
+		}, 
+		"Material Request Item": {
+			"doctype": "Purchase Order Item", 
+			"field_map": {
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"uom": "stock_uom"
+			},
+			"postprocess": update_item
+		}
+	}, target_doclist)
+
+	return [d.fields for d in doclist]
