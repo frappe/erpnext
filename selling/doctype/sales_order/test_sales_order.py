@@ -3,6 +3,19 @@ from webnotes.utils import flt
 import unittest
 
 class TestSalesOrder(unittest.TestCase):
+	def test_make_material_request(self):
+		from selling.doctype.sales_order.sales_order import make_material_request
+		
+		self.assertRaises(webnotes.ValidationError, make_material_request, 
+			"_T-Sales Order-00001")
+
+		sales_order = webnotes.bean("Sales Order", "_T-Sales Order-00001")
+		sales_order.submit()
+		mr = make_material_request("_T-Sales Order-00001")
+		
+		self.assertEquals(mr[0]["material_request_type"], "Purchase")
+		self.assertEquals(len(mr), len(sales_order.doclist))
+				
 	def create_so(self, so_doclist = None):
 		if not so_doclist:
 			so_doclist =test_records[0]
