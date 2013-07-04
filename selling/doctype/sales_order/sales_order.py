@@ -471,7 +471,8 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"parent": "sales_order", 
 				"reserved_warehouse": "warehouse"
 			},
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.amount
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

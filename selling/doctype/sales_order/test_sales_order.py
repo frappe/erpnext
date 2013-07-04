@@ -43,10 +43,19 @@ class TestSalesOrder(unittest.TestCase):
 
 		sales_order = webnotes.bean("Sales Order", so.doc.name)
 		sales_order.submit()
-		dn = make_sales_invoice(so.doc.name)
+		si = make_sales_invoice(so.doc.name)
 		
-		self.assertEquals(dn[0]["doctype"], "Sales Invoice")
-		self.assertEquals(len(dn), len(sales_order.doclist))
+		self.assertEquals(si[0]["doctype"], "Sales Invoice")
+		self.assertEquals(len(si), len(sales_order.doclist))
+		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
+		
+		si = webnotes.bean(si)
+		si.insert()
+		si.submit()
+
+		si1 = make_sales_invoice(so.doc.name)
+		self.assertEquals(len([d for d in si1 if d["doctype"]=="Sales Invoice Item"]), 0)
+		
 
 	def create_so(self, so_doclist = None):
 		if not so_doclist:
