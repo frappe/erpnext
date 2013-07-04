@@ -33,6 +33,30 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(dn[0]["doctype"], "Delivery Note")
 		self.assertEquals(len(dn), len(sales_order.doclist))
 
+	def test_make_sales_invoice(self):
+		from selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		so = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
+			so.doc.name)
+
+		sales_order = webnotes.bean("Sales Order", so.doc.name)
+		sales_order.submit()
+		si = make_sales_invoice(so.doc.name)
+		
+		self.assertEquals(si[0]["doctype"], "Sales Invoice")
+		self.assertEquals(len(si), len(sales_order.doclist))
+		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
+		
+		si = webnotes.bean(si)
+		si.insert()
+		si.submit()
+
+		si1 = make_sales_invoice(so.doc.name)
+		self.assertEquals(len([d for d in si1 if d["doctype"]=="Sales Invoice Item"]), 0)
+		
+
 	def create_so(self, so_doclist = None):
 		if not so_doclist:
 			so_doclist =test_records[0]
