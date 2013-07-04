@@ -105,29 +105,9 @@ cur_frm.cscript['Create Customer'] = function(){
 	})
 }
 
-// Create New Opportunity
-// ===============================================================
 cur_frm.cscript['Create Opportunity'] = function(){
-	var doc = cur_frm.doc;
-	$c('runserverobj',args={ 'method':'check_status', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
-		function(r,rt){
-			if(r.message == 'Converted'){
-				msgprint("This lead is now converted to customer. Please create enquiry on behalf of customer");
-			}
-			else{
-				n = wn.model.make_new_doc_and_get_name("Opportunity");
-				$c('dt_map', args={
-					'docs':wn.model.compress([locals["Opportunity"][n]]),
-					'from_doctype':'Lead',
-					'to_doctype':'Opportunity',
-					'from_docname':doc.name,
-					'from_to_list':"[['Lead', 'Opportunity']]"
-				}
-				, function(r,rt) {
-						loaddoc("Opportunity", n);
-					}
-				);
-			}
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.lead.lead.make_opportunity",
+		source_name: cur_frm.doc.name
+	})
 }

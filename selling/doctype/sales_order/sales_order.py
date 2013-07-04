@@ -379,3 +379,30 @@ def get_currency_and_number_format():
 		"currency_symbols": json.dumps(dict(webnotes.conn.sql("""select name, symbol
 			from tabCurrency where ifnull(enabled,0)=1""")))
 	}
+	
+@webnotes.whitelist()
+def make_material_request(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def postprocess(source, doclist):
+		doclist[0].material_request_type = "Purchase"
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Material Request", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Material Request Item", 
+			"field_map": {
+				"parent": "sales_order_no", 
+				"reserved_warehouse": "warehouse", 
+				"stock_uom": "uom"
+			}
+		}
+	}, target_doclist, postprocess)
+	
+	return [d.fields for d in doclist]
+	
