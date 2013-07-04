@@ -112,7 +112,7 @@ test_records = [
 		{
 			"doctype": "For Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "India"
+			"territory": "_Test Territory India"
 		}
 	],
 	[
