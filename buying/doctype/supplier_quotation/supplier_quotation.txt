@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:05:53", 
+  "modified": "2013-07-04 10:51:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,13 @@
   "name": "Supplier Quotation"
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "supplier_section", 
+  "fieldtype": "Section Break", 
+  "label": "Supplier", 
+  "options": "icon-user"
+ }, 
+ {
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
@@ -67,7 +74,6 @@
   "search_index": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
@@ -77,38 +83,34 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -139,7 +141,8 @@
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
  }, 
  {
   "allow_on_submit": 1, 
@@ -155,8 +158,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -168,8 +170,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "section_break_14", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
+  "fieldtype": "Section Break"
  }, 
  {
   "description": "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
@@ -197,7 +198,8 @@
   "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List"
+  "label": "Currency & Price List", 
+  "options": "icon-tag"
  }, 
  {
   "description": "Supplier's currency", 
@@ -264,7 +266,8 @@
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
@@ -319,7 +322,8 @@
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "doctype": "DocField", 
@@ -478,7 +482,8 @@
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
  }, 
  {
   "allow_on_submit": 1, 
@@ -512,7 +517,7 @@
   "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
-  "label": "Terms and Conditions1", 
+  "label": "Terms and Conditions", 
   "oldfieldname": "terms", 
   "oldfieldtype": "Text Editor"
  }, 
@@ -521,7 +526,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
  }, 
  {
   "doctype": "DocField", 
@@ -546,7 +552,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 
@@ -584,6 +591,11 @@
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_57", 
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Select the relevant company name if you have multiple companies", 

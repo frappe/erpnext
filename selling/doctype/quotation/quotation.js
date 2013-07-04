@@ -43,8 +43,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
 			} else if(doc.status==="Order Lost") {
 				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-			} else {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-info", "icon-exclamation-sign");
 			}
 		}
 		
@@ -121,20 +119,10 @@ cur_frm.fields_dict['enq_no'].get_query = function(doc,cdt,cdn){
 // Make Sales Order
 // =====================================================================================
 cur_frm.cscript['Make Sales Order'] = function() {
-	var doc = cur_frm.doc;
-
-	if (doc.docstatus == 1) {
-		var n = wn.model.make_new_doc_and_get_name("Sales Order");
-		$c('dt_map', args={
-			'docs':wn.model.compress([locals["Sales Order"][n]]),
-			'from_doctype':'Quotation',
-			'to_doctype':'Sales Order',
-			'from_docname':doc.name,
-			'from_to_list':"[['Quotation', 'Sales Order'], ['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'], ['Sales Team', 'Sales Team'], ['TC Detail', 'TC Detail']]"
-		}, function(r,rt) {
-			loaddoc("Sales Order", n);
-		});
-	}
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.quotation.quotation.make_sales_order",
+		source_name: cur_frm.doc.name
+	})
 }
 
 //pull enquiry details

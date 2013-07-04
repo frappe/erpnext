@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-07-03 11:54:11", 
+  "modified": "2013-07-04 10:56:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -114,7 +114,6 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
@@ -237,7 +236,7 @@
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "label": "Price List and Currency", 
-  "options": "icon-globe", 
+  "options": "icon-tag", 
   "read_only": 0
  }, 
  {

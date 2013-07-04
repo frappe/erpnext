@@ -262,7 +262,9 @@ class SellingController(StockController):
 			
 	def validate_order_type(self):
 		valid_types = ["Sales", "Maintenance", "Shopping Cart"]
-		if self.doc.order_type not in valid_types:
+		if not self.doc.order_type:
+			self.doc.order_type = "Sales"
+		elif self.doc.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types),
 				raise_exception=True)
