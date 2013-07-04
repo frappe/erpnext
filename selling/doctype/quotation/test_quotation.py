@@ -1,17 +1,31 @@
-import webnotes
+import webnotes, json
 from webnotes.utils import flt
 import unittest
 
 test_dependencies = ["Sales BOM"]
 
-class TestLead(unittest.TestCase):
+class TestQuotation(unittest.TestCase):
 	def test_make_sales_order(self):
-		lead = webnotes.bean("Lead", "_T-Lead-00001")
-		lead.make_controller()
-		customer = lead.controller.make_customer()
-		self.assertEquals(customer[0].doctype, "Customer")
-		self.assertEquals(customer[0].lead_name, lead.doc.name)
-		webnotes.bean(customer).insert()
+		from selling.doctype.quotation.quotation import make_sales_order
+		
+		self.assertRaises(webnotes.ValidationError, make_sales_order, "_T-Quotation-00001")
+		
+		quotation = webnotes.bean("Quotation","_T-Quotation-00001")
+		quotation.submit()
+
+		sales_order = make_sales_order("_T-Quotation-00001")
+				
+		self.assertEquals(sales_order[0]["doctype"], "Sales Order")
+		self.assertEquals(len(sales_order), 2)
+		self.assertEquals(sales_order[1]["doctype"], "Sales Order Item")
+		self.assertEquals(sales_order[1]["prevdoc_docname"], "_T-Quotation-00001")
+		self.assertEquals(sales_order[0]["customer"], "_Test Customer")
+		
+		sales_order[0]["delivery_date"] = "2014-01-01"
+		
+
+		webnotes.print_messages = True
+		webnotes.bean(sales_order).insert()
 
 
 test_records = [

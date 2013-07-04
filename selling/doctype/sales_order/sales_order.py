@@ -167,7 +167,7 @@ class DocType(SellingController):
 	def validate_order_type(self):
 		super(DocType, self).validate_order_type()
 		
-		#validate delivery date
+	def validate_delivery_date(self):
 		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")
 			raise Exception
@@ -186,6 +186,7 @@ class DocType(SellingController):
 		
 		self.validate_fiscal_year()
 		self.validate_order_type()
+		self.validate_delivery_date()
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()

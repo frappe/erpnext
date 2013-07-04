@@ -113,6 +113,6 @@ def make_customer(source_name, target_doclist=None):
 				"contact_no": "phone_1",
 				"fax": "fax_1"
 			}
-		}})
+		}}, target_doclist)
 		
 	return [d.fields for d in doclist]
