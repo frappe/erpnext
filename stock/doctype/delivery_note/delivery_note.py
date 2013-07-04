@@ -111,7 +111,6 @@ class DocType(SellingController):
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
-		self.validate_reference_value()
 		self.validate_for_items()
 		self.validate_warehouse()
 		
@@ -133,17 +132,6 @@ class DocType(SellingController):
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
-
-
-	def validate_reference_value(self):
-		"""Validate values with reference document with previous document"""
-		validate_ref = any([d.prevdoc_docname for d in self.doclist.get({"parentfield": self.fname})
-			if d.prevdoc_doctype == "Sales Order"])
-		
-		if validate_ref:
-			get_obj('DocType Mapper', 'Sales Order-Delivery Note', 
-				with_children = 1).validate_reference_value(self, self.doc.name)
-
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []

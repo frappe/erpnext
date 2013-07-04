@@ -188,11 +188,18 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 // Get Items based on SO or DN Selected
 cur_frm.cscript.get_items = function(doc, dt, dn) {
-	var callback = function(r,rt) {
-		unhide_field(['customer_address','contact_person', 'territory','customer_group']);
-		cur_frm.refresh_fields();
+	if(doc.delivery_note_main) {
+		wn.model.map_current_doc({
+			method: "selling.doctype.delivery_note.delivery_note.make_sales_invoice",
+			source_name: cur_frm.doc.delivery_note_main,
+		})
 	}
-	get_server_fields('pull_details','','',doc, dt, dn,1,callback);
+	else if(doc.sales_order_main) {
+		wn.model.map_current_doc({
+			method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+			source_name: cur_frm.doc.sales_order_main,
+		})
+	}
 }
 
 
