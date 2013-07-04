@@ -243,4 +243,6 @@ patch_list = [
 	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 	"patches.june_2013.p05_remove_search_criteria_reports",
 	"execute:webnotes.delete_doc('DocType', 'Update Delivery Date')",
+	"execute:webnotes.reload_doc('accounts', 'DocType Mapper', 'Purchase Order-Purchase Invoice')",
+	"execute:webnotes.reload_doc('accounts', 'DocType Mapper', 'Purchase Receipt-Purchase Invoice')",
 ]
