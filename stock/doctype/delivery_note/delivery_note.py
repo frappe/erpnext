@@ -48,9 +48,6 @@ class DocType(SellingController):
 			'keyword': 'Delivered'
 		}]
 		
-	def set_customer_defaults(self):
-		self.get_default_customer_shipping_address()
-
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 

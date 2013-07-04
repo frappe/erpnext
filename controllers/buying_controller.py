@@ -30,7 +30,7 @@ class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()
-		self.set_taxes("Purchase Taxes and Charges", "purchase_tax_details", "purchase_other_charges")
+		self.set_taxes("purchase_tax_details", "purchase_other_charges")
 	
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -55,7 +55,7 @@ class BuyingController(StockController):
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
-		self.set_taxes("Purchase Taxes and Charges", "purchase_tax_details", "purchase_other_charges")
+		self.set_taxes("purchase_tax_details", "purchase_other_charges")
 		
 	def validate_warehouse_belongs_to_company(self):
 		for warehouse, company in webnotes.conn.get_values("Warehouse", 

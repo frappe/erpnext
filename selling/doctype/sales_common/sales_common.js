@@ -26,10 +26,78 @@ wn.require("app/js/transaction.js");
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
+		var me = this;
+		
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		
-		if(this.frm.fields_dict.shipping_address_name && this.frm.fields_dict.customer_address)
-			this.frm.fields_dict.shipping_address_name.get_query = this.frm.fields_dict['customer_address'].get_query;
+		if(this.frm.fields_dict.shipping_address_name && this.frm.fields_dict.customer_address) {
+			this.frm.fields_dict.shipping_address_name.get_query = 
+				this.frm.fields_dict['customer_address'].get_query;
+		}
+		
+		this.frm.set_query("customer_address", function() {
+			return 'SELECT name, address_line1, city FROM tabAddress \
+				WHERE customer = "'+ me.frm.doc.customer +'" AND docstatus != 2 AND \
+				%(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
+		});
+		
+		this.frm.set_query("contact_person", function() {
+			return 'SELECT name, CONCAT(first_name," ",ifnull(last_name,"")) As FullName, \
+				department, designation FROM tabContact WHERE customer = "'+ me.frm.doc.customer + 
+				'" AND docstatus != 2 AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
+		});
+		
+		if(this.frm.fields_dict.charge) {
+			this.frm.set_query("charge", function() {
+				return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM \
+					`tabSales Taxes and Charges Master` \
+					WHERE `tabSales Taxes and Charges Master`.company = "' + me.frm.doc.company +
+					'" AND `tabSales Taxes and Charges Master`.company is not NULL \
+					AND `tabSales Taxes and Charges Master`.docstatus != 2 \
+					AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
+					ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
+			});
+		}
+		
+		this.frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+
+		this.frm.fields_dict.lead && this.frm.set_query("lead", erpnext.utils.lead_query);
+
+		if(!this.fname) {
+			return;
+		}
+		
+		if(this.frm.fields_dict[this.fname].grid.get_field('item_code')) {
+			this.frm.set_query("item_code", this.fname, function() {
+				return me.frm.doc.order_type === "Maintenance" ?
+					erpnext.queries.item({'ifnull(tabItem.is_service_item, "No")': "Yes"}) :
+					erpnext.queries.item({'ifnull(tabItem.is_sales_item, "No")': "Yes"});
+			});
+		}
+		
+		if(this.frm.fields_dict[this.fname].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
+				var item = wn.model.get_doc(cdt, cdn);
+				if(!item.item_code) {
+					wn.throw("Please enter Item Code to get batch no");
+				} else {
+					if(item.warehouse) {
+						return "select batch_no from `tabStock Ledger Entry` sle \
+							where item_code = '" + item.item_code + 
+							"' and warehouse = '" + item.warehouse +
+							"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
+							and exists(select * from `tabBatch` where \
+							name = sle.batch_no and expiry_date >= '" + me.frm.doc.posting_date + 
+							"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
+							order by batch_no desc limit 50";
+					} else {
+						return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
+							item.item_code + "' and expiry_date >= '" + me.frm.doc.posting_date + 
+							"' AND name like '%s' ORDER BY name DESC LIMIT 50";
+					}
+				}
+			});
+		}
 	},
 	
 	onload: function() {
@@ -397,7 +465,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		var setup_field_label_map = function(fields_list, currency) {
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.get_docfield(me.frm.doc.doctype, fname);
+				var docfield = wn.meta.docfield_map[me.frm.doc.doctype][fname];
 				if(docfield) {
 					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
@@ -442,7 +510,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var setup_field_label_map = function(fields_list, currency, parentfield) {
 			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.get_docfield(grid_doctype, fname);
+				var docfield = wn.meta.docfield_map[grid_doctype][fname];
 				if(docfield) {
 					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 
@@ -502,15 +570,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	}
 });
 
-// to save previous state of cur_frm.cscript
-var prev_cscript = {};
-$.extend(prev_cscript, cur_frm.cscript);
-
-cur_frm.cscript = new erpnext.selling.SellingController({frm: cur_frm});
-
-// for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, prev_cscript);
-
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
 	if(!cur_frm.fields_dict.packing_list) return;
@@ -534,61 +593,3 @@ var set_sales_bom_help = function(doc) {
 	}
 	refresh_field('sales_bom_help');
 }
-
-cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	if (doc.order_type == "Maintenance") {
-	 	return erpnext.queries.item({
-			'ifnull(tabItem.is_service_item, "No")': 'Yes'
-		});
-	} else {
-		return erpnext.queries.item({
-			'ifnull(tabItem.is_sales_item, "No")': 'Yes'
-		});
-	}
-}
-
-cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field('batch_no').get_query = 
-	function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.item_code) {
-			if (d.warehouse) {
-				return "select batch_no from `tabStock Ledger Entry` sle \
-					where item_code = '" + d.item_code + "' and warehouse = '" + d.warehouse +
-					"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
-					and exists(select * from `tabBatch` where \
-					name = sle.batch_no and expiry_date >= '" + doc.posting_date + 
-					"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
-					order by batch_no desc limit 50";
-			} else {
-				return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
-					d.item_code + "' and expiry_date >= '" + doc.posting_date + 
-					"' AND name like '%s' ORDER BY name DESC LIMIT 50";
-			}		
-		} else {
-			msgprint("Please enter Item Code to get batch no");
-		}
-	}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name, address_line1, city FROM tabAddress \
-		WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND \
-		%(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name, CONCAT(first_name," ",ifnull(last_name,"")) As FullName, \
-		department, designation FROM tabContact WHERE customer = "'+ doc.customer + 
-		'" AND docstatus != 2 AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-// ************* GET OTHER CHARGES BASED ON COMPANY *************
-cur_frm.fields_dict.charge.get_query = function(doc) {
-	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM \
-		`tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'
-		+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL \
-		AND `tabSales Taxes and Charges Master`.docstatus != 2 \
-		AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
-		ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
-}
-
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

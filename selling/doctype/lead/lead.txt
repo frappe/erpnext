@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-06-28 15:08:26", 
+  "modified": "2013-07-02 16:03:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -302,13 +302,6 @@
   "oldfieldname": "request_type", 
   "oldfieldtype": "Select", 
   "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOther"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_price_list", 
-  "fieldtype": "Link", 
-  "label": "Default Price List", 
-  "options": "Price List"
  }, 
  {
   "doctype": "DocField", 

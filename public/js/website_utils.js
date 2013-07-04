@@ -55,6 +55,15 @@ wn.call = function(opts) {
 					$(opts.btn).addClass("btn-danger");
 					setTimeout(function() { $(opts.btn).removeClass("btn-danger"); }, 1000);
 				}
+				try {
+					var err = JSON.parse(data.exc);
+					if($.isArray(err)) {
+						err = err.join("\n");
+					}
+					console.error ? console.error(err) : console.log(err);
+				} catch(e) {
+					console.log(data.exc);
+				}
 			} else{
 				if(opts.btn) {
 					$(opts.btn).addClass("btn-success");
@@ -66,6 +75,9 @@ wn.call = function(opts) {
 			}
 			if(opts.callback)
 				opts.callback(data);
+		},
+		error: function(response) {
+			console.error ? console.error(response) : console.log(response);
 		}
 	});
 	

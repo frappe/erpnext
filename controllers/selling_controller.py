@@ -28,48 +28,62 @@ class SellingController(StockController):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
 		
-		self.set_taxes("Sales Taxes and Charges", "other_charges", "charge")
+		self.set_taxes("other_charges", "charge")
 			
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
-		self.set_price_list_currency("Selling")
-		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-					
-		self.set_missing_item_details(get_item_details)
+		
+		self.set_price_list_and_item_details()
 		
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
-			if not (self.doc.contact_person and self.doc.customer_address):
-				for fieldname, val in self.get_default_address_and_contact("customer").items():
+			if not (self.doc.contact_person and self.doc.customer_address and self.doc.customer_name):
+				for fieldname, val in self.get_customer_defaults().items():
 					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 						self.doc.fields[fieldname] = val
 		
-			customer_fetch = webnotes.conn.get_value("Customer", self.doc.customer,
-				['customer_name', 'customer_group', 'territory'], as_dict=True)
-			for fieldname in ['customer_name', 'customer_group', 'territory']:
-				if not self.doc.fields.get(fieldname):
-					self.doc.fields[fieldname] = customer_fetch[fieldname]
-			
 		elif self.doc.lead:
-			lead_fetch = webnotes.conn.get_value("Lead", self.doc.lead,
-				['company_name', 'lead_name', 'territory'], as_dict=True)
-			if not self.doc.customer_name:
-				self.doc.customer_name = lead_fetch.company_name or lead_fetch.lead_name
-			if not self.doc.territory:
-				self.doc.territory = lead_fetch.territory
-							
+			if not (self.doc.customer_address and self.doc.customer_name and \
+				self.doc.contact_display):
+				for fieldname, val in self.get_lead_defaults().items():
+					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+						self.doc.fields[fieldname] = val
+						
+	def set_price_list_and_item_details(self):
+		self.set_price_list_currency("Selling")
+		self.set_missing_item_details(get_item_details)
+								
 	def get_other_charges(self):
 		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
-		self.set_taxes("Sales Taxes and Charges", "other_charges", "charge")
+		self.set_taxes("other_charges", "charge")
 		
-	def set_customer_defaults(self):
-		self.get_default_customer_address()
-		
-		if self.meta.get_field("shipping_address"):
-			self.doc.fields.update(self.get_shipping_address(self.doc.customer))
+	def apply_shipping_rule(self):
+		if self.doc.shipping_rule:
+			shipping_rule = webnotes.bean("Shipping Rule", self.doc.shipping_rule)
+			value = self.doc.net_total
+			
+			# TODO
+			# shipping rule calculation based on item's net weight
+			
+			shipping_amount = 0.0
+			for condition in shipping_rule.doclist.get({"parentfield": "shipping_rule_conditions"}):
+				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
+					shipping_amount = condition.shipping_amount
+					break
+					
+			if shipping_amount:
+				self.doclist.append({
+					"doctype": "Sales Taxes and Charges",
+					"parentfield": "other_charges",
+					"charge_type": "Actual",
+					"account_head": shipping_rule.doc.account,
+					"cost_center": shipping_rule.doc.cost_center,
+					"description": shipping_rule.doc.label,
+					"rate": shipping_amount
+				})
 		
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words

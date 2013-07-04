@@ -80,7 +80,15 @@ cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {
-		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
+		cur_frm.call({
+			doc: cur_frm.doc,
+			method: "set_lead_defaults",
+			callback: function(r) {
+				if(!r.exc) {
+					cur_frm.refresh_fields();
+				}
+			}
+		});
 		unhide_field('territory');
 	}
 }

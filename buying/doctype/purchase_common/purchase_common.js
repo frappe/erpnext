@@ -355,7 +355,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		var setup_field_label_map = function(fields_list, currency) {
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.get_docfield(me.frm.doc.doctype, fname);
+				var docfield = wn.meta.docfield_map[me.frm.doc.doctype][fname];
 				if(docfield) {
 					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
@@ -401,7 +401,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var setup_field_label_map = function(fields_list, currency, parentfield) {
 			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.get_docfield(grid_doctype, fname);
+				var docfield = wn.meta.docfield_map[grid_doctype][fname];
 				if(docfield) {
 					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 

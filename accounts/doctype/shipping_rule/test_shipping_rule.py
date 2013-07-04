@@ -32,7 +32,7 @@ test_records = [
 	[
 		{
 			"doctype": "Shipping Rule",
-			"calculate_based_on": "Amount",
+			"calculate_based_on": "Net Total",
 			"company": "_Test Company",
 			"account": "_Test Account Shipping Charges - _TC",
 			"cost_center": "_Test Cost Center - _TC"

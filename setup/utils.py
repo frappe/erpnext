@@ -39,8 +39,8 @@ def get_ancestors_of(doctype, name):
 	"""Get ancestor elements of a DocType with a tree structure"""
 	lft, rgt = webnotes.conn.get_value(doctype, name, ["lft", "rgt"])
 	result = webnotes.conn.sql_list("""select name from `tab%s` 
-		where lft<%s and rgt>%s""" % (doctype, "%s", "%s"), (lft, rgt))
-	return result or None
+		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
+	return result or []
 
 @webnotes.whitelist()
 def get_price_list_currency(args):

@@ -91,6 +91,8 @@ items = [
 	},
 	{ "doctype": "Sales Taxes and Charges Master" },
 	{ "doctype": "Purchase Taxes and Charges Master" },
+	{ "doctype": "Shipping Rule" },
+	{ "doctype": "Currency Exchange" },
 	{
 		"type": "Section",
 		"title": "Opening Accounts and Stock",

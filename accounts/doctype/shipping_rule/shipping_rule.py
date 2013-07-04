@@ -16,6 +16,7 @@ class DocType(DocListController):
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
+		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
 		self.shipping_rule_conditions = self.doclist.get({"parentfield": "shipping_rule_conditions"})
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
