@@ -211,19 +211,10 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 
 
 cur_frm.cscript['Make Sales Invoice'] = function() {
-	var doc = cur_frm.doc;
-
-	n = wn.model.make_new_doc_and_get_name('Sales Invoice');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Sales Invoice'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Sales Invoice',
-		'from_docname':doc.name,
-		'from_to_list':"[['Sales Order','Sales Invoice'],['Sales Order Item','Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
-		}, function(r,rt) {
-			 loaddoc('Sales Invoice', n);
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+		source_name: cur_frm.doc.name
+	})
 }
 
 

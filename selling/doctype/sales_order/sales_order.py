@@ -84,9 +84,6 @@ class DocType(SellingController):
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Sales Order Date')
 	
-	def validate_reference_value(self):
-		get_obj('DocType Mapper', 'Quotation-Sales Order', with_children = 1).validate_reference_value(self, self.doc.name)
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
@@ -190,7 +187,6 @@ class DocType(SellingController):
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()
-		#self.validate_reference_value()
 		
 		if self.doc.docstatus == 1:
 			self.validate_for_items()
@@ -445,5 +441,44 @@ def make_delivery_note(source_name, target_doclist=None):
 			"doctype": "Sales Team", 
 		}
 	}, target_doclist)
+	
+	return [d.fields for d in doclist]
+
+@webnotes.whitelist()
+def make_sales_invoice(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def update_item(obj, target):
+		target.export_amount = (flt(obj.amount) - flt(obj.billed_amt))* flt(obj.export_rate)/flt(obj.basic_rate)
+		target.qty = obj.basic_rate and (flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate) or obj.qty
+		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+		
+	def update_accounts(source, target):
+		si = webnotes.bean(target)
+		si.run_method("update_accounts")
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Sales Invoice", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Sales Invoice Item", 
+			"field_map": {
+				"name": "so_detail", 
+				"parent": "sales_order", 
+				"reserved_warehouse": "warehouse"
+			},
+			"postprocess": update_item
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team", 
+		}
+	}, target_doclist, update_accounts)
 	
 	return [d.fields for d in doclist]

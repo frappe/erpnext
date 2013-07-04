@@ -293,33 +293,25 @@ class DocType(SellingController):
 		
 		if self.doc.debit_to:
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
+		
+	def update_accounts(self):
+		if not self.doc.debit_to:
+			self.doc.debit_to = self.get_debit_to().get("debit_to")
 
+		self.get_income_expense_account('entries')
 
-	def pull_details(self):
-		"""Pull Details of Delivery Note or Sales Order Selected"""
-		if self.doc.delivery_note_main:
-			self.validate_prev_docname('delivery note')
-			self.doclist = self.doc.clear_table(self.doclist,'other_charges')			
-			self.doclist = get_obj('DocType Mapper', 'Delivery Note-Sales Invoice').dt_map(
-				'Delivery Note', 'Sales Invoice', self.doc.delivery_note_main, self.doc, 
-				self.doclist, """[['Delivery Note', 'Sales Invoice'],
-					['Delivery Note Item', 'Sales Invoice Item'],
-					['Sales Taxes and Charges','Sales Taxes and Charges'],
-					['Sales Team','Sales Team']]""")								
-			self.get_income_expense_account('entries')
-			
-		elif self.doc.sales_order_main:
-			self.validate_prev_docname('sales order')
-			self.doclist = self.doc.clear_table(self.doclist,'other_charges')
-			get_obj('DocType Mapper', 'Sales Order-Sales Invoice').dt_map('Sales Order', 
-				'Sales Invoice', self.doc.sales_order_main, self.doc, self.doclist, 
-				"""[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'], 
-				['Sales Taxes and Charges','Sales Taxes and Charges'], 
-				['Sales Team', 'Sales Team']]""")
-			self.get_income_expense_account('entries')
-			
-		ret = self.get_debit_to()
-		self.doc.debit_to = ret.get('debit_to')
+	def get_income_expense_account(self,doctype):
+		auto_inventory_accounting = cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
+		default_cost_center = webnotes.conn.get_value("Company", self.doc.company, "cost_center")
+		for d in getlist(self.doclist, doctype):			
+			if d.item_code:
+				item = webnotes.conn.get_value("Item", d.item_code, ["default_income_account", 
+					"default_sales_cost_center", "purchase_account"], as_dict=True)
+				d.income_account = item['default_income_account'] or ""
+				d.cost_center = item['default_sales_cost_center'] or default_cost_center
+				
+				if auto_inventory_accounting and cint(self.doc.update_stock):
+					d.expense_account = item['purchase_account'] or ""
 
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
@@ -345,18 +337,6 @@ class DocType(SellingController):
 		
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
-		
-		
-	def validate_prev_docname(self,doctype):
-		"""Check whether sales order / delivery note items already pulled"""
-		for d in getlist(self.doclist, 'entries'): 
-			if doctype == 'delivery note' and self.doc.delivery_note_main == d.delivery_note:
-				msgprint(cstr(self.doc.delivery_note_main) + " delivery note details have already been pulled.")
-				raise Exception , "Validation Error. Delivery note details have already been pulled."
-			elif doctype == 'sales order' and self.doc.sales_order_main == d.sales_order and not d.delivery_note:
-				msgprint(cstr(self.doc.sales_order_main) + " sales order details have already been pulled.")
-				raise Exception , "Validation Error. Sales order details have already been pulled."
-
 
 	def update_against_document_in_jv(self):
 		"""

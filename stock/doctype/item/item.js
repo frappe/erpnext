@@ -40,7 +40,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
-	if(doc.__islocal) 
+	if(cur_frm.doc.__islocal) 
 		return;
 }
 
