@@ -58,7 +58,7 @@ def execute(filters=None):
 			row.append(invoice_tax_map.get(inv.name, {}).get(tax_acc))
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [inv.other_charges_total, inv.grand_total, flt(inv.grand_total, 2), \
+		row += [inv.total_tax, inv.grand_total, flt(inv.grand_total, 2), \
 			inv.outstanding_amount]
 		data.append(row)
 	
