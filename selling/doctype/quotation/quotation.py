@@ -154,8 +154,11 @@ class DocType(SellingController):
 		super(DocType, self).validate()
 		
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
-			"Order Confirmed", "Order Lost", "Cancelled"])
+		if not self.doc.status:
+			self.doc.status = "Draft"
+		else:
+			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
+				"Order Confirmed", "Order Lost", "Cancelled"])
 
 		self.validate_fiscal_year()
 		self.set_last_contact_date()

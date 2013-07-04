@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-07-03 16:12:26", 
+  "modified": "2013-07-04 10:56:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -84,7 +84,6 @@
   "search_index": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 

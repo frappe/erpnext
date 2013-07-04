@@ -45,7 +45,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 }
 
 cur_frm.cscript.make_dashboard = function(doc) {
-	cur_frm.dashboard.wrapper.empty().toggle(doc.__islocal ? false : true);
+	cur_frm.dashboard.reset();
 	if(doc.__islocal) 
 		return;
 	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')

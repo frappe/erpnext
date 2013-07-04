@@ -24,6 +24,16 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	refresh: function(doc) {
 		this._super();
 		
+		// dashboard
+		cur_frm.dashboard.reset();
+		if(doc.docstatus===1) {
+			if(doc.status==="Stopped") {
+				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop")
+			}
+			cur_frm.dashboard.add_progress(cint(doc.per_ordered) + "% " 
+				+ wn._("Fulfilled"), cint(doc.per_ordered));
+		}
+		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
 			if(doc.material_request_type === "Purchase")
 				cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);

@@ -8,6 +8,11 @@ wn.module_page["Stock"] = [
 		icon: "icon-copy",
 		items: [
 			{
+				label: wn._("Item"),
+				description: wn._("All Products or Services."),
+				doctype:"Item"
+			},
+			{
 				label: wn._("Material Request"),
 				description: wn._("Requests for items."),
 				doctype:"Material Request"
@@ -33,11 +38,6 @@ wn.module_page["Stock"] = [
 		title: wn._("Masters"),
 		icon: "icon-book",
 		items: [
-			{
-				label: wn._("Item"),
-				description: wn._("All Products or Services."),
-				doctype:"Item"
-			},
 			{
 				label: wn._("Serial No"),
 				description: wn._("Single unit of an Item."),
