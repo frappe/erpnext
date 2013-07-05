@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-20 15:40:29", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:33:47", 
+  "modified": "2013-07-05 16:26:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,7 +11,7 @@
   "description": "Specify Exchange Rate to convert one currency into another", 
   "doctype": "DocType", 
   "document_type": "Master", 
-  "icon": "icon-bitcoin", 
+  "icon": "icon-exchange", 
   "module": "Setup", 
   "name": "__common__"
  }, 
