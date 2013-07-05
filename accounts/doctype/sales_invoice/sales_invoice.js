@@ -55,7 +55,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				wn.set_route("general-ledger");
 			});
 			
-			cur_frm.dashboard.add_progress()
+			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
+			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
