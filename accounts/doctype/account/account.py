@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
@@ -196,10 +196,23 @@ class DocType:
 
 		if parts[-1].lower() != company_abbr.lower():
 			parts.append(company_abbr)
-
+		
 		# rename account name
-		account_name = " - ".join(parts[:-1])
-		sql("update `tabAccount` set account_name = %s where name = %s", (account_name, old))
+		new_account_name = " - ".join(parts[:-1])
+		sql("update `tabAccount` set account_name = %s where name = %s", (new_account_name, old))
+		
+		if merge:
+			new_name = " - ".join(parts)
+			val = list(webnotes.conn.get_value("Account", new_name, 
+				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
+			
+			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account]:
+				msgprint(_("""Merging is only possible if following \
+					properties are same in both records.
+					Group or Ledger, Debit or Credit, Is PL Account"""), raise_exception=1)
+
+			from webnotes.utils.nestedset import rebuild_tree
+			rebuild_tree("Account", "parent_account")
 
 		return " - ".join(parts)
 

@@ -17,7 +17,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.model.code import get_obj
-from setup.utils import get_company_currency
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -49,19 +48,6 @@ class DocType(BuyingController):
 		
 	def on_trash(self):
 		pass
-		
-	def get_indent_details(self):
-		if self.doc.indent_no:
-			mapper = get_obj("DocType Mapper", "Material Request-Supplier Quotation")
-			mapper.dt_map("Material Request", "Supplier Quotation", self.doc.indent_no,
-				self.doc, self.doclist, """[['Material Request', 'Supplier Quotation'],
-				['Material Request Item', 'Supplier Quotation Item']]""")
-			
-			from webnotes.model.bean import getlist
-			for d in getlist(self.doclist, self.fname):
-				if d.item_code and not d.purchase_rate:
-					d.purchase_ref_rate = d.discount_rate = d.purchase_rate = 0.0
-					d.import_ref_rate = d.import_rate = 0.0
 	
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year( \

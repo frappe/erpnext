@@ -254,9 +254,6 @@ class DocType(SellingController):
 @webnotes.whitelist()
 def make_sales_order(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
-	
-	if target_doclist:
-		target_doclist = json.loads(target_doclist)
 
 	doclist = get_mapped_doclist("Quotation", source_name, {
 			"Quotation": {

@@ -32,7 +32,8 @@ def get_company_currency(company):
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
 	result = webnotes.conn.sql_list("""select name from `tab%s` 
-		where lft=1 and rgt=(select max(rgt) from `tab%s`)""" % (doctype, doctype))
+		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" % 
+		(doctype, doctype))
 	return result[0] if result else None
 	
 def get_ancestors_of(doctype, name):

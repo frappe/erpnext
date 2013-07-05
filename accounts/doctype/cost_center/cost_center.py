@@ -98,5 +98,7 @@ class DocType(DocTypeNestedSet):
 		cost_center_name = " - ".join(parts[:-1])
 		webnotes.conn.sql("update `tabCost Center` set cost_center_name = %s where name = %s", \
 			(cost_center_name, old))
+			
+		super(DocType, self).on_rename(new, old, merge, "group_or_ledger")
 
 		return " - ".join(parts)	

@@ -204,3 +204,9 @@ class DocType:
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
 
+	def on_rename(self, newdn, olddn, merge=False):
+		if merge:
+			from stock.stock_ledger import update_entries_after
+			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 
+				where warehouse=%s""", newdn):
+					update_entries_after({"item_code": item_code, "warehouse": newdn})

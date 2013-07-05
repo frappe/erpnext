@@ -6,6 +6,53 @@ import webnotes, unittest
 from webnotes.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
+	def test_make_purchase_order(self):
+		from stock.doctype.material_request.material_request import make_purchase_order
+
+		mr = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_purchase_order, 
+			mr.doc.name)
+
+		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr.submit()
+		po = make_purchase_order(mr.doc.name)
+		
+		self.assertEquals(po[0]["doctype"], "Purchase Order")
+		self.assertEquals(len(po), len(mr.doclist))
+		
+	def test_make_supplier_quotation(self):
+		from stock.doctype.material_request.material_request import make_supplier_quotation
+
+		mr = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_supplier_quotation, 
+			mr.doc.name)
+
+		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr.submit()
+		sq = make_supplier_quotation(mr.doc.name)
+		
+		self.assertEquals(sq[0]["doctype"], "Supplier Quotation")
+		self.assertEquals(len(sq), len(mr.doclist))
+		
+			
+	def test_make_stock_entry(self):
+		from stock.doctype.material_request.material_request import make_stock_entry
+
+		mr = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_stock_entry, 
+			mr.doc.name)
+
+		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr.doc.material_request_type = "Transfer"
+		mr.submit()
+		se = make_stock_entry(mr.doc.name)
+		
+		self.assertEquals(se[0]["doctype"], "Stock Entry")
+		self.assertEquals(len(se), len(mr.doclist))
+	
 	def _test_expected(self, doclist, expected_values):
 		for i, expected in enumerate(expected_values):
 			for fieldname, val in expected.items():

@@ -21,7 +21,6 @@ from webnotes.utils import cstr, flt
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from buying.utils import get_last_purchase_details
 
 sql = webnotes.conn.sql
 	
@@ -72,24 +71,6 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	# Pull Material Request
-	def get_indent_details(self):
-		if self.doc.indent_no:
-			get_obj('DocType Mapper','Material Request-Purchase Order').dt_map('Material Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Material Request','Purchase Order'],['Material Request Item', 'Purchase Order Item']]")
-			for d in getlist(self.doclist, 'po_details'):
-				if d.item_code and not d.purchase_rate:
-					last_purchase_details = get_last_purchase_details(d.item_code, self.doc.name)
-					if last_purchase_details:
-						conversion_factor = d.conversion_factor or 1.0
-						conversion_rate = self.doc.fields.get('conversion_rate') or 1.0
-						d.purchase_ref_rate = last_purchase_details['purchase_ref_rate'] * conversion_factor
-						d.discount_rate = last_purchase_details['discount_rate']
-						d.purchase_rate = last_purchase_details['purchase_rate'] * conversion_factor
-						d.import_ref_rate = d.purchase_ref_rate / conversion_rate
-						d.import_rate = d.purchase_rate / conversion_rate						
-					else:
-						d.purchase_ref_rate = d.discount_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = 0.0
-						
 	def get_supplier_quotation_items(self):
 		if self.doc.supplier_quotation:
 			get_obj("DocType Mapper", "Supplier Quotation-Purchase Order").dt_map("Supplier Quotation",
