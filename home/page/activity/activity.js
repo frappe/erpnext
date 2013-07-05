@@ -56,7 +56,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// link
 		if(data.doc_name && data.feed_type!='Login') {
-			data.link = repl('<a href="#!Form/%(doc_type)s/%(doc_name)s">%(doc_name)s</a>', data)
+			data.link = wn.format(data.doc_name, {"fieldtype":"Link", "options":data.doc_type})
 		} else {
 			data.link = "";
 		}
