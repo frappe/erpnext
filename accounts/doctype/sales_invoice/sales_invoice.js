@@ -43,6 +43,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this._super();
 		
 		cur_frm.cscript.is_opening(doc, dt, dn);
+		cur_frm.dashboard.reset();
 
 		if(doc.docstatus==1) {
 			cur_frm.add_custom_button('View Ledger', function() {
@@ -53,6 +54,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				};
 				wn.set_route("general-ledger");
 			});
+			
+			cur_frm.dashboard.add_progress()
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 

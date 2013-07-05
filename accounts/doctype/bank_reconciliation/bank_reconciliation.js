@@ -17,4 +17,6 @@
 
 cur_frm.add_fetch("bank_account", "company", "company");
 cur_frm.cscript.onload = function(doc, cdt, cdn){
+	cur_frm.set_intro('<i class="icon-question" /> ' + 
+		wn._("Update clearance date of Journal Entries marked as 'Bank Vouchers'"))
 }
