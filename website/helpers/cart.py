@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 import webnotes.defaults
-from webnotes.utils import cint, get_fullname, fmt_money
+from webnotes.utils import flt, get_fullname, fmt_money
 
 class WebsitePriceListMissingError(webnotes.ValidationError): pass
 
@@ -18,14 +18,15 @@ def get_cart_quotation(doclist=None):
 	return {
 		"doclist": decorate_quotation_doclist(doclist),
 		"addresses": [{"name": address.name, "display": address.display} 
-			for address in get_address_docs(party)]
+			for address in get_address_docs(party)],
+		"shipping_rules": get_applicable_shipping_rules(party)
 	}
 
 @webnotes.whitelist()
 def update_cart(item_code, qty, with_doclist=0):
 	quotation = _get_cart_quotation()
 	
-	qty = cint(qty)
+	qty = flt(qty)
 	if qty == 0:
 		quotation.set_doclist(quotation.doclist.get({"item_code": ["!=", item_code]}))
 	else:
@@ -40,8 +41,7 @@ def update_cart(item_code, qty, with_doclist=0):
 		else:
 			quotation_items[0].qty = qty
 	
-	quotation.ignore_permissions = True
-	quotation.save()
+	apply_cart_settings(quotation=quotation)
 	
 	if with_doclist:
 		return get_cart_quotation(quotation.doclist)
@@ -69,6 +69,8 @@ def update_cart_address(address_fieldname, address_name):
 	
 	quotation.ignore_permissions = True
 	quotation.save()
+	
+	apply_cart_settings(quotation=quotation)
 		
 	return get_cart_quotation(quotation.doclist)
 
@@ -131,14 +133,23 @@ def get_lead_or_customer():
 			"doctype": "Lead",
 			"email_id": webnotes.session.user,
 			"lead_name": get_fullname(webnotes.session.user),
-			"territory": webnotes.conn.get_value("Shopping Cart Settings", None, "territory") or \
-				"All Territories",
+			"territory": guess_territory(),
 			"status": "Open" # TODO: set something better???
 		})
 		lead_bean.ignore_permissions = True
 		lead_bean.insert()
 		
 		return lead_bean.doc
+		
+def guess_territory():
+	territory = None
+	geoip_country = webnotes.session.get("session_country")
+	if geoip_country:
+		territory = webnotes.conn.get_value("Territory", geoip_country)
+	
+	return territory or \
+		webnotes.conn.get_value("Shopping Cart Settings", None, "territory") or \
+		"All Territories"
 
 def decorate_quotation_doclist(doclist):
 	for d in doclist:
@@ -147,7 +158,13 @@ def decorate_quotation_doclist(doclist):
 				["website_image", "web_short_description", "page_name"], as_dict=True))
 			d.formatted_rate = fmt_money(d.export_rate, currency=doclist[0].currency)
 			d.formatted_amount = fmt_money(d.export_amount, currency=doclist[0].currency)
+		elif d.charge_type:
+			d.formatted_tax_amount = fmt_money(d.tax_amount / doclist[0].conversion_rate,
+				currency=doclist[0].currency)
 
+	doclist[0].formatted_grand_total_export = fmt_money(doclist[0].grand_total_export,
+		currency=doclist[0].currency)
+	
 	return [d.fields for d in doclist]
 
 def _get_cart_quotation(party=None):
@@ -168,42 +185,122 @@ def _get_cart_quotation(party=None):
 			"order_type": "Shopping Cart",
 			"status": "Draft",
 			"__islocal": 1,
-			"price_list_name": get_price_list(party),
 			(party.doctype.lower()): party.name
 		})
+		qbean.run_method("onload_post_render")
+		apply_cart_settings(party, qbean)
 	
 	return qbean
 	
-def get_price_list(party):
-	if not party.default_price_list:
-		party.default_price_list = get_price_list_using_geoip()
-		party.save()
+def apply_cart_settings(party=None, quotation=None):
+	if not party:
+		party = get_lead_or_customer()
+	if not quotation:
+		quotation = _get_cart_quotation(party)
+	
+	cart_settings = webnotes.get_obj("Shopping Cart Settings")
+	
+	billing_territory = get_address_territory(quotation.doc.customer_address) or \
+		party.territory
+	
+	set_price_list_and_rate(quotation, cart_settings, billing_territory)
+	
+	quotation.run_method("calculate_taxes_and_totals")
+	
+	set_taxes(quotation, cart_settings, billing_territory)
+	
+	_apply_shipping_rule(party, quotation, cart_settings)
+	
+	quotation.ignore_permissions = True
+	quotation.save()
+	
+def set_price_list_and_rate(quotation, cart_settings, billing_territory):
+	"""set price list based on billing territory"""
+	quotation.doc.price_list_name = cart_settings.get_price_list(billing_territory)
+	
+	# reset values
+	quotation.doc.price_list_currency = quotation.doc.currency = \
+		quotation.doc.plc_conversion_rate = quotation.doc.conversion_rate = None
+	for item in quotation.doclist.get({"parentfield": "quotation_details"}):
+		item.ref_rate = item.adj_rate = item.export_rate = item.export_amount = None
+	
+	# refetch values
+	quotation.run_method("set_price_list_and_item_details")
+	
+def set_taxes(quotation, cart_settings, billing_territory):
+	"""set taxes based on billing territory"""
+	quotation.doc.charge = cart_settings.get_tax_master(billing_territory)
+
+	# clear table
+	quotation.doclist = quotation.doc.clear_table(quotation.doclist, "other_charges")
+
+	# append taxes
+	controller = quotation.make_controller()
+	controller.append_taxes_from_master("other_charges", "charge")
+	quotation.set_doclist(controller.doclist)
+
+@webnotes.whitelist()
+def apply_shipping_rule(shipping_rule):
+	quotation = _get_cart_quotation()
+	
+	quotation.doc.shipping_rule = shipping_rule
+	
+	apply_cart_settings(quotation=quotation)
+	
+	quotation.save()
+	
+	return get_cart_quotation(quotation.doclist)
+	
+def _apply_shipping_rule(party=None, quotation=None, cart_settings=None):
+	shipping_rules = get_shipping_rules(party, quotation, cart_settings)
+	
+	if not shipping_rules:
+		return
 		
-	return party.default_price_list
-
-def get_price_list_using_geoip():
-	country = webnotes.session.get("session_country")
-	price_list_name = None
-
-	if country:
-		price_list_name = webnotes.conn.sql("""select parent 
-			from `tabPrice List Country` plc
-			where country=%s and exists (select name from `tabPrice List` pl
-				where use_for_website=1 and ifnull(valid_for_all_countries, 0)=0 and 
-				pl.name = plc.parent)""", country)
+	elif quotation.doc.shipping_rule not in shipping_rules:
+		quotation.doc.shipping_rule = shipping_rules[0]
 	
-	if price_list_name:
-		price_list_name = price_list_name[0][0]
-	else:
-		price_list_name = webnotes.conn.get_value("Price List", 
-			{"use_for_website": 1, "valid_for_all_countries": 1})
-			
-	if not price_list_name:
-		raise WebsitePriceListMissingError, "No website Price List specified"
+	quotation.run_method("apply_shipping_rule")
+	quotation.run_method("calculate_taxes_and_totals")
 	
-	return price_list_name
+def get_applicable_shipping_rules(party=None, quotation=None):
+	shipping_rules = get_shipping_rules(party, quotation)
+	
+	if shipping_rules:
+		rule_label_map = webnotes.conn.get_values("Shipping Rule", shipping_rules, "label")
+		# we need this in sorted order as per the position of the rule in the settings page
+		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
+		
+def get_shipping_rules(party=None, quotation=None, cart_settings=None):
+	if not party:
+		party = get_lead_or_customer()
+	if not quotation:
+		quotation = _get_cart_quotation()
+	if not cart_settings:
+		cart_settings = webnotes.get_obj("Shopping Cart Settings")
+		
+	# set shipping rule based on shipping territory	
+	shipping_territory = get_address_territory(quotation.doc.shipping_address_name) or \
+		party.territory
+	
+	shipping_rules = cart_settings.get_shipping_rules(shipping_territory)
+	
+	return shipping_rules
+	
+def get_address_territory(address_name):
+	"""Tries to match city, state and country of address to existing territory"""
+	territory = None
 
-
+	if address_name:
+		address_fields = webnotes.conn.get_value("Address", address_name, 
+			["city", "state", "country"])
+		for value in address_fields:
+			territory = webnotes.conn.get_value("Territory", value)
+			if territory:
+				break
+	
+	return territory
+	
 @webnotes.whitelist()
 def checkout():
 	quotation = _get_cart_quotation()

@@ -14,6 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.provide("erpnext.support");
+// TODO commonify this code
+erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
+	customer: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+				callback: function(r) {
+					if(!r.exc) me.frm.refresh_fields();
+				}
+			});
+			
+			// TODO shift this to depends_on
+			unhide_field(['customer_address', 'contact_person', 'customer_name',
+				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
+				'territory', 'customer_group']);
+			
+		}
+	}
+});
+
+$.extend(cur_frm.cscript, new erpnext.support.MaintenanceSchedule({frm: cur_frm}));
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
   if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
   
@@ -21,18 +46,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
     set_multiple(dt,dn,{transaction_date:get_today()});
     hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
   }   
-}
-
-
-//customer
-cur_frm.cscript.customer = function(doc,dt,dn) {
-  var callback = function(r,rt) {
-      var doc = locals[cur_frm.doctype][cur_frm.docname];
-      cur_frm.refresh();
-  }   
-
-  if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-  if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {    

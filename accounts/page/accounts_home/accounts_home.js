@@ -107,6 +107,11 @@ wn.module_page["Accounts"] = [
 				"description": wn._("Rules to calculate shipping amount for a sale")
 			},
 			{
+				"label": wn._("Currency Exchange"),
+				"doctype":"Currency Exchange",
+				"description": wn._("Manage exchange rates for currency conversion")
+			},
+			{
 				"label": wn._("Point-of-Sale Setting"),
 				"doctype":"POS Setting",
 				"description": "User settings for Point-of-sale (POS)"

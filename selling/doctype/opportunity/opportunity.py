@@ -24,9 +24,8 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
-
 class DocType(TransactionBase):
-	def __init__(self,doc,doclist=[]):
+	def __init__(self,doc,doclist):
 		self.doc = doc
 		self.doclist = doclist
 		self.fname = 'enq_details'

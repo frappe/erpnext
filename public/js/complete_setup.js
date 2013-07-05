@@ -84,6 +84,8 @@ $.extend(erpnext.complete_setup, {
 					wn.container.wntoolbar.set_user_name();
 					
 					setTimeout(function() { window.location.reload(); }, 3000);
+				} else {
+					$(this).done_working();
 				}
 				
 			});

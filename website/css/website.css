@@ -10,6 +10,10 @@ a {
 	cursor: pointer;
 }
 
+img {
+	max-width: 100%;
+}
+
 .content {
 	padding-bottom: 30px;
 }

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-06-21 12:59:30", 
+  "modified": "2013-07-03 21:01:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,7 +53,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "shopping_cart_price_lists", 
+  "fieldname": "price_lists", 
   "fieldtype": "Table", 
   "label": "Shopping Cart Price Lists", 
   "options": "Shopping Cart Price List", 
@@ -61,10 +61,18 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "shopping_cart_taxes_and_charges_masters", 
+  "fieldname": "sales_taxes_and_charges_masters", 
   "fieldtype": "Table", 
   "label": "Shopping Cart Taxes and Charges Masters", 
   "options": "Shopping Cart Taxes and Charges Master", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_rules", 
+  "fieldtype": "Table", 
+  "label": "Shopping Cart Shipping Rules", 
+  "options": "Shopping Cart Shipping Rule", 
   "reqd": 0
  }, 
  {

@@ -16,6 +16,25 @@
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
 
+wn.provide("erpnext.support");
+// TODO commonify this code
+erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
+	customer: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+				callback: function(r) {
+					if(!r.exc) me.frm.refresh_fields();
+				}
+			});			
+		}
+	}
+});
+
+$.extend(cur_frm.cscript, new erpnext.support.CustomerIssue({frm: cur_frm}));
+
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
@@ -67,17 +86,6 @@ $.extend(cur_frm.cscript, {
 
 	},
 		
-	customer: function(doc, dt, dn) {
-		var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			if(!r.exc) {
-				cur_frm.refresh();
-			}
-		}
-		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
-			'get_default_customer_address', '', callback);
-	}, 
-	
 	'Close Ticket': function() {
 		cur_frm.cscript.set_status("Closed");
 	},

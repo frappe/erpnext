@@ -16,6 +16,30 @@
 
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
+wn.provide("erpnext.selling");
+// TODO commonify this code
+erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
+	customer: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+				callback: function(r) {
+					if(!r.exc) me.frm.refresh_fields();
+				}
+			});
+			
+			// TODO shift this to depends_on
+			unhide_field(['customer_address', 'contact_person', 'customer_name',
+				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
+				'territory', 'customer_group']);
+		}
+	}
+});
+
+$.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
+
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
 
@@ -117,28 +141,6 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 	}
 }
 
-// customer
-cur_frm.cscript.customer = function(doc,dt,dn) {
-	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
-	
-	if(doc.customer) {
-		cur_frm.call({
-			doc: cur_frm.doc,
-			method: "get_default_customer_address",
-			args: { customer: doc.customer },
-			callback: function(r) {
-				if(!r.exc) {
-					cur_frm.refresh();
-				}
-			}
-		});
-		
-		unhide_field(["customer_name", "customer_address", "contact_person",
-			"address_display", "contact_display", "contact_mobile", "contact_email",
-			"territory", "customer_group"]);
-	}
-}
-
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
@@ -167,7 +169,15 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
 	
 	if(doc.lead) {
-		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
+		cur_frm.call({
+			doc: cur_frm.doc,
+			method: "set_lead_defaults",
+			callback: function(r) {
+				if(!r.exc) {
+					cur_frm.refresh_fields();
+				}
+			}
+		});
 		unhide_field(['customer_name', 'address_display','contact_mobile', 'contact_email', 
 			'territory']);	
 	}

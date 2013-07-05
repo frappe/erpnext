@@ -31,6 +31,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		from controllers.buying_controller import WrongWarehouseCompany
 		po = webnotes.bean(copy=test_records[0])
 		po.doc.company = "_Test Company 1"
+		po.doc.conversion_rate = 0.0167
 		self.assertRaises(WrongWarehouseCompany, po.insert)
 
 

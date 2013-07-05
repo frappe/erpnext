@@ -55,14 +55,18 @@ class AccountsController(TransactionBase):
 
 				if self.doc.price_list_currency:
 					if not self.doc.plc_conversion_rate:
-						exchange = self.doc.price_list_currency + "-" + get_company_currency(self.doc.company)
-						self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-							exchange, "exchange_rate"))
+						company_currency = get_company_currency(self.doc.company)
+						if self.doc.price_list_currency == company_currency:
+							self.doc.plc_conversion_rate = 1.0
+						else:
+							exchange = self.doc.price_list_currency + "-" + company_currency
+							self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
+								exchange, "exchange_rate"))
 						
 					if not self.doc.currency:
 						self.doc.currency = self.doc.price_list_currency
 						self.doc.conversion_rate = self.doc.plc_conversion_rate
-				
+						
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""
 		for item in self.doclist.get({"parentfield": self.fname}):
@@ -71,34 +75,44 @@ class AccountsController(TransactionBase):
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \
-						item.fields.get(fieldname) is None:
+						item.fields.get(fieldname) is None and value is not None:
 							item.fields[fieldname] = value
 							
-	def set_taxes(self, tax_doctype, tax_parentfield, tax_master_field):
+	def set_taxes(self, tax_parentfield, tax_master_field):
 		if not self.meta.get_field(tax_parentfield):
 			return
+			
+		tax_master_doctype = self.meta.get_field(tax_master_field).options
 			
 		if not self.doclist.get({"parentfield": tax_parentfield}):
 			if not self.doc.fields.get(tax_master_field):
 				# get the default tax master
 				self.doc.fields[tax_master_field] = \
-					webnotes.conn.get_value(tax_doctype + " Master", {"is_default": 1})
-				
-			if self.doc.fields.get(tax_master_field):
-				from webnotes.model import default_fields
-				tax_master = webnotes.bean(tax_doctype + " Master", self.doc.fields.get(tax_master_field))
-				
-				for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
-					for fieldname in default_fields:
-						tax.fields[fieldname] = None
+					webnotes.conn.get_value(tax_master_doctype, {"is_default": 1})
 					
-					tax.fields.update({
-						"doctype": tax_doctype,
-						"parentfield": tax_parentfield,
-						"idx": i+1
-					})
-					
-					self.doclist.append(tax)
+			self.append_taxes_from_master(tax_parentfield, tax_master_field, tax_master_doctype)
+				
+	def append_taxes_from_master(self, tax_parentfield, tax_master_field, tax_master_doctype=None):
+		if self.doc.fields.get(tax_master_field):
+			if not tax_master_doctype:
+				tax_master_doctype = self.meta.get_field(tax_master_field).options
+			
+			tax_doctype = self.meta.get_field(tax_parentfield).options
+			
+			from webnotes.model import default_fields
+			tax_master = webnotes.bean(tax_master_doctype, self.doc.fields.get(tax_master_field))
+			
+			for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
+				for fieldname in default_fields:
+					tax.fields[fieldname] = None
+				
+				tax.fields.update({
+					"doctype": tax_doctype,
+					"parentfield": tax_parentfield,
+					"idx": i+1
+				})
+				
+				self.doclist.append(tax)
 					
 	def calculate_taxes_and_totals(self):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)

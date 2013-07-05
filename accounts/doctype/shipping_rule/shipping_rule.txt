@@ -2,11 +2,12 @@
  {
   "creation": "2013-06-25 11:48:03", 
   "docstatus": 0, 
-  "modified": "2013-06-25 12:15:21", 
+  "modified": "2013-07-04 16:28:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "autoname": "Prompt", 
   "description": "Specify conditions to calculate shipping amount", 
   "doctype": "DocType", 
   "module": "Accounts", 
@@ -37,7 +38,7 @@
  {
   "description": "example: Next Day Shipping", 
   "doctype": "DocField", 
-  "fieldname": "shipping_rule_label", 
+  "fieldname": "label", 
   "fieldtype": "Data", 
   "in_list_view": 1, 
   "label": "Shipping Rule Label", 
@@ -49,14 +50,16 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "default": "Amount", 
+  "default": "Net Total", 
   "doctype": "DocField", 
   "fieldname": "calculate_based_on", 
   "fieldtype": "Select", 
+  "hidden": 1, 
   "in_list_view": 1, 
   "label": "Calculate Based On", 
-  "options": "Amount\nNet Weight", 
-  "reqd": 1
+  "options": "Net Total\nNet Weight", 
+  "read_only": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

@@ -87,18 +87,20 @@ class DocType:
 		self.curr_fiscal_year = curr_fiscal_year
 	
 	def create_price_lists(self, args):
-		webnotes.bean({
-			'doctype': 'Price List', 
-			'price_list_name': 'Standard Selling',
-			"buying_or_selling": "Selling",
-			"currency": args["currency"]
-		}).insert(),
-		webnotes.bean({
-			'doctype': 'Price List', 
-			'price_list_name': 'Standard Buying',
-			"buying_or_selling": "Buying",
-			"currency": args["currency"]
-		}).insert(),
+		for pl_type in ["Selling", "Buying"]:
+			webnotes.bean([
+				{
+					"doctype": "Price List",
+					"price_list_name": "Standard " + pl_type,
+					"buying_or_selling": pl_type,
+					"currency": args["currency"]
+				},
+				{
+					"doctype": "For Territory",
+					"parentfield": "valid_for_territories",
+					"territory": "All Territories"
+				}
+			]).insert()
 	
 	def set_defaults(self, args):
 		# enable default currency
@@ -207,15 +209,18 @@ class DocType:
 	# ------------------------
 	def get_fy_details(self, fy_start, last_year=False):
 		st = {'1st Jan':'01-01','1st Apr':'04-01','1st Jul':'07-01', '1st Oct': '10-01'}
-		curr_year = getdate(nowdate()).year
-		if last_year:
-			curr_year = curr_year - 1
 		if cint(getdate(nowdate()).month) < cint((st[fy_start].split('-'))[0]):
 			curr_year = getdate(nowdate()).year - 1
+		else:
+			curr_year = getdate(nowdate()).year
+		
+		if last_year:
+			curr_year = curr_year - 1
+		
 		stdt = cstr(curr_year)+'-'+cstr(st[fy_start])
 
 		if(fy_start == '1st Jan'):
-			fy = cstr(getdate(nowdate()).year)
+			fy = cstr(curr_year)
 			abbr = cstr(fy)[-2:]
 		else:
 			fy = cstr(curr_year) + '-' + cstr(curr_year+1)

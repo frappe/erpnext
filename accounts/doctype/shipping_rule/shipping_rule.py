@@ -16,6 +16,7 @@ class DocType(DocListController):
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
+		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
 		self.shipping_rule_conditions = self.doclist.get({"parentfield": "shipping_rule_conditions"})
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
@@ -57,7 +58,7 @@ class DocType(DocListController):
 				then condition y can only be like 50 to 99 or 301 to 400
 				hence, non-overlapping condition = (x1 <= x2 < y1 <= y2) or (y1 <= y2 < x1 <= x2)
 			"""
-			separate = (x1 <= x2 < y1 <= y2) or (y1 <= y2 < x1 <= x2)
+			separate = (x1 <= x2 <= y1 <= y2) or (y1 <= y2 <= x1 <= x2)
 			return (not separate)
 		
 		overlaps = []
