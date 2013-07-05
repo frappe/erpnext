@@ -111,6 +111,7 @@ wn.module_page["Stock"] = [
 			{
 				"route":"Sales Browser/Item Group",
 				"label": wn._("Item Group"),
+				"doctype": "Item Group",
 				"description": wn._("Item classification.")
 			},
 			{
