@@ -13,7 +13,7 @@ def get_doctypes():
 	return webnotes.conn.sql_list("""select name from tabDocType
 		where ifnull(allow_rename,0)=1 and module!='Core' order by name""")
 		
-@webnotes.whitelist(allow_roles=["System Manager"])
+@webnotes.whitelist()
 def upload(select_doctype=None, rows=None):
 	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
 	from webnotes.modules import scrub
@@ -21,6 +21,9 @@ def upload(select_doctype=None, rows=None):
 
 	if not select_doctype:
 		select_doctype = webnotes.form_dict.select_doctype
+		
+	if not webnotes.has_permission(select_doctype, "write"):
+		raise webnotes.PermissionError
 
 	if not rows:
 		rows = read_csv_content_from_uploaded_file()
