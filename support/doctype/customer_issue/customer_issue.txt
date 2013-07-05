@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:33", 
+  "modified": "2013-07-05 12:31:46", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -37,6 +37,13 @@
  {
   "doctype": "DocType", 
   "name": "Customer Issue"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -121,7 +128,7 @@
   "fieldtype": "Section Break", 
   "label": "Issue Details", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-ticket"
  }, 
  {
   "doctype": "DocField", 
@@ -212,7 +219,7 @@
   "fieldtype": "Section Break", 
   "label": "Resolution", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-thumbs-up"
  }, 
  {
   "doctype": "DocField", 
@@ -250,7 +257,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
  }, 
  {
   "doctype": "DocField", 
@@ -333,7 +341,8 @@
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "label": "More Info"
+  "label": "More Info", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 

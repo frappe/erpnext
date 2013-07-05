@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:37", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:18", 
+  "modified": "2013-07-05 11:05:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,6 +56,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "clearance_date", 
+  "fieldtype": "Date", 
+  "label": "Clearance Date", 
+  "oldfieldname": "clearance_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "cheque_number", 
   "fieldtype": "Data", 
   "label": "Cheque Number", 
@@ -91,13 +99,5 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "clearance_date", 
-  "fieldtype": "Date", 
-  "label": "Clearance Date", 
-  "oldfieldname": "clearance_date", 
-  "oldfieldtype": "Date"
  }
 ]

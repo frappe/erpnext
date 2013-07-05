@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-04-12 07:16:42", 
+  "modified": "2013-07-05 11:23:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -610,12 +610,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "career_history", 
-  "fieldtype": "Section Break", 
-  "label": "Career History"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "previous_work_experience", 
   "fieldtype": "Section Break", 
   "label": "Previous Work Experience", 
@@ -762,7 +756,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "Employee", 
@@ -791,7 +784,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "HR User", 
@@ -801,7 +793,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 0, 
   "role": "HR Manager", 
