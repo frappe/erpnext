@@ -448,11 +448,10 @@ def make_delivery_note(source_name, target_doclist=None):
 def make_sales_invoice(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
-	def update_item(obj, target):
-		target.export_amount = (flt(obj.amount) - flt(obj.billed_amt))* flt(obj.export_rate)/flt(obj.basic_rate)
-		target.qty = obj.basic_rate and \
-			(flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate) or obj.qty
-		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+	def update_item(obj, target, source_parent):
+		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.amount = target.export_amount / flt(source_parent.conversion_rate)
+		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
 		
 	def update_accounts(source, target):
 		si = webnotes.bean(target)
