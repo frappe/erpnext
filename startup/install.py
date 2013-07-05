@@ -139,8 +139,10 @@ def import_defaults():
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
 		
 		# Price List
-		{'doctype': 'Price List', 'name': 'Default Price List', 'price_list_name': 'Default Price List'},
-		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard'},
+		{'doctype': 'Price List', 'name': 'Default Price List', 
+			'price_list_name': 'Default Price List', "valid_for_all_countries": 1},
+		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard',
+		 	"valid_for_all_countries": 1},
 				
 		# warehouse type
 		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
