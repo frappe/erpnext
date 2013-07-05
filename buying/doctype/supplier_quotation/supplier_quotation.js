@@ -31,6 +31,12 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 			cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
 		}
 	},	
+	get_items: function() {
+		wn.model.map_current_doc({
+			method: "stock.doctype.material_request.material_request.make_supplier_quotation",
+			source_name: cur_frm.doc.indent_no,
+		})
+	}
 });
 
 // for backward compatibility: combine new and previous states

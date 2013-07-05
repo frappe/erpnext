@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-07-04 10:51:05", 
+  "modified": "2013-07-04 18:47:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,6 @@
   "parent": "Supplier Quotation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -191,8 +190,7 @@
   "fieldtype": "Button", 
   "hidden": 0, 
   "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "options": "get_indent_details"
+  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
@@ -644,6 +642,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Manufacturing Manager", 
   "submit": 1, 
   "write": 1
@@ -653,6 +652,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -662,6 +662,7 @@
   "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Purchase User", 
   "submit": 0, 
   "write": 1
@@ -671,6 +672,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material User", 
   "submit": 0, 
   "write": 0
@@ -680,7 +682,18 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Supplier", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All", 
   "submit": 0, 
   "write": 0
  }

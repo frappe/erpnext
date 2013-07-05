@@ -83,7 +83,13 @@ cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 
 }
 
-//========================= Make Purchase Receipt =======================================================
+cur_frm.cscript.get_items = function(doc, dt, dn) {
+	wn.model.map_current_doc({
+		method: "stock.doctype.material_request.material_request.make_purchase_order",
+		source_name: cur_frm.doc.indent_no,
+	})
+}
+
 cur_frm.cscript['Make Purchase Receipt'] = function() {
 	n = wn.model.make_new_doc_and_get_name('Purchase Receipt');
 	$c('dt_map', args={
