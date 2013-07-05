@@ -121,7 +121,6 @@ class DocType(DocListController):
 			self.doc.posting_time = '00:00'
 
 def on_doctype_update():
-	print "on_doctype_update called for SLE"
 	if not webnotes.conn.sql("""show index from `tabStock Ledger Entry` 
 		where Key_name="posting_sort_index" """):
 		webnotes.conn.commit()
