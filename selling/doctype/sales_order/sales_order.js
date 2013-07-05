@@ -36,7 +36,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				
 				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Delivered"), 
 					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Billed"), 
+				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
 					doc.per_billed);
 
 				cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);

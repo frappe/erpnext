@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 12:58:38", 
   "docstatus": 0, 
-  "modified": "2013-05-02 11:42:08", 
+  "modified": "2013-07-05 14:26:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "description": "System for managing Backups", 
   "doctype": "DocType", 
   "document_type": "System", 
+  "icon": "icon-cloud-upload", 
   "issingle": 1, 
   "module": "Setup", 
   "name": "__common__"

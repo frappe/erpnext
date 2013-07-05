@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-28 17:57:33", 
   "docstatus": 0, 
-  "modified": "2013-03-01 17:54:57", 
+  "modified": "2013-07-05 14:58:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Batch Time Logs for Billing.", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-time", 
   "is_submittable": 1, 
   "module": "Projects", 
   "name": "__common__"

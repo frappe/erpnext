@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 11:18:11", 
   "docstatus": 0, 
-  "modified": "2013-02-19 16:30:05", 
+  "modified": "2013-07-05 14:44:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Apply / Approve Leaves", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-calendar", 
   "is_submittable": 1, 
   "max_attachments": 3, 
   "module": "HR", 
@@ -240,7 +241,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "role": "All", 
   "submit": 0
@@ -273,7 +273,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 1, 
   "role": "HR User", 
@@ -285,7 +284,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1, 
   "report": 1, 
   "role": "Leave Approver", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-05 13:02:52", 
+  "modified": "2013-07-05 14:51:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "Buying", 
   "name": "__common__", 
@@ -31,6 +32,7 @@
   "parent": "Purchase Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -787,28 +789,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
   "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Purchase Manager", 
   "submit": 0, 
   "write": 0
  }, 
@@ -817,7 +798,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Purchase Manager", 
   "submit": 1, 
   "write": 1
@@ -827,24 +807,13 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All", 
-  "submit": 0
- }, 
- {
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
   "role": "Supplier"
  }
 ]

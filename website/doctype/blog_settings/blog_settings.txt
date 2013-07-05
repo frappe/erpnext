@@ -2,13 +2,14 @@
  {
   "creation": "2013-03-11 17:48:16", 
   "docstatus": 0, 
-  "modified": "2013-03-11 17:48:16", 
+  "modified": "2013-07-05 14:27:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "description": "Blog Settings", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"

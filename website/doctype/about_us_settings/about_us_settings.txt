@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-19 12:02:15", 
   "docstatus": 0, 
-  "modified": "2013-05-03 11:01:30", 
+  "modified": "2013-07-05 14:23:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Settings for the About Us Page", 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-group", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"

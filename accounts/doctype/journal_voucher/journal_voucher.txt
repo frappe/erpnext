@@ -2,13 +2,14 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-06-28 14:27:11", 
+  "modified": "2013-07-05 14:43:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "Accounts", 
   "name": "__common__", 
@@ -36,6 +37,13 @@
  {
   "doctype": "DocType", 
   "name": "Journal Voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type_and_date", 
+  "fieldtype": "Section Break", 
+  "label": "Voucher Type and Date", 
+  "options": "icon-flag"
  }, 
  {
   "doctype": "DocField", 
@@ -102,7 +110,7 @@
   "fieldtype": "Section Break", 
   "label": "Journal Entries", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple", 
+  "options": "icon-table", 
   "read_only": 0
  }, 
  {
@@ -121,7 +129,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break99", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "read_only": 0
  }, 
  {
@@ -180,6 +187,7 @@
   "fieldname": "reference", 
   "fieldtype": "Section Break", 
   "label": "Reference", 
+  "options": "icon-pushpin", 
   "read_only": 0
  }, 
  {
@@ -286,6 +294,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "read_only": 0
  }, 
  {

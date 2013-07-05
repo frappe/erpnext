@@ -13,8 +13,11 @@ class DocType():
 		self.doc = doc
 		self.doclist = doclist
 
-@webnotes.whitelist(allow_roles=['System Manager', 'HR Manager', "HR User"])
+@webnotes.whitelist()
 def get_template():
+	if not webnotes.has_permission("Attendance", "create"):
+		raise webnotes.PermissionError
+	
 	args = webnotes.form_dict
 	global doclist
 	doclist = webnotes.model.doctype.get("Attendance")
@@ -96,8 +99,11 @@ def get_naming_series():
 	return series[0]
 
 
-@webnotes.whitelist(allow_roles=['System Manager', 'HR Manager', "HR User"])
+@webnotes.whitelist()
 def upload():
+	if not webnotes.has_permission("Attendance", "create"):
+		raise webnotes.PermissionError
+	
 	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
 	from webnotes.modules import scrub
 	

@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-11 15:32:24", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:37", 
+  "modified": "2013-07-05 14:47:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-suitcase", 
   "is_submittable": 1, 
   "module": "Stock", 
   "name": "__common__", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-20 11:53:21", 
   "docstatus": 0, 
-  "modified": "2013-06-25 16:43:18", 
+  "modified": "2013-07-05 14:54:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-sitemap", 
   "is_submittable": 0, 
   "module": "Selling", 
   "name": "__common__"
@@ -23,6 +24,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Sales BOM", 
@@ -73,7 +75,6 @@
   "reqd": 1
  }, 
  {
-  "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -81,7 +82,6 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
@@ -89,7 +89,6 @@
   "write": 0
  }, 
  {
-  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 

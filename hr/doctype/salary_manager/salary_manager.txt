@@ -2,23 +2,20 @@
  {
   "creation": "2012-03-27 14:35:59", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:35:59", 
+  "modified": "2013-07-05 14:53:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "_last_update": "1314253977", 
   "allow_copy": 1, 
   "allow_email": 1, 
   "allow_print": 1, 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "HR", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 1, 
-  "version": 30
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -42,18 +39,6 @@
  {
   "doctype": "DocType", 
   "name": "Salary Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR Manager"
  }, 
  {
   "doctype": "DocField", 
@@ -154,8 +139,7 @@
   "doctype": "DocField", 
   "fieldname": "create_salary_slip", 
   "fieldtype": "Button", 
-  "label": "Create Salary Slip", 
-  "trigger": "Client"
+  "label": "Create Salary Slip"
  }, 
  {
   "doctype": "DocField", 
@@ -168,8 +152,7 @@
   "doctype": "DocField", 
   "fieldname": "submit_salary_slip", 
   "fieldtype": "Button", 
-  "label": "Submit Salary Slip", 
-  "trigger": "Client"
+  "label": "Submit Salary Slip"
  }, 
  {
   "doctype": "DocField", 
@@ -182,8 +165,7 @@
   "doctype": "DocField", 
   "fieldname": "make_bank_voucher", 
   "fieldtype": "Button", 
-  "label": "Make Bank Voucher", 
-  "trigger": "Client"
+  "label": "Make Bank Voucher"
  }, 
  {
   "doctype": "DocField", 
@@ -195,5 +177,17 @@
   "fieldname": "activity_log", 
   "fieldtype": "HTML", 
   "label": "Activity Log"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

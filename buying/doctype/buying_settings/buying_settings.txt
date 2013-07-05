@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 11:04:03", 
   "docstatus": 0, 
-  "modified": "2013-06-25 11:43:08", 
+  "modified": "2013-07-05 14:29:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "description": "Settings for Buying Module", 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Buying", 
   "name": "__common__"

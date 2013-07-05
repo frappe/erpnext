@@ -2,13 +2,14 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-05-30 12:09:39", 
+  "modified": "2013-07-05 14:50:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "POS/.####", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "module": "Accounts", 
   "name": "__common__"
  }, 

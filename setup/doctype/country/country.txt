@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:30", 
   "docstatus": 0, 
-  "modified": "2013-01-21 15:56:50", 
+  "modified": "2013-07-05 14:33:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:country_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-globe", 
   "in_create": 0, 
   "module": "Setup", 
   "name": "__common__", 

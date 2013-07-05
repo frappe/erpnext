@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-21 14:15:31", 
   "docstatus": 0, 
-  "modified": "2013-02-25 13:08:26", 
+  "modified": "2013-07-05 14:36:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Send regular summary reports via Email.", 
   "doctype": "DocType", 
   "document_type": "System", 
+  "icon": "icon-envelope", 
   "module": "Setup", 
   "name": "__common__"
  }, 

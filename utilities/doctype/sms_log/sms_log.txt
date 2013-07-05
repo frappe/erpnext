@@ -2,18 +2,16 @@
  {
   "creation": "2012-03-27 14:36:47", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:47", 
+  "modified": "2013-07-05 14:55:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "SMSLOG/.########", 
   "doctype": "DocType", 
+  "icon": "icon-mobile-phone", 
   "module": "Utilities", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 3
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -39,9 +37,6 @@
  {
   "doctype": "DocType", 
   "name": "SMS Log"
- }, 
- {
-  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocField", 
@@ -90,5 +85,8 @@
   "fieldname": "message", 
   "fieldtype": "Small Text", 
   "label": "Message"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

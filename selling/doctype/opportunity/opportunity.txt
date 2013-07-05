@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-07-03 10:29:20", 
+  "modified": "2013-07-05 14:47:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Potential Sales Deal", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-info-sign", 
   "is_submittable": 1, 
   "module": "Selling", 
   "name": "__common__", 

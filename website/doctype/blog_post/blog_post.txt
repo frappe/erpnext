@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:30", 
   "docstatus": 0, 
-  "modified": "2013-03-18 13:55:53", 
+  "modified": "2013-07-05 15:08:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "allow_import": 1, 
   "doctype": "DocType", 
+  "icon": "icon-quote-left", 
   "max_attachments": 5, 
   "module": "Website", 
   "name": "__common__"

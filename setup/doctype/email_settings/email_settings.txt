@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-03-25 18:41:27", 
+  "modified": "2013-07-05 14:36:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "allow_print": 1, 
   "description": "Email Settings for Outgoing and Incoming Emails.", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "in_create": 1, 
   "issingle": 1, 
   "module": "Setup", 

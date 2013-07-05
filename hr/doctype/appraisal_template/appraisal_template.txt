@@ -1,69 +1,70 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
-  "docstatus": 0, 
   "creation": "2012-07-03 13:30:39", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:25:14", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-07 17:16:25"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
-  "name": "__common__", 
   "autoname": "field:kra_title", 
-  "module": "HR", 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "icon": "icon-file-text", 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Appraisal Template", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Appraisal Template", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Appraisal Template", 
-  "read": 1, 
-  "report": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Appraisal Template", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "HR User", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "write": 1
  }, 
  {
-  "name": "Appraisal Template", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Appraisal Template"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Appraisal Template Title", 
-  "oldfieldname": "kra_title", 
   "fieldname": "kra_title", 
   "fieldtype": "Data", 
+  "label": "Appraisal Template Title", 
+  "oldfieldname": "kra_title", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
-  "print_width": "300px", 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Appraisal Template Goal", 
-  "oldfieldname": "kra_sheet", 
   "fieldname": "kra_sheet", 
   "fieldtype": "Table", 
+  "label": "Appraisal Template Goal", 
+  "oldfieldname": "kra_sheet", 
+  "oldfieldtype": "Table", 
   "options": "Appraisal Template Goal"
  }, 
  {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:58", 
+  "modified": "2013-07-05 14:29:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:distribution_id", 
   "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
   "doctype": "DocType", 
+  "icon": "icon-bar-chart", 
   "module": "Accounts", 
   "name": "__common__", 
   "name_case": "Title Case"

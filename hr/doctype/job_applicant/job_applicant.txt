@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:37", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:44:52", 
+  "modified": "2013-07-05 14:43:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Applicant for a Job", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-user", 
   "module": "HR", 
   "name": "__common__"
  }, 

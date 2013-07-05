@@ -2,7 +2,7 @@
  {
   "creation": "2012-03-27 14:36:09", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:09", 
+  "modified": "2013-07-05 14:40:42", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -10,10 +10,9 @@
   "autoname": "field:industry", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-flag", 
   "module": "Selling", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "version": 4
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -44,6 +43,9 @@
   "name": "Industry Type"
  }, 
  {
+  "doctype": "DocField"
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Manager", 
@@ -58,8 +60,5 @@
   "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
   "write": 1
- }, 
- {
-  "doctype": "DocField"
  }
 ]

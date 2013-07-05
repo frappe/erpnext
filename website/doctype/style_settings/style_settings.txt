@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 16:01:33", 
   "docstatus": 0, 
-  "modified": "2013-03-14 11:57:20", 
+  "modified": "2013-07-05 14:57:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "description": "Set your background color, font and image (tiled)", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "max_attachments": 1, 
   "module": "Website", 

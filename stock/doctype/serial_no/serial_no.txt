@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-07-02 12:07:21", 
+  "modified": "2013-07-05 14:54:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Distinct unit of an Item", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-barcode", 
   "module": "Stock", 
   "name": "__common__", 
   "search_fields": "item_code,status"

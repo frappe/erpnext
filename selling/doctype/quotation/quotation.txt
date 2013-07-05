@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-07-04 10:56:10", 
+  "modified": "2013-07-05 14:52:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "doctype": "DocType", 
   "document_type": "Transaction", 
   "hide_toolbar": 0, 
+  "icon": "icon-shopping-cart", 
   "is_submittable": 1, 
   "max_attachments": 1, 
   "module": "Selling", 

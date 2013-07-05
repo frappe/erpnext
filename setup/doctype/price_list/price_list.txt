@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-06-25 12:05:12", 
+  "modified": "2013-07-05 14:50:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,6 +15,7 @@
   "description": "Price List Master", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-tags", 
   "max_attachments": 1, 
   "module": "Setup", 
   "name": "__common__"
@@ -115,6 +116,13 @@
   "fieldtype": "HTML", 
   "label": "How to upload", 
   "options": "<div class=\"well\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
  }, 
  {
   "cancel": 0, 

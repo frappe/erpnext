@@ -19,7 +19,7 @@ patch_list = [
 	"execute:webnotes.reload_doc('core', 'doctype', 'docfield')",
 	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') # 2013-04-07",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report')",
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype')",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype') # 2013-07-04",
 	"patches.mar_2012.so_rv_mapper_fix", 
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 

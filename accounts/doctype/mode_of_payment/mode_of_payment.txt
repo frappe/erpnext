@@ -2,7 +2,7 @@
  {
   "creation": "2012-12-04 17:49:20", 
   "docstatus": 0, 
-  "modified": "2013-04-19 10:59:05", 
+  "modified": "2013-07-05 14:46:28", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "field:mode_of_payment", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-credit-card", 
   "module": "Accounts", 
   "name": "__common__"
  }, 

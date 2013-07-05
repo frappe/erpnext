@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 15:53:15", 
   "docstatus": 0, 
-  "modified": "2013-05-28 16:57:32", 
+  "modified": "2013-07-05 15:03:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Slideshow like display for the website", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-play", 
   "max_attachments": 10, 
   "module": "Website", 
   "name": "__common__"

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 11:48:03", 
   "docstatus": 0, 
-  "modified": "2013-07-04 16:28:42", 
+  "modified": "2013-07-05 14:55:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "Prompt", 
   "description": "Specify conditions to calculate shipping amount", 
   "doctype": "DocType", 
+  "icon": "icon-truck", 
   "module": "Accounts", 
   "name": "__common__"
  }, 

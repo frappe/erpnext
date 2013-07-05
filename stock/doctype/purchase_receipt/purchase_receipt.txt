@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:38:03", 
+  "modified": "2013-07-05 14:52:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-truck", 
   "is_submittable": 1, 
   "module": "Stock", 
   "name": "__common__", 
@@ -37,6 +38,13 @@
  {
   "doctype": "DocType", 
   "name": "Purchase Receipt"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_section", 
+  "fieldtype": "Section Break", 
+  "label": "Supplier", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -86,38 +94,34 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
-  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -195,7 +199,8 @@
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
  }, 
  {
   "allow_on_submit": 1, 
@@ -213,8 +218,7 @@
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -267,7 +271,8 @@
   "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List"
+  "label": "Currency & Price List", 
+  "options": "icon-tag"
  }, 
  {
   "description": "Supplier's currency", 
@@ -334,7 +339,8 @@
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
@@ -387,7 +393,8 @@
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "doctype": "DocField", 
@@ -536,7 +543,8 @@
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
  }, 
  {
   "doctype": "DocField", 
@@ -568,7 +576,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
  }, 
  {
   "doctype": "DocField", 
@@ -597,7 +606,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 
@@ -801,7 +811,8 @@
   "doctype": "DocField", 
   "fieldname": "transporter_info", 
   "fieldtype": "Section Break", 
-  "label": "Transporter Info"
+  "label": "Transporter Info", 
+  "options": "icon-truck"
  }, 
  {
   "doctype": "DocField", 
@@ -849,8 +860,9 @@
   "doctype": "DocField", 
   "fieldname": "raw_material_details", 
   "fieldtype": "Section Break", 
-  "label": "Raw Material Details", 
+  "label": "Raw Materials Supplied", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-table", 
   "print_hide": 1, 
   "read_only": 1
  }, 

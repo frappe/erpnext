@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-22 16:50:39", 
   "docstatus": 0, 
-  "modified": "2013-01-22 16:54:49", 
+  "modified": "2013-07-05 14:43:57", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
  {
   "doctype": "DocType", 
+  "icon": "icon-magic", 
   "issingle": 1, 
   "module": "Stock", 
   "name": "__common__"

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:47:58", 
+  "modified": "2013-07-05 14:52:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:order_lost_reason", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-flag", 
   "module": "Setup", 
   "name": "__common__"
  }, 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:06", 
   "docstatus": 0, 
-  "modified": "2013-06-11 12:10:33", 
+  "modified": "2013-07-05 14:29:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "max_attachments": 3, 
   "module": "Accounts", 

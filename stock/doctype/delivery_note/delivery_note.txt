@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-06-27 11:33:53", 
+  "modified": "2013-07-05 14:34:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "doctype": "DocType", 
   "document_type": "Transaction", 
   "hide_toolbar": 0, 
+  "icon": "icon-truck", 
   "in_create": 0, 
   "is_submittable": 1, 
   "module": "Stock", 
@@ -40,6 +41,13 @@
  {
   "doctype": "DocType", 
   "name": "Delivery Note"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "delivery_to_section", 
+  "fieldtype": "Section Break", 
+  "label": "Delivery To", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -100,38 +108,34 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Shipping Address", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -248,6 +252,7 @@
   "fieldname": "sec_break25", 
   "fieldtype": "Section Break", 
   "label": "Price List and Currency", 
+  "options": "icon-tag", 
   "read_only": 0
  }, 
  {
@@ -323,6 +328,7 @@
   "fieldtype": "Section Break", 
   "label": "Items", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
   "read_only": 0
  }, 
  {
@@ -345,6 +351,7 @@
   "fieldtype": "Section Break", 
   "label": "Packing List", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-suitcase", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -371,7 +378,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "read_only": 0
  }, 
  {
@@ -442,6 +448,7 @@
   "fieldtype": "Section Break", 
   "label": "Taxes", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -542,6 +549,7 @@
   "fieldtype": "Section Break", 
   "label": "Totals", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "print_hide": 0, 
   "read_only": 0
  }, 
@@ -644,6 +652,7 @@
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-legal", 
   "read_only": 0
  }, 
  {
@@ -690,6 +699,7 @@
   "fieldname": "transporter_info", 
   "fieldtype": "Section Break", 
   "label": "Transporter Info", 
+  "options": "icon-truck", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -751,6 +761,7 @@
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
   "label": "Contact Info", 
+  "options": "icon-bullhorn", 
   "read_only": 0
  }, 
  {
@@ -802,6 +813,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1040,6 +1052,7 @@
   "fieldtype": "Section Break", 
   "label": "Sales Team", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1095,7 +1108,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break1", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "print_hide": 1, 
   "read_only": 0
  }, 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-06-07 12:38:37", 
+  "modified": "2013-07-05 14:51:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "field:project_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-puzzle-piece", 
   "max_attachments": 4, 
   "module": "Projects", 
   "name": "__common__", 

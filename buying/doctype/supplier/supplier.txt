@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-07-04 10:13:19", 
+  "modified": "2013-07-05 14:57:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Supplier of Goods or Services.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "module": "Buying", 
   "name": "__common__", 
   "search_fields": "supplier_name,supplier_type"

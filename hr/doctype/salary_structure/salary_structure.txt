@@ -2,12 +2,13 @@
  {
   "creation": "2013-03-07 18:50:29", 
   "docstatus": 0, 
-  "modified": "2013-04-22 14:09:04", 
+  "modified": "2013-07-05 14:54:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "module": "HR", 
   "name": "__common__"
  }, 

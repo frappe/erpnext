@@ -35,8 +35,6 @@ class DocType:
 		self.account_list = []
 		self.ac_details = {} # key: account id, values: debit_or_credit, lft, rgt
 		
-		self.roles = webnotes.user.get_roles()
-
 		self.period_list = []
 		self.period_start_date = {}
 		self.period_end_date = {}
@@ -44,7 +42,7 @@ class DocType:
 		self.fs_list = []
 		self.root_bal = []
 		self.flag = 0
-
+		
 	# Get defaults on load of MIS, MIS - Comparison Report and Financial statements
 	# ----------------------------------------------------
 	def get_comp(self):
@@ -75,6 +73,7 @@ class DocType:
 		ret['month'] = mon
 
 		# ------------------------ get MIS Type on basis of roles of session user ------------------------------------------
+		self.roles = webnotes.user.get_roles()
 		if has_common(self.roles, ['Sales Manager']):
 			type.append('Sales')
 		if has_common(self.roles, ['Purchase Manager']):

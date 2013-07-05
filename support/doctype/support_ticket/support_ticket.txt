@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-01 10:36:25", 
   "docstatus": 0, 
-  "modified": "2013-05-21 16:27:46", 
+  "modified": "2013-07-05 14:57:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-ticket", 
   "module": "Support", 
   "name": "__common__", 
   "search_fields": "status,customer,allocated_to,subject,raised_by"
@@ -39,6 +40,13 @@
  {
   "doctype": "DocType", 
   "name": "Support Ticket"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "subject_section", 
+  "fieldtype": "Section Break", 
+  "label": "Subject", 
+  "options": "icon-flag"
  }, 
  {
   "doctype": "DocField", 
@@ -99,7 +107,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "sb00", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Messages", 
+  "options": "icon-comments"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
@@ -123,7 +133,8 @@
   "doctype": "DocField", 
   "fieldname": "additional_info", 
   "fieldtype": "Section Break", 
-  "label": "Additional Info", 
+  "label": "Reference", 
+  "options": "icon-pushpin", 
   "read_only": 1
  }, 
  {

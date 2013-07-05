@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-04-17 14:07:46", 
+  "modified": "2013-07-05 14:32:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-building", 
   "module": "Setup", 
   "name": "__common__"
  }, 

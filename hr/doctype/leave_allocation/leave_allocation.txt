@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:32", 
+  "modified": "2013-07-05 14:44:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_import": 1, 
   "autoname": "LAL/.#####", 
   "doctype": "DocType", 
+  "icon": "icon-ok", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 

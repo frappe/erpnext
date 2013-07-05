@@ -2,13 +2,14 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-07-03 21:01:00", 
+  "modified": "2013-07-05 14:55:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "description": "Default settings for Shopping Cart", 
   "doctype": "DocType", 
+  "icon": "icon-shopping-cart", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"

@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:27", 
+  "modified": "2013-07-05 15:02:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "field:warehouse_type", 
   "doctype": "DocType", 
+  "icon": "icon-flag", 
   "istable": 0, 
   "module": "Setup", 
   "name": "__common__"

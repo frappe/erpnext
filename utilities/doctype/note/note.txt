@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 13:41:00", 
   "docstatus": 0, 
-  "modified": "2013-05-27 12:16:46", 
+  "modified": "2013-07-05 14:47:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Note is a free page where users can share documents / notes", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-file-text", 
   "module": "Utilities", 
   "name": "__common__", 
   "read_only_onload": 1
