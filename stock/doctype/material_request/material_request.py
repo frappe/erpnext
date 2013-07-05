@@ -241,19 +241,17 @@ def _update_requested_qty(controller, mr_obj, mr_items):
 			"posting_date": controller.doc.posting_date,
 		})
 
-
+def set_missing_values(source, target):
+	po = webnotes.bean(target)
+	po.run_method("set_missing_values")
 
 @webnotes.whitelist()
 def make_purchase_order(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 
-	def update_item(obj, target):
+	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
 		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
-		
-	def set_missing_values(source, target):
-		po = webnotes.bean(target)
-		po.run_method("set_missing_values")
 
 	doclist = get_mapped_doclist("Material Request", source_name, 	{
 		"Material Request": {
@@ -281,10 +279,6 @@ def make_purchase_order(source_name, target_doclist=None):
 def make_supplier_quotation(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 
-	def set_missing_values(source, target):
-		sq = webnotes.bean(target)
-		sq.run_method("set_missing_values")
-
 	doclist = get_mapped_doclist("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Supplier Quotation", 
@@ -309,7 +303,7 @@ def make_supplier_quotation(source_name, target_doclist=None):
 def make_stock_entry(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 
-	def set_purpose(source, target):
+	def set_purpose(source, target, source_parent):
 		target[0].purpose = "Material Transfer"
 		
 	def update_item(source, target):

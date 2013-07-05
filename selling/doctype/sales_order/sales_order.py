@@ -450,7 +450,8 @@ def make_sales_invoice(source_name, target_doclist=None):
 	
 	def update_item(obj, target):
 		target.export_amount = (flt(obj.amount) - flt(obj.billed_amt))* flt(obj.export_rate)/flt(obj.basic_rate)
-		target.qty = obj.basic_rate and (flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate) or obj.qty
+		target.qty = obj.basic_rate and \
+			(flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate) or obj.qty
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		
 	def update_accounts(source, target):

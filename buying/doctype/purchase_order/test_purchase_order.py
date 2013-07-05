@@ -19,9 +19,38 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 import webnotes.defaults
-from webnotes.utils import cint
 
 class TestPurchaseOrder(unittest.TestCase):
+	def test_make_purchase_receipt(self):
+		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
+		po = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_purchase_receipt, 
+			po.doc.name)
+
+		po = webnotes.bean("Purchase Order", po.doc.name)
+		po.submit()
+		pr = make_purchase_receipt(po.doc.name)
+		
+		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
+		self.assertEquals(len(pr), len(test_records[0]))
+		
+	def test_make_purchase_invocie(self):
+		from buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		po = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_purchase_invoice, 
+			po.doc.name)
+
+		po = webnotes.bean("Purchase Order", po.doc.name)
+		po.submit()
+		pi = make_purchase_invoice(po.doc.name)
+		
+		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
+		self.assertEquals(len(pi), len(test_records[0]))
+		
 	def test_subcontracting(self):
 		po = webnotes.bean(copy=test_records[0])
 		po.insert()		

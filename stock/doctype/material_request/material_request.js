@@ -37,15 +37,15 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
 			if(doc.material_request_type === "Purchase")
 				cur_frm.add_custom_button("Make Supplier Quotation", 
-					cur_frm.cscript.make_supplier_quotation);
+					this.make_supplier_quotation);
 				
 			if(doc.material_request_type === "Transfer" && doc.status === "Submitted")
-				cur_frm.add_custom_button("Transfer Material", cur_frm.cscript.make_stock_entry);
+				cur_frm.add_custom_button("Transfer Material", this.make_stock_entry);
 			
 			if(flt(doc.per_ordered, 2) < 100) {
 				if(doc.material_request_type === "Purchase")
 					cur_frm.add_custom_button('Make Purchase Order', 
-						cur_frm.cscript.make_purchase_order);
+						this.make_purchase_order);
 				
 				cur_frm.add_custom_button('Stop Material Request', 
 					cur_frm.cscript['Stop Material Request']);

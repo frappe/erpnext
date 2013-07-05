@@ -71,17 +71,11 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	def get_supplier_quotation_items(self):
-		if self.doc.supplier_quotation:
-			get_obj("DocType Mapper", "Supplier Quotation-Purchase Order").dt_map("Supplier Quotation",
-				"Purchase Order", self.doc.supplier_quotation, self.doc, self.doclist,
-				"""[['Supplier Quotation', 'Purchase Order'],
-				['Supplier Quotation Item', 'Purchase Order Item'],
-				['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]""")
-			for d in getlist(self.doclist, 'po_details'):
-				if d.prevdoc_detail_docname and not d.schedule_date:
-					d.schedule_date = webnotes.conn.get_value("Material Request Item",
-							d.prevdoc_detail_docname, "schedule_date")
+	def get_schedule_dates(self):
+		for d in getlist(self.doclist, 'po_details'):
+			if d.prevdoc_detail_docname and not d.schedule_date:
+				d.schedule_date = webnotes.conn.get_value("Material Request Item",
+						d.prevdoc_detail_docname, "schedule_date")
 	
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
@@ -206,3 +200,83 @@ class DocType(BuyingController):
 		
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
+
+@webnotes.whitelist()
+def make_purchase_receipt(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.run_method("set_missing_values")
+
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1
+		target.qty = flt(obj.qty) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.import_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)
+
+	doclist = get_mapped_doclist("Purchase Order", source_name,	{
+		"Purchase Order": {
+			"doctype": "Purchase Receipt", 
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		}, 
+		"Purchase Order Item": {
+			"doctype": "Purchase Receipt Item", 
+			"field_map": {
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.received_qty < doc.qty
+		}, 
+		"Purchase Taxes and Charges": {
+			"doctype": "Purchase Taxes and Charges", 
+		}
+	}, target_doclist, set_missing_values)
+
+	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_purchase_invoice(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.run_method("set_missing_values")
+		bean.run_method("set_supplier_defaults")
+
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1
+		target.qty = (flt(obj.amount) - flt(obj.billed_amt)) / flt(obj.purchase_rate)
+		target.import_amount = (flt(obj.amount) - flt(obj.billed_amt)) / \
+			flt(source_parent.conversion_rate)
+		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+
+	doclist = get_mapped_doclist("Purchase Order", source_name,	{
+		"Purchase Order": {
+			"doctype": "Purchase Invoice", 
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		}, 
+		"Purchase Order Item": {
+			"doctype": "Purchase Invoice Item", 
+			"field_map": {
+				"name": "po_detail", 
+				"parent": "purchase_order", 
+				"purchase_rate": "rate"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.amount 
+		}, 
+		"Purchase Taxes and Charges": {
+			"doctype": "Purchase Taxes and Charges", 
+		}
+	}, target_doclist, set_missing_values)
+
+	return [d.fields for d in doclist]

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:40", 
+  "modified": "2013-07-05 14:38:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,6 @@
   "parent": "Purchase Receipt", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -262,7 +261,6 @@
   "fieldtype": "Button", 
   "label": "Pull Purchase Order Details", 
   "oldfieldtype": "Button", 
-  "options": "get_po_details", 
   "print_hide": 1
  }, 
  {
@@ -869,19 +867,41 @@
   "read_only": 1
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 1, 
   "role": "Material Manager", 
-  "submit": 1, 
-  "write": 1
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Material Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Material User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1
@@ -891,13 +911,24 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Purchase User", 
+  "submit": 0
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "supplier", 
+  "permlevel": 0, 
   "role": "Supplier"
  }
 ]

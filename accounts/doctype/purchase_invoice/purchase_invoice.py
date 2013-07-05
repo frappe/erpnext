@@ -126,26 +126,6 @@ class DocType(BuyingController):
 			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
 			
 		return ret
-		
-	def pull_details(self):
-		if self.doc.purchase_receipt_main:
-			self.validate_duplicate_docname('purchase_receipt')
-			self.doclist = get_obj('DocType Mapper', 'Purchase Receipt-Purchase Invoice').dt_map('Purchase Receipt', 'Purchase Invoice', self.doc.purchase_receipt_main, self.doc, self.doclist, "[['Purchase Receipt', 'Purchase Invoice'], ['Purchase Receipt Item', 'Purchase Invoice Item'], ['Purchase Taxes and Charges','Purchase Taxes and Charges']]")
-
-		elif self.doc.purchase_order_main:
-			self.validate_duplicate_docname('purchase_order')
-			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Purchase Invoice').dt_map('Purchase Order', 'Purchase Invoice', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Purchase Invoice'],['Purchase Order Item', 'Purchase Invoice Item'], ['Purchase Taxes and Charges','Purchase Taxes and Charges']]")
-		
-		self.get_expense_account('entries')
-
-		ret = self.get_credit_to()
-		if ret.has_key('credit_to'):
-			self.doc.credit_to = ret['credit_to']
-
-	def get_expense_account(self, doctype):
-		for d in getlist(self.doclist, doctype):			
-			if d.item_code:
-				d.fields.update(self.get_default_values(d.fields))
 
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.credit_to, 

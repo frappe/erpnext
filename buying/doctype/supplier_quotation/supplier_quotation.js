@@ -28,32 +28,27 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		this._super();
 
 		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
+			cur_frm.add_custom_button("Make Purchase Order", this.make_purchase_order);
 		}
 	},	
+	
 	get_items: function() {
 		wn.model.map_current_doc({
 			method: "stock.doctype.material_request.material_request.make_supplier_quotation",
 			source_name: cur_frm.doc.indent_no,
+		})
+	},
+	
+	make_purchase_order: function() {
+		wn.model.open_mapped_doc({
+			method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+			source_name: cur_frm.doc.name
 		})
 	}
 });
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
-
-cur_frm.cscript.make_purchase_order = function() {
-	var new_po_name = wn.model.make_new_doc_and_get_name("Purchase Order");
-	$c("dt_map", {
-		"docs": wn.model.compress([locals['Purchase Order'][new_po_name]]),
-		"from_doctype": cur_frm.doc.doctype,
-		"to_doctype": "Purchase Order",
-		"from_docname": cur_frm.doc.name,
-		"from_to_list": JSON.stringify([['Supplier Quotation', 'Purchase Order'],
-			['Supplier Quotation Item', 'Purchase Order Item'],
-			['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]),
-	}, function(r, rt) { loaddoc("Purchase Order", new_po_name) });
-}
 
 cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	// no need to trigger updation of stock uom, as this field doesn't exist in supplier quotation

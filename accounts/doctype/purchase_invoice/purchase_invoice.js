@@ -67,7 +67,23 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 	allocated_amount: function() {
 		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
 		this.frm.refresh_fields();
+	}, 
+	
+	get_items: function() {
+		if(doc.purchase_order_main) {
+			wn.model.map_current_doc({
+				method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+				source_name: cur_frm.doc.purchase_order_main,
+			})
+		}
+		else if(doc.purchase_receipt_main) {
+			wn.model.map_current_doc({
+				method: "selling.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+				source_name: cur_frm.doc.purchase_receipt_main,
+			})
+		}
 	}
+	
 });
 
 // for backward compatibility: combine new and previous states
@@ -99,14 +115,6 @@ cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
-}
-
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-	var callback = function(r,rt) { 
-		unhide_field(['supplier_address', 'contact_person']);				
-		cur_frm.refresh_fields();
-	}
-	$c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
 
 cur_frm.cscript.make_bank_voucher = function() {

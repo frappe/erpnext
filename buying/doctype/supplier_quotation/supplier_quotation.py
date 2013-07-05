@@ -58,3 +58,41 @@ class DocType(BuyingController):
 		pc.validate_for_items(self)
 		pc.get_prevdoc_date(self)
 		pc.validate_reference_value(self)
+
+@webnotes.whitelist()
+def make_purchase_order(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.run_method("set_missing_values")
+		bean.run_method("get_schedule_dates")
+
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1
+
+	doclist = get_mapped_doclist("Supplier Quotation", source_name,		{
+		"Supplier Quotation": {
+			"doctype": "Purchase Order", 
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		}, 
+		"Supplier Quotation Item": {
+			"doctype": "Purchase Order Item", 
+			"field_map": {
+				"name": "supplier_quotation_item", 
+				"parent": "supplier_quotation", 
+				"uom": "stock_uom",
+				"prevdoc_detail_docname": "prevdoc_detail_docname",
+				"prevdoc_doctype": "prevdoc_doctype",
+				"prevdoc_docname": "prevdoc_docname",
+			},
+			"postprocess": update_item
+		}, 
+		"Purchase Taxes and Charges": {
+			"doctype": "Purchase Taxes and Charges", 
+		},
+	}, target_doclist, set_missing_values)
+
+	return [d.fields for d in doclist]

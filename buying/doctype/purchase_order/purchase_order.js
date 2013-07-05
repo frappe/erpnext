@@ -30,15 +30,46 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-			if(flt(doc.per_received, 2) < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
-			if(flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
-			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+			if(flt(doc.per_received, 2) < 100) 
+				cur_frm.add_custom_button('Make Purchase Receipt', this.make_purchase_receipt);	
+			if(flt(doc.per_billed, 2) < 100) 
+				cur_frm.add_custom_button('Make Invoice', this.make_purchase_invoice);
+			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) 
+				cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
-			
+			cur_frm.add_custom_button('Unstop Purchase Order', 
+				cur_frm.cscript['Unstop Purchase Order']);
 	},
+	
+	get_items: function() {
+		wn.model.map_current_doc({
+			method: "stock.doctype.material_request.material_request.make_purchase_order",
+			source_name: cur_frm.doc.indent_no,
+		})
+	},
+	
+	make_purchase_receipt: function() {
+		wn.model.open_mapped_doc({
+			method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+			source_name: cur_frm.doc.name
+		})
+	},
+	
+	make_purchase_invoice: function() {
+		wn.model.open_mapped_doc({
+			method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+			source_name: cur_frm.doc.name
+		})
+	},
+	
+	get_supplier_quotation_items: function() {
+		wn.model.map_current_doc({
+			method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+			source_name: cur_frm.doc.supplier_quotation,
+		})
+	}
 });
 
 // for backward compatibility: combine new and previous states
@@ -70,58 +101,14 @@ cur_frm.fields_dict['indent_no'].get_query = function(doc) {
 		ORDER BY `name` DESC LIMIT 50';
 }
 
-
-//========================= Get Last Purhase Rate =====================================
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
-	$c_obj(make_doclist(doc.doctype, doc.name), 'get_last_purchase_rate', '', 
-			function(r, rt) { 
-				refresh_field(cur_frm.cscript.fname);
-				var doc = locals[cdt][cdn];
-				cur_frm.cscript.calc_amount( doc, 2);
-			}
-	);
-
+	$c_obj(make_doclist(doc.doctype, doc.name), 'get_last_purchase_rate', '', function(r, rt) { 
+		refresh_field(cur_frm.cscript.fname);
+		var doc = locals[cdt][cdn];
+		cur_frm.cscript.calc_amount( doc, 2);
+	});
 }
 
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-	wn.model.map_current_doc({
-		method: "stock.doctype.material_request.material_request.make_purchase_order",
-		source_name: cur_frm.doc.indent_no,
-	})
-}
-
-cur_frm.cscript['Make Purchase Receipt'] = function() {
-	n = wn.model.make_new_doc_and_get_name('Purchase Receipt');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Purchase Receipt'][n]]),
-		'from_doctype': cur_frm.doc.doctype,
-		'to_doctype':'Purchase Receipt',
-		'from_docname':cur_frm.doc.name,
-		'from_to_list':"[['Purchase Order','Purchase Receipt'],['Purchase Order Item','Purchase Receipt Item'],['Purchase Taxes and Charges','Purchase Taxes and Charges']]"
-		}, function(r,rt) {
-			 loaddoc('Purchase Receipt', n);
-		}
-	);
-}
-
-//========================== Make Purchase Invoice =====================================================
-cur_frm.cscript['Make Purchase Invoice'] = function() {
-	n = wn.model.make_new_doc_and_get_name('Purchase Invoice');
-	$c('dt_map', {
-		'docs':wn.model.compress([locals['Purchase Invoice'][n]]),
-		'from_doctype':cur_frm.doc.doctype,
-		'to_doctype':'Purchase Invoice',
-		'from_docname': cur_frm.doc.name,
-		'from_to_list':"[['Purchase Order','Purchase Invoice'],['Purchase Order Item','Purchase Invoice Item'],['Purchase Taxes and Charges','Purchase Taxes and Charges']]"
-		}, function(r,rt) {
-			 loaddoc('Purchase Invoice', n);
-		}
-	);
-}
-
-
-// Stop PURCHASE ORDER
-// ==================================================================================================
 cur_frm.cscript['Stop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to STOP " + doc.name);
@@ -133,8 +120,6 @@ cur_frm.cscript['Stop Purchase Order'] = function() {
 	}
 }
 
-// Unstop PURCHASE ORDER
-// ==================================================================================================
 cur_frm.cscript['Unstop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to UNSTOP " + doc.name);
@@ -146,7 +131,6 @@ cur_frm.cscript['Unstop Purchase Order'] = function() {
 	}
 }
 
-//****************** For print sales order no and date*************************
 cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 	//function to make row of table
 	

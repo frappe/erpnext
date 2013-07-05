@@ -30,7 +30,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		if(this.frm.doc.docstatus == 1) {
 			if(flt(this.frm.doc.per_billed, 2) < 100) {
 				cur_frm.add_custom_button('Make Purchase Invoice', 
-					cur_frm.cscript['Make Purchase Invoice']);
+					this.make_purchase_invoice);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 		}
@@ -68,7 +68,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		wn.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 		
 		if(item.rejected_qty > item.received_qty) {
-			msgprint(wn._("Error") + ": " + wn._(wn.meta.get_label(item.doctype, "rejected_qty", item.name))
+			msgprint(wn._("Error") + ": " + 
+				wn._(wn.meta.get_label(item.doctype, "rejected_qty", item.name))
 				+ " > " + wn._(wn.meta.get_label(item.doctype, "received_qty", item.name)));
 			item.qty = item.rejected_qty = 0.0;
 		} else {
@@ -77,6 +78,21 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		
 		this.qty(doc, cdt, cdn);
 	},
+	
+	make_purchase_invoice: function() {
+		wn.model.open_mapped_doc({
+			method: "stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+			source_name: cur_frm.doc.name
+		})
+	}, 
+	
+	pull_purchase_order_details: function() {
+		wn.model.map_current_doc({
+			method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+			source_name: cur_frm.doc.purchase_order_no,
+		})
+	}
+	
 });
 
 // for backward compatibility: combine new and previous states
@@ -94,17 +110,6 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-// Get Purchase Order Button
-// -----------------
-cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
-	$c_obj(make_doclist(dt,dn),'get_po_details','',function(r,rt) { 
-		cur_frm.refresh_fields();
-	});
-}
-
-
-
-//================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
 	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_supplier = 1;
@@ -112,15 +117,12 @@ cur_frm.cscript.new_contact = function(){
 	loaddoc('Contact', tn);
 }
 
-// ***************** Get project name *****************
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabProject`.name FROM `tabProject` \
 		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
 		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
-
-//========================= Overloaded query for link batch_no =============================================================
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.item_code){
@@ -139,12 +141,11 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	else
 		cur_frm.pformat.print_heading = "Purchase Receipt";
 }
-// ***************** Get Print Heading	*****************
+
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }
 
-//================================= Purchase Order No Get Query ====================================
 cur_frm.fields_dict['purchase_order_no'].get_query = function(doc) {
 	if (doc.supplier)
 		return 'SELECT DISTINCT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`supplier` = "' +doc.supplier + '" and`tabPurchase Order`.`docstatus` = 1 and `tabPurchase Order`.`status` != "Stopped" and ifnull(`tabPurchase Order`.`per_received`, 0) < 99.99	and `tabPurchase Order`.`currency` = ifnull("' +doc.currency+ '","") and `tabPurchase Order`.company = "'+ doc.company +'" and `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50';
@@ -152,36 +153,10 @@ cur_frm.fields_dict['purchase_order_no'].get_query = function(doc) {
 		return 'SELECT DISTINCT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 and `tabPurchase Order`.`company` = "'+ doc.company +'" and `tabPurchase Order`.`status` != "Stopped" and ifnull(`tabPurchase Order`.`per_received`, 0) < 99.99 and `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50';
 }
 
-// QA INspection report get_query
-//---------------------------------
-
 cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
 	return 'SELECT `tabQuality Inspection`.name FROM `tabQuality Inspection` WHERE `tabQuality Inspection`.docstatus = 1 AND `tabQuality Inspection`.%(key)s LIKE "%s"';
 }
 
-// On Button Click Functions
-// ------------------------------------------------------------------------------
-
-
-// ================================ Make Purchase Invoice ==========================================
-cur_frm.cscript['Make Purchase Invoice'] = function() {
-	n = wn.model.make_new_doc_and_get_name('Purchase Invoice');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Purchase Invoice'][n]]),
-		'from_doctype': cur_frm.doc.doctype,
-		'to_doctype':'Purchase Invoice',
-		'from_docname': cur_frm.doc.name,
-		'from_to_list':"[['Purchase Receipt','Purchase Invoice'],['Purchase Receipt Item','Purchase Invoice Item'],['Purchase Taxes and Charges','Purchase Taxes and Charges']]"
-		}, function(r,rt) {
-			loaddoc('Purchase Invoice', n);
-		}
-	);
-}
-
-
-
-
-//****************** For print sales order no and date*************************
 cur_frm.pformat.purchase_order_no = function(doc, cdt, cdn){
 	//function to make row of table
 	

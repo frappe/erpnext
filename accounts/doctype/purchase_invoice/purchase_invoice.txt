@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:38", 
+  "modified": "2013-07-05 14:40:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,7 +30,6 @@
   "parent": "Purchase Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -259,7 +258,6 @@
   "fieldtype": "Button", 
   "label": "Get Items", 
   "oldfieldtype": "Button", 
-  "options": "pull_details", 
   "read_only": 0
  }, 
  {
@@ -828,30 +826,12 @@
   "reqd": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Accounts User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Purchase User", 
-  "submit": 0, 
-  "write": 1
- }, 
- {
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "supplier", 
-  "role": "Supplier", 
+  "permlevel": 1, 
+  "role": "Accounts Manager", 
   "submit": 0, 
   "write": 0
  }, 
@@ -860,6 +840,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Accounts Manager", 
   "submit": 1, 
   "write": 1
@@ -869,8 +850,44 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Auditor", 
+  "permlevel": 1, 
+  "role": "Accounts User", 
   "submit": 0, 
   "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Purchase User", 
+  "submit": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Purchase User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "supplier", 
+  "permlevel": 0, 
+  "role": "Supplier"
  }
 ]
