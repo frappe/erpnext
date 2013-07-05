@@ -176,6 +176,6 @@ def import_defaults():
 	]
 	
 	for r in records:
-		doc = webnotes.doc(r)
-		doc.insert()
-	
+		if not webnotes.conn.exists(r['doctype'], r['name']):
+			bean = webnotes.bean(r)
+			bean.insert()
