@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-25 11:34:53", 
   "docstatus": 0, 
-  "modified": "2013-03-05 15:50:03", 
+  "modified": "2013-07-05 15:02:09", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
   "allow_attach": 0, 
   "doctype": "DocType", 
+  "icon": "icon-upload-alt", 
   "issingle": 1, 
   "max_attachments": 1, 
   "module": "HR", 

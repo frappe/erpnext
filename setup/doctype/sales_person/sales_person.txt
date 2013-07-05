@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:23", 
+  "modified": "2013-07-05 14:54:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "in_create": 1, 
   "module": "Setup", 
   "name": "__common__", 

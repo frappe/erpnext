@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-07-04 10:56:35", 
+  "modified": "2013-07-05 14:54:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "issingle": 0, 
   "module": "Selling", 

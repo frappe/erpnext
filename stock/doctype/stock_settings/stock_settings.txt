@@ -2,13 +2,14 @@
  {
   "creation": "2013-06-24 16:37:54", 
   "docstatus": 0, 
-  "modified": "2013-06-24 17:41:02", 
+  "modified": "2013-07-05 14:56:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "description": "Settings", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Stock", 
   "name": "__common__"

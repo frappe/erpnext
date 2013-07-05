@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-05 10:14:59", 
   "docstatus": 0, 
-  "modified": "2013-03-28 07:18:24", 
+  "modified": "2013-07-05 14:23:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:activity_type", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-flag", 
   "in_dialog": 0, 
   "module": "Projects", 
   "name": "__common__"

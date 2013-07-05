@@ -2,13 +2,14 @@
  {
   "creation": "2013-04-30 13:13:03", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:05:29", 
+  "modified": "2013-07-05 14:52:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-search", 
   "is_submittable": 1, 
   "module": "Buying", 
   "name": "__common__", 

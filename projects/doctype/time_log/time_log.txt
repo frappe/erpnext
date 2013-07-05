@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-03 16:38:41", 
   "docstatus": 0, 
-  "modified": "2013-04-03 15:51:32", 
+  "modified": "2013-07-05 14:58:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Log of Activities performed by users against Tasks that can be used for tracking time, billing.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-time", 
   "is_submittable": 1, 
   "module": "Projects", 
   "name": "__common__"

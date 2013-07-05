@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-12 15:34:06", 
   "docstatus": 0, 
-  "modified": "2013-06-13 14:40:04", 
+  "modified": "2013-07-05 14:54:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "in_create": 0, 
   "module": "Setup", 
   "name": "__common__", 

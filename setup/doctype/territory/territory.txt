@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:26", 
+  "modified": "2013-07-05 14:58:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Classification of Customers by region", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-map-marker", 
   "in_create": 1, 
   "module": "Setup", 
   "name": "__common__", 

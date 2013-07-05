@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-04 10:24:53", 
+  "modified": "2013-07-05 14:46:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "allow_print": 0, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-ticket", 
   "is_submittable": 1, 
   "module": "Stock", 
   "name": "__common__", 

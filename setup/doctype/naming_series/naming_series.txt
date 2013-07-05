@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:08", 
   "docstatus": 0, 
-  "modified": "2013-05-02 15:34:41", 
+  "modified": "2013-07-05 14:46:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "doctype": "DocType", 
   "hide_heading": 0, 
   "hide_toolbar": 1, 
+  "icon": "icon-sort-by-order", 
   "issingle": 1, 
   "module": "Setup", 
   "name": "__common__", 

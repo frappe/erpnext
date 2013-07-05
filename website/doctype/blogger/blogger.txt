@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 16:00:51", 
   "docstatus": 0, 
-  "modified": "2013-03-29 10:37:37", 
+  "modified": "2013-07-05 14:27:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Profile of a Blogger", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "max_attachments": 1, 
   "module": "Website", 
   "name": "__common__"

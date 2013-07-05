@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:54", 
   "docstatus": 0, 
-  "modified": "2013-03-28 07:18:30", 
+  "modified": "2013-07-05 14:28:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:brand", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-certificate", 
   "in_dialog": 0, 
   "module": "Setup", 
   "name": "__common__"

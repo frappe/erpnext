@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:04:45", 
+  "modified": "2013-07-05 14:50:27", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
  {
   "autoname": "PCE/.###", 
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "Accounts", 
   "name": "__common__", 

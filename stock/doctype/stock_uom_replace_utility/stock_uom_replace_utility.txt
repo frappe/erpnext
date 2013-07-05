@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:57:23", 
+  "modified": "2013-07-05 14:56:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "DocType", 
+  "icon": "icon-magic", 
   "in_create": 0, 
   "issingle": 1, 
   "module": "Stock", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-01 10:36:25", 
   "docstatus": 0, 
-  "modified": "2013-07-05 12:27:54", 
+  "modified": "2013-07-05 14:57:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-ticket", 
   "module": "Support", 
   "name": "__common__", 
   "search_fields": "status,customer,allocated_to,subject,raised_by"

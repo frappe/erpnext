@@ -2,13 +2,14 @@
  {
   "creation": "2013-06-24 15:49:57", 
   "docstatus": 0, 
-  "modified": "2013-06-24 16:12:29", 
+  "modified": "2013-07-05 14:23:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "description": "Settings for Accounts", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Accounts", 
   "name": "__common__"

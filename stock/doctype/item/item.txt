@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-07-05 10:24:36", 
+  "modified": "2013-07-05 14:43:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,6 +14,7 @@
   "description": "A Product or a Service that is bought, sold or kept in stock.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-circle", 
   "max_attachments": 1, 
   "module": "Stock", 
   "name": "__common__", 

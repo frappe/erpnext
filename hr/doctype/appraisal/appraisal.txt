@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:12", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:06:06", 
+  "modified": "2013-07-05 14:24:59", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
  {
   "autoname": "APRSL.#####", 
   "doctype": "DocType", 
+  "icon": "icon-thumbs-up", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 

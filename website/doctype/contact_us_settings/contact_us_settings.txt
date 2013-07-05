@@ -2,13 +2,14 @@
  {
   "creation": "2013-02-21 20:12:42", 
   "docstatus": 0, 
-  "modified": "2013-03-12 14:49:01", 
+  "modified": "2013-07-05 14:32:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "description": "Settings for Contact Us Page", 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"

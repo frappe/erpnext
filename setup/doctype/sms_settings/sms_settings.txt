@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:24", 
+  "modified": "2013-07-05 14:55:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "allow_email": 1, 
   "allow_print": 1, 
   "doctype": "DocType", 
+  "icon": "icon-cog", 
   "in_create": 0, 
   "issingle": 1, 
   "module": "Setup", 

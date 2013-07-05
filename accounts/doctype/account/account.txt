@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-02-05 15:38:32", 
+  "modified": "2013-07-05 14:23:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-money", 
   "in_create": 1, 
   "module": "Accounts", 
   "name": "__common__", 

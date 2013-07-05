@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 12:31:46", 
+  "modified": "2013-07-05 14:34:37", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-bug", 
   "is_submittable": 1, 
   "module": "Support", 
   "name": "__common__", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-04-01 12:06:52", 
+  "modified": "2013-07-05 14:43:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Item Classification", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-sitemap", 
   "in_create": 1, 
   "issingle": 0, 
   "max_attachments": 3, 

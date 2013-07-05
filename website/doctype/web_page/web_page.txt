@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:30", 
   "docstatus": 0, 
-  "modified": "2013-03-11 17:41:11", 
+  "modified": "2013-07-05 15:02:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Page to show on the website\n", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-file-alt", 
   "max_attachments": 20, 
   "module": "Website", 
   "name": "__common__"
@@ -148,7 +149,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "", 
   "permlevel": 1
  }
 ]

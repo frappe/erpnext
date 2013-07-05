@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2013-05-09 13:31:00", 
+  "modified": "2013-07-05 14:56:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,6 +16,7 @@
   "doctype": "DocType", 
   "hide_heading": 0, 
   "hide_toolbar": 0, 
+  "icon": "icon-file-text", 
   "in_create": 0, 
   "in_dialog": 0, 
   "is_submittable": 1, 

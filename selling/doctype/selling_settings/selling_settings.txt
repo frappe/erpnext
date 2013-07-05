@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 10:25:16", 
   "docstatus": 0, 
-  "modified": "2013-06-25 10:52:35", 
+  "modified": "2013-07-05 14:54:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "description": "Settings for Selling Module", 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "Selling", 
   "name": "__common__"

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:06:17", 
+  "modified": "2013-07-05 14:25:19", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-ok", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 

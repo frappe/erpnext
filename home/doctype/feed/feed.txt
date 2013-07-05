@@ -2,18 +2,16 @@
  {
   "creation": "2012-07-03 13:29:42", 
   "docstatus": 0, 
-  "modified": "2012-10-15 15:23:02", 
+  "modified": "2013-07-05 14:38:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "_FEED.#####", 
   "doctype": "DocType", 
+  "icon": "icon-rss", 
   "module": "Home", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 

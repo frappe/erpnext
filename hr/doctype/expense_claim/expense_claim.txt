@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-06-11 16:16:35", 
+  "modified": "2013-07-05 14:36:59", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
   "autoname": "EXP.######", 
   "doctype": "DocType", 
+  "icon": "icon-money", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-07-05 10:43:08", 
+  "modified": "2013-07-05 14:34:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "doctype": "DocType", 
   "document_type": "Transaction", 
   "hide_toolbar": 0, 
+  "icon": "icon-truck", 
   "in_create": 0, 
   "is_submittable": 1, 
   "module": "Stock", 

@@ -2,13 +2,14 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-07-05 10:27:45", 
+  "modified": "2013-07-05 14:43:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "Accounts", 
   "name": "__common__", 

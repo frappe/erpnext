@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-07-03 10:26:04", 
+  "modified": "2013-07-05 14:34:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Buyer of Goods and Services.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "module": "Selling", 
   "name": "__common__", 
   "search_fields": "customer_name,customer_group,country,territory"
