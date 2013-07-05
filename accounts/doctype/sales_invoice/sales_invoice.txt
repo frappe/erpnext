@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-06-27 11:35:29", 
+  "modified": "2013-07-05 10:37:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -38,6 +38,13 @@
  {
   "doctype": "DocType", 
   "name": "Sales Invoice"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer", 
+  "options": "icon-user"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -94,38 +101,34 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Address", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
-  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -135,6 +138,16 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_pos", 
+  "fieldtype": "Check", 
+  "label": "Is POS", 
+  "oldfieldname": "is_pos", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -207,29 +220,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "is_pos", 
-  "fieldtype": "Check", 
-  "label": "Is POS", 
-  "oldfieldname": "is_pos", 
-  "oldfieldtype": "Check", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "update_stock", 
-  "fieldtype": "Check", 
-  "label": "Update Stock", 
-  "oldfieldname": "update_stock", 
-  "oldfieldtype": "Check", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "currency_section", 
   "fieldtype": "Section Break", 
   "label": "Price List and Currency", 
+  "options": "icon-tag", 
   "read_only": 0
  }, 
  {
@@ -304,6 +298,17 @@
   "fieldtype": "Section Break", 
   "label": "Items", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update_stock", 
+  "fieldtype": "Check", 
+  "label": "Update Stock", 
+  "oldfieldname": "update_stock", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -323,6 +328,7 @@
   "fieldname": "packing_list", 
   "fieldtype": "Section Break", 
   "label": "Packing List", 
+  "options": "icon-suitcase", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -347,7 +353,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "read_only": 0
  }, 
  {
@@ -426,6 +431,7 @@
   "fieldtype": "Section Break", 
   "label": "Taxes and Charges", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -524,6 +530,7 @@
   "fieldtype": "Section Break", 
   "label": "Totals", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -657,6 +664,7 @@
   "fieldtype": "Section Break", 
   "label": "Advances", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -686,6 +694,7 @@
   "fieldname": "payments_section", 
   "fieldtype": "Section Break", 
   "label": "Payments", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -765,6 +774,7 @@
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-legal", 
   "read_only": 0
  }, 
  {
@@ -813,6 +823,7 @@
   "fieldtype": "Section Break", 
   "hidden": 0, 
   "label": "Contact Info", 
+  "options": "icon-bullhorn", 
   "read_only": 0
  }, 
  {
@@ -869,6 +880,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1033,6 +1045,7 @@
   "fieldtype": "Section Break", 
   "label": "Sales Team", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1091,7 +1104,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break2", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1112,6 +1124,7 @@
   "fieldname": "recurring_invoice", 
   "fieldtype": "Section Break", 
   "label": "Recurring Invoice", 
+  "options": "icon-time", 
   "print_hide": 1, 
   "read_only": 0
  }, 

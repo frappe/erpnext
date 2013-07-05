@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-07-01 11:45:59", 
+  "modified": "2013-07-05 10:24:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,11 +44,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "item", 
+  "fieldname": "name_and_description_section", 
   "fieldtype": "Section Break", 
-  "label": "Item", 
+  "label": "Name and Description", 
   "no_copy": 0, 
   "oldfieldtype": "Section Break", 
+  "options": "icon-flag", 
   "read_only": 0
  }, 
  {
@@ -188,6 +189,7 @@
   "fieldtype": "Section Break", 
   "label": "Inventory", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-truck", 
   "read_only": 0
  }, 
  {
@@ -343,6 +345,7 @@
   "fieldname": "reorder_section", 
   "fieldtype": "Section Break", 
   "label": "Re-order", 
+  "options": "icon-rss", 
   "read_only": 0
  }, 
  {
@@ -367,7 +370,6 @@
   "doctype": "DocField", 
   "fieldname": "section_break_31", 
   "fieldtype": "Section Break", 
-  "options": "Simple", 
   "read_only": 0
  }, 
  {
@@ -384,6 +386,7 @@
   "fieldtype": "Section Break", 
   "label": "Purchase Details", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
   "read_only": 0
  }, 
  {
@@ -508,6 +511,7 @@
   "fieldtype": "Section Break", 
   "label": "Sales Details", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-tag", 
   "read_only": 0
  }, 
  {
@@ -617,6 +621,7 @@
   "fieldtype": "Section Break", 
   "label": "Item Tax", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -634,6 +639,7 @@
   "fieldname": "price_list_section", 
   "fieldtype": "Section Break", 
   "label": "Price Lists and Rates", 
+  "options": "icon-money", 
   "read_only": 0
  }, 
  {
@@ -653,6 +659,7 @@
   "fieldtype": "Section Break", 
   "label": "Inspection Criteria", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-search", 
   "read_only": 0
  }, 
  {
@@ -686,6 +693,7 @@
   "fieldtype": "Section Break", 
   "label": "Manufacturing", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-cogs", 
   "read_only": 0
  }, 
  {
@@ -756,6 +764,7 @@
   "fieldname": "website_section", 
   "fieldtype": "Section Break", 
   "label": "Website", 
+  "options": "icon-globe", 
   "read_only": 0
  }, 
  {
