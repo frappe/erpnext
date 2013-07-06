@@ -35,6 +35,13 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
 				'territory', 'customer_group']);
 		}
+	}, 
+	
+	create_quotation: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.opportunity.opportunity.make_quotation",
+			source_name: cur_frm.doc.name
+		})
 	}
 });
 
@@ -54,7 +61,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	
 	cur_frm.clear_custom_buttons();
 	if(doc.docstatus === 1 && doc.status!=="Opportunity Lost") {
-		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript['Create Quotation']);
+		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript.create_quotation);
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
@@ -168,24 +175,15 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
 	
-	if(doc.lead) {
-		cur_frm.call({
-			doc: cur_frm.doc,
-			method: "set_lead_defaults",
-			callback: function(r) {
-				if(!r.exc) {
-					cur_frm.refresh_fields();
-				}
-			}
-		});
-		unhide_field(['customer_name', 'address_display','contact_mobile', 'contact_email', 
-			'territory']);	
-	}
+	wn.model.map_current_doc({
+		method: "selling.doctype.lead.lead.make_opportunity",
+		source_name: cur_frm.doc.lead
+	})
+	
+	unhide_field(['customer_name', 'address_display','contact_mobile', 
+		'contact_email', 'territory']);	
 }
 
-
-//item getquery
-//=======================================
 cur_frm.fields_dict['enquiry_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	if (doc.enquiry_type == 'Maintenance')
 	 	return erpnext.queries.item({
@@ -197,25 +195,6 @@ cur_frm.fields_dict['enquiry_details'].grid.get_field('item_code').get_query = f
 		});
 }
 
-// Create New Quotation
-cur_frm.cscript['Create Quotation'] = function(){
-	n = wn.model.make_new_doc_and_get_name("Quotation");
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals["Quotation"][n]]),
-		'from_doctype':'Opportunity',
-		'to_doctype':'Quotation',
-		'from_docname':cur_frm.docname,
-		'from_to_list':"[['Opportunity', 'Quotation'],['Opportunity Item','Quotation Item']]"
-	}
-	, function(r,rt) {
-		loaddoc("Quotation", n);
-		}
-	);
-}
-
-
-// declare enquiry	lost
-//-------------------------
 cur_frm.cscript['Declare Opportunity Lost'] = function(){
 	var dialog = new wn.ui.Dialog({
 		title: "Set as Lost",

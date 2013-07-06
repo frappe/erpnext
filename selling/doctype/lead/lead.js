@@ -55,8 +55,8 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 		
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
 		if(!this.frm.doc.__islocal && !this.frm.__is_customer) {
-			this.frm.add_custom_button("Create Customer", this.frm.cscript['Create Customer']);
-			this.frm.add_custom_button("Create Opportunity", this.frm.cscript['Create Opportunity']);
+			this.frm.add_custom_button("Create Customer", this.create_customer);
+			this.frm.add_custom_button("Create Opportunity", this.create_opportunity);
 			this.frm.add_custom_button("Send SMS", this.frm.cscript.send_sms);
 		}
 		
@@ -93,21 +93,21 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 			// note: render_address_row is defined in contact_control.js
 		}
 		this.frm.address_list.run();
+	}, 
+	
+	create_customer: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.lead.lead.make_customer",
+			source_name: cur_frm.doc.name
+		})
+	}, 
+	
+	create_opportunity: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.lead.lead.make_opportunity",
+			source_name: cur_frm.doc.name
+		})
 	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
-
-cur_frm.cscript['Create Customer'] = function(){
-	wn.model.open_mapped_doc({
-		method: "selling.doctype.lead.lead.make_customer",
-		source_name: cur_frm.doc.name
-	})
-}
-
-cur_frm.cscript['Create Opportunity'] = function(){
-	wn.model.open_mapped_doc({
-		method: "selling.doctype.lead.lead.make_opportunity",
-		source_name: cur_frm.doc.name
-	})
-}

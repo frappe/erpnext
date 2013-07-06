@@ -66,7 +66,6 @@ class DocType(TransactionBase):
 
 			contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
-			
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
 			ret['email_id']			 = contact_det and contact_det[0]['email_id'] or ''
@@ -176,3 +175,31 @@ class DocType(TransactionBase):
 
 	def on_trash(self):
 		self.delete_events()
+		
+@webnotes.whitelist()
+def make_quotation(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	doclist = get_mapped_doclist("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Quotation", 
+			"field_map": {
+				"enquiry_from": "quotation_to", 
+				"enquiry_type": "order_type", 
+				"name": "enq_no", 
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Opportunity Item": {
+			"doctype": "Quotation Item", 
+			"field_map": {
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"uom": "stock_uom"
+			}
+		}
+	}, target_doclist)
+		
+	return [d.fields for d in doclist]
