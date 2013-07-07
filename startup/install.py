@@ -135,7 +135,7 @@ def import_defaults():
 			
 		# supplier type
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
-
+		
 		# warehouse type
 		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
 		{'doctype': 'Warehouse Type', 'name': 'Fixed Asset', 'warehouse_type': 'Fixed Asset'},
@@ -170,6 +170,6 @@ def import_defaults():
 	]
 	
 	for r in records:
-		bean = webnotes.bean(r)
-		bean.insert()
-	
+		if not webnotes.conn.exists(r['doctype'], r['name']):
+			bean = webnotes.bean(r)
+			bean.insert()
