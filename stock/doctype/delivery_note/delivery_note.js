@@ -29,7 +29,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		
-		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
+		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
 
@@ -45,6 +45,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
+	}, 
+	
+	get_items: function() {
+		wn.model.map_current_doc({
+			method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+			source_name: cur_frm.doc.sales_order_no,
+		})
+	},
+	
+	make_sales_invoice: function() {
+		wn.model.open_mapped_doc({
+			method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			source_name: cur_frm.doc.name
+		})
 	}
 });
 
@@ -55,16 +69,6 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-
-cur_frm.cscript.get_items = function(doc,dt,dn) {
-	wn.model.map_current_doc({
-		method: "selling.doctype.sales_order.sales_order.make_delivery_note",
-		source_name: cur_frm.doc.sales_order_no,
-	})
-}
-
-
-//================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
 	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;

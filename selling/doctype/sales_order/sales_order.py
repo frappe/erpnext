@@ -39,18 +39,6 @@ class DocType(SellingController):
 		self.person_tname = 'Target Detail'
 		self.partner_tname = 'Partner Target Detail'
 		self.territory_tname = 'Territory Target Detail'
-		
-	def pull_quotation_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'other_charges')
-		self.doclist = self.doc.clear_table(self.doclist, 'sales_order_details')
-		self.doclist = self.doc.clear_table(self.doclist, 'sales_team')
-		self.doclist = self.doc.clear_table(self.doclist, 'tc_details')
-		if self.doc.quotation_no:				
-			get_obj('DocType Mapper', 'Quotation-Sales Order').dt_map('Quotation', 'Sales Order', self.doc.quotation_no, self.doc, self.doclist, "[['Quotation', 'Sales Order'],['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team'],['TC Detail','TC Detail']]")			
-		else:
-			msgprint("Please select Quotation whose details need to pull")		
-
-		return cstr(self.doc.quotation_no)
 	
 	def get_contact_details(self):
 		get_obj('Sales Common').get_contact_details(self,0)
@@ -406,7 +394,7 @@ def make_material_request(source_name, target_doclist=None):
 def make_delivery_note(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
-	def update_item(obj, target):
+	def update_item(obj, target, source_parent):
 		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
 		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
 		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
@@ -472,7 +460,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"reserved_warehouse": "warehouse"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.amount
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

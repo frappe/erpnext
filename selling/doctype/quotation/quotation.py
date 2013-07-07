@@ -280,4 +280,6 @@ def make_sales_order(source_name, target_doclist=None):
 			}
 		}, target_doclist)
 		
+	# postprocess: fetch shipping address, set missing values
+		
 	return [d.fields for d in doclist]

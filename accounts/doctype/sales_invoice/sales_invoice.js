@@ -194,7 +194,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	if(doc.delivery_note_main) {
 		wn.model.map_current_doc({
-			method: "selling.doctype.delivery_note.delivery_note.make_sales_invoice",
+			method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_name: cur_frm.doc.delivery_note_main,
 		})
 	}

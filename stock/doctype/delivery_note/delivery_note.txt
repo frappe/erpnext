@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:34:50", 
+  "modified": "2013-07-06 19:04:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,7 +34,6 @@
   "parent": "Delivery Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -401,7 +400,6 @@
   "hidden": 0, 
   "label": "Get Items", 
   "oldfieldtype": "Button", 
-  "options": "pull_sales_order_details", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -1127,39 +1125,83 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Material User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Material Manager", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Material Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 0, 
   "write": 0
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Accounts User", 
+  "submit": 0
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "customer_name", 
+  "permlevel": 0, 
   "role": "Customer"
  }
 ]

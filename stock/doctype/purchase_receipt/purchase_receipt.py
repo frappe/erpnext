@@ -360,7 +360,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"purchase_rate": "rate"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.amount
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 

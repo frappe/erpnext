@@ -42,21 +42,23 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
-					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+					cur_frm.add_custom_button('Make Delivery', this.make_delivery_note);
 			
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
-					cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
-					cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
+					cur_frm.add_custom_button('Make Maint. Visit', this.make_maintenance_visit);
+					cur_frm.add_custom_button('Make Maint. Schedule', 
+						this.make_maintainance_schedule);
 				}
 
 				// indent
 				if(!doc.order_type || (doc.order_type == 'Sales'))
-					cur_frm.add_custom_button('Make ' + wn._('Material Request'), cur_frm.cscript['Make Material Request']);
+					cur_frm.add_custom_button('Make ' + wn._('Material Request'), 
+						this.make_material_request);
 			
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100)
-					cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
+					cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
 			
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
@@ -78,6 +80,39 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	reserved_warehouse: function(doc, cdt, cdn) {
 		this.warehouse(doc, cdt, cdn);
 	},
+	
+	make_material_request: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.sales_order.sales_order.make_material_request",
+			source_name: cur_frm.doc.name
+		})
+	},
+
+	make_delivery_note: function() {
+		console.log(cur_frm.doc.name);
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+			source_name: cur_frm.doc.name
+		})
+	},
+
+	make_sales_invoice: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.quotation.quotation.make_quotation",
+			source_name: cur_frm.doc.name
+		})
+	},
+	
+	pull_quotation_details: function() {
+		
+		wn.model.map_current_doc({
+			method: "selling.doctype.quotation.quotation.make_sales_order",
+			source_name: cur_frm.doc.quotation_no,
+		});
+		unhide_field(['quotation_date', 'customer_address', 
+			'contact_person', 'territory', 'customer_group']);
+	}
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -85,23 +120,6 @@ $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
-cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
-	var callback = function(r,rt){
-		var doc = locals[cur_frm.doctype][cur_frm.docname];					
-		if(!r.exc){							
-			doc.quotation_no = r.message;			
-			if(doc.quotation_no) {					
-				unhide_field(['quotation_date', 'customer_address', 
-					'contact_person', 'territory', 'customer_group']);
-				if(doc.customer) get_server_fields('get_shipping_address', doc.customer, '', doc, dt, dn, 0);
-			}			
-			cur_frm.refresh_fields();
-		}
-	} 
-
- $c_obj(make_doclist(doc.doctype, doc.name),'pull_quotation_details','',callback);
 }
 
 
@@ -192,29 +210,6 @@ cur_frm.cscript.make_maintenance_visit = function() {
 			}
 		);
 	}
-}
-
-cur_frm.cscript['Make Material Request'] = function() {
-	wn.model.open_mapped_doc({
-		method: "selling.doctype.sales_order.sales_order.make_material_request",
-		source_name: cur_frm.doc.name
-	})
-}
-
-
-cur_frm.cscript['Make Delivery Note'] = function() {
-	wn.model.open_mapped_doc({
-		method: "selling.doctype.sales_order.sales_order.make_delivery_note",
-		source_name: cur_frm.doc.name
-	})
-}
-
-
-cur_frm.cscript['Make Sales Invoice'] = function() {
-	wn.model.open_mapped_doc({
-		method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
-		source_name: cur_frm.doc.name
-	})
 }
 
 

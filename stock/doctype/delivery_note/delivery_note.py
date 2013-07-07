@@ -363,3 +363,48 @@ class DocType(SellingController):
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
+
+@webnotes.whitelist()
+def make_sales_invoice(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def update_item(obj, target, source_parent):
+		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.amount = target.export_amount / flt(source_parent.conversion_rate)
+		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
+		
+	def update_accounts(source, target):
+		si = webnotes.bean(target)
+		si.run_method("update_accounts")
+	
+	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Sales Invoice", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Delivery Note Item": {
+			"doctype": "Sales Invoice Item", 
+			"field_map": {
+				"name": "dn_detail", 
+				"parent": "delivery_note", 
+				"prevdoc_detail_docname": "so_detail", 
+				"prevdoc_docname": "sales_order", 
+				"serial_no": "serial_no"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team", 
+			"field_map": {
+				"incentives": "incentives"
+			}
+		}
+	}, target_doclist, update_accounts)
+	
+	return [d.fields for d in doclist]
