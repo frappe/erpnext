@@ -19,11 +19,7 @@ import webnotes
 
 from webnotes.utils import cstr, flt, getdate
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
-
-sql = webnotes.conn.sql
-
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -39,23 +35,18 @@ class DocType:
 		self.calculate_total()
 
 	def get_employee_name(self):
-		emp_nm = sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
+		emp_nm = webnotes.conn.sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
 		emp_nm= emp_nm and emp_nm[0][0] or ''
 		self.doc.employee_name = emp_nm
 		return emp_nm
-	
-	def fetch_kra(self):
-		self.doclist = self.doc.clear_table(self.doclist,'appraisal_details')
-		get_obj('DocType Mapper', 'Appraisal Template-Appraisal').dt_map('Appraisal Template', 'Appraisal', 
-			self.doc.kra_template, self.doc, self.doclist, "[['Appraisal Template','Appraisal'],['Appraisal Template Goal', 'Appraisal Goal']]")
-	
+		
 	def validate_dates(self):
 		if getdate(self.doc.start_date) > getdate(self.doc.end_date):
 			msgprint("End Date can not be less than Start Date")
 			raise Exception
 	
 	def validate_existing_appraisal(self):
-		chk = sql("""select name from `tabAppraisal` where employee=%s 
+		chk = webnotes.conn.sql("""select name from `tabAppraisal` where employee=%s 
 			and (status='Submitted' or status='Completed') 
 			and ((start_date>=%s and start_date<=%s) 
 			or (end_date>=%s and end_date<=%s))""",(self.doc.employee,self.doc.start_date,self.doc.end_date,self.doc.start_date,self.doc.end_date))
@@ -88,3 +79,18 @@ class DocType:
 	
 	def on_cancel(self): 
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+
+@webnotes.whitelist()
+def fetch_appraisal_template(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	doclist = get_mapped_doclist("Appraisal Template", source_name, {
+		"Appraisal Template": {
+			"doctype": "Appraisal", 
+		}, 
+		"Appraisal Template Goal": {
+			"doctype": "Appraisal Goal", 
+		}
+	}, target_doclist)
+
+	return [d.fields for d in doclist]

@@ -22,6 +22,8 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
+from webnotes.model.mapper import get_mapped_doclist
+
 
 
 sql = webnotes.conn.sql
@@ -365,9 +367,7 @@ class DocType(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 @webnotes.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
-	
+def make_sales_invoice(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
 		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount / flt(source_parent.conversion_rate)
@@ -406,5 +406,36 @@ def make_sales_invoice(source_name, target_doclist=None):
 			}
 		}
 	}, target_doclist, update_accounts)
+	
+	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_installation_note(source_name, target_doclist=None):
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) - flt(obj.installed_qty)
+	
+	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Installation Note Item", 
+			"field_map": {
+				"name": "delivery_note_no", 
+				"posting_date": "prevdoc_date"
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Delivery Note Item": {
+			"doctype": "Installation Note Item", 
+			"field_map": {
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"serial_no": "serial_no"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.installed_qty < doc.qty
+		}
+	}, target_doclist)
 	
 	return [d.fields for d in doclist]

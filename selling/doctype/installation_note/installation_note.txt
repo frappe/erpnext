@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:40:56", 
+  "modified": "2013-07-07 18:10:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,20 +23,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Installation Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "role": "Sales User", 
-  "submit": 1, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -267,7 +260,6 @@
   "hidden": 0, 
   "label": "Get Items", 
   "oldfieldtype": "Button", 
-  "options": "pull_delivery_note_details", 
   "print_hide": 1
  }, 
  {
@@ -280,6 +272,60 @@
   "options": "Installation Note Item"
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "System Manager", 
+  "submit": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales User", 
+  "submit": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales Manager", 
+  "submit": 0
  }
 ]

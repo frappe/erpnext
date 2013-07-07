@@ -250,4 +250,5 @@ patch_list = [
 	"patches.june_2013.p08_shopping_cart_settings",
 	"patches.june_2013.p09_update_global_defaults",
 	"patches.june_2013.p10_lead_address",
+	"patches.july_2013.p01_remove_doctype_mappers",
 ]

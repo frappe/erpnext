@@ -95,3 +95,40 @@ class DocType:
 	def validate(self):	 
 		self.check_existing()
 		self.validate_amount()
+		
+@webnotes.whitelist()
+def make_salary_slip(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def postprocess(source, target):
+		emp = webnotes.conn.get_value("Employee", source.doc.employee, 
+			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
+		if emp:
+			target[0].bank_name = emp.bank_name
+			target[0].bank_ac_no = emp.bank_ac_no
+			target[0].esic_no = emp.esic_card_no
+			target[0].pf_no = emp.pf_number
+				
+	doclist = get_mapped_doclist("Salary Structure", source_name, {
+		"Salary Structure": {
+			"doctype": "Salary Slip", 
+			"field_map": {
+				"total_earning": "gross_pay"
+			}
+		}, 
+		"Salary Structure Deduction": {
+			"doctype": "Salary Slip Deduction", 
+			"field_map": {
+				"depend_on_lwp": "d_depends_on_lwp"
+			}
+		}, 
+		"Salary Structure Earning": {
+			"doctype": "Salary Slip Earning", 
+			"field_map": {
+				"depend_on_lwp": "e_depends_on_lwp", 
+				"modified_value": "e_modified_amount"
+			}
+		}
+	}, target_doclist, postprocess)
+
+	return [d.fields for d in doclist]

@@ -36,6 +36,14 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
 				'territory', 'customer_group']);
 		}
+	}, 
+	get_items: function() {
+		wn.model.map_current_doc({
+			method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+			source_name: cur_frm.doc.delivery_note_no,
+		})
+		unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 
+			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	}
 });
 
@@ -64,14 +72,6 @@ cur_frm.fields_dict['delivery_note_no'].get_query = function(doc) {
 
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
-}
-
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-	var callback = function(r,rt) { 
-		unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-		cur_frm.refresh();
-	}
-	get_server_fields('pull_delivery_note_details','','',doc, dt, dn,1,callback);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		

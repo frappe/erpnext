@@ -31,7 +31,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		
 		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
 	
-		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
+		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
+			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
 
 		if (doc.docstatus==1) cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
@@ -59,7 +60,15 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_name: cur_frm.doc.name
 		})
+	}, 
+	
+	make_installation_note: function() {
+		wn.model.open_mapped_doc({
+			method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+			source_name: cur_frm.doc.name
+		});
 	}
+	
 });
 
 // for backward compatibility: combine new and previous states
@@ -112,40 +121,6 @@ cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 	return 'SELECT DISTINCT `tabSupplier`.`name` FROM `tabSupplier` WHERE `tabSupplier`.supplier_type = "transporter" AND `tabSupplier`.docstatus != 2 AND `tabSupplier`.%(key)s LIKE "%s" ORDER BY `tabSupplier`.`name` LIMIT 50';
-}
-
-cur_frm.cscript['Make Sales Invoice'] = function() {
-	var doc = cur_frm.doc
-	n = wn.model.make_new_doc_and_get_name('Sales Invoice');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Sales Invoice'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Sales Invoice',
-		'from_docname':doc.name,
-		'from_to_list':"[['Delivery Note','Sales Invoice'],['Delivery Note Item','Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
-		}, function(r,rt) {
-			 loaddoc('Sales Invoice', n);
-		}
-	);
-}
-
-cur_frm.cscript['Make Installation Note'] = function() {
-	var doc = cur_frm.doc;
-	if(doc.per_installed < 99.99){
-		n = wn.model.make_new_doc_and_get_name('Installation Note');
-		$c('dt_map', args={
-			'docs':wn.model.compress([locals['Installation Note'][n]]),
-			'from_doctype':doc.doctype,
-			'to_doctype':'Installation Note',
-			'from_docname':doc.name,
-			'from_to_list':"[['Delivery Note','Installation Note'],['Delivery Note Item','Installation Note Item']]"
-			}, function(r,rt) {
-				 loaddoc('Installation Note', n);
-			}
-		);
-	}
-	else if(doc.per_installed >= 100)
-		msgprint("Item installation is already completed")
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
