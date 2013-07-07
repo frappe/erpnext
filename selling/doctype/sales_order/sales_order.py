@@ -23,6 +23,7 @@ from webnotes.utils import cstr, flt, getdate
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from webnotes.model.mapper import get_mapped_doclist
 
 sql = webnotes.conn.sql
 	
@@ -54,20 +55,6 @@ class DocType(SellingController):
 	
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
-
-	def check_maintenance_schedule(self):
-		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
-		nm = nm and nm[0][0] or ''
-		
-		if not nm:
-			return 'No'
-
-	def check_maintenance_visit(self):
-		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
-		nm = nm and nm[0][0] or ''
-		
-		if not nm:
-			return 'No'
 
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Sales Order Date')
@@ -365,9 +352,7 @@ def get_currency_and_number_format():
 	}
 	
 @webnotes.whitelist()
-def make_material_request(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
-	
+def make_material_request(source_name, target_doclist=None):	
 	def postprocess(source, doclist):
 		doclist[0].material_request_type = "Purchase"
 	
@@ -391,9 +376,7 @@ def make_material_request(source_name, target_doclist=None):
 	return [d.fields for d in doclist]
 
 @webnotes.whitelist()
-def make_delivery_note(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
-	
+def make_delivery_note(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
 		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
 		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
@@ -433,9 +416,7 @@ def make_delivery_note(source_name, target_doclist=None):
 	return [d.fields for d in doclist]
 
 @webnotes.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
-	
+def make_sales_invoice(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
 		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount / flt(source_parent.conversion_rate)
@@ -471,3 +452,59 @@ def make_sales_invoice(source_name, target_doclist=None):
 	}, target_doclist, update_accounts)
 	
 	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_maintenance_schedule(source_name, target_doclist=None):
+	maint_schedule = webnotes.conn.sql("""select t1.name 
+		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 
+		where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1""", source_name)
+		
+	if not maint_schedule:
+		doclist = get_mapped_doclist("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Maintenance Schedule", 
+				"field_map": {
+					"name": "sales_order_no"
+				}, 
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Sales Order Item": {
+				"doctype": "Maintenance Schedule Item", 
+				"field_map": {
+					"parent": "prevdoc_docname"
+				}
+			}
+		}, target_doclist)
+	
+		return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_maintenance_visit(source_name, target_doclist=None):
+	visit = webnotes.conn.sql("""select t1.name 
+		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 
+		where t2.parent=t1.name and t2.prevdoc_docname=%s 
+		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
+		
+	if not visit:
+		doclist = get_mapped_doclist("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Maintenance Visit", 
+				"field_map": {
+					"name": "sales_order_no"
+				},
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Sales Order Item": {
+				"doctype": "Maintenance Visit Purpose", 
+				"field_map": {
+					"parent": "prevdoc_docname", 
+					"parenttype": "prevdoc_doctype"
+				}
+			}
+		}, target_doclist)
+	
+		return [d.fields for d in doclist]

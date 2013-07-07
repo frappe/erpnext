@@ -34,6 +34,15 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 				'territory', 'customer_group']);
 			
 		}
+	}, 
+	
+	get_items: function() {
+		wn.model.map_current_doc({
+			method: "selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+			source_name: cur_frm.doc.quotation_no,
+		});
+		unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 
+			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	}
 });
 
@@ -65,16 +74,6 @@ cur_frm.fields_dict['item_maintenance_detail'].grid.get_field('item_code').get_q
   return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 }
 
-// Get Items based on SO Selected
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-  var callback = function(r,rt) { 
-	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-	  cur_frm.refresh();
-  }
-  get_server_fields('pull_sales_order_detail','','',doc, dt, dn,1,callback);
-}
-
-
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
   var fname = cur_frm.cscript.fname;
   var d = locals[cdt][cdn];
@@ -82,17 +81,6 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
     get_server_fields('get_item_details',d.item_code, 'item_maintenance_detail',doc,cdt,cdn,1);
   }
 }
-
-/*
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT `tabContact`.contact_name FROM `tabContact` WHERE `tabContact`.is_customer = 1 AND `tabContact`.customer = "'+ doc.customer+'" AND `tabContact`.contact_name LIKE "%s" ORDER BY `tabContact`.contact_name ASC LIMIT 50';
-}
-
-
-cur_frm.cscript.customer = function(doc, cdt, cdn) {
-  get_server_fields('get_customer_details','','',doc, cdt, cdn, 1);
-}
-*/
 
 cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
   doc = locals[this.doctype][this.docname];
@@ -129,8 +117,6 @@ cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
   }  
 }
 
-//get query select Territory
-//=======================================================================================================================
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
   return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
 }

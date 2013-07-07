@@ -48,7 +48,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
 					cur_frm.add_custom_button('Make Maint. Visit', this.make_maintenance_visit);
 					cur_frm.add_custom_button('Make Maint. Schedule', 
-						this.make_maintainance_schedule);
+						this.make_maintenance_schedule);
 				}
 
 				// indent
@@ -98,13 +98,26 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_sales_invoice: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.quotation.quotation.make_quotation",
+			method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+			source_name: cur_frm.doc.name
+		})
+	},
+	
+	make_maintenance_schedule: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+			source_name: cur_frm.doc.name
+		})
+	}, 
+	
+	make_maintenance_visit: function() {
+		wn.model.open_mapped_doc({
+			method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
 			source_name: cur_frm.doc.name
 		})
 	},
 	
 	pull_quotation_details: function() {
-		
 		wn.model.map_current_doc({
 			method: "selling.doctype.quotation.quotation.make_sales_order",
 			source_name: cur_frm.doc.quotation_no,
@@ -154,64 +167,6 @@ cur_frm.fields_dict['quotation_no'].get_query = function(doc) {
 			and %(cond)s `tabQuotation`.%(key)s LIKE "%s" \
 			ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
 }
-
-//----------- make maintenance schedule----------
-cur_frm.cscript['Make Maintenance Schedule'] = function() {
-	var doc = cur_frm.doc;
-
-	if (doc.docstatus == 1) { 
-		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_schedule','',
-			function(r,rt){
-				if(r.message == 'No'){
-					n = wn.model.make_new_doc_and_get_name("Maintenance Schedule");
-					$c('dt_map', args={
-									'docs':wn.model.compress([locals["Maintenance Schedule"][n]]),
-									'from_doctype':'Sales Order',
-									'to_doctype':'Maintenance Schedule',
-									'from_docname':doc.name,
-						'from_to_list':"[['Sales Order', 'Maintenance Schedule'], ['Sales Order Item', 'Maintenance Schedule Item']]"
-					}
-					, function(r,rt) {
-						loaddoc("Maintenance Schedule", n);
-					}
-					);
-				}
-				else{
-					msgprint("You have already created Maintenance Schedule against this Sales Order");
-				}
-			}
-		);
-	}
-}
-
-cur_frm.cscript.make_maintenance_visit = function() {
-	var doc = cur_frm.doc;
-
-	if (doc.docstatus == 1) { 
-		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_visit','',
-			function(r,rt){
-				if(r.message == 'No'){
-					n = wn.model.make_new_doc_and_get_name("Maintenance Visit");
-					$c('dt_map', args={
-									'docs':wn.model.compress([locals["Maintenance Visit"][n]]),
-									'from_doctype':'Sales Order',
-									'to_doctype':'Maintenance Visit',
-									'from_docname':doc.name,
-						'from_to_list':"[['Sales Order', 'Maintenance Visit'], ['Sales Order Item', 'Maintenance Visit Purpose']]"
-					}
-					, function(r,rt) {
-						loaddoc("Maintenance Visit", n);
-					}
-					);
-				}
-				else{
-					msgprint("You have already completed maintenance against this Sales Order");
-				}
-			}
-		);
-	}
-}
-
 
 cur_frm.cscript['Stop Sales Order'] = function() {
 	var doc = cur_frm.doc;

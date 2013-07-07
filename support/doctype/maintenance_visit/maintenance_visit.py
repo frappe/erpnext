@@ -18,8 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr
-from webnotes.model import db_exists
-from webnotes.model.bean import getlist, copy_doclist
+from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -33,48 +32,20 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 	
-	#get item details
-	#------------------
 	def get_item_details(self, item_code):
 		item = sql("select item_name,description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
 		ret = {
 			'item_name' : item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
 		}
-		return ret
-	
-	# fetch details of resp Sales order or customer issue
-	#-----------------------------------------------------------
-	def fetch_items(self):
-		if self.doc.sales_order_no and self.doc.customer_issue_no :
-			msgprint("You can not fetch details of both, Sales Order and Customer Issue, in same Maintenance Visit")
-			raise Exception
-		
-		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_visit_details')
-		
-		if self.doc.sales_order_no:
-			self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Visit').dt_map('Sales Order', \
-				'Maintenance Visit', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Visit'],\
-				['Sales Order Item', 'Maintenance Visit Purpose']]")
-		elif self.doc.customer_issue_no:			
-			self.doclist = get_obj('DocType Mapper', 'Customer Issue-Maintenance Visit').dt_map('Customer Issue', \
-				'Maintenance Visit', self.doc.customer_issue_no, self.doc, self.doclist, "[['Customer Issue', 'Maintenance Visit'],\
-				['Customer Issue', 'Maintenance Visit Purpose']]")			
-		elif self.doc.maintenance_schedule:
-			self.doclist = get_obj('DocType Mapper', 'Maintenance Schedule-Maintenance Visit').dt_map('Maintenance Schedule',\
-			 	'Maintenance Visit', self.doc.maintenance_schedule, self.doc, self.doclist, "[['Maintenance Schedule', \
-				'Maintenance Visit'], ['Maintenance Schedule Item', 'Maintenance Visit Purpose']]")			
-	
-	#validate reference value using doctype mapper
-	#-----------------------------------------------------
+		return ret		
+
 	def validate_reference_value(self, check_for):
 		if check_for == 'Sales Order':
 			get_obj('DocType Mapper', 'Sales Order-Maintenance Visit', with_children = 1).validate_reference_value(self, self.doc.name)
 		elif check_for == 'Customer Issue':
 			get_obj('DocType Mapper', 'Customer Issue-Maintenance Visit', with_children = 1).validate_reference_value(self, self.doc.name)
 	
-	#check if serial no exist in system
-	#--------------------------------------
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
 			if d.serial_no and not sql("select name from `tabSerial No` where name = '%s' and docstatus != 2" % d.serial_no):

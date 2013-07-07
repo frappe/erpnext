@@ -17,6 +17,13 @@
 wn.provide("erpnext.support");
 // TODO commonify this code
 erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
+	refresh: function() {
+		if(cur_frm.doc.docstatus==1 && (cur_frm.doc.status=='Open' || 
+			cur_frm.doc.status == 'Work In Progress')) {
+				cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
+			}
+	}, 
+	
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
@@ -31,6 +38,13 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 			// TODO shift this to depends_on
 			unhide_field(['customer_address', 'contact_person']);
 		}
+	}, 
+	
+	make_maintenance_visit: function() {
+		wn.model.open_mapped_doc({
+			method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+			source_name: cur_frm.doc.name
+		})
 	}
 });
 
@@ -42,12 +56,6 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 	if(doc.__islocal){		
 		hide_field(['customer_address','contact_person']);
 	} 
-}
-
-cur_frm.cscript.refresh = function(doc,ct,cdn){
-	if(doc.docstatus == 1 && (doc.status == 'Open' || doc.status == 'Work In Progress')) 
-		cur_frm.add_custom_button('Make Maintenance Visit', 
-			cur_frm.cscript['Make Maintenance Visit']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -66,34 +74,6 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 		FROM tabContact WHERE customer = "'	+ doc.customer +
 		'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
-
-cur_frm.cscript['Make Maintenance Visit'] = function() {
-	var doc = cur_frm.doc;
-	if (doc.docstatus == 1) { 
-		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_visit','',
-			function(r,rt){
-				if(r.message == 'No'){
-					n = wn.model.make_new_doc_and_get_name("Maintenance Visit");
-					$c('dt_map', args={
-						'docs':wn.model.compress([locals["Maintenance Visit"][n]]),
-						'from_doctype':'Customer Issue',
-						'to_doctype':'Maintenance Visit',
-						'from_docname':doc.name,
-						'from_to_list':"[['Customer Issue', 'Maintenance Visit'], ['Customer Issue', 'Maintenance Visit Purpose']]"
-					}, function(r,rt) {
-						loaddoc("Maintenance Visit", n);
-					});
-				} else{
-					msgprint("You have already completed maintenance against this Customer Issue");
-				}
-			}
-		);
-	}
-}
-
-// ----------
-// serial no
-// ----------
 
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = '';
@@ -115,9 +95,6 @@ cur_frm.add_fetch('serial_no', 'customer', 'customer');
 cur_frm.add_fetch('serial_no', 'customer_name', 'customer_name');
 cur_frm.add_fetch('serial_no', 'delivery_address', 'customer_address');
 
-// ----------
-// item code
-// ----------
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	if(doc.serial_no) {
 		return 'SELECT `tabSerial No`.item_code, `tabSerial No`.description \
@@ -135,9 +112,6 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 cur_frm.add_fetch('item_code', 'item_name', 'item_name');
 cur_frm.add_fetch('item_code', 'description', 'description');
 
-
-//get query select Territory
-//=======================================================================================================================
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` \
 		FROM `tabTerritory` \

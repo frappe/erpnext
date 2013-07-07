@@ -31,6 +31,26 @@ erpnext.support.MaintenanceVisit = wn.ui.form.Controller.extend({
 			// TODO shift this to depends_on
 			hide_contact_info(this.frm.doc);			
 		}
+	}, 
+	
+	get_items: function() {
+		if(cur_frm.doc.sales_order_no) {
+			wn.model.map_current_doc({
+				method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
+				source_name: cur_frm.doc.quotation_no,
+			});
+		} else if (cur_frm.doc.customer_issue_no) {
+			wn.model.map_current_doc({
+				method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+				source_name: cur_frm.doc.quotation_no,
+			});
+		} else if (cur_frm.doc.maintenance_schedule) {
+			wn.model.map_current_doc({
+				method: "support.doctype.maintenance_schedule.maintenance_schedule\
+					.make_maintenance_visit",
+				source_name: cur_frm.doc.quotation_no,
+			});
+		}	
 	}
 });
 

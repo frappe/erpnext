@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:45:42", 
+  "modified": "2013-07-07 12:18:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,19 +24,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Maintenance Schedule", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 1, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -227,7 +221,6 @@
   "fieldtype": "Button", 
   "label": "Get Items", 
   "oldfieldtype": "Button", 
-  "options": "pull_sales_order_detail", 
   "report_hide": 1
  }, 
  {
@@ -265,11 +258,41 @@
   "read_only": 1
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "submit": 1, 
+  "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Maintenance Manager"
+  "permlevel": 1, 
+  "role": "System Manager", 
+  "submit": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Maintenance Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Maintenance Manager", 
+  "submit": 0
  }
 ]

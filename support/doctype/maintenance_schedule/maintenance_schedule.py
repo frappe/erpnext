@@ -33,15 +33,6 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 	
-	# pull sales order details
-	#--------------------------
-	def pull_sales_order_detail(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'item_maintenance_detail')
-		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
-		self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Schedule').dt_map('Sales Order', 'Maintenance Schedule', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Schedule'],['Sales Order Item', 'Maintenance Schedule Item']]")
-	
-	#pull item details 
-	#-------------------
 	def get_item_details(self, item_code):
 		item = sql("select item_name, description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
 		ret = {
@@ -50,8 +41,6 @@ class DocType(TransactionBase):
 		}
 		return ret
 		
-	# generate maintenance schedule
-	#-------------------------------------
 	def generate_schedule(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
 		count = 0
@@ -74,8 +63,6 @@ class DocType(TransactionBase):
 				child.save(1)
 				
 		self.on_update()
-
-
 
 	def on_submit(self):
 		if not getlist(self.doclist, 'maintenance_schedule_detail'):
@@ -149,10 +136,6 @@ class DocType(TransactionBase):
 			msgprint("Weekly periodicity can be set for period of atleast 1 week or more")
 			raise Exception
 	
-
-
-	#get count on the basis of periodicity selected
-	#----------------------------------------------------
 	def get_no_of_visits(self, arg):
 		arg1 = eval(arg)		
 		self.validate_period(arg)
@@ -331,3 +314,28 @@ class DocType(TransactionBase):
 		
 	def on_trash(self):
 		delete_events(self.doc.doctype, self.doc.name)
+
+@webnotes.whitelist()
+def make_maintenance_visit(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	doclist = get_mapped_doclist("Maintenance Schedule", source_name, {
+		"Maintenance Schedule": {
+			"doctype": "Maintenance Visit", 
+			"field_map": {
+				"name": "maintenance_schedule"
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Maintenance Schedule Item": {
+			"doctype": "Maintenance Visit Purpose", 
+			"field_map": {
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype"
+			}
+		}
+	}, target_doclist)
+
+	return [d.fields for d in doclist]
