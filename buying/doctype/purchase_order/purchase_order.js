@@ -94,8 +94,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					}
 				})
 			});	
-	}
-	
+	},
+
+	tc_name: function() {
+		this.get_terms();
+	},
+
 });
 
 // for backward compatibility: combine new and previous states

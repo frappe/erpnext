@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-08 15:12:46", 
+  "modified": "2013-07-08 17:49:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -487,13 +487,6 @@
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
   "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 
