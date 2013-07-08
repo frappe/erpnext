@@ -68,7 +68,10 @@ class DocType(BuyingController):
 				msgprint("Rejected Warehouse is necessary if there are rejections.")
 				raise Exception
 
-			if not flt(d.qty) and flt(d.rejected_qty):
+			if not flt(d.received_qty) and flt(d.qty):
+				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
+
+			elif not flt(d.qty) and flt(d.rejected_qty):
 				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
 
 			elif not flt(d.rejected_qty):

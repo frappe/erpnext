@@ -325,21 +325,18 @@ class DocType(TransactionBase):
 				if so_status == 'Stopped':
 					msgprint("You cannot do any transaction against Sales Order : '%s' as it is Stopped." %(ref_doc_name))
 					raise Exception
-					
-					
-	# ****** Check for Item.is_sales_item = 'Yes' and Item.docstatus != 2 *******
+
 	def check_active_sales_items(self,obj):
 		for d in getlist(obj.doclist, obj.fname):
-			if d.item_code:		# extra condn coz item_code is not mandatory in RV
-				valid_item = webnotes.conn.sql("select docstatus,is_sales_item, is_service_item from tabItem where name = %s",d.item_code)
-				if valid_item and valid_item[0][0] == 2:
-					msgprint("Item : '%s' does not exist in system." %(d.item_code))
+			if d.item_code:
+				item = webnotes.conn.sql("""select docstatus, is_sales_item, 
+					is_service_item, default_income_account, default_expense_account from tabItem where name = %s""", 
+					d.item_code, as_dict=True)
+				if item.sales_item == 'No' and item.service_item == 'No':
+					msgprint("Item : '%s' is neither Sales nor Service Item" % (d.item_code))
 					raise Exception
-				sales_item = valid_item and valid_item[0][1] or 'No'
-				service_item = valid_item and valid_item[0][2] or 'No'
-				if sales_item == 'No' and service_item == 'No':
-					msgprint("Item : '%s' is neither Sales nor Service Item"%(d.item_code))
-					raise Exception
+				if d.income_account and not default_income_account:
+					webnotes.conn.set_value("Item", d.item_code, "default_income_account", d.income_account)
 
 
 # **************************************************************************************************************************************************

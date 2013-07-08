@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-05-31 14:26:41", 
+  "modified": "2013-07-08 13:52:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -165,7 +165,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate*", 
+  "label": "Price List Rate*", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 0
