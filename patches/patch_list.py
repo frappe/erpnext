@@ -238,7 +238,7 @@ patch_list = [
 	"patches.june_2013.p03_buying_selling_for_price_list",
 	"patches.june_2013.p04_fix_event_for_lead_oppty_project",
 	"patches.june_2013.p05_remove_search_criteria_reports",
-	"execute: webnotes.delete_doc('Report', 'Sales Orders Pending To Be Delivered')",
+	"execute:webnotes.delete_doc('Report', 'Sales Orders Pending To Be Delivered')",
 	"patches.june_2013.p05_remove_unused_doctypes",
 	"patches.june_2013.p06_drop_unused_tables",
 	"patches.june_2013.p07_taxes_price_list_for_territory",
