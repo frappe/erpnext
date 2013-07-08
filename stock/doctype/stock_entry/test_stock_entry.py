@@ -363,8 +363,8 @@ class TestStockEntry(unittest.TestCase):
 	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
 
-		from selling.doctype.sales_order.test_sales_order \
-			import test_records as sales_order_test_records, make_sales_invoice, make_delivery_note
+		from selling.doctype.sales_order.test_sales_order import test_records as sales_order_test_records
+		from selling.doctype.sales_order.sales_order import make_sales_invoice, make_delivery_note
 
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -445,6 +445,7 @@ class TestStockEntry(unittest.TestCase):
 			d.cost_center = "_Test Cost Center - _TC"
 		
 		pi.run_method("calculate_taxes_and_totals")
+		pi.doc.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 		
@@ -544,6 +545,7 @@ class TestStockEntry(unittest.TestCase):
 			d.cost_center = "_Test Cost Center - _TC"
 		
 		pi.run_method("calculate_taxes_and_totals")
+		pi.doc.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 		

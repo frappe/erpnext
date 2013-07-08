@@ -55,6 +55,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(test_records[0]))
 
+		pi[0].bill_no = "NA"
 		webnotes.bean(pi).insert()
 		
 	def test_subcontracting(self):

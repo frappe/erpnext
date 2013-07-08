@@ -39,8 +39,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		po[0]["naming_series"] = "_T-Purchase Order-"
 
 		for doc in po:
-			if doc.parentfield=="purchase_order_items":
-				doc.schedule_date = "2013-04-12"
+			if doc.get("item_code"):
+				doc["schedule_date"] = "2013-04-12"
 
 		webnotes.bean(po).insert()
 		

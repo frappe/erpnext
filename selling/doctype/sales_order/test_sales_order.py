@@ -59,11 +59,12 @@ class TestSalesOrder(unittest.TestCase):
 
 	def create_so(self, so_doclist = None):
 		if not so_doclist:
-			so_doclist =test_records[0]
-			
+			so_doclist = test_records[0]
+		
 		w = webnotes.bean(copy=so_doclist)
 		w.insert()
 		w.submit()
+
 		return w
 		
 	def create_dn_against_so(self, so, delivered_qty=0):
