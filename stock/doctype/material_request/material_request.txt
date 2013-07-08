@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-08 16:17:33", 
+  "modified": "2013-07-08 16:18:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -97,44 +97,6 @@
   "oldfieldname": "indent_details", 
   "oldfieldtype": "Table", 
   "options": "Material Request Item"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break1", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "description": "One or multiple Sales Order no which generated this Material Request", 
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "label": "Sales Order No", 
-  "no_copy": 1, 
-  "oldfieldname": "sales_order_no", 
-  "oldfieldtype": "Data", 
-  "options": "Sales Order", 
-  "print_width": "100px", 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_sales_order_details", 
-  "fieldtype": "Button", 
-  "label": "Pull Sales Order Items"
  }, 
  {
   "description": "Give additional details about the indent.", 
@@ -307,13 +269,6 @@
   "options": "Terms and Conditions", 
   "print_hide": 1, 
   "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 

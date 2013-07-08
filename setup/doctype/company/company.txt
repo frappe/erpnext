@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:32:14", 
+  "modified": "2013-07-08 17:34:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -90,15 +90,6 @@
   "read_only": 0
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "default_currency", 
-  "fieldtype": "Link", 
-  "label": "Default Currency", 
-  "options": "Currency", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "default_bank_account", 
@@ -143,6 +134,28 @@
   "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "default_expense_account", 
+  "fieldtype": "Link", 
+  "label": "Default Expense Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_income_account", 
+  "fieldtype": "Link", 
+  "label": "Default Income Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
@@ -153,11 +166,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "options": "Currency", 
   "read_only": 0, 
-  "width": "50%"
+  "reqd": 1
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 

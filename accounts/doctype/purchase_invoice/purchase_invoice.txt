@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:51:53", 
+  "modified": "2013-07-08 18:03:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "parent": "Purchase Invoice", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -214,53 +215,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "recalculate", 
   "fieldtype": "Button", 
   "label": "Recalculate", 
-  "oldfieldtype": "Button", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_17", 
-  "fieldtype": "Section Break", 
-  "read_only": 0
- }, 
- {
-  "description": "Select Items from Purchase Order", 
-  "doctype": "DocField", 
-  "fieldname": "purchase_order_main", 
-  "fieldtype": "Link", 
-  "label": "Purchase Order", 
-  "oldfieldname": "purchase_order_main", 
-  "oldfieldtype": "Link", 
-  "options": "Purchase Order", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "description": "Select Items from Purchase Receipt", 
-  "doctype": "DocField", 
-  "fieldname": "purchase_receipt_main", 
-  "fieldtype": "Link", 
-  "label": "Purchase Receipt", 
-  "oldfieldname": "purchase_receipt_main", 
-  "oldfieldtype": "Link", 
-  "options": "Purchase Receipt", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "label": "Get Items", 
   "oldfieldtype": "Button", 
   "read_only": 0
  }, 
@@ -696,12 +653,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
   "label": "Terms and Conditions1"
@@ -837,68 +788,49 @@
   "reqd": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Accounts Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Purchase User", 
-  "submit": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Purchase User", 
-  "submit": 0, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "match": "supplier", 
-  "permlevel": 0, 
-  "role": "Supplier"
+  "role": "Supplier", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Auditor", 
+  "submit": 0, 
+  "write": 0
  }
 ]

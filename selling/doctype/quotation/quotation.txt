@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:52:37", 
+  "modified": "2013-07-08 15:51:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -345,42 +345,6 @@
   "read_only": 0
  }, 
  {
-  "description": "To create Quotation against Opportunity, Select Opportunity No. and click on 'Pull Opportunity Details' ", 
-  "doctype": "DocField", 
-  "fieldname": "enq_no", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_filter": 1, 
-  "label": "Opportunity No", 
-  "no_copy": 0, 
-  "oldfieldname": "enq_no", 
-  "oldfieldtype": "Link", 
-  "options": "Opportunity", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "report_hide": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_enquiry_detail", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Pull Opportunity Detail", 
-  "no_copy": 0, 
-  "oldfieldtype": "Button", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "report_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break34", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "net_total_export", 
   "fieldtype": "Currency", 
@@ -633,24 +597,6 @@
   "print_hide": 1, 
   "read_only": 0, 
   "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_54", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_56", 
-  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
