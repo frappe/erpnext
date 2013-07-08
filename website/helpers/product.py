@@ -6,11 +6,18 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, cint, fmt_money
 from webnotes.webutils import build_html, delete_page_cache
+from website.helpers.cart import _get_cart_quotation
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
 	"""get product price / stock info"""
-	price_list = webnotes.conn.get_value("Price List", {"use_for_website": 1})
+	if not webnotes.conn.get_default("shopping_cart_enabled"):
+		return {}
+	
+	cart_quotation = _get_cart_quotation()
+	
+	price_list = webnotes.cookies.get("price_list_name").value
+
 	warehouse = webnotes.conn.get_value("Item", item_code, "website_warehouse")
 	if warehouse:
 		in_stock = webnotes.conn.sql("""select actual_qty from tabBin where
@@ -35,8 +42,7 @@ def get_product_info(item_code):
 			or ""
 		
 		if webnotes.session.user != "Guest":
-			from website.helpers.cart import _get_cart_quotation
-			item = _get_cart_quotation().doclist.get({"item_code": item_code})
+			item = cart_quotation.doclist.get({"item_code": item_code})
 			if item:
 				qty = item[0].qty
 

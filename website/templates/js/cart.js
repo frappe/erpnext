@@ -96,7 +96,7 @@ $.extend(wn.cart, {
 		
 		var shipping_rule_added = false;
 		var taxes_exist = false;
-		var shipping_rule_labels = $.map(out.shipping_rules, function(rule) { return rule[1]; });
+		var shipping_rule_labels = $.map(out.shipping_rules || [], function(rule) { return rule[1]; });
 		$.each(doclist, function(i, doc) {
 			if(doc.doctype === "Quotation Item") {
 				wn.cart.render_item_row($cart_items, doc);
