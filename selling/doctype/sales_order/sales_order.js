@@ -69,14 +69,35 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 			}
 		}
-	
+
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Quotation'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.quotation.quotation.make_sales_order",
+						source_doctype: "Quotation",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Order Lost"],
+							order_type: cur_frm.doc.order_type,
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+		}
+
 		this.order_type(doc);
 	},
 	
 	order_type: function() {
 		this.frm.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
 	},
-	
+
+	tc_name: function() {
+		this.get_terms();
+	},
+
 	reserved_warehouse: function(doc, cdt, cdn) {
 		this.warehouse(doc, cdt, cdn);
 	},
@@ -115,16 +136,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			source_name: cur_frm.doc.name
 		})
 	},
-	
-	pull_quotation_details: function() {
-		wn.model.map_current_doc({
-			method: "selling.doctype.quotation.quotation.make_sales_order",
-			source_name: cur_frm.doc.quotation_no,
-		});
-		unhide_field(['quotation_date', 'customer_address', 
-			'contact_person', 'territory', 'customer_group']);
-	}
-
 });
 
 // for backward compatibility: combine new and previous states
@@ -149,22 +160,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
 		AND %(cond)s `tabProject`.name LIKE "%s" \
 		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
-}
-
-
-cur_frm.fields_dict['quotation_no'].get_query = function(doc) {
-	var cond='';
-	if(doc.order_type) cond = ' ifnull(`tabQuotation`.order_type, "") = "'
-		+doc.order_type+'" and';
-	if(doc.customer) cond += ' ifnull(`tabQuotation`.customer, "") = "'
-		+doc.customer+'" and';
-	
-	return repl('SELECT DISTINCT name, customer, transaction_date FROM `tabQuotation` \
-		WHERE `tabQuotation`.company = "' 
-		+ doc.company + '" and `tabQuotation`.`docstatus` = 1 \
-			and `tabQuotation`.status != "Order Lost" \
-			and %(cond)s `tabQuotation`.%(key)s LIKE "%s" \
-			ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
 }
 
 cur_frm.cscript['Stop Sales Order'] = function() {

@@ -330,9 +330,9 @@ class DocType(TransactionBase):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.item_code:
 				item = webnotes.conn.sql("""select docstatus, is_sales_item, 
-					is_service_item, default_income_account, default_expense_account from tabItem where name = %s""", 
-					d.item_code, as_dict=True)
-				if item.sales_item == 'No' and item.service_item == 'No':
+					is_service_item, default_income_account from tabItem where name = %s""", 
+					d.item_code, as_dict=True)[0]
+				if item.is_sales_item == 'No' and item.is_service_item == 'No':
 					msgprint("Item : '%s' is neither Sales nor Service Item" % (d.item_code))
 					raise Exception
 				if d.income_account and not default_income_account:
