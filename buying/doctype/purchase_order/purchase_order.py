@@ -44,23 +44,13 @@ class DocType(BuyingController):
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
-		# Step 2:=> get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
-		
-
-		# Step 4:=> validate for items
 		pc_obj.validate_for_items(self)
-
-		# Get po date
 		pc_obj.get_prevdoc_date(self)
-		
-		# validate_doc
+
 		self.validate_doc(pc_obj)
-		
-		# Check for stopped status
 		self.check_for_stopped_status(pc_obj)
-		
-		# sub-contracting
+
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
