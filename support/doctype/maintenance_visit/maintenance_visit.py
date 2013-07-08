@@ -19,7 +19,6 @@ import webnotes
 
 from webnotes.utils import cstr
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
@@ -38,13 +37,7 @@ class DocType(TransactionBase):
 			'item_name' : item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
 		}
-		return ret		
-
-	def validate_reference_value(self, check_for):
-		if check_for == 'Sales Order':
-			pass
-		elif check_for == 'Customer Issue':
-			pass
+		return ret
 			
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
@@ -57,16 +50,6 @@ class DocType(TransactionBase):
 		if not getlist(self.doclist, 'maintenance_visit_details'):
 			msgprint("Please enter maintenance details")
 			raise Exception
-			
-		check_for = ''
-		for d in getlist(self.doclist, 'maintenance_visit_details'):
-			if d.prevdoc_doctype == 'Sales Order':
-				check_for = 'Sales Order'
-			elif d.prevdoc_doctype == 'Customer Issue':
-				check_for = 'Customer Issue'
-			
-		if check_for:
-			self.validate_reference_value(check_for)
 
 		self.validate_serial_no()
 	

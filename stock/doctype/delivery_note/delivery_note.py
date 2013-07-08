@@ -118,11 +118,26 @@ class DocType(SellingController):
 
 		# Set actual qty for each item in selected warehouse
 		self.update_current_stock()
-
+		
+		self.validate_with_previous_doc()
+		
 		self.doc.status = 'Draft'
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
-		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
-
+		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Sales Order": {
+				"ref_dn_field": "prevdoc_docname",
+				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+					["currency", "="]],
+			},
+			"Sales Order Item": {
+				"ref_dn_field": "prevdoc_detail_docname",
+				"compare_fields": [["export_rate", "="]],
+				"is_child_table": True
+			}
+		})
 		
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

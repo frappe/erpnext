@@ -36,6 +36,7 @@ class DocType(BuyingController):
 		
 		self.validate_fiscal_year()
 		self.validate_common()
+		self.validate_with_previous_doc()
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
@@ -53,11 +54,24 @@ class DocType(BuyingController):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year( \
 			self.doc.fiscal_year, self.doc.transaction_date, 'Quotation Date')
 			
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Material Request": {
+				"ref_dn_field": "prevdoc_docname",
+				"compare_fields": [["company", "="]],
+			},
+			"Material Request Item": {
+				"ref_dn_field": "prevdoc_detail_docname",
+				"compare_fields": [["item_code", "="], ["uom", "="]],
+				"is_child_table": True
+			}
+		})
+
+			
 	def validate_common(self):
 		pc = get_obj('Purchase Common')
 		pc.validate_for_items(self)
 		pc.get_prevdoc_date(self)
-		pc.validate_reference_value(self)
 
 @webnotes.whitelist()
 def make_purchase_order(source_name, target_doclist=None):

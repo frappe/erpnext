@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-07-06 19:04:46", 
+  "modified": "2013-07-08 13:17:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -101,7 +101,7 @@
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Select Shipping Address", 
+  "label": "Billing Address Name", 
   "options": "Address", 
   "print_hide": 1, 
   "read_only": 1
@@ -109,6 +109,22 @@
  {
   "doctype": "DocField", 
   "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Billing Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address_name", 
+  "fieldtype": "Link", 
+  "label": "Shipping Address Name", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
   "label": "Shipping Address", 

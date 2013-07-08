@@ -173,6 +173,8 @@ class DocType(SellingController):
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 		
+		self.validate_with_previous_doc()
+				
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
@@ -182,6 +184,15 @@ class DocType(SellingController):
 
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Quotation": {
+				"ref_dn_field": "prevdoc_docname",
+				"compare_fields": [["customer", "="], ["company", "="], ["currency", "="]]
+			}
+		})
+
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
