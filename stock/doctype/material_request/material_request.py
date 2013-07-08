@@ -21,15 +21,6 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	# Pull Sales Order Items
-	# -------------------------
-	def pull_so_details(self):
-		self.check_if_already_pulled()
-		if self.doc.sales_order_no:
-			get_obj('DocType Mapper', 'Sales Order-Material Request', with_children=1).dt_map('Sales Order', 'Material Request', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Material Request'],['Sales Order Item', 'Material Request Item']]")
-		else:
-			msgprint("Please select Sales Order whose details need to pull")
-
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
 
@@ -303,10 +294,10 @@ def make_supplier_quotation(source_name, target_doclist=None):
 def make_stock_entry(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 
-	def set_purpose(source, target, source_parent):
+	def set_purpose(source, target):
 		target[0].purpose = "Material Transfer"
 		
-	def update_item(source, target):
+	def update_item(source, target, source_parent):
 		target.conversion_factor = 1
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		

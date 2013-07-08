@@ -37,26 +37,11 @@ class DocType(SellingController):
 	def onload(self):
 		self.add_communication_list()
 		 
-	# Pull Opportunity Details
-	# --------------------
-	def pull_enq_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'quotation_details')
-		get_obj('DocType Mapper', 'Opportunity-Quotation').dt_map('Opportunity', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Opportunity', 'Quotation'],['Opportunity Item', 'Quotation Item']]")
-
-		self.get_adj_percent()
-
-		return self.doc.quotation_to
-
 	# Get contact person details based on customer selected
 	# ------------------------------------------------------
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 	
-	
-		
-# QUOTATION DETAILS TRIGGER FUNCTIONS
-# ================================================================================		
-
 	# Get Item Details
 	# -----------------
 	def get_item_details(self, args=None):
@@ -83,20 +68,12 @@ class DocType(SellingController):
 	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-
 	
 		
-
-# OTHER CHARGES TRIGGER FUNCTIONS
-# ====================================================================================
-	
 	# Get Tax rate if account type is TAX
 	# -----------------------------------
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
-
-# VALIDATE
-# ==============================================================================================
 	
 	# Fiscal Year Validation
 	# ----------------------

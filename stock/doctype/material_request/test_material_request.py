@@ -116,17 +116,8 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 		# map a purchase order
-		po_doclist = webnotes.map_doclist([["Material Request", "Purchase Order"], 
-			["Material Request Item", "Purchase Order Item"]], mr.doc.name)
-		po_doclist[0].fields.update({
-			"supplier": "_Test Supplier",
-			"supplier_name": "_Test Supplier",
-			"transaction_date": mr.doc.transaction_date,
-			"fiscal_year": "_Test Fiscal Year 2013",
-			"currency": "INR",
-			"conversion_rate": 1.0,
-			"grand_total_import": 0.0
-		})
+		from stock.doctype.material_request.material_request import make_purchase_order
+		po_doclist = make_purchase_order(mr.doc.name)
 		po_doclist[1].qty = 27.0
 		po_doclist[2].qty = 1.5
 		
@@ -167,22 +158,23 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
 		
 		self._test_requested_qty(54.0, 3.0)
-		
+
+		from stock.doctype.material_request.material_request import make_stock_entry
+				
 		# map a stock entry
-		se_doclist = webnotes.map_doclist([["Material Request", "Stock Entry"], 
-			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
-		se_doclist[0].fields.update({
+		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "01:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].fields.update({
+		se_doclist[1].update({
 			"qty": 27.0,
 			"transfer_qty": 27.0,
 			"s_warehouse": "_Test Warehouse 1",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].fields.update({
+		se_doclist[2].update({
 			"qty": 1.5,
 			"transfer_qty": 1.5,
 			"s_warehouse": "_Test Warehouse 1",
@@ -231,20 +223,21 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 		# map a stock entry
-		se_doclist = webnotes.map_doclist([["Material Request", "Stock Entry"], 
-			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
-		se_doclist[0].fields.update({
+		from stock.doctype.material_request.material_request import make_stock_entry
+
+		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].fields.update({
+		se_doclist[1].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse 1",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].fields.update({
+		se_doclist[2].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1",
@@ -285,21 +278,22 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# map a stock entry
-		se_doclist = webnotes.map_doclist([["Material Request", "Stock Entry"], 
-			["Material Request Item", "Stock Entry Detail"]], mr.doc.name)
-		se_doclist[0].fields.update({
+		from stock.doctype.material_request.material_request import make_stock_entry
+		
+		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].fields.update({
+		se_doclist[1].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse",
 			"t_warehouse": "_Test Warehouse 1",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].fields.update({
+		se_doclist[2].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1",

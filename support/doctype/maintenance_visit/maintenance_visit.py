@@ -42,10 +42,10 @@ class DocType(TransactionBase):
 
 	def validate_reference_value(self, check_for):
 		if check_for == 'Sales Order':
-			get_obj('DocType Mapper', 'Sales Order-Maintenance Visit', with_children = 1).validate_reference_value(self, self.doc.name)
+			pass
 		elif check_for == 'Customer Issue':
-			get_obj('DocType Mapper', 'Customer Issue-Maintenance Visit', with_children = 1).validate_reference_value(self, self.doc.name)
-	
+			pass
+			
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
 			if d.serial_no and not sql("select name from `tabSerial No` where name = '%s' and docstatus != 2" % d.serial_no):

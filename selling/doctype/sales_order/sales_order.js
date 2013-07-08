@@ -89,7 +89,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_delivery_note: function() {
-		console.log(cur_frm.doc.name);
 		wn.model.open_mapped_doc({
 			method: "selling.doctype.sales_order.sales_order.make_delivery_note",
 			source_name: cur_frm.doc.name

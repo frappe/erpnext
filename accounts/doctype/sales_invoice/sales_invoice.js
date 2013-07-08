@@ -212,19 +212,10 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 //-----------------------------
 
 cur_frm.cscript['Make Delivery Note'] = function() {
-
-	var doc = cur_frm.doc
-	n = wn.model.make_new_doc_and_get_name('Delivery Note');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Delivery Note'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Delivery Note',
-		'from_docname':doc.name,
-		'from_to_list':"[['Sales Invoice','Delivery Note'],['Sales Invoice Item','Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
-		}, function(r,rt) {
-			 loaddoc('Delivery Note', n);
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
+		source_name: cur_frm.doc.name
+	})
 }
 
 cur_frm.cscript.make_bank_voucher = function() {

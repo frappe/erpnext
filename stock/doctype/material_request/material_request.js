@@ -72,6 +72,13 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		return;
 	},
 	
+	pull_sales_order_details: function(doc) {
+		wn.model.map_current_doc({
+			method: "selling.doctype.sales_order.sales_order.make_material_request",
+			source_name: cur_frm.doc.sales_order_no,
+		});
+	},
+	
 	make_purchase_order: function() {
 		wn.model.open_mapped_doc({
 			method: "stock.doctype.material_request.material_request.make_purchase_order",

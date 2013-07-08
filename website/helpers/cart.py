@@ -308,8 +308,9 @@ def checkout():
 	quotation.ignore_permissions = True
 	quotation.submit()
 	
-	sales_order = webnotes.bean(webnotes.map_doclist([["Quotation", "Sales Order"], ["Quotation Item", "Sales Order Item"],
-		["Sales Taxes and Charges", "Sales Taxes and Charges"]], quotation.doc.name))
+	from selling.doctype.quotation.quotation import make_sales_order
+	
+	sales_order = webnotes.bean(make_sales_order(quotation.doc.name))
 		
 	sales_order.ignore_permissions = True
 	sales_order.insert()

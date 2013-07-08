@@ -135,25 +135,10 @@ cur_frm.cscript['Make Sales Order'] = function() {
 
 //pull enquiry details
 cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
-
-	var callback = function(r,rt){
-		if(r.message){
-			doc.quotation_to = r.message;
-
-			if(doc.quotation_to == 'Lead') {
-					unhide_field('lead');
-			}
-			else if(doc.quotation_to == 'Customer') {
-				unhide_field(['customer','customer_address','contact_person','territory','customer_group']);
-			}
-			refresh_many(['quotation_details','quotation_to','customer','customer_address', 
-				'contact_person', 'lead', 'address_display', 'contact_display', 'contact_mobile', 
-				'contact_email', 'territory', 'customer_group', 'order_type']);
-		}
-	}
-
-	$c_obj(make_doclist(doc.doctype, doc.name),'pull_enq_details','',callback);
-
+	wn.model.map_current_doc({
+		method: "selling.doctype.opportunity.opportunity.make_quotation",
+		source_name: cur_frm.doc.enq_no,
+	})
 }
 
 // declare order lost

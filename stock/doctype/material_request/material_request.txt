@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:46:13", 
+  "modified": "2013-07-08 11:02:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -134,8 +134,7 @@
   "doctype": "DocField", 
   "fieldname": "pull_sales_order_details", 
   "fieldtype": "Button", 
-  "label": "Pull Sales Order Items", 
-  "options": "pull_so_details"
+  "label": "Pull Sales Order Items"
  }, 
  {
   "default": "Give additional details about the indent.", 
