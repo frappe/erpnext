@@ -51,20 +51,6 @@ class DocType(SellingController):
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed'
-		}, 
-		{
-			'source_dt': 'Sales Invoice Item',
-			'target_dt': 'Delivery Note Item',
-			'join_field': 'dn_detail',
-			'target_field': 'billed_amt',
-			'target_parent_dt': 'Delivery Note',
-			'target_parent_field': 'per_billed',
-			'target_ref_field': 'export_amount',
-			'source_field': 'export_amount',
-			'percent_join_field': 'delivery_note',
-			'status_field': 'billing_status',
-			'keyword': 'Billed',
-			'no_tolerance': True,
 		}]
 		
 

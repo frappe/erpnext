@@ -464,16 +464,23 @@ class DocType(StockController):
 					item_dict = self.get_pending_raw_materials(pro_obj)
 				else:
 					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
+					for item in item_dict.values():
+						item["from_warehouse"] = pro_obj.doc.wip_warehouse
+						item["to_warehouse"] = ""
 
 				# add raw materials to Stock Entry Detail table
 				self.add_to_stock_entry_detail(item_dict)
 					
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
-				self.doc.to_warehouse = pro_obj.doc.fg_warehouse
 				self.add_to_stock_entry_detail({
-					cstr(pro_obj.doc.production_item): 
-						[self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]
+					cstr(pro_obj.doc.production_item): {
+						"to_warehouse": pro_obj.doc.fg_warehouse,
+						"from_warehouse": "",
+						"qty": self.doc.fg_completed_qty,
+						"description": pro_obj.doc.description,
+						"stock_uom": pro_obj.doc.stock_uom
+					}
 				}, bom_no=pro_obj.doc.bom_no)
 				
 			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack"]:

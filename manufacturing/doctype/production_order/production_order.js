@@ -28,8 +28,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	if(doc.docstatus===0 && !doc.__islocal) {
 		cur_frm.set_intro("Submit this Production Order for further processing.");
 	} else if(doc.docstatus===1) {
-		var percent = flt(doc.produced_qty) / doc.qty * 100;
-		cur_frm.dashboard.add_progress(cint(percent) + "% " + wn._("Complete"));
+		var percent = flt(doc.produced_qty) / flt(doc.qty) * 100;
+		cur_frm.dashboard.add_progress(cint(percent) + "% " + wn._("Complete"), percent);
 
 		if(doc.status === "Stopped") {
 			cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");

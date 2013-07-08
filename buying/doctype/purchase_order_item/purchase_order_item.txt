@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:06", 
   "docstatus": 0, 
-  "modified": "2013-05-31 14:26:22", 
+  "modified": "2013-07-08 13:51:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,7 +32,7 @@
   "hidden": 0, 
   "in_filter": 1, 
   "label": "Reqd By Date", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -121,7 +121,7 @@
   "doctype": "DocField", 
   "fieldname": "import_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate ", 
+  "label": "Price List Rate", 
   "options": "currency", 
   "print_hide": 1, 
   "read_only": 0

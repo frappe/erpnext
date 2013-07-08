@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:51:59", 
+  "modified": "2013-07-08 17:49:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -185,59 +185,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "description": "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
-  "doctype": "DocField", 
-  "fieldname": "indent_no", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Select Material Request", 
-  "no_copy": 1, 
-  "oldfieldname": "indent_no", 
-  "oldfieldtype": "Link", 
-  "options": "Material Request", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Get Items", 
-  "no_copy": 0, 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "description": "You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.", 
-  "doctype": "DocField", 
-  "fieldname": "supplier_quotation", 
-  "fieldtype": "Link", 
-  "label": "Select Supplier Quotation", 
-  "no_copy": 1, 
-  "options": "Supplier Quotation", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_supplier_quotation_items", 
-  "fieldtype": "Button", 
-  "label": "Get Items", 
-  "options": "get_supplier_quotation_items", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "price_list_and_currency", 
   "fieldtype": "Section Break", 
   "label": "Currency & Price List", 
@@ -269,7 +216,7 @@
   "fieldtype": "Float", 
   "hidden": 0, 
   "label": "Exchange Rate", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
@@ -540,13 +487,6 @@
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
   "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button"
  }, 
  {
   "doctype": "DocField", 

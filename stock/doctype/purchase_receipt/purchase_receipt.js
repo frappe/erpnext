@@ -35,6 +35,22 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 		}
 
+		cur_frm.add_custom_button(wn._('From Purchase Order'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+					source_doctype: "Purchase Order",
+					get_query_filters: {
+						supplier: cur_frm.doc.supplier || undefined,
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+						per_received: ["<", 99.99],
+						company: cur_frm.doc.company
+					}
+				})
+			});
+
+
 		if(wn.boot.control_panel.country == 'India') {
 			unhide_field(['challan_no', 'challan_date']);
 		}
@@ -85,14 +101,11 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			source_name: cur_frm.doc.name
 		})
 	}, 
-	
-	pull_purchase_order_details: function() {
-		wn.model.map_current_doc({
-			method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-			source_name: cur_frm.doc.purchase_order_no,
-		})
-	}
-	
+
+	tc_name: function() {
+		this.get_terms();
+	},
+		
 });
 
 // for backward compatibility: combine new and previous states
@@ -146,55 +159,8 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }
 
-cur_frm.fields_dict['purchase_order_no'].get_query = function(doc) {
-	if (doc.supplier)
-		return 'SELECT DISTINCT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`supplier` = "' +doc.supplier + '" and`tabPurchase Order`.`docstatus` = 1 and `tabPurchase Order`.`status` != "Stopped" and ifnull(`tabPurchase Order`.`per_received`, 0) < 99.99	and `tabPurchase Order`.`currency` = ifnull("' +doc.currency+ '","") and `tabPurchase Order`.company = "'+ doc.company +'" and `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50';
-	else
-		return 'SELECT DISTINCT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 and `tabPurchase Order`.`company` = "'+ doc.company +'" and `tabPurchase Order`.`status` != "Stopped" and ifnull(`tabPurchase Order`.`per_received`, 0) < 99.99 and `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50';
-}
-
 cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
 	return 'SELECT `tabQuality Inspection`.name FROM `tabQuality Inspection` WHERE `tabQuality Inspection`.docstatus = 1 AND `tabQuality Inspection`.%(key)s LIKE "%s"';
-}
-
-cur_frm.pformat.purchase_order_no = function(doc, cdt, cdn){
-	//function to make row of table
-	
-	var make_row = function(title,val1, val2, bold){
-		var bstart = '<b>'; var bend = '</b>';
-
-		return '<tr><td style="width:39%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-		 +'<td style="width:61%;text-align:left;">'+val1+(val2?' ('+dateutil.str_to_user(val2)+')':'')+'</td>'
-		 +'</tr>'
-	}
-
-	out ='';
-	
-	var cl = getchildren('Purchase Receipt Item',doc.name,'purchase_receipt_details');
-
-	// outer table	
-	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
-	
-	// main table
-	out +='<table class="noborder" style="width:100%">';
-
-	// add rows
-	if(cl.length){
-		prevdoc_list = new Array();
-		for(var i=0;i<cl.length;i++){
-			if(cl[i].prevdoc_doctype == 'Purchase Order' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
-				prevdoc_list.push(cl[i].prevdoc_docname);
-				if(prevdoc_list.length ==1)
-					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
-				else
-					out += make_row('', cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
-			}
-		}
-	}
-
-	out +='</table></td></tr></table></div>';
-
-	return out;
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

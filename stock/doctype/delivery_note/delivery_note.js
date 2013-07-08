@@ -46,14 +46,26 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
+
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Sales Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+						source_doctype: "Sales Order",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_delivered: ["<", 99.99],
+							project_name: cur_frm.doc.project_name || undefined,
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+		}
+
 	}, 
-	
-	get_items: function() {
-		wn.model.map_current_doc({
-			method: "selling.doctype.sales_order.sales_order.make_delivery_note",
-			source_name: cur_frm.doc.sales_order_no,
-		})
-	},
 	
 	make_sales_invoice: function() {
 		wn.model.open_mapped_doc({
@@ -67,7 +79,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
 			source_name: cur_frm.doc.name
 		});
-	}
+	},
+
+	tc_name: function() {
+		this.get_terms();
+	},
 	
 });
 
@@ -94,22 +110,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
 		AND %(cond)s `tabProject`.name LIKE "%s" \
 		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
-}
-
-
-// *************** Customized link query for SALES ORDER based on customer and currency***************************** 
-cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
-	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	
-	if(doc.customer) {
-		cond = '`tabSales Order`.customer = "'+doc.customer+'" and';
-	}
-
-	if(doc.project_name){
-		cond += '`tabSales Order`.project_name ="'+doc.project_name+'"';
-	}
-	return repl('SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "%(company)s" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_delivered,0) < 99.99 and %(cond)s `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50', {company:doc.company,cond:cond})
 }
 
 cur_frm.cscript.serial_no = function(doc, cdt, cdn) {

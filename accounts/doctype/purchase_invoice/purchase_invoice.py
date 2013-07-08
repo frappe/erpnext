@@ -43,17 +43,6 @@ class DocType(BuyingController):
 			'target_ref_field': 'import_amount',
 			'source_field': 'import_amount',
 			'percent_join_field': 'purchase_order',
-		},
-		{
-			'source_dt': 'Purchase Invoice Item',
-			'target_dt': 'Purchase Receipt Item',
-			'join_field': 'pr_detail',
-			'target_field': 'billed_amt',
-			'target_parent_dt': 'Purchase Receipt',
-			'target_parent_field': 'per_billed',
-			'target_ref_field': 'import_amount',
-			'source_field': 'import_amount',
-			'percent_join_field': 'purchase_receipt',
 		}]
 		
 	def validate(self):

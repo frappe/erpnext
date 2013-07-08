@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:54:19", 
+  "modified": "2013-07-08 17:05:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -349,52 +349,6 @@
   "label": "Sales BOM Help", 
   "print_hide": 1, 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "read_only": 0
- }, 
- {
-  "description": "Select Items from Sales Order", 
-  "doctype": "DocField", 
-  "fieldname": "sales_order_main", 
-  "fieldtype": "Link", 
-  "label": "Sales Order", 
-  "oldfieldname": "sales_order_main", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Order", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "description": "Select Items from Delivery Note", 
-  "doctype": "DocField", 
-  "fieldname": "delivery_note_main", 
-  "fieldtype": "Link", 
-  "label": "Delivery Note", 
-  "oldfieldname": "delivery_note_main", 
-  "oldfieldtype": "Link", 
-  "options": "Delivery Note", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break25", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
@@ -788,25 +742,6 @@
   "options": "Terms and Conditions", 
   "print_hide": 1, 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_71", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_73", 
-  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 

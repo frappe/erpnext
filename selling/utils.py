@@ -113,8 +113,10 @@ def _get_basic_details(args, item_bean):
 			"description": item.description_html or item.description,
 			"reserved_warehouse": item.default_warehouse or args.warehouse or args.reserved_warehouse,
 			"warehouse": item.default_warehouse or args.warehouse,
-			"income_account": item.default_income_account or args.income_account,
-			"expense_account": item.purchase_account or args.expense_account,
+			"income_account": item.default_income_account or args.income_account \
+				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
+			"expense_account": item.purchase_account or args.expense_account \
+				or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
 			"cost_center": item.default_sales_cost_center or args.cost_center,
 			"qty": 1.0,
 			"adj_rate": 0.0,

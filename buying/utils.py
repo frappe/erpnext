@@ -85,7 +85,8 @@ def _get_basic_details(args, item_bean):
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
 			item_bean.doclist.get({"parentfield": "item_tax"})))),
 		"batch_no": None,
-		"expense_head": item.purchase_account,
+		"expense_head": item.purchase_account \
+			or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
 		"cost_center": item.cost_center
 	})
 	
