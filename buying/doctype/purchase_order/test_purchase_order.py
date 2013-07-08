@@ -32,9 +32,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = webnotes.bean("Purchase Order", po.doc.name)
 		po.submit()
 		pr = make_purchase_receipt(po.doc.name)
+		pr[0]["supplier_warehouse"] = "_Test Warehouse 1"
 		
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
+		
+		webnotes.bean(pr).insert()
 		
 	def test_make_purchase_invocie(self):
 		from buying.doctype.purchase_order.purchase_order import make_purchase_invoice
@@ -50,10 +53,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(test_records[0]))
+
+		webnotes.bean(pi).insert()
 		
 	def test_subcontracting(self):
 		po = webnotes.bean(copy=test_records[0])
-		po.insert()		
+		po.insert()
 		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
 
 	def test_warehouse_company_validation(self):

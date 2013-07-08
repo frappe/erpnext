@@ -234,7 +234,6 @@ def make_purchase_receipt(source_name, target_doclist=None):
 def make_purchase_invoice(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
-	
 	def set_missing_values(source, target):
 		bean = webnotes.bean(target)
 		bean.run_method("set_missing_values")

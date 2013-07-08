@@ -52,9 +52,11 @@ class BuyingController(StockController):
 					self.doc.fields[fieldname] = val
 
 		self.set_missing_item_details(get_item_details)
-		
+
 	def set_supplier_defaults(self):
-		self.doc.fields.update(self.get_default_supplier_address(self.doc.fields))
+		for fieldname, val in self.get_default_address_and_contact("supplier").items():
+			if self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = val
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")

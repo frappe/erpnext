@@ -244,7 +244,7 @@ class DocType(BuyingController):
 				raise Exception , " Validation Error "
 
 	def validate_reference_value(self):
-		# pass
+		pass
 	
 	# Validate PO and PR
 	# -------------------
