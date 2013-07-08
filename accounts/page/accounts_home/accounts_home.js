@@ -205,16 +205,6 @@ wn.module_page["Accounts"] = [
 				doctype: "Journal Voucher"
 			},
 			{
-				"label":wn._("Delivered Items To Be Billed"),
-				route: "query-report/Delivered Items To Be Billed",
-				doctype: "Sales Invoice"
-			},
-			{
-				"label":wn._("Received Items To Be Billed"),
-				route: "query-report/Received Items To Be Billed",
-				doctype: "Purchase Invoice"
-			},
-			{
 				"label":wn._("Ordered Items To Be Billed"),
 				route: "query-report/Ordered Items To Be Billed",
 				doctype: "Sales Invoice"

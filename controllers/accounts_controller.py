@@ -358,6 +358,7 @@ class AccountsController(TransactionBase):
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)
+			
 		
 	@property
 	def stock_items(self):

@@ -19,7 +19,7 @@ patch_list = [
 	"execute:webnotes.reload_doc('core', 'doctype', 'docfield')",
 	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') # 2013-04-07",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report')",
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype') # 2013-07-04",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype') # 2013-07-08",
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 
 	"patches.mar_2012.cleanup_control_panel", 
@@ -246,4 +246,6 @@ patch_list = [
 	"patches.june_2013.p09_update_global_defaults",
 	"patches.june_2013.p10_lead_address",
 	"patches.july_2013.p01_remove_doctype_mappers",
+	"execute:webnotes.delete_doc('Report', 'Delivered Items To Be Billed')",
+	"execute:webnotes.delete_doc('Report', 'Received Items To Be Billed')",
 ]

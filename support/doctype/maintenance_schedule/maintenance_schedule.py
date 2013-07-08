@@ -20,7 +20,6 @@ import webnotes
 from webnotes.utils import add_days, cstr, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
@@ -191,11 +190,7 @@ class DocType(TransactionBase):
 					msgprint("Maintenance Schedule against "+d.prevdoc_docname+" already exist")
 					raise Exception
 	
-	# Validate values with reference document
-	#----------------------------------------
-	def validate_reference_value(self):
-		pass
-	
+
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			cur_s_no=[]			
@@ -219,8 +214,6 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.validate_maintenance_detail()
 		self.validate_sales_order()
-		if self.doc.sales_order_no:
-			self.validate_reference_value()
 		self.validate_serial_no()
 		self.validate_start_date()
 	

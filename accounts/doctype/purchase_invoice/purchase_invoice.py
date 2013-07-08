@@ -58,16 +58,7 @@ class DocType(BuyingController):
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
-
-		self.po_list, self.pr_list = [], []
-		for d in getlist(self.doclist, 'entries'):
-			self.validate_supplier(d)
-			self.validate_po_pr(d)
-			if not d.purchase_order in self.po_list:
-				self.po_list.append(d.purchase_order)
-			if not d.purhcase_receipt in self.pr_list:
-				self.pr_list.append(d.purchase_receipt)
-
+		self.validate_with_previous_doc()
 
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
@@ -156,10 +147,7 @@ class DocType(BuyingController):
 		if (self.doc.currency == default_currency and flt(self.doc.conversion_rate) != 1.00) or not self.doc.conversion_rate or (self.doc.currency != default_currency and flt(self.doc.conversion_rate) == 1.00):
 			msgprint("Message: Please Enter Appropriate Conversion Rate.")
 			raise Exception				
-
-	# 1. Check whether bill is already booked against this bill no. or not
-	# 2. Add Remarks
-	# ---------------------------------------------------------------------
+			
 	def validate_bill_no(self):
 		if self.doc.bill_no and self.doc.bill_no.lower().strip()	not in ['na', 'not applicable', 'none']:
 			b_no = sql("select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` where bill_no = '%s' and credit_to = '%s' and docstatus = 1 and name != '%s' " % (self.doc.bill_no, self.doc.credit_to, self.doc.name))
@@ -172,16 +160,10 @@ class DocType(BuyingController):
 			if not self.doc.remarks:
 				self.doc.remarks = "No Remarks"
 					
-	# Validate Bill No Date
-	# ---------------------
 	def validate_bill_no_date(self):
 		if self.doc.bill_no and not self.doc.bill_date and self.doc.bill_no.lower().strip() not in ['na', 'not applicable', 'none']:
 			msgprint(_("Please enter Bill Date"), raise_exception=1)
 
-	# 1. Credit To Account Exists
-	# 2. Is a Credit Account
-	# 3. Is not a PL Account
-	# ----------------------------
 	def validate_credit_acc(self):
 		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
 			self.doc.credit_to)
@@ -215,50 +197,30 @@ class DocType(BuyingController):
 				if stopped:
 					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
 					raise Exception
-					
-	# Validate Supplier
-	# -----------------
-	def validate_supplier(self, d):
-		supplier = ''
-		if d.purchase_order and not d.purchase_order in self.po_list:
-			supplier = sql("select supplier from `tabPurchase Order` where name = '%s'" % d.purchase_order)[0][0]
-			if supplier and not cstr(self.doc.supplier) == cstr(supplier):
-				msgprint("Supplier name %s do not match with supplier name	of purhase order: %s." %(self.doc.supplier,cstr(d.purchase_order)))
-				raise Exception , " Validation Error "
-
-		if d.purchase_receipt and not d.purchase_receipt in self.pr_list:
-			supplier = sql("select supplier from `tabPurchase Receipt` where name = '%s'" % d.purchase_receipt)[0][0]
-			if supplier and not cstr(self.doc.supplier) == cstr(supplier):
-				msgprint("Supplier name %s do not match with supplier name	of %s %s." %(self.doc.supplier,cstr(d.purchase_receipt)))
-				raise Exception , " Validation Error "
-
-	def validate_reference_value(self):
-		pass
-	
-	# Validate PO and PR
-	# -------------------
-	def validate_po_pr(self, d):
-		# check po / pr for qty and rates and currency and conversion rate
-
-		# currency, import_rate must be equal to currency, import_rate of purchase order
-		if d.purchase_order and not d.purchase_order in self.po_list:
-			# currency
-			currency = cstr(sql("select currency from `tabPurchase Order` where name = '%s'" % d.purchase_order)[0][0])
-			if not cstr(currency) == cstr(self.doc.currency):
-				msgprint("Purchase Order: " + cstr(d.purchase_order) + " currency : " + cstr(currency) + " does not match with currency of current document.")
-				raise Exception
-			# import_rate
-			rate = flt(sql('select import_rate from `tabPurchase Order Item` where item_code=%s and parent=%s and name = %s', (d.item_code, d.purchase_order, d.po_detail))[0][0])
-			if abs(rate - flt(d.import_rate)) > 1 and cint(webnotes.defaults.get_global_default('maintain_same_rate')):
-				msgprint("Import Rate for %s in the Purchase Order is %s. Rate must be same as Purchase Order Rate" % (d.item_code,rate))
-				raise Exception
-									
-		if d.purchase_receipt and not d.purchase_receipt in self.pr_list:
-			# currency , conversion_rate
-			data = sql("select currency, conversion_rate from `tabPurchase Receipt` where name = '%s'" % d.purchase_receipt, as_dict = 1)
-			if not cstr(data[0]['currency']) == cstr(self.doc.currency):
-				msgprint("Purchase Receipt: " + cstr(d.purchase_receipt) + " currency : " + cstr(data[0]['currency']) + " does not match with currency of current document.")
-				raise Exception
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Purchase Order": {
+				"ref_dn_field": "purchase_order",
+				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+			},
+			"Purchase Order Item": {
+				"ref_dn_field": "po_detail",
+				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+					["uom", "="]],
+				"is_child_table": True
+			},
+			"Purchase Receipt": {
+				"ref_dn_field": "purchase_receipt",
+				"compare_fields": [["customer", "="], ["company", "="], ["currency", "="]],
+			},
+			"Purchase Receipt Item": {
+				"ref_dn_field": "pr_detail",
+				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+					["uom", "="]],
+				"is_child_table": True
+			}
+		})
 					
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':

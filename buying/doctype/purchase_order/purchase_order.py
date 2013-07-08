@@ -47,15 +47,28 @@ class DocType(BuyingController):
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		pc_obj.get_prevdoc_date(self)
-
-		self.validate_doc(pc_obj)
 		self.check_for_stopped_status(pc_obj)
 
+		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'PO Date')
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Supplier Quotation": {
+				"ref_dn_field": "supplier_quotation",
+				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+			},
+			"Supplier Quotation Item": {
+				"ref_dn_field": "supplier_quotation_item",
+				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+					["uom", "="]],
+				"is_child_table": True
+			}
+		})
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
@@ -69,10 +82,6 @@ class DocType(BuyingController):
 	
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
-		
-	def validate_doc(self,pc_obj):
-		# Validate values with reference document
-		pc_obj.validate_reference_value(obj = self)
 
 	# Check for Stopped status 
 	def check_for_stopped_status(self, pc_obj):
