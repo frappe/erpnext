@@ -132,11 +132,17 @@ cur_frm.cscript.make_bank_voucher = function() {
 
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{'supplier':  doc.supplier}
+	}
+	// return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{'supplier':  doc.supplier}
+	}	
+	// return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
@@ -146,32 +152,73 @@ cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(
 }
 
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Credit" AND tabAccount.is_pl_account="No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'debit_or_credit': 'Credit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
+	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Credit" AND tabAccount.is_pl_account="No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 cur_frm.fields_dict['purchase_order_main'].get_query = function(doc) {
+	var filter = [
+			['Purchase Order', 'docstatus', '=', 1],
+			['Purchase Order', 'status', '!=', 'Stopped'],
+			['Purchase Order', 'per_billed', '<', 99.99],
+			['Purchase Order', 'company', '=', doc.company]
+	];
+	var cond = [];
 	if (doc.supplier){
-		return 'SELECT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 AND `tabPurchase Order`.supplier = "'+ doc.supplier +'" AND `tabPurchase Order`.`status` != "Stopped" AND ifnull(`tabPurchase Order`.`per_billed`,0) < 99.99 AND `tabPurchase Order`.`company` = "' + doc.company + '" AND `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50'
-	} else {
-		return 'SELECT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 AND `tabPurchase Order`.`status` != "Stopped" AND ifnull(`tabPurchase Order`.`per_billed`, 0) < 99.99 AND `tabPurchase Order`.`company` = "' + doc.company + '" AND `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50'
+		cond = ['Purchase Order', 'supplier', '=', doc.supplier];
+		// return 'SELECT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 AND `tabPurchase Order`.supplier = "'+ doc.supplier +'" AND `tabPurchase Order`.`status` != "Stopped" AND ifnull(`tabPurchase Order`.`per_billed`,0) < 99.99 AND `tabPurchase Order`.`company` = "' + doc.company + '" AND `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50'
+	}
+	filter.push(cond);
+	return{
+		filters: filter
 	}
 }
 
 cur_frm.fields_dict['purchase_receipt_main'].get_query = function(doc) {
+	var filter = [
+			['Purchase Receipt', 'docstatus', '=', 1],
+			['Purchase Receipt', 'status', '!=', 'Stopped'],
+			['Purchase Receipt', 'per_billed', '<', 99.99],
+			['Purchase Receipt', 'company', '=', doc.company]
+	];
+	var cond = []; 
 	if (doc.supplier){
-		return 'SELECT `tabPurchase Receipt`.`name` FROM `tabPurchase Receipt` WHERE `tabPurchase Receipt`.`docstatus` = 1 AND `tabPurchase Receipt`.supplier = "'+ doc.supplier +'" AND `tabPurchase Receipt`.`status` != "Stopped" AND ifnull(`tabPurchase Receipt`.`per_billed`, 0) < 99.99 AND `tabPurchase Receipt`.`company` = "' + doc.company + '" AND `tabPurchase Receipt`.%(key)s LIKE "%s" ORDER BY `tabPurchase Receipt`.`name` DESC LIMIT 50'
-	} else {
-		return 'SELECT `tabPurchase Receipt`.`name` FROM `tabPurchase Receipt` WHERE `tabPurchase Receipt`.`docstatus` = 1 AND `tabPurchase Receipt`.`status` != "Stopped" AND ifnull(`tabPurchase Receipt`.`per_billed`, 0) < 99.99 AND `tabPurchase Receipt`.`company` = "' + doc.company + '" AND `tabPurchase Receipt`.%(key)s LIKE "%s" ORDER BY `tabPurchase Receipt`.`name` DESC LIMIT 50'
+		['Purchase Receipt', 'supplier', '=', doc.supplier];
+		// return 'SELECT `tabPurchase Receipt`.`name` FROM `tabPurchase Receipt` WHERE `tabPurchase Receipt`.`docstatus` = 1 AND `tabPurchase Receipt`.supplier = "'+ doc.supplier +'" AND `tabPurchase Receipt`.`status` != "Stopped" AND ifnull(`tabPurchase Receipt`.`per_billed`, 0) < 99.99 AND `tabPurchase Receipt`.`company` = "' + doc.company + '" AND `tabPurchase Receipt`.%(key)s LIKE "%s" ORDER BY `tabPurchase Receipt`.`name` DESC LIMIT 50'
+	} 
+	filter.push(cond);
+	return{
+		filters: filter
 	}
 }
 
 // Get Print Heading
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
+return{
+		filters:[
+			['Print Heading', 'docstatus', '!=', 2]
+		]
+	}	
+	// return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['entries'].grid.get_field("expense_head").get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Debit" OR tabAccount.account_type = "Expense Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
+	return{
+		filters:{
+			'debit_or_credit':'Debit',
+			'account_type': 'Expense Account',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
+	// return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Debit" OR tabAccount.account_type = "Expense Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
 }
 cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
@@ -186,8 +233,11 @@ cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
+		// query: "accounts.utils.get_cost_center_list",
+		filters: { 
+			'company_name': doc.company,
+			'group_or_ledger': 'Ledger'
+		}
 	}
 }
 
@@ -228,9 +278,14 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}	
+	// return 'SELECT `tabProject`.name FROM `tabProject` \
+	// 	WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+	// 	AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
 

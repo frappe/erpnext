@@ -241,38 +241,75 @@ cur_frm.cscript.make_bank_voucher = function() {
 }
 
 cur_frm.fields_dict.debit_to.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters: {
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
+	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters: {
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
+	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "Yes" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'Yes',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
+	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "Yes" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 // Write off cost center
 //-----------------------
 cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
-	return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company_name="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'group_or_ledger': 'Ledger',
+			'company_name': doc.company
+		}
+	}	
+	// return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company_name="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
 }
 
 //project name
 //--------------------------
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
-	var cond = '';
-	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	return repl('SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND %(cond)s `tabProject`.name LIKE "%s" \
-		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+	return{
+		query: "controllers.queries.get_project_name",
+		filters: {'customer': doc.customer}
+	}	
+	// var cond = '';
+	// if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
+	// return repl('SELECT `tabProject`.name FROM `tabProject` \
+	// 	WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+	// 	AND %(cond)s `tabProject`.name LIKE "%s" \
+	// 	ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
 }
 
 //Territory
 //-----------------------------
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters: {'is_group': 'NO'}
+	}	
+	// return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
 // Income Account in Details Table
@@ -285,11 +322,12 @@ cur_frm.set_query("income_account", "entries", function(doc) {
 if (sys_defaults.auto_inventory_accounting) {
 	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
-			"query": "accounts.utils.get_account_list", 
-			"filters": {
-				"is_pl_account": "Yes",
-				"debit_or_credit": "Debit",
-				"company": doc.company
+			// "query": "accounts.utils.get_account_list", 
+			filters: {
+				'is_pl_account': 'Yes',
+				'debit_or_credit': 'Debit',
+				'company': doc.company,
+				'group_or_ledger': 'Ledger'
 			}
 		}
 	}
@@ -299,45 +337,66 @@ if (sys_defaults.auto_inventory_accounting) {
 //----------------------------
 cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	return "SELECT `tabBin`.`warehouse`, `tabBin`.`actual_qty` FROM `tabBin` WHERE `tabBin`.`item_code` = '"+ d.item_code +"' AND ifnull(`tabBin`.`actual_qty`,0) > 0 AND `tabBin`.`warehouse` like '%s' ORDER BY `tabBin`.`warehouse` DESC LIMIT 50";
+	return{
+		filters:[
+			['Bin', 'item_code', '=', d.item_code],
+			['Bin', 'actual_qty', '>', 0]
+		]
+	}	
+	// return "SELECT `tabBin`.`warehouse`, `tabBin`.`actual_qty` FROM `tabBin` WHERE `tabBin`.`item_code` = '"+ d.item_code +"' AND ifnull(`tabBin`.`actual_qty`,0) > 0 AND `tabBin`.`warehouse` like '%s' ORDER BY `tabBin`.`warehouse` DESC LIMIT 50";
 }
 
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
+		// query: "accounts.utils.get_cost_center_list",
+		filters: { 
+			'company_name': doc.company,
+			'group_or_ledger': 'Ledger'
+		}	
 	}
 }
 
 // Sales Order
 // -----------
 cur_frm.fields_dict.sales_order_main.get_query = function(doc) {
-	if (doc.customer)
-		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.`customer` =	"' + doc.customer + '" and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
-	else
-		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
+	var filter = [
+		['Sales Order','company','=',doc.company],
+		['Sales Order','docstatus','=',1],
+		['Sales Order','status','!=','Stopped'],
+		['Sales Order','per_billed','<',99.99]
+	];
+	var cond = [];
+	if (doc.customer) cond = ['Sales Order', 'customer', '=', doc.customer];
+		// return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.`customer` =	"' + doc.customer + '" and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
+	filter.push(cond);
+	return{
+		filters: filter
+	}
 }
 
 // Delivery Note
 // --------------
 cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
-	if (doc.customer)
-		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
-			WHERE `tabDelivery Note`.company = "' + doc.company 
-			+ '" and `tabDelivery Note`.`docstatus` = 1 and \
-			ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
-			`tabDelivery Note`.`customer` =	"' 
-			+ doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" \
-			ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
-	else
-		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
-			WHERE `tabDelivery Note`.company = "' + doc.company 
-			+ '" and `tabDelivery Note`.`docstatus` = 1 and \
-			ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
-			`tabDelivery Note`.%(key)s LIKE "%s" \
-			ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
+	var filter = [
+		['Delivery Note', 'company', '=', doc.company],
+		['Delivery Note', 'docstatus', '=', 1],
+		['Delivery Note', 'per_billed', '<', 99.99]
+	];	
+	var cond = [];
+	if (doc.customer) ['Delivery Note', 'customer', '=', doc.customer];
+		// return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
+		// 	WHERE `tabDelivery Note`.company = "' + doc.company 
+		// 	+ '" and `tabDelivery Note`.`docstatus` = 1 and \
+		// 	ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
+		// 	`tabDelivery Note`.`customer` =	"' 
+		// 	+ doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" \
+		// 	ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
+	filter.push(cond);
+	return{
+		filters: filter
+	}
 }
 
 

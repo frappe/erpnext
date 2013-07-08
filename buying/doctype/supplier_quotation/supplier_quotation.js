@@ -56,18 +56,23 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query = 
 	function(doc, cdt, cdn) {
-		return "select `tabProject`.name from `tabProject` \
-			where `tabProject`.status not in (\"Completed\", \"Cancelled\") \
-			and `tabProject`.name like \"%s\" \
-			order by `tabProject`.name ASC LIMIT 50";
+		return{
+			filters:[
+				['Project', 'status', 'not in', 'Completed, Cancelled'],
+			]
+		}
 	}
 
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return "select distinct `name` from `tabMaterial Request` \
-		where material_request_type='Purchase' and company = \"" + doc.company +
-		"\" and `docstatus` = 1 and `status` != \"Stopped\" and \
-		ifnull(`per_ordered`,0) < 99.99 and \
-		%(key)s LIKE \"%s\" order by `name` desc limit 50";
+	return{
+		filters:[
+			['Material Request', 'material_request_type', '=', 'Purchase'],
+			['Material Request', 'company', '=', doc.company],
+			['Material Request', 'docstatus', '=', 1],
+			['Material Request', 'status', '!=', 'Stopped'],
+			['Material Request', 'per_ordered', '<', 99.99]
+		]
+	}	
 }
 
 cur_frm.cscript.supplier_address = function(doc, dt, dn) {
@@ -79,12 +84,13 @@ cur_frm.cscript.supplier_address = function(doc, dt, dn) {
 cur_frm.cscript.contact_person = cur_frm.cscript.supplier_address;
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return "SELECT name, address_line1, city FROM tabAddress WHERE supplier = \"" + doc.supplier
-		+ "\" AND docstatus != 2 AND name LIKE \"%s\" ORDER BY name ASC LIMIT 50";
+	return {
+		filters:{'supplier': doc.supplier}
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return "SELECT name, CONCAT(first_name, \" \", ifnull(last_name,\"\")) As FullName, \
-		department, designation FROM tabContact WHERE supplier = \"" + doc.supplier 
-		+"\" AND docstatus != 2 AND name LIKE \"%s\" ORDER BY name ASC LIMIT 50";
+	return {
+		filters:{'supplier': doc.supplier}
+	}
 }
