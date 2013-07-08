@@ -76,9 +76,9 @@ class DocType:
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
-		
+				
 		if ordered_qty_against_so > so_qty:
-			msgprint("""Total production order qty for item: %s against sales order: %s \
+			webnotes.msgprint("""Total production order qty for item: %s against sales order: %s \
 			 	will be %s, which is greater than sales order qty (%s). 
 				Please reduce qty or remove the item.""" %
 				(self.doc.production_item, self.doc.sales_order, 
