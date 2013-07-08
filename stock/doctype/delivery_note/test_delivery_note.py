@@ -109,6 +109,7 @@ test_records = [
 			"net_total": 500.0,
 			"grand_total": 500.0, 
 			"grand_total_export": 500.0,
+			"naming_series": "_T-Delivery Note-"
 		}, 
 		{
 			"description": "CPU", 

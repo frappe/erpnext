@@ -321,7 +321,8 @@ test_records = [
 			"doctype": "Material Request", 
 			"fiscal_year": "_Test Fiscal Year 2013", 
 			"transaction_date": "2013-02-18",
-			"material_request_type": "Purchase"
+			"material_request_type": "Purchase",
+			"naming_series": "_T-Material Request-"
 		}, 
 		{
 			"description": "_Test Item Home Desktop 100", 

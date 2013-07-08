@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-07-05 16:24:34", 
+  "modified": "2013-07-08 14:05:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -202,7 +202,7 @@
   "label": "Is Stock Item", 
   "oldfieldname": "is_stock_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -270,7 +270,7 @@
   "label": "Is Asset Item", 
   "oldfieldname": "is_asset_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -283,7 +283,7 @@
   "label": "Has Batch No", 
   "oldfieldname": "has_batch_no", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -298,7 +298,7 @@
   "label": "Has Serial No", 
   "oldfieldname": "has_serial_no", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -399,7 +399,7 @@
   "label": "Is Purchase Item", 
   "oldfieldname": "is_purchase_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -525,7 +525,7 @@
   "label": "Is Sales Item", 
   "oldfieldname": "is_sales_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -540,7 +540,7 @@
   "label": "Is Service Item", 
   "oldfieldname": "is_service_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -554,7 +554,7 @@
   "label": "Allow Samples", 
   "oldfieldname": "is_sample_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -706,7 +706,7 @@
   "label": "Allow Bill of Materials", 
   "oldfieldname": "is_manufactured_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -732,7 +732,7 @@
   "label": "Allow Production Order", 
   "oldfieldname": "is_pro_applicable", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -745,7 +745,7 @@
   "label": "Is Sub Contracted Item", 
   "oldfieldname": "is_sub_contracted_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
  }, 

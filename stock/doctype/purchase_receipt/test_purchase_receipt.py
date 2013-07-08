@@ -102,6 +102,7 @@ test_records = [
 			"supplier": "_Test Supplier",
 			"net_total": 500.0, 
 			"grand_total": 720.0,
+			"naming_series": "_T-Purchase Receipt-",
 		}, 
 		{
 			"conversion_factor": 1.0, 

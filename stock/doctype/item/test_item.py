@@ -69,7 +69,8 @@ test_records = [
 		"parentfield": "item_reorder",
 		"warehouse": "_Test Warehouse",
 		"warehouse_reorder_level": 20,
-		"warehouse_reorder_qty": 20
+		"warehouse_reorder_qty": 20,
+		"material_request_type": "Purchase"
 	}, {
 		"doctype": "Item Price",
 		"parentfield": "ref_rate_details",

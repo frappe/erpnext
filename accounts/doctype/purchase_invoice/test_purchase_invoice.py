@@ -366,6 +366,7 @@ test_records = [
 		# parent
 		{
 			"doctype": "Purchase Invoice",
+			"naming_series": "_T-Purchase Invoice-",
 			"supplier_name": "_Test Supplier",
 			"credit_to": "_Test Supplier - _TC",
 			"bill_no": "NA",

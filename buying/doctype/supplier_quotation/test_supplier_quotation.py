@@ -36,6 +36,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(po[0]["doctype"], "Purchase Order")
 		self.assertEquals(len(po), len(sq.doclist))
 		
+		po[0]["naming_series"] = "_T-Purchase Order-"
+
+		for doc in po:
+			if doc.parentfield=="purchase_order_items":
+				doc.schedule_date = "2013-04-12"
+
 		webnotes.bean(po).insert()
 		
 test_records = [
@@ -53,7 +59,7 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
-			
+			"naming_series": "_T-Supplier Quotation-"
 		}, 
 		{
 			"description": "_Test FG Item", 

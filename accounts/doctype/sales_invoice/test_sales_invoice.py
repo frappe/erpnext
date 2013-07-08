@@ -423,6 +423,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = webnotes.bean(copy=pr_test_records[0])
+		pr.doc.naming_series = "_T-Purchase Receipt-"
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
@@ -431,6 +432,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from stock.doctype.delivery_note.test_delivery_note import test_records \
 			as dn_test_records
 		dn = webnotes.bean(copy=dn_test_records[0])
+		dn.doc.naming_series = "_T-Delivery Note-"
 		dn.insert()
 		dn.submit()
 		return dn

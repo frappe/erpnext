@@ -290,6 +290,7 @@ test_records = [
 			"transaction_date": "2013-02-21",
 			"grand_total": 1000.0, 
 			"grand_total_export": 1000.0, 
+			"naming_series": "_T-Sales Order-"
 		}, 
 		{
 			"description": "CPU", 
