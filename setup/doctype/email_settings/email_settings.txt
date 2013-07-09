@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:36:16", 
+  "modified": "2013-07-09 10:28:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -80,6 +80,13 @@
   "fieldname": "mail_login", 
   "fieldtype": "Data", 
   "label": "Login Id"
+ }, 
+ {
+  "description": "Check this if you want to send emails as this id only (in case of restriction by your email provider).", 
+  "doctype": "DocField", 
+  "fieldname": "always_use_login_id_as_sender", 
+  "fieldtype": "Check", 
+  "label": "Always use Login Id as sender"
  }, 
  {
   "doctype": "DocField", 
