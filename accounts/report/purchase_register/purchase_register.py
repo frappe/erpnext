@@ -23,7 +23,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 
 	invoice_list = get_invoices(filters)
-	columns, expense_accounts, tax_accounts = get_columns(invoice_list)
+	columns, expense_accounts, tax_accounts, renamed_columns = get_columns(invoice_list)
 	
 	
 	if not invoice_list:
@@ -31,7 +31,7 @@ def execute(filters=None):
 		return columns, invoice_list
 	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
-	invoice_tax_map = get_invoice_tax_map(invoice_list)
+	invoice_tax_map = get_invoice_tax_map(invoice_list, renamed_columns)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	account_map = get_account_details(invoice_list)
 
@@ -73,7 +73,9 @@ def get_columns(invoice_list):
 		"Project:Link/Project:80", "Bill No::120", "Bill Date:Date:80", "Remarks::150", 
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
 	]
-	expense_accounts = tax_accounts = []
+	expense_accounts = tax_accounts = expense_columns = tax_columns = []
+	renamed_columns = {}
+	
 	if invoice_list:	
 		expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
 			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
@@ -85,13 +87,23 @@ def get_columns(invoice_list):
 			and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
 			order by account_head""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+			
+				
+	expense_columns = [(account + ":Currency:120") for account in expense_accounts]
+	for account in tax_accounts:
+		if account in expense_accounts:
+			new_account = account + " (Tax)"
+			renamed_columns[account] = new_account
+			tax_columns.append(new_account + ":Currency:120")
+		else:
+			tax_columns.append(account + ":Currency:120")
 	
-	columns = columns + [(account + ":Currency:120") for account in expense_accounts] + \
-		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
+	columns = columns + expense_columns + \
+		["Net Total:Currency:120"] + tax_columns + \
 		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
 		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
-	return columns, expense_accounts, tax_accounts
+	return columns, expense_accounts, tax_accounts, renamed_columns
 
 def get_conditions(filters):
 	conditions = ""
@@ -125,15 +137,16 @@ def get_invoice_expense_map(invoice_list):
 	
 	return invoice_expense_map
 	
-def get_invoice_tax_map(invoice_list):
+def get_invoice_tax_map(invoice_list, renamed_columns):
 	tax_details = webnotes.conn.sql("""select parent, account_head, sum(tax_amount) as tax_amount
 		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_tax_map = {}
 	for d in tax_details:
-		invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
-		invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
+		account = renamed_columns.get(d.account_head) or d.account_head
+		invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(account, [])
+		invoice_tax_map[d.parent][account] = flt(d.tax_amount)
 	
 	return invoice_tax_map
 	
