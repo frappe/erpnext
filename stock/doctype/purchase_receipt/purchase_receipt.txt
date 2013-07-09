@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-08 17:46:13", 
+  "modified": "2013-07-09 12:50:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -172,7 +172,7 @@
   "fieldname": "challan_no", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "Challan No", 
+  "label": "Supplier Shipment No", 
   "no_copy": 1, 
   "oldfieldname": "challan_no", 
   "oldfieldtype": "Data", 
@@ -186,7 +186,7 @@
   "fieldname": "challan_date", 
   "fieldtype": "Date", 
   "hidden": 1, 
-  "label": "Challan Date", 
+  "label": "Supplier Shipment Date", 
   "no_copy": 1, 
   "oldfieldname": "challan_date", 
   "oldfieldtype": "Date", 
@@ -197,56 +197,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "items", 
-  "fieldtype": "Section Break", 
-  "label": "Items", 
-  "oldfieldtype": "Section Break", 
-  "options": "icon-shopping-cart"
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "purchase_receipt_details", 
-  "fieldtype": "Table", 
-  "label": "Purchase Receipt Items", 
-  "oldfieldname": "purchase_receipt_details", 
-  "oldfieldtype": "Table", 
-  "options": "Purchase Receipt Item", 
-  "print_hide": 0, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "oldfieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_current_stock", 
-  "fieldtype": "Button", 
-  "label": "Get Current Stock", 
-  "oldfieldtype": "Button", 
-  "options": "get_current_stock", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_18", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List", 
+  "label": "Currency and Price List", 
   "options": "icon-tag"
  }, 
  {
@@ -309,6 +262,71 @@
   "print_hide": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "purchase_receipt_details", 
+  "fieldtype": "Table", 
+  "label": "Purchase Receipt Items", 
+  "oldfieldname": "purchase_receipt_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Receipt Item", 
+  "print_hide": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_import", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "oldfieldname": "net_total_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_current_stock", 
+  "fieldtype": "Button", 
+  "label": "Get Current Stock", 
+  "oldfieldtype": "Button", 
+  "options": "get_current_stock", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_27", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Company Currency)", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
   "description": "Add / Edit Taxes and Charges", 
   "doctype": "DocField", 
   "fieldname": "taxes", 
@@ -330,29 +348,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_tax_detail", 
-  "fieldtype": "Button", 
-  "label": "Get Tax Detail", 
-  "oldfieldtype": "Button", 
-  "options": "get_purchase_tax_details", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "purchase_tax_details", 
   "fieldtype": "Table", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
   "oldfieldtype": "Table", 
   "options": "Purchase Taxes and Charges"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "calculate_tax", 
-  "fieldtype": "Button", 
-  "label": "Calculate Tax", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -373,20 +374,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "net_total_import", 
-  "fieldtype": "Currency", 
-  "label": "Net Total (Import)", 
-  "oldfieldname": "net_total_import", 
-  "oldfieldtype": "Currency", 
-  "options": "currency", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "other_charges_added_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added (Import)", 
+  "label": "Taxes and Charges Added", 
   "oldfieldname": "other_charges_added_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -397,7 +387,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted (Import)", 
+  "label": "Taxes and Charges Deducted", 
   "oldfieldname": "other_charges_deducted_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -408,7 +398,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total_import", 
   "fieldtype": "Currency", 
-  "label": "Grand Total (Import)", 
+  "label": "Grand Total", 
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -419,7 +409,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words_import", 
   "fieldtype": "Data", 
-  "label": "In Words (Import)", 
+  "label": "In Words", 
   "oldfieldname": "in_words_import", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -434,23 +424,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "label": "Net Total", 
-  "oldfieldname": "net_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "read_only": 1, 
-  "reqd": 1, 
-  "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "other_charges_added", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added", 
+  "label": "Taxes and Charges Added (Company Currency)", 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -461,7 +437,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted", 
+  "label": "Taxes and Charges Deducted (Company Currency)", 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -472,7 +448,7 @@
   "doctype": "DocField", 
   "fieldname": "total_tax", 
   "fieldtype": "Currency", 
-  "label": "Total Tax", 
+  "label": "Total Tax (Company Currency)", 
   "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -483,7 +459,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
-  "label": "Grand Total", 
+  "label": "Grand Total (Company Currency)", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -494,7 +470,7 @@
   "doctype": "DocField", 
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
-  "label": "Rounded Total", 
+  "label": "Rounded Total (Company Currency)", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -506,7 +482,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words", 
   "fieldtype": "Data", 
-  "label": "In Words", 
+  "label": "In Words (Company Currency)", 
   "oldfieldname": "in_words", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 

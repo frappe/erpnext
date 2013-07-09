@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-07-08 15:51:41", 
+  "modified": "2013-07-09 12:48:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -236,7 +236,7 @@
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "label": "Price List and Currency", 
+  "label": "Currency and Price List", 
   "options": "icon-tag", 
   "read_only": 0
  }, 
@@ -348,15 +348,20 @@
   "doctype": "DocField", 
   "fieldname": "net_total_export", 
   "fieldtype": "Currency", 
-  "label": "Net Total (Export)", 
+  "label": "Net Total", 
   "options": "currency", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_28", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "net_total", 
   "fieldtype": "Currency", 
-  "label": "Net Total*", 
+  "label": "Net Total (Company Currency)", 
   "no_copy": 0, 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
@@ -365,15 +370,6 @@
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -445,19 +441,8 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_total_export", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Total (Export)", 
-  "options": "currency", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "other_charges_total", 
-  "fieldtype": "Currency", 
   "label": "Taxes and Charges Total", 
-  "oldfieldname": "other_charges_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -468,12 +453,14 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "calculate_charges", 
-  "fieldtype": "Button", 
-  "label": "Calculate Taxes and Charges", 
-  "oldfieldtype": "Button", 
+  "fieldname": "other_charges_total", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total (Company Currency)", 
+  "oldfieldname": "other_charges_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -539,7 +526,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
-  "label": "Grand Total*", 
+  "label": "Grand Total (Company Currency)", 
   "no_copy": 0, 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
@@ -553,7 +540,7 @@
   "doctype": "DocField", 
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
-  "label": "Rounded Total", 
+  "label": "Rounded Total (Company Currency)", 
   "no_copy": 0, 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
@@ -567,7 +554,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words", 
   "fieldtype": "Data", 
-  "label": "In Words", 
+  "label": "In Words (Company Currency)", 
   "no_copy": 0, 
   "oldfieldname": "in_words", 
   "oldfieldtype": "Data", 

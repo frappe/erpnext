@@ -71,12 +71,6 @@ erpnext.startup.start = function() {
 	}
 }
 
-erpnext.hide_naming_series = function() {
-	if(cur_frm.fields_dict.naming_series) {
-		cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
-	}
-}
-
 erpnext.setup_mousetrap = function() {
 	$(document).keydown("meta+g ctrl+g", function(e) {
 		wn.ui.toolbar.search.show();

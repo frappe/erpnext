@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-07 11:42:56", 
+  "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:02:28", 
+  "modified": "2013-07-09 12:15:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -106,7 +106,7 @@
   "doctype": "DocField", 
   "fieldname": "import_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate ", 
+  "label": "Price List Rate", 
   "options": "currency", 
   "print_hide": 1, 
   "read_only": 0
@@ -145,7 +145,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate*", 
+  "label": "Price List Rate (Company Currency)", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 0
@@ -155,7 +155,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_rate", 
   "fieldtype": "Currency", 
-  "label": "Rate*", 
+  "label": "Rate (Company Currency)", 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -170,7 +170,7 @@
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
-  "label": "Amount*", 
+  "label": "Amount (Company Currency)", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
