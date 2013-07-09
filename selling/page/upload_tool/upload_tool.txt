@@ -1,0 +1,32 @@
+[
+ {
+  "creation": "2013-06-19 14:47:38", 
+  "docstatus": 0, 
+  "modified": "2013-06-19 14:47:38", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "page_name": "Upload Tool", 
+  "standard": "Yes", 
+  "title": "Upload Tool"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "upload-tool", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "upload-tool"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

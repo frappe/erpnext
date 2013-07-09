@@ -13,6 +13,7 @@
   "description": "Buyer of Goods and Services.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "is_submittable": 1, 
   "module": "Selling", 
   "name": "__common__", 
   "search_fields": "customer_name,customer_group,country,territory"
@@ -30,7 +31,8 @@
   "parent": "Customer", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "read": 1, 
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -327,20 +329,55 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Customer", 
   "permlevel": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 1
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "permlevel": 1, 
-  "role": "Sales User"
+  "role": "Sales Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 0, 
@@ -348,15 +385,65 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "report": 1, 
   "role": "Sales Master Manager", 
   "submit": 0, 
   "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "permlevel": 1, 
   "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "All", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Administrator", 
+  "submit": 1, 
   "write": 1
  }
 ]
