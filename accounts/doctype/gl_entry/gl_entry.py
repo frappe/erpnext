@@ -120,7 +120,7 @@ class DocType:
 		def _get_cost_center_company():
 			if not self.cost_center_company.get(self.doc.cost_center):
 				self.cost_center_company[self.doc.cost_center] = webnotes.conn.get_value("Cost Center",
-					self.doc.cost_center, "company_name")
+					self.doc.cost_center, "company")
 			
 			return self.cost_center_company[self.doc.cost_center]
 			

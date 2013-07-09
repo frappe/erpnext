@@ -247,7 +247,7 @@ if (sys_defaults.auto_inventory_accounting) {
 	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
 		return {
 			query: "accounts.utils.get_cost_center_list",
-			filters: { company_name: doc.company}
+			filters: { company: doc.company}
 		}
 	}
 }
