@@ -248,4 +248,5 @@ patch_list = [
 	"patches.july_2013.p01_remove_doctype_mappers",
 	"execute:webnotes.delete_doc('Report', 'Delivered Items To Be Billed')",
 	"execute:webnotes.delete_doc('Report', 'Received Items To Be Billed')",
+	"patches.july_2013.p02_copy_shipping_address",
 ]
