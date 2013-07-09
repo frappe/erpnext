@@ -67,10 +67,15 @@ wn.pages['Setup'].onload = function(wrapper) {
 				+item.title+'</a></b></div>').appendTo(row);
 			
 		} else {
-			var col = $('<div class="col col-lg-5">\
-					<span class="badge">'+ item.count +'</span>'+
-					' <b>' + (item.title || item.doctype) + '</b>'
-					+'</div>')
+			var col = $(repl('<div class="col col-lg-5">\
+					<span class="badge">%(count)s</span>\
+					 <b><i class="%(icon)s"></i>\
+						<a class="data-link">%(title)s</a></b>\
+					</div>', {
+						count: item.count,
+						title: wn._(item.title || item.doctype),
+						icon: wn.boot.doctype_icons[item.doctype]
+					}))
 				.appendTo(row);
 
 			col.find(".badge")
@@ -91,12 +96,19 @@ wn.pages['Setup'].onload = function(wrapper) {
 			$('<div class="col col-lg-1"></div>').appendTo(row);
 			
 		if(item.doctype) {
-			col.find(".badge")
+			var badge = col.find(".badge, .data-link")
 				.attr("data-doctype", item.doctype)
 				.css({"cursor": "pointer"})
-				.click(function() {
+				
+			if(item.single) {
+				badge.click(function() {
+					wn.set_route("Form", $(this).attr("data-doctype"))
+				})
+			} else {
+				badge.click(function() {
 					wn.set_route(item.tree || "List", $(this).attr("data-doctype"))
 				})
+			}
 		}
 		
 		// tree
@@ -108,11 +120,13 @@ wn.pages['Setup'].onload = function(wrapper) {
 				<a class="import-link"><i class="icon-upload"></i> Import</a>')
 				.appendTo($links)
 
-			$links.find(".view-link")
+			var mylink = $links.find(".view-link")
 				.attr("data-doctype", item.doctype)
-				.click(function() {
-					wn.set_route(item.tree, item.doctype);
-				})
+
+			mylink.click(function() {
+				wn.set_route(item.tree, item.doctype);
+			})
+						
 		} else if(item.single) {
 			$('<a class="view-link"><i class="icon-edit"></i> Edit</a>')
 				.appendTo($links)

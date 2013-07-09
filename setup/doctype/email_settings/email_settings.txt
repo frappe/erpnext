@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-07-09 10:28:29", 
+  "modified": "2013-07-09 10:41:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -109,18 +109,11 @@
   "label": "Send Print in Body and Attachment"
  }, 
  {
-  "description": "Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets", 
-  "doctype": "DocField", 
-  "fieldname": "support_ticket_mail_settings", 
-  "fieldtype": "Section Break", 
-  "label": "Support Ticket Mail Settings"
- }, 
- {
   "description": "To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.", 
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "label": "Incoming Mail Setting"
+  "label": "Incoming / Support Mail Setting"
  }, 
  {
   "description": "Check this to pull emails from your mailbox", 
