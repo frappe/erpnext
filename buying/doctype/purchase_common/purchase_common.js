@@ -107,7 +107,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							company: me.frm.doc.company,
-							currency: me.frm.doc.currency
+							currency: me.frm.doc.currency,
+							transaction_date: me.frm.doc.transaction_date
 						}
 					},
 					callback: function(r) {
