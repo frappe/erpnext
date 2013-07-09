@@ -92,3 +92,12 @@ def get_events(start, end, filters=None):
 		}, as_dict=True, update={"allDay": 0})
 
 	return data
+
+def get_project(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+	return webnotes.conn.sql(""" select name from `tabProject`
+			where %(key)s like %(txt)s %(mcond)s
+			order by name limit %(start)s, %(page_len)s
+		""" % {'key': searchfield, 'txt': "%%%s%%" % txt, 
+		'mcond':get_match_cond(doctype, searchfield),
+		'start': start, 'page_len': page_len})

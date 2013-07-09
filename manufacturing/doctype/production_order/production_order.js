@@ -101,13 +101,21 @@ cur_frm.cscript.make_se = function(doc, purpose) {
 }
 
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
-	 return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.`description` FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.docstatus != 2 AND `tabItem`.is_pro_applicable = "Yes" AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.`name` LIMIT 50';
+	return {
+		filters:[
+			['Item', 'is_pro_applicable', '=', 'Yes']
+		]
+	}
+	 // return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.`description` FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.docstatus != 2 AND `tabItem`.is_pro_applicable = "Yes" AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.`name` LIMIT 50';
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:['Project', 'status', 'not in', 'Completed, Cancelled']
+	}	
+	// return 'SELECT `tabProject`.name FROM `tabProject` \
+	// 	WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+	// 	AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
 

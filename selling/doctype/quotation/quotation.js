@@ -118,7 +118,8 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 	}),'', doc, dt, dn, 1);
 }
 
-cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;
+cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.lead_query" } }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {
@@ -186,45 +187,22 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 	if(doc.customer) {
 		var export_rate_field = wn.meta.get_docfield(cdt, 'export_rate', cdn);
 		var precision = (export_rate_field && export_rate_field.fieldtype) === 'Float' ? 6 : 2;
-		return repl("\
-			select \
-				item.name, \
-				( \
-					select concat('Last Quote @ ', q.currency, ' ', \
-						format(q_item.export_rate, %(precision)s)) \
-					from `tabQuotation` q, `tabQuotation Item` q_item \
-					where \
-						q.name = q_item.parent \
-						and q_item.item_code = item.name \
-						and q.docstatus = 1 \
-						and q.customer = \"%(cust)s\" \
-					order by q.transaction_date desc \
-					limit 1 \
-				) as quote_rate, \
-				( \
-					select concat('Last Sale @ ', si.currency, ' ', \
-						format(si_item.basic_rate, %(precision)s)) \
-					from `tabSales Invoice` si, `tabSales Invoice Item` si_item \
-					where \
-						si.name = si_item.parent \
-						and si_item.item_code = item.name \
-						and si.docstatus = 1 \
-						and si.customer = \"%(cust)s\" \
-					order by si.posting_date desc \
-					limit 1 \
-				) as sales_rate, \
-				item.item_name, item.description \
-			from `tabItem` item \
-			where \
-				item.%(key)s like \"%s\" \
-				%(cond)s \
-				limit 25", {
-					cust: doc.customer,
-					cond: cond,
-					precision: precision
-				});
+		return {
+			query: "selling.doctype.quotation.quotation.quotation_details",
+			filters:{
+				cust: doc.customer,
+				cond: cond,
+				precision: precision
+			}
+		}
 	} else {
-		return repl("SELECT name, item_name, description FROM `tabItem` item WHERE item.%(key)s LIKE '%s' %(cond)s ORDER BY item.item_code DESC LIMIT 50", {cond:cond});
+		return {
+			query: 'selling.doctype.quotation.quotation.quotation_details',
+			filters:{
+				cond: cond,
+			}		
+		}	
+		// return repl("SELECT name, item_name, description FROM `tabItem` item WHERE item.%(key)s LIKE '%s' %(cond)s ORDER BY item.item_code DESC LIMIT 50", {cond:cond});
 	}
 }
 

@@ -77,11 +77,15 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+    	filters:{'customer': doc.customer}
+  	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+  	return{
+    	filters:{'customer': doc.customer}
+  	}
 }
 
 cur_frm.cscript.get_items = function(doc, dt, dn) {
@@ -93,7 +97,9 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 }
 
 cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+	return{
+    	filters:{ 'is_service_item': "Yes"}
+  	}
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
@@ -110,30 +116,52 @@ cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
 	if(doc.customer) {
 		cond = '`tabSales Order`.customer = "'+doc.customer+'" AND';
 	}
-	return repl('SELECT DISTINCT `tabSales Order`.name FROM `tabSales Order`, `tabSales Order Item`, `tabItem` WHERE `tabSales Order`.company = "%(company)s" AND `tabSales Order`.docstatus = 1 AND `tabSales Order Item`.parent = `tabSales Order`.name AND `tabSales Order Item`.item_code = `tabItem`.name AND `tabItem`.is_service_item = "Yes" AND %(cond)s `tabSales Order`.name LIKE "%s" ORDER BY `tabSales Order`.name DESC LIMIT 50', {company:doc.company, cond:cond});
+  	return{
+    	query:"support.doctype.maintenance_schedule.maintenance_schedule.get_sales_order_no",
+    	filters: {
+      		'cond': cond,
+      		'company': doc.company
+    	}
+  	}
 }
 
 cur_frm.fields_dict['customer_issue_no'].get_query = function(doc) {
 	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabCustomer Issue`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT `tabCustomer Issue`.name FROM `tabCustomer Issue` WHERE `tabCustomer Issue`.company = "%(company)s" AND %(cond)s `tabCustomer Issue`.docstatus = 1 AND (`tabCustomer Issue`.status = "Open" OR `tabCustomer Issue`.status = "Work In Progress") AND `tabCustomer Issue`.name LIKE "%s" ORDER BY `tabCustomer Issue`.name DESC LIMIT 50', {company:doc.company, cond:cond});
+	var cond = [];
+  	var filter = [
+        ['Customer Issue', 'company', '=', doc.company],
+        ['Customer Issue', 'docstatus', '=', 1],
+        ['Customer Issue', 'status', 'in', 'Open, Work In Progress']
+  	];
+	if(doc.customer) cond = ['Customer Issue', 'customer', '=', doc.customer];
+  	filter.push(cond);
+  	return {
+    	filters:filter
+  	}	
 }
 
 cur_frm.fields_dict['maintenance_schedule'].get_query = function(doc) {
 	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabMaintenance Schedule`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT `tabMaintenance Schedule`.name FROM `tabMaintenance Schedule` WHERE `tabMaintenance Schedule`.company = "%(company)s" AND %(cond)s `tabMaintenance Schedule`.docstatus = 1 AND `tabMaintenance Schedule`.name LIKE "%s" ORDER BY `tabMaintenance Schedule`.name DESC LIMIT 50', {company:doc.company, cond:cond});
+  	var cond = [];
+  	var filter = [
+        	['Maintenance Schedule', 'company', '=', doc.company],
+        	['Maintenance Schedule', 'docstatus', '=', 1]
+  		];
+  	if(doc.customer) cond = ['Maintenance Schedule', 'customer', '=', doc.customer];
+  	filter.push(cond);
+  	return{
+    	filters:filter
+    }
 }
 
 //get query select Territory
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+  	return{
+    	filters:{
+      		'is_group': "No"
+    	}
+  	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.customer_query" } }

@@ -97,4 +97,6 @@ cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 	}
 }
 
-cur_frm.fields_dict.user.get_query = erpnext.utils.profile_query;
+cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.profile_query"}
+}

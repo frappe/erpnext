@@ -28,4 +28,8 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.customer_query"
+	}
+}

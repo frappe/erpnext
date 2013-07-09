@@ -366,47 +366,6 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 	}
 }
 
-// Sales Order
-// -----------
-cur_frm.fields_dict.sales_order_main.get_query = function(doc) {
-	var filter = [
-		['Sales Order','company','=',doc.company],
-		['Sales Order','docstatus','=',1],
-		['Sales Order','status','!=','Stopped'],
-		['Sales Order','per_billed','<',99.99]
-	];
-	var cond = [];
-	if (doc.customer) cond = ['Sales Order', 'customer', '=', doc.customer];
-		// return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.`customer` =	"' + doc.customer + '" and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
-	filter.push(cond);
-	return{
-		filters: filter
-	}
-}
-
-// Delivery Note
-// --------------
-cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
-	var filter = [
-		['Delivery Note', 'company', '=', doc.company],
-		['Delivery Note', 'docstatus', '=', 1],
-		['Delivery Note', 'per_billed', '<', 99.99]
-	];	
-	var cond = [];
-	if (doc.customer) ['Delivery Note', 'customer', '=', doc.customer];
-		// return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
-		// 	WHERE `tabDelivery Note`.company = "' + doc.company 
-		// 	+ '" and `tabDelivery Note`.`docstatus` = 1 and \
-		// 	ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
-		// 	`tabDelivery Note`.`customer` =	"' 
-		// 	+ doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" \
-		// 	ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
-	filter.push(cond);
-	return{
-		filters: filter
-	}
-}
-
 cur_frm.cscript.income_account = function(doc, cdt, cdn){
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
 }

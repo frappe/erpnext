@@ -15,7 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.fields_dict['item_code'].get_query = function(doc) {
- 	return erpnext.queries.item_std();	
+ 	return {
+ 		query: "controllers.queries.item_std"
+ 	}	
 }
 
 //==================== Get Items Stock UOM =====================================================

@@ -56,7 +56,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			this.frm.fields_dict.delivery_note_no.get_query;
 		
 		this.frm.fields_dict.purchase_receipt_no.get_query = function() {
-			return { query: "stock.doctype.stock_entry.stock_entry.query_purchase_return_doc" };
+			return { 
+				filters:{ 'docstatus': 1 }
+			};
 		};
 		
 		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
@@ -81,8 +83,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
 				return {
-					"query": "accounts.utils.get_account_list", 
-					"filters": { "company": me.frm.doc.company }
+					filters: { 
+						"company": me.frm.doc.company,
+						"group_or_ledger": "Ledger"
+					}
 				}
 			}
 		}
@@ -278,9 +282,12 @@ cur_frm.cscript.supplier = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
-	return 'select name from `tabProduction Order` \
-		where docstatus = 1 and qty > ifnull(produced_qty,0) AND %(key)s like "%s%%" \
-		order by name desc limit 50';
+	return{
+		filters:[
+			['Production Order', 'docstatus', '=', 1],
+			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty']
+		]
+	}
 }
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
@@ -305,17 +312,21 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 	var d = locals[cdt][cdn];		
 	if(d.item_code) {
 		if (d.s_warehouse) {
-			return "select batch_no from `tabStock Ledger Entry` sle \
-				where item_code = '" + d.item_code + "' and warehouse = '" + d.s_warehouse +
-				"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
-				and exists(select * from `tabBatch` where \
-				name = sle.batch_no and expiry_date >= '" + doc.posting_date + 
-				"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
-				order by batch_no desc limit 50";
+			return{
+				query: "stock.doctype.stock_entry.stock_entry.get_batch_no",
+				filters:{
+					'item_code': d.item_code,
+					's_warehouse': d.s_warehouse,
+					'posting_date': doc.posting_date
+				}
+			}			
 		} else {
-			return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
-				d.item_code + "' and expiry_date >= '" + doc.posting_date + 
-				"' AND name like '%s' ORDER BY name DESC LIMIT 50";
+			return{
+				filters:[
+					['Batch', 'item', '=', d.item_code],
+					['Batch', 'expiry_date', '>=', doc.posting_date]
+				]
+			}
 		}		
 	} else {
 		msgprint("Please enter Item Code to get batch no");
@@ -372,6 +383,8 @@ cur_frm.cscript.validate_items = function(doc) {
 	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{ query:"controllers.queries.customer_query" } }
 
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+cur_frm.fields_dict.supplier.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.supplier_query" } }

@@ -173,8 +173,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters['customer']:
-		cond = '(`tabProject`.customer = filter[customer] or ifnull(`tabProject`.customer,"")="") '
+		cond = '(`tabProject`.customer = "' + filters['customer'] + '" or ifnull(`tabProject`.customer,"")="") and'
 	return webnotes.conn.sql("""select `tabProject`.name from `tabProject` 
-		where `tabProject`.status not in ("Completed", "Cancelled") and %(cond)s %(mcond)s
-		`tabProject`.name like "%(txt)s"	order by `tabProject`.name asc limit %(start)s, %(page_len)s """ % 
+		where `tabProject`.status not in ("Completed", "Cancelled") and %(cond)s
+		`tabProject`.name like "%(txt)s" %(mcond)s order by `tabProject`.name asc limit %(start)s, %(page_len)s """ % 
 		{'cond': cond,'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield),'start': start, 'page_len': page_len})

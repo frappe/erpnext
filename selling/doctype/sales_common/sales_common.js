@@ -59,7 +59,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 		
-		this.frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+		this.frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+			return{	query:"controllers.queries.customer_query" } }
 
 		this.frm.fields_dict.lead && this.frm.set_query("lead", erpnext.utils.lead_query);
 
