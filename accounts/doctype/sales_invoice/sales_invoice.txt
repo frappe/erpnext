@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-08 17:05:43", 
+  "modified": "2013-07-09 11:18:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -645,6 +645,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "payments_section", 
   "fieldtype": "Section Break", 
@@ -653,6 +654,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
@@ -660,6 +662,7 @@
   "width": "50%"
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "paid_amount", 
   "fieldtype": "Currency", 
@@ -671,6 +674,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "cash_bank_account", 
   "fieldtype": "Link", 
@@ -682,6 +686,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break", 
@@ -689,6 +694,7 @@
   "width": "50%"
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_outstanding_amount_automatically", 
   "fieldtype": "Check", 
@@ -697,6 +703,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_amount", 
   "fieldtype": "Currency", 
@@ -706,6 +713,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_account", 
   "fieldtype": "Link", 
@@ -715,6 +723,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_cost_center", 
   "fieldtype": "Link", 
