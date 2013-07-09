@@ -28,6 +28,25 @@ class TestDeliveryNote(unittest.TestCase):
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
+		
+	def test_over_billing_against_dn(self):
+		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		
+		dn = webnotes.bean(copy=test_records[0]).insert()
+		
+		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
+			dn.doc.name)
+
+		dn = webnotes.bean("Delivery Note", dn.doc.name)
+		dn.submit()
+		si = make_sales_invoice(dn.doc.name)
+		
+		self.assertEquals(len(si), len(dn.doclist))
+		
+		# modify export_amount
+		si[1].export_rate = 200
+		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).submit)
+		
 	
 	def test_delivery_note_no_gl_entry(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
