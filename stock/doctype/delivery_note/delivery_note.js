@@ -34,7 +34,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
 			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
 
-		if (doc.docstatus==1) cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+		if (doc.docstatus==1) {
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
 			cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
@@ -248,6 +250,7 @@ if (sys_defaults.auto_inventory_accounting) {
 	
 	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
 		return {
+
 			filters: { 
 				'company_name': doc.company,
 				'group_or_ledger': "Ledger"

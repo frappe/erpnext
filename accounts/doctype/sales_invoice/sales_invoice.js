@@ -287,6 +287,7 @@ cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 // Write off cost center
 //-----------------------
 cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
+
 	return{
 		filters:{
 			'group_or_ledger': 'Ledger',

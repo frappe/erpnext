@@ -149,7 +149,6 @@ cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_qu
   }
 }
 
-
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.account_head){

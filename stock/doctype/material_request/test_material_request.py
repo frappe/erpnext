@@ -124,6 +124,9 @@ class TestMaterialRequest(unittest.TestCase):
 		po_doclist[0].supplier = "_Test Supplier"
 		po_doclist[1].qty = 27.0
 		po_doclist[2].qty = 1.5
+		po_doclist[1].schedule_date = "2013-07-09"
+		po_doclist[2].schedule_date = "2013-07-09"
+
 		
 		# check for stopped status of Material Request
 		po = webnotes.bean(copy=po_doclist)

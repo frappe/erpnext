@@ -64,7 +64,7 @@ class DocType(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
 					["uom", "="]],
 				"is_child_table": True
 			}

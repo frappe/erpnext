@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-08 17:05:43", 
+  "modified": "2013-07-09 12:48:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -223,7 +223,7 @@
   "doctype": "DocField", 
   "fieldname": "currency_section", 
   "fieldtype": "Section Break", 
-  "label": "Price List and Currency", 
+  "label": "Currency and Price List", 
   "options": "icon-tag", 
   "read_only": 0
  }, 
@@ -352,33 +352,34 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "section_break_30", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "net_total_export", 
   "fieldtype": "Currency", 
-  "label": "Net Total (Export)", 
+  "label": "Net Total", 
   "options": "currency", 
   "print_hide": 0, 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_32", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "net_total", 
   "fieldtype": "Currency", 
-  "label": "Net Total*", 
+  "label": "Net Total (Company Currency)", 
   "oldfieldname": "net_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -449,19 +450,8 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_total_export", 
   "fieldtype": "Currency", 
-  "label": "Total Taxes and Charges (Export)", 
-  "options": "currency", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "other_charges_total", 
-  "fieldtype": "Currency", 
   "label": "Total Taxes and Charges", 
-  "oldfieldname": "other_charges_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
+  "options": "currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -472,12 +462,14 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "calculate_charges", 
-  "fieldtype": "Button", 
-  "label": "Calculate Taxes and Charges", 
-  "oldfieldtype": "Button", 
+  "fieldname": "other_charges_total", 
+  "fieldtype": "Currency", 
+  "label": "Total Taxes and Charges (Company Currency)", 
+  "oldfieldname": "other_charges_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -494,7 +486,7 @@
   "fieldname": "grand_total_export", 
   "fieldtype": "Currency", 
   "in_list_view": 1, 
-  "label": "Grand Total (Export)", 
+  "label": "Grand Total", 
   "oldfieldname": "grand_total_export", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -506,7 +498,7 @@
   "doctype": "DocField", 
   "fieldname": "rounded_total_export", 
   "fieldtype": "Currency", 
-  "label": "Rounded Total (Export)", 
+  "label": "Rounded Total", 
   "oldfieldname": "rounded_total_export", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -517,7 +509,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words_export", 
   "fieldtype": "Data", 
-  "label": "In Words (Export)", 
+  "label": "In Words", 
   "oldfieldname": "in_words_export", 
   "oldfieldtype": "Data", 
   "print_hide": 0, 
@@ -558,7 +550,7 @@
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
   "in_filter": 1, 
-  "label": "Grand Total", 
+  "label": "Grand Total (Company Currency)", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -571,7 +563,7 @@
   "doctype": "DocField", 
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
-  "label": "Rounded Total", 
+  "label": "Rounded Total (Company Currency)", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -583,7 +575,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words", 
   "fieldtype": "Data", 
-  "label": "In Words", 
+  "label": "In Words (Company Currency)", 
   "oldfieldname": "in_words", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -645,6 +637,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "payments_section", 
   "fieldtype": "Section Break", 
@@ -653,6 +646,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
@@ -660,6 +654,7 @@
   "width": "50%"
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "paid_amount", 
   "fieldtype": "Currency", 
@@ -671,6 +666,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "cash_bank_account", 
   "fieldtype": "Link", 
@@ -682,6 +678,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break", 
@@ -689,6 +686,7 @@
   "width": "50%"
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_outstanding_amount_automatically", 
   "fieldtype": "Check", 
@@ -697,6 +695,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_amount", 
   "fieldtype": "Currency", 
@@ -706,6 +705,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_account", 
   "fieldtype": "Link", 
@@ -715,6 +715,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "is_pos", 
   "doctype": "DocField", 
   "fieldname": "write_off_cost_center", 
   "fieldtype": "Link", 

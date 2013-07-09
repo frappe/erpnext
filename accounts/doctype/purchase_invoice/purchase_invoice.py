@@ -75,6 +75,7 @@ class DocType(BuyingController):
 		self.validate_write_off_account()
 		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "import_amount")
 
 	def get_credit_to(self):
 		acc_head = sql("""select name, credit_days from `tabAccount` 
@@ -206,17 +207,17 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "po_detail",
-				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
 					["uom", "="]],
 				"is_child_table": True
 			},
 			"Purchase Receipt": {
 				"ref_dn_field": "purchase_receipt",
-				"compare_fields": [["customer", "="], ["company", "="], ["currency", "="]],
+				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 			},
 			"Purchase Receipt Item": {
 				"ref_dn_field": "pr_detail",
-				"compare_fields": [["export_rate", "="], ["project_name", "="], ["item_code", "="], 
+				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
 					["uom", "="]],
 				"is_child_table": True
 			}

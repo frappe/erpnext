@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-22 01:27:37", 
+  "creation": "2013-03-07 11:55:04", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:19", 
+  "modified": "2013-07-09 14:44:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,7 +44,7 @@
   "label": "Budget Allocated", 
   "oldfieldname": "budget_allocated", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company_name:default_currency", 
+  "options": "Company:company:default_currency", 
   "reqd": 1
  }, 
  {
@@ -54,7 +54,7 @@
   "label": "Actual", 
   "oldfieldname": "actual", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company_name:default_currency", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

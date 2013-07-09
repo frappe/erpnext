@@ -107,7 +107,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							company: me.frm.doc.company,
-							currency: me.frm.doc.currency
+							currency: me.frm.doc.currency,
+							transaction_date: me.frm.doc.transaction_date
 						}
 					},
 					callback: function(r) {
@@ -217,6 +218,21 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		// should be the category field of tax table
 		if(cdt != doc.doctype) {
 			this.calculate_taxes_and_totals();
+		}
+	},
+	
+	purchase_other_charges: function() {
+		var me = this;
+		if(this.frm.doc.purchase_other_charges) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "get_purchase_tax_details",
+				callback: function(r) {
+					if(!r.exc) {
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
 		}
 	},
 	

@@ -31,6 +31,8 @@ erpnext.toolbar.setup = function() {
 		'+wn._('Live Chat')+'</a></li>')
 	
 	erpnext.toolbar.set_new_comments();
+
+	$("#toolbar-tools").append('<li><a href="#latest-updates">Latest Updates</li>');
 }
 
 erpnext.toolbar.set_new_comments = function(new_comments) {

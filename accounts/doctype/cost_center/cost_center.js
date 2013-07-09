@@ -17,7 +17,7 @@
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
 	cur_frm.toggle_display('cost_center_name', doc.__islocal);
-	cur_frm.toggle_enable(['group_or_ledger', 'company_name'], doc.__islocal);
+	cur_frm.toggle_enable(['group_or_ledger', 'company'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
 		intro_txt += '<p><b>Note:</b> This Cost Center is a <i>Group</i>, \
@@ -61,7 +61,7 @@ cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
 
 //parent cost center
 cur_frm.cscript.parent_cost_center = function(doc,cdt,cdn){
-	if(!doc.company_name){
+	if(!doc.company){
 		alert('Please enter company name first');
 	}
 }

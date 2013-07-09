@@ -158,7 +158,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 10.0)
 		
 	def test_reserved_qty_for_so_with_packing_list(self):
-		from stock.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		test_record = test_records[0][:]
@@ -185,7 +185,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 0.0)
 			
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
-		from stock.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		
@@ -235,7 +235,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 20.0)
 			
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
-		from stock.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		test_record = webnotes.copy_doclist(test_records[0])

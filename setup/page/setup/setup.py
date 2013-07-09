@@ -93,6 +93,8 @@ items = [
 	{ "doctype": "Purchase Taxes and Charges Master" },
 	{ "doctype": "Shipping Rule" },
 	{ "doctype": "Currency Exchange" },
+	{ "title": "Accounts Settings", 
+		"route": "Form/Accounts Settings", "type": "Link", "icon": "icon-cog" },
 	{
 		"type": "Section",
 		"title": "Opening Accounts and Stock",
@@ -146,7 +148,8 @@ items = [
 		"query": "select count(*) from tabSingles where doctype='Email Settings' and field='outgoing_mail_server'"
 	},
 	{ 
-		"doctype": "Support Email Settings",
+		"title": "Support Email Settings",
+		"doctype": "Email Settings",
 		"single": 1,
 		"query": "select count(*) from tabSingles where doctype='Email Settings' and field='support_host'"
 	},

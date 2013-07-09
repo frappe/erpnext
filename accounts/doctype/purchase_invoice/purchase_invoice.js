@@ -261,6 +261,7 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 			'company_name': doc.company,
 			'group_or_ledger': 'Ledger'
 		}
+
 	}
 }
 

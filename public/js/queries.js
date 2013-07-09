@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // searches for enabled profiles
+wn.provide("erpnext.utils");
 erpnext.utils.profile_query = function() {
 	return "select name, concat_ws(' ', first_name, middle_name, last_name) \
 		from `tabProfile` where ifnull(enabled, 0)=1 and docstatus < 2 and \

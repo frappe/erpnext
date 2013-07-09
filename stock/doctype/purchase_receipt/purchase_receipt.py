@@ -103,7 +103,7 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "prevdoc_detail_docname",
-				"compare_fields": [["export_rate", "="], ["project_name", "="], ["warehouse", "="], 
+				"compare_fields": [["import_rate", "="], ["project_name", "="], ["warehouse", "="], 
 					["uom", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
