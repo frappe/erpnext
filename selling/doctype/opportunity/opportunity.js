@@ -157,18 +157,12 @@ cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
 	return {
 		filters:{'customer':doc.customer}
 	}
-	// return 'SELECT name, address_line1, city FROM tabAddress \
-	// 	WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND \
-	// 	%(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	if (!doc.customer) msgprint("Please select customer first");
 	else {
 		filters:{'customer':doc.customer}
-		// return 'SELECT name, CONCAT(first_name," ",ifnull(last_name,"")) As FullName, \
-		// department, designation FROM tabContact WHERE customer = "'+ doc.customer + 
-		// '" AND docstatus != 2 AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
 	}
 }
 
@@ -177,7 +171,6 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 	return {
 		query: "selling.doctype.opportunity.opportunity.get_lead"
 	}
-	// return 'SELECT `tabLead`.name, `tabLead`.lead_name FROM `tabLead` WHERE `tabLead`.%(key)s LIKE "%s"	ORDER BY	`tabLead`.`name` ASC LIMIT 50';
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
@@ -243,7 +236,6 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{'is_group': 'No'}
 	}	
-	// return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';}
 	
 cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
 				return { query:"controllers.queries.lead_query" } }

@@ -202,7 +202,6 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 				cond: cond,
 			}		
 		}	
-		// return repl("SELECT name, item_name, description FROM `tabItem` item WHERE item.%(key)s LIKE '%s' %(cond)s ORDER BY item.item_code DESC LIMIT 50", {cond:cond});
 	}
 }
 

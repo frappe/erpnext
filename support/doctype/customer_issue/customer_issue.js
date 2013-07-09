@@ -68,17 +68,12 @@ cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'customer': doc.customer}
 	}
-	// return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +
-	// 	'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'customer': doc.customer}
 	}
-	// return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation \
-	// 	FROM tabContact WHERE customer = "'	+ doc.customer +
-	// 	'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
@@ -110,10 +105,6 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 		return{
 			filters:{ 'serial_no': doc.serial_no}
 		}		
-		// return 'SELECT `tabSerial No`.item_code, `tabSerial No`.description \
-		// 	FROM `tabSerial No` \
-		// 	WHERE `tabSerial No`.docstatus != 2 AND `tabSerial No`.name = "' + doc.serial_no +
-		// 	'" AND `tabSerial No`.item_code LIKE "%s" ORDER BY `tabSerial No`.item_code ASC LIMIT 50';
 	}
 	else{
 		return{
@@ -121,9 +112,6 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 				['Item', 'docstatus', '!=', 2]
 			]
 		}		
-		// return 'SELECT `tabItem`.name, `tabItem`.item_name, `tabItem`.description \
-		// 	FROM `tabItem` \
-		// 	WHERE `tabItem`.docstatus != 2 AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.name ASC LIMIT 50';
 	}
 }
 
@@ -134,10 +122,6 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{ 'is_group': "No"}
 	}
-	// return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` \
-	// 	FROM `tabTerritory` \
-	// 	WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 \
-	// 	AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {

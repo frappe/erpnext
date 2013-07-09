@@ -100,5 +100,4 @@ cur_frm.fields_dict['partner_target_details'].grid.get_field("item_group").get_q
   return{
   	filters:{ 'is_group': "No" }
   }
-  // return 'SELECT `tabItem Group`.`name`,`tabItem Group`.`parent_item_group` FROM `tabItem Group` WHERE `tabItem Group`.is_group="No" AND `tabItem Group`.docstatus != 2 AND `tabItem Group`.%(key)s LIKE "%s" LIMIT 50'
 }

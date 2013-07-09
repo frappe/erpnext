@@ -45,8 +45,7 @@ cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = func
 			['Account', 'group_or_ledger', 'is not', 'NULL']
 		]
 	}
-	// return 'SELECT DISTINCT `tabAccount`.`name`,`tabAccount`.debit_or_credit,`tabAccount`.group_or_ledger FROM `tabAccount` WHERE `tabAccount`.`company` = "' + doc.company_name + '" AND `tabAccount`.docstatus != 2 AND `tabAccount`.`is_pl_account` = "Yes" AND `tabAccount`.debit_or_credit = "Debit" AND `tabAccount`.`group_or_ledger` != "Group" AND `tabAccount`.`group_or_ledger` is not NULL AND `tabAccount`.`name` LIKE "%s" ORDER BY `tabAccount`.`name` LIMIT 50';
-	}
+}
 
 cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
 	return{
@@ -56,7 +55,6 @@ cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
 			['Cost Center', 'company_name', 'is not', 'NULL']
 		]
 	}
-	// return 'SELECT DISTINCT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Group" AND `tabCost Center`.docstatus != 2 AND `tabCost Center`.company_name="'+ doc.company_name+'" AND `tabCost Center`.company_name is not NULL AND `tabCost Center`.name LIKE "%s" ORDER BY `tabCost Center`.name LIMIT 50';
 }
 
 //parent cost center

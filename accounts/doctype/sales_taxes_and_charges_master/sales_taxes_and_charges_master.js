@@ -144,7 +144,6 @@ cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = 
       ['Account', 'company', '=', doc.company]
     ]
   }  
-  // return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.account_type in ("Tax", "Chargeable", "Income Account") AND tabAccount.company = "'+doc.company+'" AND  tabAccount.name LIKE "%s"'
 }
 
 cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = function(doc) {
@@ -152,7 +151,6 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
     'company_name': doc.company,
     'group_or_ledger': "Ledger"
   }	
-  // return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
 }
 
 

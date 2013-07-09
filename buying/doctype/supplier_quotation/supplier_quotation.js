@@ -72,18 +72,6 @@ cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query 
 		}
 	}
 
-cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return{
-		filters:[
-			['Material Request', 'material_request_type', '=', 'Purchase'],
-			['Material Request', 'company', '=', doc.company],
-			['Material Request', 'docstatus', '=', 1],
-			['Material Request', 'status', '!=', 'Stopped'],
-			['Material Request', 'per_ordered', '<', 99.99]
-		]
-	}	
-}
-
 cur_frm.cscript.supplier_address = function(doc, dt, dn) {
 	if (doc.supplier) {
 		get_server_fields("get_supplier_address", JSON.stringify({supplier: doc.supplier,

@@ -28,5 +28,4 @@ return{
 			['Account', 'debit_or_credit', '=', 'Debit']
 		]
 	}
-  // return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type = "Tax" OR tabAccount.account_type = "Chargeable" or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND  tabAccount.name LIKE "%s"';
 }

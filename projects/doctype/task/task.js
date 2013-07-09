@@ -22,7 +22,7 @@ erpnext.projects.Task = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
 			return {
-				query: "projects.doctype.tast.task.get_project"
+				query: "projects.doctype.task.task.get_project"
 			}
 		};
 	},

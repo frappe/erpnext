@@ -196,7 +196,6 @@ cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(do
 
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		// query: "accounts.utils.get_cost_center_list",
 		filters: { 
 			'company_name': doc.company,
 			'group_or_ledger': 'Ledger'
@@ -207,7 +206,6 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {	
 	var d = locals[this.doctype][this.docname];
 	return {
-		// query: "accounts.doctype.journal_voucher.journal_voucher.get_against_purchase_invoice",
 		filters: [
 			['Purchase Invoice', 'credit_to', '=', d.account],
 			['Purchase Invoice', 'docstatus', '=', 1],
@@ -219,7 +217,6 @@ cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = fun
 cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
 	return {
-		// query: "accounts.doctype.journal_voucher.journal_voucher.get_against_sales_invoice",
 		filters: [
 			['Sales Invoice', 'debit_to', '=', d.account],
 			['Sales Invoice', 'docstatus', '=', 1],

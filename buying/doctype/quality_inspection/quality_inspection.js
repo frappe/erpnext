@@ -48,12 +48,10 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 		filter:{
 			'parent': doc.purchase_receipt_no
 		}
-		// return 'SELECT item_code, item_name, description FROM `tabPurchase Receipt Item` WHERE parent = "'+ doc.purchase_receipt_no +'" and docstatus != 2 AND item_code LIKE "%s" ORDER BY item_code ASC LIMIT 50';
 	else if (doc.delivery_note_no) 
 		filter:{
 			'parent': doc.delivery_note_no
 		}		
-		// return 'SELECT item_code, item_name, description FROM `tabDelivery Note Item` WHERE parent = "'+ doc.delivery_note_no +'" and docstatus != 2 AND item_code LIKE "%s" ORDER BY item_code ASC LIMIT 50';
 	return{
 		filters: filter
 	}

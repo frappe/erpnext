@@ -55,12 +55,7 @@ cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 			'account_type': "Bank or Cash"
 		}
 	}  
-  // return 'SELECT `tabAccount`.name, `tabAccount`.debit_or_credit, `tabAccount`.group_or_ledger FROM `tabAccount` WHERE `tabAccount`.company = "'+doc.name+'" AND `tabAccount`.group_or_ledger = "Ledger" AND `tabAccount`.docstatus != 2 AND `tabAccount`.account_type = "Bank or Cash" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';   
 }
-
-// cur_frm.fields_dict.default_cash_account.get_query = function(doc) {    
-//   return 'SELECT `tabAccount`.name, `tabAccount`.debit_or_credit, `tabAccount`.group_or_ledger FROM `tabAccount` WHERE `tabAccount`.company = "'+doc.name+'" AND `tabAccount`.group_or_ledger = "Ledger" AND `tabAccount`.docstatus != 2 AND `tabAccount`.account_type = "Bank or Cash" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';   
-// }
 
 cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
 
@@ -71,17 +66,11 @@ cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 			'group_or_ledger': "Group"
 		}
 	}  
-  // return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.company = "'+doc.name+'" AND `tabAccount`.group_or_ledger = "Group" AND `tabAccount`.docstatus != 2 AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';
 }
-
-// cur_frm.fields_dict.payables_group.get_query = function(doc) {  
-//   return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.company = "'+doc.name+'" AND `tabAccount`.group_or_ledger = "Group" AND `tabAccount`.docstatus != 2 AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name LIMIT 50';
-// }
 
 if (sys_defaults.auto_inventory_accounting) {
 	cur_frm.fields_dict["stock_in_hand_account"].get_query = function(doc) {
 		return {
-			// "query": "accounts.utils.get_account_list", 
 			"filters": {
 				"is_pl_account": "No",
 				"debit_or_credit": "Debit",
@@ -93,7 +82,6 @@ if (sys_defaults.auto_inventory_accounting) {
 
 	cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
 		return {
-			// "query": "accounts.utils.get_account_list", 
 			"filters": {
 				"is_pl_account": "Yes",
 				"debit_or_credit": "Debit",
@@ -108,7 +96,6 @@ if (sys_defaults.auto_inventory_accounting) {
 
 	cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 		return {
-			// "query": "accounts.utils.get_account_list", 
 			"filters": {
 				"is_pl_account": "No",
 				"debit_or_credit": "Credit",
@@ -120,7 +107,6 @@ if (sys_defaults.auto_inventory_accounting) {
 
 	cur_frm.fields_dict["stock_adjustment_cost_center"].get_query = function(doc) {
 		return {
-			// "query": "accounts.utils.get_cost_center_list", 
 			"filters": {"company": doc.name}
 		}
 	}

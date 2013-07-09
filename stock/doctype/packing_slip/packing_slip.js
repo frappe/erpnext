@@ -18,7 +18,6 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'docstatus': 0}
 	}
-	// return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=0 AND %(key)s LIKE "%s"';
 }
 
 

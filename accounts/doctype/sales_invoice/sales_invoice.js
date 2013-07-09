@@ -257,7 +257,6 @@ cur_frm.fields_dict.debit_to.get_query = function(doc) {
 			'company': doc.company
 		}
 	}
-	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
@@ -269,7 +268,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 			'company': doc.company
 		}
 	}	
-	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
@@ -281,7 +279,6 @@ cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 			'company': doc.company
 		}
 	}
-	// return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "Yes" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
 // Write off cost center
@@ -294,7 +291,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 			'company_name': doc.company
 		}
 	}	
-	// return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company_name="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
 }
 
 //project name
@@ -304,12 +300,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 		query: "controllers.queries.get_project_name",
 		filters: {'customer': doc.customer}
 	}	
-	// var cond = '';
-	// if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	// return repl('SELECT `tabProject`.name FROM `tabProject` \
-	// 	WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-	// 	AND %(cond)s `tabProject`.name LIKE "%s" \
-	// 	ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
 }
 
 //Territory
@@ -318,7 +308,6 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters: {'is_group': 'NO'}
 	}	
-	// return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
 // Income Account in Details Table
@@ -352,14 +341,12 @@ cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(d
 			['Bin', 'actual_qty', '>', 0]
 		]
 	}	
-	// return "SELECT `tabBin`.`warehouse`, `tabBin`.`actual_qty` FROM `tabBin` WHERE `tabBin`.`item_code` = '"+ d.item_code +"' AND ifnull(`tabBin`.`actual_qty`,0) > 0 AND `tabBin`.`warehouse` like '%s' ORDER BY `tabBin`.`warehouse` DESC LIMIT 50";
 }
 
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		// query: "accounts.utils.get_cost_center_list",
 		filters: { 
 			'company_name': doc.company,
 			'group_or_ledger': 'Ledger'

@@ -73,7 +73,5 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-  return{
-    query:"controllers.queries.employee_query"
-  } 
+  return{ query:"controllers.queries.employee_query" } 
 }

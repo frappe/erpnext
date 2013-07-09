@@ -41,14 +41,12 @@ cur_frm.fields_dict['parent_sales_person'].get_query = function(doc,cdt,cdn) {
 			['Sales Person', 'name', '!=', doc.sales_person_name]
 		]
 	}
-  // return 'SELECT `tabSales Person`.`name`,`tabSales Person`.`parent_sales_person` FROM `tabSales Person` WHERE `tabSales Person`.`is_group` = "Yes" AND `tabSales Person`.`docstatus`!= 2 AND `tabSales Person`.`name` !="'+doc.sales_person_name+'" AND `tabSales Person`.%(key)s LIKE "%s" ORDER BY  `tabSales Person`.`name` ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['target_details'].grid.get_field("item_group").get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'is_group': "No" }
 	}
-  // return 'SELECT `tabItem Group`.name FROM `tabItem Group` WHERE `tabItem Group`.is_group="No" AND `tabItem Group`.docstatus != 2 AND `tabItem Group`.%(key)s LIKE "%s" LIMIT 50'
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
