@@ -49,15 +49,6 @@ def get_columns(filters):
 
 def get_conditions(filters):
 	conditions = ""
-	if filters.get("item_code"):
-		conditions += " and item_code='%s'" % filters["item_code"]
-
-	if filters.get("warehouse"):
-		conditions += " and warehouse='%s'" % filters["warehouse"]
-
-	if filters.get("batch_no"):
-		conditions += " and batch_no='%s'" % filters["batch_no"]
-
 	if not filters.get("from_date"):
 		webnotes.msgprint("Please enter From Date", raise_exception=1)
 
@@ -100,8 +91,6 @@ def get_item_warehouse_batch_map(filters):
 	return iwb_map
 
 def get_item_details(filters):
-	if filters.get("item_code"):
-		conditions = " and name = '%s'" % filters["item_code"]
 	item_map = {}
 	for d in webnotes.conn.sql("select name, item_name, description from tabItem", as_dict=1):
 		item_map.setdefault(d.name, d)
