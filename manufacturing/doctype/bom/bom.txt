@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:27:38", 
+  "modified": "2013-07-08 16:18:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -247,7 +247,6 @@
   "print_hide": 0
  }, 
  {
-  "default": "No Toolbar", 
   "doctype": "DocField", 
   "fieldname": "flat_bom_details", 
   "fieldtype": "Table", 

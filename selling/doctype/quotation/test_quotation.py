@@ -22,9 +22,7 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order[0]["customer"], "_Test Customer")
 		
 		sales_order[0]["delivery_date"] = "2014-01-01"
-		
-
-		webnotes.print_messages = True
+		sales_order[0]["naming_series"] = "_T-Quotation-"
 		webnotes.bean(sales_order).insert()
 
 
@@ -34,6 +32,7 @@ test_records = [
 			"company": "_Test Company", 
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
+			"quotation_to": "Customer",
 			"customer": "_Test Customer", 
 			"customer_name": "_Test Customer",
 			"customer_group": "_Test Customer Group", 

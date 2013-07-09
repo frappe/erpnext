@@ -298,6 +298,26 @@ class TransactionBase(StatusUpdater):
 				})
 			
 			webnotes.bean(event_doclist).insert()
+			
+	def validate_with_previous_doc(self, source_dt, ref):
+		for key, val in ref.items():
+			ref_doc = {}
+			for d in self.doclist.get({"doctype": source_dt}):
+				if d.fields[val["ref_dn_field"]]:
+					ref_doc.setdefault(key, d.fields[val["ref_dn_field"]])
+
+			if val.get("is_child_table"):
+				self.compare_values(ref_doc, val["compare_fields"], d)
+			else:
+				self.compare_values(ref_doc, val["compare_fields"])
+	
+	def compare_values(self, ref_doc, fields, doc=None):
+		for ref_doctype, ref_docname in ref_doc.items():
+			prevdoc_values = webnotes.conn.get_value(ref_doctype, ref_docname, 
+				[d[0] for d in fields], as_dict=1)
+			
+			for field, condition in fields:
+				self.validate_value(field, condition, prevdoc_values[field], doc)
 
 def get_default_address_and_contact(party_field, party_name, fetch_shipping_address=False):
 	out = {}

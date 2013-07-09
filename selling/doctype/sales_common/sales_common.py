@@ -292,7 +292,7 @@ class DocType(TransactionBase):
 			return obj.doclist
 		
 		# delete from doclist
-		obj.doclist = filter(lambda d: d.name not in delete_list, obj.doclist)
+		obj.doclist = webnotes.doclist(filter(lambda d: d.name not in delete_list, obj.doclist))
 		
 		# delete from db
 		webnotes.conn.sql("""\

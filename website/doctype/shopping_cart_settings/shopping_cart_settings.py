@@ -15,6 +15,9 @@ class DocType(DocListController):
 			self.validate_tax_masters()
 			self.validate_exchange_rates_exist()
 			
+	def on_update(self):
+		webnotes.conn.set_default("shopping_cart_enabled", self.doc.fields.get("enabled") or 0)
+			
 	def validate_overlapping_territories(self, parentfield, fieldname):
 		# for displaying message
 		doctype = self.meta.get_field(parentfield).options

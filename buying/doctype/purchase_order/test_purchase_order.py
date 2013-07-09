@@ -37,6 +37,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
 		
+		pr[0].naming_series = "_T-Purchase Receipt-"
 		webnotes.bean(pr).insert()
 		
 	def test_make_purchase_invocie(self):
@@ -54,6 +55,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(test_records[0]))
 
+		pi[0].bill_no = "NA"
 		webnotes.bean(pi).insert()
 		
 	def test_subcontracting(self):
@@ -75,6 +77,7 @@ test_records = [
 	[
 		{
 			"company": "_Test Company", 
+			"naming_series": "_T-Purchase Order-",
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
 			"doctype": "Purchase Order", 
@@ -86,7 +89,6 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
-			
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -101,6 +103,7 @@ test_records = [
 			"warehouse": "_Test Warehouse", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
+			"schedule_date": "2013-03-01"
 		}
 	],
 ]

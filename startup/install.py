@@ -169,7 +169,14 @@ def import_defaults():
 		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'}, 
 	]
 	
+	from webnotes.modules import scrub
 	for r in records:
 		if not webnotes.conn.exists(r['doctype'], r['name']):
 			bean = webnotes.bean(r)
+			
+			# ignore mandatory for root
+			parent_link_field = ("parent_" + scrub(bean.doc.doctype))
+			if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
+				bean.ignore_mandatory = True
+			
 			bean.insert()

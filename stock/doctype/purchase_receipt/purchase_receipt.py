@@ -94,6 +94,20 @@ class DocType(BuyingController):
 			if exists:
 				webnotes.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
 			Please enter a valid Challan No.", raise_exception=1)
+			
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Purchase Order": {
+				"ref_dn_field": "prevdoc_docname",
+				"compare_fields": [["supplier", "="], ["company", "="],	["currency", "="]],
+			},
+			"Purchase Order Item": {
+				"ref_dn_field": "prevdoc_detail_docname",
+				"compare_fields": [["export_rate", "="], ["project_name", "="], ["warehouse", "="], 
+					["uom", "="], ["item_code", "="]],
+				"is_child_table": True
+			}
+		})
 
 	def po_required(self):
 		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':
@@ -114,6 +128,7 @@ class DocType(BuyingController):
 		import utilities
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
 
+		self.validate_with_previous_doc()
 		self.validate_accepted_rejected_qty()
 		self.validate_inspection()						 # Validate Inspection
 		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
@@ -122,7 +137,6 @@ class DocType(BuyingController):
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		pc_obj.get_prevdoc_date(self)
-		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)
 
 		# sub-contracting

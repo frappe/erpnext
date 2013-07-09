@@ -55,7 +55,7 @@ class SellingController(StockController):
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details(get_item_details)
-								
+										
 	def get_other_charges(self):
 		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
 		self.set_taxes("other_charges", "charge")

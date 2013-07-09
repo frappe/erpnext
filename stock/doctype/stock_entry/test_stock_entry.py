@@ -278,7 +278,9 @@ class TestStockEntry(unittest.TestCase):
 		self._insert_material_receipt()
 		
 		from stock.doctype.delivery_note.test_delivery_note \
-			import test_records as delivery_note_test_records, make_sales_invoice
+			import test_records as delivery_note_test_records
+
+		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -361,9 +363,8 @@ class TestStockEntry(unittest.TestCase):
 	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
 
-		from selling.doctype.sales_order.test_sales_order \
-			import test_records as sales_order_test_records, 
-			make_sales_invoice, make_delivery_note
+		from selling.doctype.sales_order.test_sales_order import test_records as sales_order_test_records
+		from selling.doctype.sales_order.sales_order import make_sales_invoice, make_delivery_note
 
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -418,8 +419,9 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_0 = self._get_actual_qty()
 		
 		from stock.doctype.purchase_receipt.test_purchase_receipt \
-			import test_records as purchase_receipt_test_records,
-			make_purchase_invoice
+			import test_records as purchase_receipt_test_records
+
+		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 		
 		# submit purchase receipt
 		pr = webnotes.bean(copy=purchase_receipt_test_records[0])
@@ -443,6 +445,7 @@ class TestStockEntry(unittest.TestCase):
 			d.cost_center = "_Test Cost Center - _TC"
 		
 		pi.run_method("calculate_taxes_and_totals")
+		pi.doc.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 		
@@ -506,7 +509,9 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_0 = self._get_actual_qty()
 		
 		from buying.doctype.purchase_order.test_purchase_order \
-			import test_records as purchase_order_test_records, 
+			import test_records as purchase_order_test_records
+		
+		from buying.doctype.purchase_order.purchase_order import \
 			make_purchase_receipt, make_purchase_invoice
 		
 		# submit purchase receipt
@@ -540,6 +545,7 @@ class TestStockEntry(unittest.TestCase):
 			d.cost_center = "_Test Cost Center - _TC"
 		
 		pi.run_method("calculate_taxes_and_totals")
+		pi.doc.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 		

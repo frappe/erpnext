@@ -100,7 +100,17 @@ class DocType(SellingController):
 @webnotes.whitelist()
 def make_customer(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
-		
+	
+	def set_missing_values(source, target):
+		if source.doc.company_name:
+			target[0].customer_type = "Company"
+			target[0].customer_name = source.doc.company_name
+		else:
+			target[0].customer_type = "Individual"
+			target[0].customer_name = source.doc.lead_name
+			
+		target[0].customer_group = webnotes.conn.get_default("customer_group")
+			
 	doclist = get_mapped_doclist("Lead", source_name, 
 		{"Lead": {
 			"doctype": "Customer",
@@ -110,7 +120,7 @@ def make_customer(source_name, target_doclist=None):
 				"contact_no": "phone_1",
 				"fax": "fax_1"
 			}
-		}}, target_doclist)
+		}}, target_doclist, set_missing_values)
 		
 	return [d.fields for d in doclist]
 	

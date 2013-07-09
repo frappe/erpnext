@@ -42,6 +42,9 @@ def update_cart(item_code, qty, with_doclist=0):
 			quotation_items[0].qty = qty
 	
 	apply_cart_settings(quotation=quotation)
+
+	quotation.ignore_permissions = True
+	quotation.save()
 	
 	if with_doclist:
 		return get_cart_quotation(quotation.doclist)
@@ -67,10 +70,10 @@ def update_cart_address(address_fieldname, address_name):
 		quotation.doc.address_display = address_display
 		
 	
+	apply_cart_settings(quotation=quotation)
+	
 	quotation.ignore_permissions = True
 	quotation.save()
-	
-	apply_cart_settings(quotation=quotation)
 		
 	return get_cart_quotation(quotation.doclist)
 
@@ -136,9 +139,11 @@ def get_lead_or_customer():
 			"territory": guess_territory(),
 			"status": "Open" # TODO: set something better???
 		})
-		lead_bean.ignore_permissions = True
-		lead_bean.insert()
 		
+		if webnotes.session.user != "Guest":
+			lead_bean.ignore_permissions = True
+			lead_bean.insert()
+			
 		return lead_bean.doc
 		
 def guess_territory():
@@ -202,7 +207,7 @@ def apply_cart_settings(party=None, quotation=None):
 	
 	billing_territory = get_address_territory(quotation.doc.customer_address) or \
 		party.territory
-	
+		
 	set_price_list_and_rate(quotation, cart_settings, billing_territory)
 	
 	quotation.run_method("calculate_taxes_and_totals")
@@ -210,9 +215,6 @@ def apply_cart_settings(party=None, quotation=None):
 	set_taxes(quotation, cart_settings, billing_territory)
 	
 	_apply_shipping_rule(party, quotation, cart_settings)
-	
-	quotation.ignore_permissions = True
-	quotation.save()
 	
 def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	"""set price list based on billing territory"""
@@ -226,6 +228,9 @@ def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	
 	# refetch values
 	quotation.run_method("set_price_list_and_item_details")
+	
+	# set it in cookies for using in product page
+	webnotes.cookies[b"price_list_name"] = quotation.doc.price_list_name
 	
 def set_taxes(quotation, cart_settings, billing_territory):
 	"""set taxes based on billing territory"""
@@ -247,6 +252,7 @@ def apply_shipping_rule(shipping_rule):
 	
 	apply_cart_settings(quotation=quotation)
 	
+	quotation.ignore_permissions = True
 	quotation.save()
 	
 	return get_cart_quotation(quotation.doclist)

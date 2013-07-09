@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-08 15:40:01", 
+  "modified": "2013-07-08 16:18:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -99,7 +99,7 @@
   "options": "Material Request Item"
  }, 
  {
-  "default": "Give additional details about the indent.", 
+  "description": "Give additional details about the indent.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 

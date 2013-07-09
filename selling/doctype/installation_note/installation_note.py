@@ -52,7 +52,6 @@ class DocType(TransactionBase):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
-		self.validate_reference_value()
  	
 	def validate_prev_docname(self):
 		for d in getlist(self.doclist, 'installed_item_details'): 
@@ -63,9 +62,6 @@ class DocType(TransactionBase):
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, self.doc.inst_date, 
 			'Installation Date')
-
-	def validate_reference_value(self):
-		pass
 	
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = webnotes.conn.get_value("Item", item_code, "has_serial_no")
