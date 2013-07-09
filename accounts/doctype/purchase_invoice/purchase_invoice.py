@@ -75,6 +75,7 @@ class DocType(BuyingController):
 		self.validate_write_off_account()
 		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "import_amount")
 
 	def get_credit_to(self):
 		acc_head = sql("""select name, credit_days from `tabAccount` 

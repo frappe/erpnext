@@ -93,6 +93,7 @@ class DocType(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
+		self.validate_multiple_billing("Delivered Note", "dn_detail", "export_amount")
 
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:
@@ -149,7 +150,7 @@ class DocType(SellingController):
 		self.make_cancel_gl_entries()
 		
 	def update_status_updater_args(self):
-		if cint(self.doc.is_pos) and cint(self.doc.update_stock):
+		if cint(self.doc.update_stock):
 			self.status_updater.append({
 				'source_dt':'Sales Invoice Item',
 				'target_dt':'Sales Order Item',

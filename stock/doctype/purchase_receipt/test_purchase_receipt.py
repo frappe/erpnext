@@ -22,7 +22,7 @@ import webnotes.defaults
 from webnotes.utils import cint
 
 class TestPurchaseReceipt(unittest.TestCase):
-	def test_make_purchase_invocie(self):
+	def test_make_purchase_invoice(self):
 		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		pr = webnotes.bean(copy=test_records[0]).insert()
@@ -36,6 +36,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(pr.doclist))
+		
+		# modify import_rate
+		pi[1].import_rate = 200
+		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
 		pr = webnotes.bean(copy=test_records[0])
