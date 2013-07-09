@@ -103,6 +103,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_enable_bom();
 		if (this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
+			if(wn.boot.auto_inventory_accounting)
+				this.show_general_ledger();
 		}
 		
 		if(this.frm.doc.docstatus === 1 && 
