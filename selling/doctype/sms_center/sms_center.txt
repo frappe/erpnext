@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-25 10:29:33", 
   "docstatus": 0, 
-  "modified": "2013-06-20 14:32:32", 
+  "modified": "2013-06-21 11:06:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -120,6 +120,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "chhk", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "send_sms", 
   "fieldtype": "Button", 
   "label": "Send SMS", 
@@ -140,6 +145,17 @@
   "fieldname": "upd", 
   "fieldtype": "Button", 
   "label": "Upload"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "av", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "refresh1", 
+  "fieldtype": "Button", 
+  "label": "Refresh"
  }, 
  {
   "doctype": "DocPerm"
