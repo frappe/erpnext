@@ -354,6 +354,22 @@ class AccountsController(TransactionBase):
 				"advance_amount": flt(d.amount),
 				"allocate_amount": 0
 			})
+			
+	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if item.fields.get(item_ref_dn):
+				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
+					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
+					item.fields[item_ref_dn])[0][0]
+				if already_billed:
+					max_allowed_amt = webnotes.conn.get_value(ref_dt + " Item", 
+						item.fields[item_ref_dn], based_on)
+					
+					if flt(already_billed) + flt(item.fields[based_on]) > max_allowed_amt:
+						webnotes.msgprint(_("Row ")+ item.idx + ": " + item.item_code + 
+							_(" will be over-billed against mentioned ") + ref_dt +  
+							_(". Max allowed " + based_on + ": " + max_allowed_amt), 
+							raise_exception=1)
 		
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default

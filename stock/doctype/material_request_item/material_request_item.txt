@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:25", 
+  "modified": "2013-07-09 11:37:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,20 +26,6 @@
   "name": "Material Request Item"
  }, 
  {
-  "allow_on_submit": 0, 
-  "doctype": "DocField", 
-  "fieldname": "schedule_date", 
-  "fieldtype": "Date", 
-  "label": "Required Date", 
-  "no_copy": 1, 
-  "oldfieldname": "schedule_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 0, 
-  "print_width": "100px", 
-  "reqd": 1, 
-  "width": "100px"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
@@ -51,6 +37,20 @@
   "print_width": "100px", 
   "reqd": 1, 
   "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "schedule_date", 
+  "fieldtype": "Date", 
+  "label": "Required Date", 
+  "no_copy": 1, 
+  "oldfieldname": "schedule_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "print_width": "100px", 
+  "reqd": 1, 
   "width": "100px"
  }, 
  {

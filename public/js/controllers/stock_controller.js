@@ -19,7 +19,7 @@ wn.provide("erpnext.stock");
 erpnext.stock.StockController = wn.ui.form.Controller.extend({
 	show_stock_ledger: function() {
 		var me = this;
-		this.frm.add_custom_button("Show Stock Ledger", function() {
+		this.frm.add_custom_button("Stock Ledger", function() {
 			wn.route_options = {
 				voucher_no: me.frm.doc.name,
 				from_date: cur_frm.doc.posting_date,
@@ -27,5 +27,17 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 			};
 			wn.set_route('stock-ledger');
 		}, "icon-bar-chart");
+	},
+	show_general_ledger: function() {
+		if(doc.docstatus==1) { 
+			cur_frm.add_custom_button('Accounting Ledger', function() {
+				wn.route_options = {
+					"voucher_no": doc.name,
+					"from_date": doc.posting_date,
+					"to_date": doc.posting_date,
+				};
+				wn.set_route("general-ledger");
+			});
+		}
 	}
 });

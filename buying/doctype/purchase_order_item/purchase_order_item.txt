@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:06", 
   "docstatus": 0, 
-  "modified": "2013-07-09 12:16:19", 
+  "modified": "2013-07-09 11:45:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,6 +27,20 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "schedule_date", 
   "fieldtype": "Date", 
   "hidden": 0, 
@@ -36,20 +50,6 @@
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_code", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "oldfieldtype": "Link", 
-  "options": "Item", 
-  "print_hide": 0, 
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 1

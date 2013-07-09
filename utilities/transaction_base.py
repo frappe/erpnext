@@ -303,7 +303,7 @@ class TransactionBase(StatusUpdater):
 		for key, val in ref.items():
 			ref_doc = {}
 			for d in self.doclist.get({"doctype": source_dt}):
-				if d.fields[val["ref_dn_field"]]:
+				if d.fields.get(val["ref_dn_field"]):
 					ref_doc.setdefault(key, d.fields[val["ref_dn_field"]])
 
 			if val.get("is_child_table"):
