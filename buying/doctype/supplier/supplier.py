@@ -24,7 +24,6 @@ from webnotes.model.doc import make_autoname
 
 sql = webnotes.conn.sql
 
-from accounts.utils import add_ac
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -71,14 +70,16 @@ class DocType(TransactionBase):
 		return g
 
 	def add_account(self, ac, par, abbr):
-		ac = add_ac({
+		ac_bean = webnotes.bean({
+			"doctype": "Account",
 			'account_name':ac,
 			'parent_account':par,
 			'group_or_ledger':'Group',
 			'company':self.doc.company,
-			'account_type':'',
-			'tax_rate':'0'
+			"freeze_account": "No",
 		})
+		ac_bean.ignore_permissions = True
+		ac_bean.insert()
 		
 		msgprint(_("Created Group ") + ac)
 	
@@ -109,8 +110,8 @@ class DocType(TransactionBase):
 			parent_account = self.get_parent_account(abbr)
 						
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
-				
-				ac = add_ac({
+				ac_bean = webnotes.bean({
+					"doctype": "Account",
 					'account_name': self.doc.name,
 					'parent_account': parent_account,
 					'group_or_ledger':'Ledger',
@@ -119,8 +120,12 @@ class DocType(TransactionBase):
 					'tax_rate': '0',
 					'master_type': 'Supplier',
 					'master_name': self.doc.name,
+					"freeze_account": "No"
 				})
-				msgprint(_("Created Account Head: ") + ac)
+				ac_bean.ignore_permissions = True
+				ac_bean.insert()
+				
+				msgprint(_("Created Account Head: ") + ac_bean.doc.name)
 			else:
 				self.check_parent_account(parent_account, abbr)
 		else : 

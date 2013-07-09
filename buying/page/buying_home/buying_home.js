@@ -91,11 +91,6 @@ wn.module_page["Buying"] = [
 				"label":wn._("Purchase Analytics"),
 				page: "purchase-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Purchase Order"
-			},
 		]
 	},
 	{
@@ -115,6 +110,15 @@ wn.module_page["Buying"] = [
 				"label":wn._("Requested Items To Be Ordered"),
 				route: "query-report/Requested Items To Be Ordered",
 			},
+			{
+				"label":wn._("Purchase Order Trends"),
+				route: "query-report/Purchase Order Trends",
+				doctype: "Purchase Order"
+			},
+			{
+				"label":wn._("Item-wise Last Purchase Rate"),
+				route: "query-report/Item-wise Last Purchase Rate",
+			}
 		]
 	}
 ]

@@ -162,6 +162,8 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				} else {
 					break;
 				}
+				
+				me.round_item_values(item);
 			}
 		}
 	},

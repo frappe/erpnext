@@ -119,7 +119,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 
 				var qty_diff = sl.qty;
 				var value_diff = me.get_value_diff(wh, sl, is_fifo);
-
+				
 				if(sl_posting_date < from_date) {
 					item.opening_qty += qty_diff;
 					item.opening_value += value_diff;
@@ -146,6 +146,8 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				} else {
 					break;
 				}
+				
+				me.round_item_values(item);
 			}
 		}
 

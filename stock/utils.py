@@ -19,13 +19,14 @@ from webnotes import msgprint, _
 import json
 from webnotes.utils import flt, cstr, nowdate, add_days, cint
 from webnotes.defaults import get_global_default
+from webnotes.utils.email_lib import sendmail
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
 	
 	from webnotes.utils import getdate, now_datetime, formatdate
-	if end_of_life and getdate(end_of_life) > now_datetime().date():
+	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
 			" %(date)s. " + _("Please check") + ": %(end_of_life_label)s " + \
 			"in Item master") % {
@@ -205,7 +206,11 @@ def reorder_item():
 	if webnotes.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
-			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''""",
+			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
+			and exists (select name from `tabItem` 
+				where `tabItem`.name = `tabBin`.item_code and 
+				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
+				(ifnull(end_of_life, '')='') or end_of_life > now())""",
 			as_dict=True)
 		for bin in bin_list:
 			#check if re-order is required
@@ -220,7 +225,7 @@ def reorder_item():
 					["re_order_level", "re_order_qty"])
 				material_request_type = "Purchase"
 		
-			if reorder_level and flt(bin.projected_qty) < flt(reorder_level):
+			if flt(reorder_level) and flt(bin.projected_qty) < flt(reorder_level):
 				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
 					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
 					
@@ -242,10 +247,14 @@ def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
 	mr_list = []
 	defaults = webnotes.defaults.get_defaults()
+	exceptions_list = []
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
-			items = material_requests[request_type][company]
-			if items:
+			try:
+				items = material_requests[request_type][company]
+				if not items:
+					continue
+
 				mr = [{
 					"doctype": "Material Request",
 					"company": company,
@@ -257,27 +266,34 @@ def create_material_request(material_requests):
 						quantity reaches re-order level when the following record was created""")
 				}]
 			
-			for d in items:
-				item = webnotes.doc("Item", d.item_code)
-				mr.append({
-					"doctype": "Material Request Item",
-					"parenttype": "Material Request",
-					"parentfield": "indent_details",
-					"item_code": d.item_code,
-					"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
-					"uom":	item.stock_uom,
-					"warehouse": d.warehouse,
-					"item_name": item.item_name,
-					"description": item.description,
-					"item_group": item.item_group,
-					"qty": d.reorder_qty,
-					"brand": item.brand,
-				})
+				for d in items:
+					item = webnotes.doc("Item", d.item_code)
+					mr.append({
+						"doctype": "Material Request Item",
+						"parenttype": "Material Request",
+						"parentfield": "indent_details",
+						"item_code": d.item_code,
+						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
+						"uom":	item.stock_uom,
+						"warehouse": d.warehouse,
+						"item_name": item.item_name,
+						"description": item.description,
+						"item_group": item.item_group,
+						"qty": d.reorder_qty,
+						"brand": item.brand,
+					})
 			
-			mr_bean = webnotes.bean(mr)
-			mr_bean.insert()
-			mr_bean.submit()
-			mr_list.append(mr_bean)
+				mr_bean = webnotes.bean(mr)
+				mr_bean.insert()
+				mr_bean.submit()
+				mr_list.append(mr_bean)
+				
+			except:
+				if webnotes.message_log:
+					exceptions_list.append([] + webnotes.message_log)
+					webnotes.message_log = []
+				else:
+					exceptions_list.append(webnotes.getTraceback())
 
 	if mr_list:
 		if not hasattr(webnotes, "reorder_email_notify"):
@@ -286,11 +302,13 @@ def create_material_request(material_requests):
 			
 		if(webnotes.reorder_email_notify):
 			send_email_notification(mr_list)
+
+	if exceptions_list:
+		notify_errors(exceptions_list)
 		
 def send_email_notification(mr_list):
 	""" Notify user about auto creation of indent"""
 	
-	from webnotes.utils.email_lib import sendmail
 	email_list = webnotes.conn.sql_list("""select distinct r.parent 
 		from tabUserRole r, tabProfile p
 		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
@@ -308,3 +326,21 @@ def send_email_notification(mr_list):
 		msg += "</table>"
 
 	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
+	
+def notify_errors(exceptions_list):
+	subject = "[Important] [ERPNext] Error(s) while creating Material Requests based on Re-order Levels"
+	msg = """Dear System Manager,
+
+		An error occured for certain Items while creating Material Requests based on Re-order level.
+		
+		Please rectify these issues:
+		---
+
+		%s
+
+		---
+		Regards,
+		Administrator""" % ("\n\n".join(["\n".join(msg) for msg in exceptions_list]),)
+
+	from webnotes.profile import get_system_managers
+	sendmail(get_system_managers(), subject=subject, msg=msg)

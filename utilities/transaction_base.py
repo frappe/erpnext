@@ -268,4 +268,43 @@ class TransactionBase(DocListController):
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
 			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')
-	
+			
+	def add_calendar_event(self, opts, force=False):
+		if self.doc.contact_by != cstr(self._prev.contact_by) or \
+				self.doc.contact_date != cstr(self._prev.contact_date) or force:
+			
+			self.delete_events()
+			self._add_calendar_event(opts)
+			
+	def delete_events(self):
+		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))
+			
+	def _add_calendar_event(self, opts):
+		opts = webnotes._dict(opts)
+		
+		if self.doc.contact_date:
+			event_doclist = [{
+				"doctype": "Event",
+				"owner": opts.owner or self.doc.owner,
+				"subject": opts.subject,
+				"description": opts.description,
+				"starts_on": self.doc.contact_date + " 10:00:00",
+				"event_type": "Private",
+				"ref_type": self.doc.doctype,
+				"ref_name": self.doc.name
+			}]
+			
+			if webnotes.conn.exists("Profile", self.doc.contact_by):
+				event_doclist.append({
+					"doctype": "Event User",
+					"parentfield": "event_individuals",
+					"person": self.doc.contact_by
+				})
+			
+			webnotes.bean(event_doclist).insert()
+
+
+def delete_events(ref_type, ref_name):
+	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

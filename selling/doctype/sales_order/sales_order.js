@@ -130,6 +130,29 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
+cur_frm.fields_dict.shipping_address_name.get_query = cur_frm.fields_dict['customer_address'].get_query;
+
+cur_frm.cscript.shipping_address_name = function() {
+	if(cur_frm.doc.shipping_address_name) {
+		wn.model.with_doc("Address", cur_frm.doc.shipping_address_name, function(name) {
+			var address = wn.model.get_doc("Address", name);
+			
+			var out = $.map(["address_line1", "address_line2", "city"], 
+				function(f) { return address[f]; });
+
+			var state_pincode = $.map(["state", "pincode"], function(f) { return address[f]; }).join(" ");
+			if(state_pincode) out.push(state_pincode);
+			
+			if(address["country"]) out.push(address["country"]);
+			
+			out.concat($.map([["Phone:", address["phone"]], ["Fax:", address["fax"]]], 
+				function(val) { return val[1] ? val.join(" ") : null; }));
+			
+			cur_frm.set_value("shipping_address", out.join("\n"));
+		});
+	}
+};
+
 cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 	var callback = function(r,rt){
 		var doc = locals[cur_frm.doctype][cur_frm.docname];					
@@ -140,7 +163,7 @@ cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 					'contact_person', 'territory', 'customer_group']);
 				if(doc.customer) get_server_fields('get_shipping_address', doc.customer, '', doc, dt, dn, 0);
 			}			
-			cur_frm.refresh();
+			cur_frm.refresh_fields();
 		}
 	} 
 

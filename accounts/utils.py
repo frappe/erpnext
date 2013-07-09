@@ -26,17 +26,23 @@ from utilities import build_filter_conditions
 
 class FiscalYearError(webnotes.ValidationError): pass
 
-def get_fiscal_year(date, verbose=1):
-	return get_fiscal_years(date, verbose=1)[0]
+def get_fiscal_year(date=None, fiscal_year=None, verbose=1):
+	return get_fiscal_years(date, fiscal_year, verbose=1)[0]
 	
-def get_fiscal_years(date, verbose=1):
+def get_fiscal_years(date=None, fiscal_year=None, verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
+	cond = ""
+	if fiscal_year:
+		cond = "name = '%s'" % fiscal_year
+	else:
+		cond = "'%s' >= year_start_date and '%s' < adddate(year_start_date, interval 1 year)" % \
+			(date, date)
 	fy = webnotes.conn.sql("""select name, year_start_date, 
 		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
 			as year_end_date
 		from `tabFiscal Year`
-		where %s >= year_start_date and %s < adddate(year_start_date, interval 1 year)
-		order by year_start_date desc""", (date, date))
+		where %s
+		order by year_start_date desc""" % cond)
 	
 	if not fy:
 		error_msg = """%s not in any Fiscal Year""" % formatdate(date)
@@ -125,7 +131,6 @@ def add_ac(args=None):
 	ac.doc.doctype = "Account"
 	ac.doc.old_parent = ""
 	ac.doc.freeze_account = "No"
-	ac.ignore_permissions = 1
 	ac.insert()
 	return ac.doc.name
 
@@ -138,7 +143,6 @@ def add_cc(args=None):
 	cc = webnotes.bean(args)
 	cc.doc.doctype = "Cost Center"
 	cc.doc.old_parent = ""
-	cc.ignore_permissions = 1
 	cc.insert()
 	return cc.doc.name
 

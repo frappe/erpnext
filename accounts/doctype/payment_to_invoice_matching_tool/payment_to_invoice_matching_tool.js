@@ -50,6 +50,7 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 		        where against_voucher_type = '%(dt)s' \
 		        and against_voucher = gle.voucher_no \
 		        and voucher_no != gle.voucher_no \
+				and account = gle.account \
 		        and ifnull(is_cancelled, 'No') = 'No') != \
 		        abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)) \
 		    ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50", 

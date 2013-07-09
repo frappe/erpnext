@@ -87,7 +87,6 @@ cur_frm.cscript.supplier = function(doc, dt, dn) {
 		get_server_fields('get_default_supplier_address',
 			JSON.stringify({ supplier: doc.supplier }), '', doc, dt, dn, 1,
 			function() { cur_frm.refresh(); });
-		cur_frm.cscript.toggle_contact_section(doc);
 	}
 }
 

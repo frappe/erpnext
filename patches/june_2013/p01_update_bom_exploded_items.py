@@ -23,7 +23,7 @@ def execute():
 		if bom[0] not in updated_bom:
 			try:
 				bom_obj = webnotes.get_obj("BOM", bom[0], with_children=1)
-				updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
+				updated_bom += bom_obj.update_cost_and_exploded_items(bom[0])
 				webnotes.conn.commit()
 			except:
 				pass

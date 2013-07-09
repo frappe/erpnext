@@ -115,18 +115,20 @@ class DocType(TransactionBase):
 			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_receivables_group()
 				# create
-				from accounts.utils import add_ac
-				ac = add_ac({
-					'account_name':self.doc.name,
+				ac_bean = webnotes.bean({
+					"doctype": "Account",
+					'account_name': self.doc.name,
 					'parent_account': parent_account, 
 					'group_or_ledger':'Ledger',
 					'company':self.doc.company, 
-					'account_type':'', 
-					'tax_rate':'0', 
 					'master_type':'Customer', 
-					'master_name':self.doc.name
+					'master_name':self.doc.name,
+					"freeze_account": "No"
 				})
-				msgprint("Account Head: %s created" % ac)
+				ac_bean.ignore_permissions = True
+				ac_bean.insert()
+				
+				msgprint("Account Head: %s created" % ac_bean.doc.name)
 		else :
 			msgprint("Please Select Company under which you want to create account head")
 

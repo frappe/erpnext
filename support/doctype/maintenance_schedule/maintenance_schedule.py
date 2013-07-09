@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, cstr, getdate
-from webnotes.model.doc import Document, addchild
+from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
@@ -26,7 +26,7 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 	
 
-from utilities.transaction_base import TransactionBase
+from utilities.transaction_base import TransactionBase, delete_events
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -100,23 +100,21 @@ class DocType(TransactionBase):
 
 			for key in scheduled_date:
 				if email_map[d.incharge_name]:
-					self.add_calender_event(key["scheduled_date"],email_map[d.incharge_name],d.item_code)		 
+					description = "Reference: %s, Item Code: %s and Customer: %s" % \
+						(self.doc.name, d.item_code, self.doc.customer)
+					webnotes.bean({
+						"doctype": "Event",
+						"owner": email_map[d.incharge_name] or self.doc.owner,
+						"subject": description,
+						"description": description,
+						"starts_on": key["scheduled_date"] + " 10:00:00",
+						"event_type": "Private",
+						"ref_type": self.doc.doctype,
+						"ref_name": self.doc.name
+					}).insert()
+
 		webnotes.conn.set(self.doc, 'status', 'Submitted')		
 		
-
-	def add_calender_event(self,scheduled_date,incharge_email,item_code):
-		""" Add calendar event for Maintenece Schedule in calendar of Allocated person"""
-		event = Document('Event')
-		event.owner = incharge_email
-		event.description = "Reference:%s, Item Code:%s and Customer: %s" %(self.doc.name, item_code, self.doc.customer)
-		event.event_date = scheduled_date
-		event.event_hour =	'10:00'
-		event.event_type = 'Private'
-		event.ref_type = 'Maintenance Schedule'
-		event.ref_name = self.doc.name
-		event.save(1)
-
-
 	#get schedule dates
 	#----------------------
 	def create_schedule_list(self, start_date, end_date, no_of_visit):
@@ -329,8 +327,7 @@ class DocType(TransactionBase):
 			if d.serial_no:
 				self.update_amc_date(d.serial_no, '')
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
-		sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
-	def on_trash(self):
-		sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
+		delete_events(self.doc.doctype, self.doc.name)
 		
-
+	def on_trash(self):
+		delete_events(self.doc.doctype, self.doc.name)

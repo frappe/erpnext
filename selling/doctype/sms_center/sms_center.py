@@ -24,7 +24,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 import requests
 sql = webnotes.conn.sql
-	
+  
 # ----------
 
 class DocType:
@@ -34,7 +34,6 @@ class DocType:
       
   def create_receiver_list(self):
     rec, where_clause = '', ''
-    
     if self.doc.cus == 'All Customer Contact':
       where_clause = self.doc.customer and " and customer = '%s'" % self.doc.customer or " and ifnull(is_customer, 0) = 1"
     if self.doc.cus == 'All Supplier Contact':
@@ -53,12 +52,11 @@ class DocType:
       rec = sql("select sales_person_name, mobile_no from `tabSales Person` where docstatus != 2 and ifnull(mobile_no,'')!=''")
     else:
       rec=sql("select cont_name,ph_no from `tabSub Contact` where parent='"+self.doc.cus+"'")
-   
     rec_list = ''
     for d in rec:
       rec_list += d[0] + ' - ' + d[1] + '\n'
     self.doc.receiver_list = rec_list
-
+    webnotes.errprint(rec_list)
   def get_receiver_nos(self):
     receiver_nos = []
     for d in self.doc.receiver_list.split('\n'):
