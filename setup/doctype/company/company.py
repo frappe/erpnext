@@ -191,6 +191,8 @@ class DocType:
 
 	def set_default_accounts(self):
 		accounts = {
+			"default_income_account": "Sales",
+			"default_expense_account": "Cost of Goods Sold",
 			"receivables_group": "Accounts Receivable",
 			"payables_group": "Accounts Payable",
 			"stock_received_but_not_billed": "Stock Received But Not Billed",

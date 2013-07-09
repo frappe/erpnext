@@ -161,8 +161,8 @@ wn.module_page["Selling"] = [
 				route: "query-report/Customer Addresses And Contacts"
 			},
 			{
-				"label":wn._("Sales Orders Pending to be Delivered"),
-				route: "query-report/Sales Orders Pending To Be Delivered"
+				"label":wn._("Ordered Items To Be Delivered"),
+				route: "query-report/Ordered Items To Be Delivered",
 			},
 			{
 				"label":wn._("Sales Person-wise Transaction Summary"),

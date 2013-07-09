@@ -194,7 +194,7 @@ class DocType(TransactionBase):
 	# Validate values with reference document
 	#----------------------------------------
 	def validate_reference_value(self):
-		get_obj('DocType Mapper', 'Sales Order-Maintenance Schedule', with_children = 1).validate_reference_value(self, self.doc.name)
+		pass
 	
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):

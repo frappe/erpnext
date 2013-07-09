@@ -68,6 +68,15 @@ class DocType(BuyingController):
 				msgprint("Rejected Warehouse is necessary if there are rejections.")
 				raise Exception
 
+			if not flt(d.received_qty) and flt(d.qty):
+				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
+
+			elif not flt(d.qty) and flt(d.rejected_qty):
+				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+
+			elif not flt(d.rejected_qty):
+				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
+
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
 
@@ -339,9 +348,10 @@ def make_purchase_invoice(source_name, target_doclist=None):
 
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
-		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
+		target.import_amount = flt(obj.import_amount)
 		target.amount = target.import_amount / flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(obj.purchase_rate)
+		if flt(obj.purchase_rate):
+			target.qty = target.amount / flt(obj.purchase_rate)
 
 	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -359,8 +369,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "purchase_order", 
 				"purchase_rate": "rate"
 			},
-			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount
+			"postprocess": update_item
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 

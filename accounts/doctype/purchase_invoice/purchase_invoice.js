@@ -51,7 +51,38 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 				wn.set_route("general-ledger");
 			});
 		}
-		
+
+		if(doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Purchase Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+						source_doctype: "Purchase Order",
+						get_query_filters: {
+							supplier: cur_frm.doc.supplier || undefined,
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_billed: ["<", 99.99],
+							company: cur_frm.doc.company
+						}
+					})
+				});
+
+			cur_frm.add_custom_button(wn._('From Purchase Receipt'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+						source_doctype: "Purchase Receipt",
+						get_query_filters: {
+							supplier: cur_frm.doc.supplier || undefined,
+							docstatus: 1,
+							company: cur_frm.doc.company
+						}
+					})
+				});	
+			
+		}
+
 		this.is_opening(doc);
 	},
 	
@@ -68,22 +99,11 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
 		this.frm.refresh_fields();
 	}, 
-	
-	get_items: function() {
-		if(doc.purchase_order_main) {
-			wn.model.map_current_doc({
-				method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
-				source_name: cur_frm.doc.purchase_order_main,
-			})
-		}
-		else if(doc.purchase_receipt_main) {
-			wn.model.map_current_doc({
-				method: "selling.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
-				source_name: cur_frm.doc.purchase_receipt_main,
-			})
-		}
-	}
-	
+
+	tc_name: function() {
+		this.get_terms();
+	},
+
 });
 
 // for backward compatibility: combine new and previous states

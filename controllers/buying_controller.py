@@ -34,6 +34,9 @@ class BuyingController(StockController):
 	
 	def validate(self):
 		super(BuyingController, self).validate()
+		if self.doc.supplier and not self.doc.supplier_name:
+			self.doc.supplier_name = webnotes.conn.get_value("Supplier", 
+				self.doc.supplier, "supplier_name")
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse_belongs_to_company()
 		
@@ -47,11 +50,13 @@ class BuyingController(StockController):
 			for fieldname, val in self.get_default_address_and_contact("supplier").items():
 				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 					self.doc.fields[fieldname] = val
-		
+
 		self.set_missing_item_details(get_item_details)
-		
+
 	def set_supplier_defaults(self):
-		self.doc.fields.update(self.get_default_supplier_address(self.doc.fields))
+		for fieldname, val in self.get_default_address_and_contact("supplier").items():
+			if self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = val
 						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")

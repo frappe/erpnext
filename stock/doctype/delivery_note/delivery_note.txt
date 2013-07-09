@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-07-06 19:04:46", 
+  "modified": "2013-07-08 17:46:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,6 +34,7 @@
   "parent": "Delivery Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
   "report": 1
  }, 
@@ -375,42 +376,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "read_only": 0
- }, 
- {
-  "description": "You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.", 
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "in_list_view": 1, 
-  "label": "Sales Order No", 
-  "no_copy": 0, 
-  "oldfieldname": "sales_order_no", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Order", 
-  "print_hide": 0, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break24", 
-  "fieldtype": "Column Break", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "net_total_export", 
   "fieldtype": "Currency", 
   "label": "Net Total (Export)", 
@@ -663,25 +628,6 @@
   "options": "Terms and Conditions", 
   "print_hide": 1, 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_59", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_61", 
-  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -955,33 +901,6 @@
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
-  "description": "% of materials billed against this Delivery Note", 
-  "doctype": "DocField", 
-  "fieldname": "per_billed", 
-  "fieldtype": "Percent", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "% Amount Billed", 
-  "no_copy": 1, 
-  "oldfieldname": "per_billed", 
-  "oldfieldtype": "Currency", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "billing_status", 
-  "fieldtype": "Select", 
-  "hidden": 1, 
-  "label": "Billing Status", 
-  "no_copy": 1, 
-  "options": "\nNot Billed\nPartly Billed\nFully Billed", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
   "description": "% of materials delivered against this Delivery Note", 
   "doctype": "DocField", 
   "fieldname": "per_installed", 
@@ -1125,83 +1044,39 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material User", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material Manager", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Material Manager", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Accounts User", 
   "submit": 0, 
   "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Accounts User", 
-  "submit": 0
  }, 
  {
   "doctype": "DocPerm", 
   "match": "customer_name", 
-  "permlevel": 0, 
   "role": "Customer"
  }
 ]

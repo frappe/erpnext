@@ -65,8 +65,7 @@ class DocType(TransactionBase):
 			'Installation Date')
 
 	def validate_reference_value(self):
-		mapper = get_obj('DocType Mapper', 'Delivery Note-Installation Note', with_children = 1)
-		mapper.validate_reference_value(self, self.doc.name)
+		pass
 	
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = webnotes.conn.get_value("Item", item_code, "has_serial_no")

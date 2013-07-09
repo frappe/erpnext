@@ -231,16 +231,6 @@ class DocType(BuyingController):
 				else:
 					chk_dupl_itm.append(f)
 
-	def validate_reference_value(self, obj):
-		ref_doc = []
-		for d in getlist(obj.doclist, obj.fname):
-			if d.prevdoc_doctype and d.prevdoc_docname and d.prevdoc_doctype not in ref_doc:
-				mapper_name = d.prevdoc_doctype + '-' + obj.doc.doctype
-				get_obj('DocType Mapper', mapper_name, with_children = 1).\
-					validate_reference_value(obj, obj.doc.name)
-				ref_doc.append(d.prevdoc_doctype)
-
-
 	# Check for Stopped status 
 	def check_for_stopped_status(self, doctype, docname):
 		stopped = sql("select name from `tab%s` where name = '%s' and status = 'Stopped'" % 
@@ -248,7 +238,10 @@ class DocType(BuyingController):
 		if stopped:
 			msgprint("One cannot do any transaction against %s : %s, it's status is 'Stopped'" % 
 				( doctype, docname), raise_exception=1)
-			
+	
+	def validate_reference_value(self, obj=None):
+		pass
+	
 	# Check Docstatus of Next DocType on Cancel AND of Previous DocType on Submit
 	def check_docstatus(self, check, doctype, docname , detail_doctype = ''):
 		

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:57:12", 
+  "modified": "2013-07-08 15:14:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -166,32 +166,6 @@
   "fieldname": "recalculate_values", 
   "fieldtype": "Button", 
   "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_14", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "description": "You can make a purchase order from multiple Material Requests. Select Material Requests one by one and click on the button below.", 
-  "doctype": "DocField", 
-  "fieldname": "indent_no", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Select Material Request", 
-  "no_copy": 1, 
-  "oldfieldname": "indent_no", 
-  "oldfieldtype": "Link", 
-  "options": "Material Request", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Get Items", 
   "oldfieldtype": "Button"
  }, 
  {

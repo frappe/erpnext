@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-22 13:15:44", 
   "docstatus": 0, 
-  "modified": "2013-05-22 12:15:32", 
+  "modified": "2013-07-08 17:46:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -307,18 +307,6 @@
   "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "billed_amt", 
-  "fieldtype": "Currency", 
-  "label": "Billed Amt", 
-  "no_copy": 1, 
-  "options": "currency", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "width": "100px"
  }, 
  {
   "doctype": "DocField", 

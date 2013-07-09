@@ -43,17 +43,6 @@ class DocType(BuyingController):
 			'target_ref_field': 'import_amount',
 			'source_field': 'import_amount',
 			'percent_join_field': 'purchase_order',
-		},
-		{
-			'source_dt': 'Purchase Invoice Item',
-			'target_dt': 'Purchase Receipt Item',
-			'join_field': 'pr_detail',
-			'target_field': 'billed_amt',
-			'target_parent_dt': 'Purchase Receipt',
-			'target_parent_field': 'per_billed',
-			'target_ref_field': 'import_amount',
-			'source_field': 'import_amount',
-			'percent_join_field': 'purchase_receipt',
 		}]
 		
 	def validate(self):
@@ -65,7 +54,6 @@ class DocType(BuyingController):
 		self.check_conversion_rate()
 		self.validate_bill_no_date()
 		self.validate_bill_no()
-		self.validate_reference_value()
 		self.validate_credit_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.check_for_acc_head_of_supplier()
@@ -244,12 +232,9 @@ class DocType(BuyingController):
 				msgprint("Supplier name %s do not match with supplier name	of %s %s." %(self.doc.supplier,cstr(d.purchase_receipt)))
 				raise Exception , " Validation Error "
 
-	# Validate values with reference document
-	#----------------------------------------
 	def validate_reference_value(self):
-		get_obj('DocType Mapper', 'Purchase Order-Purchase Invoice', with_children = 1).validate_reference_value(self, self.doc.name)
-
-				
+		pass
+	
 	# Validate PO and PR
 	# -------------------
 	def validate_po_pr(self, d):

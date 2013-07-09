@@ -44,23 +44,13 @@ class DocType(BuyingController):
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
-		# Step 2:=> get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
-		
-
-		# Step 4:=> validate for items
 		pc_obj.validate_for_items(self)
-
-		# Get po date
 		pc_obj.get_prevdoc_date(self)
-		
-		# validate_doc
+
 		self.validate_doc(pc_obj)
-		
-		# Check for stopped status
 		self.check_for_stopped_status(pc_obj)
-		
-		# sub-contracting
+
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
@@ -244,7 +234,6 @@ def make_purchase_receipt(source_name, target_doclist=None):
 def make_purchase_invoice(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
-	
 	def set_missing_values(source, target):
 		bean = webnotes.bean(target)
 		bean.run_method("set_missing_values")
@@ -254,7 +243,8 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		target.conversion_factor = 1
 		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
 		target.amount = target.import_amount / flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(obj.purchase_rate)
+		if flt(obj.purchase_rate):
+			target.qty = target.amount / flt(obj.purchase_rate)
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-07-06 18:38:37", 
+  "modified": "2013-07-08 15:54:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,8 +33,8 @@
   "parent": "Sales Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1, 
-  "report": 1
+  "permlevel": 0, 
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -366,55 +366,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "description": "Quotation no against which this Sales Order is made ", 
-  "doctype": "DocField", 
-  "fieldname": "quotation_no", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Quotation No", 
-  "no_copy": 0, 
-  "oldfieldname": "quotation_no", 
-  "oldfieldtype": "Link", 
-  "options": "Quotation", 
-  "print_hide": 1, 
-  "search_index": 1, 
-  "width": "150px"
- }, 
- {
-  "depends_on": "eval:doc.quotation_no", 
-  "doctype": "DocField", 
-  "fieldname": "quotation_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Quotation Date", 
-  "no_copy": 0, 
-  "oldfieldname": "quotation_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 0, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_quotation_details", 
-  "fieldtype": "Button", 
-  "label": "Pull Quotation Items", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break20", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "net_total_export", 
   "fieldtype": "Currency", 
   "label": "Net Total (Export)", 
@@ -646,24 +597,6 @@
   "options": "Terms and Conditions", 
   "print_hide": 1, 
   "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_58", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_60", 
-  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -975,22 +908,12 @@
   "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales Manager", 
+  "report": 1, 
+  "role": "Sales User", 
   "submit": 1, 
   "write": 1
  }, 
@@ -999,63 +922,18 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales User", 
+  "report": 1, 
+  "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
+  "role": "Accounts User"
  }, 
  {
   "doctype": "DocPerm", 
-  "match": "customer_name", 
-  "permlevel": 0, 
+  "match": "customer", 
   "role": "Customer"
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Maintenance Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Maintenance Manager", 
-  "submit": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Maintenance User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Maintenance User", 
-  "submit": 0
  }
 ]

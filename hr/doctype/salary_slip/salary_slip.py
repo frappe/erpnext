@@ -62,7 +62,8 @@ class DocType(TransactionBase):
 		self.doclist = self.doc.clear_table(self.doclist, 'earning_details')
 		self.doclist = self.doc.clear_table(self.doclist, 'deduction_details')
 
-		get_obj('DocType Mapper', 'Salary Structure-Salary Slip').dt_map('Salary Structure', 'Salary Slip', struct, self.doc, self.doclist, "[['Salary Structure', 'Salary Slip'],['Salary Structure Earning', 'Salary Slip Earning'],['Salary Structure Deduction','Salary Slip Deduction']]")
+		from hr.doctype.salary_structure.salary_structure import make_salary_slip
+		make_salary_slip(struct, self.doclist)
 
 		basic_info = sql("select bank_name, bank_ac_no, esic_card_no, pf_number from `tabEmployee` where name ='%s'" % self.doc.employee)
 		self.doc.bank_name = basic_info[0][0]

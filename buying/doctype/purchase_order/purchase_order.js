@@ -27,8 +27,15 @@ wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		this._super();
+		this.frm.dashboard.reset();
 		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
+			cur_frm.dashboard.add_progress(cint(doc.per_received) + wn._("% Received"), 
+				doc.per_received);
+			cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
+				doc.per_billed);
+
+
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 			if(flt(doc.per_received, 2) < 100) 
 				cur_frm.add_custom_button('Make Purchase Receipt', this.make_purchase_receipt);	
@@ -36,20 +43,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button('Make Invoice', this.make_purchase_invoice);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) 
 				cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+		} else if(doc.docstatus===0) {
+			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button('Unstop Purchase Order', 
 				cur_frm.cscript['Unstop Purchase Order']);
 	},
-	
-	get_items: function() {
-		wn.model.map_current_doc({
-			method: "stock.doctype.material_request.material_request.make_purchase_order",
-			source_name: cur_frm.doc.indent_no,
-		})
-	},
-	
+		
 	make_purchase_receipt: function() {
 		wn.model.open_mapped_doc({
 			method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -64,12 +66,40 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		})
 	},
 	
-	get_supplier_quotation_items: function() {
-		wn.model.map_current_doc({
-			method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
-			source_name: cur_frm.doc.supplier_quotation,
-		})
-	}
+	add_from_mappers: function() {
+		cur_frm.add_custom_button(wn._('From Material Request'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "stock.doctype.material_request.material_request.make_purchase_order",
+					source_doctype: "Material Request",
+					get_query_filters: {
+						material_request_type: "Purchase",
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+						per_ordered: ["<", 99.99],
+						company: cur_frm.doc.company
+					}
+				})
+			});
+
+		cur_frm.add_custom_button(wn._('From Supplier Quotation'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+					source_doctype: "Supplier Quotation",
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+						company: cur_frm.doc.company
+					}
+				})
+			});	
+	},
+
+	tc_name: function() {
+		this.get_terms();
+	},
+
 });
 
 // for backward compatibility: combine new and previous states

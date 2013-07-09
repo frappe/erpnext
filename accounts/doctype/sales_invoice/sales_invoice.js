@@ -66,7 +66,43 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(doc.outstanding_amount!=0)
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
+
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Sales Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+						source_doctype: "Sales Order",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_billed: ["<", 99.99],
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+
+			cur_frm.add_custom_button(wn._('From Delivery Note'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+						source_doctype: "Delivery Note",
+						get_query_filters: {
+							docstatus: 1,
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+
+		}
+		
 		cur_frm.cscript.hide_fields(doc, dt, dn);
+	},
+
+	tc_name: function() {
+		this.get_terms();
 	},
 	
 	is_pos: function() {
@@ -122,9 +158,8 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
-	par_flds = ['project_name', 'due_date', 'sales_order_main',
-	'delivery_note_main', 'get_items', 'is_opening', 'conversion_rate',
-	'source', 'cancel_reason', 'total_advance', 'gross_profit',
+	par_flds = ['project_name', 'due_date', 'is_opening', 'conversion_rate',
+	'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
 	'total_commission', 'advances'];
@@ -190,41 +225,14 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-// Get Items based on SO or DN Selected
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-	if(doc.delivery_note_main) {
-		wn.model.map_current_doc({
-			method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_name: cur_frm.doc.delivery_note_main,
-		})
-	}
-	else if(doc.sales_order_main) {
-		wn.model.map_current_doc({
-			method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
-			source_name: cur_frm.doc.sales_order_main,
-		})
-	}
-}
-
-
-
 //Make Delivery Note Button
 //-----------------------------
 
 cur_frm.cscript['Make Delivery Note'] = function() {
-
-	var doc = cur_frm.doc
-	n = wn.model.make_new_doc_and_get_name('Delivery Note');
-	$c('dt_map', args={
-		'docs':wn.model.compress([locals['Delivery Note'][n]]),
-		'from_doctype':doc.doctype,
-		'to_doctype':'Delivery Note',
-		'from_docname':doc.name,
-		'from_to_list':"[['Sales Invoice','Delivery Note'],['Sales Invoice Item','Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
-		}, function(r,rt) {
-			 loaddoc('Delivery Note', n);
-		}
-	);
+	wn.model.open_mapped_doc({
+		method: "accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
+		source_name: cur_frm.doc.name
+	})
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
@@ -398,8 +406,6 @@ cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
 		filters: filter
 	}
 }
-
-
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn){
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");

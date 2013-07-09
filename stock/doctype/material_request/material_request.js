@@ -52,16 +52,32 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
+		} 
+		
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Sales Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.sales_order.sales_order.make_material_request",
+						source_doctype: "Sales Order",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_delivered: ["<", 99.99],
+							company: cur_frm.doc.company
+						}
+					})
+				});
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button('Unstop Material Request', 
 				cur_frm.cscript['Unstop Material Request']);
 		
-		if(doc.material_request_type === "Transfer") {
-			cur_frm.toggle_display("sales_order_no", false);
-			cur_frm.fields_dict.indent_details.grid.set_column_disp("sales_order_no", false);
-		}
+	},
+	
+	tc_name: function() {
+		this.get_terms();
 	},
 	
 	validate_company_and_party: function(party_field) {
@@ -71,7 +87,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	calculate_taxes_and_totals: function() {
 		return;
 	},
-	
+		
 	make_purchase_order: function() {
 		wn.model.open_mapped_doc({
 			method: "stock.doctype.material_request.material_request.make_purchase_order",

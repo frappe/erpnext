@@ -53,6 +53,25 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 		}
+		
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Opportunity'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.opportunity.opportunity.make_quotation",
+						source_doctype: "Opportunity",
+						get_query_filters: {
+							docstatus: 1,
+							status: "Submitted",
+							enquiry_type: cur_frm.doc.order_type,
+							customer: cur_frm.doc.customer || undefined,
+							lead: cur_frm.doc.lead || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+		}
+		
 
 		if (!doc.__islocal) {
 			cur_frm.communication_view = new wn.views.CommunicationList({
@@ -69,6 +88,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	quotation_to: function() {
 		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
+	},
+
+	tc_name: function() {
+		this.get_terms();
 	},
 	
 	validate_company_and_party: function(party_field) {
@@ -113,17 +136,6 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 }
 
 
-// =====================================================================================
-cur_frm.fields_dict['enq_no'].get_query = function(doc,cdt,cdn){
-	var cond='';
-	var cond1='';
-	if(doc.order_type) cond = 'ifnull(`tabOpportunity`.enquiry_type, "") = "'+doc.order_type+'" AND';
-	if(doc.customer) cond1 = '`tabOpportunity`.customer = "'+doc.customer+'" AND';
-	else if(doc.lead) cond1 = '`tabOpportunity`.lead = "'+doc.lead+'" AND';
-
-	return repl('SELECT `tabOpportunity`.`name` FROM `tabOpportunity` WHERE `tabOpportunity`.`docstatus` = 1 AND `tabOpportunity`.status = "Submitted" AND %(cond)s %(cond1)s `tabOpportunity`.`name` LIKE "%s" ORDER BY `tabOpportunity`.`name` ASC LIMIT 50', {cond:cond, cond1:cond1});
-}
-
 // Make Sales Order
 // =====================================================================================
 cur_frm.cscript['Make Sales Order'] = function() {
@@ -131,29 +143,6 @@ cur_frm.cscript['Make Sales Order'] = function() {
 		method: "selling.doctype.quotation.quotation.make_sales_order",
 		source_name: cur_frm.doc.name
 	})
-}
-
-//pull enquiry details
-cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
-
-	var callback = function(r,rt){
-		if(r.message){
-			doc.quotation_to = r.message;
-
-			if(doc.quotation_to == 'Lead') {
-					unhide_field('lead');
-			}
-			else if(doc.quotation_to == 'Customer') {
-				unhide_field(['customer','customer_address','contact_person','territory','customer_group']);
-			}
-			refresh_many(['quotation_details','quotation_to','customer','customer_address', 
-				'contact_person', 'lead', 'address_display', 'contact_display', 'contact_mobile', 
-				'contact_email', 'territory', 'customer_group', 'order_type']);
-		}
-	}
-
-	$c_obj(make_doclist(doc.doctype, doc.name),'pull_enq_details','',callback);
-
 }
 
 // declare order lost

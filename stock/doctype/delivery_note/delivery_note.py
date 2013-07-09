@@ -369,7 +369,7 @@ class DocType(SellingController):
 @webnotes.whitelist()
 def make_sales_invoice(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
-		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.export_amount = flt(obj.amount)
 		target.amount = target.export_amount / flt(source_parent.conversion_rate)
 		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
 		
@@ -393,8 +393,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "sales_order", 
 				"serial_no": "serial_no"
 			},
-			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount
+			"postprocess": update_item
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

@@ -29,16 +29,25 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button("Make Purchase Order", this.make_purchase_order);
+		} 
+		else if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Material Request'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "stock.doctype.material_request.material_request.make_supplier_quotation",
+						source_doctype: "Material Request",
+						get_query_filters: {
+							material_request_type: "Purchase",
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_ordered: ["<", 99.99],
+							company: cur_frm.doc.company
+						}
+					})
+				});
 		}
 	},	
-	
-	get_items: function() {
-		wn.model.map_current_doc({
-			method: "stock.doctype.material_request.material_request.make_supplier_quotation",
-			source_name: cur_frm.doc.indent_no,
-		})
-	},
-	
+		
 	make_purchase_order: function() {
 		wn.model.open_mapped_doc({
 			method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",

@@ -36,6 +36,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(po[0]["doctype"], "Purchase Order")
 		self.assertEquals(len(po), len(sq.doclist))
 		
+		webnotes.bean(po).insert()
+		
 test_records = [
 	[
 		{
@@ -45,7 +47,7 @@ test_records = [
 			"doctype": "Supplier Quotation", 
 			"fiscal_year": "_Test Fiscal Year 2013", 
 			"transaction_date": "2013-02-12", 
-			"is_subcontracted": "Yes",
+			"is_subcontracted": "No",
 			"supplier": "_Test Supplier",
 			"supplier_name": "_Test Supplier",
 			"net_total": 5000.0, 
