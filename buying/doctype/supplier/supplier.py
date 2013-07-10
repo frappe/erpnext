@@ -196,7 +196,7 @@ class DocType(TransactionBase):
 
 @webnotes.whitelist()
 def get_dashboard_info(supplier):
-	if not webnotes.has_permission("Supplier", supplier):
+	if not webnotes.has_permission("Supplier", "read", supplier):
 		webnotes.msgprint("No Permission", raise_exception=True)
 	
 	out = {}

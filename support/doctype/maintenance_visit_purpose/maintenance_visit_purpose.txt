@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:06", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:24", 
+  "modified": "2013-07-10 12:58:21", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -24,36 +24,6 @@
  {
   "doctype": "DocType", 
   "name": "Maintenance Visit Purpose"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "oldfieldtype": "Small Text", 
-  "print_width": "300px", 
-  "reqd": 1, 
-  "width": "300px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "service_person", 
-  "fieldtype": "Link", 
-  "label": "Service Person", 
-  "oldfieldname": "service_person", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Person", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "work_done", 
-  "fieldtype": "Small Text", 
-  "label": "Work Done", 
-  "oldfieldname": "work_done", 
-  "oldfieldtype": "Small Text", 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -80,6 +50,42 @@
   "label": "Serial No", 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "reqd": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "work_details", 
+  "fieldtype": "Section Break", 
+  "label": "Work Details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "service_person", 
+  "fieldtype": "Link", 
+  "label": "Sales Person", 
+  "oldfieldname": "service_person", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "work_done", 
+  "fieldtype": "Small Text", 
+  "label": "Work Done", 
+  "oldfieldname": "work_done", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

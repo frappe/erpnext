@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-07-09 12:21:47", 
+  "modified": "2013-07-10 11:56:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,12 @@
   "print_width": "300px", 
   "read_only": 0, 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -157,6 +163,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "accounting", 
+  "fieldtype": "Section Break", 
+  "label": "Accounting"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "expense_head", 
   "fieldtype": "Link", 
   "label": "Expense Head", 
@@ -182,6 +194,12 @@
   "print_width": "120px", 
   "read_only": 0, 
   "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reference", 
+  "fieldtype": "Section Break", 
+  "label": "Reference"
  }, 
  {
   "doctype": "DocField", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-04 11:02:19", 
   "docstatus": 0, 
-  "modified": "2013-07-09 12:46:12", 
+  "modified": "2013-07-10 11:57:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -80,6 +80,12 @@
   "read_only": 0, 
   "reqd": 1, 
   "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -181,15 +187,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "warehouse", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Warehouse", 
-  "oldfieldname": "warehouse", 
-  "oldfieldtype": "Link", 
-  "options": "Warehouse", 
-  "print_hide": 1, 
-  "read_only": 0
+  "fieldname": "accounting", 
+  "fieldtype": "Section Break", 
+  "label": "Accounting"
  }, 
  {
   "doctype": "DocField", 
@@ -233,6 +233,24 @@
   "read_only": 0, 
   "reqd": 0, 
   "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse_and_reference", 
+  "fieldtype": "Section Break", 
+  "label": "Warehouse and Reference"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 

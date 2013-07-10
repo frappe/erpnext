@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-07-09 11:37:12", 
+  "modified": "2013-07-10 11:53:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -63,6 +63,12 @@
   "print_width": "250px", 
   "reqd": 1, 
   "width": "250px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_warehouse", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Warehouse"
  }, 
  {
   "doctype": "DocField", 

@@ -17,6 +17,49 @@
 wn.provide("erpnext.support");
 // TODO commonify this code
 erpnext.support.MaintenanceVisit = wn.ui.form.Controller.extend({
+	refresh: function() {
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Maintenance Schedule'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
+						source_doctype: "Maintenance Schedule",
+						get_query_filters: {
+							docstatus: 1,
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+			cur_frm.add_custom_button(wn._('From Customer Issue'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+						source_doctype: "Customer Issue",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["in", "Open, Work in Progress"],
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+			cur_frm.add_custom_button(wn._('From Sales Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
+						source_doctype: "Sales Order",
+						get_query_filters: {
+							docstatus: 1,
+							order_type: cur_frm.doc.order_type,
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				});
+		}
+		cur_frm.cscript.hide_contact_info();			
+	},
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
@@ -29,29 +72,9 @@ erpnext.support.MaintenanceVisit = wn.ui.form.Controller.extend({
 			});
 			
 			// TODO shift this to depends_on
-			hide_contact_info(this.frm.doc);			
+			cur_frm.cscript.hide_contact_info();			
 		}
 	}, 
-	
-	get_items: function() {
-		if(cur_frm.doc.sales_order_no) {
-			wn.model.map_current_doc({
-				method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
-				source_name: cur_frm.doc.quotation_no,
-			});
-		} else if (cur_frm.doc.customer_issue_no) {
-			wn.model.map_current_doc({
-				method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
-				source_name: cur_frm.doc.quotation_no,
-			});
-		} else if (cur_frm.doc.maintenance_schedule) {
-			wn.model.map_current_doc({
-				method: "support.doctype.maintenance_schedule.maintenance_schedule\
-					.make_maintenance_visit",
-				source_name: cur_frm.doc.quotation_no,
-			});
-		}	
-	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.support.MaintenanceVisit({frm: cur_frm}));
@@ -59,17 +82,11 @@ $.extend(cur_frm.cscript, new erpnext.support.MaintenanceVisit({frm: cur_frm}));
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 	if(doc.__islocal) set_multiple(dt,dn,{mntc_date:get_today()});
-	hide_contact_info(doc);
+	cur_frm.cscript.hide_contact_info();			
 }
 
-var hide_contact_info = function(doc) {
-	if(doc.customer) $(cur_frm.fields_dict.contact_info_section.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_info_section.row.wrapper).toggle(false);
-	
-}
-
-cur_frm.cscript.refresh = function(doc) {
-	hide_contact_info(doc);
+cur_frm.cscript.hide_contact_info = function() {
+	cur_frm.toggle_display("contact_info_section", cur_frm.doc.customer ? true : false);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -84,14 +101,6 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-	var callback = function(r,rt) { 
-		hide_contact_info(doc);
-		cur_frm.refresh();
-	}
-	get_server_fields('fetch_items','','',doc, dt, dn,1,callback);
-}
-
 cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 }
@@ -102,38 +111,6 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	if (d.item_code) {
 		get_server_fields('get_item_details',d.item_code, 'maintenance_visit_details',doc,cdt,cdn,1);
 	}
-}
-
-cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
-	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabSales Order`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT DISTINCT `tabSales Order`.name FROM `tabSales Order`, `tabSales Order Item`, `tabItem` WHERE `tabSales Order`.company = "%(company)s" AND `tabSales Order`.docstatus = 1 AND `tabSales Order Item`.parent = `tabSales Order`.name AND `tabSales Order Item`.item_code = `tabItem`.name AND `tabItem`.is_service_item = "Yes" AND %(cond)s `tabSales Order`.name LIKE "%s" ORDER BY `tabSales Order`.name DESC LIMIT 50', {company:doc.company, cond:cond});
-}
-
-cur_frm.fields_dict['customer_issue_no'].get_query = function(doc) {
-	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabCustomer Issue`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT `tabCustomer Issue`.name FROM `tabCustomer Issue` WHERE `tabCustomer Issue`.company = "%(company)s" AND %(cond)s `tabCustomer Issue`.docstatus = 1 AND (`tabCustomer Issue`.status = "Open" OR `tabCustomer Issue`.status = "Work In Progress") AND `tabCustomer Issue`.name LIKE "%s" ORDER BY `tabCustomer Issue`.name DESC LIMIT 50', {company:doc.company, cond:cond});
-}
-
-cur_frm.fields_dict['maintenance_schedule'].get_query = function(doc) {
-	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabMaintenance Schedule`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT `tabMaintenance Schedule`.name FROM `tabMaintenance Schedule` WHERE `tabMaintenance Schedule`.company = "%(company)s" AND %(cond)s `tabMaintenance Schedule`.docstatus = 1 AND `tabMaintenance Schedule`.name LIKE "%s" ORDER BY `tabMaintenance Schedule`.name DESC LIMIT 50', {company:doc.company, cond:cond});
-}
-
-//get query select Territory
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

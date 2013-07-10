@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:51", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:26", 
+  "modified": "2013-07-10 11:52:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -80,14 +80,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "basic_rate", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Basic Rate", 
-  "oldfieldname": "basic_rate", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -96,6 +91,17 @@
   "label": "Qty", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "basic_rate", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Basic Rate", 
+  "oldfieldname": "basic_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
