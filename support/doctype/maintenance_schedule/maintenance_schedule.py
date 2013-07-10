@@ -335,12 +335,16 @@ def make_maintenance_visit(source_name, target_doclist=None):
 def get_sales_order_no(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
-	return webnotes.conn.sql(""" select distinct `tabSales Order`.name from `tabSales Order`, 
-			`tabSales Order Item`, `tabItem` 
-    	where `tabSales Order`.company = "%(company)s" and `tabSales Order`.docstatus = 1 
-    	and `tabSales Order Item`.parent = `tabSales Order`.name 
-    	and `tabSales Order Item`.item_code = `tabItem`.name 
-     	and `tabItem`.is_service_item = "Yes" and %(cond)s `tabSales Order`.name LIKE "%(txt)s" %(mcond)s
-    	ORDER BY `tabSales Order`.name desc LIMIT %(start)s, %(page_len)s""" 
-    	% 'company': filters["company"], 'cond': filters['cond'], 'txt': "%%%s%%" % txt, 
-    	'mcond':get_match_cond(doctype, searchfield), "start": start, "page_len": page_len})
+	return webnotes.conn.sql(""" select distinct `tabSales Order`.name 
+			from `tabSales Order`, `tabSales Order Item`, `tabItem` 
+    		where `tabSales Order`.company = "%(company)s" 
+    			and `tabSales Order`.docstatus = 1 
+    			and `tabSales Order Item`.parent = `tabSales Order`.name 
+    			and `tabSales Order Item`.item_code = `tabItem`.name 
+     			and `tabItem`.is_service_item = "Yes" 
+     			and %(cond)s `tabSales Order`.name LIKE "%(txt)s" 
+     			%(mcond)s
+    		order by `tabSales Order`.name desc 
+    		limit %(start)s, %(page_len)s """ % {'company': filters["company"], 
+    		'cond': filters['cond'], 'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+    		'start': start, 'page_len': page_len})

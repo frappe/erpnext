@@ -990,8 +990,10 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
-				or tabAccount.account_type = "Income Account") 
-			and tabAccount.group_or_ledger="Ledger" and tabAccount.docstatus!=2 
-			and tabAccount.company = '%(company)s' and tabAccount.%(key)s LIKE '%(txt)s'
-			%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
+					or tabAccount.account_type = "Income Account") 
+				and tabAccount.group_or_ledger="Ledger" 
+				and tabAccount.docstatus!=2 
+				and tabAccount.company = '%(company)s' 
+				and tabAccount.%(key)s LIKE '%(txt)s'
+				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
 			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})

@@ -199,7 +199,7 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 		return {
 			query: 'selling.doctype.quotation.quotation.quotation_details',
 			filters:{
-				cond: cond,
+				cond: cond
 			}		
 		}	
 	}

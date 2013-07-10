@@ -43,15 +43,11 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 // item code based on GRN/DN
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
-	filter = {};
-	if (doc.purchase_receipt_no)
-		filter:{
-			'parent': doc.purchase_receipt_no
-		}
-	else if (doc.delivery_note_no) 
-		filter:{
-			'parent': doc.delivery_note_no
-		}		
+	var filter = {};
+	if (doc.purchase_receipt_no) filter['parent'] = doc.purchase_receipt_no;
+		
+	else if (doc.delivery_note_no) filter['parent'] =  doc.delivery_note_no;
+
 	return{
 		filters: filter
 	}
@@ -59,15 +55,14 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 
 // Serial No based on item_code
 cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
-	filter = {};
+	var filter = {};
 	if (doc.item_code)
 		filter:{
 			'item_code': doc.item_code,
 			'status': "In Store"
 		}
-		// return 'SELECT name, item_code, warehouse FROM `tabSerial No` WHERE docstatus != 2 AND item_code = "' + doc.item_code +'" AND status = "In Store" AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
 	else
-		filter:{ 'status': "In Store" }
-		// return 'SELECT name, item_code, warehouse FROM `tabSerial No` WHERE docstatus != 2 AND status = "In Store" AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
-	return{	filters: filter	}
+		filter: { 'status': "In Store" }
+	
+	return { filters: filter }
 }

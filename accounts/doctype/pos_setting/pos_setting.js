@@ -55,7 +55,7 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
 			'company_name': doc.company,
-			'group_or_ledger': "Ledger",
+			'group_or_ledger': "Ledger"
 		}
 	}	
 }

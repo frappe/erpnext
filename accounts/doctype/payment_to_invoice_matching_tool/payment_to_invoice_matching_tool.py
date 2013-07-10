@@ -153,13 +153,14 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 			    		or ifnull(gle.against_voucher, '') = gle.voucher_no ) 
 					and ifnull(gle.%(account_type)s, 0) > 0 
 			   		and (select ifnull(abs(sum(ifnull(debit, 0)) 
-			   			- sum(ifnull(credit, 0))), 0) 
+			   				- sum(ifnull(credit, 0))), 0) 
 						from `tabGL Entry` 
 			        	where against_voucher_type = '%(dt)s' 
 			        		and against_voucher = gle.voucher_no 
 			        	and voucher_no != gle.voucher_no 
 			        	and ifnull(is_cancelled, 'No') = 'No') 
-							!= abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)) 
+							!= abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)
+						) 
 					%(mcond)s
 			    ORDER BY gle.posting_date desc, gle.voucher_no desc 
 			    limit %(start)s, %(page_len)s""" %  {dt:filters["dt"], acc:filters["acc"], 

@@ -67,7 +67,7 @@ cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query 
 	function(doc, cdt, cdn) {
 		return{
 			filters:[
-				['Project', 'status', 'not in', 'Completed, Cancelled'],
+				['Project', 'status', 'not in', 'Completed, Cancelled']
 			]
 		}
 	}
