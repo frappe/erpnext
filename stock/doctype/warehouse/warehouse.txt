@@ -2,13 +2,12 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-07-10 18:37:24", 
+  "modified": "2013-07-10 18:46:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_rename": 1, 
-  "autoname": "field:warehouse_name", 
   "description": "A logical Warehouse against which stock entries are made.", 
   "doctype": "DocType", 
   "document_type": "Master", 

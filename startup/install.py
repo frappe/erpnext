@@ -100,8 +100,10 @@ def import_country_and_currency():
 def import_defaults():
 	records = [
 		# item group
-		{'doctype': 'Item Group', 'item_group_name': 'All Item Groups', 'is_group': 'Yes', 'name': 'All Item Groups', 'parent_item_group': ''},
-		{'doctype': 'Item Group', 'item_group_name': 'Default', 'is_group': 'No', 'name': 'Default', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'All Item Groups', 'is_group': 'Yes', 'parent_item_group': ''},
+		{'doctype': 'Item Group', 'item_group_name': 'Products', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Raw Material', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Services', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		
 		# deduction type
 		{'doctype': 'Deduction Type', 'name': 'Income Tax', 'description': 'Income Tax', 'deduction_name': 'Income Tax'},
@@ -131,16 +133,25 @@ def import_defaults():
 			
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': 'All Customer Groups', 'is_group': 'Yes', 	'name': 'All Customer Groups', 'parent_customer_group': ''},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Default', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Individual', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Commercial', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Non Profit', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Government', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
 			
 		# supplier type
-		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Services'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Local'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Raw Material'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Electrical'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Hardware'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Pharmaceutical'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Distributor'},
 
 		# Workstation
 		{'doctype': 'Workstation', 'name': 'Default Workstation', 'workstation_name': 'Default Workstation', 'warehouse': 'Default Warehouse'},
 		
 		# Sales Person
-		{'doctype': 'Sales Person', 'name': 'All Sales Persons', 'sales_person_name': 'All Sales Persons', 'is_group': "Yes", "parent_sales_person": ""},
+		{'doctype': 'Sales Person', 'sales_person_name': 'Sales Team', 'is_group': "Yes", "parent_sales_person": ""},
 		
 		# UOM
 		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit'}, 

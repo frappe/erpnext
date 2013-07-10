@@ -27,7 +27,12 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		
+	
+	def autoname(self):
+		suffix = " - " + webnotes.conn.get_value("Company", self.doc.company, "abbr")
+		if not self.doc.warehouse_name.endswith(suffix):
+			self.doc.name = self.doc.warehouse_name + suffix
+	
 	def get_bin(self, item_code, warehouse=None):
 		warehouse = warehouse or self.doc.name
 		bin = sql("select name from tabBin where item_code = %s and \
