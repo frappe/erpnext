@@ -53,6 +53,22 @@ wn.module_page["Accounts"] = [
 		]
 	},
 	{
+		title: wn._("Setup"),
+		icon: "icon-wrench",
+		items: [
+			{
+				label: wn._("Company"),
+				description: wn._("Company Master."),
+				doctype:"Company"
+			},
+			{
+				label: wn._("Fiscal Year"),
+				description: wn._("Accounting Year."),
+				doctype:"Fiscal Year"
+			},
+		]
+	},
+	{
 		title: wn._("Tools"),
 		icon: "icon-wrench",
 		items: [

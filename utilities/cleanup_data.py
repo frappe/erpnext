@@ -42,8 +42,6 @@ def delete_masters():
 	print "Deleting masters...."
 	masters = {
 		'Workstation': ['Default Workstation'],
-		'Warehouse Type': ['Default Warehouse Type', 'Fixed Asset', 'Rejected', 'Reserved', 
-			'Sample', 'Stores', 'WIP Warehouse'],
 		'Warehouse': ['Default Warehouse'],
 		'UOM': ['Kg', 'Mtr', 'Box', 'Ltr', 'Nos', 'Ft', 'Pair', 'Set'],
 		'Territory': ['All Territories', 'Default Territory'],
@@ -139,7 +137,6 @@ def reset_global_defaults():
 		'default_item_group': 'Default', 
 		'default_stock_uom': 'Nos', 
 		'default_valuation_method': 'FIFO', 
-		'default_warehouse_type': 'Default Warehouse Type', 
 		'tolerance': None, 
 		'acc_frozen_upto': None, 
 		'bde_auth_role': None, 

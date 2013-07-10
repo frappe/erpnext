@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-07-08 17:34:21", 
+  "modified": "2013-07-10 18:17:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,6 +53,17 @@
   "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
+  "label": "Company", 
+  "no_copy": 0, 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
   "doctype": "DocField", 
   "fieldname": "abbr", 
@@ -72,13 +83,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "company_name", 
-  "fieldtype": "Data", 
-  "label": "Company", 
-  "no_copy": 0, 
-  "oldfieldname": "company_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 0, 
+  "fieldname": "domain", 
+  "fieldtype": "Select", 
+  "label": "Domain", 
+  "options": "Distribution\nManufacturing\nRetail\nServices", 
   "reqd": 1
  }, 
  {
