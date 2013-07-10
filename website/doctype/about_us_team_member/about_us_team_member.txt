@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:11", 
   "docstatus": 0, 
-  "modified": "2013-03-12 13:51:02", 
+  "modified": "2013-07-10 14:54:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,6 +14,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "About Us Team Member", 
   "parentfield": "fields", 

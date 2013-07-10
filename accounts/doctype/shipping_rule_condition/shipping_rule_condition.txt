@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 11:54:50", 
   "docstatus": 0, 
-  "modified": "2013-06-25 11:58:04", 
+  "modified": "2013-07-10 14:54:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,6 +15,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Shipping Rule Condition", 
   "parentfield": "fields", 

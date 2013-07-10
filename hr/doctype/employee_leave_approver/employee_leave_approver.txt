@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-12 06:56:15", 
   "docstatus": 0, 
-  "modified": "2013-04-12 07:53:33", 
+  "modified": "2013-07-10 14:54:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -19,6 +19,7 @@
   "doctype": "DocField", 
   "fieldname": "leave_approver", 
   "fieldtype": "Select", 
+  "in_list_view": 0, 
   "label": "Leave Approver", 
   "name": "__common__", 
   "parent": "Employee Leave Approver", 

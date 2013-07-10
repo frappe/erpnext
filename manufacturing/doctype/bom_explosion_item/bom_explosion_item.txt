@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-06-04 13:13:28", 
+  "modified": "2013-07-10 14:54:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -41,6 +42,7 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
@@ -51,6 +53,7 @@
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Qty", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency"
@@ -59,6 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Rate", 
   "oldfieldname": "standard_rate", 
   "oldfieldtype": "Currency"
@@ -67,6 +71,7 @@
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "amount_as_per_sr", 
   "oldfieldtype": "Currency"
@@ -75,6 +80,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
@@ -85,6 +91,7 @@
   "fieldname": "qty_consumed_per_unit", 
   "fieldtype": "Float", 
   "hidden": 0, 
+  "in_list_view": 1, 
   "label": "Qty Consumed Per Unit", 
   "no_copy": 0
  }

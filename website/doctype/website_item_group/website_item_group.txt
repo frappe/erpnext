@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:09", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:34", 
+  "modified": "2013-07-10 14:54:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -18,6 +18,7 @@
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Group", 
   "name": "__common__", 
   "options": "Item Group", 

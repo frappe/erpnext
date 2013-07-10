@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 12:26:33", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:34", 
+  "modified": "2013-07-10 14:54:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,6 +16,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Website Slideshow Item", 
   "parentfield": "fields", 
