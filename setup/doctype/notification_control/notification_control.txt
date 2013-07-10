@@ -2,7 +2,7 @@
  {
   "creation": "2012-07-12 23:29:45", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:11", 
+  "modified": "2013-07-10 19:24:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "allow_print": 1, 
   "description": "Send automatic emails to Contacts on Submitting transactions.", 
   "doctype": "DocType", 
+  "icon": "icon-envelope", 
   "issingle": 1, 
   "module": "Setup", 
   "name": "__common__"

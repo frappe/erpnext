@@ -41,6 +41,10 @@ img {
 	margin-left: 5px;
 }
 
+div.web-footer {
+	border-top: 1px solid #dddddd;
+	padding-top: 10px;
+}
 
 .web-footer-menu ul {
 	list-style: none;

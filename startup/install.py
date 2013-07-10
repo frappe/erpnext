@@ -146,9 +146,6 @@ def import_defaults():
 		{'doctype': 'Supplier Type', 'supplier_type': 'Hardware'},
 		{'doctype': 'Supplier Type', 'supplier_type': 'Pharmaceutical'},
 		{'doctype': 'Supplier Type', 'supplier_type': 'Distributor'},
-
-		# Workstation
-		{'doctype': 'Workstation', 'name': 'Default Workstation', 'workstation_name': 'Default Workstation', 'warehouse': 'Default Warehouse'},
 		
 		# Sales Person
 		{'doctype': 'Sales Person', 'sales_person_name': 'Sales Team', 'is_group': "Yes", "parent_sales_person": ""},
@@ -166,12 +163,11 @@ def import_defaults():
 	
 	from webnotes.modules import scrub
 	for r in records:
-		if not webnotes.conn.exists(r['doctype'], r['name']):
-			bean = webnotes.bean(r)
-			
-			# ignore mandatory for root
-			parent_link_field = ("parent_" + scrub(bean.doc.doctype))
-			if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
-				bean.ignore_mandatory = True
-			
-			bean.insert()
+		bean = webnotes.bean(r)
+		
+		# ignore mandatory for root
+		parent_link_field = ("parent_" + scrub(bean.doc.doctype))
+		if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
+			bean.ignore_mandatory = True
+		
+		bean.insert()
