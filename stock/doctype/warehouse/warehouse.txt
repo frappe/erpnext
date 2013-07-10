@@ -2,20 +2,18 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-07-05 15:02:12", 
+  "modified": "2013-07-10 18:46:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_rename": 1, 
-  "autoname": "field:warehouse_name", 
   "description": "A logical Warehouse against which stock entries are made.", 
   "doctype": "DocType", 
   "document_type": "Master", 
   "icon": "icon-building", 
   "module": "Stock", 
-  "name": "__common__", 
-  "search_fields": "warehouse_type"
+  "name": "__common__"
  }, 
  {
   "doctype": "DocField", 
@@ -59,19 +57,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "warehouse_type", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Warehouse Type", 
-  "oldfieldname": "warehouse_type", 
-  "oldfieldtype": "Link", 
-  "options": "Warehouse Type", 
-  "permlevel": 0, 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -80,12 +65,13 @@
   "oldfieldtype": "Link", 
   "options": "Company", 
   "permlevel": 0, 
+  "reqd": 1, 
   "search_index": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break_4", 
-  "fieldtype": "Column Break", 
+  "fieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {

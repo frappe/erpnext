@@ -34,7 +34,7 @@ $.extend(cur_frm.cscript, {
 	
 	url: function(doc, cdt, cdn) {
 		this.label(doc, cdt, cdn);
-	}
+	},
 	
 	set_parent_label_options: function() {
 		wn.meta.get_docfield("Top Bar Item", "parent_label", cur_frm.docname).options = 

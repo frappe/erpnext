@@ -31,11 +31,7 @@ class DocType:
 	def validate(self):
 		if not self.doc.stock_uom:
 			self.doc.stock_uom = webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom')
-		
-		if not self.doc.warehouse_type:
-			self.doc.warehouse_type = webnotes.conn.get_value("Warehouse", self.doc.warehouse,
-				"warehouse_type")
-		
+				
 		self.validate_mandatory()
 		
 		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + \

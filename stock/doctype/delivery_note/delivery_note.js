@@ -106,12 +106,12 @@ cur_frm.cscript.new_contact = function(){
 
 // ***************** Get project name *****************
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
-	var cond = '';
-	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	return repl('SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND %(cond)s `tabProject`.name LIKE "%s" \
-		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+	return {
+		query: "controllers.queries.get_project_name",
+		filters: {
+			'customer': doc.customer
+		}
+	}
 }
 
 cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
@@ -122,7 +122,9 @@ cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabSupplier`.`name` FROM `tabSupplier` WHERE `tabSupplier`.supplier_type = "transporter" AND `tabSupplier`.docstatus != 2 AND `tabSupplier`.%(key)s LIKE "%s" ORDER BY `tabSupplier`.`name` LIMIT 50';
+	return{
+		filters: { 'supplier_type': "transporter" }
+	}	
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
@@ -135,7 +137,9 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 
 //get query select Territory
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters: { 'is_group': "No" }
+	}
 }
 
 var set_print_hide= function(doc, cdt, cdn){
@@ -223,11 +227,11 @@ if (sys_defaults.auto_inventory_accounting) {
 	// expense account
 	cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
-			"query": "accounts.utils.get_account_list", 
-			"filters": {
+			filters: {
 				"is_pl_account": "Yes",
 				"debit_or_credit": "Debit",
-				"company": doc.company
+				"company": doc.company,
+				"group_or_ledger": "Ledger"
 			}
 		}
 	}
@@ -246,8 +250,11 @@ if (sys_defaults.auto_inventory_accounting) {
 	
 	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
 		return {
-			query: "accounts.utils.get_cost_center_list",
-			filters: { company: doc.company}
+
+			filters: { 
+				'company_name': doc.company,
+				'group_or_ledger': "Ledger"
+			}
 		}
 	}
 }

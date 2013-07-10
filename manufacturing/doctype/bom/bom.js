@@ -169,30 +169,37 @@ var calculate_total = function(doc) {
 
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
-	return erpnext.queries.item({
-		'ifnull(tabItem.is_manufactured_item, "No")': 'Yes',
-	})
+ 	return{
+		query:"controllers.queries.item_query",
+		filters:{
+			'has_serial_no': 'Yes'	
+		}
+	}
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` \
-		WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" \
-			OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.`%(key)s` like "%s" \
-		ORDER BY `tabItem`.`name` LIMIT 50';
+	return{
+		query:"controllers.queries.item_query"
+	}
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
-		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
-		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
-		ORDER BY `tabBOM`.`name` LIMIT 50';
+	return{
+		filters:{
+			'item': d.item_code,
+			'is_active': 1,
+			'docstatus': 1
+		}
+	}	
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {

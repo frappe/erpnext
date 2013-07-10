@@ -62,16 +62,20 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 cur_frm.fields_dict['delivery_note_no'].get_query = function(doc) {
 	doc = locals[this.doctype][this.docname];
-	var cond = '';
-	if(doc.customer) {
-		cond = '`tabDelivery Note`.customer = "'+doc.customer+'" AND';
-	}
-	return repl('SELECT DISTINCT `tabDelivery Note`.name, `tabDelivery Note`.customer_name	FROM `tabDelivery Note`, `tabDelivery Note Item` WHERE `tabDelivery Note`.company = "%(company)s" AND `tabDelivery Note`.docstatus = 1 AND ifnull(`tabDelivery Note`.per_installed,0) < 99.99 AND %(cond)s `tabDelivery Note`.name LIKE "%s" ORDER BY `tabDelivery Note`.name DESC LIMIT 50', {company:doc.company, cond:cond});
+
+	var filter = {
+    	'company': doc.company,
+    	'docstatus': 1,
+    	'per_installed': 99.99
+  	};
+	if(doc.customer) filter['customer'] = doc.customer;
+  	return { filters: filter }
 }
 
-
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+  	return{
+ 		filters: { 'is_group': "No" }
+  	}	
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -79,11 +83,19 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+  	return{
+    	filters: { 'customer': doc.customer }
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+    	filters: { 'customer': doc.customer }
+	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.customer_query"
+	}
+}

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:56:15", 
+  "modified": "2013-07-10 18:34:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -90,18 +90,6 @@
   "read_only": 1, 
   "search_index": 1, 
   "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "warehouse_type", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Warehouse Type", 
-  "oldfieldname": "warehouse_type", 
-  "oldfieldtype": "Select", 
-  "options": "link:Warehouse Type", 
-  "read_only": 1, 
-  "search_index": 0
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 

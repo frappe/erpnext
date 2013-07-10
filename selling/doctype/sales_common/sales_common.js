@@ -36,32 +36,34 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 		
 		this.frm.set_query("customer_address", function() {
-			return 'SELECT name, address_line1, city FROM tabAddress \
-				WHERE customer = "'+ me.frm.doc.customer +'" AND docstatus != 2 AND \
-				%(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
 		});
 		
 		this.frm.set_query("contact_person", function() {
-			return 'SELECT name, CONCAT(first_name," ",ifnull(last_name,"")) As FullName, \
-				department, designation FROM tabContact WHERE customer = "'+ me.frm.doc.customer + 
-				'" AND docstatus != 2 AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
 		});
 		
 		if(this.frm.fields_dict.charge) {
 			this.frm.set_query("charge", function() {
-				return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM \
-					`tabSales Taxes and Charges Master` \
-					WHERE `tabSales Taxes and Charges Master`.company = "' + me.frm.doc.company +
-					'" AND `tabSales Taxes and Charges Master`.company is not NULL \
-					AND `tabSales Taxes and Charges Master`.docstatus != 2 \
-					AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
-					ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
+				return {
+					filters: [
+						['Sales Taxes and Charges Master', 'company', '=', me.frm.doc.company],
+						['Sales Taxes and Charges Master', 'company', 'is not', 'NULL'],
+						['Sales Taxes and Charges Master', 'docstatus', '!=', 2]
+					]
+				}
 			});
 		}
 		
-		this.frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+		this.frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+			return{	query:"controllers.queries.customer_query" } }
 
-		this.frm.fields_dict.lead && this.frm.set_query("lead", erpnext.utils.lead_query);
+		this.frm.fields_dict.lead && this.frm.set_query("lead", function(doc,cdt,cdn) {
+			return{	query:"controllers.queries.lead_query" } });
 
 		if(!this.fname) {
 			return;
@@ -70,8 +72,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict[this.fname].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", this.fname, function() {
 				return me.frm.doc.order_type === "Maintenance" ?
-					erpnext.queries.item({'ifnull(tabItem.is_service_item, "No")': "Yes"}) :
-					erpnext.queries.item({'ifnull(tabItem.is_sales_item, "No")': "Yes"});
+					 	{ query:"controllers.queries.item_query",
+							filters:{'is_service_item': 'Yes'}}	:
+						{ query:"controllers.queries.item_query",
+							filters:{'is_sales_item': 'Yes'	}}	;
 			});
 		}
 		
@@ -82,18 +86,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					wn.throw("Please enter Item Code to get batch no");
 				} else {
 					if(item.warehouse) {
-						return "select batch_no from `tabStock Ledger Entry` sle \
-							where item_code = '" + item.item_code + 
-							"' and warehouse = '" + item.warehouse +
-							"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
-							and exists(select * from `tabBatch` where \
-							name = sle.batch_no and expiry_date >= '" + me.frm.doc.posting_date + 
-							"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
-							order by batch_no desc limit 50";
+						return {
+							query : "selling.doctype.sales_common.sales_common.get_batch_no",
+							filters: {
+								'item_code': item.item_code,
+								'warehouse': item.warehouse,
+								'posting_date': me.frm.doc.posting_date
+							}
+						}
 					} else {
-						return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
-							item.item_code + "' and expiry_date >= '" + me.frm.doc.posting_date + 
-							"' AND name like '%s' ORDER BY name DESC LIMIT 50";
+						return{
+							query : "selling.doctype.sales_common.sales_common.get_batch_no",
+							filters: {
+								'item': item.item_code,
+								'posting_date': me.frm.doc.posting_date
+							}
+						}
 					}
 				}
 			});

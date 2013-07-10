@@ -172,3 +172,14 @@ class DocType:
 				ch.stock_uom = item.stock_uom
 				ch.qty = flt(item.qty) - flt(item.packed_qty)
 		self.update_item_details()
+
+def item_details(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+	return webnotes.conn.sql("""select name, item_name, description from `tabItem` 
+				where name in ( select item_code FROM `tabDelivery Note Item` 
+	 						where parent= %s 
+	 							and ifnull(qty, 0) > ifnull(packed_qty, 0)) 
+	 			and %s like "%s" %s 
+	 			limit  %s, %s """ % ("%s", searchfield, "%s", 
+	 			get_match_cond(doctype, searchfield), "%s", "%s"), 
+	 			(filters["delivery_note"], "%%%s%%" % txt, start, page_len))

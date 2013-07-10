@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:24", 
+  "modified": "2013-07-10 14:54:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -41,6 +42,7 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
@@ -50,6 +52,7 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Data", 
@@ -59,9 +62,17 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "schedule_details", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Schedule Details"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "start_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Start Date", 
   "oldfieldname": "start_date", 
   "oldfieldtype": "Date", 
@@ -73,6 +84,7 @@
   "fieldname": "end_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "End Date", 
   "oldfieldname": "end_date", 
   "oldfieldtype": "Date", 
@@ -83,6 +95,7 @@
   "doctype": "DocField", 
   "fieldname": "periodicity", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Periodicity", 
   "oldfieldname": "periodicity", 
   "oldfieldtype": "Select", 
@@ -102,12 +115,18 @@
   "fieldname": "incharge_name", 
   "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Incharge Name", 
+  "label": "Sales Person Incharge", 
   "oldfieldname": "incharge_name", 
   "oldfieldtype": "Link", 
   "options": "Sales Person", 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reference", 
+  "fieldtype": "Section Break", 
+  "label": "Reference"
  }, 
  {
   "doctype": "DocField", 

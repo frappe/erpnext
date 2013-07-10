@@ -65,7 +65,7 @@ class DocType:
 		webnotes.bean([{
 			"doctype":"Fiscal Year",
 			'year': curr_fiscal_year,
-			'year_start_date': fy_start_date,
+			'year_start_date': fy_start_date
 		}]).insert()
 
 		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
@@ -79,9 +79,10 @@ class DocType:
 		# Company
 		webnotes.bean([{
 			"doctype":"Company",
+			'domain': args.get("industry"),
 			'company_name':args.get('company_name'),
 			'abbr':args.get('company_abbr'),
-			'default_currency':args.get('currency')
+			'default_currency':args.get('currency'),
 		}]).insert()
 		
 		self.curr_fiscal_year = curr_fiscal_year
@@ -148,7 +149,7 @@ class DocType:
 
 		# control panel
 		cp = webnotes.doc("Control Panel", "Control Panel")
-		for k in ['industry', 'country', 'timezone', 'company_name']:
+		for k in ['country', 'timezone', 'company_name']:
 			cp.fields[k] = args[k]
 			
 		cp.save()

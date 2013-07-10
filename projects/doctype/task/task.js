@@ -21,9 +21,9 @@ cur_frm.add_fetch("project", "company", "company");
 erpnext.projects.Task = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
-			return "select name from `tabProject` \
-				where %(key)s like \"%s\" \
-				order by name asc limit 50";
+			return {
+				query: "projects.doctype.task.task.get_project"
+			}
 		};
 	},
 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-07-01 13:53:33", 
+  "modified": "2013-07-10 14:56:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "fieldname": "account", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Account", 
   "oldfieldname": "account", 
   "oldfieldtype": "Link", 
@@ -40,29 +41,13 @@
   "width": "250px"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "debit", 
-  "fieldtype": "Currency", 
-  "label": "Debit", 
-  "oldfieldname": "debit", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "credit", 
-  "fieldtype": "Currency", 
-  "label": "Credit", 
-  "oldfieldname": "credit", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
- }, 
- {
   "default": ":Company", 
+  "description": "If Income or Expense", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
@@ -73,8 +58,29 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "balance", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Account Balance", 
   "no_copy": 1, 
   "oldfieldname": "balance", 
@@ -87,6 +93,7 @@
   "fieldname": "against_voucher", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Against Purchase Invoice", 
   "no_copy": 1, 
   "oldfieldname": "against_voucher", 

@@ -984,3 +984,16 @@ def get_bank_cash_account(mode_of_payment):
 	return {
 		"cash_bank_account": val
 	}
+
+def get_income_account(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
+			where (tabAccount.debit_or_credit="Credit" 
+					or tabAccount.account_type = "Income Account") 
+				and tabAccount.group_or_ledger="Ledger" 
+				and tabAccount.docstatus!=2 
+				and tabAccount.company = '%(company)s' 
+				and tabAccount.%(key)s LIKE '%(txt)s'
+				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})

@@ -15,17 +15,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=0 AND %(key)s LIKE "%s"';
+	return{
+		filters:{ 'docstatus': 0}
+	}
 }
 
 
 cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = 
 		function(doc, cdt, cdn) {
-	var query = 'SELECT name, item_name, description FROM `tabItem` WHERE name IN ( \
-		SELECT item_code FROM `tabDelivery Note Item` dnd \
-		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) \
-		AND %(key)s LIKE "%s" LIMIT 50';
-	return query;
+			return {
+				query: "stock.doctype.packing_slip.packing_slip.item_details",
+				filters:{ 'delivery_note': doc.delivery_note}
+			}
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {

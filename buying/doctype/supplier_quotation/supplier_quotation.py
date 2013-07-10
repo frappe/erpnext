@@ -94,14 +94,15 @@ def make_purchase_order(source_name, target_doclist=None):
 		}, 
 		"Supplier Quotation Item": {
 			"doctype": "Purchase Order Item", 
-			"field_map": {
-				"name": "supplier_quotation_item", 
-				"parent": "supplier_quotation", 
-				"uom": "stock_uom",
-				"prevdoc_detail_docname": "prevdoc_detail_docname",
-				"prevdoc_doctype": "prevdoc_doctype",
-				"prevdoc_docname": "prevdoc_docname",
-			},
+			"field_map": [
+				["name", "supplier_quotation_item"], 
+				["parent", "supplier_quotation"], 
+				["uom", "stock_uom"],
+				["uom", "uom"],
+				["prevdoc_detail_docname", "prevdoc_detail_docname"],
+				["prevdoc_doctype", "prevdoc_doctype"],
+				["prevdoc_docname", "prevdoc_docname"]
+			],
 			"postprocess": update_item
 		}, 
 		"Purchase Taxes and Charges": {

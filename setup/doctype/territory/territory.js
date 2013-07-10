@@ -30,11 +30,18 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 
 //get query select territory
 cur_frm.fields_dict['parent_territory'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "Yes" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.`name` !="'+doc.territory_name+'" AND `tabTerritory`.%(key)s LIKE "%s" ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters:[
+			['Territory', 'is_group', '=', 'Yes'],
+			['Territory', 'name', '!=', doc.territory_name]
+		]
+	}
 }
 
 
 // ******************** ITEM Group ******************************** 
 cur_frm.fields_dict['target_details'].grid.get_field("item_group").get_query = function(doc, cdt, cdn) {
-  return 'SELECT `tabItem Group`.`name`,`tabItem Group`.`parent_item_group` FROM `tabItem Group` WHERE `tabItem Group`.is_group="No" AND `tabItem Group`.docstatus != 2 AND `tabItem Group`.%(key)s LIKE "%s" LIMIT 50'
+	return{
+		filters:{ 'is_group': "No"}
+	}
 }

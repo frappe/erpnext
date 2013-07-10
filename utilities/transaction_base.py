@@ -274,24 +274,29 @@ class TransactionBase(StatusUpdater):
 			
 	def validate_with_previous_doc(self, source_dt, ref):
 		for key, val in ref.items():
+			is_child = val.get("is_child_table")
 			ref_doc = {}
 			for d in self.doclist.get({"doctype": source_dt}):
-				if d.fields.get(val["ref_dn_field"]):
-					ref_doc.setdefault(key, d.fields[val["ref_dn_field"]])
-
-			if val.get("is_child_table"):
-				self.compare_values(ref_doc, val["compare_fields"], d)
-			else:
+				ref_dn = d.fields.get(val["ref_dn_field"])
+				if ref_dn:
+					if is_child:
+						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
+					elif ref_dn:								
+						ref_doc.setdefault(key, [])
+						if ref_dn not in ref_doc[key]:
+							ref_doc[key].append(ref_dn)
+			if ref_doc:
 				self.compare_values(ref_doc, val["compare_fields"])
 	
 	def compare_values(self, ref_doc, fields, doc=None):
-		for ref_doctype, ref_docname in ref_doc.items():
-			prevdoc_values = webnotes.conn.get_value(ref_doctype, ref_docname, 
-				[d[0] for d in fields], as_dict=1)
-			
-			for field, condition in fields:
-				if prevdoc_values[field] is not None:
-					self.validate_value(field, condition, prevdoc_values[field], doc)
+		for ref_doctype, ref_dn_list in ref_doc.items():
+			for ref_docname in ref_dn_list:
+				prevdoc_values = webnotes.conn.get_value(ref_doctype, ref_docname, 
+					[d[0] for d in fields], as_dict=1)
+
+				for field, condition in fields:
+					if prevdoc_values[field] is not None:
+						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 def get_default_address_and_contact(party_field, party_name, fetch_shipping_address=False):
 	out = {}

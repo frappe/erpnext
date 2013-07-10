@@ -18,8 +18,10 @@ wn.provide("erpnext.hr");
 erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.setup_leave_approver_select();
-		this.frm.fields_dict.user_id.get_query = erpnext.utils.profile_query;
-		this.frm.fields_dict.reports_to.get_query = erpnext.utils.employee_query;
+		this.frm.fields_dict.user_id.get_query = function(doc,cdt,cdn) {
+				return { query:"controllers.queries.profile_query"} }
+		this.frm.fields_dict.reports_to.get_query = function(doc,cdt,cdn) {	
+			return{	query:"controllers.queries.employee_query"}	}
 	},
 	
 	onload: function() {
@@ -30,13 +32,9 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	refresh: function() {
 		var me = this;
 		erpnext.hide_naming_series();
-		if(!this.frm.doc.__islocal) {
-			cur_frm.add_custom_button('View Active Salary Structure', function() {
-				me.view_active_salary_structure(this); });
-			
+		if(!this.frm.doc.__islocal) {			
 			cur_frm.add_custom_button('Make Salary Structure', function() {
 				me.make_salary_structure(this); });
-			
 		}
 	},
 	
@@ -45,7 +43,8 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		this.frm.call({
 			method:"hr.utils.get_leave_approver_list",
 			callback: function(r) {
-				me.frm.fields_dict.employee_leave_approvers.grid.get_field("leave_approver").df.options =
+				me.frm.fields_dict.employee_leave_approvers.grid
+					.get_field("leave_approver").df.options =
 					$.map(r.message, function(profile) { 
 						return {value: profile, label: wn.user_info(profile).fullname}; 
 					});
@@ -75,9 +74,9 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 			if(r.message) {
 				msgprint(wn._("Employee") + ' "' + me.frm.doc.name + '": ' 
 					+ wn._("An active Salary Structure already exists. \
-						If you want to create new one, please ensure that no active Salary Structure \
-					 	exists for this Employee. Go to the active Salary Structure and set \
-						\"Is Active\" = \"No\""));
+						If you want to create new one, please ensure that no active \
+						Salary Structure exists for this Employee. \
+						Go to the active Salary Structure and set \"Is Active\" = \"No\""));
 			} else if(!r.exc) {
 				wn.model.map({
 					source: wn.model.get_doclist(me.frm.doc.doctype, me.frm.doc.name),

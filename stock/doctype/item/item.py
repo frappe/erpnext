@@ -51,7 +51,6 @@ class DocType(DocListController):
 		self.fill_customer_code()
 		self.check_item_tax()
 		self.validate_barcode()
-		self.check_non_asset_warehouse()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
 
@@ -185,18 +184,7 @@ class DocType(DocListController):
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
 					(self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
-					
-	def check_non_asset_warehouse(self):
-		if not self.doc.__islocal and self.doc.is_asset_item == "Yes":
-			existing_qty = webnotes.conn.sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
-			for e in existing_qty:
-				msgprint("%s Units exist in Warehouse %s, which is not an Asset Warehouse." % 
-					(e[1],e[0]))
-			if existing_qty:
-				self.doc.is_asset_item = 'No'
-				msgprint(_("""Please transfer the above quantities to an asset warehouse \
-					before changing this item to an asset item"""), raise_exception=1)
-					
+
 	def cant_change(self):
 		if not self.doc.fields.get("__islocal"):
 			vals = webnotes.conn.get_value("Item", self.doc.name, 

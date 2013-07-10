@@ -85,10 +85,10 @@ class DocType:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
 			
 	def set_bom_material_details(self):
-		for item in self.doclist.get({"parentfield": "bom_materials"}):			
-			ret = self.get_bom_material_detail({ "item_code": item.item_code, "bom_no": item.bom_no,
-				"qty": item.qty	})
-			
+		for item in self.doclist.get({"parentfield": "bom_materials"}):
+			ret = self.get_bom_material_detail({"item_code": item.item_code, "bom_no": item.bom_no, 
+				"qty": item.qty})
+
 			for r in ret:
 				if not item.fields.get(r):
 					item.fields[r] = ret[r]
@@ -100,7 +100,7 @@ class DocType:
 			args = webnotes.form_dict.get('args')
 			import json
 			args = json.loads(args)
-			
+
 		item = self.get_item_det(args['item_code'])
 		self.validate_rm_item(item)
 		

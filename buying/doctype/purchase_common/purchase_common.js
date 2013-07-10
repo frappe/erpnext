@@ -28,27 +28,37 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		if(this.frm.fields_dict.price_list_name) {
 			this.frm.set_query("price_list_name", function() {
-				return repl("select name, currency from `tabPrice List` \
-					where buying_or_selling = 'Buying' and name like \"%s%%\"");
+				return{
+					filters: { 'buying_or_selling': "Buying" }
+				}
 			});
 			
 			this.frm.set_query("price_list_currency", function() {
-				return repl("select distinct ref_currency from `tabItem Price` \
-					where price_list_name=\"%(price_list_name)s\" and buying_or_selling = 'Buying' \
-					and ref_currency like \"%s%%\"", 
-					{price_list_name: me.frm.doc.price_list_name});
+				return{
+					filters: {
+						'price_list_name': me.frm.doc.price_list_name,
+						'buying_or_selling': "Buying"
+					}					
+				}
 			});
 		}
 		
 		if(this.frm.fields_dict.supplier) {
-			this.frm.set_query("supplier", erpnext.utils.supplier_query);
+			this.frm.set_query("supplier", function() {
+				return{	query:"controllers.queries.supplier_query" }});
 		}
 		
 		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
 			if(me.frm.doc.is_subcontracted == "Yes") {
-				return erpnext.queries.item({'ifnull(tabItem.is_sub_contracted_item, "No")': "Yes"});
+				 return{
+					query:"controllers.queries.item_query",
+					filters:{ 'is_sub_contracted_item': 'Yes' }
+				}
 			} else {
-				return erpnext.queries.item({'ifnull(tabItem.is_purchase_item, "No")': "Yes"});
+				return{
+					query: "controllers.queries.item_query",
+					filters: { 'is_purchase_item': 'Yes' }
+				}				
 			}
 		});
 	},
@@ -191,7 +201,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			this.frm.call({
-				method: "buying.utils.get_conversion_factor",
+				method: "buying.utils.get_projected_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,

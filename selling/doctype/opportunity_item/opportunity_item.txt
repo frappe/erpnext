@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:51", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:26", 
+  "modified": "2013-07-10 14:54:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -38,6 +39,7 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
@@ -47,6 +49,7 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
@@ -59,6 +62,7 @@
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "in_list_view": 0, 
   "label": "Item Group", 
   "oldfieldname": "item_group", 
   "oldfieldtype": "Link", 
@@ -71,6 +75,7 @@
   "fieldname": "brand", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "in_list_view": 0, 
   "label": "Brand", 
   "oldfieldname": "brand", 
   "oldfieldtype": "Link", 
@@ -80,9 +85,26 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Quantity and Rate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "basic_rate", 
   "fieldtype": "Currency", 
   "hidden": 1, 
+  "in_list_view": 0, 
   "label": "Basic Rate", 
   "oldfieldname": "basic_rate", 
   "oldfieldtype": "Currency", 
@@ -91,16 +113,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "qty", 
-  "fieldtype": "Float", 
-  "label": "Qty", 
-  "oldfieldname": "qty", 
-  "oldfieldtype": "Currency"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "UOM", 
   "oldfieldname": "uom", 
   "oldfieldtype": "Link", 

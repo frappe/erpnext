@@ -18,10 +18,9 @@ wn.provide("erpnext.support");
 // TODO commonify this code
 erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	refresh: function() {
-		if(cur_frm.doc.docstatus==1 && (cur_frm.doc.status=='Open' || 
-			cur_frm.doc.status == 'Work In Progress')) {
-				cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
-			}
+		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
+			cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
+		}
 	}, 
 	
 	customer: function() {
@@ -65,24 +64,29 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +
-		'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{ 'customer': doc.customer}
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation \
-		FROM tabContact WHERE customer = "'	+ doc.customer +
-		'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{ 'customer': doc.customer}
+	}
 }
 
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
-	var cond = '';
-	if(doc.item_code) cond = ' AND `tabSerial No`.item_code = "'+ doc.item_code +'"';
-	if(doc.customer) cond += ' AND `tabSerial No`.customer = "' + doc.customer + '"';
-	return 'SELECT `tabSerial No`.name, `tabSerial No`.description \
-		FROM `tabSerial No` \
-		WHERE `tabSerial No`.docstatus != 2 AND `tabSerial No`.status = "Delivered" \
-		AND `tabSerial No`.name LIKE "%s" ' + cond + ' ORDER BY `tabSerial No`.name ASC LIMIT 50';
+	var cond = [];
+	var filter = [
+		['Serial No', 'docstatus', '!=', 2],
+		['Serial No', 'status', '=', "Delivered"]
+	];
+	if(doc.item_code) cond = ['Serial No', 'item_code', '=', doc.item_code];
+	if(doc.customer) cond = ['Serial No', 'customer', '=', doc.customer];
+	filter.push(cond);
+	return{
+		filters:filter
+	}
 }
 
 cur_frm.add_fetch('serial_no', 'item_code', 'item_code');
@@ -97,15 +101,16 @@ cur_frm.add_fetch('serial_no', 'delivery_address', 'customer_address');
 
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	if(doc.serial_no) {
-		return 'SELECT `tabSerial No`.item_code, `tabSerial No`.description \
-			FROM `tabSerial No` \
-			WHERE `tabSerial No`.docstatus != 2 AND `tabSerial No`.name = "' + doc.serial_no +
-			'" AND `tabSerial No`.item_code LIKE "%s" ORDER BY `tabSerial No`.item_code ASC LIMIT 50';
+		return{
+			filters:{ 'serial_no': doc.serial_no}
+		}		
 	}
 	else{
-		return 'SELECT `tabItem`.name, `tabItem`.item_name, `tabItem`.description \
-			FROM `tabItem` \
-			WHERE `tabItem`.docstatus != 2 AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.name ASC LIMIT 50';
+		return{
+			filters:[
+				['Item', 'docstatus', '!=', 2]
+			]
+		}		
 	}
 }
 
@@ -113,10 +118,10 @@ cur_frm.add_fetch('item_code', 'item_name', 'item_name');
 cur_frm.add_fetch('item_code', 'description', 'description');
 
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` \
-		FROM `tabTerritory` \
-		WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 \
-		AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters:{ 'is_group': "No"}
+	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.customer_query" } }

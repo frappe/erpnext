@@ -9,7 +9,7 @@ body {
 	background-color: #{{ doc.background_color }};
 	background-image: none;
 {% else %}
-	background-color: #edede7;
+	background-color: #ffffff;
 {% endif %}	
 {% if doc.font or doc.google_web_font_for_text %}
 	font-family: '{{ doc.google_web_font_for_text or doc.font }}', 'Helvetica Neue', Arial, Sans !important;

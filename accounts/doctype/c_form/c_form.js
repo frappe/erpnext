@@ -18,10 +18,12 @@
 // -----------------------------
 cur_frm.fields_dict.invoice_details.grid.get_field("invoice_no").get_query = function(doc) {
 	return {
-		query: "accounts.doctype.c_form.c_form.get_invoice_nos",
 		filters: {
-			customer: doc.customer,
-			company: doc.company
+			"docstatus": 1, 
+			"customer": doc.customer,
+			"company": doc.company,
+			"c_form_applicable": 'Yes',
+			"c_form_no": ''
 		}
 	}
 }

@@ -110,17 +110,23 @@ cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return {
+		filters: {'supplier': doc.supplier}
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return {
+		filters: {'supplier': doc.supplier}
+	}
 }
 
 cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return {
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}
 }
 
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){

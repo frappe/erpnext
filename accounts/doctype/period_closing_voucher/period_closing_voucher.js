@@ -23,5 +23,13 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 // ***************** Get Account Head *****************
 cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.is_pl_account = "No" AND `tabAccount`.debit_or_credit = "Credit" AND `tabAccount`.company = "'+ cstr(doc.company) +'" AND ifnull(`tabAccount`.freeze_account, "No") = "No" AND `tabAccount`.group_or_ledger = "Ledger" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name ASC LIMIT 50';
+	return{
+		filters:{
+			'is_pl_account': "No",
+			"debit_or_credit": "Credit",
+			"company": doc.company,
+			"freeze_account": "No",
+			"group_or_ledger": "Ledger"
+		}
+	}	
 }

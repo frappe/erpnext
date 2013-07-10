@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-06-11 18:27:55", 
+  "modified": "2013-07-10 14:54:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -17,6 +17,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Item Price", 
   "parentfield": "fields", 

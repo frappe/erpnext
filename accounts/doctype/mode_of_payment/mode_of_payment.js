@@ -15,8 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.set_query("default_account", function(doc) {
-	return erpnext.queries.account({
-		account_type: "Bank or Cash",
-		company: doc.company
-	});
+	return{
+		query: "controllers.queries.account_query",
+		filters: {
+			'account_type': "Bank or Cash",
+			'company': doc.company
+		}
+	}
 });

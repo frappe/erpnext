@@ -33,9 +33,67 @@ class DocType:
 		if self.doc.fields.get('__islocal') and len(self.doc.abbr) > 5:
 			webnotes.msgprint("Abbreviation cannot have more than 5 characters",
 				raise_exception=1)
-	
-	# Create default accounts
-	# ---------------------------------------------------
+
+	def on_update(self):
+		if not webnotes.conn.sql("""select name from tabAccount 
+			where company=%s and docstatus<2 limit 1""", self.doc.name):
+			self.create_default_accounts()
+			self.create_default_warehouses()
+			self.create_default_web_page()
+		
+		if not self.doc.cost_center:
+			self.create_default_cost_center()
+			
+		self.set_default_accounts()
+
+		if self.doc.default_currency:
+			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+
+	def create_default_warehouses(self):
+		for whname in ("Stores", "Work In Progress", "Finished Goods"):
+			webnotes.bean({
+				"doctype":"Warehouse",
+				"warehouse_name": whname,
+				"company": self.doc.name
+			}).insert()
+			
+	def create_default_web_page(self):
+		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
+			import os
+			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
+				webpage = webnotes.bean({
+					"doctype": "Web Page",
+					"title": self.doc.name + " Home",
+					"published": 1,
+					"description": "Standard Home Page for " + self.doc.company,
+					"main_section": webfile.read() % self.doc.fields
+				}).insert()
+			
+				# update in home page in settings
+				website_settings = webnotes.bean("Website Settings", "Website Settings")
+				website_settings.doc.home_page = webpage.doc.name
+				website_settings.doc.banner_html = """<h3 style='margin-bottom: 20px;'>""" + self.doc.name + "</h3>"
+				website_settings.doc.copyright = self.doc.name
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Home",
+					"url": webpage.doc.name
+				})
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Contact",
+					"url": "contact"
+				})
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Blog",
+					"url": "blog"
+				})
+				website_settings.save()
+
 	def create_default_accounts(self):
 		self.fld_dict = {'account_name':0,'parent_account':1,'group_or_ledger':2,'is_pl_account':3,'account_type':4,'debit_or_credit':5,'company':6,'tax_rate':7}
 		acc_list_common = [
@@ -162,32 +220,16 @@ class DocType:
 			for d in acc_list_india:
 				self.add_acc(d)
 
-	# Create account
-	# ---------------------------------------------------
 	def add_acc(self,lst):
-		ac = Document('Account')
+		account = webnotes.bean({
+			"doctype": "Account",
+			"freeze_account": "No",
+			"master_type": "",
+		})
 		for d in self.fld_dict.keys():
-			ac.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
-		ac_obj = get_obj(doc=ac)
-		ac_obj.doc.freeze_account='No'
-		ac_obj.doc.master_type = ''
-		ac_obj.validate()
-		ac_obj.doc.save(1)
-		ac_obj.on_update()
-
-
-	# Set letter head
-	# ---------------------------------------------------
-	def set_letter_head(self):
-		if not self.doc.letter_head:
-			if self.doc.address:
-				header = """ 
-<div><h3> %(comp)s </h3> %(add)s </div>
-
-			""" % {'comp':self.doc.name,
-				 'add':self.doc.address.replace("\n",'<br>')}
-			 
-				self.doc.letter_head = header
+			account.doc.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
+			
+		account.insert()
 
 	def set_default_accounts(self):
 		accounts = {
@@ -209,8 +251,6 @@ class DocType:
 		if not self.doc.stock_adjustment_cost_center:
 				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)
 
-	# Create default cost center
-	# ---------------------------------------------------
 	def create_default_cost_center(self):
 		cc_list = [
 			{
@@ -237,21 +277,6 @@ class DocType:
 			cc_bean.insert()
 			
 		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
-			
-	def on_update(self):
-		self.set_letter_head()
-
-		if not webnotes.conn.sql("""select name from tabAccount 
-			where company=%s and docstatus<2 limit 1""", self.doc.name):
-			self.create_default_accounts()
-		
-		if not self.doc.cost_center:
-			self.create_default_cost_center()
-			
-		self.set_default_accounts()
-			
-		if self.doc.default_currency:
-			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
 
 	def on_trash(self):
 		"""

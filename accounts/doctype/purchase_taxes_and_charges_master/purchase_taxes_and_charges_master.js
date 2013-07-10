@@ -127,17 +127,27 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
   refresh_field('row_id',d.name,'purchase_tax_details');
 }
 
-/*---------------------- Get rate if account_head has account_type as TAX or CHARGEABLE-------------------------------------*/
-
-cur_frm.fields_dict['purchase_tax_details'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
-  return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type in ("Tax", "Chargeable", "Expense Account") or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND tabAccount.company = "' + doc.company + '" AND  tabAccount.name LIKE "%s"'
-}
-
+cur_frm.set_query("account_head", "purchase_tax_details", function() {
+  return {
+    filters: [
+      ["Account", "group_or_ledger", "=", "Ledger"],
+      ["Account", "docstatus", "!=", 2],
+      ["Account", "account_type", "in", "Tax, Chargeable, Expense Account"],
+      ["Account", "is_pl_account", "=", "Yes"],
+      ["Account", "debit_or_credit", "=", "Debit"],
+      ["Account", "company", "=", doc.company]
+    ]
+  }
+});
 
 cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_query = function(doc) {
-	return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
+  return {
+    filters: {
+      'company_name': doc.company,
+      'group_or_ledger': "Ledger"
+    }
+  }
 }
-
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
