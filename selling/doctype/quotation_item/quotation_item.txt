@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-07-09 12:24:21", 
+  "modified": "2013-07-10 11:52:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -78,6 +78,12 @@
   "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "default": "0.00", 
@@ -216,6 +222,12 @@
   "reqd": 0, 
   "search_index": 0, 
   "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reference", 
+  "fieldtype": "Section Break", 
+  "label": "Reference"
  }, 
  {
   "doctype": "DocField", 

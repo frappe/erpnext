@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:06", 
   "docstatus": 0, 
-  "modified": "2013-07-09 11:45:00", 
+  "modified": "2013-07-10 11:55:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -77,6 +77,12 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -192,6 +198,12 @@
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse_and_reference", 
+  "fieldtype": "Section Break", 
+  "label": "Warehouse and Reference"
  }, 
  {
   "doctype": "DocField", 
