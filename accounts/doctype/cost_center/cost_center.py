@@ -28,16 +28,16 @@ class DocType(DocTypeNestedSet):
 				
 	def autoname(self):
 		company_abbr = webnotes.conn.sql("select abbr from tabCompany where name=%s", 
-			self.doc.company_name)[0][0]
+			self.doc.company)[0][0]
 		self.doc.name = self.doc.cost_center_name.strip() + ' - ' + company_abbr		
 		
 	def validate_mandatory(self):
 		if not self.doc.group_or_ledger:
 			msgprint("Please select Group or Ledger value", raise_exception=1)
 			
-		if self.doc.cost_center_name != self.doc.company_name and not self.doc.parent_cost_center:
+		if self.doc.cost_center_name != self.doc.company and not self.doc.parent_cost_center:
 			msgprint("Please enter parent cost center", raise_exception=1)
-		elif self.doc.cost_center_name == self.doc.company_name and self.doc.parent_cost_center:
+		elif self.doc.cost_center_name == self.doc.company and self.doc.parent_cost_center:
 			msgprint(_("Root cannot have a parent cost center"), raise_exception=1)
 		
 	def convert_group_to_ledger(self):
@@ -81,14 +81,14 @@ class DocType(DocTypeNestedSet):
 		"""
 			Cost Center name must be unique
 		"""
-		if (self.doc.fields.get("__islocal") or not self.doc.name) and webnotes.conn.sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
+		if (self.doc.fields.get("__islocal") or not self.doc.name) and webnotes.conn.sql("select name from `tabCost Center` where cost_center_name = %s and company=%s", (self.doc.cost_center_name, self.doc.company)):
 			msgprint("Cost Center Name already exists, please rename", raise_exception=1)
 			
 		self.validate_mandatory()
 		self.validate_budget_details()
 		
 	def on_rename(self, new, old, merge=False):
-		company_abbr = webnotes.conn.get_value("Company", self.doc.company_name, "abbr")		
+		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
 		parts = new.split(" - ")	
 
 		if parts[-1].lower() != company_abbr.lower():

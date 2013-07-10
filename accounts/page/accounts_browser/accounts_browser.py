@@ -28,16 +28,14 @@ def get_children():
 	args = webnotes.form_dict
 	ctype, company = args['ctype'], args['comp']
 	
-	company_field = ctype=='Account' and 'company' or 'company_name'
-
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
 		acc = webnotes.conn.sql(""" select 
 			name as value, if(group_or_ledger='Group', 1, 0) as expandable
 			from `tab%s`
 			where ifnull(parent_%s,'') = ''
-			and %s = %s	and docstatus<2 
-			order by name""" % (ctype, ctype.lower().replace(' ','_'), company_field, '%s'),
+			and `company` = %s	and docstatus<2 
+			order by name""" % (ctype, ctype.lower().replace(' ','_'), '%s'),
 				company, as_dict=1)
 	else:	
 		# other

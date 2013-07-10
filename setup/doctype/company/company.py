@@ -215,13 +215,13 @@ class DocType:
 		cc_list = [
 			{
 				'cost_center_name': self.doc.name,
-				'company_name':self.doc.name,
+				'company':self.doc.name,
 				'group_or_ledger':'Group',
 				'parent_cost_center':''
 			}, 
 			{
 				'cost_center_name':'Main', 
-				'company_name':self.doc.name,
+				'company':self.doc.name,
 				'group_or_ledger':'Ledger',
 				'parent_cost_center':self.doc.name + ' - ' + self.doc.abbr
 			},
@@ -266,9 +266,9 @@ class DocType:
 			webnotes.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
 			
 			#delete cost center child table - budget detail
-			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company_name = %s", self.doc.name)
+			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
 			#delete cost center
-			webnotes.conn.sql("delete from `tabCost Center` WHERE company_name = %s order by lft desc, rgt desc", self.doc.name)
+			webnotes.conn.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
 			
 		webnotes.defaults.clear_default("company", value=self.doc.name)
 			

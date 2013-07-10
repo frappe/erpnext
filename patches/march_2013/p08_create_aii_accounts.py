@@ -79,9 +79,9 @@ def add_accounts(accounts_to_add, check_fn=None):
 def add_aii_cost_center():
 	for company, abbr in webnotes.conn.sql("""select name, abbr from `tabCompany`"""):
 		if not webnotes.conn.sql("""select name from `tabCost Center` where cost_center_name = 
-				'Auto Inventory Accounting' and company_name = %s""", company):
+				'Auto Inventory Accounting' and company = %s""", company):
 			parent_cost_center = webnotes.conn.get_value("Cost Center", 
-				{"parent_cost_center['']": '', "company_name": company})
+				{"parent_cost_center['']": '', "company": company})
 				
 			if not parent_cost_center:
 				webnotes.errprint("Company " + company + "does not have a root cost center")
@@ -92,7 +92,7 @@ def add_aii_cost_center():
 				"cost_center_name": "Auto Inventory Accounting",
 				"parent_cost_center": parent_cost_center,
 				"group_or_ledger": "Ledger",
-				"company_name": company
+				"company": company
 			})
 			cc.insert()
 				

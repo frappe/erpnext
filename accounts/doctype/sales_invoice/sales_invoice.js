@@ -263,7 +263,7 @@ cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 // Write off cost center
 //-----------------------
 cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
-	return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company_name="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
+	return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
 }
 
 //project name
@@ -315,7 +315,7 @@ cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(d
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
+		filters: { company: doc.company}
 	}
 }
 

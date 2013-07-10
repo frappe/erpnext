@@ -191,7 +191,7 @@ cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
+		filters: { company: doc.company}
 	}
 }
 

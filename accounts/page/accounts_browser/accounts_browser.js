@@ -310,7 +310,7 @@ erpnext.AccountsChart = Class.extend({
 			var node = me.selected_node();
 			
 			v.parent_cost_center = node.data('label');
-			v.company_name = me.company;
+			v.company = me.company;
 			
 			wn.call({
 				args: v,

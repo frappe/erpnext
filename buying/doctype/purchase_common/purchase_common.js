@@ -221,6 +221,21 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 	
+	purchase_other_charges: function() {
+		var me = this;
+		if(this.frm.doc.purchase_other_charges) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "get_purchase_tax_details",
+				callback: function(r) {
+					if(!r.exc) {
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
+		}
+	},
+	
 	calculate_taxes_and_totals: function() {
 		this._super();
 		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");

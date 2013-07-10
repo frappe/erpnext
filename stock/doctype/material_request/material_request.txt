@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-08 16:18:00", 
+  "modified": "2013-07-09 11:39:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -81,6 +81,35 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
@@ -129,22 +158,6 @@
   "reqd": 1, 
   "search_index": 1, 
   "width": "100px"
- }, 
- {
-  "description": "Select the relevant company name if you have multiple companies", 
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "oldfieldtype": "Link", 
-  "options": "Company", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "reqd": 1, 
-  "search_index": 1, 
-  "width": "150px"
  }, 
  {
   "doctype": "DocField", 
@@ -223,19 +236,6 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amended_from", 
-  "fieldtype": "Data", 
-  "label": "Amended From", 
-  "no_copy": 1, 
-  "oldfieldname": "amended_from", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "read_only": 1, 
-  "width": "150px"
  }, 
  {
   "doctype": "DocField", 
