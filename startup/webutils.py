@@ -62,6 +62,30 @@ def update_template_args(page_name, args):
 	
 	args.url = quote(str(get_request_site_address(full_address=True)), str(""))
 	args.encoded_title = quote(encode(args.title or ""), str(""))
+	args.shopping_cart_enabled = cint(webnotes.conn.get_default("shopping_cart_enabled"))
 	
 	return args
 	
+@webnotes.whitelist()
+def update_profile(fullname, password=None, company_name=None, mobile_no=None, phone=None):
+	from website.helpers.cart import update_party
+	update_party(fullname, company_name, mobile_no, phone)
+	
+	from core.doctype.profile import profile
+	return profile.update_profile(fullname, password)
+	
+def get_profile_args():
+	from website.helpers.cart import get_lead_or_customer
+	party = get_lead_or_customer()
+	if party.doctype == "Lead":
+		mobile_no = party.mobile_no
+		phone = party.phone
+	else:
+		mobile_no, phone = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user, 
+			"customer": party.name})
+		
+	return {
+		"company_name": party.customer_name if party.doctype == "Customer" else party.company_name,
+		"mobile_no": mobile_no,
+		"phone": phone
+	}

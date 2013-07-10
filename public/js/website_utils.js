@@ -95,6 +95,8 @@ $(document).ready(function() {
 		$("#user-full-name").text(full_name);
 	}
 	
+	wn.cart.set_cart_count();
+	
 	$("#user-tools a").tooltip({"placement":"bottom"});
 	$("#user-tools-post-login a").tooltip({"placement":"bottom"});
 });
@@ -212,8 +214,16 @@ $.extend(wn.cart, {
 				callback: function(r) {
 					if(opts.callback)
 						opts.callback(r);
+					
+					wn.cart.set_cart_count();
 				}
 			});
 		}
 	},
+	
+	set_cart_count: function() {
+		var cart_count = getCookie("cart_count");
+		if(cart_count)
+			$(".cart-count").html("( "+ cart_count +" )")
+	}
 });

@@ -136,6 +136,10 @@ img {
 	padding-left: 10px;
 }
 
+fieldset {
+	margin-bottom: 20px;
+}
+
 /* buttons */
 .btn-default {
   color: #ffffff;

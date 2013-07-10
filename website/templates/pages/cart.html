@@ -13,8 +13,9 @@
 		<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
 	</div>
 	<div id="cart-container" class="hide">
-		<button class="btn btn-success pull-right" type="button">Place Order</button>
+		<button class="btn btn-success pull-right btn-place-order" type="button">Place Order</button>
 		<div class="clearfix"></div>
+		<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
 		<hr>
 		<div class="row">
 			<div class="col col-lg-9 col-sm-9">
@@ -50,7 +51,7 @@
 			</div>
 			<hr>
 		</div>
-		<button class="btn btn-success pull-right" type="button">Place Order</button>
+		<button class="btn btn-success pull-right btn-place-order" type="button">Place Order</button>
 	</div>
 </div>
 {% endblock %}

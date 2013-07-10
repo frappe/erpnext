@@ -32,6 +32,41 @@ class TransactionBase(StatusUpdater):
 		return get_default_address_and_contact(party_field, party_name,
 			fetch_shipping_address=True if self.meta.get_field("shipping_address_name") else False)
 			
+	def set_address_fields(self):
+		party_type, party_name = self.get_party_type_and_name()
+		
+		if party_type in ("Customer", "Lead"):
+			if self.doc.customer_address:
+				self.doc.address_display = get_address_display(self.doc.customer_address)
+				
+			if self.doc.shipping_address_name:
+				self.doc.shipping_address = get_address_display(self.doc.shipping_address_name)
+			
+		elif self.doc.supplier_address:
+			self.doc.address_display = get_address_display(self.doc.supplier_address)
+		
+	def set_contact_fields(self):
+		party_type, party_name = self.get_party_type_and_name()
+		
+		if party_type == "Lead":
+			contact_dict = map_lead_contact_details(party_name)
+		else:
+			contact_dict = map_party_contact_details(self.doc.contact_person, party_type, party_name)
+			
+		for fieldname, value in contact_dict.items():
+			if self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = value
+		
+	def get_party_type_and_name(self):
+		if not hasattr(self, "_party_type_and_name"):
+			for party_type in ("Lead", "Customer", "Supplier"):
+				party_field = party_type.lower()
+				if self.meta.get_field(party_field) and self.doc.fields.get(party_field):
+					self._party_type_and_name = (party_type, self.doc.fields.get(party_field))
+					break
+
+		return self._party_type_and_name
+			
 	def get_customer_defaults(self):
 		out = self.get_default_address_and_contact("customer")
 
@@ -53,12 +88,7 @@ class TransactionBase(StatusUpdater):
 			3. Clears existing Sales Team and fetches the one mentioned in Customer
 		"""
 		customer_defaults = self.get_customer_defaults()
-		
-		# hack! TODO - add shipping_address_field in Delivery Note
-		if self.doc.doctype == "Delivery Note":
-			customer_defaults["customer_address"] = customer_defaults["shipping_address_name"]
-			customer_defaults["address_display"] = customer_defaults["shipping_address"]
-			
+					
 		customer_defaults["price_list"] = customer_defaults["price_list"] or \
 			webnotes.conn.get_value("Customer Group", self.doc.customer_group, "default_price_list") or \
 			self.doc.price_list
@@ -110,91 +140,35 @@ class TransactionBase(StatusUpdater):
 	# -----------------------
 	def get_customer_address(self, args):
 		args = load_json(args)		
-		address_text, address_name = self.get_address_text(address_name=args['address'])
 		ret = {
-			'customer_address' : address_name,
-			'address_display' : address_text,
+			'customer_address' : args["address"],
+			'address_display' : get_address_display(args["address"]),
 		}
 		
-		ret.update(self.get_contact_text(contact_name=args['contact']))
-		
-		return ret	
-			
-	# Get Address Text
-	# -----------------------
-	def get_address_text(self, customer=None, address_name=None, supplier=None, is_shipping_address=None):
-		if customer:
-			cond = customer and 'customer="%s"' % customer or 'name="%s"' % address_name
-		elif supplier:
-			cond = supplier and 'supplier="%s"' % supplier or 'name="%s"' % address_name	
-		else:
-			cond = 'name="%s"' % address_name	
+		ret.update(map_party_contact_details(args['contact']))
 
-		if is_shipping_address:
-			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc, is_primary_address desc limit 1" % cond, as_dict = 1)
-		else:
-			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
-		
-		address_display = ""
-		
-		if details:
-			address_display = get_address_display(details[0])			
+		return ret
 
-		address_name = details and details[0]['name'] or ''
-		
-		return address_display, address_name
-
-	# Get Contact Text
-	# -----------------------
-	def get_contact_text(self, customer=None, contact_name=None, supplier=None):
-		if customer:
-			cond = customer and 'customer="%s"' % customer or 'name="%s"' % contact_name
-		elif supplier:
-			cond = supplier and 'supplier="%s"' % supplier or 'name="%s"' % contact_name
-		else:
-			cond = 'name="%s"' % contact_name			
-			
-		details = webnotes.conn.sql("select name, first_name, last_name, email_id, phone, mobile_no, department, designation from `tabContact` where %s and docstatus != 2 order by is_primary_contact desc limit 1" % cond, as_dict = 1)
-
-		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
-		contact_fields = [('','first_name'),(' ','last_name')]
-		contact_display = ''.join([a[0]+cstr(extract(a[1])) for a in contact_fields if extract(a[1])])
-		if contact_display.startswith('\n'): contact_display = contact_display[1:]
-		
-		return {
-			"contact_display": contact_display,
-			"contact_person": details and details[0]["name"] or "",
-			"contact_email": details and details[0]["email_id"] or "",
-			"contact_mobile": details and details[0]["mobile_no"] or "",
-			"contact_designation": details and details[0]["designation"] or "",
-			"contact_department": details and details[0]["department"] or "",
-		}
-		
 	# TODO deprecate this - used only in sales_order.js
 	def get_shipping_address(self, name):
-		details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where customer = '%s' and docstatus != 2 order by is_shipping_address desc, is_primary_address desc limit 1" %(name), as_dict = 1)
-		
-		address_display = ""
-		if details:
-			address_display = get_address_display(details[0])
-		
-		ret = {
-			'shipping_address_name' : details and details[0]['name'] or '',
-			'shipping_address' : address_display
+		shipping_address = get_default_address("customer", name, is_shipping_address=True)
+		return {
+			'shipping_address_name' : shipping_address,
+			'shipping_address' : get_address_display(shipping_address) if shipping_address else None
 		}
-		return ret
 		
 	# Get Supplier Default Primary Address - first load
 	# -----------------------
 	def get_default_supplier_address(self, args):
 		if isinstance(args, basestring):
 			args = load_json(args)
-		address_text, address_name = self.get_address_text(supplier=args['supplier'])
+			
+		address_name = get_default_address("supplier", args["supplier"])
 		ret = {
 			'supplier_address' : address_name,
-			'address_display' : address_text,
+			'address_display' : get_address_display(address_name),
 		}
-		ret.update(self.get_contact_text(supplier=args['supplier']))
+		ret.update(map_party_contact_details(None, "supplier", args["supplier"]))
 		ret.update(self.get_supplier_details(args['supplier']))
 		return ret
 		
@@ -202,12 +176,11 @@ class TransactionBase(StatusUpdater):
 	# -----------------------
 	def get_supplier_address(self, args):
 		args = load_json(args)
-		address_text, address_name = self.get_address_text(address_name=args['address'])
 		ret = {
-			'supplier_address' : address_name,
-			'address_display' : address_text,
+			'supplier_address' : args['address'],
+			'address_display' : get_address_display(args["address"]),
 		}
-		ret.update(self.get_contact_text(contact_name=args['contact']))
+		ret.update(map_party_contact_details(contact_name=args['contact']))
 		return ret
 	
 	# Get Supplier Details
@@ -317,23 +290,24 @@ class TransactionBase(StatusUpdater):
 				[d[0] for d in fields], as_dict=1)
 			
 			for field, condition in fields:
-				self.validate_value(field, condition, prevdoc_values[field], doc)
+				if prevdoc_values[field] is not None:
+					self.validate_value(field, condition, prevdoc_values[field], doc)
 
 def get_default_address_and_contact(party_field, party_name, fetch_shipping_address=False):
 	out = {}
 	
 	# get addresses
-	billing_address = get_address_dict(party_field, party_name)
+	billing_address = get_default_address(party_field, party_name)
 	if billing_address:
-		out[party_field + "_address"] = billing_address["name"]
+		out[party_field + "_address"] = billing_address
 		out["address_display"] = get_address_display(billing_address)
 	else:
 		out[party_field + "_address"] = out["address_display"] = None
 	
 	if fetch_shipping_address:
-		shipping_address = get_address_dict(party_field, party_name, is_shipping_address=True)
+		shipping_address = get_default_address(party_field, party_name, is_shipping_address=True)
 		if shipping_address:
-			out["shipping_address_name"] = shipping_address["name"]
+			out["shipping_address_name"] = shipping_address
 			out["shipping_address"] = get_address_display(shipping_address)
 		else:
 			out["shipping_address_name"] = out["shipping_address"] = None
@@ -341,39 +315,47 @@ def get_default_address_and_contact(party_field, party_name, fetch_shipping_addr
 	# get contact
 	if party_field == "lead":
 		out["customer_address"] = out.get("lead_address")
-		out.update(map_lead_fields(party_name))
+		out.update(map_lead_contact_details(party_name))
 	else:
-		out.update(map_contact_fields(party_field, party_name))
+		out.update(map_party_contact_details(None, party_field, party_name))
 	
 	return out
-
-def get_address_dict(party_field, party_name, is_shipping_address=None):
-	order_by = "is_shipping_address desc, is_primary_address desc, name asc" if \
-		is_shipping_address else "is_primary_address desc, name asc"
-
-	address = webnotes.conn.sql("""select * from `tabAddress` where `%s`=%s order by %s
-		limit 1""" % (party_field, "%s", order_by), party_name, as_dict=True,
-		update={"doctype": "Address"})
 	
-	return address[0] if address else None
-			
+def get_default_address(party_field, party_name, is_shipping_address=False):
+	if is_shipping_address:
+		order_by = "is_shipping_address desc, is_primary_address desc, name asc"
+	else:
+		order_by = "is_primary_address desc, name asc"
+		
+	address = webnotes.conn.sql("""select name from `tabAddress` where `%s`=%s order by %s
+		limit 1""" % (party_field, "%s", order_by), party_name)
+	
+	return address[0][0] if address else None
+
+def get_default_contact(party_field, party_name):
+	contact = webnotes.conn.sql("""select name from `tabContact` where `%s`=%s
+		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
+		(party_name,))
+		
+	return contact[0][0] if contact else None
+	
 def get_address_display(address_dict):
-	def _prepare_for_display(a_dict, sequence):
-		display = ""
-		for separator, fieldname in sequence:
-			if a_dict.get(fieldname):
-				display += separator + a_dict.get(fieldname)
-			
-		return display.strip()
+	if not isinstance(address_dict, dict):
+		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True)
 	
 	meta = webnotes.get_doctype("Address")
-	address_sequence = (("", "address_line1"), ("\n", "address_line2"), ("\n", "city"),
+	sequence = (("", "address_line1"), ("\n", "address_line2"), ("\n", "city"),
 		("\n", "state"), ("\n" + meta.get_label("pincode") + ": ", "pincode"), ("\n", "country"),
 		("\n" + meta.get_label("phone") + ": ", "phone"), ("\n" + meta.get_label("fax") + ": ", "fax"))
 	
-	return _prepare_for_display(address_dict, address_sequence)
+	display = ""
+	for separator, fieldname in sequence:
+		if address_dict.get(fieldname):
+			display += separator + address_dict.get(fieldname)
+		
+	return display.strip()
 	
-def map_lead_fields(party_name):
+def map_lead_contact_details(party_name):
 	out = {}
 	for fieldname in ["contact_display", "contact_email", "contact_mobile", "contact_phone"]:
 		out[fieldname] = None
@@ -390,15 +372,19 @@ def map_lead_fields(party_name):
 
 	return out
 
-def map_contact_fields(party_field, party_name):
+def map_party_contact_details(contact_name=None, party_field=None, party_name=None):
 	out = {}
 	for fieldname in ["contact_person", "contact_display", "contact_email",
 		"contact_mobile", "contact_phone", "contact_designation", "contact_department"]:
 			out[fieldname] = None
 	
+	if not contact_name:
+		contact_name = get_default_contact(party_field, party_name)
+
 	contact = webnotes.conn.sql("""select * from `tabContact` where `%s`=%s
 		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
 		(party_name,), as_dict=True)
+
 	if contact:
 		contact = contact[0]
 		out.update({

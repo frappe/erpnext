@@ -664,11 +664,15 @@ class DocType(StockController):
 		return result and result[0] or {}
 		
 	def get_cust_addr(self):
+		from utilities.transaction_base import get_default_address, get_address_display
 		res = sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
-		addr = self.get_address_text(customer = self.doc.customer)
+		address_display = None
+		customer_address = get_default_address("customer", self.doc.customer)
+		if customer_address:
+			address_display = get_address_display(customer_address)
 		ret = { 
 			'customer_name'		: res and res[0][0] or '',
-			'customer_address' : addr and addr[0] or ''}
+			'customer_address' : address_display}
 
 		return ret
 
@@ -681,12 +685,17 @@ class DocType(StockController):
 		return result and result[0] or {}
 		
 	def get_supp_addr(self):
+		from utilities.transaction_base import get_default_address, get_address_display
 		res = sql("""select supplier_name from `tabSupplier`
 			where name=%s""", self.doc.supplier)
-		addr = self.get_address_text(supplier = self.doc.supplier)
+		address_display = None
+		supplier_address = get_default_address("customer", self.doc.customer)
+		if supplier_address:
+			address_display = get_address_display(supplier_address)	
+		
 		ret = {
 			'supplier_name' : res and res[0][0] or '',
-			'supplier_address' : addr and addr[0] or ''}
+			'supplier_address' : address_display }
 		return ret
 		
 	def validate_with_material_request(self):
