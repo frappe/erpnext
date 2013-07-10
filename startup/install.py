@@ -10,9 +10,9 @@ def pre_import():
 	
 def make_modules():
 	modules = [
-		" Home", " System", " Utilities", " Website", " Setup",
-		" Selling", " Buying", " Projects", " Accounts", " Stock",
-		" Support", " HR", " Manufacturing"]
+		"Home", "System", "Utilities", "Website", "Setup",
+		"Selling", "Buying", "Projects", "Accounts", "Stock",
+		"Support", "HR", "Manufacturing"]
 	
 	for m in modules:
 		doc = webnotes.doc(fielddata = {
@@ -135,19 +135,7 @@ def import_defaults():
 			
 		# supplier type
 		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
-		
-		# warehouse type
-		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
-		{'doctype': 'Warehouse Type', 'name': 'Fixed Asset', 'warehouse_type': 'Fixed Asset'},
-		{'doctype': 'Warehouse Type', 'name': 'Reserved', 'warehouse_type': 'Reserved'},
-		{'doctype': 'Warehouse Type', 'name': 'Rejected', 'warehouse_type': 'Rejected'},
-		{'doctype': 'Warehouse Type', 'name': 'Sample', 'warehouse_type': 'Sample'},
-		{'doctype': 'Warehouse Type', 'name': 'Stores', 'warehouse_type': 'Stores'},
-		{'doctype': 'Warehouse Type', 'name': 'WIP Warehouse', 'warehouse_type': 'WIP Warehouse'},
-		
-		# warehouse 
-		{'doctype': 'Warehouse', 'warehouse_name': 'Default Warehouse', 'name': 'Default Warehouse', 'warehouse_type': 'Default Warehouse Type'},
-			
+
 		# Workstation
 		{'doctype': 'Workstation', 'name': 'Default Workstation', 'workstation_name': 'Default Workstation', 'warehouse': 'Default Warehouse'},
 		
@@ -157,11 +145,7 @@ def import_defaults():
 		# UOM
 		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit'}, 
 		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box'}, 
-		{'uom_name': 'Ft', 'doctype': 'UOM', 'name': 'Ft'}, 
 		{'uom_name': 'Kg', 'doctype': 'UOM', 'name': 'Kg'}, 
-		{'uom_name': 'Ltr', 'doctype': 'UOM', 'name': 'Ltr'}, 
-		{'uom_name': 'Meter', 'doctype': 'UOM', 'name': 'Meter'}, 
-		{'uom_name': 'Mtr', 'doctype': 'UOM', 'name': 'Mtr'}, 
 		{'uom_name': 'Nos', 'doctype': 'UOM', 'name': 'Nos'}, 
 		{'uom_name': 'Pair', 'doctype': 'UOM', 'name': 'Pair'}, 
 		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set'}, 

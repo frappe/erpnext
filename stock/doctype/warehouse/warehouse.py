@@ -47,15 +47,7 @@ class DocType:
 			bin_obj = get_obj('Bin', bin)
 		return bin_obj
 	
-
-	def validate_asset(self, item_code):
-		if webnotes.conn.get_value("Item", item_code, "is_asset_item") == 'Yes' \
-				and self.doc.warehouse_type != 'Fixed Asset':
-			msgprint("""Fixed Asset Item %s can only be transacted in a 
-				Fixed Asset type Warehouse""" % item_code, raise_exception=1)
-
 	def update_bin(self, args):
-		self.validate_asset(args.get("item_code"))
 		is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
 		if is_stock_item == 'Yes':
 			bin = self.get_bin(args.get("item_code"))
@@ -68,14 +60,7 @@ class DocType:
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
-		if not self.doc.warehouse_type:
-			msgprint("Warehouse Type is Mandatory", raise_exception=1)
-			
-		wt = sql("select warehouse_type from `tabWarehouse` where name ='%s'" % self.doc.name)
-		if wt and cstr(self.doc.warehouse_type) != cstr(wt[0][0]):
-			sql("""update `tabStock Ledger Entry` set warehouse_type = %s 
-				where warehouse = %s""", (self.doc.warehouse_type, self.doc.name))
-	
+
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
 		

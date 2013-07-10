@@ -222,9 +222,6 @@ class DocType:
 
 	def make_entry(self, args):
 		args.update({"doctype": "Stock Ledger Entry"})
-		if args.get("warehouse"):
-			args["warehouse_type"] = webnotes.conn.get_value('Warehouse' , args["warehouse"],
-				'warehouse_type')
 		sle = webnotes.bean([args])
 		sle.ignore_permissions = 1
 		sle.insert()

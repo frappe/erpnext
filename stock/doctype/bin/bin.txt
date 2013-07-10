@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:25", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:04", 
+  "modified": "2013-07-10 18:32:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -51,15 +51,6 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "warehouse_type", 
-  "fieldtype": "Data", 
-  "in_list_view": 1, 
-  "label": "Warehouse Type", 
-  "oldfieldname": "warehouse_type", 
-  "oldfieldtype": "Data"
  }, 
  {
   "doctype": "DocField", 
