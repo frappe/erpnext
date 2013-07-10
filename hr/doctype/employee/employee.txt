@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:36:19", 
+  "modified": "2013-07-10 12:52:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,7 +31,9 @@
   "parent": "Employee", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -55,7 +57,7 @@
   "doctype": "DocField", 
   "fieldname": "image_view", 
   "fieldtype": "Image", 
-  "in_list_view": 1, 
+  "in_list_view": 0, 
   "label": "Image View", 
   "options": "image"
  }, 
@@ -564,6 +566,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break6", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "marital_status", 
   "fieldtype": "Select", 
   "label": "Marital Status", 
@@ -575,12 +583,6 @@
   "fieldtype": "Select", 
   "label": "Blood Group", 
   "options": "\nA+\nA-\nB+\nB-\nAB+\nAB-\nO+\nO-"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break6", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
  }, 
  {
   "description": "Here you can maintain family details like name and occupation of parent, spouse and children", 
@@ -748,17 +750,6 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "match": "employee", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Employee", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
   "role": "Employee", 
   "write": 0
  }, 
@@ -767,8 +758,6 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "match": "company", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "HR User", 
   "write": 1
  }, 
@@ -776,27 +765,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "HR Manager", 
   "write": 1
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "HR User", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "HR Manager", 
-  "write": 0
  }
 ]

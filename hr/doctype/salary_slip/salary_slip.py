@@ -21,7 +21,7 @@ from webnotes.utils import add_days, cint, cstr, flt, getdate
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
@@ -64,12 +64,6 @@ class DocType(TransactionBase):
 
 		from hr.doctype.salary_structure.salary_structure import make_salary_slip
 		make_salary_slip(struct, self.doclist)
-
-		basic_info = sql("select bank_name, bank_ac_no, esic_card_no, pf_number from `tabEmployee` where name ='%s'" % self.doc.employee)
-		self.doc.bank_name = basic_info[0][0]
-		self.doc.bank_account_no = basic_info[0][1]
-		self.doc.esic_no = basic_info[0][2]
-		self.doc.pf_no = basic_info[0][3]
 
 
 	def get_leave_details(self, lwp=None):
