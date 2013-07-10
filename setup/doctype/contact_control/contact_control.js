@@ -24,7 +24,11 @@ cur_frm.cscript.country = function(doc, dt, dn) {
 // ---------------------------
 if(cur_frm.fields_dict['territory']){
 	cur_frm.fields_dict['territory'].get_query = function(doc,dt,dn) {
-		return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
+		return {
+			filters: {
+				'is_group': "No" 
+			}
+		}
 	}
 }
 

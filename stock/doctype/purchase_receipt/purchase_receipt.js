@@ -116,11 +116,15 @@ cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{ 'supplier': doc.supplier}
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{ 'supplier': doc.supplier}
+	}
 }
 
 cur_frm.cscript.new_contact = function(){
@@ -131,15 +135,19 @@ cur_frm.cscript.new_contact = function(){
 }
 
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}
 }
 
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.item_code){
-		return "SELECT tabBatch.name, tabBatch.description FROM tabBatch WHERE tabBatch.docstatus != 2 AND tabBatch.item = '"+ d.item_code +"' AND `tabBatch`.`name` like '%s' ORDER BY `tabBatch`.`name` DESC LIMIT 50"
+		return{
+			filters:{'item': d.item_code}
+		}
 	}
 	else{
 		alert("Please enter Item Code.");
@@ -156,11 +164,19 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Print Heading', 'docstatus', '!=', '2']
+		]
+	}
 }
 
 cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
-	return 'SELECT `tabQuality Inspection`.name FROM `tabQuality Inspection` WHERE `tabQuality Inspection`.docstatus = 1 AND `tabQuality Inspection`.%(key)s LIKE "%s"';
+	return {
+		filters: {
+			'docstatus': 1
+		}
+	}
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

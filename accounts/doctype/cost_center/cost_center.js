@@ -36,11 +36,25 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 //Account filtering for cost center
 cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = function(doc) {
 	var mydoc = locals[this.doctype][this.docname];
-	return 'SELECT DISTINCT `tabAccount`.`name`,`tabAccount`.debit_or_credit,`tabAccount`.group_or_ledger FROM `tabAccount` WHERE `tabAccount`.`company` = "' + doc.company + '" AND `tabAccount`.docstatus != 2 AND `tabAccount`.`is_pl_account` = "Yes" AND `tabAccount`.debit_or_credit = "Debit" AND `tabAccount`.`group_or_ledger` != "Group" AND `tabAccount`.`group_or_ledger` is not NULL AND `tabAccount`.`name` LIKE "%s" ORDER BY `tabAccount`.`name` LIMIT 50';
+	return{
+		filters:[
+			['Account', 'company', '=', doc.company_name],
+			['Account', 'is_pl_account', '=', 'Yes'],
+			['Account', 'debit_or_credit', '=', 'Debit'],
+			['Account', 'group_or_ledger', '!=', 'Group'],
+			['Account', 'group_or_ledger', 'is not', 'NULL']
+		]
 	}
+}
 
 cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
-	return 'SELECT DISTINCT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Group" AND `tabCost Center`.docstatus != 2 AND `tabCost Center`.company="'+ doc.company+'" AND `tabCost Center`.company is not NULL AND `tabCost Center`.name LIKE "%s" ORDER BY `tabCost Center`.name LIMIT 50';
+	return{
+		filters:[			
+			['Cost Center', 'group_or_ledger', '=', 'Group'],
+			['Cost Center', 'company', '=', doc.company_name],
+			['Cost Center', 'company_name', 'is not', 'NULL']
+		]
+	}
 }
 
 //parent cost center

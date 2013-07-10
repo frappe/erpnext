@@ -154,12 +154,12 @@ cur_frm.cscript.new_contact = function(){
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
-	var cond = '';
-	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	return repl('SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND %(cond)s `tabProject`.name LIKE "%s" \
-		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+	return {
+		query: "controllers.queries.get_project_name",
+		filters: {
+			'customer': doc.customer
+		}
+	}
 }
 
 cur_frm.cscript['Stop Sales Order'] = function() {
@@ -193,7 +193,9 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 }
 
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters:{ 'is_group': "No"}
+	}
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

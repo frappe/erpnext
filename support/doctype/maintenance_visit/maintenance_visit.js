@@ -93,15 +93,21 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+    	filters:{'customer': doc.customer}
+  	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+  	return{
+    	filters:{'customer': doc.customer}
+  	}
 }
 
 cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+	return{
+    	filters:{ 'is_service_item': "Yes"}
+  	}
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
@@ -112,4 +118,15 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+//get query select Territory
+cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
+  	return{
+    	filters:{
+      		'is_group': "No"
+    	}
+  	}
+}
+
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return {query: "controllers.queries.customer_query" }
+}

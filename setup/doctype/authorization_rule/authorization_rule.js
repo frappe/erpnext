@@ -81,20 +81,22 @@ cur_frm.cscript.transaction = function(doc,cdt,cdn){
 }
 
 
-cur_frm.fields_dict.system_user.get_query = erpnext.utils.profile_query;
+cur_frm.fields_dict.system_user.get_query = function(doc,cdt,cdn) {
+  return{ query:"controllers.queries.profile_query" } }
 
-cur_frm.fields_dict.approving_user.get_query = erpnext.utils.profile_query;
+cur_frm.fields_dict.approving_user.get_query = function(doc,cdt,cdn) {
+  return{ query:"controllers.queries.profile_query" } }
+
+cur_frm.fields_dict['approving_role'].get_query = cur_frm.fields_dict['system_role'].get_query;
 
 // System Role Trigger
 // -----------------------
 cur_frm.fields_dict['system_role'].get_query = function(doc) {
-  return 'SELECT tabRole.name FROM tabRole WHERE tabRole.name not in ("Administrator","Guest","All") AND tabRole.%(key)s LIKE "%s" LIMIT 50'
-}
-
-// Approving Role Trigger
-// -----------------------
-cur_frm.fields_dict['approving_role'].get_query = function(doc) {
-  return 'SELECT tabRole.name FROM tabRole WHERE tabRole.name not in ("Administrator","Guest","All") AND tabRole.%(key)s LIKE "%s" LIMIT 50'
+  return{
+    filters:[
+      ['Role', 'name', 'not in', 'Administrator, Guest, All']
+    ]
+  }
 }
 
 
@@ -102,11 +104,24 @@ cur_frm.fields_dict['approving_role'].get_query = function(doc) {
 // --------------------
 cur_frm.fields_dict['master_name'].get_query = function(doc){
   if(doc.based_on == 'Customerwise Discount')
-    return 'SELECT `tabCustomer`.`name` FROM `tabCustomer` WHERE `tabCustomer`.docstatus !=2 and `tabCustomer`.`name` LIKE "%s" ORDER BY `tabCustomer`.`name` DESC LIMIT 50';
+    return {
+	  doctype: "Customer",
+      filters:[
+        ['Customer', 'docstatus', '!=', 2]
+      ]
+    }
   else if(doc.based_on == 'Itemwise Discount')
-    return 'SELECT `tabItem`.`name` FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) and `tabItem`.is_sales_item = "Yes" and tabItem.%(key)s LIKE "%s" ORDER BY `tabItem`.`name` DESC LIMIT 50';
+    return {
+	  doctype: "Item",
+      query: "controllers.queries.item_query"
+    }
   else
-    return 'SELECT `tabItem`.`name` FROM `tabItem` WHERE `tabItem`.`name` = "cheating done to avoid null" ORDER BY `tabItem`.`name` DESC LIMIT 50';
+    return {
+      filters: [
+        ['Item', 'name', '=', 'cheating done to avoid null']
+      ]
+    }
 }
 
-cur_frm.fields_dict.to_emp.get_query = erpnext.utils.employee_query;
+cur_frm.fields_dict.to_emp.get_query = function(doc,cdt,cdn) {
+  return{ query:"controllers.queries.employee_query" } }

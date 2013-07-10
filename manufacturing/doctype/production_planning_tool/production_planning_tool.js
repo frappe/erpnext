@@ -53,11 +53,18 @@ cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = functi
 cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
 	if (d.item_code) {
-		return erpnext.queries.bom({item: cstr(d.item_code)});
+		return {
+			query:"controllers.queries.bom",
+			filters:{'item': cstr(d.item_code)}
+		}
 	} else msgprint(" Please enter Item first");
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.customer_query"
+	}
+}
 
 cur_frm.fields_dict.pp_so_details.grid.get_field("customer").get_query =
-	erpnext.utils.customer_query;
+	cur_frm.fields_dict.customer.get_query;

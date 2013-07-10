@@ -124,6 +124,7 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 cur_frm.fields_dict['master_name'].get_query = function(doc) {
 	if (doc.master_type) {
 		return {
+			doctype: doc.master_type,
 			query: "accounts.doctype.account.account.get_master_name",
 			filters: {	"master_type": doc.master_type }
 		}
@@ -132,7 +133,9 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
-		query: "accounts.doctype.account.account.get_parent_account",
-		filters: { "company": doc.company}
+		filters: {
+			"group_or_ledger": "Group", 
+			"company": doc.company
+		}
 	}
 }

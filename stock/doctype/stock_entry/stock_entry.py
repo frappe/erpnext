@@ -25,6 +25,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from stock.utils import get_incoming_rate
 from stock.stock_ledger import get_previous_sle
+from controllers.queries import get_match_cond
 import json
 
 sql = webnotes.conn.sql
@@ -709,24 +710,31 @@ def get_production_order_details(production_order):
 	return result and result[0] or {}
 	
 def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
 	conditions = ""
 	if doctype == "Sales Invoice":
 		conditions = "and update_stock=1"
 	
 	return webnotes.conn.sql("""select name, customer, customer_name
 		from `tab%s` where docstatus = 1
-		and (`%s` like %%(txt)s or `customer` like %%(txt)s) %s
+			and (`%s` like %%(txt)s 
+				or `customer` like %%(txt)s) %s %s
 		order by name, customer, customer_name
-		limit %s""" % (doctype, searchfield, conditions, "%(start)s, %(page_len)s"),
-		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, as_list=True)
+		limit %s""" % (doctype, searchfield, conditions, 
+		get_match_cond(doctype, searchfield), "%(start)s, %(page_len)s"), 
+		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, 
+		as_list=True)
 	
 def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
 	return webnotes.conn.sql("""select name, supplier, supplier_name
 		from `tab%s` where docstatus = 1
-		and (`%s` like %%(txt)s or `supplier` like %%(txt)s)
+			and (`%s` like %%(txt)s 
+				or `supplier` like %%(txt)s) %s
 		order by name, supplier, supplier_name
-		limit %s""" % (doctype, searchfield, "%(start)s, %(page_len)s"),
-		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, as_list=True)
+		limit %s""" % (doctype, searchfield, get_match_cond(doctype, searchfield), 
+		"%(start)s, %(page_len)s"),	{"txt": "%%%s%%" % txt, "start": 
+		start, "page_len": page_len}, as_list=True)
 		
 def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 	txt = txt.replace("%", "")
@@ -751,6 +759,26 @@ def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 					result.append(val)
 
 	return result[start:start+page_len]
+
+def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
+			where item_code = '%(item_code)s' 
+				and warehouse = '%(s_warehouse)s'
+				and ifnull(is_cancelled, 'No') = 'No' 
+				and batch_no like '%(txt)s' 
+				and exists(select * from `tabBatch` 
+						where name = sle.batch_no 
+							and expiry_date >= %(posting_date)s 
+							and docstatus != 2) 
+			%(mcond)s
+			group by batch_no having sum(actual_qty) > 0 
+			order by batch_no desc 
+			limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'], 
+			's_warehouse': filters['s_warehouse'], 'posting_date': filters['posting_date'], 
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+			"start": start, "page_len": page_len})
 
 def get_stock_items_for_return(ref_doclist, parentfields):
 	"""return item codes filtered from doclist, which are stock items"""

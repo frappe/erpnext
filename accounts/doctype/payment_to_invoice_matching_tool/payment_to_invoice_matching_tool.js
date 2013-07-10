@@ -36,25 +36,15 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	// TO-do: check for pos, it should not come
 	if (!doc.account) msgprint("Please select Account first");
 	else {
-		return repl("select gle.voucher_no, gle.posting_date, gle.%(account_type)s \
-		    from `tabGL Entry` gle \
-		    where gle.account = '%(acc)s' \
-		    and gle.voucher_type = '%(dt)s' \
-			and gle.voucher_no like '%s' \
-		    and ifnull(gle.is_cancelled, 'No') = 'No' \
-		    and (ifnull(gle.against_voucher, '') = '' \
-		        or ifnull(gle.against_voucher, '') = gle.voucher_no ) \
-			and ifnull(gle.%(account_type)s, 0) > 0 \
-		    and (select ifnull(abs(sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))), 0) \
-				from `tabGL Entry` \
-		        where against_voucher_type = '%(dt)s' \
-		        and against_voucher = gle.voucher_no \
-		        and voucher_no != gle.voucher_no \
-				and account = gle.account \
-		        and ifnull(is_cancelled, 'No') = 'No') != \
-		        abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)) \
-		    ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50", 
-			{dt:doc.voucher_type, acc:doc.account, account_type: doc.account_type});
+		return {
+			doctype: doc.voucher_type,
+			query: "accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
+			filters: {
+				"dt": doc.voucher_type,
+				"acc": doc.account,
+				"account_type": doc.account_type 
+			}
+		}		
 	}
 }
 
