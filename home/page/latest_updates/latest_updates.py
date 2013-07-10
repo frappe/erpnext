@@ -19,6 +19,7 @@ def make():
 					last_commit["author"] = l[8:-1]
 				if l.startswith("    "):
 					last_commit["message"] = l[4:-1]
+
 			if l.startswith("commit"):
 				last_commit = {
 					"repo": repo,
@@ -29,12 +30,12 @@ def make():
 	os.chdir("lib")
 	logs = []
 	out_lib = tempfile.TemporaryFile()
-	subprocess.call("git --no-pager log -n 200", shell=True, stdout=out_lib)
+	subprocess.call("git --no-pager log -n 200 --no-color", shell=True, stdout=out_lib)
 	add_to_logs(out_lib, "lib")
 
 	os.chdir("../app")
 	out_app = tempfile.TemporaryFile()
-	subprocess.call("git --no-pager log -n 200", shell=True, stdout=out_app)
+	subprocess.call("git --no-pager log -n 200 --no-color", shell=True, stdout=out_app)
 	add_to_logs(out_app, "app")
 	
 	logs.sort(key=lambda a: a["datetime"], reverse=True)
