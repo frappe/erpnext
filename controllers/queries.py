@@ -29,7 +29,7 @@ def get_filters_cond(doctype, filters, conditions):
 					flt.append([doctype, f[0], '=', f[1]])
 		
 		from webnotes.widgets.reportview import build_filter_conditions
-		build_filter_conditions(filters, conditions)
+		build_filter_conditions(flt, conditions)
 		cond = ' and ' + ' and '.join(conditions)	
 	else:
 		cond = ''
