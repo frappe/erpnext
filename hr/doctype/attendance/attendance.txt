@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:25:19", 
+  "modified": "2013-07-10 17:39:22", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -25,6 +25,7 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -33,6 +34,8 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
+  "submit": 1, 
   "write": 1
  }, 
  {
@@ -80,6 +83,7 @@
   "oldfieldtype": "Data"
  }, 
  {
+  "default": "Present", 
   "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
@@ -157,15 +161,15 @@
   "read_only": 1
  }, 
  {
-  "cancel": 1, 
   "doctype": "DocPerm", 
-  "report": 1, 
-  "role": "HR User", 
-  "submit": 1
+  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 
-  "match": "owner", 
-  "role": "Employee"
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

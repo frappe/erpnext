@@ -23,9 +23,14 @@ wn.module_page["HR"] = [
 				doctype:"Expense Claim"
 			},
 			{
-				label: wn._("Job Applicant"),
-				description: wn._("Applicant for a Job."),
-				doctype:"Job Applicant"
+				label: wn._("Salary Slip"),
+				description: wn._("Monthly salary statement."),
+				doctype:"Salary Slip"
+			},
+			{
+				label: wn._("Attendance"),
+				description: wn._("Attendance record."),
+				doctype:"Attendance"
 			},
 		]
 	},
@@ -34,14 +39,9 @@ wn.module_page["HR"] = [
 		icon: "icon-copy",
 		items: [
 			{
-				label: wn._("Attendance"),
-				description: wn._("Attendance record."),
-				doctype:"Attendance"
-			},
-			{
-				label: wn._("Salary Slip"),
-				description: wn._("Monthly salary statement."),
-				doctype:"Salary Slip"
+				label: wn._("Job Applicant"),
+				description: wn._("Applicant for a Job."),
+				doctype:"Job Applicant"
 			},
 			{
 				label: wn._("Appraisal"),
