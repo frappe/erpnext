@@ -46,9 +46,9 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		
 			this.frm.fields_dict["expense_account"].get_query = function() {
 				return {
-					"query": "accounts.utils.get_account_list", 
 					"filters": {
-						"company": me.frm.doc.company
+						'company': me.frm.doc.company,
+						'group_or_ledger': 'Ledger'
 					}
 				}
 			}

@@ -15,7 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.fields_dict['item'].get_query = function(doc, cdt, cdn) {
-	return erpnext.queries.item({
-		'ifnull(tabItem.is_stock_item, "No")': 'Yes'
-	})
+	return {
+		query:"controllers.queries.item_query",
+		filters:{
+			'is_stock_item': 'Yes'	
+		}
+	}	
 }

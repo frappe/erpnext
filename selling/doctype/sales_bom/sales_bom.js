@@ -24,9 +24,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict.new_item_code.get_query = function() {
-	return 'select name, description from tabItem where is_stock_item="No" and is_sales_item="Yes"\
-		and name not in (select name from `tabSales BOM`)\
-		and `%(key)s` like "%s"'
+	return{
+		query: "selling.doctype.sales_bom.sales_bom.get_new_item_code"
+	}
 }
 cur_frm.fields_dict.new_item_code.query_description = 'Select Item where "Is Stock Item" is "No" \
 	and "Is Sales Item" is "Yes" and there is no other Sales BOM';

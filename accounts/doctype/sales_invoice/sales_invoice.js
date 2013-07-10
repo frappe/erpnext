@@ -249,55 +249,84 @@ cur_frm.cscript.make_bank_voucher = function() {
 }
 
 cur_frm.fields_dict.debit_to.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters: {
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters: {
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
 }
 
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.is_pl_account = "Yes" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'debit_or_credit': 'Debit',
+			'is_pl_account': 'Yes',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
 }
 
 // Write off cost center
 //-----------------------
 cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
-	return 'SELECT `tabCost Center`.name FROM `tabCost Center` WHERE `tabCost Center`.group_or_ledger="Ledger" AND `tabCost Center`.docstatus!=2 AND `tabCost Center`.company="'+doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'group_or_ledger': 'Ledger',
+			'company_name': doc.company
+		}
+	}	
 }
 
 //project name
 //--------------------------
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
-	var cond = '';
-	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	return repl('SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND %(cond)s `tabProject`.name LIKE "%s" \
-		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+	return{
+		query: "controllers.queries.get_project_name",
+		filters: {'customer': doc.customer}
+	}	
 }
 
 //Territory
 //-----------------------------
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters: {'is_group': 'NO'}
+	}	
 }
 
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "entries", function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';	
-})
+	return{
+		query: "accounts.doctype.sales_invoice.sales_invoice.get_income_account",
+		filters: {'company': doc.company}
+	}
+});
 
 // expense account
 if (sys_defaults.auto_inventory_accounting) {
 	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
-			"query": "accounts.utils.get_account_list", 
-			"filters": {
-				"is_pl_account": "Yes",
-				"debit_or_credit": "Debit",
-				"company": doc.company
+			filters: {
+				'is_pl_account': 'Yes',
+				'debit_or_credit': 'Debit',
+				'company': doc.company,
+				'group_or_ledger': 'Ledger'
 			}
 		}
 	}
@@ -307,15 +336,22 @@ if (sys_defaults.auto_inventory_accounting) {
 //----------------------------
 cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	return "SELECT `tabBin`.`warehouse`, `tabBin`.`actual_qty` FROM `tabBin` WHERE `tabBin`.`item_code` = '"+ d.item_code +"' AND ifnull(`tabBin`.`actual_qty`,0) > 0 AND `tabBin`.`warehouse` like '%s' ORDER BY `tabBin`.`warehouse` DESC LIMIT 50";
+	return{
+		filters:[
+			['Bin', 'item_code', '=', d.item_code],
+			['Bin', 'actual_qty', '>', 0]
+		]
+	}	
 }
 
 // Cost Center in Details Table
 // -----------------------------
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company: doc.company}
+		filters: { 
+			'company': doc.company,
+			'group_or_ledger': 'Ledger'
+		}	
 	}
 }
 

@@ -122,8 +122,14 @@ cur_frm.cscript.make_contact = function() {
 }
 
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
-	return 'SELECT `tabCustomer Group`.`name`, `tabCustomer Group`.`parent_customer_group` FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "No" AND `tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" ORDER BY	`tabCustomer Group`.`name` ASC LIMIT 50';
+	return{
+		filters:{'is_group': 'No'}
+	}	
 }
 
 
-cur_frm.fields_dict.lead_name.get_query = erpnext.utils.lead_query;
+cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.lead_query"
+	}
+}

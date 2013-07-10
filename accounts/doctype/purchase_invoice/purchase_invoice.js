@@ -152,30 +152,55 @@ cur_frm.cscript.make_bank_voucher = function() {
 
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{'supplier':  doc.supplier}
+	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return{
+		filters:{'supplier':  doc.supplier}
+	}	
 }
 
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	return erpnext.queries.item({
-		'ifnull(tabItem.is_purchase_item, "No")': 'Yes'
-	})
+	return {
+		query:"controllers.queries.item_query",
+		filters:{
+			'is_purchase_item': 'Yes'	
+		}
+	}	 
 }
 
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Credit" AND tabAccount.is_pl_account="No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
+	return{
+		filters:{
+			'debit_or_credit': 'Credit',
+			'is_pl_account': 'No',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
 }
 
 // Get Print Heading
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
+return{
+		filters:[
+			['Print Heading', 'docstatus', '!=', 2]
+		]
+	}	
 }
 
 cur_frm.fields_dict['entries'].grid.get_field("expense_head").get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Debit" OR tabAccount.account_type = "Expense Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
+	return{
+		filters:{
+			'debit_or_credit':'Debit',
+			'account_type': 'Expense Account',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}	
 }
 cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
@@ -190,8 +215,11 @@ cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company: doc.company}
+		filters: { 
+			'company_name': doc.company,
+			'group_or_ledger': 'Ledger'
+		}
+
 	}
 }
 
@@ -232,9 +260,11 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}	
 }
 
 
