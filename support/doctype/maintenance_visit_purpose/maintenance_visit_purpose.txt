@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:06", 
   "docstatus": 0, 
-  "modified": "2013-07-10 12:58:21", 
+  "modified": "2013-07-10 14:54:10", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -29,6 +29,7 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -38,6 +39,7 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
@@ -47,6 +49,7 @@
   "doctype": "DocField", 
   "fieldname": "serial_no", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Serial No", 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Small Text"
@@ -55,6 +58,7 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
@@ -66,12 +70,14 @@
   "doctype": "DocField", 
   "fieldname": "work_details", 
   "fieldtype": "Section Break", 
+  "in_list_view": 0, 
   "label": "Work Details"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "service_person", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Sales Person", 
   "oldfieldname": "service_person", 
   "oldfieldtype": "Link", 
@@ -82,6 +88,7 @@
   "doctype": "DocField", 
   "fieldname": "work_done", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Work Done", 
   "oldfieldname": "work_done", 
   "oldfieldtype": "Small Text", 

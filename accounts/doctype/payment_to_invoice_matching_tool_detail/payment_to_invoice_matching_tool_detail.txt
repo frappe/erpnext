@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:26", 
+  "modified": "2013-07-10 14:54:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
   "doctype": "DocField", 
   "fieldname": "voucher_no", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Voucher No", 
   "options": "Journal Voucher", 
   "print_width": "140px", 
@@ -39,6 +40,7 @@
   "doctype": "DocField", 
   "fieldname": "amt_due", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Unmatched Amount", 
   "options": "Company:company:default_currency", 
   "read_only": 1
@@ -47,6 +49,7 @@
   "doctype": "DocField", 
   "fieldname": "amt_to_be_reconciled", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Allocated Amount", 
   "options": "Company:company:default_currency", 
   "reqd": 1
@@ -55,6 +58,7 @@
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
+  "in_list_view": 1, 
   "label": "Posting Date", 
   "read_only": 1
  }, 
@@ -62,6 +66,7 @@
   "doctype": "DocField", 
   "fieldname": "total_amt", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Total Amount", 
   "options": "Company:company:default_currency", 
   "read_only": 1
@@ -70,6 +75,7 @@
   "doctype": "DocField", 
   "fieldname": "against_account", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Against Account", 
   "read_only": 1
  }, 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:04", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:34", 
+  "modified": "2013-07-10 14:54:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,6 +29,7 @@
   "doctype": "DocField", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "UOM", 
   "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
@@ -38,6 +39,7 @@
   "doctype": "DocField", 
   "fieldname": "conversion_factor", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
   "oldfieldtype": "Float"

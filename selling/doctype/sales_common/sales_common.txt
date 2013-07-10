@@ -2,7 +2,7 @@
  {
   "creation": "2012-03-27 14:36:14", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:14", 
+  "modified": "2013-07-10 14:54:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,10 +10,7 @@
   "doctype": "DocType", 
   "issingle": 1, 
   "module": "Selling", 
-  "name": "__common__", 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 290
+  "name": "__common__"
  }, 
  {
   "doctype": "DocType", 

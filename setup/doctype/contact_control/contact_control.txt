@@ -2,7 +2,7 @@
  {
   "creation": "2012-03-27 14:36:19", 
   "docstatus": 0, 
-  "modified": "2012-03-27 14:36:19", 
+  "modified": "2013-07-10 14:54:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,14 +12,12 @@
   "issingle": 1, 
   "module": "Setup", 
   "name": "__common__", 
-  "read_only": 1, 
-  "section_style": "Simple", 
-  "show_in_menu": 0, 
-  "version": 25
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Contact Control", 
   "parentfield": "fields", 
@@ -43,9 +41,6 @@
   "name": "Contact Control"
  }, 
  {
-  "doctype": "DocPerm"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "header", 
   "label": "Header"
@@ -59,5 +54,8 @@
   "doctype": "DocField", 
   "fieldname": "supplier_intro", 
   "label": "Supplier Intro"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

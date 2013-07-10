@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-08 15:37:16", 
   "docstatus": 0, 
-  "modified": "2013-03-21 17:29:45", 
+  "modified": "2013-07-10 14:54:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -19,6 +19,7 @@
  {
   "doctype": "DocField", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Item Customer Detail", 
   "parentfield": "fields", 

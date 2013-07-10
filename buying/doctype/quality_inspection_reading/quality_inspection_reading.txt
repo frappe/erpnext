@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:43", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:29", 
+  "modified": "2013-07-10 14:54:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,6 +29,7 @@
   "doctype": "DocField", 
   "fieldname": "specification", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Parameter", 
   "oldfieldname": "specification", 
   "oldfieldtype": "Data", 
@@ -38,6 +39,7 @@
   "doctype": "DocField", 
   "fieldname": "value", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Acceptance Criteria", 
   "oldfieldname": "value", 
   "oldfieldtype": "Data"
@@ -46,6 +48,7 @@
   "doctype": "DocField", 
   "fieldname": "reading_1", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Reading 1", 
   "oldfieldname": "reading_1", 
   "oldfieldtype": "Data"
@@ -54,6 +57,7 @@
   "doctype": "DocField", 
   "fieldname": "reading_2", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Reading 2", 
   "oldfieldname": "reading_2", 
   "oldfieldtype": "Data"
@@ -62,6 +66,7 @@
   "doctype": "DocField", 
   "fieldname": "reading_3", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Reading 3", 
   "oldfieldname": "reading_3", 
   "oldfieldtype": "Data"
@@ -70,6 +75,7 @@
   "doctype": "DocField", 
   "fieldname": "reading_4", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Reading 4", 
   "oldfieldname": "reading_4", 
   "oldfieldtype": "Data"
