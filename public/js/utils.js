@@ -13,13 +13,31 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-wn.provide("erpnext.utils");
+wn.provide("erpnext");
 
-erpnext.get_currency = function(company) {
-	if(!company && cur_frm)
-		company = cur_frm.doc.company;
-	if(company)
-		return wn.model.get(":Company", company).default_currency || wn.boot.sysdefaults.currency;
-	else
-		return wn.boot.sysdefaults.currency;
-}
+$.extend(erpnext, {
+	get_currency: function(company) {
+		if(!company && cur_frm)
+			company = cur_frm.doc.company;
+		if(company)
+			return wn.model.get(":Company", company).default_currency || wn.boot.sysdefaults.currency;
+		else
+			return wn.boot.sysdefaults.currency;
+	},
+	
+	hide_naming_series: function() {
+		if(cur_frm.fields_dict.naming_series) {
+			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
+		}
+	},
+	
+	hide_company: function() {
+		if(cur_frm.fields_dict.company) {
+			var companies = Object.keys(locals[":Company"]);
+			if(companies.length === 1) {
+				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
+				cur_frm.toggle_display("company", false);
+			}
+		}
+	}
+});

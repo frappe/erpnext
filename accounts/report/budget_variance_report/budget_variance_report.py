@@ -79,7 +79,7 @@ def get_costcenter_target_details(filters):
 		cc.parent_cost_center, bd.account, bd.budget_allocated 
 		from `tabCost Center` cc, `tabBudget Detail` bd 
 		where bd.parent=cc.name and bd.fiscal_year=%s and 
-		cc.company_name=%s and ifnull(cc.distribution_id, '')!='' 
+		cc.company=%s and ifnull(cc.distribution_id, '')!='' 
 		order by cc.name""" % ('%s', '%s'), 
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 

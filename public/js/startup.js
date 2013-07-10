@@ -15,23 +15,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 var current_module;
-var is_system_manager = 0;
 
 wn.provide('erpnext.startup');
-
-erpnext.startup.set_globals = function() {
-	if(inList(user_roles,'System Manager')) is_system_manager = 1;
-}
 
 erpnext.startup.start = function() {
 	console.log('Starting up...');
 	$('#startup_div').html('Starting up...').toggle(true);
 	
-	erpnext.startup.set_globals();
-
 	if(user != 'Guest'){
-		erpnext.setup_mousetrap();
-				
 		// setup toolbar
 		erpnext.toolbar.setup();
 		
@@ -66,31 +57,7 @@ erpnext.startup.start = function() {
 			}
 		}
 		erpnext.set_about();
-		if(wn.control_panel.custom_startup_code)
-			eval(wn.control_panel.custom_startup_code);		
 	}
-}
-
-erpnext.hide_naming_series = function() {
-	if(cur_frm.fields_dict.naming_series) {
-		cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
-	}
-}
-
-erpnext.setup_mousetrap = function() {
-	$(document).keydown("meta+g ctrl+g", function(e) {
-		wn.ui.toolbar.search.show();
-		return false;
-	});
-	
-	$(document).keydown("meta+s ctrl+s", function(e) {
-		if(cur_frm) {
-			cur_frm.save_or_update();
-		}
-		else if(wn.container.page.save_action)
-			wn.container.page.save_action();
-		return false;
-	})
 }
 
 // start

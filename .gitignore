@@ -1,10 +1,7 @@
 *.pyc
 *.py~
-*.comp.js
 .DS_Store
-patch.log
-lib
 conf.py
-version.num
 locale
+latest_updates.json
 .wnf-lang-status

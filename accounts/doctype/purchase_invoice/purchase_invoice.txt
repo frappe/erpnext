@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-08 18:03:17", 
+  "modified": "2013-07-09 12:51:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -172,7 +172,7 @@
   "fieldname": "bill_no", 
   "fieldtype": "Data", 
   "in_filter": 1, 
-  "label": "Bill No", 
+  "label": "Supplier Invoice No", 
   "oldfieldname": "bill_no", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -185,7 +185,7 @@
   "fieldname": "bill_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
-  "label": "Bill Date", 
+  "label": "Supplier Invoice Date", 
   "oldfieldname": "bill_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -195,37 +195,34 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "items", 
-  "fieldtype": "Section Break", 
-  "label": "Items", 
-  "oldfieldtype": "Section Break", 
-  "options": "icon-shopping-cart", 
-  "read_only": 0
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "entries", 
-  "fieldtype": "Table", 
-  "label": "Entries", 
-  "oldfieldname": "entries", 
-  "oldfieldtype": "Table", 
-  "options": "Purchase Invoice Item", 
-  "read_only": 0
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Invoice", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "recalculate", 
-  "fieldtype": "Button", 
-  "label": "Recalculate", 
-  "oldfieldtype": "Button", 
-  "read_only": 0
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List", 
+  "label": "Currency and Price List", 
   "options": "icon-tag", 
   "read_only": 0
  }, 
@@ -288,6 +285,59 @@
   "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
+  "read_only": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "entries", 
+  "fieldtype": "Table", 
+  "label": "Entries", 
+  "oldfieldname": "entries", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Invoice Item", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_26", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_import", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "oldfieldname": "net_total_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_28", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Will be calculated automatically when you enter the details", 
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Company Currency)", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
   "description": "Add / Edit Taxes and Charges", 
   "doctype": "DocField", 
   "fieldname": "taxes", 
@@ -310,16 +360,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_tax_detail", 
-  "fieldtype": "Button", 
-  "label": "Get Tax Detail", 
-  "oldfieldtype": "Button", 
-  "options": "get_purchase_tax_details", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "purchase_tax_details", 
   "fieldtype": "Table", 
   "label": "Purchase Taxes and Charges", 
@@ -330,63 +370,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "calculate_tax", 
-  "fieldtype": "Button", 
-  "label": "Calculate Tax", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "tax_calculation", 
   "fieldtype": "HTML", 
   "label": "Tax Calculation", 
   "oldfieldtype": "HTML", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "total_tax", 
-  "fieldtype": "Currency", 
-  "label": "Total Tax", 
-  "oldfieldname": "total_tax", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "depends_on": "supplier", 
-  "doctype": "DocField", 
-  "fieldname": "contact_section", 
-  "fieldtype": "Section Break", 
-  "label": "Contact Info", 
-  "options": "icon-bullhorn", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "supplier_address", 
-  "fieldtype": "Link", 
-  "label": "Supplier Address", 
-  "options": "Address", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break23", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_person", 
-  "fieldtype": "Link", 
-  "label": "Contact Person", 
-  "options": "Contact", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -401,20 +388,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "net_total_import", 
-  "fieldtype": "Currency", 
-  "label": "Net Total (Import)", 
-  "oldfieldname": "net_total_import", 
-  "oldfieldtype": "Currency", 
-  "options": "currency", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "other_charges_added_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added (Import)", 
+  "label": "Taxes and Charges Added", 
   "oldfieldname": "other_charges_added_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -425,7 +401,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted (Import)", 
+  "label": "Taxes and Charges Deducted", 
   "oldfieldname": "other_charges_deducted_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -437,7 +413,7 @@
   "fieldname": "grand_total_import", 
   "fieldtype": "Currency", 
   "in_list_view": 1, 
-  "label": "Grand Total (Import)", 
+  "label": "Grand Total", 
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -448,7 +424,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words_import", 
   "fieldtype": "Data", 
-  "label": "In Words (Import)", 
+  "label": "In Words", 
   "oldfieldname": "in_words_import", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -504,12 +480,11 @@
   "width": "50%"
  }, 
  {
-  "description": "Will be calculated automatically when you enter the details", 
   "doctype": "DocField", 
-  "fieldname": "net_total", 
+  "fieldname": "total_tax", 
   "fieldtype": "Currency", 
-  "label": "Net Total", 
-  "oldfieldname": "net_total", 
+  "label": "Total Tax (Company Currency)", 
+  "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
@@ -519,7 +494,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_added", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added", 
+  "label": "Taxes and Charges Added (Company Currency)", 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -530,7 +505,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted", 
+  "label": "Taxes and Charges Deducted (Company Currency)", 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -541,7 +516,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
-  "label": "Grand Total", 
+  "label": "Grand Total (Company Currency)", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -553,7 +528,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words", 
   "fieldtype": "Data", 
-  "label": "In Words", 
+  "label": "In Words (Company Currency)", 
   "oldfieldname": "in_words", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -658,6 +633,39 @@
   "label": "Terms and Conditions1"
  }, 
  {
+  "depends_on": "supplier", 
+  "doctype": "DocField", 
+  "fieldname": "contact_section", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "options": "icon-bullhorn", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_address", 
+  "fieldtype": "Link", 
+  "label": "Supplier Address", 
+  "options": "Address", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break23", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -693,18 +701,6 @@
   "print_hide": 1, 
   "read_only": 0, 
   "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amended_from", 
-  "fieldtype": "Link", 
-  "label": "Amended From", 
-  "no_copy": 1, 
-  "oldfieldname": "amended_from", 
-  "oldfieldtype": "Link", 
-  "options": "Purchase Invoice", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "allow_on_submit": 1, 
@@ -748,19 +744,6 @@
   "fieldname": "column_break_63", 
   "fieldtype": "Column Break", 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "oldfieldtype": "Link", 
-  "options": "Company", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "search_index": 1
  }, 
  {
   "doctype": "DocField", 

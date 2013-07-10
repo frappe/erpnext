@@ -48,7 +48,7 @@ $.extend(erpnext.complete_setup, {
 				{fieldname:'update', label:'Setup',fieldtype:'Button'},
 			],
 		});
-
+		
 		if(user != 'Administrator'){
 			$(d.appframe.$titlebar).find('.close').toggle(false); // Hide close image
 			$('header').toggle(false); // hide toolbar
@@ -87,7 +87,6 @@ $.extend(erpnext.complete_setup, {
 				} else {
 					$(this).done_working();
 				}
-				
 			});
 		};
 		
@@ -125,7 +124,7 @@ $.extend(erpnext.complete_setup, {
 			}
 		}
 		
-		return d;	
+		return d;
 	},
 	
 	fy_start_list: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'],
