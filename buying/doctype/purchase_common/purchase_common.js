@@ -191,7 +191,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			this.frm.call({
-				method: "buying.utils.get_conversion_factor",
+				method: "buying.utils.get_projected_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
