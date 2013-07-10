@@ -18,10 +18,9 @@ wn.provide("erpnext.support");
 // TODO commonify this code
 erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	refresh: function() {
-		if(cur_frm.doc.docstatus==1 && (cur_frm.doc.status=='Open' || 
-			cur_frm.doc.status == 'Work In Progress')) {
-				cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
-			}
+		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
+			cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
+		}
 	}, 
 	
 	customer: function() {

@@ -37,7 +37,6 @@ erpnext.support.MaintenanceVisit = wn.ui.form.Controller.extend({
 						method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
 						source_doctype: "Customer Issue",
 						get_query_filters: {
-							docstatus: 1,
 							status: ["in", "Open, Work in Progress"],
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
