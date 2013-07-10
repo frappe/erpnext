@@ -33,3 +33,12 @@ class DocType(DocTypeNestedSet):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				webnotes.msgprint("Either target qty or target amount is mandatory.")
 				raise Exception
+	
+	def get_email_id(self):
+		profile = webnotes.conn.get_value("Employee", self.doc.employee, "user_id")
+		if not profile:
+			webnotes.msgprint("User ID (Profile) no set for Employee %s" % self.doc.employee, 
+				raise_exception=True)
+		else:
+			return webnotes.conn.get_value("Profile", profile, "email") or profile
+		

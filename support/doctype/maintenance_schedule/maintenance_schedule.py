@@ -77,8 +77,8 @@ class DocType(TransactionBase):
 				self.update_amc_date(d.serial_no, d.end_date)
 
 			if d.incharge_name not in email_map:
-				e = sql("select email_id, name from `tabSales Person` where name='%s' " %(d.incharge_name),as_dict=1)[0]
-				email_map[d.incharge_name] = (e['email_id'])
+				email_map[d.incharge_name] = webnotes.bean("Sales Person", 
+					d.incharge_name).run_method("get_email_id")
 
 			scheduled_date =sql("select scheduled_date from `tabMaintenance Schedule Detail` \
 				where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
@@ -312,6 +312,9 @@ class DocType(TransactionBase):
 def make_maintenance_visit(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
+	def update_status(source, target, parent):
+		target.maintenance_type = "Scheduled"
+	
 	doclist = get_mapped_doclist("Maintenance Schedule", source_name, {
 		"Maintenance Schedule": {
 			"doctype": "Maintenance Visit", 
@@ -320,13 +323,15 @@ def make_maintenance_visit(source_name, target_doclist=None):
 			},
 			"validation": {
 				"docstatus": ["=", 1]
-			}
+			},
+			"postprocess": update_status
 		}, 
 		"Maintenance Schedule Item": {
 			"doctype": "Maintenance Visit Purpose", 
 			"field_map": {
 				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype"
+				"parenttype": "prevdoc_doctype",
+				"incharge_name": "service_person"
 			}
 		}
 	}, target_doclist)
