@@ -36,11 +36,14 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	// TO-do: check for pos, it should not come
 	if (!doc.account) msgprint("Please select Account first");
 	else {
-		query: "accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
-		filters: {
-			"dt": doc.voucher_type,
-			"acc": doc.account,
-			"account_type": doc.account_type 
+		return {
+			doctype: doc.voucher_type,
+			query: "accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
+			filters: {
+				"dt": doc.voucher_type,
+				"acc": doc.account,
+				"account_type": doc.account_type 
+			}
 		}		
 	}
 }

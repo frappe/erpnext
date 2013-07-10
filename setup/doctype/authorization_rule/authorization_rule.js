@@ -99,24 +99,20 @@ cur_frm.fields_dict['system_role'].get_query = function(doc) {
   }
 }
 
-// Approving Role Trigger
-// -----------------------
-// cur_frm.fields_dict['approving_role'].get_query = function(doc) {
-//   return 'SELECT tabRole.name FROM tabRole WHERE tabRole.name not in ("Administrator","Guest","All") AND tabRole.%(key)s LIKE "%s" LIMIT 50'
-// }
-
 
 // Master Name Trigger
 // --------------------
 cur_frm.fields_dict['master_name'].get_query = function(doc){
   if(doc.based_on == 'Customerwise Discount')
     return {
+	  doctype: "Customer",
       filters:[
         ['Customer', 'docstatus', '!=', 2]
       ]
     }
   else if(doc.based_on == 'Itemwise Discount')
     return {
+	  doctype: "Item",
       query: "controllers.queries.item_query"
     }
   else
