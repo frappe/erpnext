@@ -92,7 +92,9 @@ class DocType(TransactionBase):
 			if getdate(emp['relieving_date']) > m['month_start_date'] and getdate(emp['relieving_date']) < m['month_end_date']:
 				payment_days = getdate(emp['relieving_date']).day
 			elif getdate(emp['relieving_date']) < m['month_start_date']:
-				payment_days = 0
+				webnotes.msgprint(_("Relieving Date of employee is ") + cstr(emp['relieving_date']
+					+ _(". Please set status of the employee as 'Left'")), raise_exception=1)
+				
 			
 		if emp['date_of_joining']:
 			if getdate(emp['date_of_joining']) > m['month_start_date'] and getdate(emp['date_of_joining']) < m['month_end_date']:
