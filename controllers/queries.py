@@ -20,7 +20,13 @@ import webnotes
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
 		if isinstance(filters, dict):
-			filters = map(lambda f: [doctype, f[0], "=", f[1]], filters.items())
+			filters = filters.items()
+			flt = []
+			for f in filters:
+				if f[1][0] == '!':
+					flt.append([doctype, f[0], '!=', f[1][1:]])
+				else:
+					flt.append([doctype, f[0], '=', f[1]])
 		
 		from webnotes.widgets.reportview import build_filter_conditions
 		build_filter_conditions(filters, conditions)
@@ -36,6 +42,7 @@ def get_match_cond(doctype, searchfield = 'name'):
 
 	from webnotes.widgets.reportview import build_match_conditions
 	cond = build_match_conditions(doctype, fields)
+
 	if cond:
 		cond = ' and ' + cond
 	else:
@@ -81,10 +88,12 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
  # searches for customer
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	cust_master_name = webnotes.defaults.get_user_default("cust_master_name")
+
 	if cust_master_name == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
+
 	fields = ", ".join(fields) 
 
 	return webnotes.conn.sql("""select %(field)s from `tabCustomer` where docstatus < 2 and 
@@ -142,6 +151,7 @@ def account_query(doctype, txt, searchfield, start, page_len, filters):
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
+
 	return webnotes.conn.sql("""select tabItem.name, 
 		if(length(tabItem.item_name) > 40, 
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name, 
@@ -158,6 +168,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []	
+
 	return webnotes.conn.sql("""select tabBOM.name, tabBOM.item 
 		from tabBOM 
 		where tabBOM.docstatus=1 and tabBOM.is_active=1 
@@ -165,10 +176,6 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		%(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
 		'fcond': get_filters_cond(doctype, filters, conditions), 'mcond':get_match_cond(doctype, searchfield),
 		'start': start, 'page_len': page_len})
-
-# erpnext.queries.task = function() {
-# 	return { query: "projects.utils.query_task" };
-# };
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''

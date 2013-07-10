@@ -313,14 +313,16 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "entries", function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';	
-})
+	return{
+		query: "accounts.doctype.sales_invoice.sales_invoice.get_income_account",
+		filters: {'company': doc.company}
+	}
+});
 
 // expense account
 if (sys_defaults.auto_inventory_accounting) {
 	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
-			// "query": "accounts.utils.get_account_list", 
 			filters: {
 				'is_pl_account': 'Yes',
 				'debit_or_credit': 'Debit',
