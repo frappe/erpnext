@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:34:37", 
+  "modified": "2013-07-10 13:13:27", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -10,7 +10,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "icon": "icon-bug", 
-  "is_submittable": 1, 
+  "is_submittable": 0, 
   "module": "Support", 
   "name": "__common__", 
   "search_fields": "status,customer,customer_name,allocated_to,allocated_on, territory"
@@ -24,6 +24,8 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -33,6 +35,8 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Maintenance User", 
+  "submit": 0, 
   "write": 1
  }, 
  {
@@ -412,28 +416,6 @@
   "width": "150px"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "submit": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "doctype": "DocPerm", 
-  "role": "Maintenance Manager", 
-  "submit": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "doctype": "DocPerm", 
-  "role": "Maintenance User", 
-  "submit": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Guest"
+  "doctype": "DocPerm"
  }
 ]

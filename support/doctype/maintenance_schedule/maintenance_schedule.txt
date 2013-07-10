@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-07 12:18:51", 
+  "modified": "2013-07-10 12:18:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,13 +24,19 @@
   "permlevel": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Maintenance Schedule", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "report": 1
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -42,7 +48,7 @@
   "fieldtype": "Section Break", 
   "label": "Customer Details", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -97,6 +103,7 @@
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
+  "hidden": 1, 
   "label": "Address", 
   "read_only": 1
  }, 
@@ -104,20 +111,23 @@
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
-  "fieldtype": "Text", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
   "label": "Mobile No", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_email", 
-  "fieldtype": "Text", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
   "label": "Contact Email", 
   "print_hide": 1, 
   "read_only": 1
@@ -202,26 +212,7 @@
   "fieldtype": "Section Break", 
   "label": "Items", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Sales Order No", 
-  "oldfieldname": "sales_order_no", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Order", 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "report_hide": 1
+  "options": "icon-shopping-cart"
  }, 
  {
   "doctype": "DocField", 
@@ -238,7 +229,7 @@
   "fieldtype": "Section Break", 
   "label": "Schedule", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-time"
  }, 
  {
   "doctype": "DocField", 
@@ -258,41 +249,11 @@
   "read_only": 1
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "submit": 1, 
-  "write": 1
+  "role": "System Manager"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "System Manager", 
-  "submit": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Maintenance Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Maintenance Manager", 
-  "submit": 0
+  "role": "Maintenance Manager"
  }
 ]
