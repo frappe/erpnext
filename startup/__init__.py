@@ -18,9 +18,9 @@
 
 # default settings that can be made for a profile.
 from __future__ import unicode_literals
-
+import conf
 import webnotes
-
+from webnotes.utils import get_request_site_address
 lang_names = {
 	"हिंदी": "hi",
 	"deutsch": "de",
@@ -40,6 +40,7 @@ lang_names = {
 lang_list = ["ar", "de", "en", "hi", "es", "fr", "pt-BR", "pt", "nl", "hr", "th"]
 
 product_name = "ERPNext"
+
 profile_defaults = {
 	"Company": "company",
 	"Territory": "territory"
@@ -49,7 +50,7 @@ application_home_page = "desktop"
 
 # add startup propertes
 mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via 
-	<a style="color: #888" href="https://erpnext.com">ERPNext</a></div>"""
+	<a style="color: #888" href="%s">%s</a></div>"""%(get_request_site_address(),getattr(conf, "product_name",product_name))
 	
 def get_monthly_bulk_mail_limit():
 	import webnotes
