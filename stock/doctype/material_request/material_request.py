@@ -254,12 +254,13 @@ def make_purchase_order(source_name, target_doclist=None):
 		}, 
 		"Material Request Item": {
 			"doctype": "Purchase Order Item", 
-			"field_map": {
-				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype", 
-				"uom": "stock_uom"
-			},
+			"field_map": [
+				["name", "prevdoc_detail_docname"], 
+				["parent", "prevdoc_docname"], 
+				["parenttype", "prevdoc_doctype"], 
+				["uom", "stock_uom"],
+				["uom", "uom"]
+			],
 			"postprocess": update_item
 		}
 	}, target_doclist, set_missing_values)
