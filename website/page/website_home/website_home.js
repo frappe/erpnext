@@ -78,12 +78,6 @@ wn.module_page["Website"] = [
 		right: true,
 		items: [
 			{
-				"route":"Form/Product Settings",
-				"label":wn._("Product Settings"),
-				"description":wn._("Settings for Product Catalog on the website."),
-				doctype:"Product Settings"
-			},
-			{
 				"route":"Form/About Us Settings",
 				"label":wn._("About Us Settings"),
 				"description":wn._("Settings for About Us Page."),
