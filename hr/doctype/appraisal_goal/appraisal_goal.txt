@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:44", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:18", 
+  "modified": "2013-07-10 14:54:03", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -15,6 +15,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Appraisal Goal", 
   "parentfield": "fields", 

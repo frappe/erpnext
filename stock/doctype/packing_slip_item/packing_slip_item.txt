@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-08 13:10:16", 
   "docstatus": 0, 
-  "modified": "2013-04-11 15:06:05", 
+  "modified": "2013-07-10 14:54:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,6 +29,7 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "options": "Item", 
   "print_width": "100px", 
@@ -40,6 +41,7 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Item Name", 
   "print_width": "200px", 
   "read_only": 1, 
@@ -49,6 +51,7 @@
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Quantity", 
   "print_width": "100px", 
   "read_only": 0, 
@@ -59,6 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
+  "in_list_view": 0, 
   "label": "UOM", 
   "print_width": "100px", 
   "read_only": 1, 
@@ -68,6 +72,7 @@
   "doctype": "DocField", 
   "fieldname": "net_weight", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Net Weight", 
   "print_width": "100px", 
   "read_only": 0, 
@@ -77,6 +82,7 @@
   "doctype": "DocField", 
   "fieldname": "weight_uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "Weight UOM", 
   "options": "UOM", 
   "print_width": "100px", 
@@ -87,6 +93,7 @@
   "doctype": "DocField", 
   "fieldname": "page_break", 
   "fieldtype": "Check", 
+  "in_list_view": 1, 
   "label": "Page Break", 
   "read_only": 0
  }, 
@@ -95,6 +102,7 @@
   "fieldname": "dn_detail", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "in_list_view": 1, 
   "label": "DN Detail", 
   "read_only": 0
  }

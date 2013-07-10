@@ -26,12 +26,6 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		
-	def get_emp_name(self):
-		return {
-			"employee_name": webnotes.conn.get_value("Employee", 
-				self.doc.employee_name, "employee_name")
-		}
 	
 	def validate_duplicate_record(self):	 
 		res = sql("""select name from `tabAttendance` where employee = %s and att_date = %s 

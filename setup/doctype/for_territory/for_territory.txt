@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-20 12:48:38", 
   "docstatus": 0, 
-  "modified": "2013-06-20 12:48:38", 
+  "modified": "2013-07-10 14:54:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,6 +16,7 @@
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Territory", 
   "name": "__common__", 
   "options": "Territory", 

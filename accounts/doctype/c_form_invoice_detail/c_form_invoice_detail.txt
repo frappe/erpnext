@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:38", 
   "docstatus": 0, 
-  "modified": "2013-03-07 07:03:19", 
+  "modified": "2013-07-10 14:54:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,6 +14,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "C-Form Invoice Detail", 
   "parentfield": "fields", 

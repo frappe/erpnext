@@ -17,11 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, getdate
+from webnotes.utils import add_days, cint, cstr, flt, getdate, nowdate
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
@@ -40,9 +40,7 @@ class DocType(TransactionBase):
 
 	def get_emp_and_leave_details(self):
 		if self.doc.employee:
-			# Get payment days
-			if self.doc.fiscal_year and self.doc.month:
-				self.get_leave_details()
+			self.get_leave_details()
 
 			# check sal structure
 			struct = self.check_sal_struct()
@@ -59,20 +57,24 @@ class DocType(TransactionBase):
 
 
 	def pull_sal_struct(self, struct):
-		self.doclist = self.doc.clear_table(self.doclist, 'earning_details')
-		self.doclist = self.doc.clear_table(self.doclist, 'deduction_details')
-
 		from hr.doctype.salary_structure.salary_structure import make_salary_slip
-		make_salary_slip(struct, self.doclist)
-
-		basic_info = sql("select bank_name, bank_ac_no, esic_card_no, pf_number from `tabEmployee` where name ='%s'" % self.doc.employee)
-		self.doc.bank_name = basic_info[0][0]
-		self.doc.bank_account_no = basic_info[0][1]
-		self.doc.esic_no = basic_info[0][2]
-		self.doc.pf_no = basic_info[0][3]
-
+		self.doclist = make_salary_slip(struct, self.doclist)
+		
+	def pull_emp_details(self):
+		emp = webnotes.conn.get_value("Employee", self.doc.employee, 
+			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
+		if emp:
+			self.doc.bank_name = emp.bank_name
+			self.doc.bank_ac_no = emp.bank_ac_no
+			self.doc.esic_no = emp.esic_card_no
+			self.doc.pf_no = emp.pf_number
 
 	def get_leave_details(self, lwp=None):
+		if not self.doc.fiscal_year:
+			self.doc.fiscal_year = webnotes.get_default("fiscal_year")
+		if not self.doc.month:
+			self.doc.month = "%02d" % getdate(nowdate()).month
+			
 		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
 		
 		if not lwp:
@@ -92,7 +94,9 @@ class DocType(TransactionBase):
 			if getdate(emp['relieving_date']) > m['month_start_date'] and getdate(emp['relieving_date']) < m['month_end_date']:
 				payment_days = getdate(emp['relieving_date']).day
 			elif getdate(emp['relieving_date']) < m['month_start_date']:
-				payment_days = 0
+				webnotes.msgprint(_("Relieving Date of employee is ") + cstr(emp['relieving_date']
+					+ _(". Please set status of the employee as 'Left'")), raise_exception=1)
+				
 			
 		if emp['date_of_joining']:
 			if getdate(emp['date_of_joining']) > m['month_start_date'] and getdate(emp['date_of_joining']) < m['month_end_date']:
