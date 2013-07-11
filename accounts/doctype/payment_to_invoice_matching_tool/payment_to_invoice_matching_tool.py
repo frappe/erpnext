@@ -164,5 +164,5 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 					%(mcond)s
 			    ORDER BY gle.posting_date desc, gle.voucher_no desc 
 			    limit %(start)s, %(page_len)s""" %  {dt:filters["dt"], acc:filters["acc"], 
-			    account_type: filters['account_type'], 'mcond':get_match_cond(doctype, searchfield)
+			    account_type: filters['account_type'], 'mcond':get_match_cond(doctype, searchfield),
 			    'txt': "%%%s%%" % txt,"start": start, "page_len": page_len})

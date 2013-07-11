@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:34:09", 
+  "modified": "2013-07-11 16:53:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -93,7 +93,7 @@
   "fieldtype": "Link", 
   "hidden": 0, 
   "in_filter": 1, 
-  "label": "Lead Ref", 
+  "label": "From Lead", 
   "no_copy": 1, 
   "oldfieldname": "lead_name", 
   "oldfieldtype": "Link", 

@@ -76,7 +76,8 @@ class TransactionBase(StatusUpdater):
 		
 		# fields prepended with default in Customer doctype
 		for f in ['sales_partner', 'commission_rate', 'currency', 'price_list']:
-			out[f] = customer.fields.get("default_" + f)
+			if customer.fields.get("default_" + f):
+				out[f] = customer.fields.get("default_" + f)
 			
 		return out
 				
