@@ -60,8 +60,8 @@ class DocType(TransactionBase):
 					" delivery note details have already been pulled", raise_exception=1)
 
 	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, self.doc.inst_date, 
-			'Installation Date')
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.inst_date, self.doc.fiscal_year, "Installation Date")
 	
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = webnotes.conn.get_value("Item", item_code, "has_serial_no")

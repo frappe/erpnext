@@ -34,14 +34,14 @@ class TestStockReconciliation(unittest.TestCase):
 		
 			# check stock value
 			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
-				where item_code = '_Test Item' and warehouse = '_Test Warehouse'
+				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
 			self.assertEqual(res and flt(res[0][0]) or 0, d[4])
 			
 			# check bin qty and stock value
 			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
-				where item_code = '_Test Item' and warehouse = '_Test Warehouse'""")
+				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1])] or [], [d[5], d[6]])
 			
@@ -79,7 +79,7 @@ class TestStockReconciliation(unittest.TestCase):
 			
 			# check stock value in sle
 			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
-				where item_code = '_Test Item' and warehouse = '_Test Warehouse'
+				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
 				
@@ -87,7 +87,7 @@ class TestStockReconciliation(unittest.TestCase):
 			
 			# bin qty and stock value
 			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
-				where item_code = '_Test Item' and warehouse = '_Test Warehouse'""")
+				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1], 4)] or [], 
 				[flt(d[5]), flt(d[6])])
@@ -183,7 +183,7 @@ class TestStockReconciliation(unittest.TestCase):
 			"expense_account": "Stock Adjustment - _TC",
 			"reconciliation_json": json.dumps([
 				["Item Code", "Warehouse", "Quantity", "Valuation Rate"],
-				["_Test Item", "_Test Warehouse", qty, rate]
+				["_Test Item", "_Test Warehouse - _TC", qty, rate]
 			]),
 		}])
 		stock_reco.insert()
@@ -226,7 +226,7 @@ class TestStockReconciliation(unittest.TestCase):
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC",
 				"posting_date": "2012-12-12", "posting_time": "01:00",
 				"actual_qty": 20, "incoming_rate": 1000, "company": "_Test Company",
 				"fiscal_year": "_Test Fiscal Year 2012",
@@ -234,7 +234,7 @@ class TestStockReconciliation(unittest.TestCase):
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC",
 				"posting_date": "2012-12-15", "posting_time": "02:00",
 				"actual_qty": 10, "incoming_rate": 700, "company": "_Test Company",
 				"fiscal_year": "_Test Fiscal Year 2012",
@@ -242,7 +242,7 @@ class TestStockReconciliation(unittest.TestCase):
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC",
 				"posting_date": "2012-12-25", "posting_time": "03:00",
 				"actual_qty": -15, "company": "_Test Company",
 				"fiscal_year": "_Test Fiscal Year 2012",
@@ -250,7 +250,7 @@ class TestStockReconciliation(unittest.TestCase):
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC",
 				"posting_date": "2012-12-31", "posting_time": "08:00",
 				"actual_qty": -20, "company": "_Test Company",
 				"fiscal_year": "_Test Fiscal Year 2012",
@@ -258,7 +258,7 @@ class TestStockReconciliation(unittest.TestCase):
 			{
 				"doctype": "Stock Ledger Entry", "__islocal": 1,
 				"voucher_type": "Stock Entry", "voucher_no": "TEST",
-				"item_code": "_Test Item", "warehouse": "_Test Warehouse",
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC",
 				"posting_date": "2013-01-05", "posting_time": "07:00",
 				"actual_qty": 15, "incoming_rate": 1200, "company": "_Test Company",
 				"fiscal_year": "_Test Fiscal Year 2013",

@@ -45,9 +45,6 @@ class DocType(BuyingController):
 			'percent_join_field': 'prevdoc_docname',
 		}]
 
-	def validate_fiscal_year(self):
-		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
-
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
@@ -120,7 +117,6 @@ class DocType(BuyingController):
 		super(DocType, self).validate()
 		
 		self.po_required()
-		self.validate_fiscal_year()
 
 		if not self.doc.status:
 			self.doc.status = "Draft"

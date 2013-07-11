@@ -303,7 +303,7 @@ test_records = [
 			"basic_rate": 100.0,
 			"export_rate": 100.0,
 			"amount": 1000.0,
-			"reserved_warehouse": "_Test Warehouse",
+			"reserved_warehouse": "_Test Warehouse - _TC",
 		}
 	],	
 ]

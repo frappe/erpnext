@@ -50,7 +50,7 @@ def delete_masters():
 		'Supplier Type': ['Default Supplier Type'],
 		'Supplier': '',
 		'Serial No': '',
-		'Sales Person': ['All Sales Persons'],
+		'Sales Person': ['Sales Team'],
 		'Sales Partner': '',
 		'Sales BOM': '',
 		'Salary Structure': '',

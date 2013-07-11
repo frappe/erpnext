@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, getdate, nowdate
+from webnotes.utils import cint, cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -30,26 +30,9 @@ from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+		self.doc, self.doclist = d, dl
 
-		self.doctype_dict = {
-			'Sales Order'		: 'Sales Order Item',
-			'Delivery Note'		: 'Delivery Note Item',
-			'Sales Invoice':'Sales Invoice Item',
-			'Installation Note' : 'Installation Note Item'
-		}
-												 
-		self.ref_doctype_dict= {}
 
-		self.next_dt_detail = {
-			'delivered_qty' : 'Delivery Note Item',
-			'billed_qty'		: 'Sales Invoice Item',
-			'installed_qty' : 'Installation Note Item'}
-
-		self.msg = []
-
-	# Get customer's contact person details
-	# ==============================================================
 	def get_contact_details(self, obj = '', primary = 0):
 		cond = " and contact_name = '"+cstr(obj.doc.contact_person)+"'"
 		if primary: cond = " and is_primary_contact = 'Yes'"
@@ -64,15 +47,11 @@ class DocType(TransactionBase):
 		if c['contact_address']:
 			obj.doc.customer_address = c['contact_address']
 
-
-	# get invoice details
-	# ====================
 	def get_invoice_details(self, obj = ''):
 		if obj.doc.company:
 			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + webnotes.conn.get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
 			
-#---------------------------------------- Get Tax Details -------------------------------#
 	def get_tax_details(self, item_code, obj):
 		import json
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
@@ -83,8 +62,6 @@ class DocType(TransactionBase):
 		}
 		return ret
 
-	# Get Serial No Details
-	# ==========================================================================
 	def get_serial_details(self, serial_no, obj):
 		import json
 		item = webnotes.conn.sql("select item_code, make, label,brand, description from `tabSerial No` where name = '%s' and docstatus != 2" %(serial_no), as_dict=1)
@@ -339,8 +316,6 @@ class DocType(TransactionBase):
 					webnotes.conn.set_value("Item", d.item_code, "default_income_account", d.income_account)
 
 
-# **************************************************************************************************************************************************
-
 	def check_credit(self,obj,grand_total):
 		acc_head = webnotes.conn.sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
 		if acc_head:
@@ -351,10 +326,6 @@ class DocType(TransactionBase):
 
 			exact_outstanding = flt(tot_outstanding) + flt(grand_total)
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
-
-	def validate_fiscal_year(self, fiscal_year, transaction_date, label):
-		import accounts.utils
-		accounts.utils.validate_fiscal_year(transaction_date, fiscal_year, label)
 
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):

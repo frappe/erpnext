@@ -172,7 +172,7 @@ cur_frm.fields_dict['item'].get_query = function(doc) {
  	return{
 		query:"controllers.queries.item_query",
 		filters:{
-			'has_serial_no': 'Yes'	
+			'is_manufactured_item': 'Yes'
 		}
 	}
 }
