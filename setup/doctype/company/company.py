@@ -94,6 +94,7 @@ class DocType:
 				})
 				website_settings.save()
 				style_settings = webnotes.bean("Style Settings", "Style Settings")
+				style_settings.doc.top_bar_background = "F2F2F2"
 				style_settings.doc.font_size = "15px"
 				style_settings.save()
 
