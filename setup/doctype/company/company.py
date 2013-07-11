@@ -93,6 +93,9 @@ class DocType:
 					"url": "blog"
 				})
 				website_settings.save()
+				style_settings = webnotes.bean("Style Settings", "Style Settings")
+				style_settings.doc.font_size = "15px"
+				style_settings.save()
 
 	def create_default_accounts(self):
 		self.fld_dict = {'account_name':0,'parent_account':1,'group_or_ledger':2,'is_pl_account':3,'account_type':4,'debit_or_credit':5,'company':6,'tax_rate':7}
