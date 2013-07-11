@@ -3,17 +3,26 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 import webnotes.defaults
-from webnotes.utils import flt, get_fullname, fmt_money
+from webnotes.utils import flt, get_fullname, fmt_money, cstr
 
 class WebsitePriceListMissingError(webnotes.ValidationError): pass
+
+def set_cart_count(quotation=None):
+	if not quotation:
+		quotation = _get_cart_quotation()
+	webnotes.add_cookies["cart_count"] = cstr(len(quotation.doclist.get(
+		{"parentfield": "quotation_details"})) or "")
 
 @webnotes.whitelist()
 def get_cart_quotation(doclist=None):
 	party = get_lead_or_customer()
 	
 	if not doclist:
-		doclist = _get_cart_quotation(party).doclist
+		quotation = _get_cart_quotation(party)
+		doclist = quotation.doclist
+		set_cart_count(quotation)
 	
 	return {
 		"doclist": decorate_quotation_doclist(doclist),
@@ -21,6 +30,26 @@ def get_cart_quotation(doclist=None):
 			for address in get_address_docs(party)],
 		"shipping_rules": get_applicable_shipping_rules(party)
 	}
+	
+@webnotes.whitelist()
+def place_order():
+	quotation = _get_cart_quotation()
+	controller = quotation.make_controller()
+	for fieldname in ["customer_address", "shipping_address_name"]:
+		if not quotation.doc.fields.get(fieldname):
+			msgprint(_("Please select a") + " " + _(controller.meta.get_label(fieldname)), raise_exception=True)
+	
+	quotation.ignore_permissions = True
+	quotation.submit()
+	
+	from selling.doctype.quotation.quotation import _make_sales_order
+	sales_order = webnotes.bean(_make_sales_order(quotation.doc.name, ignore_permissions=True))
+	sales_order.ignore_permissions = True
+	sales_order.insert()
+	sales_order.submit()
+	webnotes.add_cookies["cart_count"] = ""
+	
+	return sales_order.doc.name
 
 @webnotes.whitelist()
 def update_cart(item_code, qty, with_doclist=0):
@@ -45,6 +74,8 @@ def update_cart(item_code, qty, with_doclist=0):
 
 	quotation.ignore_permissions = True
 	quotation.save()
+	
+	set_cart_count(quotation)
 	
 	if with_doclist:
 		return get_cart_quotation(quotation.doclist)
@@ -192,11 +223,47 @@ def _get_cart_quotation(party=None):
 			"__islocal": 1,
 			(party.doctype.lower()): party.name
 		})
+		
+		# map_contact_fields(qbean, party)
+		
 		qbean.run_method("onload_post_render")
 		apply_cart_settings(party, qbean)
 	
 	return qbean
+
+def update_party(fullname, company_name=None, mobile_no=None, phone=None):
+	party = get_lead_or_customer()
+
+	if party.doctype == "Lead":
+		party.company_name = company_name
+		party.lead_name = fullname
+		party.mobile_no = mobile_no
+		party.phone = phone
+	else:
+		party.customer_name = company_name or fullname
+		party.customer_type == "Company" if company_name else "Individual"
+		
+		contact_name = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user,
+			"customer": party.name})
+		contact = webnotes.bean("Contact", contact_name)
+		contact.doc.first_name = fullname
+		contact.doc.last_name = None
+		contact.doc.customer_name = party.customer_name
+		contact.doc.mobile_no = mobile_no
+		contact.doc.phone = phone
+		contact.ignore_permissions = True
+		contact.save()
 	
+	party_bean = webnotes.bean(party.fields)
+	party_bean.ignore_permissions = True
+	party_bean.save()
+	
+	qbean = _get_cart_quotation(party)
+	qbean.doc.customer_name = company_name or fullname
+	qbean.run_method("set_contact_fields")
+	qbean.ignore_permissions = True
+	qbean.save()
+
 def apply_cart_settings(party=None, quotation=None):
 	if not party:
 		party = get_lead_or_customer()
@@ -237,8 +304,8 @@ def set_taxes(quotation, cart_settings, billing_territory):
 	quotation.doc.charge = cart_settings.get_tax_master(billing_territory)
 
 	# clear table
-	quotation.doclist = quotation.doc.clear_table(quotation.doclist, "other_charges")
-
+	quotation.set_doclist(quotation.doclist.get({"parentfield": ["!=", "other_charges"]}))
+	
 	# append taxes
 	controller = quotation.make_controller()
 	controller.append_taxes_from_master("other_charges", "charge")

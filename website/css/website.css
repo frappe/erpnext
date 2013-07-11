@@ -41,6 +41,10 @@ img {
 	margin-left: 5px;
 }
 
+div.web-footer {
+	border-top: 1px solid #dddddd;
+	padding-top: 10px;
+}
 
 .web-footer-menu ul {
 	list-style: none;
@@ -134,6 +138,10 @@ img {
 
 .accordion-heading, .accordion-inner {
 	padding-left: 10px;
+}
+
+fieldset {
+	margin-bottom: 20px;
 }
 
 /* buttons */

@@ -319,7 +319,7 @@ def get_orders():
 	# find customer id
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
 		"customer")
-	
+		
 	if customer:
 		orders = webnotes.conn.sql("""select 
 			name, creation, currency from `tabSales Order`
@@ -334,6 +334,7 @@ def get_orders():
 				from `tabSales Order Item` 
 				where parent=%s 
 				order by idx""", order.name, as_dict=1)
+				
 		return orders
 	else:
 		return []

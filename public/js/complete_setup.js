@@ -75,6 +75,7 @@ $.extend(erpnext.complete_setup, {
 			if(!data) return;
 			$(this).set_working();
 			$c_obj('Setup Control','setup_account',data,function(r, rt){
+				$(this).done_working();
 				if(!r.exc) {
 					sys_defaults = r.message;
 					user_fullname = r.message.user_fullname;
@@ -84,12 +85,16 @@ $.extend(erpnext.complete_setup, {
 					wn.container.wntoolbar.set_user_name();
 					
 					setTimeout(function() { window.location.reload(); }, 3000);
-				} else {
-					$(this).done_working();
 				}
 			});
 		};
-		
+
+		d.fields_dict.company_name.input.onchange = function() {
+			var parts = d.get_input("company_name").val().split(" ");
+			var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
+			d.get_input("company_abbr").val(abbr.toUpperCase());
+		}
+
 		d.fields_dict.country.input.onchange = function() {
 			var country = d.fields_dict.country.input.value;
 			var $timezone = $(d.fields_dict.timezone.input);

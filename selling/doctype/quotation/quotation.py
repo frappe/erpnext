@@ -230,8 +230,18 @@ class DocType(SellingController):
 
 @webnotes.whitelist()
 def make_sales_order(source_name, target_doclist=None):
+	return _make_sales_order(source_name, target_doclist)
+	
+def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False):
 	from webnotes.model.mapper import get_mapped_doclist
-
+	
+	customer = _make_customer(source_name, ignore_permissions)
+	
+	def set_missing_values(source, target):
+		if customer:
+			target[0].customer = customer.doc.name
+			target[0].customer_name = customer.doc.customer_name
+	
 	doclist = get_mapped_doclist("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order", 
@@ -255,11 +265,37 @@ def make_sales_order(source_name, target_doclist=None):
 			"Sales Team": {
 				"doctype": "Sales Team",
 			}
-		}, target_doclist)
+		}, target_doclist, set_missing_values, ignore_permissions=ignore_permissions)
 		
 	# postprocess: fetch shipping address, set missing values
 		
 	return [d.fields for d in doclist]
+
+def _make_customer(source_name, ignore_permissions=False):
+	quotation = webnotes.conn.get_value("Quotation", source_name, ["lead", "order_type"])
+	if quotation and quotation[0]:
+		lead_name = quotation[0]
+		customer_name = webnotes.conn.get_value("Customer", {"lead_name": lead_name})
+		if not customer_name:
+			from selling.doctype.lead.lead import _make_customer
+			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
+			customer = webnotes.bean(customer_doclist)
+			customer.ignore_permissions = ignore_permissions
+			if quotation[1] == "Shopping Cart":
+				customer.doc.customer_group = webnotes.conn.get_value("Shopping Cart Settings", None,
+					"default_customer_group")
+			
+			try:
+				customer.insert()
+				return customer
+			except NameError, e:
+				if webnotes.defaults.get_global_default('cust_master_name') == "Customer Name":
+					customer.run_method("autoname")
+					customer.doc.name += "-" + lead_name
+					customer.insert()
+					return customer
+				else:
+					raise e
 
 def quotation_details(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond

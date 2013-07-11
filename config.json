@@ -134,7 +134,8 @@
 			},
 			"profile": {
 				"no_cache": true,
-				"template": "app/website/templates/pages/profile"
+				"template": "app/website/templates/pages/profile",
+				"args_method": "startup.webutils.get_profile_args"
 			},
 			"cart": {
 				"no_cache": true,

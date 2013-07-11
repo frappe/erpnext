@@ -39,6 +39,7 @@ class DocType:
 			where company=%s and docstatus<2 limit 1""", self.doc.name):
 			self.create_default_accounts()
 			self.create_default_warehouses()
+			self.create_default_web_page()
 		
 		if not self.doc.cost_center:
 			self.create_default_cost_center()
@@ -52,8 +53,46 @@ class DocType:
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
 			webnotes.bean({
 				"doctype":"Warehouse",
+				"warehouse_name": whname,
 				"company": self.doc.name
 			}).insert()
+			
+	def create_default_web_page(self):
+		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
+			import os
+			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
+				webpage = webnotes.bean({
+					"doctype": "Web Page",
+					"title": self.doc.name + " Home",
+					"published": 1,
+					"description": "Standard Home Page for " + self.doc.company,
+					"main_section": webfile.read() % self.doc.fields
+				}).insert()
+			
+				# update in home page in settings
+				website_settings = webnotes.bean("Website Settings", "Website Settings")
+				website_settings.doc.home_page = webpage.doc.name
+				website_settings.doc.banner_html = """<h3 style='margin-bottom: 20px;'>""" + self.doc.name + "</h3>"
+				website_settings.doc.copyright = self.doc.name
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Home",
+					"url": webpage.doc.name
+				})
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Contact",
+					"url": "contact"
+				})
+				website_settings.doclist.append({
+					"doctype": "Top Bar Item",
+					"parentfield": "top_bar_items",
+					"label":"Blog",
+					"url": "blog"
+				})
+				website_settings.save()
 
 	def create_default_accounts(self):
 		self.fld_dict = {'account_name':0,'parent_account':1,'group_or_ledger':2,'is_pl_account':3,'account_type':4,'debit_or_credit':5,'company':6,'tax_rate':7}
