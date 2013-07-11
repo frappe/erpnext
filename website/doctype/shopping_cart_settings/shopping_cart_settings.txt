@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:55:05", 
+  "modified": "2013-07-10 18:42:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,6 +46,19 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "section_break_2", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "default_territory", 
   "fieldtype": "Link", 
   "label": "Default Territory", 
@@ -54,18 +67,28 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break_4", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_customer_group", 
+  "fieldtype": "Link", 
+  "label": "Default Customer Group", 
+  "options": "Customer Group", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_6", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "price_lists", 
   "fieldtype": "Table", 
   "label": "Shopping Cart Price Lists", 
   "options": "Shopping Cart Price List", 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sales_taxes_and_charges_masters", 
-  "fieldtype": "Table", 
-  "label": "Shopping Cart Taxes and Charges Masters", 
-  "options": "Shopping Cart Taxes and Charges Master", 
   "reqd": 0
  }, 
  {
@@ -78,11 +101,16 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
-  "label": "Company", 
-  "options": "Company", 
-  "reqd": 1
+  "fieldname": "column_break_10", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_taxes_and_charges_masters", 
+  "fieldtype": "Table", 
+  "label": "Shopping Cart Taxes and Charges Masters", 
+  "options": "Shopping Cart Taxes and Charges Master", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocPerm"

@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import webnotes
 import home
 
-		
 def on_login_post_session(login_manager):
 	"""
 		called after login
@@ -30,7 +29,14 @@ def on_login_post_session(login_manager):
 			'%s logged in at %s' % (get_user_fullname(login_manager.user), nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
 		webnotes.conn.commit()
-
+		
+	if webnotes.cookies.get("full_name"):
+		from website.helpers.cart import set_cart_count
+		set_cart_count()
+		
+def on_logout(login_manager):
+	webnotes.add_cookies["cart_count"] = ""
+		
 def check_if_expired():
 	"""check if account is expired. If expired, do not allow login"""
 	import conf

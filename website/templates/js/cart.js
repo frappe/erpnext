@@ -17,8 +17,6 @@
 // js inside blog page
 
 $(document).ready(function() {
-	// make list of items in the cart
-	// wn.cart.render();
 	wn.cart.bind_events();
 	wn.call({
 		type: "POST",
@@ -36,6 +34,7 @@ $(document).ready(function() {
 					wn.cart.show_error("Oops!", "Something went wrong.");
 				}
 			} else {
+				wn.cart.set_cart_count();
 				wn.cart.render(r.message);
 			}
 		}
@@ -74,6 +73,10 @@ $.extend(wn.cart, {
 		
 		$("#cart-add-billing-address").on("click", function() {
 			window.location.href = "address?address_fieldname=customer_address";
+		});
+		
+		$(".btn-place-order").on("click", function() {
+			wn.cart.place_order();
 		});
 	},
 	
@@ -282,5 +285,27 @@ $.extend(wn.cart, {
 		
 		$address_wrapper.find('.accordion-body[data-address-name="'+ address_name +'"]')
 			.collapse("show");
+	},
+	
+	place_order: function() {
+		wn.call({
+			type: "POST",
+			method: "website.helpers.cart.place_order",
+			callback: function(r) {
+				if(r.exc) {
+					var msg = "";
+					if(r._server_messages) {
+						msg = JSON.parse(r._server_messages || []).join("<br>");
+					}
+					
+					$("#cart-error")
+						.empty()
+						.html(msg || "Something went wrong!")
+						.toggle(true);
+				} else {
+					window.location.href = "order?name=" + encodeURIComponent(r.message);
+				}
+			}
+		});
 	}
 });

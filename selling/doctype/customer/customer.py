@@ -132,8 +132,15 @@ class DocType(TransactionBase):
 				self.doc.name, raise_exception=1)
 
 	def delete_customer_address(self):
-		for rec in sql("select * from `tabAddress` where customer=%s", (self.doc.name,), as_dict=1):
-			sql("delete from `tabAddress` where name=%s", (rec['name']))
+		addresses = webnotes.conn.sql("""select name, lead from `tabAddress`
+			where customer=%s""", (self.doc.name,))
+		
+		for name, lead in addresses:
+			if lead:
+				webnotes.conn.sql("""update `tabAddress` set customer=null, customer_name=null
+					where name=%s""", name)
+			else:
+				webnotes.conn.sql("""delete from `tabAddress` where name=%s""", name)
 	
 	def delete_customer_contact(self):
 		for rec in sql("select * from `tabContact` where customer=%s", (self.doc.name,), as_dict=1):
