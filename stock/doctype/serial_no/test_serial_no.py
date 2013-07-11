@@ -22,7 +22,7 @@ class TestSerialNo(unittest.TestCase):
 			where voucher_type = 'Serial No' and voucher_no = %s""", sr.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
-			["_Test Serialized Item", "_Test Warehouse", 1.0])
+			["_Test Serialized Item", "_Test Warehouse - _TC", 1.0])
 			
 		# check gl entries
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
@@ -92,7 +92,7 @@ test_records = [
 			"status": "In Store",
 			"item_code": "_Test Serialized Item", 
 			"item_group": "_Test Item Group", 
-			"warehouse": "_Test Warehouse",
+			"warehouse": "_Test Warehouse - _TC",
 			"purchase_rate": 1000.0, 
 			"purchase_time": "11:37:39", 
 			"purchase_date": "2013-02-26",

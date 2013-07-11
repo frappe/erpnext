@@ -39,7 +39,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
-		st1.doclist[1].t_warehouse="_Test Warehouse 2"
+		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
 
@@ -55,7 +55,7 @@ class TestStockEntry(unittest.TestCase):
 			"stock_in_hand_account")
 		
 		self.check_stock_ledger_entries("Stock Entry", mr.doc.name, 
-			[["_Test Item", "_Test Warehouse", 50.0]])
+			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
 			
 		self.check_gl_entries("Stock Entry", mr.doc.name, 
 			sorted([
@@ -66,8 +66,8 @@ class TestStockEntry(unittest.TestCase):
 		
 		mr.cancel()
 		self.check_stock_ledger_entries("Stock Entry", mr.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse", 50.0], 
-				["_Test Item", "_Test Warehouse", -50.0]]))
+			sorted([["_Test Item", "_Test Warehouse - _TC", 50.0], 
+				["_Test Item", "_Test Warehouse - _TC", -50.0]]))
 			
 		self.check_gl_entries("Stock Entry", mr.doc.name, 
 			sorted([
@@ -94,7 +94,7 @@ class TestStockEntry(unittest.TestCase):
 			"stock_in_hand_account")
 		
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
-			[["_Test Item", "_Test Warehouse", -40.0]])
+			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 			
 		self.check_gl_entries("Stock Entry", mi.doc.name, 
 			sorted([
@@ -106,8 +106,8 @@ class TestStockEntry(unittest.TestCase):
 		mi.cancel()
 		
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse", -40.0], 
-				["_Test Item", "_Test Warehouse", 40.0]]))
+			sorted([["_Test Item", "_Test Warehouse - _TC", -40.0], 
+				["_Test Item", "_Test Warehouse - _TC", 40.0]]))
 			
 		self.check_gl_entries("Stock Entry", mi.doc.name, 
 			sorted([
@@ -131,7 +131,7 @@ class TestStockEntry(unittest.TestCase):
 		mtn.submit()
 
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
-			[["_Test Item", "_Test Warehouse", -45.0], ["_Test Item", "_Test Warehouse 1", 45.0]])
+			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
 		# no gl entry
 		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
@@ -140,10 +140,10 @@ class TestStockEntry(unittest.TestCase):
 		
 		mtn.cancel()
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse", 45.0], 
-				["_Test Item", "_Test Warehouse 1", -45.0],
-				["_Test Item", "_Test Warehouse", -45.0], 
-				["_Test Item", "_Test Warehouse 1", 45.0]]))
+			sorted([["_Test Item", "_Test Warehouse - _TC", 45.0], 
+				["_Test Item", "_Test Warehouse 1 - _TC", -45.0],
+				["_Test Item", "_Test Warehouse - _TC", -45.0], 
+				["_Test Item", "_Test Warehouse 1 - _TC", 45.0]]))
 
 		# no gl entry
 		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
@@ -196,7 +196,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	def _get_actual_qty(self):
 		return flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
-			"warehouse": "_Test Warehouse"}, "actual_qty"))
+			"warehouse": "_Test Warehouse - _TC"}, "actual_qty"))
 			
 	def _test_sales_invoice_return(self, item_code, delivered_qty, returned_qty):
 		from stock.doctype.stock_entry.stock_entry import NotUpdateStockError
@@ -224,7 +224,7 @@ class TestStockEntry(unittest.TestCase):
 		# insert a pos invoice with update stock
 		si = webnotes.bean(copy=sales_invoice_test_records[1])
 		si.doc.is_pos = si.doc.update_stock = 1
-		si.doclist[1].warehouse = "_Test Warehouse"
+		si.doclist[1].warehouse = "_Test Warehouse - _TC"
 		si.doclist[1].item_code = item_code
 		si.doclist[1].qty = 5.0
 		si.insert()
@@ -456,7 +456,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.posting_date = "2013-03-01"
 		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
-		se.doclist[1].s_warehouse = "_Test Warehouse"
+		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
 		se.insert()
 		se.submit()
 		
@@ -481,7 +481,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.posting_date = "2013-03-01"
 		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 6
-		se.doclist[1].s_warehouse = "_Test Warehouse"
+		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
 		
 		self.assertRaises(StockOverReturnError, se.insert)
 		
@@ -556,7 +556,7 @@ class TestStockEntry(unittest.TestCase):
 		se.doc.posting_date = "2013-03-01"
 		se.doc.fiscal_year = "_Test Fiscal Year 2013"
 		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
-		se.doclist[1].s_warehouse = "_Test Warehouse"
+		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
 		se.insert()
 		se.submit()
 		
@@ -589,7 +589,7 @@ test_records = [
 			"stock_uom": "_Test UOM", 
 			"transfer_qty": 50.0, 
 			"uom": "_Test UOM",
-			"t_warehouse": "_Test Warehouse",
+			"t_warehouse": "_Test Warehouse - _TC",
 		}, 
 	],
 	[
@@ -612,7 +612,7 @@ test_records = [
 			"stock_uom": "_Test UOM", 
 			"transfer_qty": 40.0, 
 			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse",
+			"s_warehouse": "_Test Warehouse - _TC",
 		}, 
 	],
 	[
@@ -635,8 +635,8 @@ test_records = [
 			"stock_uom": "_Test UOM", 
 			"transfer_qty": 45.0, 
 			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse",
-			"t_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse - _TC",
+			"t_warehouse": "_Test Warehouse 1 - _TC",
 		}
 	]
 ]

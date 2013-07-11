@@ -327,7 +327,7 @@ class TestSalesInvoice(unittest.TestCase):
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
-			["_Test Item", "_Test Warehouse", -1.0])
+			["_Test Item", "_Test Warehouse - _TC", -1.0])
 		
 		# check gl entries
 		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 

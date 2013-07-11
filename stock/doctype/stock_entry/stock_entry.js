@@ -313,23 +313,14 @@ cur_frm.fields_dict['mtn_details'].grid.onrowadd = function(doc, cdt, cdn){
 cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];		
 	if(d.item_code) {
-		if (d.s_warehouse) {
-			return{
-				query: "stock.doctype.stock_entry.stock_entry.get_batch_no",
-				filters:{
-					'item_code': d.item_code,
-					's_warehouse': d.s_warehouse,
-					'posting_date': doc.posting_date
-				}
-			}			
-		} else {
-			return{
-				filters:[
-					['Batch', 'item', '=', d.item_code],
-					['Batch', 'expiry_date', '>=', doc.posting_date]
-				]
+		return{
+			query: "stock.doctype.stock_entry.stock_entry.get_batch_no",
+			filters:{
+				'item_code': d.item_code,
+				's_warehouse': d.s_warehouse,
+				'posting_date': doc.posting_date
 			}
-		}		
+		}			
 	} else {
 		msgprint("Please enter Item Code to get batch no");
 	}

@@ -68,7 +68,7 @@ wn.pages['Setup'].onload = function(wrapper) {
 			
 		} else {
 			var col = $(repl('<div class="col col-lg-5">\
-					<span class="badge">%(count)s</span>\
+					<span class="badge view-link">%(count)s</span>\
 					 <b><i class="%(icon)s"></i>\
 						<a class="data-link">%(title)s</a></b>\
 					</div>', {

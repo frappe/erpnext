@@ -26,10 +26,10 @@ from utilities import build_filter_conditions
 
 class FiscalYearError(webnotes.ValidationError): pass
 
-def get_fiscal_year(date=None, fiscal_year=None, verbose=1):
-	return get_fiscal_years(date, fiscal_year, verbose=1)[0]
+def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
+	return get_fiscal_years(date, fiscal_year, label, verbose=1)[0]
 	
-def get_fiscal_years(date=None, fiscal_year=None, verbose=1):
+def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
 	if fiscal_year:
@@ -45,14 +45,14 @@ def get_fiscal_years(date=None, fiscal_year=None, verbose=1):
 		order by year_start_date desc""" % cond)
 	
 	if not fy:
-		error_msg = """%s not in any Fiscal Year""" % formatdate(date)
+		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
 		if verbose: webnotes.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	
 	return fy
 	
 def validate_fiscal_year(date, fiscal_year, label="Date"):
-	years = [f[0] for f in get_fiscal_years(date)]
+	years = [f[0] for f in get_fiscal_years(date, label=label)]
 	if fiscal_year not in years:
 		webnotes.msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
 			": '%(fiscal_year)s'") % {

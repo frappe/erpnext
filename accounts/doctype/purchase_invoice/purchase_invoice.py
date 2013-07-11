@@ -66,10 +66,6 @@ class DocType(BuyingController):
 
 		#set against account for credit to
 		self.set_against_expense_account()
-
-		#FY validation
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,
-		 	self.doc.posting_date,'Posting Date')
 		
 		self.validate_write_off_account()
 		self.update_raw_material_cost()

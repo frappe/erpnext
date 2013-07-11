@@ -99,7 +99,7 @@ class DocType(SellingController):
 
 @webnotes.whitelist()
 def make_customer(source_name, target_doclist=None):
-	_make_customer(source_name, target_doclist)
+	return _make_customer(source_name, target_doclist)
 
 def _make_customer(source_name, target_doclist=None, ignore_permissions=False):
 	from webnotes.model.mapper import get_mapped_doclist

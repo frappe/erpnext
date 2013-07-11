@@ -31,12 +31,21 @@ class DocType(BuyingController):
 		self.doclist = doclist
 		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
+		self.status_updater = [{
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Material Request Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'ordered_qty',
+			'target_parent_dt': 'Material Request',
+			'target_parent_field': 'per_ordered',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'prevdoc_docname',
+		}]
 		
 	def validate(self):
 		super(DocType, self).validate()
 		
-		self.validate_fiscal_year()
-
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
@@ -52,9 +61,6 @@ class DocType(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")
-		
-	def validate_fiscal_year(self):
-		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'PO Date')
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -157,27 +163,18 @@ class DocType(BuyingController):
 		purchase_controller = webnotes.get_obj("Purchase Common")
 		purchase_controller.is_item_table_empty(self)
 		
-		# Step 1 :=> Update Previous Doc i.e. update pending_qty and Status accordingly
-		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
-
-		# Step 2 :=> Update Bin 
+		self.update_prevdoc_status()
 		self.update_bin(is_submit = 1, is_stopped = 0)
 		
-		# Step 3 :=> Check For Approval Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
+		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+			self.doc.company, self.doc.grand_total)
 		
-		# Step 5 :=> Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
-
-		# Step 6 :=> Set Status
+		
 		webnotes.conn.set(self.doc,'status','Submitted')
 	 
 	def on_cancel(self):
-		pc_obj = get_obj(dt = 'Purchase Common')
-		
-		# Check if PO status is stopped
-		pc_obj.check_for_stopped_status(cstr(self.doc.doctype), cstr(self.doc.name))
-		
+		pc_obj = get_obj(dt = 'Purchase Common')		
 		self.check_for_stopped_status(pc_obj)
 		
 		# Check if Purchase Receipt has been submitted against current Purchase Order
@@ -190,7 +187,7 @@ class DocType(BuyingController):
 			raise Exception
 
 		webnotes.conn.set(self.doc,'status','Cancelled')
-		pc_obj.update_prevdoc_detail(self,is_submit = 0)
+		self.update_prevdoc_status()
 		self.update_bin( is_submit = 0, is_stopped = 0)
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
 				

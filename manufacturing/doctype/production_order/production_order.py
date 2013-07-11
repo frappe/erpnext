@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, now, nowdate
+from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -65,6 +65,7 @@ class DocType:
 			where production_item = %s and sales_order = %s and docstatus < 2""", 
 			(self.doc.production_item, self.doc.sales_order))[0][0]
 
+		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
 		
 		# get qty from Sales Order Item table
 		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
@@ -77,12 +78,12 @@ class DocType:
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 				
-		if ordered_qty_against_so > so_qty:
+		if total_qty > so_qty:
 			webnotes.msgprint("""Total production order qty for item: %s against sales order: %s \
 			 	will be %s, which is greater than sales order qty (%s). 
 				Please reduce qty or remove the item.""" %
 				(self.doc.production_item, self.doc.sales_order, 
-					ordered_qty_against_so, so_qty), raise_exception=1)
+					total_qty, so_qty), raise_exception=1)
 
 
 	def stop_unstop(self, status):

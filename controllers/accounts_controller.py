@@ -19,13 +19,15 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today
 from setup.utils import get_company_currency, get_price_list_currency
-from accounts.utils import get_fiscal_year
+from accounts.utils import get_fiscal_year, validate_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
 
 class AccountsController(TransactionBase):
 	def validate(self):
 		self.set_missing_values(for_validate=True)
+		
+		self.validate_date_with_fiscal_year()
 		
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
@@ -43,6 +45,18 @@ class AccountsController(TransactionBase):
 				self.doc.fields[fieldname] = today()
 				if not self.doc.fiscal_year:
 					self.doc.fiscal_year = get_fiscal_year(self.doc.fields[fieldname])[0]
+					
+	def validate_date_with_fiscal_year(self):
+		if self.meta.get_field("fiscal_year") :
+			date_field = ""
+			if self.meta.get_field("posting_date"):
+				date_field = "posting_date"
+			elif self.meta.get_field("transaction_date"):
+				date_field = "transaction_date"
+				
+			if date_field and self.doc.fields[date_field]:
+				validate_fiscal_year(self.doc.fields[date_field], self.doc.fiscal_year, 
+					label=self.meta.get_label(date_field))
 			
 	def set_price_list_currency(self, buying_or_selling):
 		# TODO - change this, since price list now has only one currency allowed

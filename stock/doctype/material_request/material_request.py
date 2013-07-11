@@ -24,8 +24,6 @@ class DocType(BuyingController):
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
 
-	# Validate so items
-	# ----------------------------
 	def validate_qty_against_so(self):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in getlist(self.doclist, 'indent_details'):
@@ -49,14 +47,6 @@ class DocType(BuyingController):
 				if flt(so_items[so_no][item]) + already_indented > actual_so_qty:
 					msgprint("You can raise indent of maximum qty: %s for item: %s against sales order: %s\n Anyway, you can add more qty in new row for the same item." % (actual_so_qty - already_indented, item, so_no), raise_exception=1)
 				
-		
-	# Validate fiscal year
-	# ----------------------------
-	def validate_fiscal_year(self):
-		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Material Request Date')
-
-	# Validate Schedule Date
-	#--------------------------------
 	def validate_schedule_date(self):
 		 #:::::::: validate schedule date v/s indent date ::::::::::::
 		for d in getlist(self.doclist, 'indent_details'):
@@ -70,7 +60,6 @@ class DocType(BuyingController):
 		super(DocType, self).validate()
 		
 		self.validate_schedule_date()
-		self.validate_fiscal_year()
 		
 		if not self.doc.status:
 			self.doc.status = "Draft"

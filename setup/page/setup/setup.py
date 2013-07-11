@@ -9,7 +9,7 @@ items = [
 	},
 	{"doctype":"Company"}, 
 	{"doctype":"Fiscal Year"}, 
-	{"doctype":"Currency"}, 
+	{"doctype":"Currency", "filter": {"enabled": 1}},
 	{
 		"type": "Section",
 		"title": "Users and Permissions",
@@ -48,8 +48,8 @@ items = [
 			{"doctype":"Customer Group", "tree": "Sales Browser"}, 
 			{"doctype":"Territory", "tree": "Sales Browser"}, 
 			{"doctype":"Sales Person", "tree": "Sales Browser"}, 
-			{"doctype":"Contact"}, 
-			{"doctype":"Address"}, 
+			{"doctype":"Contact", "query": "select count(*) from `tabContact` where ifnull(customer, '')!=''"}, 
+			{"doctype":"Address", "query": "select count(*) from `tabAddress` where ifnull(customer, '')!=''"}, 
 			{ "title": "Selling Settings", 
 				"route": "Form/Selling Settings", "type": "Link", "icon": "icon-cog" },
 		]
@@ -58,8 +58,8 @@ items = [
 		"doctype": "Supplier",
 		"dependencies": [
 			{"doctype":"Supplier Type"}, 
-			{"doctype":"Contact"}, 
-			{"doctype":"Address"}, 
+			{"doctype":"Contact", "query": "select count(*) from `tabContact` where ifnull(supplier, '')!=''"}, 
+			{"doctype":"Address", "query": "select count(*) from `tabAddress` where ifnull(supplier, '')!=''"}, 
 			{ "title": "Buying Settings", 
 				"route": "Form/Buying Settings", "type": "Link", "icon": "icon-cog" },
 		]

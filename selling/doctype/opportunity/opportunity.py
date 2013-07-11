@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, getdate, cint
+from webnotes.utils import cstr, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
@@ -129,14 +129,6 @@ class DocType(TransactionBase):
 			msgprint("Please select items for which enquiry needs to be made")
 			raise Exception
 
-	def validate_fiscal_year(self):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(self.doc.transaction_date) < str(ysd) or str(self.doc.transaction_date) > str(yed):
-			msgprint("Opportunity Date is not within the Fiscal Year selected")
-			raise Exception		
-
 	def validate_lead_cust(self):
 		if self.doc.enquiry_from == 'Lead' and not self.doc.lead:
 			msgprint("Lead Id is mandatory if 'Opportunity From' is selected as Lead", raise_exception=1)
@@ -144,10 +136,12 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
-		self.validate_fiscal_year()
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_lead_cust()
+		
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
 		
 		if not self.doc.status:
 			self.doc.status = "Draft"

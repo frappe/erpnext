@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.defaults
 
-from webnotes.utils import cstr, cint, flt, comma_or
+from webnotes.utils import cstr, cint, flt, comma_or, nowdate
 from webnotes.model.doc import Document, addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -719,7 +719,6 @@ def get_production_order_details(production_order):
 	return result and result[0] or {}
 	
 def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
 	conditions = ""
 	if doctype == "Sales Invoice":
 		conditions = "and update_stock=1"
@@ -735,7 +734,6 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 		as_list=True)
 	
 def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
 	return webnotes.conn.sql("""select name, supplier, supplier_name
 		from `tab%s` where docstatus = 1
 			and (`%s` like %%(txt)s 
@@ -770,24 +768,50 @@ def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 	return result[start:start+page_len]
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
-
-	return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
+	if not filters.get("posting_date"):
+		filters["posting_date"] = nowdate()
+		
+	batch_nos = None
+	args = {
+		'item_code': filters['item_code'], 
+		's_warehouse': filters['s_warehouse'], 
+		'posting_date': filters['posting_date'], 
+		'txt': "%%%s%%" % txt, 
+		'mcond':get_match_cond(doctype, searchfield), 
+		"start": start, 
+		"page_len": page_len
+	}
+	
+	if filters.get("s_warehouse"):
+		batch_nos = webnotes.conn.sql("""select batch_no 
+			from `tabStock Ledger Entry` sle 
 			where item_code = '%(item_code)s' 
 				and warehouse = '%(s_warehouse)s'
 				and ifnull(is_cancelled, 'No') = 'No' 
 				and batch_no like '%(txt)s' 
 				and exists(select * from `tabBatch` 
-						where name = sle.batch_no 
-							and expiry_date >= %(posting_date)s 
-							and docstatus != 2) 
+					where name = sle.batch_no 
+					and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s 
+						or expiry_date = '')
+					and docstatus != 2) 
 			%(mcond)s
 			group by batch_no having sum(actual_qty) > 0 
 			order by batch_no desc 
-			limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'], 
-			's_warehouse': filters['s_warehouse'], 'posting_date': filters['posting_date'], 
-			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
-			"start": start, "page_len": page_len})
+			limit %(start)s, %(page_len)s """ 
+			% args)
+	
+	if batch_nos:
+		return batch_nos
+	else:
+		return webnotes.conn.sql("""select name from `tabBatch` 
+			where item = '%(item_code)s'
+			and docstatus < 2
+			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s 
+				or expiry_date = '' or expiry_date = "0000-00-00")
+			%(mcond)s
+			order by name desc 
+			limit %(start)s, %(page_len)s
+		""" % args)
 
 def get_stock_items_for_return(ref_doclist, parentfields):
 	"""return item codes filtered from doclist, which are stock items"""

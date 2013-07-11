@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, validate_email_add
+from webnotes.utils import flt, validate_email_add
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 

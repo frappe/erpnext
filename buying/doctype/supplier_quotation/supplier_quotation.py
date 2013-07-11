@@ -34,7 +34,6 @@ class DocType(BuyingController):
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 		
-		self.validate_fiscal_year()
 		self.validate_common()
 		self.validate_with_previous_doc()
 
@@ -49,10 +48,6 @@ class DocType(BuyingController):
 		
 	def on_trash(self):
 		pass
-	
-	def validate_fiscal_year(self):
-		get_obj(dt = 'Purchase Common').validate_fiscal_year( \
-			self.doc.fiscal_year, self.doc.transaction_date, 'Quotation Date')
 			
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {

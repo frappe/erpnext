@@ -63,9 +63,9 @@ class TestMaterialRequest(unittest.TestCase):
 				
 	def _test_requested_qty(self, qty1, qty2):
 		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
-			"warehouse": "_Test Warehouse"}, "indented_qty")), qty1)
+			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty1)
 		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
-			"warehouse": "_Test Warehouse"}, "indented_qty")), qty2)
+			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty2)
 			
 	def _insert_stock_entry(self, qty1, qty2):
 		se = webnotes.bean([
@@ -87,7 +87,7 @@ class TestMaterialRequest(unittest.TestCase):
 				"stock_uom": "_Test UOM", 
 				"transfer_qty": qty1, 
 				"uom": "_Test UOM",
-				"t_warehouse": "_Test Warehouse 1",
+				"t_warehouse": "_Test Warehouse 1 - _TC",
 			},
 			{
 				"conversion_factor": 1.0, 
@@ -99,7 +99,7 @@ class TestMaterialRequest(unittest.TestCase):
 				"stock_uom": "_Test UOM", 
 				"transfer_qty": qty2, 
 				"uom": "_Test UOM",
-				"t_warehouse": "_Test Warehouse 1",
+				"t_warehouse": "_Test Warehouse 1 - _TC",
 			},
 		])
 		se.insert()
@@ -148,7 +148,7 @@ class TestMaterialRequest(unittest.TestCase):
 		po.cancel()
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
 		self._test_requested_qty(54.0, 3.0)
 		
 	def test_completed_qty_for_transfer(self):
@@ -178,13 +178,13 @@ class TestMaterialRequest(unittest.TestCase):
 		se_doclist[1].update({
 			"qty": 27.0,
 			"transfer_qty": 27.0,
-			"s_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 		se_doclist[2].update({
 			"qty": 1.5,
 			"transfer_qty": 1.5,
-			"s_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 		
@@ -241,13 +241,13 @@ class TestMaterialRequest(unittest.TestCase):
 		se_doclist[1].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
-			"s_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 		se_doclist[2].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
-			"s_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 
@@ -296,14 +296,14 @@ class TestMaterialRequest(unittest.TestCase):
 		se_doclist[1].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
-			"s_warehouse": "_Test Warehouse",
-			"t_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse - _TC",
+			"t_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 		se_doclist[2].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
-			"s_warehouse": "_Test Warehouse 1",
+			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
 		
@@ -336,7 +336,7 @@ test_records = [
 			"qty": 54.0, 
 			"schedule_date": "2013-02-18", 
 			"uom": "_Test UOM",
-			"warehouse": "_Test Warehouse"
+			"warehouse": "_Test Warehouse - _TC"
 		}, 
 		{
 			"description": "_Test Item Home Desktop 200", 
@@ -347,7 +347,7 @@ test_records = [
 			"qty": 3.0, 
 			"schedule_date": "2013-02-19", 
 			"uom": "_Test UOM",
-			"warehouse": "_Test Warehouse"
+			"warehouse": "_Test Warehouse - _TC"
 		}
 	],
 ]
