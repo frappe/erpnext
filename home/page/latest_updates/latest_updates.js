@@ -21,7 +21,7 @@ wn.pages['latest-updates'].onload = function(wrapper) {
 			var $tbody = $('<table class="table table-bordered"><tbody></tbody></table>')
 				.appendTo(parent).find("tbody");
 			$.each(r.message, function(i, log) {
-				if(log.message.indexOf("minor")===1 && log.message.indexOf("[")!==-1) {
+				if(log.message.indexOf("minor")===-1 && log.message.indexOf("[")!==-1) {
 					log.message = log.message.replace(/(\[[^\]]*\])/g, 
 						function(match, p1, offset, string) { 
 							match = match.toLowerCase();
