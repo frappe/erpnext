@@ -6,7 +6,7 @@ test_records = [
 		"conversion_rate": 1.0,
 		"price_list_name": "_Test Price List",
 		"company": "_Test Company",
-		"warehouse": "_Test Warehouse",
+		"warehouse": "_Test Warehouse - _TC",
 		"territory": "_Test Territory", 
 		"cash_bank_account": "_Test Account Bank Account - _TC",
 		"income_account": "Sales - _TC",

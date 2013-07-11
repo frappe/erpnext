@@ -32,7 +32,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = webnotes.bean("Purchase Order", po.doc.name)
 		po.submit()
 		pr = make_purchase_receipt(po.doc.name)
-		pr[0]["supplier_warehouse"] = "_Test Warehouse 1"
+		pr[0]["supplier_warehouse"] = "_Test Warehouse 1 - _TC"
 		
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
@@ -100,7 +100,7 @@ test_records = [
 			"qty": 10.0,
 			"import_rate": 500.0,
 			"amount": 5000.0,
-			"warehouse": "_Test Warehouse", 
+			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
 			"schedule_date": "2013-03-01"

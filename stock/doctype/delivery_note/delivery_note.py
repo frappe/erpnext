@@ -50,10 +50,6 @@ class DocType(SellingController):
 			'keyword': 'Delivered'
 		}]
 		
-	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
-
-
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 
@@ -104,7 +100,6 @@ class DocType(SellingController):
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
 
 		self.so_required()
-		self.validate_fiscal_year()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -122,7 +117,6 @@ class DocType(SellingController):
 		self.validate_with_previous_doc()
 		
 		self.doc.status = 'Draft'
-		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
 	def validate_with_previous_doc(self):

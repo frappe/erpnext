@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
@@ -202,7 +201,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		from tabBOM 
 		where tabBOM.docstatus=1 
 			and tabBOM.is_active=1 
-			and tabBOM.%(key)s like "%s"  
+			and tabBOM.%(key)s like "%(txt)s"  
 			%(fcond)s  %(mcond)s  
 		limit %(start)s, %(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
 		'fcond': get_filters_cond(doctype, filters, conditions), 

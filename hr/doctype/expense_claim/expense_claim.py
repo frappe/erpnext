@@ -17,12 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days
 from webnotes.model.bean import getlist
-from webnotes import form, msgprint
-from webnotes.model.code import get_obj
-
-sql = webnotes.conn.sql
+from webnotes import msgprint
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -30,8 +26,6 @@ class DocType:
 		self.doclist = doclist
 
 	def validate(self):
-		# if self.doc.exp_approver == self.doc.owner:
-		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
 		self.validate_fiscal_year()
 		self.validate_exp_details()
 			
@@ -41,12 +35,8 @@ class DocType:
 				'Rejected' before submitting""", raise_exception=1)
 	
 	def validate_fiscal_year(self):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(self.doc.posting_date) < str(ysd) or str(self.doc.posting_date) > str(yed):
-			msgprint("Posting Date is not within the Fiscal Year selected")
-			raise Exception
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
 			
 	def validate_exp_details(self):
 		if not getlist(self.doclist, 'expense_voucher_details'):

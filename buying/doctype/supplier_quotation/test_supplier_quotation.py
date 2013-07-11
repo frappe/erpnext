@@ -70,7 +70,7 @@ test_records = [
 			"qty": 10.0,
 			"import_rate": 500.0,
 			"amount": 5000.0,
-			"warehouse": "_Test Warehouse", 
+			"warehouse": "_Test Warehouse - _TC", 
 			"uom": "_Test UOM",
 		}
 	],

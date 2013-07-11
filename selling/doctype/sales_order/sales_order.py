@@ -56,9 +56,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Sales Order Date')
-	
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
@@ -156,7 +153,6 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		self.validate_fiscal_year()
 		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_mandatory()
@@ -398,7 +394,6 @@ def make_delivery_note(source_name, target_doclist=None):
 		"Sales Order": {
 			"doctype": "Delivery Note", 
 			"field_map": {
-				"name": "sales_order_no", 
 				"shipping_address": "address_display", 
 				"shipping_address_name": "customer_address", 
 			},

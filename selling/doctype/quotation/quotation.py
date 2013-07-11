@@ -75,11 +75,6 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 	
-	# Fiscal Year Validation
-	# ----------------------
-	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Quotation Date')
-	
 	# Does not allow same item code to be entered twice
 	# -------------------------------------------------
 	def validate_for_items(self):
@@ -137,7 +132,6 @@ class DocType(SellingController):
 			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
 				"Order Confirmed", "Order Lost", "Cancelled"])
 
-		self.validate_fiscal_year()
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
@@ -245,10 +239,6 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 	doclist = get_mapped_doclist("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order", 
-				"field_map": {
-					"name": "quotation_no", 
-					"transaction_date": "quotation_date"
-				},
 				"validation": {
 					"docstatus": ["=", 1]
 				}

@@ -19,6 +19,7 @@ import unittest
 import webnotes
 
 test_ignore = ["BOM"]
+test_dependencies = ["Warehouse"]
 
 class TestItem(unittest.TestCase):
 	def test_duplicate_price_list(self):
@@ -41,7 +42,6 @@ class TestItem(unittest.TestCase):
 		item.doc.is_stock_item = "Yes"
 		item.doc.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
-		
 
 test_records = [
 	[{
@@ -63,11 +63,11 @@ test_records = [
 		"is_sub_contracted_item": "No",
 		"stock_uom": "_Test UOM",
 		"default_income_account": "Sales - _TC",
-		"default_warehouse": "_Test Warehouse",
+		"default_warehouse": "_Test Warehouse - _TC",
 	}, {
 		"doctype": "Item Reorder",
 		"parentfield": "item_reorder",
-		"warehouse": "_Test Warehouse",
+		"warehouse": "_Test Warehouse - _TC",
 		"warehouse_reorder_level": 20,
 		"warehouse_reorder_qty": 20,
 		"material_request_type": "Purchase"
@@ -86,7 +86,7 @@ test_records = [
 		"item_name": "_Test Item Home Desktop 100",
 		"description": "_Test Item Home Desktop 100",
 		"item_group": "_Test Item Group Desktops",
-		"default_warehouse": "_Test Warehouse",
+		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
@@ -112,7 +112,7 @@ test_records = [
 		"item_name": "_Test Item Home Desktop 200",
 		"description": "_Test Item Home Desktop 200",
 		"item_group": "_Test Item Group Desktops",
-		"default_warehouse": "_Test Warehouse",
+		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
@@ -154,7 +154,7 @@ test_records = [
 		"description": "_Test FG Item",
 		"item_group": "_Test Item Group Desktops",
 		"is_stock_item": "Yes",
-		"default_warehouse": "_Test Warehouse",
+		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -194,7 +194,7 @@ test_records = [
 		"description": "_Test Serialized Item",
 		"item_group": "_Test Item Group Desktops",
 		"is_stock_item": "Yes",
-		"default_warehouse": "_Test Warehouse",
+		"default_warehouse": "_Test Warehouse - _TC",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
 		"has_serial_no": "Yes",

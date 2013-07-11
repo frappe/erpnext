@@ -18,9 +18,8 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
-from webnotes.model.doc import addchild, make_autoname
+from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 from setup.utils import get_company_currency
 
@@ -39,13 +38,13 @@ class DocType(AccountsController):
 			self.doc.is_opening='No'
 			
 		self.doc.clearance_date = None
-			
+		
+		super(DocType, self).validate_date_with_fiscal_year()
+		
 		self.validate_debit_credit()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
 		self.validate_against_jv()
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, \
-			self.doc.posting_date, 'Posting Date')
 		
 		self.set_against_account()
 		self.create_remarks()

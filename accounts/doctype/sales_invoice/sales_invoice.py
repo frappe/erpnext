@@ -65,8 +65,6 @@ class DocType(SellingController):
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
 		sales_com_obj.validate_max_discount(self, 'entries')
-		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year, 
-			self.doc.posting_date,'Posting Date')
 		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
