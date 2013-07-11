@@ -30,6 +30,19 @@ class DocType:
 		from webnotes.webutils import get_hex_shade
 		import os
 		
+		default_colours = {
+			"background_color": "FFFFFF",
+			"page_background": "FFFFFF",
+			"top_bar_background": "FFFFFF",
+			"top_bar_foreground": "444444",
+			"page_headings": "222222",
+			"page_text": "000000"
+		}
+		
+		for d in default_colours:
+			if not self.doc.fields.get(d):
+				self.doc.fields[d] = default_colours[d]
+		
 		self.validate_colors()
 		
 		with open(os.path.join(

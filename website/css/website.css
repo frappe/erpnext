@@ -18,6 +18,19 @@ img {
 	padding-bottom: 30px;
 }
 
+.outer {
+	padding: 0px 20px;
+}
+
+.navbar {
+	margin: 0px -20px;
+}
+
+.banner {
+	margin-top: 20px;
+	padding: 0px 20px;
+}
+
 .missing-image {
 	background-color: #eee;
 	padding: 40px;
@@ -42,7 +55,6 @@ img {
 }
 
 div.web-footer {
-	border-top: 1px solid #dddddd;
 	padding-top: 10px;
 }
 

@@ -1,30 +1,31 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-02-20 15:46:39", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:01", 
   "modified_by": "Administrator", 
-  "modified": "2012-02-20 15:46:57"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Selling Home", 
-  "module": "Selling", 
   "doctype": "Page", 
-  "page_name": "selling-home", 
-  "standard": "Yes"
- }, 
- {
-  "parent": "selling-home", 
+  "icon": "icon-th", 
+  "module": "Selling", 
   "name": "__common__", 
-  "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "role": "All", 
-  "parentfield": "roles"
+  "page_name": "selling-home", 
+  "standard": "Yes", 
+  "title": "Selling Home"
  }, 
  {
-  "name": "selling-home", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "selling-home", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "All"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "selling-home"
  }, 
  {
   "doctype": "Page Role"

@@ -1,40 +1,41 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-09-21 20:15:14", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:19", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 17:25:35"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Stock Ledger", 
-  "module": "Stock", 
   "doctype": "Page", 
+  "icon": "icon-table", 
+  "module": "Stock", 
+  "name": "__common__", 
   "page_name": "stock-ledger", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Stock Ledger"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "stock-ledger", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "stock-ledger"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Analytics"
  }, 
  {
-  "name": "stock-ledger", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "role": "Material Manager"
  }, 
  {
-  "role": "Analytics", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Material Manager", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Material User", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Material User"
  }
 ]

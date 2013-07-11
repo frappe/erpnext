@@ -2,12 +2,13 @@
  {
   "creation": "2013-04-09 11:45:31", 
   "docstatus": 0, 
-  "modified": "2013-04-09 11:47:32", 
+  "modified": "2013-07-11 14:40:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "Page", 
+  "icon": "icon-play", 
   "module": "Home", 
   "name": "__common__", 
   "page_name": "activity", 

@@ -29,7 +29,7 @@ body {
 {% endif %}
 
 div.outer {
-	background-color: #{{ doc.page_background or "fffffff" }};
+	background-color: #{{ doc.page_background }};
 }
 
 {% if doc.google_web_font_for_heading or doc.heading_font %}h1, h2, h3, h4, h5 {
@@ -52,9 +52,9 @@ div.outer {
 	-webkibox-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 {% else %}
-{% if doc.background_color == doc.page_background %}
+{% if doc.background_color.lower() == doc.page_background.lower() %}
 div.web-footer {
-	border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	border-top: 1px solid #{{ get_hex_shade(doc.page_background, 15) }};
 	padding-top: 10px;
 }
 {% endif %}
@@ -62,60 +62,55 @@ div.web-footer {
 
 div.web-footer, div.web-footer a {
 	font-size: 90%;
-	color: #{{ get_hex_shade(doc.background_color or "ffffff", 70) }};
+	color: #{{ get_hex_shade(doc.background_color, 70) }};
 }
 
 /* Bootstrap Navbar */
-.navbar-inverse {
+.navbar {
 	box-shadow: none;
 	border-radius: 0px;
-    background-color: #{{ doc.top_bar_background or "444444"}};
+    background-color: #{{ doc.top_bar_background}};
     background-repeat: repeat-x;
 	background-image: none;
-	border-bottom: 1px solid {% if doc.top_bar_background == doc.page_background -%}
-		#{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	border-bottom: 1px solid {% if doc.top_bar_background.lower() == doc.page_background.lower() -%}
+		#{{ get_hex_shade(doc.page_background, 15) }};
 	{%- else -%}
 		transparent;
 	{%- endif %}
 }
 
-.navbar-inverse .navbar-brand,
-.navbar-inverse .navbar-brand:hover,
-.navbar-inverse .navbar-brand:focus,
-.navbar-inverse .nav > li > a {
-  color: #{{ doc.top_bar_foreground or "fffffff"}};
+.navbar .navbar-brand,
+.navbar .navbar-brand:hover,
+.navbar .navbar-brand:focus,
+.navbar .nav > li > a {
+  color: #{{ doc.top_bar_foreground }};
   text-shadow: none;
 }
 
-.navbar-inverse .nav > li > a:hover,
-.navbar-inverse .nav > li > a:focus {
-  color: #{{ doc.top_bar_background or "0000000"}};
-}
-
-.navbar-inverse .navbar-text {
-  color: #999999;
-}
-
-.navbar-inverse .nav > li > a:focus,
-.navbar-inverse .nav > li > a:hover {
-  color: #{{ doc.top_bar_foreground or "fffffff"}};
+.navbar .nav > li > a:hover,
+.navbar .nav > li > a:focus {
+  color: #{{ doc.top_bar_foreground }};
   background-color: transparent;
 }
 
-.navbar-inverse .nav .active > a,
-.navbar-inverse .nav .active > a:hover,
-.navbar-inverse .nav .active > a:focus {
-  color: #{{ doc.top_bar_foreground or "fffffff"}};
-  background-color: transparent;
-}
-
-.navbar-inverse .navbar-link {
+.navbar .navbar-text {
   color: #999999;
 }
 
-.navbar-inverse .navbar-link:hover,
-.navbar-inverse .navbar-link:focus {
-  color: #{{ doc.top_bar_foreground or "fffffff"}};
+.navbar .nav .active > a,
+.navbar .nav .active > a:hover,
+.navbar .nav .active > a:focus {
+  color: #{{ doc.top_bar_foreground }};
+  background-color: transparent;
+}
+
+.navbar .navbar-link {
+  color: #444444;
+}
+
+.navbar .navbar-link:hover,
+.navbar .navbar-link:focus {
+  color: #{{ doc.top_bar_foreground}};
 }
 
 .navbar-fixed-top,
@@ -136,55 +131,55 @@ div.web-footer, div.web-footer a {
           box-shadow: none;
 }
 
-.navbar-inverse .nav li.dropdown > .dropdown-toggle .caret, 
-.navbar-inverse .nav li.dropdown > .dropdown-toggle:hover .caret {
-	border-top-color: #{{ doc.top_bar_foreground or "fffffff"}};
-	border-bottom-color: #{{ doc.top_bar_foreground or "fffffff"}};
+.navbar .nav li.dropdown > .dropdown-toggle .caret, 
+.navbar .nav li.dropdown > .dropdown-toggle:hover .caret {
+	border-top-color: #{{ doc.top_bar_foreground}};
+	border-bottom-color: #{{ doc.top_bar_foreground}};
 }
 
-.navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret,
-.navbar-inverse .nav li.dropdown.open > .dropdown-toggle:hover .caret {
-	border-top-color: #{{ doc.top_bar_background or "0000000"}};
-	border-bottom-color: #{{ doc.top_bar_background or "0000000"}};
+.navbar .nav li.dropdown.open > .dropdown-toggle .caret,
+.navbar .nav li.dropdown.open > .dropdown-toggle:hover .caret {
+	border-top-color: #{{ doc.top_bar_background}};
+	border-bottom-color: #{{ doc.top_bar_background}};
 }
 
-.navbar-inverse .nav li.dropdown.open > .dropdown-toggle {
-  color: #{{ doc.top_bar_background or "0000000"}};
-  background-color: #{{ doc.top_bar_foreground or "fffffff"}};
+.navbar .nav li.dropdown.open > .dropdown-toggle {
+  color: #{{ doc.top_bar_background}};
+  background-color: #{{ doc.top_bar_foreground}};
 }
 
 @media (max-width: 800px) {
-  .navbar-inverse .nav-collapse .nav > li > a,
-  .navbar-inverse .nav-collapse .dropdown-menu a {
-    background-color: #{{ doc.top_bar_background or "0000000"}};
-    color: #{{ doc.top_bar_foreground or "fffffff"}};
+  .navbar .nav-collapse .nav > li > a,
+  .navbar .nav-collapse .dropdown-menu a {
+    background-color: #{{ doc.top_bar_background}};
+    color: #{{ doc.top_bar_foreground}};
   }
-  .navbar-inverse .nav-collapse .nav > li > a:hover, 
-  .navbar-inverse .nav-collapse .dropdown-menu a:hover {
-    background-color: #{{ doc.top_bar_foreground or "fffffff"}};
-    color: #{{ doc.top_bar_background or "0000000"}};
-  }
-
-  .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
-    border-top-color: #{{ doc.top_bar_foreground or "fffffff" }};
-    border-bottom-color: #{{ doc.top_bar_foreground or "fffffff" }};	
+  .navbar .nav-collapse .nav > li > a:hover, 
+  .navbar .nav-collapse .dropdown-menu a:hover {
+    background-color: #{{ doc.top_bar_foreground}};
+    color: #{{ doc.top_bar_background}};
   }
 
-  .navbar-inverse .nav li.dropdown > .dropdown-toggle:hover .caret {
-    border-top-color: #{{ doc.top_bar_background or "0000000" }};
-    border-bottom-color: #{{ doc.top_bar_background or "0000000" }};
+  .navbar .nav li.dropdown > .dropdown-toggle .caret {
+    border-top-color: #{{ doc.top_bar_foreground }};
+    border-bottom-color: #{{ doc.top_bar_foreground }};	
   }
 
-  .navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret,
-  .navbar-inverse .nav li.dropdown.open > .dropdown-toggle:hover .caret {
-    border-top-color: #{{ doc.top_bar_background or "0000000" }};
-    border-bottom-color: #{{ doc.top_bar_background or "0000000" }};	
+  .navbar .nav li.dropdown > .dropdown-toggle:hover .caret {
+    border-top-color: #{{ doc.top_bar_background }};
+    border-bottom-color: #{{ doc.top_bar_background }};
+  }
+
+  .navbar .nav li.dropdown.open > .dropdown-toggle .caret,
+  .navbar .nav li.dropdown.open > .dropdown-toggle:hover .caret {
+    border-top-color: #{{ doc.top_bar_background }};
+    border-bottom-color: #{{ doc.top_bar_background }};	
   }
 
 }
 
 .breadcrumb {
-	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 10) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 10) }};
 }
 
 .breadcrumb > li {
@@ -194,39 +189,39 @@ div.web-footer, div.web-footer a {
 
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
-	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 5) }};
 }
 
 .table-hover tbody tr:hover td,
 .table-hover tbody tr:hover th {
-	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 10) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 10) }};
 }
 
 .table-bordered {
-	border: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	border: 1px solid #{{ get_hex_shade(doc.page_background, 15) }};
 }
 
 .table th,
 .table td {
-  border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+  border-top: 1px solid #{{ get_hex_shade(doc.page_background, 15) }};
 }
 
 .table-bordered th,
 .table-bordered td {
-	border-left: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	border-left: 1px solid #{{ get_hex_shade(doc.page_background, 15) }};
 }
 
 
 
 .hero-unit {
-	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 15) }};
 }
 
 pre, code {
-	background-color: #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 5) }};
 }
 
 hr {
-	border-top: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 15) }};
-	border-bottom: 1px solid #{{ get_hex_shade(doc.page_background or "ffffff", 5) }};	
+	border-top: 1px solid #{{ get_hex_shade(doc.page_background, 15) }};
+	border-bottom: 1px solid #{{ get_hex_shade(doc.page_background, 5) }};	
 }

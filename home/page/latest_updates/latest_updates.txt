@@ -1,30 +1,31 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-11-19 12:06:54", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-23 18:03:48"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Latest Updates", 
   "doctype": "Page", 
+  "icon": "icon-asterisk", 
   "module": "Home", 
+  "name": "__common__", 
+  "page_name": "latest-updates", 
   "standard": "Yes", 
-  "page_name": "latest-updates"
+  "title": "Latest Updates"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "latest-updates", 
-  "doctype": "Page Role", 
+  "parentfield": "roles", 
   "parenttype": "Page", 
-  "role": "All", 
-  "parentfield": "roles"
+  "role": "All"
  }, 
  {
-  "name": "latest-updates", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "latest-updates"
  }, 
  {
   "doctype": "Page Role"

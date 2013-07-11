@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-03-01 12:30:42", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:41:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-01 12:30:42"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Attributions", 
-  "module": "Home", 
   "doctype": "Page", 
+  "icon": "icon-trophy", 
+  "module": "Home", 
+  "name": "__common__", 
   "page_name": "attributions", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Attributions"
  }, 
  {
-  "name": "attributions", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "attributions"
  }
 ]
