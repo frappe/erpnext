@@ -23,7 +23,11 @@ wn.provide("erpnext.buying");
 wn.require("app/js/transaction.js");
 
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
-	setup: function() {
+	onload: function() {
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
 		var me = this;
 		
 		if(this.frm.fields_dict.price_list_name) {
@@ -472,16 +476,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		});
 	}
 });
-
-// to save previous state of cur_frm.cscript
-var prev_cscript = {};
-$.extend(prev_cscript, cur_frm.cscript);
-
-cur_frm.cscript = new erpnext.buying.BuyingController({frm: cur_frm});
-
-// for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, prev_cscript);
-
 
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;

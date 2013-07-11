@@ -25,7 +25,13 @@ wn.provide("erpnext.selling");
 wn.require("app/js/transaction.js");
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
-	setup: function() {
+	onload: function() {
+		this._super();
+		this.toggle_rounded_total();
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
 		var me = this;
 		
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
@@ -64,18 +70,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.fields_dict.lead && this.frm.set_query("lead", function(doc,cdt,cdn) {
 			return{	query:"controllers.queries.lead_query" } });
-
+			
 		if(!this.fname) {
 			return;
 		}
 		
 		if(this.frm.fields_dict[this.fname].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", this.fname, function() {
-				return me.frm.doc.order_type === "Maintenance" ?
-					 	{ query:"controllers.queries.item_query",
-							filters:{'is_service_item': 'Yes'}}	:
-						{ query:"controllers.queries.item_query",
-							filters:{'is_sales_item': 'Yes'	}}	;
+				return {
+					query: "controllers.queries.item_query",
+					filters: (me.frm.doc.order_type === "Maintenance" ?
+						{'is_service_item': 'Yes'}:
+						{'is_sales_item': 'Yes'	})
+				}
 			});
 		}
 		
@@ -106,11 +113,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
-	},
-	
-	onload: function() {
-		this._super();
-		this.toggle_rounded_total();
 	},
 	
 	refresh: function(doc) {

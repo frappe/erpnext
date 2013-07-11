@@ -15,12 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Module CRM
+// =====================================================================================
 cur_frm.cscript.tname = "Quotation Item";
 cur_frm.cscript.fname = "quotation_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
-// =====================================================================================
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
@@ -107,8 +107,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 });
 
-// for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.selling.QuotationController({frm: cur_frm}));
+cur_frm.script_manager.make(erpnext.selling.QuotationController);
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({
@@ -178,31 +177,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	});
 	dialog.show();
 	
-}
-
-//================ Last Quoted Price and Last Sold Price suggestion ======================
-cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	var cond = (doc.order_type == 'Maintenance') ? " and item.is_service_item = 'Yes'" : " and item.is_sales_item = 'Yes'";
-	if(doc.customer) {
-		var export_rate_field = wn.meta.get_docfield(cdt, 'export_rate', cdn);
-		var precision = (export_rate_field && export_rate_field.fieldtype) === 'Float' ? 6 : 2;
-		return {
-			query: "selling.doctype.quotation.quotation.quotation_details",
-			filters:{
-				cust: doc.customer,
-				cond: cond,
-				precision: precision
-			}
-		}
-	} else {
-		return {
-			query: 'selling.doctype.quotation.quotation.quotation_details',
-			filters:{
-				cond: cond
-			}		
-		}	
-	}
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
