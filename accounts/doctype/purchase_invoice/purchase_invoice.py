@@ -52,7 +52,6 @@ class DocType(BuyingController):
 		self.pr_required()
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
-		self.validate_bill_no_date()
 		self.validate_bill_no()
 		self.validate_credit_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
@@ -160,10 +159,6 @@ class DocType(BuyingController):
 		else:
 			if not self.doc.remarks:
 				self.doc.remarks = "No Remarks"
-					
-	def validate_bill_no_date(self):
-		if self.doc.bill_no and not self.doc.bill_date and self.doc.bill_no.lower().strip() not in ['na', 'not applicable', 'none']:
-			msgprint(_("Please enter Bill Date"), raise_exception=1)
 
 	def validate_credit_acc(self):
 		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
