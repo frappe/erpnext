@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-02-21 13:24:34", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Manufacturing Home", 
-  "module": "Manufacturing", 
   "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "Manufacturing", 
+  "name": "__common__", 
   "page_name": "manufacturing-home", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Manufacturing Home"
  }, 
  {
-  "name": "manufacturing-home", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "manufacturing-home"
  }
 ]

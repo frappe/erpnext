@@ -1,55 +1,56 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-06-14 15:07:26", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:56", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 17:34:55"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "module": "Selling", 
-  "page_name": "Sales Browser", 
   "doctype": "Page", 
+  "icon": "icon-sitemap", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "page_name": "Sales Browser", 
   "standard": "Yes"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "Sales Browser", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "Sales Browser"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Sales Master Manager"
  }, 
  {
-  "name": "Sales Browser", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "role": "Material Master Manager"
  }, 
  {
-  "role": "Sales Master Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Accounts Manager"
  }, 
  {
-  "role": "Material Master Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Sales Master Manager"
  }, 
  {
-  "role": "Accounts Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Purchase Manager"
  }, 
  {
-  "role": "Sales Master Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Purchase Master Manager"
  }, 
  {
-  "role": "Purchase Manager", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Purchase Master Manager", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Material Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Material Manager"
  }
 ]

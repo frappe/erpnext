@@ -1,36 +1,37 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-09-21 20:15:14", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:10", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 17:32:20"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Stock Analytics", 
-  "module": "Stock", 
   "doctype": "Page", 
+  "icon": "icon-bar-chart", 
+  "module": "Stock", 
+  "name": "__common__", 
   "page_name": "stock-analytics", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Stock Analytics"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "stock-analytics", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "stock-analytics"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Analytics"
  }, 
  {
-  "name": "stock-analytics", 
-  "doctype": "Page"
- }, 
- {
-  "role": "Analytics", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Material Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Material Manager"
  }
 ]

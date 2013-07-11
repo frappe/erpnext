@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-27 16:30:52", 
   "docstatus": 0, 
-  "modified": "2013-01-29 13:11:43", 
+  "modified": "2013-07-11 14:44:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "Page", 
+  "icon": "icon-table", 
   "module": "Accounts", 
   "name": "__common__", 
   "page_name": "trial-balance", 

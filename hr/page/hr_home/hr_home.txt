@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-02-21 13:24:05", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:42:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-02-21 13:24:05"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Human Resources Home", 
-  "module": "HR", 
   "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "HR", 
+  "name": "__common__", 
   "page_name": "hr-home", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Human Resources Home"
  }, 
  {
-  "name": "hr-home", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "hr-home"
  }
 ]

@@ -1,40 +1,41 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-09-14 11:25:48", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:42:21", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 17:00:09"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "General Ledger", 
-  "module": "Accounts", 
   "doctype": "Page", 
+  "icon": "icon-table", 
+  "module": "Accounts", 
+  "name": "__common__", 
   "page_name": "general-ledger", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "General Ledger"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "general-ledger", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "general-ledger"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Analytics"
  }, 
  {
-  "name": "general-ledger", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "role": "Accounts Manager"
  }, 
  {
-  "role": "Analytics", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Accounts Manager", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Accounts User", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Accounts User"
  }
 ]
