@@ -42,7 +42,7 @@ def execute(filters=None):
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
-		row = [inv.name, inv.posting_date, inv.customer, inv.debit_to, 
+		row = [inv.name, inv.posting_date, inv.customer_name, inv.debit_to, 
 			account_map.get(inv.debit_to), customer_map.get(inv.customer), inv.project_name, 
 			inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 		
@@ -68,7 +68,7 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer:Link/Customer:120", 
+		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer::120", 
 		"Customer Account:Link/Account:120", "Account Group:LInk/Account:120",
 		"Territory:Link/Territory:80", "Project:Link/Project:80", 
 		"Remarks::150", "Sales Order:Link/Sales Order:100", "Delivery Note:Link/Delivery Note:100"
@@ -118,7 +118,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
-		remarks, net_total, other_charges_total, grand_total, rounded_total, 
+		customer_name, remarks, net_total, other_charges_total, grand_total, rounded_total, 
 		outstanding_amount from `tabSales Invoice` 
 		where docstatus = 1 %s order by posting_date desc, name desc""" % 
 		conditions, filters, as_dict=1)
