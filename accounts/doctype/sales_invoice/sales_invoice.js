@@ -287,7 +287,7 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	return{
 		filters:{
 			'group_or_ledger': 'Ledger',
-			'company_name': doc.company
+			'company': doc.company
 		}
 	}	
 }

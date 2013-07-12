@@ -38,7 +38,7 @@ cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = func
 	var mydoc = locals[this.doctype][this.docname];
 	return{
 		filters:[
-			['Account', 'company', '=', doc.company_name],
+			['Account', 'company', '=', doc.company],
 			['Account', 'is_pl_account', '=', 'Yes'],
 			['Account', 'debit_or_credit', '=', 'Debit'],
 			['Account', 'group_or_ledger', '!=', 'Group'],
@@ -51,8 +51,8 @@ cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
 	return{
 		filters:[			
 			['Cost Center', 'group_or_ledger', '=', 'Group'],
-			['Cost Center', 'company', '=', doc.company_name],
-			['Cost Center', 'company_name', 'is not', 'NULL']
+			['Cost Center', 'company', '=', doc.company],
+			['Cost Center', 'company', 'is not', 'NULL']
 		]
 	}
 }

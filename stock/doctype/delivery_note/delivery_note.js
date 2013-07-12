@@ -252,7 +252,7 @@ if (sys_defaults.auto_inventory_accounting) {
 		return {
 
 			filters: { 
-				'company_name': doc.company,
+				'company': doc.company,
 				'group_or_ledger': "Ledger"
 			}
 		}

@@ -197,7 +197,7 @@ cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(do
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: { 
-			'company_name': doc.company,
+			'company': doc.company,
 			'group_or_ledger': 'Ledger'
 		}
 	}

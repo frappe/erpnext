@@ -148,7 +148,7 @@ cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = 
 
 cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = function(doc) {
   return{
-    'company_name': doc.company,
+    'company': doc.company,
     'group_or_ledger': "Ledger"
   }	
 }

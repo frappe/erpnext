@@ -143,7 +143,7 @@ cur_frm.set_query("account_head", "purchase_tax_details", function() {
 cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_query = function(doc) {
   return {
     filters: {
-      'company_name': doc.company,
+      'company': doc.company,
       'group_or_ledger': "Ledger"
     }
   }
