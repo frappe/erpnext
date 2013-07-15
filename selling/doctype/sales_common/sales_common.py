@@ -330,11 +330,13 @@ class DocType(TransactionBase):
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
-				if d.prevdoc_doctype == 'Sales Invoice':
-					dt = webnotes.conn.sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
+				if d.prevdoc_doctype in ["Sales Invoice", "Delivery Note"]:
+					date_field = "posting_date"
 				else:
-					dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
-				d.prevdoc_date = (dt and dt[0][0]) and dt[0][0].strftime('%Y-%m-%d') or ''
+					date_field = "transaction_date"
+					
+				d.prevdoc_date = webnotes.conn.get_value(d.prevdoc_doctype, 
+					d.prevdoc_docname, date_field)
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond

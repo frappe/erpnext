@@ -401,14 +401,11 @@ def make_sales_invoice(source_name, target_doclist=None):
 def make_installation_note(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
+		target.prevdoc_date = source_parent.posting_date
 	
 	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
 		"Delivery Note": {
-			"doctype": "Installation Note Item", 
-			"field_map": {
-				"name": "delivery_note_no", 
-				"posting_date": "prevdoc_date"
-			},
+			"doctype": "Installation Note", 
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -419,11 +416,10 @@ def make_installation_note(source_name, target_doclist=None):
 				"name": "prevdoc_detail_docname", 
 				"parent": "prevdoc_docname", 
 				"parenttype": "prevdoc_doctype", 
-				"serial_no": "serial_no"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.installed_qty < doc.qty
 		}
 	}, target_doclist)
-	
+
 	return [d.fields for d in doclist]

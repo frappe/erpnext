@@ -20,6 +20,67 @@ cur_frm.cscript.fname = "installed_item_details";
 wn.provide("erpnext.selling");
 // TODO commonify this code
 erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
+	onload: function() {
+		if(!this.frm.doc.status) set_multiple(dt,dn,{ status:'Draft'});
+		if(this.frm.doc.__islocal) set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
+				{inst_date: get_today()});
+				
+		fields = ['customer_address', 'contact_person','customer_name', 'address_display', 
+			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']
+		if(this.frm.doc.customer) unhide_field(fields);
+		else hide_field(fields)
+		
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
+		var me = this;
+		
+		this.frm.set_query("customer_address", function() {
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
+		});
+		
+		this.frm.set_query("contact_person", function() {
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
+		});
+		
+		this.frm.set_query("territory", function() {
+			return {
+				filters: {'is_group': "No" }
+			}
+		});
+		
+		this.frm.set_query("customer", function() {
+			return {
+				query: "controllers.queries.customer_query"
+			}
+		});
+	},
+	
+	refresh: function() {
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Delivery Note'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+						source_doctype: "Delivery Note",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_installed: ["<", 99.99],
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				}
+			);
+		}
+	},
+	
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
@@ -37,65 +98,29 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 				'territory', 'customer_group']);
 		}
 	}, 
-	get_items: function() {
-		wn.model.map_current_doc({
-			method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
-			source_name: cur_frm.doc.delivery_note_no,
-		})
-		unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 
-			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
-	}
+	
+	customer_address: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				args: {
+					customer: this.frm.doc.customer, 
+					address: this.frm.doc.customer_address, 
+					contact: this.frm.doc.contact_person
+				},
+				method: "get_customer_address",
+				freeze: true,
+				callback: function(r) {
+					me.frm.refresh_fields();
+				}
+			});
+		}
+	},
+	
+	contact_person: function() {
+		this.customer_address();
+	},
 });
 
 $.extend(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));
-
-cur_frm.cscript.onload = function(doc, dt, dn) {
-	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-	if(doc.__islocal){
-		set_multiple(dt,dn,{inst_date:get_today()});
-		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);				
-	}
-	if (doc.customer) {
-		 unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-	}	 
-}
-
-cur_frm.fields_dict['delivery_note_no'].get_query = function(doc) {
-	doc = locals[this.doctype][this.docname];
-
-	var filter = {
-    	'company': doc.company,
-    	'docstatus': 1,
-    	'per_installed': 99.99
-  	};
-	if(doc.customer) filter['customer'] = doc.customer;
-  	return { filters: filter }
-}
-
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-  	return{
- 		filters: { 'is_group': "No" }
-  	}	
-}
-
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-  	return{
-    	filters: { 'customer': doc.customer }
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return{
-    	filters: { 'customer': doc.customer }
-	}
-}
-
-cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-	return{
-		query:"controllers.queries.customer_query"
-	}
-}

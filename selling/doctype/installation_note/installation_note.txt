@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-07-07 18:10:24", 
+  "modified": "2013-07-15 17:09:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -239,28 +239,6 @@
   "label": "Item Details", 
   "oldfieldtype": "Section Break", 
   "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "delivery_note_no", 
-  "fieldtype": "Link", 
-  "label": "Delivery Note No", 
-  "no_copy": 1, 
-  "oldfieldname": "delivery_note_no", 
-  "oldfieldtype": "Link", 
-  "options": "Delivery Note", 
-  "print_hide": 0, 
-  "reqd": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
