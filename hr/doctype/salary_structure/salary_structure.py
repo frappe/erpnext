@@ -117,7 +117,8 @@ def make_salary_slip(source_name, target_doclist=None):
 				["depend_on_lwp", "d_depends_on_lwp"],
 				["d_modified_amt", "d_amount"],
 				["d_modified_amt", "d_modified_amount"]
-			]
+			],
+			"add_if_empty": True
 		}, 
 		"Salary Structure Earning": {
 			"doctype": "Salary Slip Earning", 
@@ -125,7 +126,8 @@ def make_salary_slip(source_name, target_doclist=None):
 				["depend_on_lwp", "e_depends_on_lwp"], 
 				["modified_value", "e_modified_amount"],
 				["modified_value", "e_amount"]
-			]
+			],
+			"add_if_empty": True
 		}
 	}, target_doclist, postprocess)
 

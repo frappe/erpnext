@@ -102,6 +102,7 @@ def make_purchase_order(source_name, target_doclist=None):
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 
+			"add_if_empty": True
 		},
 	}, target_doclist, set_missing_values)
 

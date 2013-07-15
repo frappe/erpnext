@@ -52,12 +52,6 @@ class DocType(TransactionBase):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.get_prevdoc_date(self)
- 	
-	def validate_prev_docname(self):
-		for d in getlist(self.doclist, 'installed_item_details'): 
-			if self.doc.delivery_note_no == d.prevdoc_docname:
-				msgprint(cstr(self.doc.delivery_note_no) + 
-					" delivery note details have already been pulled", raise_exception=1)
 
 	def validate_fiscal_year(self):
 		from accounts.utils import validate_fiscal_year

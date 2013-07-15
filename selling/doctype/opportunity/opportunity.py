@@ -192,7 +192,8 @@ def make_quotation(source_name, target_doclist=None):
 				"parent": "prevdoc_docname", 
 				"parenttype": "prevdoc_doctype", 
 				"uom": "stock_uom"
-			}
+			},
+			"add_if_empty": True
 		}
 	}, target_doclist)
 		

@@ -127,7 +127,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
   refresh_field('row_id',d.name,'purchase_tax_details');
 }
 
-cur_frm.set_query("account_head", "purchase_tax_details", function() {
+cur_frm.set_query("account_head", "purchase_tax_details", function(doc) {
   return {
     filters: [
       ["Account", "group_or_ledger", "=", "Ledger"],

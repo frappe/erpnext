@@ -340,6 +340,10 @@ def get_currency_and_number_format():
 			from tabCurrency where ifnull(enabled,0)=1""")))
 	}
 	
+def set_missing_values(source, target):
+	bean = webnotes.bean(target)
+	bean.run_method("onload_post_render")
+	
 @webnotes.whitelist()
 def make_material_request(source_name, target_doclist=None):	
 	def postprocess(source, doclist):
@@ -395,11 +399,13 @@ def make_delivery_note(source_name, target_doclist=None):
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 
+			"add_if_empty": True
 		}, 
 		"Sales Team": {
-			"doctype": "Sales Team", 
+			"doctype": "Sales Team",
+			"add_if_empty": True
 		}
-	}, target_doclist)
+	}, target_doclist, set_missing_values)
 	
 	return [d.fields for d in doclist]
 
@@ -409,10 +415,6 @@ def make_sales_invoice(source_name, target_doclist=None):
 		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount / flt(source_parent.conversion_rate)
 		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
-		
-	def update_accounts(source, target):
-		si = webnotes.bean(target)
-		si.run_method("update_accounts")
 	
 	doclist = get_mapped_doclist("Sales Order", source_name, {
 		"Sales Order": {
@@ -433,11 +435,13 @@ def make_sales_invoice(source_name, target_doclist=None):
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 
+			"add_if_empty": True
 		}, 
 		"Sales Team": {
 			"doctype": "Sales Team", 
+			"add_if_empty": True
 		}
-	}, target_doclist, update_accounts)
+	}, target_doclist, set_missing_values)
 	
 	return [d.fields for d in doclist]
 	
@@ -462,7 +466,8 @@ def make_maintenance_schedule(source_name, target_doclist=None):
 				"doctype": "Maintenance Schedule Item", 
 				"field_map": {
 					"parent": "prevdoc_docname"
-				}
+				},
+				"add_if_empty": True
 			}
 		}, target_doclist)
 	
@@ -491,7 +496,8 @@ def make_maintenance_visit(source_name, target_doclist=None):
 				"field_map": {
 					"parent": "prevdoc_docname", 
 					"parenttype": "prevdoc_doctype"
-				}
+				},
+				"add_if_empty": True
 			}
 		}, target_doclist)
 	

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-09 11:39:32", 
+  "modified": "2013-07-15 17:50:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,7 +16,7 @@
   "module": "Stock", 
   "name": "__common__", 
   "read_only_onload": 1, 
-  "search_fields": "status,transaction_date,sales_order_no"
+  "search_fields": "status,transaction_date"
  }, 
  {
   "doctype": "DocField", 

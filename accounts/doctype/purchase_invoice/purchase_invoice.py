@@ -114,16 +114,6 @@ class DocType(BuyingController):
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
 
-	def validate_duplicate_docname(self,doctype):
-		for d in getlist(self.doclist, 'entries'): 
-			if doctype == 'purchase_receipt' and cstr(self.doc.purchase_receipt_main) == cstr(d.purchase_receipt):
-				msgprint(cstr(self.doc.purchase_receipt_main) + " purchase receipt details have already been pulled.")
-				raise Exception , " Validation Error. "
-
-			if doctype == 'purchase_order' and cstr(self.doc.purchase_order_main) == cstr(d.purchase_order) and not d.purchase_receipt:
-				msgprint(cstr(self.doc.purchase_order_main) + " purchase order details have already been pulled.")
-				raise Exception , " Validation Error. "
-
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
@@ -145,13 +135,19 @@ class DocType(BuyingController):
 			raise Exception				
 			
 	def validate_bill_no(self):
-		if self.doc.bill_no and self.doc.bill_no.lower().strip()	not in ['na', 'not applicable', 'none']:
-			b_no = sql("select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` where bill_no = '%s' and credit_to = '%s' and docstatus = 1 and name != '%s' " % (self.doc.bill_no, self.doc.credit_to, self.doc.name))
+		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
+				not in ['na', 'not applicable', 'none']:
+			b_no = sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
+				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
+				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
-				msgprint("Please check you have already booked expense against Bill No. %s in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])))
-				raise Exception , "Validation Error"
-			if not self.doc.remarks:
-				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" % (self.doc.bill_no, formatdate(self.doc.bill_date)))
+				msgprint("Please check you have already booked expense against Bill No. %s \
+					in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])), 
+					raise_exception=1)
+					
+			if not self.doc.remarks and self.doc.bill_date:
+				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" 
+					% (self.doc.bill_no, formatdate(self.doc.bill_date)))
 		else:
 			if not self.doc.remarks:
 				self.doc.remarks = "No Remarks"

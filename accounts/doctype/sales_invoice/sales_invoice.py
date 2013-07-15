@@ -276,25 +276,6 @@ class DocType(SellingController):
 		
 		if self.doc.debit_to:
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
-		
-	def update_accounts(self):
-		if not self.doc.debit_to:
-			self.doc.debit_to = self.get_debit_to().get("debit_to")
-
-		self.get_income_expense_account('entries')
-
-	def get_income_expense_account(self,doctype):
-		auto_inventory_accounting = cint(webnotes.defaults.get_global_default("auto_inventory_accounting"))
-		default_cost_center = webnotes.conn.get_value("Company", self.doc.company, "cost_center")
-		for d in getlist(self.doclist, doctype):			
-			if d.item_code:
-				item = webnotes.conn.get_value("Item", d.item_code, ["default_income_account", 
-					"default_sales_cost_center", "purchase_account"], as_dict=True)
-				d.income_account = item['default_income_account'] or ""
-				d.cost_center = item['default_sales_cost_center'] or default_cost_center
-				
-				if auto_inventory_accounting and cint(self.doc.update_stock):
-					d.expense_account = item['purchase_account'] or ""
 
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
