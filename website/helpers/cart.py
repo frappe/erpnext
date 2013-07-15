@@ -58,6 +58,10 @@ def update_cart(item_code, qty, with_doclist=0):
 	qty = flt(qty)
 	if qty == 0:
 		quotation.set_doclist(quotation.doclist.get({"item_code": ["!=", item_code]}))
+		if not quotation.doclist.get({"parentfield": "quotation_details"}) and \
+			not quotation.doc.fields.get("__islocal"):
+				quotation.__delete = True
+			
 	else:
 		quotation_items = quotation.doclist.get({"item_code": item_code})
 		if not quotation_items:
@@ -72,8 +76,12 @@ def update_cart(item_code, qty, with_doclist=0):
 	
 	apply_cart_settings(quotation=quotation)
 
-	quotation.ignore_permissions = True
-	quotation.save()
+	if hasattr(quotation, "__delete"):
+		webnotes.delete_doc("Quotation", quotation.doc.name, ignore_permissions=True)
+		quotation = _get_cart_quotation()
+	else:
+		quotation.ignore_permissions = True
+		quotation.save()
 	
 	set_cart_count(quotation)
 	
@@ -191,7 +199,7 @@ def decorate_quotation_doclist(doclist):
 	for d in doclist:
 		if d.item_code:
 			d.fields.update(webnotes.conn.get_value("Item", d.item_code, 
-				["website_image", "web_short_description", "page_name"], as_dict=True))
+				["website_image", "description", "page_name"], as_dict=True))
 			d.formatted_rate = fmt_money(d.export_rate, currency=doclist[0].currency)
 			d.formatted_amount = fmt_money(d.export_amount, currency=doclist[0].currency)
 		elif d.charge_type:
@@ -215,7 +223,7 @@ def _get_cart_quotation(party=None):
 	else:
 		qbean = webnotes.bean({
 			"doctype": "Quotation",
-			"naming_series": "QTN-CART-",
+			"naming_series": webnotes.defaults.get_user_default("shopping_cart_quotation_series") or "QTN-CART-",
 			"quotation_to": party.doctype,
 			"company": webnotes.defaults.get_user_default("company"),
 			"order_type": "Shopping Cart",
@@ -224,7 +232,10 @@ def _get_cart_quotation(party=None):
 			(party.doctype.lower()): party.name
 		})
 		
-		# map_contact_fields(qbean, party)
+		if party.doctype == "Customer":
+			qbean.doc.contact_person = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user,
+				"customer": party.name})
+			qbean.run_method("set_contact_fields")
 		
 		qbean.run_method("onload_post_render")
 		apply_cart_settings(party, qbean)
@@ -259,10 +270,11 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 	party_bean.save()
 	
 	qbean = _get_cart_quotation(party)
-	qbean.doc.customer_name = company_name or fullname
-	qbean.run_method("set_contact_fields")
-	qbean.ignore_permissions = True
-	qbean.save()
+	if not qbean.doc.fields.get("__islocal"):
+		qbean.doc.customer_name = company_name or fullname
+		qbean.run_method("set_contact_fields")
+		qbean.ignore_permissions = True
+		qbean.save()
 
 def apply_cart_settings(party=None, quotation=None):
 	if not party:
@@ -374,27 +386,26 @@ def get_address_territory(address_name):
 	
 	return territory
 	
-@webnotes.whitelist()
-def checkout():
-	quotation = _get_cart_quotation()
-	
-	quotation.ignore_permissions = True
-	quotation.submit()
-	
-	from selling.doctype.quotation.quotation import make_sales_order
-	
-	sales_order = webnotes.bean(make_sales_order(quotation.doc.name))
-		
-	sales_order.ignore_permissions = True
-	sales_order.insert()
-	sales_order.submit()
-	
-	return sales_order
-
 import unittest
-test_dependencies = ["Item", "Price List", "Contact"]
+test_dependencies = ["Item", "Price List", "Contact", "Shopping Cart Settings"]
 
 class TestCart(unittest.TestCase):
+	def tearDown(self):
+		return
+		
+		cart_settings = webnotes.bean("Shopping Cart Settings")
+		cart_settings.ignore_permissions = True
+		cart_settings.doc.enabled = 0
+		cart_settings.save()
+	
+	def enable_shopping_cart(self):
+		return
+		if not webnotes.conn.get_value("Shopping Cart Settings", None, "enabled"):
+			cart_settings = webnotes.bean("Shopping Cart Settings")
+			cart_settings.ignore_permissions = True
+			cart_settings.doc.enabled = 1
+			cart_settings.save()
+			
 	def test_get_lead_or_customer(self):
 		webnotes.session.user = "test@example.com"
 		party1 = get_lead_or_customer()
@@ -407,7 +418,9 @@ class TestCart(unittest.TestCase):
 		self.assertEquals(party.name, "_Test Customer")
 		
 	def test_add_to_cart(self):
+		self.enable_shopping_cart()
 		webnotes.session.user = "test@example.com"
+		
 		update_cart("_Test Item", 1)
 		
 		quotation = _get_cart_quotation()
@@ -440,8 +453,9 @@ class TestCart(unittest.TestCase):
 		quotation_items = quotation.doclist.get({"parentfield": "quotation_details", "item_code": "_Test Item"})
 		self.assertEquals(quotation_items, [])
 		
-	def test_checkout(self):
+	def test_place_order(self):
 		quotation = self.test_update_cart()
-		sales_order = checkout()
+		sales_order_name = place_order()
+		sales_order = webnotes.bean("Sales Order", sales_order_name)
 		self.assertEquals(sales_order.doclist.getone({"item_code": "_Test Item"}).prevdoc_docname, quotation.doc.name)
 		

@@ -492,6 +492,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
+	shipping_rule: function() {
+		var me = this;
+		if(this.frm.doc.shipping_rule) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "apply_shipping_rule",
+				callback: function(r) {
+					if(!r.exc) {
+						me.calculate_taxes_and_totals();
+					}
+				}
+			})
+		}
+	},
+	
 	set_dynamic_labels: function() {
 		this._super();
 		set_sales_bom_help(this.frm.doc);
