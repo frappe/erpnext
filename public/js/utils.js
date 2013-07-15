@@ -39,5 +39,14 @@ $.extend(erpnext, {
 				cur_frm.toggle_display("company", false);
 			}
 		}
-	}
+	},
+	
+	add_for_territory: function() {
+		if(cur_frm.doc.__islocal && 
+			wn.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name).length === 1) {
+				var territory = wn.model.add_child(cur_frm.doc, "For Territory", 
+					"valid_for_territories");
+				territory.territory = wn.defaults.get_default("territory");
+		}
+	},
 });
