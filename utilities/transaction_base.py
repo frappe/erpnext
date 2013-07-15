@@ -277,12 +277,18 @@ class TransactionBase(StatusUpdater):
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
+			item_ref_dn = []
 			for d in self.doclist.get({"doctype": source_dt}):
 				ref_dn = d.fields.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
 						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
-					elif ref_dn:								
+						if ref_dn not in item_ref_dn:
+							item_ref_dn.append(ref_dn)
+						else:
+							webnotes.msgprint(_("Row ") + cstr(d.idx + 1) + 
+								_(": Duplicate row from same ") + key, raise_exception=1)
+					elif ref_dn:
 						ref_doc.setdefault(key, [])
 						if ref_dn not in ref_doc[key]:
 							ref_doc[key].append(ref_dn)

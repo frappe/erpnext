@@ -29,6 +29,9 @@ class SellingController(StockController):
 		self.set_missing_values()
 		
 		self.set_taxes("other_charges", "charge")
+		
+		if self.meta.get_field("debit_to") and not self.doc.debit_to:
+			self.doc.debit_to = self.get_debit_to().get("debit_to")
 			
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)

@@ -49,12 +49,6 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	# validate if PO has been pulled twice
-	def validate_prev_docname(self):
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if self.doc.purchase_order_no and d.prevdoc_docname and self.doc.purchase_order_no == d.prevdoc_docname:
-				msgprint(cstr(self.doc.purchase_order_no) + " Purchase Order details have already been pulled. ")
-				raise Exception
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
@@ -383,6 +377,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 
+			"add_if_empty": True
 		}
 	}, target_doclist, set_missing_values)
 

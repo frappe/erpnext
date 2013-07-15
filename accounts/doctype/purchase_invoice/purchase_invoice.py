@@ -114,16 +114,6 @@ class DocType(BuyingController):
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
 
-	def validate_duplicate_docname(self,doctype):
-		for d in getlist(self.doclist, 'entries'): 
-			if doctype == 'purchase_receipt' and cstr(self.doc.purchase_receipt_main) == cstr(d.purchase_receipt):
-				msgprint(cstr(self.doc.purchase_receipt_main) + " purchase receipt details have already been pulled.")
-				raise Exception , " Validation Error. "
-
-			if doctype == 'purchase_order' and cstr(self.doc.purchase_order_main) == cstr(d.purchase_order) and not d.purchase_receipt:
-				msgprint(cstr(self.doc.purchase_order_main) + " purchase order details have already been pulled.")
-				raise Exception , " Validation Error. "
-
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
