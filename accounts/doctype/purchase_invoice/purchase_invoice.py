@@ -135,13 +135,19 @@ class DocType(BuyingController):
 			raise Exception				
 			
 	def validate_bill_no(self):
-		if self.doc.bill_no and self.doc.bill_no.lower().strip()	not in ['na', 'not applicable', 'none']:
-			b_no = sql("select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` where bill_no = '%s' and credit_to = '%s' and docstatus = 1 and name != '%s' " % (self.doc.bill_no, self.doc.credit_to, self.doc.name))
+		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
+				not in ['na', 'not applicable', 'none']:
+			b_no = sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
+				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
+				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
-				msgprint("Please check you have already booked expense against Bill No. %s in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])))
-				raise Exception , "Validation Error"
-			if not self.doc.remarks:
-				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" % (self.doc.bill_no, formatdate(self.doc.bill_date)))
+				msgprint("Please check you have already booked expense against Bill No. %s \
+					in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])), 
+					raise_exception=1)
+					
+			if not self.doc.remarks and self.doc.bill_date:
+				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" 
+					% (self.doc.bill_no, formatdate(self.doc.bill_date)))
 		else:
 			if not self.doc.remarks:
 				self.doc.remarks = "No Remarks"
