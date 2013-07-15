@@ -80,27 +80,11 @@ class DocType(SellingController):
 	def validate_for_items(self):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
-		# Sales Order Items Validations
 		for d in getlist(self.doclist, 'sales_order_details'):
-			if self.doc.quotation_no and cstr(self.doc.quotation_no) == cstr(d.prevdoc_docname):
-				flag = 1
-			if d.prevdoc_docname:
-				if self.doc.quotation_date and getdate(self.doc.quotation_date) > getdate(self.doc.transaction_date):
-					msgprint("Sales Order Date cannot be before Quotation Date")
-					raise Exception
-				# validates whether quotation no in doctype and in table is same
-				if not cstr(d.prevdoc_docname) == cstr(self.doc.quotation_no):
-					msgprint("Items in table does not belong to the Quotation No mentioned.")
-					raise Exception
-
-			# validates whether item is not entered twice
 			e = [d.item_code, d.description, d.reserved_warehouse, d.prevdoc_docname or '']
 			f = [d.item_code, d.description]
 
-			#check item is stock item
-			st_itm = sql("select is_stock_item from `tabItem` where name = %s", d.item_code)
-
-			if st_itm and st_itm[0][0] == 'Yes':
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if not d.reserved_warehouse:
 					msgprint("""Please enter Reserved Warehouse for item %s 
 						as it is stock Item""" % d.item_code, raise_exception=1)
@@ -109,7 +93,7 @@ class DocType(SellingController):
 					msgprint("Item %s has been entered twice." % d.item_code)
 				else:
 					check_list.append(e)
-			elif st_itm and st_itm[0][0]== 'No':
+			else:
 				if f in chk_dupl_itm:
 					msgprint("Item %s has been entered twice." % d.item_code)
 				else:
@@ -121,9 +105,6 @@ class DocType(SellingController):
 			tot_avail_qty = sql("select projected_qty from `tabBin` \
 				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-		
-		if getlist(self.doclist, 'sales_order_details') and self.doc.quotation_no and flag == 0:
-			msgprint("There are no items of the quotation selected", raise_exception=1)
 
 	def validate_sales_mntc_quotation(self):
 		for d in getlist(self.doclist, 'sales_order_details'):

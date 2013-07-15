@@ -58,7 +58,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return {
 					filters: [
 						['Sales Taxes and Charges Master', 'company', '=', me.frm.doc.company],
-						['Sales Taxes and Charges Master', 'company', 'is not', 'NULL'],
 						['Sales Taxes and Charges Master', 'docstatus', '!=', 2]
 					]
 				}
@@ -144,6 +143,29 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				});
 			}
 		}
+	},
+	
+	customer_address: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				args: {
+					customer: this.frm.doc.customer, 
+					address: this.frm.doc.customer_address, 
+					contact: this.frm.doc.contact_person
+				},
+				method: "get_customer_address",
+				freeze: true,
+				callback: function(r) {
+					me.frm.refresh_fields();
+				}
+			});
+		}
+	},
+	
+	contact_person: function() {
+		this.customer_address();
 	},
 	
 	barcode: function(doc, cdt, cdn) {

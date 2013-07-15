@@ -197,10 +197,6 @@ cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 
 	cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);

@@ -141,11 +141,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
-
 cur_frm.cscript.new_contact = function(){
 	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;

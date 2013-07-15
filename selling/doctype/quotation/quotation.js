@@ -109,14 +109,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({
-		customer: doc.customer, 
-		address: doc.customer_address, 
-		contact: doc.contact_person
-	}),'', doc, dt, dn, 1);
-}
-
 cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
 	return{	query:"controllers.queries.lead_query" } }
 
