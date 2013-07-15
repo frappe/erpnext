@@ -27,5 +27,4 @@ def execute():
 		doc.save()
 	webnotes.conn.commit()
 	webnotes.conn.begin()
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'custom_script')
+	webnotes.reload_doc('core', 'doctype', 'custom_script')

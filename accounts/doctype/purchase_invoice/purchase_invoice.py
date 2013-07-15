@@ -326,7 +326,7 @@ class DocType(BuyingController):
 					against_accounts.append(stock_not_billed_account)
 			
 			elif not item.expense_head:
-				msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+				msgprint(_("""Expense account is mandatory for item: """) + (item.item_code or item.item_name), 
 					raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
@@ -464,15 +464,16 @@ class DocType(BuyingController):
 					# if auto inventory accounting enabled and stock item, 
 					# then do stock related gl entries
 					# expense will be booked in sales invoice
-					
 					stock_item_and_auto_inventory_accounting = True
+					
+					valuation_amt = (flt(item.amount) + flt(item.item_tax_amount) + 
+						flt(item.rm_supp_cost))
 					
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": stock_account,
 							"against": self.doc.credit_to,
-							"debit": flt(item.valuation_rate) * flt(item.conversion_factor) \
-								*  flt(item.qty),
+							"debit": valuation_amt,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock"
 						})
 					)

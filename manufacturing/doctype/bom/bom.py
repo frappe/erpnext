@@ -32,9 +32,10 @@ class DocType:
 
 	def autoname(self):
 		last_name = sql("""select max(name) from `tabBOM` 
-			where name like 'BOM/%s/%%'""" % self.doc.item)
+			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
 		if last_name:
-			idx = cint(cstr(last_name[0][0]).split('/')[-1]) + 1
+			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
+			
 		else:
 			idx = 1
 		self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx)
@@ -44,10 +45,11 @@ class DocType:
 		self.validate_main_item()
 		self.validate_operations()
 		self.validate_materials()
+		self.set_bom_material_details()
+		self.calculate_cost()
 		
 	def on_update(self):
 		self.check_recursion()
-		self.calculate_cost()
 		self.update_exploded_items()
 		self.doc.save()
 	
@@ -67,21 +69,13 @@ class DocType:
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = sql("""select name, is_asset_item, is_purchase_item, docstatus, description,
-		 	is_sub_contracted_item, stock_uom, default_bom, 
+		item = webnotes.conn.sql("""select name, is_asset_item, is_purchase_item, 
+			docstatus, description, is_sub_contracted_item, stock_uom, default_bom, 
 			last_purchase_rate, standard_rate, is_manufactured_item 
-			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
+			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
-
-	def get_item_details(self, item_code):
-		res = sql("""select description, stock_uom as uom
-			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
-		return res and res[0] or {}
-
-	def get_workstation_details(self,workstation):
-		return {'hour_rate': webnotes.conn.get_value("Workstation", workstation, "hour_rate")}
-
+		
 	def validate_rm_item(self, item):
 		if item[0]['name'] == self.doc.item:
 			msgprint("Item_code: %s in materials tab cannot be same as FG Item", 
@@ -89,32 +83,42 @@ class DocType:
 		
 		if not item or item[0]['docstatus'] == 2:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
-
-	def get_bom_material_detail(self):
+			
+	def set_bom_material_details(self):
+		for item in self.doclist.get({"parentfield": "bom_materials"}):			
+			ret = self.get_bom_material_detail({ "item_code": item.item_code, "bom_no": item.bom_no,
+				"qty": item.qty	})
+			
+			for r in ret:
+				if not item.fields.get(r):
+					item.fields[r] = ret[r]
+		
+	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
 
-		arg = webnotes.form_dict.get('args')
-		import json
-		arg = json.loads(arg)
-		
-		item = self.get_item_det(arg['item_code'])
+		if not args:
+			args = webnotes.form_dict.get('args')
+			import json
+			args = json.loads(args)
+			
+		item = self.get_item_det(args['item_code'])
 		self.validate_rm_item(item)
 		
-		arg['bom_no'] = arg['bom_no'] or item and cstr(item[0]['default_bom']) or ''
-		arg.update(item[0])
+		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args.update(item[0])
 
-		rate = self.get_rm_rate(arg)
+		rate = self.get_rm_rate(args)
 		ret_item = {
-			 'description'  : item and arg['description'] or '',
-			 'stock_uom'	: item and arg['stock_uom'] or '',
-			 'bom_no'		: arg['bom_no'],
+			 'description'  : item and args['description'] or '',
+			 'stock_uom'	: item and args['stock_uom'] or '',
+			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate
 		}
 		return ret_item
 
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
-
+		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg and (arg['is_purchase_item'] == 'Yes' or arg['is_sub_contracted_item'] == 'Yes'):
@@ -183,11 +187,14 @@ class DocType:
 		if not item:
 			msgprint("Item %s does not exists in the system or expired." % 
 				self.doc.item, raise_exception = 1)
-
 		elif item[0]['is_manufactured_item'] != 'Yes' \
 				and item[0]['is_sub_contracted_item'] != 'Yes':
 			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
 				you can not make BOM for it""" % self.doc.item, raise_exception = 1)
+		else:
+			ret = webnotes.conn.get_value("Item", self.doc.item, ["description", "stock_uom"])
+			self.doc.description = ret[0]
+			self.doc.uom = ret[1]
 
 	def validate_operations(self):
 		""" Check duplicate operation no"""
@@ -209,7 +216,7 @@ class DocType:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
 					is not present at Operations table""" % 
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
-		
+			
 			item = self.get_item_det(m.item_code)
 			if item[0]['is_manufactured_item'] == 'Yes':
 				if not m.bom_no:
@@ -259,22 +266,27 @@ class DocType:
 				for b in boms:
 					if b[0] == self.doc.name:
 						msgprint("""Recursion Occured => '%s' cannot be '%s' of '%s'.
-							""" % (cstr(b), cstr(d[2]), self.doc.name), raise_exception = 1)
+							""" % (cstr(b[0]), cstr(d[2]), self.doc.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
 	
-	def update_cost_and_exploded_items(self):
-		bom_list = self.traverse_tree()
+	def update_cost_and_exploded_items(self, bom_list=[]):
+		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
 			bom_obj.on_update()
 			
-	def traverse_tree(self):
+		return bom_list
+			
+	def traverse_tree(self, bom_list=[]):
 		def _get_children(bom_no):
 			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 				
-		bom_list, count = [self.doc.name], 0		
+		count = 0
+		if self.doc.name not in bom_list:
+			bom_list.append(self.doc.name)
+		
 		while(count < len(bom_list)):
 			for child_bom in _get_children(bom_list[count]):
 				if child_bom not in bom_list:
@@ -293,9 +305,10 @@ class DocType:
 		"""Update workstation rate and calculates totals"""
 		total_op_cost = 0
 		for d in getlist(self.doclist, 'bom_operations'):
+			if d.workstation and not d.hour_rate:
+				d.hour_rate = webnotes.conn.get_value("Workstation", d.workstation, "hour_rate")
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
-			d.save()
 			total_op_cost += flt(d.operating_cost)
 		self.doc.operating_cost = total_op_cost
 		
@@ -307,7 +320,6 @@ class DocType:
 				d.rate = self.get_bom_unitcost(d.bom_no)
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
-			d.save()
 			total_rm_cost += d.amount
 		self.doc.raw_material_cost = total_rm_cost
 
@@ -318,52 +330,50 @@ class DocType:
 
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
-		self.cur_exploded_items = []
+		self.cur_exploded_items = {}
 		for d in getlist(self.doclist, 'bom_materials'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
-				self.cur_exploded_items.append({
+				self.add_to_cur_exploded_items(webnotes._dict({
 					'item_code'				: d.item_code, 
 					'description'			: d.description, 
 					'stock_uom'				: d.stock_uom, 
 					'qty'					: flt(d.qty),
-					'rate'					: flt(d.rate), 
-					'amount'				: flt(d.amount),
-					'parent_bom'			: d.parent,
-					'mat_detail_no'			: d.name,
-					'qty_consumed_per_unit' : flt(d.qty_consumed_per_unit)
-				})
+					'rate'					: flt(d.rate),
+				}))
+				
+	def add_to_cur_exploded_items(self, args):
+		if self.cur_exploded_items.get(args.item_code):
+			self.cur_exploded_items[args.item_code]["qty"] += args.qty
+		else:
+			self.cur_exploded_items[args.item_code] = args
 	
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
 		child_fb_items = sql("""select item_code, description, stock_uom, qty, rate, 
-			amount, parent_bom, mat_detail_no, qty_consumed_per_unit 
-			from `tabBOM Explosion Item` where parent = '%s' and docstatus = 1""" %
-			bom_no, as_dict = 1)
+			qty_consumed_per_unit from `tabBOM Explosion Item` 
+			where parent = %s and docstatus = 1""", bom_no, as_dict = 1)
+			
 		for d in child_fb_items:
-			self.cur_exploded_items.append({
+			self.add_to_cur_exploded_items(webnotes._dict({
 				'item_code'				: d['item_code'], 
 				'description'			: d['description'], 
 				'stock_uom'				: d['stock_uom'], 
 				'qty'					: flt(d['qty_consumed_per_unit'])*qty,
-				'rate'					: flt(d['rate']), 
-				'amount'				: flt(d['amount']),
-				'parent_bom'			: d['parent_bom'],
-				'mat_detail_no'			: d['mat_detail_no'],
-				'qty_consumed_per_unit' : flt(d['qty_consumed_per_unit'])*qty/flt(self.doc.quantity)
-
-			})
+				'rate'					: flt(d['rate']),
+			}))
 
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
 		for d in self.cur_exploded_items:
-			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 
-				self.doclist)
-			for i in d.keys():
-				ch.fields[i] = d[i]
+			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', self.doclist)
+			for i in self.cur_exploded_items[d].keys():
+				ch.fields[i] = self.cur_exploded_items[d][i]
+			ch.amount = flt(ch.qty) * flt(ch.rate)
+			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.doc.quantity)
 			ch.docstatus = self.doc.docstatus
 			ch.save(1)
 

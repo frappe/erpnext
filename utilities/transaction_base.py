@@ -22,6 +22,23 @@ from webnotes.model.doc import addchild
 from webnotes.model.controller import DocListController
 
 class TransactionBase(DocListController):
+	def get_default_address_and_contact(self, party_type):
+		"""get a dict of default field values of address and contact for a given party type
+			party_type can be one of: customer, supplier"""
+		ret = {}
+		
+		# {customer: self.doc.fields.get("customer")}
+		args = {party_type: self.doc.fields.get(party_type)}
+		
+		address_text, address_name = self.get_address_text(**args)
+		ret.update({
+			# customer_address
+			(party_type + "_address"): address_name,
+			"address_display": address_text
+		})
+		ret.update(self.get_contact_text(**args))
+		return ret
+	
 	# Get Customer Default Primary Address - first load
 	def get_default_customer_address(self, args=''):
 		address_text, address_name = self.get_address_text(customer=self.doc.customer)
@@ -73,7 +90,7 @@ class TransactionBase(DocListController):
 			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc, is_primary_address desc limit 1" % cond, as_dict = 1)
 		else:
 			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
-		
+			
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),('\n','state'),(' ','pincode'),('\n','country'),('\nPhone: ','phone'),('\nFax: ', 'fax')]
 		address_display = ''.join([a[0]+extract(a[1]) for a in address_fields if extract(a[1])])
@@ -251,4 +268,43 @@ class TransactionBase(DocListController):
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
 			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')
-	
+			
+	def add_calendar_event(self, opts, force=False):
+		if self.doc.contact_by != cstr(self._prev.contact_by) or \
+				self.doc.contact_date != cstr(self._prev.contact_date) or force:
+			
+			self.delete_events()
+			self._add_calendar_event(opts)
+			
+	def delete_events(self):
+		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))
+			
+	def _add_calendar_event(self, opts):
+		opts = webnotes._dict(opts)
+		
+		if self.doc.contact_date:
+			event_doclist = [{
+				"doctype": "Event",
+				"owner": opts.owner or self.doc.owner,
+				"subject": opts.subject,
+				"description": opts.description,
+				"starts_on": self.doc.contact_date + " 10:00:00",
+				"event_type": "Private",
+				"ref_type": self.doc.doctype,
+				"ref_name": self.doc.name
+			}]
+			
+			if webnotes.conn.exists("Profile", self.doc.contact_by):
+				event_doclist.append({
+					"doctype": "Event User",
+					"parentfield": "event_individuals",
+					"person": self.doc.contact_by
+				})
+			
+			webnotes.bean(event_doclist).insert()
+
+
+def delete_events(ref_type, ref_name):
+	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

@@ -72,6 +72,18 @@ wn.module_page["Support"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Maintenance Schedules"),
+				route: "query-report/Maintenance Schedules",
+				doctype: "Maintenance Schedule"
+			}
+		]
+	}
 ]
 
 pscript['onload_support-home'] = function(wrapper) {

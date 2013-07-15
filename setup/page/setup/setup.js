@@ -73,7 +73,7 @@ wn.module_page["Setup"] = [
 			{
 				"route":"Form/Naming Series/Naming Series",
 				doctype: "Naming Series",
-				label: wn._("Manage numbering series"),
+				label: wn._("Manage Numbering Series"),
 				"description":wn._("Set multiple numbering series for transactions")
 			},
 			{
@@ -81,6 +81,12 @@ wn.module_page["Setup"] = [
 				doctype: "Rename Tool",
 				label: wn._("Rename Tool"),
 				"description":wn._("Rename multiple items in one go")
+			},
+			{
+				"route":"List/File Data",
+				doctype: "File Data",
+				label: wn._("File Manager"),
+				"description":wn._("List, delete uploaded files.")
 			},
 		]
 	},
@@ -187,27 +193,26 @@ wn.module_page["Setup"] = [
 		]
 	},
 	{
-		title: wn._("Backups"),
-		icon: "icon-cloud-upload",
-		right: true,
-		items: [
-			{
-				"route":"Form/Backup Manager",
-				doctype:"Backup Manager",
-				label: wn._("Backup Manager"),
-				"description":wn._("Sync backups with remote tools like Dropbox etc.")
-			},
-		]
-	},
-	{
-		title: wn._("Update Manager"),
-		icon: "icon-magnet",
+		title: wn._("Administration"),
+		icon: "icon-rocket",
 		right: true,
 		items: [
 			{
 				"page":"update-manager",
 				label: wn._("Update This Application"),
 				"description":wn._("Apply latest updates and patches to this app")
+			},
+			{
+				"route":"Form/Backup Manager",
+				doctype:"Backup Manager",
+				label: wn._("Backup Manager"),
+				"description":wn._("Sync backups with remote tools like Dropbox etc.")
+			},
+			{
+				"route":"List/Scheduler Log",
+				doctype:"Scheduler Log",
+				label: wn._("Scheduler Error Log"),
+				"description":wn._("Get a list of errors encountered by the Scheduler")
 			},
 		]
 	},

@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, getdate, nowdate
 import datetime
-from webnotes import msgprint
+from webnotes import msgprint, _
 	
 from controllers.stock_controller import StockController
 
@@ -117,8 +117,11 @@ class DocType(StockController):
 		self.make_stock_ledger_entry(1)
 		self.make_gl_entries()
 	
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		"""rename serial_no text fields"""
+		if merge:
+			msgprint(_("Sorry. Serial Nos. cannot be merged"), raise_exception=True)
+		
 		for dt in webnotes.conn.sql("""select parent from tabDocField 
 			where fieldname='serial_no' and fieldtype='Text'"""):
 			
@@ -139,7 +142,8 @@ class DocType(StockController):
 		gl_entries = self.get_gl_entries_for_stock(against_stock_account, self.doc.purchase_rate)
 		
 		for entry in gl_entries:
-			entry["posting_date"] = self.doc.purchase_date
+			entry["posting_date"] = self.doc.purchase_date or (self.doc.creation and 
+				self.doc.creation.split(' ')[0]) or nowdate()
 			
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel)

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-04-03 09:10:44", 
+  "creation": "2013-05-22 12:10:46", 
   "docstatus": 0, 
-  "modified": "2013-04-03 09:58:02", 
+  "modified": "2013-05-22 16:54:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -833,12 +833,11 @@
   "width": "100px"
  }, 
  {
-  "description": "Keep a track on communications regarding this Quotation. This will help you remember earlier communications in case the Customer comes back again", 
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
-  "label": "Communication History", 
   "oldfieldtype": "Section Break", 
+  "options": "Simple", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -869,27 +868,22 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Manager", 
+  "role": "Sales User", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Customer"
  }, 
  {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales User", 
+  "role": "Sales Manager", 
   "submit": 1, 
   "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "Customer", 
-  "submit": 0, 
-  "write": 0
  }, 
  {
   "amend": 1, 

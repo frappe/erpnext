@@ -137,11 +137,6 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Analytics"),
 				page: "sales-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Sales Order"
-			},
 		]
 	},
 	{
@@ -154,8 +149,47 @@ wn.module_page["Selling"] = [
 				route: "query-report/Customer Addresses And Contacts"
 			},
 			{
-				"label":wn._("Sales Orders Pending to be Delivered"),
-				route: "query-report/Sales Orders Pending To Be Delivered"
+				"label":wn._("Ordered Items To Be Delivered"),
+				route: "query-report/Ordered Items To Be Delivered",
+			},
+			{
+				"label":wn._("Sales Person-wise Transaction Summary"),
+				route: "query-report/Sales Person-wise Transaction Summary"
+			},
+			{
+				"label":wn._("Item-wise Sales History"),
+				route: "query-report/Item-wise Sales History"
+			},
+			{
+				"label":wn._("Territory Target Variance (Item Group-Wise)"),
+				route: "query-report/Territory Target Variance Item Group-Wise"
+			},
+			{
+				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
+				route: "query-report/Sales Person Target Variance Item Group-Wise"
+			},
+			{
+				"label":wn._("Customers Not Buying Since Long Time"),
+				route: "query-report/Customers Not Buying Since Long Time",
+				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Quotation Trend"),
+				route: "query-report/Quotation Trends",
+				doctype: "Quotation"
+			},
+			{
+				"label":wn._("Sales Order Trend"),
+				route: "query-report/Sales Order Trends",
+				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Available Stock for Packing Items"),
+				route: "query-report/Available Stock for Packing Items",
+			},
+			{
+				"label":wn._("Pending SO Items For Purchase Request"),
+				route: "query-report/Pending SO Items For Purchase Request"
 			},
 		]
 	}

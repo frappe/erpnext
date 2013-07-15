@@ -30,7 +30,6 @@ from webnotes import _, msgprint
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -40,12 +39,9 @@ class DocType(SellingController):
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
 
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
-		
 	def validate(self):
 		super(DocType, self).validate()
-		
+		self.fetch_missing_values()
 		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
@@ -78,8 +74,10 @@ class DocType(SellingController):
 		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
+		self.validate_rate_with_refdoc()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
+		
 		
 	def on_submit(self):
 		if cint(self.doc.is_pos) == 1:
@@ -137,7 +135,27 @@ class DocType(SellingController):
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
-
+		
+	def fetch_missing_values(self):
+		# fetch contact and address details for customer, if they are not mentioned
+		if not (self.doc.contact_person and self.doc.customer_address):
+			for fieldname, val in self.get_default_address_and_contact("customer").items():
+				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+					self.doc.fields[fieldname] = val
+					
+		# fetch missing item values
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if item.fields.get("item_code"):
+				ret = get_obj('Sales Common').get_item_details(item.fields, self)
+				for fieldname, value in ret.items():
+					if self.meta.get_field(fieldname, parentfield="entries") and \
+						item.fields.get(fieldname) is None:
+							item.fields[fieldname] = value
+		
+		# fetch pos details, if they are not fetched
+		if cint(self.doc.is_pos):
+			self.set_pos_fields(for_validate=True)
+			
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
@@ -153,59 +171,41 @@ class DocType(SellingController):
 					webnotes.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
 						raise_exception=True)
 
-	def set_pos_fields(self):
+	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from pos settings"""
-		pos = self.pos_details
-
-		if pos:
-			val = webnotes.conn.sql("""select name from `tabAccount` 
-				where name = %s and docstatus != 2""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr()))
-
-			val = val and val[0][0] or ''
-			if not val: val = pos[0]['customer_account'] or ''
+		if cint(self.doc.is_pos) != 1:
+			return
+			
+		if self.pos_settings:
+			pos = self.pos_settings[0]
+			
+			self.doc.conversion_rate = flt(pos.conversion_rate)
 			
 			if not self.doc.debit_to:
-				webnotes.conn.set(self.doc,'debit_to',val)
-			
-			lst = ['territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
-				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account']
+				self.doc.debit_to = self.doc.customer and webnotes.conn.get_value("Account", {
+					"name": self.doc.customer + " - " + self.get_company_abbr(), 
+					"docstatus": ["!=", 2]
+				}) or pos.customer_account
 				
-			for i in lst:
-				self.doc.fields[i] = pos[0][i] or ''
+			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
+				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account'):
+					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
+						self.doc.fields[fieldname] = pos.get(fieldname)
 
-			self.set_pos_item_values()
-			
-			self.doc.conversion_rate = flt(pos[0]['conversion_rate']) or 0	
+			# set pos values in items
+			for item in self.doclist.get({"parentfield": "entries"}):
+				if item.fields.get('item_code'):
+					for fieldname, val in self.apply_pos_settings(item.fields).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
+							item.fields[fieldname] = val
 
-			#fetch terms	
-			if self.doc.tc_name:
+			# fetch terms	
+			if self.doc.tc_name and not self.doc.terms:
 				self.get_tc_details()
 			
-			#fetch charges
-			if self.doc.charge:
+			# fetch charges
+			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
 				self.get_other_charges()
-
-
-	def set_pos_item_values(self):
-		"""Set default values related to pos for previously created sales invoice."""
-		if cint(self.doc.is_pos) == 1:
-			dtl = self.pos_details
-			
-			for d in getlist(self.doclist,'entries'):
-				# overwrite if mentioned in item
-				item = webnotes.conn.sql("""select default_income_account,
-					default_sales_cost_center, default_warehouse, purchase_account
-					from tabItem where name = %s""", (d.item_code,), as_dict=1)
-				
-				d.income_account = (item and item[0]['default_income_account']) \
-					or (dtl and dtl[0]['income_account']) or d.income_account
-				d.cost_center = (item and item[0]['default_sales_cost_center']) \
-					or (dtl and dtl[0]['cost_center']) or d.cost_center
-				d.warehouse = (item and item[0]['default_warehouse']) \
-					or (dtl and dtl[0]['warehouse']) or d.warehouse
-				d.expense_account = (item and item[0].purchase_account) \
-					or (dtl and dtl[0].expense_account) or d.expense_account
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -215,8 +215,9 @@ class DocType(SellingController):
 		if self.doc.customer:
 			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
 				where (name = %s or (master_name = %s and master_type = 'customer')) 
-				and docstatus != 2""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), self.doc.customer))
+				and docstatus != 2 and company = %s""", 
+				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), 
+				self.doc.customer, self.doc.company))
 			
 			if acc_head and acc_head[0][0]:
 				return acc_head[0][0]
@@ -299,60 +300,59 @@ class DocType(SellingController):
 		args = args and json.loads(args) or {}
 		if args.get('item_code'):
 			ret = get_obj('Sales Common').get_item_details(args, self)
-			return self.get_pos_details(args, ret)
-		else:
-			for doc in self.doclist:
+			
+			if cint(self.doc.is_pos) == 1 and self.pos_settings:
+				ret = self.apply_pos_settings(args, ret)
+			
+			return ret
+		
+		elif cint(self.doc.is_pos) == 1 and self.pos_settings:
+			for doc in self.doclist.get({"parentfield": "entries"}):
 				if doc.fields.get('item_code'):
-					arg = {
-						'item_code':doc.fields.get('item_code'), 	
-						'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 
-						'warehouse': doc.fields.get('warehouse'),
-						'expense_account': doc.fields.get('expense_account'),
-					}
-
-					ret = self.get_pos_details(arg)
+					ret = self.apply_pos_settings(doc.fields)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]		
 
 	@property
-	def pos_details(self):
-		if not hasattr(self, "_pos_details"):
+	def pos_settings(self):
+		if not hasattr(self, "_pos_settings"):
 			dtl = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
 				and company = %s""", (webnotes.session['user'], self.doc.company), as_dict=1)			 
 			if not dtl:
 				dtl = webnotes.conn.sql("""select * from `tabPOS Setting` 
 					where ifnull(user,'') = '' and company = %s""", self.doc.company, as_dict=1)
-			self._pos_details = dtl
+			self._pos_settings = dtl
 			
-		return self._pos_details
+		return self._pos_settings
 
-	def get_pos_details(self, args, ret = {}):
-		if args['item_code'] and cint(self.doc.is_pos) == 1:
-			dtl = self.pos_details
-
-			item = webnotes.conn.sql("""select default_income_account, default_sales_cost_center, 
-				default_warehouse, purchase_account from tabItem where name = %s""", 
-				args['item_code'], as_dict=1)
-
-			ret['income_account'] = item and item[0].get('default_income_account') \
-				or (dtl and dtl[0].get('income_account') or args.get('income_account'))
-
-			ret['cost_center'] = item and item[0].get('default_sales_cost_center') \
-				or (dtl and dtl[0].get('cost_center') or args.get('cost_center'))
+	def apply_pos_settings(self, args, ret=None):
+		if not ret: ret = {}
+		
+		pos = self.pos_settings[0]
+		
+		item = webnotes.conn.sql("""select default_income_account, default_sales_cost_center, 
+			default_warehouse, purchase_account from tabItem where name = %s""", 
+			args.get('item_code'), as_dict=1)
+		
+		if item:
+			item = item[0]
 			
-			ret['warehouse'] = item and item[0].get('default_warehouse') \
-				or (dtl and dtl[0].get('warehouse') or args.get('warehouse'))
+			ret.update({
+				"income_account": item.get("default_income_account") \
+					or pos.get("income_account") or args.get("income_account"),
+				"cost_center": item.get("default_sales_cost_center") \
+					or pos.get("cost_center") or args.get("cost_center"),
+				"warehouse": item.get("default_warehouse") \
+					or pos.get("warehouse") or args.get("warehouse"),
+				"expense_account": item.get("purchase_account") \
+					or pos.get("expense_account") or args.get("expense_account")
+			})
 			
-			ret['expense_account'] = item and item[0].get('purchase_account') \
-				or (dtl and dtl[0].get('expense_account') or args.get('expense_account'))
-
-			if ret['warehouse']:
-				actual_qty = webnotes.conn.sql("""select actual_qty from `tabBin` 
-					where item_code = %s and warehouse = %s""", 
-					(args['item_code'], ret['warehouse']))
-				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
+			if ret.get("warehouse"):
+				ret["actual_qty"] = flt(webnotes.conn.get_value("Bin",
+					{"item_code": args.get("item_code"), "warehouse": ret.get("warehouse")},
+					"actual_qty"))
 		return ret
 
 	def get_barcode_details(self, barcode):
@@ -433,17 +433,6 @@ class DocType(SellingController):
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 			
-	def validate_customer(self):
-		"""	Validate customer name with SO and DN"""
-		for d in getlist(self.doclist,'entries'):
-			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
-			if dt:
-				dt_no = d.delivery_note or d.sales_order
-				cust = webnotes.conn.sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
-				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
-					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
-			
-
 	def validate_customer_account(self):
 		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
@@ -453,6 +442,19 @@ class DocType(SellingController):
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
 				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
 					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
+			
+
+	def validate_customer(self):
+		"""	Validate customer name with SO and DN"""
+		if self.doc.customer:
+			for d in getlist(self.doclist,'entries'):
+				dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
+				if dt:
+					dt_no = d.delivery_note or d.sales_order
+					cust = webnotes.conn.get_value(dt, dt_no, "customer")
+					if cust and cstr(cust) != cstr(self.doc.customer):
+						msgprint("Customer %s does not match with customer of %s: %s." 
+							%(self.doc.customer, dt, dt_no), raise_exception=1)
 
 
 	def validate_debit_acc(self):
@@ -554,6 +556,21 @@ class DocType(SellingController):
 
 			webnotes.conn.set(self.doc, 'c_form_no', '')
 			
+	def validate_rate_with_refdoc(self):
+		"""Validate values with reference document with previous document"""
+		for d in self.doclist.get({"parentfield": "entries"}):
+			if d.so_detail:
+				self.check_value("Sales Order", d.sales_order, d.so_detail, 
+					d.export_rate, d.item_code)
+			if d.dn_detail:
+				self.check_value("Delivery Note", d.delivery_note, d.dn_detail, 
+					d.export_rate, d.item_code)
+				
+	def check_value(self, ref_dt, ref_dn, ref_item_dn, val, item_code):
+		ref_val = webnotes.conn.get_value(ref_dt + " Item", ref_item_dn, "export_rate")
+		if flt(ref_val, 2) != flt(val, 2):
+			msgprint(_("Rate is not matching with ") + ref_dt + ": " + ref_dn + 
+				_(" for item: ") + item_code, raise_exception=True)
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):

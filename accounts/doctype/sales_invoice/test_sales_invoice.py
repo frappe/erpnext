@@ -90,6 +90,9 @@ class TestSalesInvoice(unittest.TestCase):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
 		
+		old_default_company = webnotes.conn.get_default("company")
+		webnotes.conn.set_default("company", "_Test Company")
+		
 		self._insert_purchase_receipt()
 		self._insert_pos_settings()
 		
@@ -106,7 +109,8 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# check stock ledger entries
 		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-			where voucher_type = 'Sales Invoice' and voucher_no = %s""", si.doc.name, as_dict=1)[0]
+			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
+			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
 			["_Test Item", "_Test Warehouse", -5.0])
@@ -145,6 +149,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(gl_count[0][0], 16)
 			
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.conn.set_default("company", old_default_company)
 		
 	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
@@ -337,7 +342,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# change posting date but keep recuring day to be today
 		si7 = webnotes.bean(copy=base_si.doclist)
 		si7.doc.fields.update({
-			"posting_date": add_to_date(today, days=-3)
+			"posting_date": add_to_date(today, days=-1)
 		})
 		si7.insert()
 		si7.submit()
@@ -345,7 +350,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# setting so that _test function works
 		si7.doc.posting_date = today
 		self._test_recurring_invoice(si7, True)
-			
+
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
 		from webnotes.utils import add_months, get_last_day, getdate
 		from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
@@ -361,7 +366,8 @@ class TestSalesInvoice(unittest.TestCase):
 			manage_recurring_invoices(next_date=next_date, commit=False)
 			
 			recurred_invoices = webnotes.conn.sql("""select name from `tabSales Invoice`
-				where recurring_id=%s and docstatus=1 order by name desc""", base_si.doc.recurring_id)
+				where recurring_id=%s and docstatus=1 order by name desc""",
+				base_si.doc.recurring_id)
 			
 			self.assertEquals(i+2, len(recurred_invoices))
 			
@@ -395,7 +401,7 @@ class TestSalesInvoice(unittest.TestCase):
 		for i in xrange(count):
 			base_si = _test(i)
 		
-test_dependencies = ["Journal Voucher", "POS Setting"]
+test_dependencies = ["Journal Voucher", "POS Setting", "Contact", "Address"]
 
 test_records = [
 	[

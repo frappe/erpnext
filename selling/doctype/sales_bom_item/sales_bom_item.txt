@@ -1,0 +1,75 @@
+[
+ {
+  "creation": "2013-05-23 16:55:51", 
+  "docstatus": 0, 
+  "modified": "2013-06-26 13:45:41", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Sales BOM Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sales BOM Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "label": "Item", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Float", 
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "read_only": 1, 
+  "search_index": 0
+ }
+]

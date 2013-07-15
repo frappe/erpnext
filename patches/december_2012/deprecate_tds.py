@@ -15,7 +15,6 @@ def execute():
 		webnotes.conn.sql("drop table if exists `tab%s`" % dt)
 		webnotes.conn.begin()
 			
-	delete_doc("Search Criteria", "tds_return")
 			
 	# Add tds entry in tax table for purchase invoice
 	pi_list = webnotes.conn.sql("""select name from `tabPurchase Invoice` 

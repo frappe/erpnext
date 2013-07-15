@@ -1,6 +1,6 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
   "modified": "2013-01-29 16:27:52", 
   "modified_by": "Administrator", 
@@ -248,15 +248,6 @@
   "fieldtype": "Link", 
   "label": "Company", 
   "options": "Company"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

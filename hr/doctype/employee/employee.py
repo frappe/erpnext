@@ -36,7 +36,7 @@ class DocType:
 			if ret[0][0]=='Naming Series':
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
 			elif ret[0][0]=='Employee Number':
-				self.doc.name = make_autoname(self.doc.employee_number)
+				self.doc.name = self.doc.employee_number
 
 		self.doc.employee = self.doc.name
 
@@ -80,7 +80,7 @@ class DocType:
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
 			from webnotes.profile import add_role
-			add_role(self.doc.user_id, "HR User")
+			add_role(self.doc.user_id, "Employee")
 			
 		profile_wrapper = webnotes.bean("Profile", self.doc.user_id)
 		
@@ -101,18 +101,19 @@ class DocType:
 		if self.doc.gender:
 			profile_wrapper.doc.gender = self.doc.gender
 			
-		if self.doc.image and self.doc.file_list:
-			# add to file list and user_image
-			for file_args in self.doc.file_list.split("\n"):
-				fname, fid = file_args.split(",")
-				if self.doc.image == fname:
-					new_file_args = fname + "," + fid
-					file_list = cstr(profile_wrapper.doc.file_list).split("\n")
-					if new_file_args not in file_list:
-						file_list += [new_file_args]
-					profile_wrapper.doc.file_list = "\n".join(file_list)
-					profile_wrapper.doc.user_image = fname
-					break
+		if self.doc.image:
+			if not profile_wrapper.doc.user_image == self.doc.image:
+				profile_wrapper.doc.user_image = self.doc.image
+				try:
+					webnotes.doc({
+						"doctype": "File Data",
+						"file_name": self.doc.image,
+						"attached_to_doctype": "Profile",
+						"attached_to_name": self.doc.user_id
+					}).insert()
+				except webnotes.DuplicateEntryError, e:
+					# already exists
+					pass
 			
 		profile_wrapper.save()
 		

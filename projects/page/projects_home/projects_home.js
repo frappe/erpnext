@@ -60,6 +60,11 @@ wn.module_page["Projects"] = [
 				route: "query-report/Daily Time Log Summary",
 				doctype: "Time Log"
 			},
+			{
+				"label":wn._("Project wise Stock Tracking"),
+				route: "query-report/Project wise Stock Tracking",
+				doctype: "Project"
+			},
 		]
 	}]
 

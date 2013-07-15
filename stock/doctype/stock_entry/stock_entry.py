@@ -57,6 +57,7 @@ class DocType(StockController):
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_fiscal_year()
+		self.set_total_amount()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -174,6 +175,9 @@ class DocType(StockController):
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
 			
+	def set_total_amount(self):
+		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
+			
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
@@ -194,10 +198,10 @@ class DocType(StockController):
 		total_valuation_amount = 0
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.t_warehouse and not item.s_warehouse:
-				total_valuation_amount += flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount += flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 			
 			if item.s_warehouse and not item.t_warehouse:
-				total_valuation_amount -= flt(item.incoming_rate) * flt(item.transfer_qty)
+				total_valuation_amount -= flt(item.incoming_rate, 2) * flt(item.transfer_qty)
 		
 		return total_valuation_amount
 			
@@ -220,7 +224,7 @@ class DocType(StockController):
 			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(args)
 				
-			d.amount = flt(d.qty) * flt(d.incoming_rate)
+			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 			
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
@@ -502,17 +506,13 @@ class DocType(StockController):
 		
 		if self.doc.use_multi_level_bom:
 			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = sql("""select 
-					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,
-					description,stock_uom 
-				from (	select distinct fb.name, fb.description, fb.item_code,
-							fb.qty_consumed_per_unit, fb.stock_uom 
-						from `tabBOM Explosion Item` fb,`tabItem` it 
-						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
-						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 
-						and fb.parent=%s
-					) a
-				group by item_code, stock_uom""" , (qty, self.doc.bom_no), as_dict=1)
+			fl_bom_sa_child_item = sql("""select fb.item_code, 
+				ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, fb.description, fb.stock_uom 
+				from `tabBOM Explosion Item` fb,`tabItem` it 
+				where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+				and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus < 2 
+				and fb.parent=%s group by item_code, stock_uom""", 
+				(qty, self.doc.bom_no), as_dict=1)
 			
 			if fl_bom_sa_child_item:
 				_make_items_dict(fl_bom_sa_child_item)
@@ -520,10 +520,10 @@ class DocType(StockController):
 			# Get all raw materials considering multi level BOM, 
 			# if multi level bom consider childs of Sub-Assembly items
 			fl_bom_sa_items = sql("""select item_code,
-				ifnull(sum(qty_consumed_per_unit), 0) * '%s' as qty,
+				ifnull(sum(qty_consumed_per_unit), 0) *%s as qty,
 				description, stock_uom from `tabBOM Item` 
-				where parent = '%s' and docstatus < 2 
-				group by item_code""" % (qty, self.doc.bom_no), as_dict=1)
+				where parent = %s and docstatus < 2 
+				group by item_code""", (qty, self.doc.bom_no), as_dict=1)
 			
 			if fl_bom_sa_items:
 				_make_items_dict(fl_bom_sa_items)
@@ -607,7 +607,7 @@ class DocType(StockController):
 			'voucher_no': self.doc.name, 
 			'voucher_detail_no': d.name,
 			'actual_qty': qty,
-			'incoming_rate': flt(d.incoming_rate) or 0,
+			'incoming_rate': flt(d.incoming_rate, 2) or 0,
 			'stock_uom': d.stock_uom,
 			'company': self.doc.company,
 			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',

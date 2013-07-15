@@ -91,13 +91,36 @@ wn.module_page["Buying"] = [
 				"label":wn._("Purchase Analytics"),
 				page: "purchase-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Purchase Order"
-			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Item-wise Purchase History"),
+				route: "query-report/Item-wise Purchase History",
+			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
+			{
+				"label":wn._("Requested Items To Be Ordered"),
+				route: "query-report/Requested Items To Be Ordered",
+			},
+			{
+				"label":wn._("Purchase Order Trends"),
+				route: "query-report/Purchase Order Trends",
+				doctype: "Purchase Order"
+			},
+			{
+				"label":wn._("Item-wise Last Purchase Rate"),
+				route: "query-report/Item-wise Last Purchase Rate",
+			}
+		]
+	}
 ]
 
 pscript['onload_buying-home'] = function(wrapper) {

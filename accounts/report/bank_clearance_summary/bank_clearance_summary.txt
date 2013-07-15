@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-05-01 12:13:25", 
+  "docstatus": 0, 
+  "modified": "2013-05-01 12:13:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Journal Voucher", 
+  "report_name": "Bank Clearance Summary", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Bank Clearance Summary"
+ }
+]

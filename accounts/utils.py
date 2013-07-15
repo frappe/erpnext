@@ -26,17 +26,23 @@ from utilities import build_filter_conditions
 
 class FiscalYearError(webnotes.ValidationError): pass
 
-def get_fiscal_year(date, verbose=1):
-	return get_fiscal_years(date, verbose=1)[0]
+def get_fiscal_year(date=None, fiscal_year=None, verbose=1):
+	return get_fiscal_years(date, fiscal_year, verbose=1)[0]
 	
-def get_fiscal_years(date, verbose=1):
+def get_fiscal_years(date=None, fiscal_year=None, verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
+	cond = ""
+	if fiscal_year:
+		cond = "name = '%s'" % fiscal_year
+	else:
+		cond = "'%s' >= year_start_date and '%s' < adddate(year_start_date, interval 1 year)" % \
+			(date, date)
 	fy = webnotes.conn.sql("""select name, year_start_date, 
 		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
 			as year_end_date
 		from `tabFiscal Year`
-		where %s >= year_start_date and %s < adddate(year_start_date, interval 1 year)
-		order by year_start_date desc""", (date, date))
+		where %s
+		order by year_start_date desc""" % cond)
 	
 	if not fy:
 		error_msg = """%s not in any Fiscal Year""" % formatdate(date)
@@ -125,7 +131,6 @@ def add_ac(args=None):
 	ac.doc.doctype = "Account"
 	ac.doc.old_parent = ""
 	ac.doc.freeze_account = "No"
-	ac.ignore_permissions = 1
 	ac.insert()
 	return ac.doc.name
 
@@ -138,7 +143,6 @@ def add_cc(args=None):
 	cc = webnotes.bean(args)
 	cc.doc.doctype = "Cost Center"
 	cc.doc.old_parent = ""
-	cc.ignore_permissions = 1
 	cc.insert()
 	return cc.doc.name
 
@@ -273,36 +277,45 @@ def create_stock_in_hand_jv(reverse=False):
 			jv = webnotes.bean([
 				{
 					"doctype": "Journal Voucher",
-					"naming_series": "_PATCH-",
+					"naming_series": "JV-AUTO-",
 					"company": company,
 					"posting_date": today,
 					"fiscal_year": fiscal_year,
 					"voucher_type": "Journal Entry",
-					"user_remark": "Accounting Entry for Stock: \
-						Initial booking of stock received but not billed account"
+					"user_remark": (_("Auto Inventory Accounting") + ": " +
+						(_("Disabled") if reverse else _("Enabled")) + ". " +
+						_("Journal Entry for inventory that is received but not yet invoiced"))
 				},
 				{
 					"doctype": "Journal Voucher Detail",
 					"parentfield": "entries",
 					"account": get_company_default(company, "stock_received_but_not_billed"),
-					(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
+						(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
 				},
 				{
 					"doctype": "Journal Voucher Detail",
 					"parentfield": "entries",
 					"account": get_company_default(company, "stock_adjustment_account"),
-					(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
+						(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
 					"cost_center": get_company_default(company, "stock_adjustment_cost_center")
 				},
 			])
 			jv.insert()
-			jv.submit()
 			
 			jv_list.append(jv.doc.name)
 	
 	if jv_list:
-		webnotes.msgprint("""Folowing Journal Vouchers has been created automatically: 
-			%s""" % '\n'.join(jv_list))
+		msgprint(_("Following Journal Vouchers have been created automatically") + \
+			":\n%s" % ("\n".join([("<a href=\"#Form/Journal Voucher/%s\">%s</a>" % (jv, jv)) for jv in jv_list]),))
+		
+		msgprint(_("""These adjustment vouchers book the difference between \
+			the total value of received items and the total value of invoiced items, \
+			as a required step to use Auto Inventory Accounting.
+			This is an approximation to get you started.
+			You will need to submit these vouchers after checking if the values are correct.
+			For more details, read: \
+			<a href="http://erpnext.com/auto-inventory-accounting" target="_blank">\
+			Auto Inventory Accounting</a>"""))
 			
 	webnotes.msgprint("""Please refresh the system to get effect of Auto Inventory Accounting""")
 			
@@ -322,3 +335,20 @@ def get_stock_rbnb_value(company):
 		and exists(select name from `tabPurchase Invoice` 
 			where name = pi_item.parent and company = %s)""", company)
 	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])
+
+
+def fix_total_debit_credit():
+	vouchers = webnotes.conn.sql("""select voucher_type, voucher_no, 
+		sum(debit) - sum(credit) as diff 
+		from `tabGL Entry` 
+		group by voucher_type, voucher_no
+		having sum(ifnull(debit, 0)) != sum(ifnull(credit, 0))""", as_dict=1)
+		
+	for d in vouchers:
+		if abs(d.diff) > 0:
+			dr_or_cr = d.voucher_type == "Sales Invoice" and "credit" or "debit"
+			
+			webnotes.conn.sql("""update `tabGL Entry` set %s = %s + %s
+				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
+				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
+				(d.diff, d.voucher_type, d.voucher_no), debug=1)

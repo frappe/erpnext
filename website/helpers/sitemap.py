@@ -2,6 +2,7 @@
 # License: GNU General Public License (v3). For more information see license.txt
 
 from __future__ import unicode_literals
+
 frame_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s
 </urlset>"""
@@ -32,10 +33,11 @@ def generate(domain):
 		
 			for p in pages:
 				if count >= max_items: break
-				page_url = os.path.join(domain, urllib.quote(p[0]))
-				modified = p[1].strftime('%Y-%m-%d')
-				site_map += link_xml % (page_url, modified)
-				count += 1
+				if p[0]:
+					page_url = os.path.join(domain, urllib.quote(p[0]))
+					modified = p[1].strftime('%Y-%m-%d')
+					site_map += link_xml % (page_url, modified)
+					count += 1
 				
 			if count >= max_items: break
 		

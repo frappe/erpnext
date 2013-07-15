@@ -35,23 +35,25 @@
 				{{ web_long_description or web_short_description or 
 					"[No description given]" }}
 				</div>
-				{% if obj.doclist.get({"doctype":"Item Website Specification"}) %}
+				<div class="item-price hide"></div>
+				<div class="item-stock"></div>
+			</div>
+		</div>
+		{% if obj.doclist.get({"doctype":"Item Website Specification"}) -%}
+		<div class="row" style="margin-top: 20px">
+			<div class="span12">
 				<h4>Specifications</h4>
 				<table class="table table-bordered" style="width: 100%">
 				{% for d in obj.doclist.get(
-					{"doctype":"Item Website Specification"}) %}
+					{"doctype":"Item Website Specification"}) -%}
 					<tr>
 						<td style="width: 30%;">{{ d.label }}</td>
 						<td>{{ d.description }}</td>
 					</tr>
-				{% endfor %}
+				{%- endfor %}
 				</table>
-				{% endif %}
-				<div class="item-price hide">
-					<p>Price:</p>
-				</div>
-				<div class="item-stock"></div>
 			</div>
 		</div>
+		{%- endif %}
 	</div>
 {% endblock %}

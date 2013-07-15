@@ -53,11 +53,15 @@ def execute_daily():
 
 	# daily backup
 	from setup.doctype.backup_manager.backup_manager import take_backups_daily
-	take_backups_daily()
+	run_fn(take_backups_daily)
+
+	# check reorder level
+	from stock.utils import reorder_item
+	run_fn(reorder_item)
 
 def execute_weekly():
 	from setup.doctype.backup_manager.backup_manager import take_backups_weekly
-	take_backups_weekly()
+	run_fn(take_backups_weekly)
 
 def execute_monthly():
 	pass

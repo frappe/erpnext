@@ -18,24 +18,18 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import Document
-from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
-
-sql = webnotes.conn.sql
-	
-
+from utilities.transaction_base import delete_events
 
 class DocType:
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
 	
 	# Get Customer Details along with its primary contact details
 	# ==============================================================
 	def get_customer_details(self):
-		details =sql("select address, territory, customer_group,customer_name from `tabCustomer` where name=%s and docstatus!=2",(self.doc.customer),as_dict=1)
+		details =webnotes.conn.sql("select address, territory, customer_group,customer_name from `tabCustomer` where name=%s and docstatus!=2",(self.doc.customer),as_dict=1)
 		if details:
 			ret = {
 				'customer_address'	:	details and details[0]['address'] or '',
@@ -44,7 +38,7 @@ class DocType:
 	'customer_name'		 :	details and details[0]['customer_name'] or ''
 			}
 			#get primary contact details(this is done separately coz. , if join query used & no primary contact thn it would not be able to fetch customer details)
-			contact_det = sql("select contact_name, phone, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact=1 and docstatus!=2" %(self.doc.customer), as_dict = 1)
+			contact_det = webnotes.conn.sql("select contact_name, phone, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact=1 and docstatus!=2" %(self.doc.customer), as_dict = 1)
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no'] = contact_det and contact_det[0]['phone'] or ''
 			ret['email_id'] = contact_det and contact_det[0]['email_id'] or ''		
@@ -52,21 +46,7 @@ class DocType:
 		else:
 			msgprint("Customer : %s does not exist in system." % (self.doc.customer))
 			raise Exception	
-	
-	# Get customer's contact person details
-	# ==============================================================
-	def get_contact_details(self):
-		contact = sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s' and docstatus != 2" %(self.doc,contact_person,self.doc.customer), as_dict=1)
-		if contact:
-			ret = {
-				'contact_no' : contact and contact[0]['contact_no'] or '',
-				'email_id' : contact and contact[0]['email_id'] or ''
-			}
-			return ret
-		else:
-			msgprint("Contact Person : %s does not exist in the system." % (self.doc,contact_person))
-			raise Exception
-	
+		
 	#calculate gross profit
 	#=============================================
 	def get_gross_profit(self):
@@ -86,20 +66,26 @@ class DocType:
 				raise Exception
 				
 	def on_update(self):
-		# update milestones
-		webnotes.conn.sql("""delete from tabEvent where ref_type='Project' and ref_name=%s""",
-			self.doc.name)
-		for d in self.doclist:
-			if d.doctype=='Project Milestone' and d.docstatus!=2:
-				self.add_calendar_event(d.milestone, d.milestone_date)
+		self.add_calendar_event()
 
-	def add_calendar_event(self, milestone, date):
-		""" Add calendar event for task in calendar of Allocated person"""
-		event = Document('Event')
-		event.description = milestone + ' for ' + self.doc.name
-		event.event_date = date
-		event.event_hour =  '10:00'
-		event.event_type = 'Public'
-		event.ref_type = 'Project'
-		event.ref_name = self.doc.name
-		event.save(1)
+	def add_calendar_event(self):
+		# delete any earlier event for this project
+		delete_events(self.doc.doctype, self.doc.name)
+		
+		# add events
+		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
+			if milestone.milestone_date:
+				description = (milestone.milestone or "Milestone") + " for " + self.doc.name
+				webnotes.bean({
+					"doctype": "Event",
+					"owner": self.doc.owner,
+					"subject": description,
+					"description": description,
+					"starts_on": milestone.milestone_date + " 10:00:00",
+					"event_type": "Private",
+					"ref_type": self.doc.doctype,
+					"ref_name": self.doc.name
+				}).insert()
+	
+	def on_trash(self):
+		delete_events(self.doc.doctype, self.doc.name)

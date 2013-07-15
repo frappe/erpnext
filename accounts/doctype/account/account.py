@@ -187,7 +187,7 @@ class DocType:
 		sql("""delete from `tabGL Entry` where account = %s and 
 			ifnull(is_cancelled, 'No') = 'Yes'""", self.doc.name)
 
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
 		parts = new.split(" - ")	
 

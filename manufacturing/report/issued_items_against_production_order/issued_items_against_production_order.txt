@@ -1,0 +1,23 @@
+[
+ {
+  "creation": "2013-05-03 17:48:46", 
+  "docstatus": 0, 
+  "modified": "2013-05-07 11:49:56", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 0, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select\n    ste.production_order as \"Production Order:Link/Production Order:120\",\n    ste.posting_date as \"Issue Date:Date:140\",\n    ste_item.item_code as \"Item Code:Link/Item:120\",\n\tste_item.description as \"Description::150\",\n\tste_item.transfer_qty as \"Qty:Float:100\",\n\tste_item.stock_uom as \"UOM:Link/UOM:80\",\n\tste_item.amount as \"Amount:Currency:120\",\n\tste_item.serial_no as \"Serial No:Link/Serial No:80\",\n\tste_item.s_warehouse as \"Source Warehouse:Link/Warehouse:120\",\n\tste_item.t_warehouse as \"Target Warehouse:Link/Warehouse:120\",\n\tpro.production_item as \"Finished Goods:Link/Item:120\", \n\tste.name as \"Stock Entry:Link/Stock Entry:120\"\nfrom\n\t`tabStock Entry` ste, `tabStock Entry Detail` ste_item, `tabProduction Order` pro\nwhere\n\tifnull(ste.production_order, '') != '' and ste.name = ste_item.parent \n\tand ste.production_order = pro.name and ste.docstatus = 1 \n\tand ste.purpose = 'Manufacture/Repack'\norder by ste.posting_date, ste.production_order, ste_item.item_code", 
+  "ref_doctype": "Production Order", 
+  "report_name": "Issued Items Against Production Order", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Issued Items Against Production Order"
+ }
+]

@@ -115,18 +115,20 @@ class DocType(TransactionBase):
 			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_receivables_group()
 				# create
-				from accounts.utils import add_ac
-				ac = add_ac({
-					'account_name':self.doc.name,
+				ac_bean = webnotes.bean({
+					"doctype": "Account",
+					'account_name': self.doc.name,
 					'parent_account': parent_account, 
 					'group_or_ledger':'Ledger',
 					'company':self.doc.company, 
-					'account_type':'', 
-					'tax_rate':'0', 
 					'master_type':'Customer', 
-					'master_name':self.doc.name
+					'master_name':self.doc.name,
+					"freeze_account": "No"
 				})
-				msgprint("Account Head: %s created" % ac)
+				ac_bean.ignore_permissions = True
+				ac_bean.insert()
+				
+				msgprint("Account Head: %s created" % ac_bean.doc.name)
 		else :
 			msgprint("Please Select Company under which you want to create account head")
 
@@ -216,35 +218,16 @@ class DocType(TransactionBase):
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		#update customer_name if not naming series
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			update_fields = [
-			('Customer', 'name'),
-			('Address', 'customer'),
-			('Contact', 'customer'),
-			('Customer Issue', 'customer'),
-			('Delivery Note', 'customer'),
-			('Opportunity', 'customer'),
-			('Installation Note', 'customer'),
-			('Maintenance Schedule', 'customer'),
-			('Maintenance Visit', 'customer'),
-			('Project', 'customer'),
-			('Quotation', 'customer'),
-			('Sales Invoice', 'customer'),
-			('Sales Order', 'customer'),
-			('Serial No', 'customer'),
-			('Shipping Address', 'customer'),
-			('Stock Entry', 'customer'),
-			('Support Ticket', 'customer')]
-			for rec in update_fields:
-				sql("""update `tab%s` set customer_name = %s
-					where `%s` = %s""" % (rec[0], "%s" ,rec[1], "%s"), (new, old))
+			webnotes.conn.sql("""update `tabCustomer` set customer_name = %s where name = %s""", 
+				(new, old))
 		
 		for account in webnotes.conn.sql("""select name, account_name from 
 			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
 			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new)
+				webnotes.rename_doc("Account", account.name, new, merge=merge)
 
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 

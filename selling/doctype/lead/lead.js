@@ -104,7 +104,17 @@ cur_frm.cscript['Create Customer'] = function(){
 					'from_to_list':"[['Lead', 'Customer']]"
 				}, 
 				function(r,rt) {
-					loaddoc("Customer", n);
+					wn.model.with_doctype("Customer", function() {
+						var customer = wn.model.get_doc("Customer", n);
+						var customer_copy = $.extend({}, customer);
+
+						var updated = wn.model.set_default_values(customer_copy);
+						$.each(updated, function(i, f) {
+							if(!customer[f]) customer[f] = customer_copy[f];
+						});
+					
+						loaddoc("Customer", n);
+					});
 				}
 				);
 			}

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-01 08:21:54", 
+  "creation": "2013-03-05 14:50:38", 
   "docstatus": 0, 
-  "modified": "2013-03-01 08:22:16", 
+  "modified": "2013-05-01 15:49:47", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -97,24 +97,6 @@
   "label": "Batch Finished Date", 
   "oldfieldname": "finished_date", 
   "oldfieldtype": "Date"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

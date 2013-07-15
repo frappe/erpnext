@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-03-25 11:08:14", 
+  "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-03-28 15:41:03", 
+  "modified": "2013-05-22 15:57:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -169,6 +169,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item_naming_by", 
+  "fieldtype": "Select", 
+  "label": "Item Naming By", 
+  "options": "Item Code\nNaming Series", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "default_item_group", 
   "fieldtype": "Link", 
   "label": "Default Item Group", 
@@ -209,18 +217,25 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "default_warehouse_type", 
-  "fieldtype": "Link", 
-  "label": "Default Warehouse Type", 
-  "options": "Warehouse Type", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "auto_indent", 
   "fieldtype": "Check", 
   "label": "Raise Material Request when stock reaches re-order level", 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reorder_email_notify", 
+  "fieldtype": "Check", 
+  "label": "Notify by Email on creation of automatic Material Request"
+ }, 
+ {
+  "default": "Hourly", 
+  "doctype": "DocField", 
+  "fieldname": "reorder_level_checking_frequency", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Reorder Level Checking Frequency", 
+  "options": "Hourly\nDaily"
  }, 
  {
   "default": "1", 
@@ -229,6 +244,14 @@
   "fieldtype": "Column Break", 
   "read_only": 0, 
   "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_warehouse_type", 
+  "fieldtype": "Link", 
+  "label": "Default Warehouse Type", 
+  "options": "Warehouse Type", 
+  "read_only": 0
  }, 
  {
   "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>", 
@@ -269,7 +292,8 @@
   "fieldtype": "Check", 
   "label": "Auto Inventory Accounting", 
   "no_copy": 0, 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person", 

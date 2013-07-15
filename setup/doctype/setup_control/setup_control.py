@@ -97,7 +97,7 @@ class DocType:
 		self.create_email_digest()
 
 		webnotes.clear_cache()
-		msgprint("Company setup is complete. Please refresh the page before continuing.")
+		msgprint("Company setup is complete. This page will be refreshed in a moment.")
 		
 		import webnotes.utils
 		user_fullname = (args.get('first_name') or '') + (args.get('last_name')

@@ -185,21 +185,22 @@ class DocType(BuyingController):
 				if d.fields.has_key(x):
 					d.fields[x] = f_lst[x]
 			
-			item = sql("select is_stock_item, is_purchase_item, is_sub_contracted_item from tabItem where name=%s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())", d.item_code)
+			item = sql("select is_stock_item, is_purchase_item, is_sub_contracted_item, end_of_life from tabItem where name=%s", 
+				d.item_code)
 			if not item:
-				msgprint("Item %s does not exist in Item Master." % cstr(d.item_code))
-				raise Exception
+				msgprint("Item %s does not exist in Item Master." % cstr(d.item_code), raise_exception=True)
+			
+			from stock.utils import validate_end_of_life
+			validate_end_of_life(d.item_code, item[0][3])
 			
 			# validate stock item
 			if item[0][0]=='Yes' and d.qty and not d.warehouse:
-					msgprint("Warehouse is mandatory for %s, since it is a stock item" %
-					 	d.item_code, raise_exception=1)
+				msgprint("Warehouse is mandatory for %s, since it is a stock item" %
+				 	d.item_code, raise_exception=1)
 			
 			# validate purchase item
 			if item[0][1] != 'Yes' and item[0][2] != 'Yes':
-				msgprint("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code))
-				raise Exception
-
+				msgprint("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code), raise_exception=True)
 			
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname:
 				# check warehouse, uom	in previous doc and in current doc are same.
@@ -215,13 +216,13 @@ class DocType(BuyingController):
 				
 				# Check if Warehouse has been modified.
 				if not cstr(data[0]['warehouse']) == cstr(d.warehouse):
-					msgprint("Please check warehouse %s of Item %s which is not present in %s %s ." % (d.warehouse, d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
-					raise Exception
+					msgprint("Please check warehouse %s of Item %s which is not present in %s %s ." % \
+						(d.warehouse, d.item_code, d.prevdoc_doctype, d.prevdoc_docname), raise_exception=True)
 				
 				#	Check if UOM has been modified.
 				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Material Request':
-					msgprint("Please check UOM %s of Item %s which is not present in %s %s ." % (d.uom, d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
-					raise Exception
+					msgprint("Please check UOM %s of Item %s which is not present in %s %s ." % \
+						(d.uom, d.item_code, d.prevdoc_doctype, d.prevdoc_docname), raise_exception=True)
 			
 			# list criteria that should not repeat if item is stock item
 			e = [d.schedule_date, d.item_code, d.description, d.warehouse, d.uom, d.fields.has_key('prevdoc_docname') and d.prevdoc_docname or '', d.fields.has_key('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', d.fields.has_key('batch_no') and d.batch_no or '']
@@ -432,6 +433,7 @@ class DocType(BuyingController):
 			d.account_head = other['account_head']
 			d.rate = flt(other['rate'])
 			d.tax_amount = flt(other['tax_amount'])
+			d.cost_center = other["cost_center"]
 			d.idx = idx
 			idx += 1
 		return obj.doclist

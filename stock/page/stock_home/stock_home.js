@@ -197,6 +197,42 @@ wn.module_page["Stock"] = [
 				route: "query-report/Item-Wise Price List",
 				doctype: "Item"
 			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
+			{
+				"label":wn._("Requested Items To Be Transferred"),
+				route: "query-report/Requested Items To Be Transferred",
+			},
+			{
+				"label":wn._("Batch-Wise Balance History"),
+				route: "query-report/Batch-Wise Balance History",
+			},
+			{
+				"label":wn._("Warehouse-Wise Stock Balance"),
+				route: "query-report/Warehouse-Wise Stock Balance",
+			},
+			{
+				"label":wn._("Item Prices"),
+				route: "query-report/Item Prices",
+
+			},
+			{
+				"label":wn._("Itemwise Recommended Reorder Level"),
+				route: "query-report/Itemwise Recommended Reorder Level",
+				doctype: "Item"
+			},
+			{
+				"label":wn._("Delivery Note Trends"),
+				route: "query-report/Delivery Note Trends",
+				doctype: "Delivery Note"
+			},
+			{
+				"label":wn._("Purchase Receipt Trends"),
+				route: "query-report/Purchase Receipt Trends",
+				doctype: "Purchase Receipt"
+			},
 		]
 	}
 ]

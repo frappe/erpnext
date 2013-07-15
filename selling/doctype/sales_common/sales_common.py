@@ -132,6 +132,7 @@ class DocType(TransactionBase):
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life >	now() 
 			or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' 
 			or is_service_item = 'Yes')""", args['item_code'], as_dict=1)
+		
 		tax = webnotes.conn.sql("""select tax_type, tax_rate from `tabItem Tax` 
 			where parent = %s""", args['item_code'])
 		t = {}
@@ -167,8 +168,9 @@ class DocType(TransactionBase):
 			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['base_ref_rate'] = flt(base_ref_rate)
 			ret['basic_rate'] = flt(base_ref_rate)
-			
+		
 		if ret['warehouse'] or ret['reserved_warehouse']:
+			
 			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
 			ret.update(av_qty)
 			
@@ -179,7 +181,7 @@ class DocType(TransactionBase):
 			(args['item_code'], obj.doc.customer))
 		if customer_item_code_row and customer_item_code_row[0][0]:
 			ret['customer_item_code'] = customer_item_code_row[0][0]
-		
+
 		return ret
 
 
@@ -374,7 +376,7 @@ class DocType(TransactionBase):
 			msgprint("Please Enter Appropriate Conversion Rate for Customer's Currency to Base Currency (%s --> %s)" % (obj.doc.currency, default_currency), raise_exception = 1)
 	
 		if (obj.doc.price_list_currency == default_currency and flt(obj.doc.plc_conversion_rate) != 1.00) or not obj.doc.plc_conversion_rate or (obj.doc.price_list_currency != default_currency and flt(obj.doc.plc_conversion_rate) == 1.00):
-			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency ( (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
+			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
 	
 
 

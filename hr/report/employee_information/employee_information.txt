@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-05-06 18:43:53", 
+  "docstatus": 0, 
+  "modified": "2013-05-06 18:47:43", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "json": "{\"filters\":[],\"columns\":[[\"name\",\"Employee\"],[\"employee_number\",\"Employee\"],[\"date_of_joining\",\"Employee\"],[\"branch\",\"Employee\"],[\"department\",\"Employee\"],[\"designation\",\"Employee\"],[\"gender\",\"Employee\"],[\"status\",\"Employee\"],[\"company\",\"Employee\"],[\"employment_type\",\"Employee\"],[\"grade\",\"Employee\"],[\"reports_to\",\"Employee\"],[\"company_email\",\"Employee\"]],\"sort_by\":\"Employee.bank_ac_no\",\"sort_order\":\"desc\",\"sort_by_next\":\"\",\"sort_order_next\":\"desc\"}", 
+  "name": "__common__", 
+  "ref_doctype": "Employee", 
+  "report_name": "Employee Information", 
+  "report_type": "Report Builder"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Employee Information"
+ }
+]

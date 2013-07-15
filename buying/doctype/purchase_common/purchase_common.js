@@ -128,23 +128,27 @@ erpnext.buying.BuyingController = wn.ui.form.Controller.extend({
 	},
 	
 	currency: function() {
-		this.set_dynamic_labels();
+		if(this.frm.doc.currency === this.get_company_currency())
+			this.frm.set_value("conversion_rate", 1.0);
+		
+		this.price_list_currency();
 	},
 	
 	company: function() {
-		this.set_dynamic_labels();
+		if(this.frm.fields_dict.currency)
+			this.set_dynamic_labels();
 	},
 	
 	price_list_currency: function() {
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 		
-		this.set_dynamic_labels();
-				
 		if(this.frm.doc.price_list_currency === this.get_company_currency())
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		else if(this.frm.doc.price_list_currency === this.frm.doc.currency)
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate || 1.0);		
+		
+		this.set_dynamic_labels();
 	},
 	
 	set_dynamic_labels: function(doc, dt, dn) {

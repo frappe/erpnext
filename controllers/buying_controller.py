@@ -26,9 +26,13 @@ from webnotes.model.utils import round_floats_in_doc
 
 from controllers.stock_controller import StockController
 
+class WrongWarehouseCompany(Exception): pass
+
 class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
+		self.validate_stock_or_nonstock_items()
+		self.validate_warehouse_belongs_to_company()
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")
@@ -41,7 +45,23 @@ class BuyingController(StockController):
 						
 			# set total in words
 			self.set_total_in_words()
-		
+	
+	def validate_warehouse_belongs_to_company(self):
+		for warehouse, company in webnotes.conn.get_values("Warehouse", 
+			self.doclist.get_distinct_values("warehouse"), "company").items():
+			if company and company != self.doc.company:
+				webnotes.msgprint(_("Company mismatch for Warehouse") + (": %s" % (warehouse,)),
+					raise_exception=WrongWarehouseCompany)
+
+	def validate_stock_or_nonstock_items(self):
+		if not self.stock_items:
+			tax_for_valuation = [d.account_head for d in 
+				self.doclist.get({"parentfield": "purchase_tax_details"}) 
+				if d.category in ["Valuation", "Valuation and Total"]]
+			if tax_for_valuation:
+				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' 
+					as all items are non-stock items"""), raise_exception=1)
+			
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):
 			ret = get_item_details({
@@ -338,9 +358,13 @@ class BuyingController(StockController):
 			if d.item_code and d.qty:
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it
-				d.valuation_rate = (flt(d.purchase_rate or d.rate)
-					+ (flt(d.item_tax_amount) + flt(d.rm_supp_cost)) / flt(d.qty)
-					) / flt(d.conversion_factor)
+				d.valuation_rate = flt(((flt(d.purchase_rate, self.precision.item.purchase_rate) or 
+					flt(d.rate, self.precision.item.rate)) + 
+					(flt(d.item_tax_amount, self.precision.item.item_tax_amount) + 
+					flt(d.rm_supp_cost, self.precision.item.rm_supp_cost)) / 
+					flt(d.qty, self.precision.item.qty)) / 
+					flt(d.conversion_factor, self.precision.item.conversion_factor), 
+					self.precision.item.valuation_rate)	
 			else:
 				d.valuation_rate = 0.0
 				
@@ -419,21 +443,25 @@ class BuyingController(StockController):
 	@property
 	def sub_contracted_items(self):
 		if not hasattr(self, "_sub_contracted_items"):
+			self._sub_contracted_items = []
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
-			self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
-				from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
-				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+			if item_codes:
+				self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
+					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
+					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._sub_contracted_items
 		
 	@property
 	def purchase_items(self):
 		if not hasattr(self, "_purchase_items"):
+			self._purchase_items = []
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
-			self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
-				from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
-				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+			if item_codes:
+				self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
+					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
+					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items

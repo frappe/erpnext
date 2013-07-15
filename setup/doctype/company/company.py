@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _, msgprint
 
 from webnotes.utils import cstr
 from webnotes.model.doc import Document
@@ -221,7 +222,6 @@ class DocType:
 	# Create default cost center
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
-		from accounts.utils import add_cc
 		cc_list = [
 			{
 				'cost_center_name':'Root',
@@ -243,7 +243,10 @@ class DocType:
 			}
 		]
 		for cc in cc_list:
-			add_cc(cc)
+			cc.update({"doctype": "Cost Center"})
+			cc_bean = webnotes.bean(cc)
+			cc_bean.ignore_permissions = True
+			cc_bean.insert()
 			
 		webnotes.conn.set_value("Company", self.doc.name, "cost_center",
 			"Default CC Ledger - " + self.doc.abbr)
@@ -287,7 +290,10 @@ class DocType:
 			where doctype='Global Defaults' and field='default_company' 
 			and value=%s""", self.doc.name)
 			
-	def on_rename(self,newdn,olddn):
+	def on_rename(self,newdn,olddn, merge=False):
+		if merge:
+			msgprint(_("Sorry. Companies cannot be merged"), raise_exception=True)
+		
 		webnotes.conn.sql("""update `tabCompany` set company_name=%s
 			where name=%s""", (newdn, olddn))
 		

@@ -14,11 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cur_frm.add_fetch("price_list_name", "currency", "ref_currency")
+
 cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
-	cur_frm.toggle_enable("item_code", doc.__islocal);
+	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
+		&& doc.__islocal)
+	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
+		&& doc.__islocal)
+
 
 	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
 		var callback = function(r, rt) {
@@ -128,11 +134,7 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 	erpnext.utils.supplier_query;
 
 cur_frm.cscript.on_remove_attachment = function(doc) {
-	// refresh image list before unsetting image
-	refresh_field("image");
 	if(!inList(cur_frm.fields_dict.image.df.options.split("\n"), doc.image)) {
-		// if the selected image is removed from attachment, unset it
-		cur_frm.set_value("image", "");
 		msgprint(wn._("Attachment removed. You may need to update: ") 
 			+ wn.meta.get_docfield(doc.doctype, "description_html").label);
 	}
@@ -150,4 +152,8 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 		);
 		cur_frm.refresh();
 	});
+}
+
+cur_frm.cscript.image = function() {
+	refresh_field("image_view");
 }

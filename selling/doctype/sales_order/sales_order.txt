@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 15:24:17", 
+  "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:14:58", 
+  "modified": "2013-06-18 17:49:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -203,7 +203,7 @@
   "label": "Shipping Address Name", 
   "options": "Address", 
   "print_hide": 1, 
-  "read_only": 1
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -952,15 +952,6 @@
   "print_hide": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
@@ -981,14 +972,12 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
   "doctype": "DocPerm", 
   "match": "customer", 
-  "report": 0, 
-  "role": "Customer", 
-  "submit": 0, 
-  "write": 0
+  "role": "Customer"
  }
 ]
