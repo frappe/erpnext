@@ -10,6 +10,39 @@
 
 > These are instructions that will help you to install ERPNext on your Unix like system (Linux / Ubuntu / MacOS) using the Terminal. If you are looking at easier ways to evaluate ERPNext, [see this page](docs.user.intro.try.html).
 
+### ERPNext Installer (Beta)
+
+Install ERPNext in one command!
+
+1. Switch to root user using `sudo su`
+1. create a folder where you want to install erpnext
+1. go to the new folder
+1. `wget https://gist.github.com/anandpdoshi/5991402/raw/5b3b451720a8575f8708e58a640b9a760d048392/install_erpnext.py`
+1. `python install_erpnext.py`
+
+> If you are installing on your server for deployment, remember to change Administrator's password!
+
+> If you get stuck, post your questions at [ERPNext Developer Forum](https://groups.google.com/forum/#!forum/erpnext-developer-forum)
+
+--
+> [Server Setup Tips](http://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers)
+
+> [MySQL configuration file - my.cnf](MySQL-configuration-file)
+
+> [Some Useful Aliases](Some-Useful-Aliases)
+
+---
+### Upgrade / run latest patches
+
+1. Backup your database!
+1. go to Setup > Update This Application [under Update Manager]
+1. click on 'Get Latest Updates'
+
+> [Restoring from ERPNext backup](Restoring-From-ERPNext-Backup)
+
+---
+### Step by step instructions
+
 1. You will need some linux background to be able to install this on your system.
 1. These are high-level instructions and by no means cover every installation issue.
 
@@ -121,21 +154,3 @@ service iptables save
 			RewriteRule ^([^/]+)$ /web.py?page=$1 [QSA,L]		
 		</Directory>
 	</VirtualHost>
-
-## Upgrade / run latest patches
-
-1. Backup your database!
-1. go to Setup > Update This Application [under Update Manager]
-1. click on 'Get Latest Updates'
-
-
-#### If you cannot see this option (Update This Application), you will need to run a manual update once
-
-1. go your erpnext folder i.e. `cd /var/www/erpnext`
-1. run `lib/wnf.py --update origin master`
-1. run `chown -R apache:apache *` or `chown -R _www:_www *`. This will make the erpnext folder accessible to apache webserver.
-1. once done, you can use Setup > Update This Application, henceforth.
-
----
-
-> Looking for a one click installer? Help us build one.
