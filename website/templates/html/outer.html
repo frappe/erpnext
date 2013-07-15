@@ -3,8 +3,10 @@
 {% block body %}
 	<div class="container">
 		<div class="pull-right" style="margin:4px;" id="user-tools">
+			{% if shopping_cart_enabled -%}
 			<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> 
 				<span class="cart-count"></span></a> |
+			{%- endif %}
 			<a id="login-link" href="login">Login</a>
 		</div>
 		<div class="pull-right hide" style="margin:4px;" id="user-tools-post-login">
