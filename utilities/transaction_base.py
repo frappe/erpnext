@@ -145,9 +145,9 @@ class TransactionBase(StatusUpdater):
 			'customer_address' : args["address"],
 			'address_display' : get_address_display(args["address"]),
 		}
+		if args.get('contact'):
+			ret.update(map_party_contact_details(args['contact']))
 		
-		ret.update(map_party_contact_details(args['contact']))
-
 		return ret
 
 	# TODO deprecate this - used only in sales_order.js
@@ -347,7 +347,7 @@ def get_default_contact(party_field, party_name):
 	
 def get_address_display(address_dict):
 	if not isinstance(address_dict, dict):
-		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True)
+		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True) or {}
 	
 	meta = webnotes.get_doctype("Address")
 	sequence = (("", "address_line1"), ("\n", "address_line2"), ("\n", "city"),
@@ -386,23 +386,23 @@ def map_party_contact_details(contact_name=None, party_field=None, party_name=No
 	
 	if not contact_name:
 		contact_name = get_default_contact(party_field, party_name)
+	if party_field:
+		contact = webnotes.conn.sql("""select * from `tabContact` where `%s`=%s
+			order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
+			(party_name,), as_dict=True)
 
-	contact = webnotes.conn.sql("""select * from `tabContact` where `%s`=%s
-		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
-		(party_name,), as_dict=True)
-
-	if contact:
-		contact = contact[0]
-		out.update({
-			"contact_person": contact.get("name"),
-			"contact_display": " ".join(filter(None, 
-				[contact.get("first_name"), contact.get("last_name")])),
-			"contact_email": contact.get("email_id"),
-			"contact_mobile": contact.get("mobile_no"),
-			"contact_phone": contact.get("phone"),
-			"contact_designation": contact.get("designation"),
-			"contact_department": contact.get("department")
-		})
+		if contact:
+			contact = contact[0]
+			out.update({
+				"contact_person": contact.get("name"),
+				"contact_display": " ".join(filter(None, 
+					[contact.get("first_name"), contact.get("last_name")])),
+				"contact_email": contact.get("email_id"),
+				"contact_mobile": contact.get("mobile_no"),
+				"contact_phone": contact.get("phone"),
+				"contact_designation": contact.get("designation"),
+				"contact_department": contact.get("department")
+			})
 	
 	return out
 	

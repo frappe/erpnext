@@ -58,14 +58,6 @@ class DocType(SellingController):
 		"""Get Commission rate of Sales Partner"""
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-	def validate_prev_docname(self):
-		"""Validates that Sales Order is not pulled twice"""
-		for d in getlist(self.doclist, 'delivery_note_details'):
-			if self.doc.sales_order_no == d.prevdoc_docname:
-				msgprint(cstr(self.doc.sales_order_no) + " sales order details have already been pulled. ")
-				raise Exception, "Validation Error. "
-
-
 	def set_actual_qty(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if d.item_code and d.warehouse:
@@ -246,7 +238,6 @@ class DocType(SellingController):
 					d.fields.get('packed_qty', 0)
 				])
 		if packing_error_list:
-			from webnotes.utils import cstr
 			err_msg = "\n".join([("Item: " + d[0] + ", Qty: " + cstr(d[1]) \
 				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
 			webnotes.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
