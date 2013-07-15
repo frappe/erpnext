@@ -193,4 +193,6 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 
 cur_frm.cscript.image = function() {
 	refresh_field("image_view");
+	
+	if(!cur_frm.doc.description_html) cur_frm.cscript.add_image(cur_frm.doc);
 }
