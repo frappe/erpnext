@@ -3,6 +3,8 @@ import json
 from webnotes.utils import flt
 
 def execute():
+	webnotes.conn.auto_commit_on_many_writes = 1
+	
 	for doctype in ["Purchase Taxes and Charges", "Sales Taxes and Charges"]:
 		for tax_name, item_wise_tax_detail in \
 			webnotes.conn.sql("""select name, item_wise_tax_detail from `tab%s`""" % doctype):
@@ -21,3 +23,5 @@ def execute():
 					if out:
 						webnotes.conn.sql("""update `tab%s` set item_wise_tax_detail=%s
 							where name=%s""" % (doctype, "%s", "%s"), (json.dumps(out), tax_name))
+
+	webnotes.conn.auto_commit_on_many_writes = 0
