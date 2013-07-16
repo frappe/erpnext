@@ -251,5 +251,5 @@ patch_list = [
 	"patches.july_2013.p02_copy_shipping_address",
 	"patches.july_2013.p03_cost_center_company",
 	"execute:webnotes.bean('Style Settings').save() #2013-07-16",
-	"patches:july_2013.p04_merge_duplicate_leads"
+	"patches.july_2013.p04_merge_duplicate_leads",
 ]
