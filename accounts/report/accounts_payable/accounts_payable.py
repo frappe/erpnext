@@ -24,7 +24,6 @@ def execute(filters=None):
 	for gle in entries:
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
 				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
-			
 			if gle.voucher_type == "Purchase Invoice":
 				pi_info = pi_map.get(gle.voucher_no)
 				due_date = pi_info.get("due_date")
@@ -33,12 +32,12 @@ def execute(filters=None):
 			else:
 				due_date = bill_no = bill_date = ""
 		
-			invoiced_amount = gle.credit > 0 and gle.credit or 0		
-			paid_amount = get_paid_amount(gle, filters.get("report_date") or nowdate(), 
-				entries_after_report_date)
-			outstanding_amount = invoiced_amount - paid_amount
+			invoiced_amount = gle.credit > 0 and gle.credit or 0
+			outstanding_amount = get_outstanding_amount(gle, 
+				filters.get("report_date") or nowdate())
 
 			if abs(flt(outstanding_amount)) > 0.01:
+				paid_amount = invoiced_amount - outstanding_amount
 				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
 					gle.remarks, account_supplier_type_map.get(gle.account), due_date, bill_no, 
 					bill_date, invoiced_amount, paid_amount, outstanding_amount]
@@ -116,17 +115,13 @@ def get_pi_map():
 		
 	return pi_map
 
-def get_paid_amount(gle, report_date, entries_after_report_date):
-
-	paid_amount = 0
-	if flt(gle.debit) > 0 and (not gle.against_voucher or 
-		[gle.against_voucher_type, gle.against_voucher] in entries_after_report_date):
-			paid_amount = gle.debit
-	elif flt(gle.credit) > 0:
-		paid_amount = webnotes.conn.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) from `tabGL Entry` 
-			where account = %s and posting_date <= %s and against_voucher_type = %s 
-			and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
-			(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
-	
-	return flt(paid_amount)
+def get_outstanding_amount(gle, report_date):
+	payment_amount = webnotes.conn.sql("""
+		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+		from `tabGL Entry` 
+		where account = %s and posting_date <= %s and against_voucher_type = %s 
+		and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
+		(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
+		
+	outstanding_amount = flt(gle.credit) - flt(gle.debit) - flt(payment_amount)
+	return outstanding_amount
