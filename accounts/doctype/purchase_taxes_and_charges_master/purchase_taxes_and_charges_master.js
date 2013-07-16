@@ -128,16 +128,14 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 }
 
 cur_frm.set_query("account_head", "purchase_tax_details", function(doc) {
-  return {
-    filters: [
-      ["Account", "group_or_ledger", "=", "Ledger"],
-      ["Account", "docstatus", "!=", 2],
-      ["Account", "account_type", "in", "Tax, Chargeable, Expense Account"],
-      ["Account", "is_pl_account", "=", "Yes"],
-      ["Account", "debit_or_credit", "=", "Debit"],
-      ["Account", "company", "=", doc.company]
-    ]
-  }
+	return {
+		query: "controllers.queries.tax_account_query",
+    	filters: {
+			"account_type": ["Tax", "Chargeable", "Expense Account"],
+			"debit_or_credit": "Debit",
+			"company": doc.company
+		}
+	}
 });
 
 cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_query = function(doc) {
