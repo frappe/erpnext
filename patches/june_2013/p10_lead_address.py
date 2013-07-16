@@ -47,4 +47,6 @@ def create_address_for(lead):
 	del lead["company_name"]
 	del lead["status"]
 	
-	webnotes.bean(lead).insert()
+	lead_bean = webnotes.bean(lead)
+	lead_bean.ignore_mandatory = True
+	lead_bean.insert()
