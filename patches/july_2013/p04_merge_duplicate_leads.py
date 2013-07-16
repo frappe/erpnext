@@ -10,4 +10,4 @@ def execute():
 			if email not in email_lead:
 				email_lead[email] = name
 			else:
-				webnotes.rename("Lead", name, email_lead[email], merge=True)
+				webnotes.rename_doc("Lead", name, email_lead[email], merge=True)
