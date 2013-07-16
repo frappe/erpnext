@@ -50,7 +50,7 @@ $.extend(erpnext.complete_setup, {
 		});
 		
 		if(user != 'Administrator'){
-			d.appframe.$w.find('.close').toggle(false); // Hide close image
+			d.$wrapper.find('.close').toggle(false); // Hide close image
 			$('header').toggle(false); // hide toolbar
 		}
 		
