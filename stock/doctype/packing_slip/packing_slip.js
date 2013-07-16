@@ -15,66 +15,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=0 AND %(key)s LIKE "%s"';
-}
-
-
-cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	var query = 'SELECT name, item_name, description FROM `tabItem` WHERE name IN ( \
-		SELECT item_code FROM `tabDelivery Note Item` dnd \
-		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) AND %(key)s LIKE "%s" LIMIT 50';
-	return query;
-}
-
-
-// Fetch item details
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	if(locals[cdt][cdn].item_code) {
-		$c_obj(make_doclist(cdt, cdn), 'get_item_details', doc.delivery_note, function(r, rt) {
-			if(r.exc) {
-				msgprint(r.exc);
-			} else {
-				refresh_field('item_details');
-			}
-		});
+	return{
+		filters:{ 'docstatus': 0}
 	}
 }
 
+
+cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = 
+		function(doc, cdt, cdn) {
+			return {
+				query: "stock.doctype.packing_slip.packing_slip.item_details",
+				filters:{ 'delivery_note': doc.delivery_note}
+			}
+}
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.delivery_note && doc.__islocal) {
-		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
-		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
-			cur_frm.cscript.update_item_details(doc);
-		}
+			cur_frm.cscript.get_items(doc, cdt, cdn);
 	}
 }
 
-cur_frm.cscript.refresh = function(doc, dt, dn) {
-	if(!doc.amended_from) {
-		hide_field('misc_details');
-	} else {
-		unhide_field('misc_details');
-	}
-}
-
-
-cur_frm.cscript.update_item_details = function(doc) {
-	$c_obj(make_doclist(doc.doctype, doc.name), 'update_item_details', '', function(r, rt) {
-		if(r.exc) {
-			msgprint(r.exc);
-		} else {
-			refresh_many(['item_details', 'naming_series', 'from_case_no', 'to_case_no'])
+cur_frm.cscript.get_items = function(doc, cdt, cdn) {
+	this.frm.call({
+		doc: this.frm.doc,
+		method: "get_items",
+		callback: function(r) {
+			if(!r.exc) cur_frm.refresh();
 		}
 	});
 }
 
+cur_frm.cscript.refresh = function(doc, dt, dn) {
+	cur_frm.toggle_display("misc_details", doc.amended_from);
+}
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_case_nos(doc);
 	cur_frm.cscript.validate_calculate_item_details(doc);
 }
-
 
 // To Case No. cannot be less than From Case No.
 cur_frm.cscript.validate_case_nos = function(doc) {
@@ -106,7 +84,7 @@ cur_frm.cscript.validate_calculate_item_details = function(doc) {
 cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		for(var j=0; j<ps_detail.length; j++) {
-			if(i!=j && ps_detail[i].item_code==ps_detail[j].item_code) {
+			if(i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
 				msgprint("You have entered duplicate items. Please rectify and try again.");
 				validated = false;
 				return;
@@ -145,3 +123,17 @@ cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 	refresh_many(['net_weight_pkg', 'net_weight_uom', 'gross_weight_uom', 'gross_weight_pkg']);
 }
 
+var make_row = function(title,val,bold){
+	var bstart = '<b>'; var bend = '</b>';
+	return '<tr><td class="datalabelcell">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
+	 +'<td class="datainputcell" style="text-align:left;">'+ val +'</td>'
+	 +'</tr>'
+}
+
+cur_frm.pformat.net_weight_pkg= function(doc){
+	return '<table style="width:100%">' + make_row('Net Weight', doc.net_weight_pkg) + '</table>'
+}
+
+cur_frm.pformat.gross_weight_pkg= function(doc){
+	return '<table style="width:100%">' + make_row('Gross Weight', doc.gross_weight_pkg) + '</table>'
+}

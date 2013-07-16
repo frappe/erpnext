@@ -47,8 +47,8 @@ data_map = {
 		"order_by": "lft"
 	},
 	"GL Entry": {
-		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", "is_opening",
-			"company", "voucher_type", "voucher_no", "remarks"],
+		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", 
+			"is_opening", "company", "voucher_type", "voucher_no", "remarks"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, account",
 		"links": {
@@ -72,10 +72,15 @@ data_map = {
 	},
 	"Item Group": {
 		"columns": ["name", "parent_item_group"],
-		"conditions": ["docstatus < 2"],
+		# "conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Brand": {
+		"columns": ["name"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name"
+	},
+	"Project": {
 		"columns": ["name"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name"
@@ -86,13 +91,15 @@ data_map = {
 		"order_by": "name"
 	},
 	"Stock Ledger Entry": {
-		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
-			"voucher_type", "voucher_no", "ifnull(incoming_rate,0) as incoming_rate"],
+		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", 
+			"actual_qty as qty", "voucher_type", "voucher_no", "project",
+			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],
-			"warehouse": ["Warehouse", "name"]
+			"warehouse": ["Warehouse", "name"],
+			"project": ["Project", "name"]
 		},
 		"force_index": "posting_sort_index"
 	},
@@ -117,8 +124,7 @@ data_map = {
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"material_request_type = 'Purchase'", "ifnull(warehouse, '')!=''", 
-			"ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

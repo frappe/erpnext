@@ -1,29 +1,30 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-06-14 15:07:28", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 16:52:41"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
+  "doctype": "Page", 
+  "icon": "icon-cog", 
   "module": "Setup", 
-  "standard": "Yes", 
-  "page_name": "Setup", 
-  "doctype": "Page"
- }, 
- {
-  "parent": "Setup", 
   "name": "__common__", 
-  "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "role": "System Manager", 
-  "parentfield": "roles"
+  "page_name": "Setup", 
+  "standard": "Yes"
  }, 
  {
-  "name": "Setup", 
-  "doctype": "Page"
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "Setup", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "Setup"
  }, 
  {
   "doctype": "Page Role"

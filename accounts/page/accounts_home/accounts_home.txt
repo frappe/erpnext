@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-06-14 15:07:28", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:40:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-05 16:30:46"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Accounts Home", 
-  "module": "Accounts", 
   "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "Accounts", 
+  "name": "__common__", 
   "page_name": "accounts-home", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Accounts Home"
  }, 
  {
-  "name": "accounts-home", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "accounts-home"
  }
 ]

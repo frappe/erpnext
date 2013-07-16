@@ -1,0 +1,80 @@
+[
+ {
+  "creation": "2013-06-20 15:40:29", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 16:26:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "description": "Specify Exchange Rate to convert one currency into another", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-exchange", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Currency Exchange", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Currency Exchange", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Currency Exchange"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_currency", 
+  "fieldtype": "Link", 
+  "label": "From Currency", 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_currency", 
+  "fieldtype": "Link", 
+  "label": "To Currency", 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "exchange_rate", 
+  "fieldtype": "Float", 
+  "label": "Exchange Rate"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-05-06 12:09:05", 
+  "docstatus": 0, 
+  "modified": "2013-05-06 12:22:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "SELECT\n    pi.name as \"Purchase Invoice:Link/Purchase Invoice:120\",\n\tpi.posting_date as \"Posting Date:Date:100\",\n\tpi.credit_to as \"Supplier Account:Link/Account:120\",\n\tpi_item.item_code as \"Item Code:Link/Item:120\",\n\tpi_item.description as \"Description:Data:140\",\n\tpi_item.qty as \"Qty:Float:120\",\n\tpi_item.amount as \"Amount:Currency:120\",\n\tpi_item.purchase_order as \"Purchase Order:Link/Purchase Order:120\",\n\tpi_item.purchase_receipt as \"Purchase Receipt:Link/Purchase Receipt:120\",\n\tpr.posting_date as \"PR Posting Date:Date:130\",\n\tpi.company as \"Company:Link/Company:120\"\nFROM\n\t`tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item, `tabPurchase Receipt` pr\nWHERE\n\tpi.name = pi_item.parent and pi_item.purchase_receipt = pr.name\n\tand pi.docstatus = 1 and pr.posting_date > pi.posting_date\nORDER BY\n\tpi.name desc", 
+  "ref_doctype": "Purchase Receipt", 
+  "report_name": "Purchase In Transit", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Purchase In Transit"
+ }
+]

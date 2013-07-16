@@ -3,22 +3,30 @@
 
 wn.module_page["Support"] = [
 	{
-		title: wn._("Documents"),
+		title: wn._("Top"),
+		top: true,
 		icon: "icon-copy",
 		items: [
 			{
 				label: wn._("Support Ticket"),
-				description: wn._("Support queries from customers via email or website."),
+				description: wn._("Support queries from customers."),
 				doctype:"Support Ticket"
 			},
 			{
 				label: wn._("Customer Issue"),
-				description: wn._("Customer Issue against a Serial No (warranty)."),
+				description: wn._("Customer Issue against Serial No."),
 				doctype:"Customer Issue"
 			},
+		]
+	},
+
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
 			{
 				label: wn._("Maintenance Schedule"),
-				description: wn._("Plan for scheduled maintenance contracts."),
+				description: wn._("Plan for maintenance visits."),
 				doctype:"Maintenance Schedule"
 			},
 			{
@@ -28,7 +36,7 @@ wn.module_page["Support"] = [
 			},
 			{
 				label: wn._("Newsletter"),
-				description: wn._("Send Newsletters to your contacts, leads."),
+				description: wn._("Newsletters to contacts, leads."),
 				doctype:"Newsletter"
 			},
 			{
@@ -72,6 +80,18 @@ wn.module_page["Support"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Maintenance Schedules"),
+				route: "query-report/Maintenance Schedules",
+				doctype: "Maintenance Schedule"
+			}
+		]
+	}
 ]
 
 pscript['onload_support-home'] = function(wrapper) {

@@ -17,22 +17,26 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild
+from webnotes.utils import cstr, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
-
 class DocType(TransactionBase):
-	def __init__(self,doc,doclist=[]):
+	def __init__(self,doc,doclist):
 		self.doc = doc
 		self.doclist = doclist
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
+
+		self._prev = webnotes._dict({
+			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+		})
 
 	def onload(self):
 		self.add_communication_list()
@@ -62,7 +66,6 @@ class DocType(TransactionBase):
 
 			contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
-			
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
 			ret['email_id']			 = contact_det and contact_det[0]['email_id'] or ''
@@ -84,48 +87,34 @@ class DocType(TransactionBase):
 	def on_update(self):
 		# Add to calendar
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
-			if self.doc.contact_by:
-				self.add_calendar_event()
 			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-		webnotes.conn.set(self.doc, 'status', 'Draft')
 
-	def add_calendar_event(self):
-		desc=''
-		user_lst =[]
+		self.add_calendar_event()
+
+	def add_calendar_event(self, opts=None, force=False):
+		if not opts:
+			opts = webnotes._dict()
+		
+		opts.description = ""
+		
 		if self.doc.customer:
 			if self.doc.contact_person:
-				desc = 'Contact '+cstr(self.doc.contact_person)
+				opts.description = 'Contact '+cstr(self.doc.contact_person)
 			else:
-				desc = 'Contact customer '+cstr(self.doc.customer)
+				opts.description = 'Contact customer '+cstr(self.doc.customer)
 		elif self.doc.lead:
-			if self.doc.lead_name:
-				desc = 'Contact '+cstr(self.doc.lead_name)
+			if self.doc.contact_display:
+				opts.description = 'Contact '+cstr(self.doc.contact_display)
 			else:
-				desc = 'Contact lead '+cstr(self.doc.lead)
-		desc = desc+ '. By : ' + cstr(self.doc.contact_by)
+				opts.description = 'Contact lead '+cstr(self.doc.lead)
+				
+		opts.subject = opts.description
+		opts.description += '. By : ' + cstr(self.doc.contact_by)
 		
 		if self.doc.to_discuss:
-			desc = desc+' To Discuss : ' + cstr(self.doc.to_discuss)
+			opts.description += ' To Discuss : ' + cstr(self.doc.to_discuss)
 		
-		ev = Document('Event')
-		ev.description = desc
-		ev.event_date = self.doc.contact_date
-		ev.event_hour = '10:00'
-		ev.event_type = 'Private'
-		ev.ref_type = 'Opportunity'
-		ev.ref_name = self.doc.name
-		ev.save(1)
-		
-		user_lst.append(self.doc.owner)
-		
-		chk = sql("select t1.name from `tabProfile` t1, `tabSales Person` t2 where t2.email_id = t1.name and t2.name=%s",self.doc.contact_by)
-		if chk:
-			user_lst.append(chk[0][0])
-		
-		for d in user_lst:
-			ch = addchild(ev, 'event_individuals', 'Event User')
-			ch.person = d
-			ch.save(1)
+		super(DocType, self).add_calendar_event(opts, force)
 
 	def set_last_contact_date(self):
 		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
@@ -140,14 +129,6 @@ class DocType(TransactionBase):
 			msgprint("Please select items for which enquiry needs to be made")
 			raise Exception
 
-	def validate_fiscal_year(self):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(self.doc.transaction_date) < str(ysd) or str(self.doc.transaction_date) > str(yed):
-			msgprint("Opportunity Date is not within the Fiscal Year selected")
-			raise Exception		
-
 	def validate_lead_cust(self):
 		if self.doc.enquiry_from == 'Lead' and not self.doc.lead:
 			msgprint("Lead Id is mandatory if 'Opportunity From' is selected as Lead", raise_exception=1)
@@ -155,10 +136,15 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
-		self.validate_fiscal_year()
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_lead_cust()
+		
+		from accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
+		
+		if not self.doc.status:
+			self.doc.status = "Draft"
 
 	def on_submit(self):
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
@@ -180,3 +166,45 @@ class DocType(TransactionBase):
 			webnotes.conn.set(self.doc, 'status', 'Opportunity Lost')
 			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
 			return 'true'
+
+	def on_trash(self):
+		self.delete_events()
+		
+@webnotes.whitelist()
+def make_quotation(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	doclist = get_mapped_doclist("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Quotation", 
+			"field_map": {
+				"enquiry_from": "quotation_to", 
+				"enquiry_type": "order_type", 
+				"name": "enq_no", 
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Opportunity Item": {
+			"doctype": "Quotation Item", 
+			"field_map": {
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"uom": "stock_uom"
+			},
+			"add_if_empty": True
+		}
+	}, target_doclist)
+		
+	return [d.fields for d in doclist]
+
+def get_lead(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+	return webnotes.conn.sql ("""select `tabLead`.name, `tabLead`.lead_name FROM `tabLead` 
+			where `tabLead`.%(key)s like "%(txt)s" 
+				%(mcond)s	
+			order by `tabLead`.`name` asc 
+			limit %(start)s, %(page_len)s """ % {'key': searchfield, 
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield),
+			'start': start, 'page_len': page_len})

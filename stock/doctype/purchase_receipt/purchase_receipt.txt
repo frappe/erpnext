@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 15:24:18", 
+  "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-02-02 19:09:37", 
+  "modified": "2013-07-09 12:50:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-truck", 
   "is_submittable": 1, 
   "module": "Stock", 
   "name": "__common__", 
@@ -38,6 +39,13 @@
  {
   "doctype": "DocType", 
   "name": "Purchase Receipt"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_section", 
+  "fieldtype": "Section Break", 
+  "label": "Supplier", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -77,10 +85,11 @@
   "width": "150px"
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
-  "hidden": 1, 
+  "hidden": 0, 
   "in_list_view": 1, 
   "label": "Supplier Name", 
   "read_only": 1
@@ -163,7 +172,7 @@
   "fieldname": "challan_no", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "label": "Challan No", 
+  "label": "Supplier Shipment No", 
   "no_copy": 1, 
   "oldfieldname": "challan_no", 
   "oldfieldtype": "Data", 
@@ -177,7 +186,7 @@
   "fieldname": "challan_date", 
   "fieldtype": "Date", 
   "hidden": 1, 
-  "label": "Challan Date", 
+  "label": "Supplier Shipment Date", 
   "no_copy": 1, 
   "oldfieldname": "challan_date", 
   "oldfieldtype": "Date", 
@@ -188,83 +197,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "items", 
-  "fieldtype": "Section Break", 
-  "label": "Items", 
-  "oldfieldtype": "Section Break"
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "purchase_receipt_details", 
-  "fieldtype": "Table", 
-  "label": "Purchase Receipt Items", 
-  "oldfieldname": "purchase_receipt_details", 
-  "oldfieldtype": "Table", 
-  "options": "Purchase Receipt Item", 
-  "print_hide": 0, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "oldfieldtype": "Section Break", 
-  "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_current_stock", 
-  "fieldtype": "Button", 
-  "label": "Get Current Stock", 
-  "oldfieldtype": "Button", 
-  "options": "get_current_stock", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_18", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
-  "label": "Re-Calculate Values", 
-  "oldfieldtype": "Button"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_20", 
-  "fieldtype": "Section Break"
- }, 
- {
-  "description": "You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.", 
-  "doctype": "DocField", 
-  "fieldname": "purchase_order_no", 
-  "fieldtype": "Link", 
-  "in_list_view": 0, 
-  "label": "Purchase Order", 
-  "no_copy": 1, 
-  "oldfieldname": "purchase_order_no", 
-  "oldfieldtype": "Link", 
-  "options": "Purchase Order", 
-  "print_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_purchase_order_details", 
-  "fieldtype": "Button", 
-  "label": "Pull Purchase Order Details", 
-  "oldfieldtype": "Button", 
-  "options": "get_po_details", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "currency_price_list", 
   "fieldtype": "Section Break", 
-  "label": "Currency & Price List"
+  "label": "Currency and Price List", 
+  "options": "icon-tag"
  }, 
  {
   "description": "Supplier's currency", 
@@ -326,12 +262,78 @@
   "print_hide": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "purchase_receipt_details", 
+  "fieldtype": "Table", 
+  "label": "Purchase Receipt Items", 
+  "oldfieldname": "purchase_receipt_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Receipt Item", 
+  "print_hide": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_import", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "oldfieldname": "net_total_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_current_stock", 
+  "fieldtype": "Button", 
+  "label": "Get Current Stock", 
+  "oldfieldtype": "Button", 
+  "options": "get_current_stock", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_27", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Company Currency)", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
   "description": "Add / Edit Taxes and Charges", 
   "doctype": "DocField", 
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
@@ -346,29 +348,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_tax_detail", 
-  "fieldtype": "Button", 
-  "label": "Get Tax Detail", 
-  "oldfieldtype": "Button", 
-  "options": "get_purchase_tax_details", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "purchase_tax_details", 
   "fieldtype": "Table", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
   "oldfieldtype": "Table", 
   "options": "Purchase Taxes and Charges"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "calculate_tax", 
-  "fieldtype": "Button", 
-  "label": "Calculate Tax", 
-  "oldfieldtype": "Button", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -384,24 +369,14 @@
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
-  "oldfieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "net_total_import", 
-  "fieldtype": "Currency", 
-  "label": "Net Total (Import)", 
-  "oldfieldname": "net_total_import", 
-  "oldfieldtype": "Currency", 
-  "options": "currency", 
-  "print_hide": 1, 
-  "read_only": 1
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "other_charges_added_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added (Import)", 
+  "label": "Taxes and Charges Added", 
   "oldfieldname": "other_charges_added_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -412,7 +387,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted_import", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted (Import)", 
+  "label": "Taxes and Charges Deducted", 
   "oldfieldname": "other_charges_deducted_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -423,7 +398,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total_import", 
   "fieldtype": "Currency", 
-  "label": "Grand Total (Import)", 
+  "label": "Grand Total", 
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
@@ -434,7 +409,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words_import", 
   "fieldtype": "Data", 
-  "label": "In Words (Import)", 
+  "label": "In Words", 
   "oldfieldname": "in_words_import", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -449,23 +424,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "label": "Net Total", 
-  "oldfieldname": "net_total", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "read_only": 1, 
-  "reqd": 1, 
-  "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "other_charges_added", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Added", 
+  "label": "Taxes and Charges Added (Company Currency)", 
   "oldfieldname": "other_charges_added", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -476,7 +437,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges_deducted", 
   "fieldtype": "Currency", 
-  "label": "Taxes and Charges Deducted", 
+  "label": "Taxes and Charges Deducted (Company Currency)", 
   "oldfieldname": "other_charges_deducted", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -487,7 +448,7 @@
   "doctype": "DocField", 
   "fieldname": "total_tax", 
   "fieldtype": "Currency", 
-  "label": "Total Tax", 
+  "label": "Total Tax (Company Currency)", 
   "oldfieldname": "total_tax", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -498,7 +459,7 @@
   "doctype": "DocField", 
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
-  "label": "Grand Total", 
+  "label": "Grand Total (Company Currency)", 
   "oldfieldname": "grand_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -509,7 +470,7 @@
   "doctype": "DocField", 
   "fieldname": "rounded_total", 
   "fieldtype": "Currency", 
-  "label": "Rounded Total", 
+  "label": "Rounded Total (Company Currency)", 
   "oldfieldname": "rounded_total", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
@@ -521,7 +482,7 @@
   "doctype": "DocField", 
   "fieldname": "in_words", 
   "fieldtype": "Data", 
-  "label": "In Words", 
+  "label": "In Words (Company Currency)", 
   "oldfieldname": "in_words", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -533,7 +494,8 @@
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
  }, 
  {
   "doctype": "DocField", 
@@ -547,23 +509,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "options": "get_tc_details"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "terms_html", 
-  "fieldtype": "HTML", 
-  "label": "Terms and Conditions HTML", 
-  "oldfieldtype": "HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
   "label": "Terms and Conditions1", 
@@ -571,10 +516,12 @@
   "oldfieldtype": "Text Editor"
  }, 
  {
+  "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "contact_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
  }, 
  {
   "doctype": "DocField", 
@@ -603,7 +550,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 
@@ -621,20 +569,6 @@
   "reqd": 1, 
   "search_index": 1, 
   "width": "150px"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "description": "% of materials billed against this Purchase Receipt", 
-  "doctype": "DocField", 
-  "fieldname": "per_billed", 
-  "fieldtype": "Percent", 
-  "in_list_view": 1, 
-  "label": "% Billed", 
-  "no_copy": 1, 
-  "oldfieldname": "per_billed", 
-  "oldfieldtype": "Currency", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "default": "No", 
@@ -789,19 +723,6 @@
   "width": "50px"
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "instructions", 
   "fieldtype": "Small Text", 
@@ -820,7 +741,8 @@
   "doctype": "DocField", 
   "fieldname": "transporter_info", 
   "fieldtype": "Section Break", 
-  "label": "Transporter Info"
+  "label": "Transporter Info", 
+  "options": "icon-truck"
  }, 
  {
   "doctype": "DocField", 
@@ -868,8 +790,9 @@
   "doctype": "DocField", 
   "fieldname": "raw_material_details", 
   "fieldtype": "Section Break", 
-  "label": "Raw Material Details", 
+  "label": "Raw Materials Supplied", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-table", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -884,29 +807,6 @@
   "options": "Purchase Receipt Item Supplied", 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "Purchase User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "match": "supplier", 
-  "role": "Supplier"
  }, 
  {
   "amend": 1, 
@@ -925,5 +825,19 @@
   "role": "Material User", 
   "submit": 1, 
   "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "supplier", 
+  "role": "Supplier"
  }
 ]

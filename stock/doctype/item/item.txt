@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-20 13:26:14", 
+  "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-02-20 18:14:06", 
+  "modified": "2013-07-08 14:05:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,6 +14,7 @@
   "description": "A Product or a Service that is bought, sold or kept in stock.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-tag", 
   "max_attachments": 1, 
   "module": "Stock", 
   "name": "__common__", 
@@ -28,13 +29,14 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Item", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
+  "report": 1, 
   "submit": 0
  }, 
  {
@@ -43,11 +45,21 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "item", 
+  "fieldname": "name_and_description_section", 
   "fieldtype": "Section Break", 
-  "label": "Item", 
+  "label": "Name and Description", 
   "no_copy": 0, 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-flag", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Naming Series", 
+  "options": "\nITEM", 
+  "read_only": 0
  }, 
  {
   "description": "Item will be saved by this name in the data base.", 
@@ -56,9 +68,11 @@
   "fieldtype": "Data", 
   "in_filter": 0, 
   "label": "Item Code", 
+  "no_copy": 1, 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Data", 
-  "reqd": 1, 
+  "read_only": 0, 
+  "reqd": 0, 
   "search_index": 0
  }, 
  {
@@ -70,6 +84,7 @@
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -83,6 +98,7 @@
   "oldfieldname": "item_group", 
   "oldfieldtype": "Link", 
   "options": "Item Group", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -94,7 +110,8 @@
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
   "options": "UOM", 
-  "reqd": 0
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -106,25 +123,29 @@
   "oldfieldtype": "Link", 
   "options": "Brand", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "barcode", 
   "fieldtype": "Data", 
-  "label": "Barcode"
+  "label": "Barcode", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "image", 
   "fieldtype": "Select", 
   "label": "Image", 
-  "options": "attach_files:"
+  "options": "attach_files:", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -132,7 +153,8 @@
   "fieldtype": "Image", 
   "in_list_view": 1, 
   "label": "Image View", 
-  "options": "image"
+  "options": "image", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -143,6 +165,7 @@
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -150,21 +173,25 @@
   "doctype": "DocField", 
   "fieldname": "description_html", 
   "fieldtype": "Small Text", 
-  "label": "Description HTML"
+  "label": "Description HTML", 
+  "read_only": 0
  }, 
  {
   "description": "Generates HTML to include selected image in the description", 
   "doctype": "DocField", 
   "fieldname": "add_image", 
   "fieldtype": "Button", 
-  "label": "Generate Description HTML"
+  "label": "Generate Description HTML", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "inventory", 
   "fieldtype": "Section Break", 
   "label": "Inventory", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-truck", 
+  "read_only": 0
  }, 
  {
   "default": "Yes", 
@@ -175,19 +202,21 @@
   "label": "Is Stock Item", 
   "oldfieldname": "is_stock_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "Mandatory if Stock Item is \"Yes\"", 
+  "description": "Mandatory if Stock Item is \"Yes\". Also the default warehouse where reserved quantity is set from Sales Order.", 
   "doctype": "DocField", 
   "fieldname": "default_warehouse", 
   "fieldtype": "Link", 
-  "label": "Default Reserved Warehouse", 
+  "label": "Default Warehouse", 
   "oldfieldname": "default_warehouse", 
   "oldfieldtype": "Link", 
-  "options": "Warehouse"
+  "options": "Warehouse", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -197,7 +226,8 @@
   "fieldtype": "Float", 
   "label": "Allowance Percent", 
   "oldfieldname": "tolerance", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -205,7 +235,8 @@
   "fieldname": "valuation_method", 
   "fieldtype": "Select", 
   "label": "Valuation Method", 
-  "options": "\nFIFO\nMoving Average"
+  "options": "\nFIFO\nMoving Average", 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
@@ -217,7 +248,8 @@
   "hidden": 0, 
   "label": "Minimum Order Qty", 
   "oldfieldname": "min_order_qty", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -225,6 +257,7 @@
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -237,7 +270,8 @@
   "label": "Is Asset Item", 
   "oldfieldname": "is_asset_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -249,7 +283,8 @@
   "label": "Has Batch No", 
   "oldfieldname": "has_batch_no", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -263,7 +298,8 @@
   "label": "Has Serial No", 
   "oldfieldname": "has_serial_no", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -273,7 +309,8 @@
   "fieldtype": "Data", 
   "label": "Warranty Period (in days)", 
   "oldfieldname": "warranty_period", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -282,7 +319,8 @@
   "fieldtype": "Date", 
   "label": "End of Life", 
   "oldfieldname": "end_of_life", 
-  "oldfieldtype": "Date"
+  "oldfieldtype": "Date", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -290,7 +328,8 @@
   "doctype": "DocField", 
   "fieldname": "net_weight", 
   "fieldtype": "Float", 
-  "label": "Net Weight"
+  "label": "Net Weight", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -298,14 +337,17 @@
   "fieldname": "weight_uom", 
   "fieldtype": "Link", 
   "label": "Weight UOM", 
-  "options": "UOM"
+  "options": "UOM", 
+  "read_only": 0
  }, 
  {
   "description": "Auto-raise Material Request if quantity goes below re-order level in a warehouse", 
   "doctype": "DocField", 
   "fieldname": "reorder_section", 
   "fieldtype": "Section Break", 
-  "label": "Re-order"
+  "label": "Re-order", 
+  "options": "icon-rss", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
@@ -314,47 +356,39 @@
   "fieldtype": "Float", 
   "label": "Re-Order Level", 
   "oldfieldname": "re_order_level", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "re_order_qty", 
   "fieldtype": "Float", 
-  "label": "Re-Order Qty"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_31", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
-  "doctype": "DocField", 
-  "fieldname": "email_notify", 
-  "fieldtype": "Check", 
-  "label": "Notify by Email on Re-order"
+  "label": "Re-Order Qty", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break_31", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "item_reorder", 
   "fieldtype": "Table", 
   "label": "Warehouse-wise Item Reorder", 
-  "options": "Item Reorder"
+  "options": "Item Reorder", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "purchase_details", 
   "fieldtype": "Section Break", 
   "label": "Purchase Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart", 
+  "read_only": 0
  }, 
  {
   "default": "Yes", 
@@ -365,7 +399,8 @@
   "label": "Is Purchase Item", 
   "oldfieldname": "is_purchase_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -377,7 +412,8 @@
   "label": "Lead Time Days", 
   "no_copy": 1, 
   "oldfieldname": "lead_time_days", 
-  "oldfieldtype": "Int"
+  "oldfieldtype": "Int", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -388,7 +424,8 @@
   "label": "Default Expense Account", 
   "oldfieldname": "purchase_account", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -399,19 +436,8 @@
   "label": "Default Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
-  "options": "Cost Center"
- }, 
- {
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "description": "Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.", 
-  "doctype": "DocField", 
-  "fieldname": "buying_cost", 
-  "fieldtype": "Float", 
-  "label": "Buying Cost", 
-  "no_copy": 1, 
-  "oldfieldname": "buying_cost", 
-  "oldfieldtype": "Currency", 
-  "read_only": 1
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -431,7 +457,8 @@
   "fieldtype": "Float", 
   "label": "Standard Rate", 
   "oldfieldname": "standard_rate", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -439,6 +466,7 @@
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -450,21 +478,24 @@
   "no_copy": 1, 
   "oldfieldname": "uom_conversion_details", 
   "oldfieldtype": "Table", 
-  "options": "UOM Conversion Detail"
+  "options": "UOM Conversion Detail", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "manufacturer", 
   "fieldtype": "Data", 
-  "label": "Manufacturer"
+  "label": "Manufacturer", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "manufacturer_part_no", 
   "fieldtype": "Data", 
-  "label": "Manufacturer Part Number"
+  "label": "Manufacturer Part Number", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -472,14 +503,17 @@
   "fieldname": "item_supplier_details", 
   "fieldtype": "Table", 
   "label": "Item Supplier Details", 
-  "options": "Item Supplier"
+  "options": "Item Supplier", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "sales_details", 
   "fieldtype": "Section Break", 
   "label": "Sales Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-tag", 
+  "read_only": 0
  }, 
  {
   "default": "Yes", 
@@ -491,7 +525,8 @@
   "label": "Is Sales Item", 
   "oldfieldname": "is_sales_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -505,7 +540,8 @@
   "label": "Is Service Item", 
   "oldfieldname": "is_service_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -518,7 +554,8 @@
   "label": "Allow Samples", 
   "oldfieldname": "is_sample_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -528,7 +565,8 @@
   "fieldtype": "Float", 
   "label": "Max Discount (%)", 
   "oldfieldname": "max_discount", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
@@ -536,7 +574,8 @@
   "fieldname": "default_income_account", 
   "fieldtype": "Link", 
   "label": "Default Income Account", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
@@ -544,7 +583,8 @@
   "fieldname": "default_sales_cost_center", 
   "fieldtype": "Link", 
   "label": "Cost Center", 
-  "options": "Cost Center"
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
@@ -554,7 +594,8 @@
   "hidden": 1, 
   "label": "Sales Rate", 
   "oldfieldname": "sales_rate", 
-  "oldfieldtype": "Currency"
+  "oldfieldtype": "Currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
@@ -562,6 +603,7 @@
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -571,14 +613,17 @@
   "fieldname": "item_customer_details", 
   "fieldtype": "Table", 
   "label": "Customer Codes", 
-  "options": "Item Customer Detail"
+  "options": "Item Customer Detail", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "item_tax_section_break", 
   "fieldtype": "Section Break", 
   "label": "Item Tax", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -587,16 +632,18 @@
   "label": "Item Tax1", 
   "oldfieldname": "item_tax", 
   "oldfieldtype": "Table", 
-  "options": "Item Tax"
+  "options": "Item Tax", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "price_list_section", 
   "fieldtype": "Section Break", 
-  "label": "Price Lists and Rates"
+  "label": "Price Lists and Rates", 
+  "options": "icon-money", 
+  "read_only": 0
  }, 
  {
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
   "doctype": "DocField", 
   "fieldname": "ref_rate_details", 
@@ -604,14 +651,17 @@
   "label": "Item Prices", 
   "oldfieldname": "ref_rate_details", 
   "oldfieldtype": "Table", 
-  "options": "Item Price"
+  "options": "Item Price", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "inspection_criteria", 
   "fieldtype": "Section Break", 
   "label": "Inspection Criteria", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-search", 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -623,6 +673,7 @@
   "oldfieldname": "inspection_required", 
   "oldfieldtype": "Select", 
   "options": "\nYes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -634,14 +685,17 @@
   "label": "Item Quality Inspection Parameter", 
   "oldfieldname": "item_specification_details", 
   "oldfieldtype": "Table", 
-  "options": "Item Quality Inspection Parameter"
+  "options": "Item Quality Inspection Parameter", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "manufacturing", 
   "fieldtype": "Section Break", 
   "label": "Manufacturing", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-cogs", 
+  "read_only": 0
  }, 
  {
   "default": "No", 
@@ -652,7 +706,8 @@
   "label": "Allow Bill of Materials", 
   "oldfieldname": "is_manufactured_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -677,7 +732,8 @@
   "label": "Allow Production Order", 
   "oldfieldname": "is_pro_applicable", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -689,17 +745,9 @@
   "label": "Is Sub Contracted Item", 
   "oldfieldname": "is_sub_contracted_item", 
   "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
+  "options": "Yes\nNo", 
+  "read_only": 0, 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -709,19 +757,23 @@
   "in_filter": 1, 
   "label": "Customer Code", 
   "no_copy": 1, 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "website_section", 
   "fieldtype": "Section Break", 
-  "label": "Website"
+  "label": "Website", 
+  "options": "icon-globe", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "show_in_website", 
   "fieldtype": "Check", 
-  "label": "Show in Website"
+  "label": "Show in Website", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
@@ -739,6 +791,7 @@
   "fieldname": "weightage", 
   "fieldtype": "Int", 
   "label": "Weightage", 
+  "read_only": 0, 
   "search_index": 1
  }, 
  {
@@ -748,7 +801,8 @@
   "fieldname": "slideshow", 
   "fieldtype": "Link", 
   "label": "Slideshow", 
-  "options": "Website Slideshow"
+  "options": "Website Slideshow", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
@@ -757,21 +811,14 @@
   "fieldname": "website_image", 
   "fieldtype": "Select", 
   "label": "Image", 
-  "options": "attach_files:"
+  "options": "attach_files:", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb72", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "depends_on": "show_in_website", 
-  "description": "Show Price in Website (if set)", 
-  "doctype": "DocField", 
-  "fieldname": "website_price_list", 
-  "fieldtype": "Link", 
-  "label": "Website Price List", 
-  "options": "Price List"
+  "fieldtype": "Column Break", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
@@ -780,7 +827,8 @@
   "fieldname": "website_warehouse", 
   "fieldtype": "Link", 
   "label": "Website Warehouse", 
-  "options": "Warehouse"
+  "options": "Warehouse", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
@@ -789,13 +837,23 @@
   "fieldname": "website_item_groups", 
   "fieldtype": "Table", 
   "label": "Website Item Groups", 
-  "options": "Website Item Group"
+  "options": "Website Item Group", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "sb72", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "show_in_website", 
+  "doctype": "DocField", 
+  "fieldname": "copy_from_item_group", 
+  "fieldtype": "Button", 
+  "label": "Copy From Item Group", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
@@ -803,85 +861,38 @@
   "fieldname": "item_website_specifications", 
   "fieldtype": "Table", 
   "label": "Item Website Specifications", 
-  "options": "Item Website Specification"
+  "options": "Item Website Specification", 
+  "read_only": 0
  }, 
  {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "web_long_description", 
   "fieldtype": "Text Editor", 
-  "label": "Website Description"
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "write": 0
- }, 
- {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "write": 0
+  "label": "Website Description", 
+  "read_only": 0
  }, 
  {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
   "role": "Material Master Manager", 
   "write": 1
  }, 
  {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Master Manager", 
+  "role": "Material Manager", 
   "write": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "System Manager", 
+  "role": "Material User", 
   "write": 0
  }
 ]

@@ -1,22 +1,24 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block content %}
-{% include 'html/product_search_box.html' %}
-{% include 'html/product_breadcrumbs.html' %}
-<div class="span12">
+{% include 'app/website/templates/html/product_search_box.html' %}
+{% include 'app/website/templates/html/product_breadcrumbs.html' %}
+<div class="col col-lg-12">
 	{% if slideshow %}<!-- slideshow -->
-	{% include "html/slideshow.html" %}
+	{% include "app/website/templates/html/slideshow.html" %}
 	{% endif %}
 	{% if description %}<!-- description -->
 	<div>{{ description or ""}}</div>
 	{% else %}
 	<h3>{{ name }}</h3>
 	{% endif %}
+</div>
+<div class="col col-lg-12">
 	{% if sub_groups %}
 	<hr />
 	<div class="row">
 	{% for d in sub_groups %}
-		<div class="span4">
+		<div class="col col-lg-4">
 			<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
 		</div>
 	{% endfor %}
@@ -29,8 +31,8 @@
 			{{ item }}
 		{% endfor %}
 	</div>
-		{% if len(items)==20 %}
-			<div class="alert info">Showing top 20</div>
+		{% if len(items)==100 %}
+			<div class="alert info">Showing top 100 items.</div>
 		{% endif %}
 	{% else %}
 		<div class="alert">No items listed.</div>

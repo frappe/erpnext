@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-03-07 11:42:57", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:43:10", 
+  "modified": "2013-07-10 14:54:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -41,15 +42,18 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "300px", 
   "width": "300px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Qty", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency"
@@ -58,6 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Rate", 
   "oldfieldname": "standard_rate", 
   "oldfieldtype": "Currency"
@@ -66,6 +71,7 @@
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "amount_as_per_sr", 
   "oldfieldtype": "Currency"
@@ -74,6 +80,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
@@ -81,27 +88,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "parent_bom", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Parent BOM", 
-  "oldfieldname": "parent_bom", 
-  "oldfieldtype": "Link", 
-  "options": "BOM", 
-  "width": "250px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "mat_detail_no", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Mat Detail No"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "qty_consumed_per_unit", 
   "fieldtype": "Float", 
   "hidden": 0, 
+  "in_list_view": 1, 
   "label": "Qty Consumed Per Unit", 
   "no_copy": 0
  }

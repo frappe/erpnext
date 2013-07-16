@@ -3,9 +3,15 @@
 
 wn.module_page["HR"] = [
 	{
-		title: wn._("Documents"),
+		title: wn._("Top"),
+		top: true,
 		icon: "icon-copy",
 		items: [
+			{
+				label: wn._("Employee"),
+				description: wn._("Employee records."),
+				doctype:"Employee"
+			},
 			{
 				label: wn._("Leave Application"),
 				description: wn._("Applications for leave."),
@@ -13,13 +19,8 @@ wn.module_page["HR"] = [
 			},
 			{
 				label: wn._("Expense Claim"),
-				description: wn._("Claims for expenses made on behalf of the organization."),
+				description: wn._("Claims for company expense."),
 				doctype:"Expense Claim"
-			},
-			{
-				label: wn._("Attendance"),
-				description: wn._("Attendance record."),
-				doctype:"Attendance"
 			},
 			{
 				label: wn._("Salary Slip"),
@@ -27,25 +28,25 @@ wn.module_page["HR"] = [
 				doctype:"Salary Slip"
 			},
 			{
-				label: wn._("Appraisal"),
-				description: wn._("Performance appraisal."),
-				doctype:"Appraisal"
-			},
-			{
-				label: wn._("Job Applicant"),
-				description: wn._("Applicant for a Job (extracted from jobs email)."),
-				doctype:"Job Applicant"
+				label: wn._("Attendance"),
+				description: wn._("Attendance record."),
+				doctype:"Attendance"
 			},
 		]
 	},
 	{
-		title: wn._("Masters"),
-		icon: "icon-book",
+		title: wn._("Documents"),
+		icon: "icon-copy",
 		items: [
 			{
-				label: wn._("Employee"),
-				description: wn._("Employee records."),
-				doctype:"Employee"
+				label: wn._("Job Applicant"),
+				description: wn._("Applicant for a Job."),
+				doctype:"Job Applicant"
+			},
+			{
+				label: wn._("Appraisal"),
+				description: wn._("Performance appraisal."),
+				doctype:"Appraisal"
 			},
 		]
 	},
@@ -54,10 +55,10 @@ wn.module_page["HR"] = [
 		icon: "icon-cog",
 		items: [
 			{
-				"route":"Form/Attendance Control Panel/Attendance Control Panel",
-				"label":wn._("Upload attendance"),
+				"route":"Form/Upload Attendance/Upload Attendance",
+				"label":wn._("Upload Attendance"),
 				"description":wn._("Upload attendance from a .csv file"),
-				doctype: "Attendance Control Panel"
+				doctype: "Upload Attendance"
 			},
 			{
 				"route":"Form/Leave Control Panel/Leave Control Panel",
@@ -157,6 +158,33 @@ wn.module_page["HR"] = [
 				"label": wn._("Grade"),
 				"description": wn._("Employee grades"),
 				doctype: "Grade"
+			},
+		]
+	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Employee Leave Balance"),
+				route: "query-report/Employee Leave Balance"
+			},
+			{
+				"label":wn._("Employee Birthday"),
+				route: "query-report/Employee Birthday"
+			},
+			{
+				"label":wn._("Employee Information"),
+				route: "Report/Employee/Employee Information"
+			},
+			{
+				"label":wn._("Monthly Salary Register"),
+				route: "query-report/Monthly Salary Register"
+			},
+			{
+				"label":wn._("Monthly Attendance Sheet"),
+				route: "query-report/Monthly Attendance Sheet"
 			},
 		]
 	}

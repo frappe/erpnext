@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-02-11 17:23:08", 
+  "modified": "2013-07-05 14:47:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Create and Send Newsletters", 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-envelope", 
   "module": "Support", 
   "name": "__common__"
  }, 

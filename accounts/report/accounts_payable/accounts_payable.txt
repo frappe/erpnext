@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-04-22 16:16:03", 
+  "docstatus": 0, 
+  "modified": "2013-04-30 17:55:54", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Purchase Invoice", 
+  "report_name": "Accounts Payable", 
+  "report_type": "Report Builder"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Accounts Payable"
+ }
+]

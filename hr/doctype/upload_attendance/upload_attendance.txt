@@ -1,0 +1,100 @@
+[
+ {
+  "creation": "2013-01-25 11:34:53", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 15:02:09", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "allow_attach": 0, 
+  "doctype": "DocType", 
+  "icon": "icon-upload-alt", 
+  "issingle": 1, 
+  "max_attachments": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Upload Attendance", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Upload Attendance", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Upload Attendance"
+ }, 
+ {
+  "description": "Download the Template, fill appropriate data and attach the modified file.\nAll dates and employee combination in the selected period will come in the template, with existing attendance records", 
+  "doctype": "DocField", 
+  "fieldname": "download_template", 
+  "fieldtype": "Section Break", 
+  "label": "Download Template"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "att_fr_date", 
+  "fieldtype": "Date", 
+  "label": "Attendance From Date", 
+  "oldfieldname": "attenadnce_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "att_to_date", 
+  "fieldtype": "Date", 
+  "label": "Attendance To Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_template", 
+  "fieldtype": "Button", 
+  "label": "Get Template", 
+  "oldfieldtype": "Button"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_attendance_data", 
+  "fieldtype": "Section Break", 
+  "label": "Import Attendance"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_html", 
+  "fieldtype": "HTML", 
+  "label": "Upload HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "import_log", 
+  "fieldtype": "HTML", 
+  "hidden": 0, 
+  "label": "Import Log"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

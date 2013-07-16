@@ -1,15 +1,15 @@
 [
  {
-  "creation": "2013-01-21 18:19:14", 
+  "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:57:49", 
+  "modified": "2013-07-10 14:54:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "autoname": "RFD/.#####", 
   "doctype": "DocType", 
-  "in_create": 1, 
+  "in_create": 0, 
   "istable": 1, 
   "module": "Stock", 
   "name": "__common__", 
@@ -17,6 +17,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Item Price", 
   "parentfield": "fields", 
@@ -60,21 +61,18 @@
   "oldfieldname": "ref_currency", 
   "oldfieldtype": "Select", 
   "options": "Currency", 
-  "reqd": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
   "search_index": 1
  }, 
  {
-  "description": "Allow this price in sales related forms", 
+  "default": "Selling", 
   "doctype": "DocField", 
-  "fieldname": "selling", 
-  "fieldtype": "Check", 
-  "label": "For Selling"
- }, 
- {
-  "description": "Allow this price in purchase related forms", 
-  "doctype": "DocField", 
-  "fieldname": "buying", 
-  "fieldtype": "Check", 
-  "label": "For Buying"
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "read_only": 1, 
+  "reqd": 1
  }
 ]

@@ -16,7 +16,6 @@
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
-
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
@@ -26,7 +25,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	}
 	cur_frm.set_df_property("leave_approver", "options", "");
 	cur_frm.call({
-		method:"get_approver_list",
+		method:"hr.utils.get_leave_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("leave_approver", "options", $.map(r.message, 
 				function(profile) { 
@@ -127,4 +126,8 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 	}
 }
 
-cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
+cur_frm.fields_dict.employee.get_query = function() {
+	return {
+		query: "hr.doctype.leave_application.leave_application.query_for_permitted_employees"
+	};
+}

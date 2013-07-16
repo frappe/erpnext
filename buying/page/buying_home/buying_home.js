@@ -4,8 +4,14 @@
 wn.module_page["Buying"] = [
 	{
 		title: wn._("Documents"),
+		top: true,
 		icon: "icon-copy",
 		items: [
+			{
+				label: wn._("Supplier"),
+				description: wn._("Supplier database."),
+				doctype:"Supplier"
+			},
 			{
 				label: wn._("Material Request"),
 				description: wn._("Request for purchase."),
@@ -13,7 +19,7 @@ wn.module_page["Buying"] = [
 			},
 			{
 				label: wn._("Supplier Quotation"),
-				description: wn._("Track Quotations received from Suppliers."),
+				description: wn._("Quotations received from Suppliers."),
 				doctype:"Supplier Quotation"
 			},
 			{
@@ -27,11 +33,6 @@ wn.module_page["Buying"] = [
 		title: wn._("Masters"),
 		icon: "icon-book",
 		items: [
-		{
-			label: wn._("Supplier"),
-			description: wn._("Supplier database."),
-			doctype:"Supplier"
-		},
 		{
 			label: wn._("Contact"),
 			description: wn._("All Contacts."),
@@ -53,6 +54,12 @@ wn.module_page["Buying"] = [
 		title: wn._("Setup"),
 		icon: "icon-cog",
 		items: [
+			{
+				"label": wn._("Buying Settings"),
+				"route": "Form/Buying Settings",
+				"doctype":"Buying Settings",
+				"description": "Settings for Buying Module"
+			},
 			{
 				"label": wn._("Purchase Taxes and Charges Master"),
 				"doctype":"Purchase Taxes and Charges Master",
@@ -80,12 +87,6 @@ wn.module_page["Buying"] = [
 		title: wn._("Tools"),
 		icon: "icon-wrench",
 		items: [
-			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label":wn._("Purchase Returns"),
-				"description":wn._("Helper for managing return of goods (sales or purchase)"),
-				doctype: "Sales and Purchase Return Tool"
-			},
 		]
 	},
 	{
@@ -97,13 +98,36 @@ wn.module_page["Buying"] = [
 				"label":wn._("Purchase Analytics"),
 				page: "purchase-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Purchase Order"
-			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Item-wise Purchase History"),
+				route: "query-report/Item-wise Purchase History",
+			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
+			{
+				"label":wn._("Requested Items To Be Ordered"),
+				route: "query-report/Requested Items To Be Ordered",
+			},
+			{
+				"label":wn._("Purchase Order Trends"),
+				route: "query-report/Purchase Order Trends",
+				doctype: "Purchase Order"
+			},
+			{
+				"label":wn._("Item-wise Last Purchase Rate"),
+				route: "query-report/Item-wise Last Purchase Rate",
+			}
+		]
+	}
 ]
 
 pscript['onload_buying-home'] = function(wrapper) {

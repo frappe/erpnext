@@ -3,9 +3,15 @@
 
 wn.module_page["Selling"] = [
 	{
+		top: true,
 		title: wn._("Documents"),
 		icon: "icon-copy",
 		items: [
+			{
+				label: wn._("Customer"),
+				description: wn._("Customer database."),
+				doctype:"Customer"
+			},
 			{
 				label: wn._("Lead"),
 				description: wn._("Database of potential customers."),
@@ -33,11 +39,6 @@ wn.module_page["Selling"] = [
 		icon: "icon-book",
 		items: [
 			{
-				label: wn._("Customer"),
-				description: wn._("Customer database."),
-				doctype:"Customer"
-			},
-			{
 				label: wn._("Contact"),
 				description: wn._("All Contacts."),
 				doctype:"Contact"
@@ -59,9 +60,20 @@ wn.module_page["Selling"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Selling Settings"),
+				"route": "Form/Selling Settings",
+				"doctype":"Selling Settings",
+				"description": "Settings for Selling Module"
+			},
+			{
 				label: wn._("Sales Taxes and Charges Master"),
 				description: wn._("Sales taxes template."),
 				doctype:"Sales Taxes and Charges Master"
+			},
+			{
+				label: wn._("Shipping Rules"),
+				description: wn._("Rules to calculate shipping amount for a sale"),
+				doctype:"Shipping Rule"
 			},
 			{
 				label: wn._("Price List"),
@@ -121,12 +133,6 @@ wn.module_page["Selling"] = [
 		icon: "icon-wrench",
 		items: [
 			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label":wn._("Sales Returns"),
-				"description":wn._("Helper for managing return of goods (sales or purchase)"),
-				doctype: "Sales and Purchase Return Tool"
-			},
-			{
 				"route":"Form/SMS Center/SMS Center",
 				"label":wn._("SMS Center"),
 				"description":wn._("Send mass SMS to your contacts"),
@@ -143,11 +149,6 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Analytics"),
 				page: "sales-analytics"
 			},
-			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
-				doctype: "Sales Order"
-			},
 		]
 	},
 	{
@@ -160,8 +161,47 @@ wn.module_page["Selling"] = [
 				route: "query-report/Customer Addresses And Contacts"
 			},
 			{
-				"label":wn._("Sales Orders Pending to be Delivered"),
-				route: "query-report/Sales Orders Pending To Be Delivered"
+				"label":wn._("Ordered Items To Be Delivered"),
+				route: "query-report/Ordered Items To Be Delivered",
+			},
+			{
+				"label":wn._("Sales Person-wise Transaction Summary"),
+				route: "query-report/Sales Person-wise Transaction Summary"
+			},
+			{
+				"label":wn._("Item-wise Sales History"),
+				route: "query-report/Item-wise Sales History"
+			},
+			{
+				"label":wn._("Territory Target Variance (Item Group-Wise)"),
+				route: "query-report/Territory Target Variance Item Group-Wise"
+			},
+			{
+				"label":wn._("Sales Person Target Variance (Item Group-Wise)"),
+				route: "query-report/Sales Person Target Variance Item Group-Wise"
+			},
+			{
+				"label":wn._("Customers Not Buying Since Long Time"),
+				route: "query-report/Customers Not Buying Since Long Time",
+				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Quotation Trend"),
+				route: "query-report/Quotation Trends",
+				doctype: "Quotation"
+			},
+			{
+				"label":wn._("Sales Order Trend"),
+				route: "query-report/Sales Order Trends",
+				doctype: "Sales Order"
+			},
+			{
+				"label":wn._("Available Stock for Packing Items"),
+				route: "query-report/Available Stock for Packing Items",
+			},
+			{
+				"label":wn._("Pending SO Items For Purchase Request"),
+				route: "query-report/Pending SO Items For Purchase Request"
 			},
 		]
 	}

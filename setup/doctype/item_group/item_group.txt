@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:23", 
+  "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:03", 
+  "modified": "2013-07-05 14:43:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Item Classification", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-sitemap", 
   "in_create": 1, 
   "issingle": 0, 
   "max_attachments": 3, 
@@ -124,6 +125,14 @@
   "label": "Description"
  }, 
  {
+  "depends_on": "show_in_website", 
+  "doctype": "DocField", 
+  "fieldname": "item_website_specifications", 
+  "fieldtype": "Table", 
+  "label": "Item Website Specifications", 
+  "options": "Item Website Specification"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "lft", 
   "fieldtype": "Int", 
@@ -164,15 +173,6 @@
   "print_hide": 1, 
   "report_hide": 1, 
   "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "amend": 0, 

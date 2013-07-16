@@ -32,6 +32,7 @@ cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
+	cur_frm.cscript.setup_dashboard(doc);
 	if(sys_defaults.cust_master_name == 'Customer Name')
 		hide_field('naming_series');
 	else
@@ -39,7 +40,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);
-	}else{
+	}else{		
 		unhide_field(['address_html','contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
@@ -53,25 +54,42 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 	}
 }
 
+cur_frm.cscript.setup_dashboard = function(doc) {
+	cur_frm.dashboard.reset(doc);
+	if(doc.__islocal) 
+		return;
+	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
+	
+	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
+	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
+	cur_frm.dashboard.add_doctype_badge("Sales Order", "customer");
+	cur_frm.dashboard.add_doctype_badge("Delivery Note", "customer");
+	cur_frm.dashboard.add_doctype_badge("Sales Invoice", "customer");
+	
+	wn.call({
+		type: "GET",
+		method:"selling.doctype.customer.customer.get_dashboard_info",
+		args: {
+			customer: cur_frm.doc.name
+		},
+		callback: function(r) {
+			cur_frm.dashboard.set_headline(
+				wn._("Total Billing This Year: ") + "<b>" 
+				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+				+ '</b></span>');
+			cur_frm.dashboard.set_badge_count(r.message);
+		}
+	})
+}
+
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
 		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['address_html'].wrapper,
-			page_length: 2,
+			page_length: 5,
 			new_doctype: "Address",
-			custom_new_doc: function(doctype) {
-				var address = wn.model.make_new_doc_and_get_name('Address');
-				address = locals['Address'][address];
-				address.customer = cur_frm.doc.name;
-				address.customer_name = cur_frm.doc.customer_name;
-				address.address_title = cur_frm.doc.customer_name;
-				
-				if(!(cur_frm.address_list.data && cur_frm.address_list.data.length)) {
-					address.address_type = "Office";
-				}
-
-				wn.set_route("Form", "Address", address.name);
-			},
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
@@ -88,17 +106,7 @@ cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
 		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
-			page_length: 2,
-			custom_new_doc: function(doctype) {
-				var contact = wn.model.make_new_doc_and_get_name('Contact');
-				contact = locals['Contact'][contact];
-				contact.customer = cur_frm.doc.name;
-				contact.customer_name = cur_frm.doc.customer_name;
-				if(cur_frm.doc.customer_type == 'Individual') {
-					contact.first_name = cur_frm.doc.customer_name;
-				}
-				wn.set_route("Form", "Contact", contact.name);
-			},
+			page_length: 5,
 			new_doctype: "Contact",
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
@@ -114,8 +122,14 @@ cur_frm.cscript.make_contact = function() {
 }
 
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
-	return 'SELECT `tabCustomer Group`.`name`, `tabCustomer Group`.`parent_customer_group` FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "No" AND `tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" ORDER BY	`tabCustomer Group`.`name` ASC LIMIT 50';
+	return{
+		filters:{'is_group': 'No'}
+	}	
 }
 
 
-cur_frm.fields_dict.lead_name.get_query = erpnext.utils.lead_query;
+cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.lead_query"
+	}
+}

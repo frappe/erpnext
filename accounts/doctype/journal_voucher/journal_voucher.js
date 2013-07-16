@@ -23,7 +23,14 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) { 
-		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+		cur_frm.add_custom_button('View Ledger', function() {
+			wn.route_options = {
+				"voucher_no": doc.name,
+				"from_date": doc.posting_date,
+				"to_date": doc.posting_date,
+			};
+			wn.set_route("general-ledger");
+		});
 	}
 }
 
@@ -49,8 +56,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-//Set debit and credit to zero on adding new row
-//----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1){
@@ -58,9 +63,6 @@ cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 		d.credit = 0;
 	}
 }
-
-// Get Outstanding of Payable & Sales Invoice
-// -----------------------------------------------
 
 cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
@@ -84,13 +86,13 @@ cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var el = getchildren('Journal Voucher Detail', doc.name, 'entries');
 	for(var i in el) {
-		td += flt(el[i].debit);
-		tc += flt(el[i].credit);
+		td += flt(el[i].debit, 2);
+		tc += flt(el[i].credit, 2);
 	}
 	var doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
 	doc.total_credit = tc;
-	doc.difference = flt(td - tc);
+	doc.difference = flt((td - tc), 2);
 	refresh_many(['total_debit','total_credit','difference']);
 }
 
@@ -131,29 +133,53 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = "Journal Voucher";
 }
 
-cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
-	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);	
-}
-
-
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
-	if(doc.voucher_type == 'Bank Voucher' && cstr(doc.company)) {
-		cur_frm.set_df_property("cheque_no", "reqd", true);
-		cur_frm.set_df_property("cheque_date", "reqd", true);
+	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
+	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
 
-		var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
-		if(!children || children.length==0) {
-			$c('accounts.get_default_bank_account', {company: doc.company }, function(r, rt) {
-				if(!r.exc) {
-					var jvd = wn.model.add_child(doc, 'Journal Voucher Detail', 'entries');
-					jvd.account = cstr(r.message);
-					refresh_field('entries');
+	if(wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length!==0 // too late
+		|| !doc.company) // too early
+		return;
+	
+	var update_jv_details = function(doc, r) {
+		$.each(r.message, function(i, d) {
+			var jvdetail = wn.model.add_child(doc, "Journal Voucher Detail", "entries");
+			jvdetail.account = d.account;
+			jvdetail.balance = d.balance;
+		});
+		refresh_field("entries");
+	}
+	
+	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
+		wn.call({
+			type: "GET",
+			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			args: {
+				"voucher_type": doc.voucher_type,
+				"company": doc.company
+			},
+			callback: function(r) {
+				if(r.message) {
+					update_jv_details(doc, r);
 				}
-			});
-		}
-	} else {
-		cur_frm.set_df_property("cheque_no", "reqd", false);
-		cur_frm.set_df_property("cheque_date", "reqd", false);		
+			}
+		})
+	} else if(doc.voucher_type=="Opening Entry") {
+		wn.call({
+			type:"GET",
+			method: "accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
+			args: {
+				"company": doc.company
+			},
+			callback: function(r) {
+				wn.model.clear_table("Journal Voucher Detail", "Journal Voucher", 
+					doc.name, "entries");
+				if(r.message) {
+					update_jv_details(doc, r);
+				}
+				cur_frm.set_value("is_opening", "Yes")
+			}
+		})
 	}
 }
 
@@ -170,24 +196,32 @@ cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(do
 
 cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
-		query: "accounts.utils.get_cost_center_list",
-		filters: { company_name: doc.company}
+		filters: { 
+			'company': doc.company,
+			'group_or_ledger': 'Ledger'
+		}
 	}
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {	
 	var d = locals[this.doctype][this.docname];
 	return {
-		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_purchase_invoice",
-		filters: { account: d.account }
+		filters: [
+			['Purchase Invoice', 'credit_to', '=', d.account],
+			['Purchase Invoice', 'docstatus', '=', 1],
+			['Purchase Invoice', 'outstanding_amount', '>', 0]
+		]
 	}
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
 	return {
-		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_sales_invoice",
-		filters: { account: d.account }
+		filters: [
+			['Sales Invoice', 'debit_to', '=', d.account],
+			['Sales Invoice', 'docstatus', '=', 1],
+			['Sales Invoice', 'outstanding_amount', '>', 0]
+		]
 	}
 }
 

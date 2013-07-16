@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:38:08", 
+  "modified": "2013-07-05 14:53:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__"
@@ -251,18 +252,6 @@
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "report_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 0, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
   "print_hide": 1, 
   "report_hide": 0
  }, 

@@ -62,49 +62,6 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.validate_values()
 
-	def create_customer_address(self):
-		addr_flds = [self.doc.address_line1, self.doc.address_line2, self.doc.city, self.doc.state, self.doc.country, self.doc.pincode]
-		address_line = "\n".join(filter(lambda x : (x!='' and x!=None),addr_flds))
-
-		if self.doc.phone_1:
-			address_line = address_line + "\n" + "Phone: " + cstr(self.doc.phone_1)
-		if self.doc.email_id:
-			address_line = address_line + "\n" + "E-mail: " + cstr(self.doc.email_id)
-		webnotes.conn.set(self.doc,'address', address_line)
-		
-		telephone = "(O): " + cstr(self.doc.phone_1) +"\n"+ cstr(self.doc.phone_2) + "\n" + "(M): " +	"\n" + "(fax): " + cstr(self.doc.fax_1)
-		webnotes.conn.set(self.doc,'telephone',telephone)
-
-	def create_p_contact(self,nm,phn_no,email_id,mob_no,fax,cont_addr):
-		c1 = Document('Contact')
-		c1.first_name = nm
-		c1.contact_name = nm
-		c1.contact_no = phn_no
-		c1.email_id = email_id
-		c1.mobile_no = mob_no
-		c1.fax = fax
-		c1.contact_address = cont_addr
-		c1.is_primary_contact = 'Yes'
-		c1.is_customer =1
-		c1.customer = self.doc.name
-		c1.customer_name = self.doc.customer_name
-		c1.customer_address = self.doc.address
-		c1.customer_group = self.doc.customer_group
-		c1.save(1)
-
-	def create_customer_contact(self):
-		contact = sql("select distinct name from `tabContact` where customer_name=%s", (self.doc.customer_name))
-		contact = contact and contact[0][0] or ''
-		if not contact:
-			# create primary contact for individual customer 
-			if self.doc.customer_type == 'Individual':
-				self.create_p_contact(self.doc.customer_name,self.doc.phone_1,self.doc.email_id,'',self.doc.fax_1,self.doc.address)
-		
-			# create primary contact for lead
-			elif self.doc.lead_name:
-				c_detail = sql("select lead_name, company_name, contact_no, mobile_no, email_id, fax, address from `tabLead` where name =%s", self.doc.lead_name, as_dict=1)
-				self.create_p_contact(c_detail and c_detail[0]['lead_name'] or '', c_detail and c_detail[0]['contact_no'] or '', c_detail and c_detail[0]['email_id'] or '', c_detail and c_detail[0]['mobile_no'] or '', c_detail and c_detail[0]['fax'] or '', c_detail and c_detail[0]['address'] or '')
-
 	def update_lead_status(self):
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
@@ -115,18 +72,20 @@ class DocType(TransactionBase):
 			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_receivables_group()
 				# create
-				from accounts.utils import add_ac
-				ac = add_ac({
-					'account_name':self.doc.name,
+				ac_bean = webnotes.bean({
+					"doctype": "Account",
+					'account_name': self.doc.name,
 					'parent_account': parent_account, 
 					'group_or_ledger':'Ledger',
 					'company':self.doc.company, 
-					'account_type':'', 
-					'tax_rate':'0', 
 					'master_type':'Customer', 
-					'master_name':self.doc.name
+					'master_name':self.doc.name,
+					"freeze_account": "No"
 				})
-				msgprint("Account Head: %s created" % ac)
+				ac_bean.ignore_permissions = True
+				ac_bean.insert()
+				
+				msgprint("Account Head: %s created" % ac_bean.doc.name)
 		else :
 			msgprint("Please Select Company under which you want to create account head")
 
@@ -137,31 +96,16 @@ class DocType(TransactionBase):
 
 	def create_lead_address_contact(self):
 		if self.doc.lead_name:
-			details = sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, phone, mobile_no, fax, email_id from `tabLead` where name = '%s'" %(self.doc.lead_name), as_dict = 1)
-			d = Document('Address') 
-			d.address_line1 = details[0]['address_line1'] 
-			d.address_line2 = details[0]['address_line2']
-			d.city = details[0]['city']
-			d.country = details[0]['country']
-			d.pincode = details[0]['pincode']
-			d.state = details[0]['state']
-			d.fax = details[0]['fax']
-			d.email_id = details[0]['email_id']
-			d.phone = details[0]['phone']
-			d.customer = self.doc.name
-			d.customer_name = self.doc.customer_name
-			d.is_primary_address = 1
-			d.address_type = 'Office'
-			try:
-				d.save(1)
-			except NameError, e:
-				pass
-				
+			if not webnotes.conn.get_value("Address", {"lead": self.doc.lead_name, "customer": self.doc.customer}):
+				webnotes.conn.sql("""update `tabAddress` set customer=%s, customer_name=%s where lead=%s""", 
+					(self.doc.name, self.doc.customer_name, self.doc.lead_name))
+
+			lead = webnotes.conn.get_value("Lead", self.doc.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
 			c = Document('Contact') 
-			c.first_name = details[0]['lead_name'] 
-			c.email_id = details[0]['email_id']
-			c.phone = details[0]['phone']
-			c.mobile_no = details[0]['mobile_no']
+			c.first_name = lead.lead_name 
+			c.email_id = lead.email_id
+			c.phone = lead.phone
+			c.mobile_no = lead.mobile_no
 			c.customer = self.doc.name
 			c.customer_name = self.doc.customer_name
 			c.is_primary_contact = 1
@@ -188,11 +132,18 @@ class DocType(TransactionBase):
 				self.doc.name, raise_exception=1)
 
 	def delete_customer_address(self):
-		for rec in sql("select * from `tabAddress` where customer='%s'" %(self.doc.name), as_dict=1):
-			sql("delete from `tabAddress` where name=%s",(rec['name']))
+		addresses = webnotes.conn.sql("""select name, lead from `tabAddress`
+			where customer=%s""", (self.doc.name,))
+		
+		for name, lead in addresses:
+			if lead:
+				webnotes.conn.sql("""update `tabAddress` set customer=null, customer_name=null
+					where name=%s""", name)
+			else:
+				webnotes.conn.sql("""delete from `tabAddress` where name=%s""", name)
 	
 	def delete_customer_contact(self):
-		for rec in sql("select * from `tabContact` where customer='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabContact` where customer=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabContact` where name=%s",(rec['name']))
 	
 	def delete_customer_communication(self):
@@ -216,37 +167,38 @@ class DocType(TransactionBase):
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		#update customer_name if not naming series
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			update_fields = [
-			('Customer', 'name'),
-			('Address', 'customer'),
-			('Contact', 'customer'),
-			('Customer Issue', 'customer'),
-			('Delivery Note', 'customer'),
-			('Opportunity', 'customer'),
-			('Installation Note', 'customer'),
-			('Maintenance Schedule', 'customer'),
-			('Maintenance Visit', 'customer'),
-			('Project', 'customer'),
-			('Quotation', 'customer'),
-			('Sales Invoice', 'customer'),
-			('Sales Order', 'customer'),
-			('Serial No', 'customer'),
-			('Shipping Address', 'customer'),
-			('Stock Entry', 'customer'),
-			('Support Ticket', 'customer'),
-			('Task', 'customer')]
-			for rec in update_fields:
-				sql("""update `tab%s` set customer_name = %s
-					where `%s` = %s""" % (rec[0], "%s" ,rec[1], "%s"), (new, old))
+			webnotes.conn.sql("""update `tabCustomer` set customer_name = %s where name = %s""", 
+				(new, old))
 		
 		for account in webnotes.conn.sql("""select name, account_name from 
 			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
 			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new)
+				webnotes.rename_doc("Account", account.name, new, merge=merge)
 
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
 			master_type = 'Customer' where master_name = %s""", (new,old))
+
+@webnotes.whitelist()
+def get_dashboard_info(customer):
+	if not webnotes.has_permission("Customer", "read", customer):
+		webnotes.msgprint("No Permission", raise_exception=True)
+	
+	out = {}
+	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		out[doctype] = webnotes.conn.get_value(doctype, 
+			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
+	
+	billing = webnotes.conn.sql("""select sum(grand_total), sum(outstanding_amount) 
+		from `tabSales Invoice` 
+		where customer=%s 
+			and docstatus = 1
+			and fiscal_year = %s""", (customer, webnotes.conn.get_default("fiscal_year")))
+	
+	out["total_billing"] = billing[0][0]
+	out["total_unpaid"] = billing[0][1]
+	
+	return out

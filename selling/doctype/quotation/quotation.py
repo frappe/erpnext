@@ -37,26 +37,11 @@ class DocType(SellingController):
 	def onload(self):
 		self.add_communication_list()
 		 
-	# Pull Opportunity Details
-	# --------------------
-	def pull_enq_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'quotation_details')
-		get_obj('DocType Mapper', 'Opportunity-Quotation').dt_map('Opportunity', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Opportunity', 'Quotation'],['Opportunity Item', 'Quotation Item']]")
-
-		self.get_adj_percent()
-
-		return self.doc.quotation_to
-
 	# Get contact person details based on customer selected
 	# ------------------------------------------------------
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 	
-	
-		
-# QUOTATION DETAILS TRIGGER FUNCTIONS
-# ================================================================================		
-
 	# Get Item Details
 	# -----------------
 	def get_item_details(self, args=None):
@@ -83,49 +68,12 @@ class DocType(SellingController):
 	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-
 	
 		
-
-# OTHER CHARGES TRIGGER FUNCTIONS
-# ====================================================================================
-	
 	# Get Tax rate if account type is TAX
 	# -----------------------------------
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
-
-	# Load Default Charges
-	# ----------------------------------------------------------
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	# Pull details from other charges master (Get Sales Taxes and Charges Master)
-	# ----------------------------------------------------------
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)	
-	
-		 
-# GET TERMS AND CONDITIONS
-# ====================================================================================
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-		
-# VALIDATE
-# ==============================================================================================
-	
-	# Amendment date is necessary if document is amended
-	# --------------------------------------------------
-	def validate_mandatory(self):
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
-
-	# Fiscal Year Validation
-	# ----------------------
-	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Quotation Date')
 	
 	# Does not allow same item code to be entered twice
 	# -------------------------------------------------
@@ -142,6 +90,8 @@ class DocType(SellingController):
 	#do not allow sales item in maintenance quotation and service item in sales quotation
 	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
+		super(DocType, self).validate_order_type()
+		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
 				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)
@@ -176,11 +126,12 @@ class DocType(SellingController):
 		super(DocType, self).validate()
 		
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
-			"Order Confirmed", "Order Lost", "Cancelled"])
+		if not self.doc.status:
+			self.doc.status = "Draft"
+		else:
+			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
+				"Order Confirmed", "Order Lost", "Cancelled"])
 
-		self.validate_fiscal_year()
-		self.validate_mandatory()
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
@@ -193,9 +144,6 @@ class DocType(SellingController):
 	def on_update(self):
 		# Set Quotation Status
 		webnotes.conn.set(self.doc, 'status', 'Draft')
-
-		# subject for follow
-		self.doc.subject = '[%(status)s] To %(customer)s worth %(currency)s %(grand_total)s' % self.doc.fields
 	
 	#update enquiry
 	#------------------
@@ -217,7 +165,7 @@ class DocType(SellingController):
 	
 	# declare as order lost
 	#-------------------------
-	def declare_order_lost(self,arg):
+	def declare_order_lost(self, arg):
 		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
@@ -273,3 +221,74 @@ class DocType(SellingController):
 		sql("delete from `tabCommunication Log` where parent = '%s'"%self.doc.name)
 		for d in getlist(self.doclist, 'follow_up'):
 			d.save()
+
+@webnotes.whitelist()
+def make_sales_order(source_name, target_doclist=None):
+	return _make_sales_order(source_name, target_doclist)
+	
+def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	customer = _make_customer(source_name, ignore_permissions)
+	
+	def set_missing_values(source, target):
+		if customer:
+			target[0].customer = customer.doc.name
+			target[0].customer_name = customer.doc.customer_name
+			
+		si = webnotes.bean(target)
+		si.run_method("onload_post_render")
+			
+	doclist = get_mapped_doclist("Quotation", source_name, {
+			"Quotation": {
+				"doctype": "Sales Order", 
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Quotation Item": {
+				"doctype": "Sales Order Item", 
+				"field_map": {
+					"parent": "prevdoc_docname"
+				}, 
+				"add_if_empty": True
+			}, 
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"add_if_empty": True
+			}, 
+			"Sales Team": {
+				"doctype": "Sales Team",
+				"add_if_empty": True
+			}
+		}, target_doclist, set_missing_values, ignore_permissions=ignore_permissions)
+		
+	# postprocess: fetch shipping address, set missing values
+		
+	return [d.fields for d in doclist]
+
+def _make_customer(source_name, ignore_permissions=False):
+	quotation = webnotes.conn.get_value("Quotation", source_name, ["lead", "order_type"])
+	if quotation and quotation[0]:
+		lead_name = quotation[0]
+		customer_name = webnotes.conn.get_value("Customer", {"lead_name": lead_name})
+		if not customer_name:
+			from selling.doctype.lead.lead import _make_customer
+			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
+			customer = webnotes.bean(customer_doclist)
+			customer.ignore_permissions = ignore_permissions
+			if quotation[1] == "Shopping Cart":
+				customer.doc.customer_group = webnotes.conn.get_value("Shopping Cart Settings", None,
+					"default_customer_group")
+			
+			try:
+				customer.insert()
+				return customer
+			except NameError, e:
+				if webnotes.defaults.get_global_default('cust_master_name') == "Customer Name":
+					customer.run_method("autoname")
+					customer.doc.name += "-" + lead_name
+					customer.insert()
+					return customer
+				else:
+					raise e

@@ -1,20 +1,20 @@
-#activity-list .label {
+#page-activity .label {
 	display: inline-block;
 	width: 100px;
 	margin-right: 7px;
 }
 
-#activity-list .label-info {
+#page-activity .label-info {
 	cursor: pointer;
 }
 
-#activity-list .user-info {
+#page-activity .user-info {
 	float: right;
 	color: #777;
 	font-size: 10px;
 }
 
-#activity-list .date-sep {
+#page-activity .date-sep {
 	margin-bottom: 11px;
 	padding: 5px 0px;
 	border-bottom: 1px solid #aaa;

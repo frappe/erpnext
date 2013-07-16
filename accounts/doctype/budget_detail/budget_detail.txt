@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:05", 
+  "creation": "2013-03-07 11:55:04", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:16", 
+  "modified": "2013-07-10 14:54:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,6 +15,7 @@
  }, 
  {
   "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Budget Detail", 
   "parentfield": "fields", 
@@ -44,7 +45,7 @@
   "label": "Budget Allocated", 
   "oldfieldname": "budget_allocated", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company_name:default_currency", 
+  "options": "Company:company:default_currency", 
   "reqd": 1
  }, 
  {
@@ -54,7 +55,7 @@
   "label": "Actual", 
   "oldfieldname": "actual", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company_name:default_currency", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {

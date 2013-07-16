@@ -8,79 +8,119 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.tname = "Installation Note Item";
 cur_frm.cscript.fname = "installed_item_details";
 
-cur_frm.cscript.onload = function(doc, dt, dn) {
-  if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-  if(doc.__islocal){
-    set_multiple(dt,dn,{inst_date:get_today()});
-    hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);        
-  }
-  if (doc.customer) {
-     unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-  }   
-}
+wn.provide("erpnext.selling");
+// TODO commonify this code
+erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
+	onload: function() {
+		if(!this.frm.doc.status) set_multiple(dt,dn,{ status:'Draft'});
+		if(this.frm.doc.__islocal) set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
+				{inst_date: get_today()});
+				
+		fields = ['customer_address', 'contact_person','customer_name', 'address_display', 
+			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']
+		if(this.frm.doc.customer) unhide_field(fields);
+		else hide_field(fields)
+		
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
+		var me = this;
+		
+		this.frm.set_query("customer_address", function() {
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
+		});
+		
+		this.frm.set_query("contact_person", function() {
+			return {
+				filters: {'customer': me.frm.doc.customer }
+			}
+		});
+		
+		this.frm.set_query("territory", function() {
+			return {
+				filters: {'is_group': "No" }
+			}
+		});
+		
+		this.frm.set_query("customer", function() {
+			return {
+				query: "controllers.queries.customer_query"
+			}
+		});
+	},
+	
+	refresh: function() {
+		if (this.frm.doc.docstatus===0) {
+			cur_frm.add_custom_button(wn._('From Delivery Note'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+						source_doctype: "Delivery Note",
+						get_query_filters: {
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_installed: ["<", 99.99],
+							customer: cur_frm.doc.customer || undefined,
+							company: cur_frm.doc.company
+						}
+					})
+				}
+			);
+		}
+	},
+	
+	customer: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+				callback: function(r) {
+					if(!r.exc) me.frm.refresh_fields();
+				}
+			});
+			
+			// TODO shift this to depends_on
+			unhide_field(['customer_address', 'contact_person', 'customer_name',
+				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
+				'territory', 'customer_group']);
+		}
+	}, 
+	
+	customer_address: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				args: {
+					customer: this.frm.doc.customer, 
+					address: this.frm.doc.customer_address, 
+					contact: this.frm.doc.contact_person
+				},
+				method: "get_customer_address",
+				freeze: true,
+				callback: function(r) {
+					me.frm.refresh_fields();
+				}
+			});
+		}
+	},
+	
+	contact_person: function() {
+		this.customer_address();
+	},
+});
 
-cur_frm.fields_dict['delivery_note_no'].get_query = function(doc) {
-  doc = locals[this.doctype][this.docname];
-  var cond = '';
-  if(doc.customer) {
-    cond = '`tabDelivery Note`.customer = "'+doc.customer+'" AND';
-  }
-  return repl('SELECT DISTINCT `tabDelivery Note`.name, `tabDelivery Note`.customer_name  FROM `tabDelivery Note`, `tabDelivery Note Item` WHERE `tabDelivery Note`.company = "%(company)s" AND `tabDelivery Note`.docstatus = 1 AND ifnull(`tabDelivery Note`.per_installed,0) < 99.99 AND %(cond)s `tabDelivery Note`.name LIKE "%s" ORDER BY `tabDelivery Note`.name DESC LIMIT 50', {company:doc.company, cond:cond});
-}
-
-
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
-}
-
-cur_frm.cscript.get_items = function(doc, dt, dn) {
-  var callback = function(r,rt) { 
-	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-	  cur_frm.refresh();
-  }
-  get_server_fields('pull_delivery_note_details','','',doc, dt, dn,1,callback);
-}
-
-//customer
-cur_frm.cscript.customer = function(doc,dt,dn) {
-  var callback = function(r,rt) {
-      var doc = locals[cur_frm.doctype][cur_frm.docname];
-      cur_frm.refresh();
-  }   
-
-  if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-  if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-}
-
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {    
-  if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
-cur_frm.fields_dict.customer_address.on_new = function(dn) {
-  locals['Address'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-  locals['Address'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-  locals['Contact'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-  locals['Contact'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+$.extend(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));

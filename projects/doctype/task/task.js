@@ -18,22 +18,23 @@ wn.provide("erpnext.projects");
 
 cur_frm.add_fetch("project", "company", "company");
 
-erpnext.projects.Task = erpnext.utils.Controller.extend({
+erpnext.projects.Task = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
-			return "select name from `tabProject` \
-				where %(key)s like \"%s\" \
-				order by name asc limit 50";
+			return {
+				query: "projects.doctype.task.task.get_project"
+			}
 		};
 	},
 
 	project: function() {
 		if(this.frm.doc.project) {
-			get_server_fields('get_project_details', '','', doc, cdt, cdn, 1);
+			get_server_fields('get_project_details', '','', this.frm.doc, this.frm.doc.doctype, 
+				this.frm.doc.name, 1);
 		}
 	},
 
-	after_save: function() {
+	validate: function() {
 		this.frm.doc.project && wn.model.remove_from_locals("Project",
 			this.frm.doc.project);
 	},

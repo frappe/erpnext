@@ -1,0 +1,23 @@
+[
+ {
+  "creation": "2013-05-28 15:54:16", 
+  "docstatus": 0, 
+  "modified": "2013-06-05 13:01:05", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select \n    `tabPurchase Order`.`name` as \"Purchase Order:Link/Purchase Order:120\",\n    `tabPurchase Order`.`transaction_date` as \"Date:Date:100\",\n\t`tabPurchase Order`.`supplier` as \"Supplier:Link/Supplier:120\",\n\t`tabPurchase Order Item`.`project_name` as \"Project\",\n\t`tabPurchase Order Item`.item_code as \"Item Code:Link/Item:120\",\n\t`tabPurchase Order Item`.amount as \"Amount:Currency:100\",\n\t`tabPurchase Order Item`.billed_amt as \"Billed Amount:Currency:100\", \n\t(`tabPurchase Order Item`.amount - ifnull(`tabPurchase Order Item`.billed_amt, 0)) as \"Amount to Bill:Currency:100\",\n\t`tabPurchase Order Item`.item_name as \"Item Name::150\",\n\t`tabPurchase Order Item`.description as \"Description::200\"\nfrom\n\t`tabPurchase Order`, `tabPurchase Order Item`\nwhere\n\t`tabPurchase Order Item`.`parent` = `tabPurchase Order`.`name`\n\tand `tabPurchase Order`.docstatus = 1\n\tand `tabPurchase Order`.status != \"Stopped\"\n\tand ifnull(`tabPurchase Order Item`.billed_amt, 0) < ifnull(`tabPurchase Order Item`.amount, 0)\norder by `tabPurchase Order`.transaction_date asc", 
+  "ref_doctype": "Purchase Invoice", 
+  "report_name": "Purchase Order Items To Be Billed", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Purchase Order Items To Be Billed"
+ }
+]

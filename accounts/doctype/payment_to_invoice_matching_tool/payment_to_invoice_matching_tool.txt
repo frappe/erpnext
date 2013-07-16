@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-02-01 14:05:56", 
+  "modified": "2013-07-05 14:48:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "doctype": "DocType", 
   "document_type": "Other", 
   "hide_toolbar": 1, 
+  "icon": "icon-magic", 
   "issingle": 1, 
   "module": "Accounts", 
   "name": "__common__"

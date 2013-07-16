@@ -14,12 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.add_fetch('employee', 'company', 'company');	
+cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 
-//get employee's name based on employee id selected
-cur_frm.cscript.employee = function(doc,cdt,cdn){
-	if(doc.employee) get_server_fields('get_emp_name', '', '', doc, cdt, cdn, 1);
-	refresh_field('employee_name'); 
+cur_frm.cscript.onload = function(doc, cdt, cdn) {
+	if(doc.__islocal) cur_frm.set_value("att_date", get_today());
 }
 
-cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
+cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.employee_query"
+	}	
+}

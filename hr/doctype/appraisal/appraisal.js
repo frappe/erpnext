@@ -37,10 +37,10 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.kra_template = function(doc, dt, dn) {
-	$c_obj(make_doclist(doc.doctype, doc.name), 'fetch_kra', '', 
-		function() { 
-			cur_frm.refresh();
-		});
+	wn.model.map_current_doc({
+		method: "hr.doctype.appraisal.appraisal.fetch_appraisal_template",
+		source_name: cur_frm.doc.kra_template,
+	});
 }
 
 cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
@@ -83,4 +83,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	refresh_field('total_score');
 }
 
-cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
+cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.employee_query" }	
+}

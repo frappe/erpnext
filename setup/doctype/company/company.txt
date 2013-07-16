@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-22 16:50:36", 
+  "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:51:54", 
+  "modified": "2013-07-10 18:17:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-building", 
   "module": "Setup", 
   "name": "__common__"
  }, 
@@ -48,7 +49,8 @@
   "fieldname": "details", 
   "fieldtype": "Section Break", 
   "label": "Company Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -58,12 +60,8 @@
   "no_copy": 0, 
   "oldfieldname": "company_name", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cb0", 
-  "fieldtype": "Column Break"
  }, 
  {
   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
@@ -74,6 +72,21 @@
   "no_copy": 0, 
   "oldfieldname": "abbr", 
   "oldfieldtype": "Data", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "domain", 
+  "fieldtype": "Select", 
+  "label": "Domain", 
+  "options": "Distribution\nManufacturing\nRetail\nServices", 
   "reqd": 1
  }, 
  {
@@ -81,15 +94,8 @@
   "fieldname": "default_settings", 
   "fieldtype": "Section Break", 
   "label": "Default Settings", 
-  "oldfieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_currency", 
-  "fieldtype": "Link", 
-  "label": "Default Currency", 
-  "options": "Currency", 
-  "reqd": 1
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -100,7 +106,16 @@
   "no_copy": 1, 
   "oldfieldname": "default_bank_account", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_cash_account", 
+  "fieldtype": "Link", 
+  "label": "Default Cash Account", 
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -111,7 +126,8 @@
   "no_copy": 1, 
   "oldfieldname": "receivables_group", 
   "oldfieldtype": "Link", 
-  "options": "Account"
+  "options": "Account", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -122,6 +138,21 @@
   "no_copy": 1, 
   "oldfieldname": "payables_group", 
   "oldfieldtype": "Link", 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_expense_account", 
+  "fieldtype": "Link", 
+  "label": "Default Expense Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_income_account", 
+  "fieldtype": "Link", 
+  "label": "Default Income Account", 
   "options": "Account"
  }, 
  {
@@ -129,7 +160,26 @@
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "options": "Currency", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -138,7 +188,8 @@
   "fieldtype": "Int", 
   "label": "Credit Days", 
   "oldfieldname": "credit_days", 
-  "oldfieldtype": "Int"
+  "oldfieldtype": "Int", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -148,7 +199,8 @@
   "label": "Credit Limit", 
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
-  "options": "default_currency"
+  "options": "default_currency", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -158,7 +210,8 @@
   "label": "If Yearly Budget Exceeded", 
   "oldfieldname": "yearly_bgt_flag", 
   "oldfieldtype": "Select", 
-  "options": "\nWarn\nIgnore\nStop"
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -168,14 +221,77 @@
   "label": "If Monthly Budget Exceeded", 
   "oldfieldname": "monthly_bgt_flag", 
   "oldfieldtype": "Select", 
-  "options": "\nWarn\nIgnore\nStop"
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "auto_inventory_accounting_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Auto Inventory Accounting Settings", 
+  "read_only": 0
+ }, 
+ {
+  "description": "This account will be used to maintain value of available stock", 
+  "doctype": "DocField", 
+  "fieldname": "stock_in_hand_account", 
+  "fieldtype": "Link", 
+  "label": "Stock In Hand Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_received_but_not_billed", 
+  "fieldtype": "Link", 
+  "label": "Stock Received But Not Billed", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break23", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_adjustment_account", 
+  "fieldtype": "Link", 
+  "label": "Stock Adjustment Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expenses_included_in_valuation", 
+  "fieldtype": "Link", 
+  "label": "Expenses Included In Valuation", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_adjustment_cost_center", 
+  "fieldtype": "Link", 
+  "label": "Stock Adjustment Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "description": "For reference only.", 
   "doctype": "DocField", 
   "fieldname": "company_info", 
   "fieldtype": "Section Break", 
-  "label": "Company Info"
+  "label": "Company Info", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -183,13 +299,15 @@
   "fieldtype": "Small Text", 
   "label": "Address", 
   "oldfieldname": "address", 
-  "oldfieldtype": "Small Text"
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -199,7 +317,8 @@
   "label": "Phone No", 
   "oldfieldname": "phone_no", 
   "oldfieldtype": "Data", 
-  "options": "Phone"
+  "options": "Phone", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -208,7 +327,8 @@
   "label": "Fax", 
   "oldfieldname": "fax", 
   "oldfieldtype": "Data", 
-  "options": "Phone"
+  "options": "Phone", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -217,7 +337,8 @@
   "label": "Email", 
   "oldfieldname": "email", 
   "oldfieldtype": "Data", 
-  "options": "Email"
+  "options": "Email", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -225,7 +346,8 @@
   "fieldtype": "Data", 
   "label": "Website", 
   "oldfieldname": "website", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 0
  }, 
  {
   "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
@@ -234,6 +356,7 @@
   "fieldtype": "Section Break", 
   "label": "Registration Info", 
   "oldfieldtype": "Section Break", 
+  "read_only": 0, 
   "width": "50%"
  }, 
  {
@@ -243,7 +366,8 @@
   "fieldtype": "Code", 
   "label": "Registration Details", 
   "oldfieldname": "registration_details", 
-  "oldfieldtype": "Code"
+  "oldfieldtype": "Code", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 

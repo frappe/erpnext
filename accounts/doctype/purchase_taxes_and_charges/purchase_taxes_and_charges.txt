@@ -1,10 +1,10 @@
 [
  {
-  "creation": "2013-01-10 16:34:08", 
+  "creation": "2013-05-21 16:16:04", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:50", 
+  "modified": "2013-07-10 14:54:18", 
   "modified_by": "Administrator", 
-  "owner": "wasim@webnotestech.com"
+  "owner": "Administrator"
  }, 
  {
   "autoname": "PVTD.######", 
@@ -27,52 +27,76 @@
   "name": "Purchase Taxes and Charges"
  }, 
  {
+  "default": "Valuation and Total", 
+  "doctype": "DocField", 
+  "fieldname": "category", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Consider Tax or Charge for", 
+  "oldfieldname": "category", 
+  "oldfieldtype": "Select", 
+  "options": "Valuation and Total\nValuation\nTotal", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "charge_type", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Type", 
   "oldfieldname": "charge_type", 
   "oldfieldtype": "Select", 
   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "account_head", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Account Head", 
   "oldfieldname": "account_head", 
   "oldfieldtype": "Link", 
   "options": "Account", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
+  "default": ":Company", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
-  "options": "Cost Center"
+  "options": "Cost Center", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "rate", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
+  "read_only": 0, 
   "reqd": 0
  }, 
  {
@@ -83,6 +107,7 @@
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
+  "read_only": 1, 
   "reqd": 0
  }, 
  {
@@ -102,18 +127,8 @@
   "hidden": 0, 
   "label": "Enter Row", 
   "oldfieldname": "row_id", 
-  "oldfieldtype": "Data"
- }, 
- {
-  "default": "Valuation and Total", 
-  "doctype": "DocField", 
-  "fieldname": "category", 
-  "fieldtype": "Select", 
-  "label": "Consider Tax or Charge for", 
-  "oldfieldname": "category", 
-  "oldfieldtype": "Select", 
-  "options": "Valuation and Total\nValuation\nTotal", 
-  "reqd": 1
+  "oldfieldtype": "Data", 
+  "read_only": 0
  }, 
  {
   "default": "Add", 
@@ -124,6 +139,7 @@
   "oldfieldname": "add_deduct_tax", 
   "oldfieldtype": "Select", 
   "options": "Add\nDeduct", 
+  "read_only": 0, 
   "reqd": 1
  }, 
  {
@@ -147,34 +163,7 @@
   "oldfieldname": "parenttype", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "search_index": 0
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_tax_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Total +Tax", 
-  "no_copy": 1, 
-  "oldfieldname": "total_tax_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "report_hide": 1
- }, 
- {
-  "description": "Cheating Field\nPlease do not delete ", 
-  "doctype": "DocField", 
-  "fieldname": "total_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Tax Amount", 
-  "no_copy": 1, 
-  "oldfieldname": "total_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "report_hide": 1
  }
 ]

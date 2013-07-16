@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-05-06 17:56:03", 
+  "docstatus": 0, 
+  "modified": "2013-05-06 17:56:03", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Employee", 
+  "report_name": "Employee Birthday", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Employee Birthday"
+ }
+]

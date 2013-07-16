@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-02-21 13:23:51", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:45:29", 
   "modified_by": "Administrator", 
-  "modified": "2012-02-21 13:23:51"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Website Home", 
-  "module": "Website", 
   "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "Website", 
+  "name": "__common__", 
   "page_name": "website-home", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Website Home"
  }, 
  {
-  "name": "website-home", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "website-home"
  }
 ]

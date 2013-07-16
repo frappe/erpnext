@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-02-20 19:11:03", 
+  "modified": "2013-07-05 14:44:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_import": 1, 
   "autoname": "LAL/.#####", 
   "doctype": "DocType", 
+  "icon": "icon-ok", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 
@@ -159,19 +160,6 @@
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 0, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
   "print_hide": 1, 
   "read_only": 1
  }, 

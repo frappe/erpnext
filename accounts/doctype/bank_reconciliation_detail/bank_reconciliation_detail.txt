@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:05", 
+  "creation": "2013-02-22 01:27:37", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:50", 
+  "modified": "2013-07-10 14:54:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "doctype": "DocField", 
   "fieldname": "voucher_id", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Voucher ID", 
   "oldfieldname": "voucher_id", 
   "oldfieldtype": "Link", 
@@ -39,6 +40,7 @@
   "doctype": "DocField", 
   "fieldname": "against_account", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Against Account", 
   "oldfieldname": "against_account", 
   "oldfieldtype": "Data", 
@@ -49,6 +51,7 @@
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
+  "in_list_view": 1, 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
@@ -56,8 +59,18 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "clearance_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Clearance Date", 
+  "oldfieldname": "clearance_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "cheque_number", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Cheque Number", 
   "oldfieldname": "cheque_number", 
   "oldfieldtype": "Data", 
@@ -67,6 +80,7 @@
   "doctype": "DocField", 
   "fieldname": "cheque_date", 
   "fieldtype": "Date", 
+  "in_list_view": 1, 
   "label": "Cheque Date", 
   "oldfieldname": "cheque_date", 
   "oldfieldtype": "Date", 
@@ -91,13 +105,5 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "clearance_date", 
-  "fieldtype": "Date", 
-  "label": "Clearance Date", 
-  "oldfieldname": "clearance_date", 
-  "oldfieldtype": "Date"
  }
 ]

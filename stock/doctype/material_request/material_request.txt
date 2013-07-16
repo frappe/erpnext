@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-20 13:25:31", 
+  "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-02-21 10:59:09", 
+  "modified": "2013-07-15 17:50:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,11 +11,12 @@
   "allow_print": 0, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-ticket", 
   "is_submittable": 1, 
   "module": "Stock", 
   "name": "__common__", 
   "read_only_onload": 1, 
-  "search_fields": "status,transaction_date,sales_order_no"
+  "search_fields": "status,transaction_date"
  }, 
  {
   "doctype": "DocField", 
@@ -26,16 +27,30 @@
   "permlevel": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Material Request", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
   "name": "Material Request"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "type_section", 
+  "fieldtype": "Section Break", 
+  "label": "Type", 
+  "options": "icon-pushpin"
  }, 
  {
   "doctype": "DocField", 
@@ -66,13 +81,43 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
  }, 
  {
-  "allow_on_submit": 1, 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "indent_details", 
   "fieldtype": "Table", 
@@ -83,53 +128,13 @@
   "options": "Material Request Item"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "section_break1", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "description": "One or multiple Sales Order no which generated this Material Request", 
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "label": "Sales Order No", 
-  "no_copy": 1, 
-  "oldfieldname": "sales_order_no", 
-  "oldfieldtype": "Data", 
-  "options": "Sales Order", 
-  "print_width": "100px", 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "print_width": "50%", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "pull_sales_order_details", 
-  "fieldtype": "Button", 
-  "label": "Pull Sales Order Items", 
-  "options": "pull_so_details"
- }, 
- {
-  "default": "Give additional details about the indent.", 
-  "description": "Filing in Additional Information about the Material Request will help you analyze your data better.", 
+  "description": "Give additional details about the indent.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 
@@ -153,22 +158,6 @@
   "reqd": 1, 
   "search_index": 1, 
   "width": "100px"
- }, 
- {
-  "description": "Select the relevant company name if you have multiple companies", 
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "oldfieldtype": "Link", 
-  "options": "Company", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "reqd": 1, 
-  "search_index": 1, 
-  "width": "150px"
  }, 
  {
   "doctype": "DocField", 
@@ -250,32 +239,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "amended_from", 
-  "fieldtype": "Data", 
-  "label": "Amended From", 
-  "no_copy": 1, 
-  "oldfieldname": "amended_from", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "read_only": 1, 
-  "width": "150px"
- }, 
- {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
   "in_list_view": 0, 
@@ -293,7 +256,8 @@
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
  }, 
  {
   "doctype": "DocField", 
@@ -308,14 +272,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "get_terms", 
-  "fieldtype": "Button", 
-  "label": "Get Terms and Conditions", 
-  "oldfieldtype": "Button", 
-  "options": "get_tc_details"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
   "label": "Terms and Conditions Content", 
@@ -326,104 +282,25 @@
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Select Print Heading", 
   "options": "Print Heading", 
   "print_hide": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
+  "doctype": "DocPerm", 
+  "role": "Purchase Manager"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Purchase Manager", 
-  "submit": 0, 
-  "write": 0
+  "role": "Material Manager"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Purchase Manager", 
-  "submit": 1, 
-  "write": 1
+  "role": "Material User"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "report": 0, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "report": 1, 
-  "role": "Purchase User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Purchase User", 
-  "submit": 0
+  "role": "Purchase User"
  }
 ]

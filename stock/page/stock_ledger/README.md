@@ -1,0 +1,1 @@
+Stock movement report based on Stock Ledger Entry.

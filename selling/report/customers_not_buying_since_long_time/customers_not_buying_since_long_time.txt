@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-07 12:27:07", 
+  "docstatus": 0, 
+  "modified": "2013-06-07 12:27:07", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Sales Order", 
+  "report_name": "Customers Not Buying Since Long Time ", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Customers Not Buying Since Long Time"
+ }
+]

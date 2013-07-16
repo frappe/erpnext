@@ -24,7 +24,6 @@ from webnotes.model.doc import make_autoname
 
 sql = webnotes.conn.sql
 
-from accounts.utils import add_ac
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -58,9 +57,6 @@ class DocType(TransactionBase):
 
 		# update credit days and limit in account
 		self.update_credit_days_limit()
-
-	def check_state(self):
-		return "\n" + "\n".join([i[0] for i in sql("select state_name from `tabState` where `tabState`.country='%s' " % self.doc.country)])
 	
 	def get_payables_group(self):
 		g = sql("select payables_group from tabCompany where name=%s", self.doc.company)
@@ -71,14 +67,16 @@ class DocType(TransactionBase):
 		return g
 
 	def add_account(self, ac, par, abbr):
-		ac = add_ac({
+		ac_bean = webnotes.bean({
+			"doctype": "Account",
 			'account_name':ac,
 			'parent_account':par,
 			'group_or_ledger':'Group',
 			'company':self.doc.company,
-			'account_type':'',
-			'tax_rate':'0'
+			"freeze_account": "No",
 		})
+		ac_bean.ignore_permissions = True
+		ac_bean.insert()
 		
 		msgprint(_("Created Group ") + ac)
 	
@@ -106,11 +104,11 @@ class DocType(TransactionBase):
 	def create_account_head(self):
 		if self.doc.company :
 			abbr = self.get_company_abbr() 
+			parent_account = self.get_parent_account(abbr)
 						
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
-				parent_account = self.get_parent_account(abbr)
-				
-				ac = add_ac({
+				ac_bean = webnotes.bean({
+					"doctype": "Account",
 					'account_name': self.doc.name,
 					'parent_account': parent_account,
 					'group_or_ledger':'Ledger',
@@ -119,12 +117,24 @@ class DocType(TransactionBase):
 					'tax_rate': '0',
 					'master_type': 'Supplier',
 					'master_name': self.doc.name,
+					"freeze_account": "No"
 				})
-				msgprint(_("Created Account Head: ") + ac)
+				ac_bean.ignore_permissions = True
+				ac_bean.insert()
 				
+				msgprint(_("Created Account Head: ") + ac_bean.doc.name)
+			else:
+				self.check_parent_account(parent_account, abbr)
 		else : 
 			msgprint("Please select Company under which you want to create account head")
-			
+	
+	def check_parent_account(self, parent_account, abbr):
+		if webnotes.conn.get_value("Account", self.doc.name + " - " + abbr, 
+			"parent_account") != parent_account:
+			ac = webnotes.bean("Account", self.doc.name + " - " + abbr)
+			ac.doc.parent_account = parent_account
+			ac.save()
+	
 	def get_contacts(self,nm):
 		if nm:
 			contact_details =webnotes.conn.convert_to_lists(sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = '%s'"%nm))
@@ -134,11 +144,11 @@ class DocType(TransactionBase):
 			return ''
 			
 	def delete_supplier_address(self):
-		for rec in sql("select * from `tabAddress` where supplier='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabAddress` where supplier=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabAddress` where name=%s",(rec['name']))
 	
 	def delete_supplier_contact(self):
-		for rec in sql("select * from `tabContact` where supplier='%s'" %(self.doc.name), as_dict=1):
+		for rec in sql("select * from `tabContact` where supplier=%s", (self.doc.name,), as_dict=1):
 			sql("delete from `tabContact` where name=%s",(rec['name']))
 			
 	def delete_supplier_communication(self):
@@ -160,7 +170,7 @@ class DocType(TransactionBase):
 		self.delete_supplier_communication()
 		self.delete_supplier_account()
 		
-	def on_rename(self, new, old):
+	def on_rename(self, new, old, merge=False):
 		#update supplier_name if not naming series
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Supplier Name':
 			update_fields = [
@@ -178,8 +188,29 @@ class DocType(TransactionBase):
 		for account in webnotes.conn.sql("""select name, account_name from 
 			tabAccount where master_name=%s and master_type='Supplier'""", old, as_dict=1):
 			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new)
+				webnotes.rename_doc("Account", account.name, new, merge=merge)
 
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
 			master_type = 'Supplier' where master_name = %s""" , (new,old))
+
+@webnotes.whitelist()
+def get_dashboard_info(supplier):
+	if not webnotes.has_permission("Supplier", "read", supplier):
+		webnotes.msgprint("No Permission", raise_exception=True)
+	
+	out = {}
+	for doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+		out[doctype] = webnotes.conn.get_value(doctype, 
+			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
+	
+	billing = webnotes.conn.sql("""select sum(grand_total), sum(outstanding_amount) 
+		from `tabPurchase Invoice` 
+		where supplier=%s 
+			and docstatus = 1
+			and fiscal_year = %s""", (supplier, webnotes.conn.get_default("fiscal_year")))
+	
+	out["total_billing"] = billing[0][0]
+	out["total_unpaid"] = billing[0][1]
+	
+	return out

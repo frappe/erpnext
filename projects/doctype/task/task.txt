@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:52", 
+  "modified": "2013-07-05 14:57:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "TASK.#####", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-check", 
   "max_attachments": 5, 
   "module": "Projects", 
   "name": "__common__"
@@ -248,15 +249,6 @@
   "fieldtype": "Link", 
   "label": "Company", 
   "options": "Company"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"

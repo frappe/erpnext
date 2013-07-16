@@ -7,12 +7,12 @@
 		"app/public/js/startup.css"
 	],
 	"public/js/all-web.min.js": [
-		"app/public/js/website_utils.js"
+		"app/public/js/website_utils.js",
+		"lib/public/js/wn/misc/number_format.js"
 	],
 	"public/js/all-app.min.js": [
 		"app/public/js/startup.js",
 		"app/public/js/conf.js",
-		"app/public/js/modules.js",
 		"app/public/js/toolbar.js",
 		"app/public/js/feature_setup.js",
 		"app/public/js/utils.js",

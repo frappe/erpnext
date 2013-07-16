@@ -1,50 +1,47 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:04", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:40", 
+  "modified": "2013-07-10 14:54:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:40"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "autoname": "UCDD/.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Stock", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "UCDD/.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "UOM Conversion Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "UOM Conversion Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "UOM Conversion Detail"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
   "options": "UOM"
  }, 
  {
-  "oldfieldtype": "Float", 
   "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Float"
+  "oldfieldtype": "Float"
  }
 ]

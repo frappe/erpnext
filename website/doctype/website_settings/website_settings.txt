@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-25 11:35:10", 
+  "creation": "2013-04-30 12:58:46", 
   "docstatus": 0, 
-  "modified": "2013-02-21 10:05:09", 
+  "modified": "2013-07-10 20:37:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "allow_attach": 1, 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "max_attachments": 10, 
   "module": "Website", 
@@ -50,7 +51,7 @@
   "fieldtype": "Link", 
   "label": "Home Page", 
   "options": "Web Page", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "description": "The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.", 
@@ -72,24 +73,45 @@
   "label": "Home Page is Products"
  }, 
  {
+  "description": "Add a banner to the site. (small banners are usually good)", 
+  "doctype": "DocField", 
+  "fieldname": "banner", 
+  "fieldtype": "Section Break", 
+  "label": "Banner"
+ }, 
+ {
+  "description": "Select an image of approx width 150px with a transparent background for best results.", 
+  "doctype": "DocField", 
+  "fieldname": "banner_image", 
+  "fieldtype": "Select", 
+  "label": "Banner Image", 
+  "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "set_banner_from_image", 
+  "fieldtype": "Button", 
+  "label": "Set Banner from Image"
+ }, 
+ {
+  "description": "Banner is above the Top Menu Bar.", 
+  "doctype": "DocField", 
+  "fieldname": "banner_html", 
+  "fieldtype": "Small Text", 
+  "label": "Banner HTML"
+ }, 
+ {
+  "description": "Menu items in the Top Bar. For setting the color of the Top Bar, go to <a href=\"#Form/Style Settings\">Style Settings</a>", 
   "doctype": "DocField", 
   "fieldname": "top_bar", 
   "fieldtype": "Section Break", 
   "label": "Top Bar"
  }, 
  {
-  "description": "Background shade of the top menu bar", 
-  "doctype": "DocField", 
-  "fieldname": "top_bar_background", 
-  "fieldtype": "Select", 
-  "label": "Top Bar Background", 
-  "options": "Black\nWhite"
- }, 
- {
   "description": "Brand is what appears on the top-right of the toolbar. If it is an image, make sure it\nhas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px", 
   "doctype": "DocField", 
   "fieldname": "brand_html", 
-  "fieldtype": "Text", 
+  "fieldtype": "Small Text", 
   "label": "Brand HTML"
  }, 
  {
@@ -198,29 +220,16 @@
   "reqd": 0
  }, 
  {
-  "description": "Enter domain names associated to this website, each on a new line", 
   "doctype": "DocField", 
-  "fieldname": "domain_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "Domain List", 
-  "reqd": 0
+  "fieldname": "column_break_28", 
+  "fieldtype": "Column Break"
  }, 
  {
+  "description": "Disable Customer Signup link in Login page", 
   "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
+  "fieldname": "disable_signup", 
+  "fieldtype": "Check", 
+  "label": "Disable Signup"
  }, 
  {
   "create": 1, 

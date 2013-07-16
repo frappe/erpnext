@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-01-25 15:04:03", 
+  "modified": "2013-07-09 14:43:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Track separate Income and Expense for product verticals or divisions.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-money", 
   "in_create": 1, 
   "module": "Accounts", 
   "name": "__common__", 
@@ -80,7 +81,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "company_name", 
+  "fieldname": "company", 
   "fieldtype": "Link", 
   "label": "Company", 
   "oldfieldname": "company_name", 

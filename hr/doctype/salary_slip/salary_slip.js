@@ -20,13 +20,14 @@ cur_frm.add_fetch('employee', 'company', 'company');
 // -------------------------------------------------------------------
 cur_frm.cscript.onload = function(doc,dt,dn){
 	if((cint(doc.__islocal) == 1) && !doc.amended_from){
-		var today=new Date();
-		month = (today.getMonth()+01).toString();
-		if(month.length>1) doc.month = month;
-		else doc.month = '0'+month;
-		doc.fiscal_year = sys_defaults['fiscal_year'];
+		if(!doc.month) {
+			var today=new Date();
+			month = (today.getMonth()+01).toString();
+			if(month.length>1) doc.month = month;
+			else doc.month = '0'+month;
+		}
+		if(!doc.fiscal_year) doc.fiscal_year = sys_defaults['fiscal_year'];
 		refresh_many(['month', 'fiscal_year']);
-		cur_frm.cscript.fiscal_year(doc, dt, dn);
 	}
 }
 
@@ -42,8 +43,6 @@ cur_frm.cscript.fiscal_year = function(doc,dt,dn){
 
 cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 
-// Calculate total if lwp exists
-// ------------------------------------------------------------------------
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {
 		$c_obj(make_doclist(doc.doctype,doc.name), 'get_leave_details',doc.leave_without_pay,function(r, rt) {
@@ -54,16 +53,12 @@ cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	}
 }
 
-// Calculate all
-// ------------------------------------------------------------------------
 var calculate_all = function(doc, dt, dn) {
 	calculate_earning_total(doc, dt, dn);
 	calculate_ded_total(doc, dt, dn);
 	calculate_net_pay(doc, dt, dn);
 }
 
-// Trigger on earning modified amount and depends on lwp
-// ------------------------------------------------------------------------
 cur_frm.cscript.e_modified_amount = function(doc,dt,dn){
 	calculate_earning_total(doc, dt, dn);
 	calculate_net_pay(doc, dt, dn);
@@ -139,4 +134,8 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 	calculate_all(doc, dt, dn);
 }
 
-cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
+cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.employee_query"
+	}		
+}

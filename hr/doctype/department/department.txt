@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-05 11:48:26", 
   "docstatus": 0, 
-  "modified": "2013-02-14 17:21:51", 
+  "modified": "2013-07-05 14:35:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:department_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-sitemap", 
   "module": "HR", 
   "name": "__common__"
  }, 

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // searches for enabled profiles
+wn.provide("erpnext.utils");
 erpnext.utils.profile_query = function() {
 	return "select name, concat_ws(' ', first_name, middle_name, last_name) \
 		from `tabProfile` where ifnull(enabled, 0)=1 and docstatus < 2 and \
@@ -133,10 +134,8 @@ erpnext.queries.item = function(opts) {
 		WHERE tabItem.docstatus!=2 \
 		AND (ifnull(`tabItem`.`end_of_life`,"") in ("", "0000-00-00") \
 			OR `tabItem`.`end_of_life` > NOW()) \
-		AND tabItem.%(key)s LIKE "%s" ' + (conditions 
-			? (" AND " + conditions.join(" AND "))
-			: "")
-		+ " LIMIT 50"
+		AND (tabItem.%(key)s LIKE \"%s\" OR tabItem.item_name LIKE \"%%%s\")' + 
+			(conditions ? (" AND " + conditions.join(" AND ")) : "") + " LIMIT 50"
 }
 
 erpnext.queries.item_std = function() {
@@ -163,3 +162,7 @@ erpnext.queries.bom = function(opts) {
 		+ " LIMIT 50"
 
 }
+
+erpnext.queries.task = function() {
+	return { query: "projects.utils.query_task" };
+};

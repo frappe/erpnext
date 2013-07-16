@@ -1,14 +1,15 @@
 [
  {
-  "creation": "2013-01-10 16:34:18", 
+  "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:02", 
+  "modified": "2013-07-15 17:09:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "IN/.####", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-wrench", 
   "is_submittable": 1, 
   "module": "Selling", 
   "name": "__common__"
@@ -22,19 +23,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Installation Note", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 1, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -229,18 +224,6 @@
   "read_only": 1
  }, 
  {
-  "description": "The date at which current entry is corrected in the system.", 
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
@@ -248,18 +231,6 @@
   "oldfieldname": "remarks", 
   "oldfieldtype": "Small Text", 
   "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cancel_reason", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Cancel Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "cancel_reason", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -271,29 +242,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "delivery_note_no", 
-  "fieldtype": "Link", 
-  "label": "Delivery Note No", 
-  "no_copy": 1, 
-  "oldfieldname": "delivery_note_no", 
-  "oldfieldtype": "Link", 
-  "options": "Delivery Note", 
-  "print_hide": 0, 
-  "reqd": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "hidden": 0, 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "options": "pull_delivery_note_details", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "installed_item_details", 
   "fieldtype": "Table", 
   "label": "Installation Note Item", 
@@ -302,15 +250,60 @@
   "options": "Installation Note Item"
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "System Manager"
+  "permlevel": 0, 
+  "role": "System Manager", 
+  "submit": 1, 
+  "write": 1
  }, 
  {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "Sales User"
+  "permlevel": 1, 
+  "role": "System Manager", 
+  "submit": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Manager"
+  "permlevel": 0, 
+  "role": "Sales User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales User", 
+  "submit": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales Manager", 
+  "submit": 0
  }
 ]

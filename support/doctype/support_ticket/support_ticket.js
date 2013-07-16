@@ -14,32 +14,50 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.customer_query" } }
+
+wn.provide("erpnext.support");
+// TODO commonify this code
+erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
+	customer: function() {
+		var me = this;
+		if(this.frm.doc.customer) {
+			this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+				callback: function(r) {
+					if(!r.exc) me.frm.refresh_fields();
+				}
+			});			
+		}
+	}
+});
+
+$.extend(cur_frm.cscript, new erpnext.support.CustomerIssue({frm: cur_frm}));
 
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
-				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
 				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
 		}
+		
+		if(doc.description)
+			doc.description = wn.utils.escape_script_and_style(doc.description);
 	},
 	
 	refresh: function(doc) {
 		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
-		if(!doc.__islocal) {											
-			if(in_list(user_roles,'System Manager')) {
-		      if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);	
-			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);		
-			}else if(doc.allocated_to) {
-			  cur_frm.set_df_property('status','read_only', 1);
-			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
+		if(!doc.__islocal) {
+			if(cur_frm.fields_dict.status.get_status()=="Write") {
+				if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
+				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);
 			}
 			
-			cur_frm.set_df_property('subject','read_only', 1);
-			cur_frm.set_df_property('description','hidden', 1);
-			cur_frm.set_df_property('raised_by','read_only', 1);
+			cur_frm.toggle_enable(["subject", "raised_by"], false);
+			cur_frm.toggle_display("description", false);
 		}
 		refresh_field('status');
 	},
@@ -69,17 +87,6 @@ $.extend(cur_frm.cscript, {
 
 	},
 		
-	customer: function(doc, dt, dn) {
-		var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			if(!r.exc) {
-				cur_frm.refresh();
-			}
-		}
-		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
-			'get_default_customer_address', '', callback);
-	}, 
-	
 	'Close Ticket': function() {
 		cur_frm.cscript.set_status("Closed");
 	},

@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt
+from webnotes import _
+from webnotes.utils import flt, comma_and, cstr
+import webnotes.defaults
 
 @webnotes.whitelist()
 def get_template():
@@ -29,13 +31,12 @@ def get_template():
 "3. Naming Series Options: %(naming_options)s"
 "4. Voucher Type Options: %(voucher_type)s"%(extra_note)s
 "-------Common Values-----------"
-"Company:","%(default_company)s"
+"Company:",
 "--------Data----------"
 %(columns)s
 ''' % {
 		"template_type": template_type,
-		"user_fmt": webnotes.conn.get_value('Control Panel', None, 'date_format'),
-		"default_company": webnotes.conn.get_default("company"),
+		"user_fmt": webnotes.defaults.get_global_default('date_format'),
 		"naming_options": naming_options.replace("\n", ", "),
 		"voucher_type": voucher_type.replace("\n", ", "),
 		"extra_note": extra_note,
@@ -47,14 +48,29 @@ def get_template():
 
 @webnotes.whitelist()
 def upload():
-	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
-	rows = read_csv_content_from_uploaded_file()
-
-	common_values = get_common_values(rows)
-	company_abbr = webnotes.conn.get_value("Company", common_values.company, "abbr")
-	data, start_idx = get_data(rows, company_abbr)
+	messages = []
+	try:
+		from webnotes.utils.datautils import read_csv_content_from_uploaded_file
+		rows = read_csv_content_from_uploaded_file()
 	
+		common_values = get_common_values(rows)
+		company_abbr = webnotes.conn.get_value("Company", common_values.company, "abbr")
+		
+		if not company_abbr:
+			webnotes.msgprint(_("Company is missing or entered incorrect value"), raise_exception=1)
+		
+		data, start_idx = get_data(rows, company_abbr, rows[0][0])
+	except Exception, e:
+		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
+		messages.append("""<p style='color: red'>%s</p>""" % (err_msg or "No message"))
+		webnotes.errprint(webnotes.getTraceback())
+		webnotes.message_log = []
+		return messages
+		
 	return import_vouchers(common_values, data, start_idx, rows[0][0])
+	
+	
+
 
 def map_fields(field_list, source, target):
 	for f in field_list:
@@ -68,9 +84,8 @@ def import_vouchers(common_values, data, start_idx, import_type):
 	from webnotes.model.bean import Bean
 	from accounts.utils import get_fiscal_year
 	from webnotes.utils.dateutils import parse_date
-
 	messages = []
-		
+	
 	def get_account_details(account):
 		acc_details = webnotes.conn.sql("""select is_pl_account, 
 			master_name from tabAccount where name=%s""", account, as_dict=1)
@@ -111,8 +126,9 @@ def import_vouchers(common_values, data, start_idx, import_type):
 				
 				if d.ref_number:
 					if not d.ref_date:
-						raise webnotes.ValidationError, \
-							"""Ref Date is Mandatory if Ref Number is specified"""
+						webnotes.msgprint(_("Ref Date is Mandatory if Ref Number is specified"), 
+							raise_exception=1)
+							
 					d.ref_date = parse_date(d.ref_date)
 				
 				d.company = common_values.company
@@ -160,6 +176,12 @@ def import_vouchers(common_values, data, start_idx, import_type):
 					raise Exception
 					
 				doclist = Bean([jv]+details)
+				
+				# validate datatype
+				from core.page.data_import_tool.data_import_tool import check_record
+				for d in doclist:
+					check_record(d.fields, d.parenttype)
+				
 				doclist.submit()
 			
 				messages.append("""<p style='color: green'>[row #%s] 
@@ -168,7 +190,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 		webnotes.conn.commit()
 	except Exception, e:
 		webnotes.conn.rollback()
-		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or unicode(e)
+		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
 		messages.append("""<p style='color: red'>[row #%s] %s failed: %s</p>"""
 			% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
 		messages.append("<p style='color: red'>All transactions rolled back</p>")
@@ -191,10 +213,11 @@ def get_common_values(rows):
 
 	return common_values
 	
-def get_data(rows, company_abbr):
+def get_data(rows, company_abbr, import_type):
 	start_row = 0
 	data = []
 	start_row_idx = 0
+	accounts = None
 	for i in xrange(len(rows)):
 		r = rows[i]
 		if r[0]:
@@ -225,12 +248,29 @@ def get_data(rows, company_abbr):
 
 			if r[0]=="--------Data----------":
 				start_row = i+2
+				
+				# check for empty columns
+				empty_columns = [j+1 for j, c in enumerate(rows[i+1]) if not c]
+				if empty_columns:
+					raise Exception, """Column No(s). %s %s empty. \
+						Please remove them and try again.""" % (comma_and(empty_columns),
+						len(empty_columns)==1 and "is" or "are")
+
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1] 
 					if not c.endswith(" - " + company_abbr)]
-				accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
-				
-				if accounts and (len(columns) != rows[i+1].index(accounts[0])):
-					raise Exception, """All account columns should be after standard columns and \
-						on the right. Please rectify it in the file and try again."""
+					
+				if import_type == "Voucher Import: Multiple Accounts":
+					accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
+
+					if not accounts:
+						webnotes.msgprint(_("""No Account found in csv file, 
+							May be company abbreviation is not correct"""), raise_exception=1)
+
+					if accounts and (len(columns) != rows[i+1].index(accounts[0])):
+						webnotes.msgprint(_("""All account columns should be after \
+							standard columns and on the right.
+							If you entered it properly, next probable reason \
+							could be wrong account name.
+							Please rectify it in the file and try again."""), raise_exception=1)
 				
 	return data, start_row_idx

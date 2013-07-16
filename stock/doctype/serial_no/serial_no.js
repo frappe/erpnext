@@ -46,7 +46,9 @@ cur_frm.add_fetch('customer', 'territory', 'territory')
 // territory
 // ----------
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
+	return{
+		filters:{'is_group': "No"}
+	}
 }
 
 // Supplier
@@ -59,11 +61,22 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 //item code
 //----------
 cur_frm.fields_dict['item_code'].get_query = function(doc,cdt,cdn) {
- 	return erpnext.queries.item({
-		'ifnull(tabItem.has_serial_no, "No")': 'Yes'
-	});
+ 	return{
+		query:"controllers.queries.item_query",
+		filters:{
+			'has_serial_no': 'Yes'	
+		}
+	}	
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.customer_query"
+	}
+}
 
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+cur_frm.fields_dict.supplier.get_query = function(doc,cdt,cdn) {
+	return{
+		query:"controllers.queries.supplier_query"
+	}
+}

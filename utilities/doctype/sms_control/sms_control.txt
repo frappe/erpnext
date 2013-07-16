@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:24", 
+  "modified": "2013-07-05 14:55:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "DocType", 
+  "icon": "icon-mobile-phone", 
   "in_create": 0, 
   "issingle": 1, 
   "module": "Utilities", 

@@ -29,13 +29,17 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 	}
 
 	cur_frm.call({
-		method:"get_approver_list",
+		method:"hr.utils.get_expense_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("exp_approver", "options", r.message);
 		}
 	});
 	
-	cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
+	cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+		return{
+			query:"controllers.queries.employee_query"
+		}	
+	}
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {

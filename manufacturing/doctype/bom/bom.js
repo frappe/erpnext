@@ -44,9 +44,9 @@ var set_operation_no = function(doc) {
 		var op = op_table[i].operation_no;
 		if (op && !inList(operations, op)) operations.push(op);
 	}
-	
-	cur_frm.fields_dict["bom_materials"].grid.get_field("operation_no")
-		.df.options = operations.join("\n");
+		
+	wn.meta.get_docfield("BOM Item", "operation_no", 
+		cur_frm.docname).options = operations.join("\n");
 	
 	$.each(getchildren("BOM Item", doc.name, "bom_materials"), function(i, v) {
 		if(!inList(operations, cstr(v.operation_no))) v.operation_no = null;
@@ -59,27 +59,22 @@ cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
 	set_operation_no(doc);
 }
 
-cur_frm.cscript.item = function(doc, dt, dn) {
-	if (doc.item) {
-		get_server_fields('get_item_details', doc.item, '', doc, dt, dn, 1);
-	}
-}
+cur_frm.add_fetch("item", "description", "description");
+cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	if (d.workstation) {
-		var callback = function(r, rt) {
-			calculate_op_cost(doc, dt, dn);
-			calculate_total(doc);
-		}
-		get_server_fields('get_workstation_details', d.workstation, 
-			'bom_operations', doc, dt, dn, 1, callback);
-	}
+	wn.model.with_doc("Workstation", d.workstation, function(i, r) {
+		d.hour_rate = r.docs[0].hour_rate;
+		refresh_field("hour_rate", dn, "bom_operations");
+		calculate_op_cost(doc);
+		calculate_total(doc);
+	});
 }
 
 
 cur_frm.cscript.hour_rate = function(doc, dt, dn) {
-	calculate_op_cost(doc, dt, dn);
+	calculate_op_cost(doc);
 	calculate_total(doc);
 }
 
@@ -114,7 +109,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 				$.extend(d, r.message);
 				refresh_field("bom_materials");
 				doc = locals[doc.doctype][doc.name];
-				calculate_rm_cost(doc, cdt, cdn);
+				calculate_rm_cost(doc);
 				calculate_total(doc);
 			},
 			freeze: true
@@ -124,7 +119,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 
 
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
-	calculate_rm_cost(doc, cdt, cdn);
+	calculate_rm_cost(doc);
 	calculate_total(doc);
 }
 
@@ -134,12 +129,12 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		msgprint("You can not change rate if BOM mentioned agianst any item");
 		get_bom_material_detail(doc, cdt, cdn);
 	} else {
-		calculate_rm_cost(doc, cdt, cdn);
+		calculate_rm_cost(doc);
 		calculate_total(doc);
 	}
 }
 
-var calculate_op_cost = function(doc, dt, dn) {	
+var calculate_op_cost = function(doc) {	
 	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
@@ -151,7 +146,7 @@ var calculate_op_cost = function(doc, dt, dn) {
 	refresh_field('operating_cost');
 }
 
-var calculate_rm_cost = function(doc, dt, dn) {	
+var calculate_rm_cost = function(doc) {	
 	var rm = getchildren('BOM Item', doc.name, 'bom_materials');
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
@@ -174,34 +169,41 @@ var calculate_total = function(doc) {
 
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
-	return erpnext.queries.item({
-		'ifnull(tabItem.is_manufactured_item, "No")': 'Yes',
-	})
+ 	return{
+		query:"controllers.queries.item_query",
+		filters:{
+			'is_manufactured_item': 'Yes'
+		}
+	}
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` \
-		WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" \
-			OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.`%(key)s` like "%s" \
-		ORDER BY `tabItem`.`name` LIMIT 50';
+	return{
+		query:"controllers.queries.item_query"
+	}
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
-		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
-		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
-		ORDER BY `tabBOM`.`name` LIMIT 50';
+	return{
+		filters:{
+			'item': d.item_code,
+			'is_active': 1,
+			'docstatus': 1
+		}
+	}	
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
-	calculate_op_cost(doc, dt, dn);
-	calculate_rm_cost(doc, dt, dn);
+	calculate_op_cost(doc);
+	calculate_rm_cost(doc);
 	calculate_total(doc);
 }

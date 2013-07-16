@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:12", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:50:21", 
+  "modified": "2013-07-05 14:24:59", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
  {
   "autoname": "APRSL.#####", 
   "doctype": "DocType", 
+  "icon": "icon-thumbs-up", 
   "is_submittable": 1, 
   "module": "HR", 
   "name": "__common__", 
@@ -210,20 +211,6 @@
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "report_hide": 1, 
-  "width": "160px"
  }, 
  {
   "doctype": "DocField", 

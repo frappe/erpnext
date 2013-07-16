@@ -1,0 +1,46 @@
+[
+ {
+  "creation": "2013-05-24 14:24:48", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "List of users who can edit a particular Note", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "istable": 1, 
+  "module": "Utilities", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Note User", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Note User"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user", 
+  "fieldtype": "Link", 
+  "label": "User", 
+  "options": "Profile", 
+  "reqd": 1
+ }, 
+ {
+  "default": "Edit", 
+  "doctype": "DocField", 
+  "fieldname": "permission", 
+  "fieldtype": "Select", 
+  "label": "Permission", 
+  "options": "Edit\nRead"
+ }
+]

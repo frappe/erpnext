@@ -26,7 +26,7 @@ wn.pages['stock-balance'].onload = function(wrapper) {
 	new erpnext.StockBalance(wrapper);
 	
 	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Stock")
+	wrapper.appframe.add_module_icon("Stock")
 	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 
@@ -35,14 +35,18 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		this._super(wrapper, {
 			title: "Stock Balance",
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
-				"Stock Entry"],
+				"Stock Entry", "Project"],
 		});
 	},
 	setup_columns: function() {
 		this.columns = [
 			{id: "name", name: "Item", field: "name", width: 300,
 				formatter: this.tree_formatter},
-				
+			{id: "item_name", name: "Item Name", field: "item_name", width: 100},
+			{id: "description", name: "Description", field: "description", width: 200, 
+				formatter: this.text_formatter},
+			{id: "brand", name: "Brand", field: "brand", width: 100},
+			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "opening_qty", name: "Opening Qty", field: "opening_qty", width: 100, 
 				formatter: this.currency_formatter},
 			{id: "inflow_qty", name: "In Qty", field: "inflow_qty", width: 100, 
@@ -60,11 +64,6 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				formatter: this.currency_formatter},
 			{id: "closing_value", name: "Closing Value", field: "closing_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "item_name", name: "Item Name", field: "item_name", width: 100},
-			{id: "description", name: "Description", field: "description", width: 200, 
-				formatter: this.text_formatter},
 		];
 	},
 	
@@ -77,6 +76,10 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
+		{fieldtype:"Select", label: "Project", link:"Project", 
+			default_value: "Select Project...", filter: function(val, item, opts, me) {
+				return me.apply_zero_filter(val, item, opts, me);
+			}, link_formatter: {filter_input: "project"}},
 		{fieldtype:"Date", label: "From Date"},
 		{fieldtype:"Label", label: "To"},
 		{fieldtype:"Date", label: "To Date"},
@@ -100,13 +103,14 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		var data = wn.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
 
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
-			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
-			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
+			var sl_posting_date = dateutil.str_to_obj(sl.posting_date);
 			
-			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
+			if((me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) &&
+				(me.is_default("project") ? true : me.project == sl.project)) {
 				var item = me.item_by_name[sl.item_code];
 				var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
 				var valuation_method = item.valuation_method ? 
@@ -115,11 +119,11 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 
 				var qty_diff = sl.qty;
 				var value_diff = me.get_value_diff(wh, sl, is_fifo);
-
-				if(posting_datetime < from_date) {
+				
+				if(sl_posting_date < from_date) {
 					item.opening_qty += qty_diff;
 					item.opening_value += value_diff;
-				} else if(posting_datetime <= to_date) {
+				} else if(sl_posting_date <= to_date) {
 					var ignore_inflow_outflow = this.is_default("warehouse")
 						&& sl.voucher_type=="Stock Entry" 
 						&& this.stock_entry_map[sl.voucher_no].purpose=="Material Transfer";
@@ -142,6 +146,8 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				} else {
 					break;
 				}
+				
+				me.round_item_values(item);
 			}
 		}
 

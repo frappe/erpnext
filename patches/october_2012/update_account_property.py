@@ -11,4 +11,4 @@ def execute():
 	for acc in roots:
 		webnotes.conn.sql("""update tabAccount set debit_or_credit = %(debit_or_credit)s, 
 			is_pl_account = %(is_pl_account)s, company = %(company)s
-			where lft > %(lft)s and rgt < %(rgt)s""", acc, debug=1)
+			where lft > %(lft)s and rgt < %(rgt)s""", acc)

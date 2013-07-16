@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-23 19:57:18", 
+  "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:28:03", 
+  "modified": "2013-07-11 16:53:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "description": "Buyer of Goods and Services.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "module": "Selling", 
   "name": "__common__", 
   "search_fields": "customer_name,customer_group,country,territory"
@@ -43,6 +44,7 @@
   "fieldtype": "Section Break", 
   "label": "Basic Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-user", 
   "permlevel": 0, 
   "reqd": 0
  }, 
@@ -91,7 +93,7 @@
   "fieldtype": "Link", 
   "hidden": 0, 
   "in_filter": 1, 
-  "label": "Lead Ref", 
+  "label": "From Lead", 
   "no_copy": 1, 
   "oldfieldname": "lead_name", 
   "oldfieldtype": "Link", 
@@ -142,6 +144,7 @@
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
   "label": "Address & Contacts", 
+  "options": "icon-map-marker", 
   "permlevel": 0
  }, 
  {
@@ -190,6 +193,8 @@
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments", 
   "permlevel": 0
  }, 
  {
@@ -205,6 +210,7 @@
   "fieldtype": "Section Break", 
   "label": "More Info", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
   "permlevel": 0
  }, 
  {
@@ -270,7 +276,7 @@
   "label": "Credit Days", 
   "oldfieldname": "credit_days", 
   "oldfieldtype": "Int", 
-  "permlevel": 2
+  "permlevel": 1
  }, 
  {
   "doctype": "DocField", 
@@ -280,7 +286,7 @@
   "oldfieldname": "credit_limit", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
-  "permlevel": 2
+  "permlevel": 1
  }, 
  {
   "doctype": "DocField", 
@@ -295,6 +301,7 @@
   "fieldtype": "Section Break", 
   "label": "Sales Team", 
   "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
   "permlevel": 0
  }, 
  {
@@ -339,7 +346,7 @@
  }, 
  {
   "doctype": "DocPerm", 
-  "permlevel": 2, 
+  "permlevel": 1, 
   "role": "Sales User"
  }, 
  {
@@ -355,7 +362,7 @@
  }, 
  {
   "doctype": "DocPerm", 
-  "permlevel": 2, 
+  "permlevel": 1, 
   "role": "Sales Master Manager", 
   "write": 1
  }

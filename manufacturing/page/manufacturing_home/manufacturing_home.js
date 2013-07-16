@@ -4,8 +4,14 @@
 wn.module_page["Manufacturing"] = [
 	{
 		title: wn._("Documents"),
+		top: true,
 		icon: "icon-copy",
 		items: [
+			{
+				label: wn._("Bill of Materials"),
+				description: wn._("Bill of Materials (BOM)"),
+				doctype:"BOM"
+			},
 			{
 				label: wn._("Production Order"),
 				description: wn._("Orders released for production."),
@@ -30,11 +36,6 @@ wn.module_page["Manufacturing"] = [
 		icon: "icon-book",
 		items: [
 			{
-				label: wn._("Bill of Materials"),
-				description: wn._("Bill of Materials (BOM)"),
-				doctype:"BOM"
-			},
-			{
 				label: wn._("Item"),
 				description: wn._("All Products or Services."),
 				doctype:"Item"
@@ -58,6 +59,17 @@ wn.module_page["Manufacturing"] = [
 			},
 		]
 	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Issued Items Against Production Order"),
+				route: "query-report/Issued Items Against Production Order",
+			},
+		]
+	}
 ]
 
 pscript['onload_manufacturing-home'] = function(wrapper) {

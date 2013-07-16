@@ -35,6 +35,9 @@ def update_entries_after(args, verbose=1):
 			"posting_time": "12:00"
 		}
 	"""
+	global _exceptions
+	_exceptions = []
+	
 	previous_sle = get_sle_before_datetime(args)
 	
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
@@ -44,7 +47,7 @@ def update_entries_after(args, verbose=1):
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
-		
+	
 	valuation_method = get_valuation_method(args["item_code"])
 	
 	for sle in entries_to_fix:
@@ -72,7 +75,7 @@ def update_entries_after(args, verbose=1):
 				(qty_after_transaction * valuation_rate) or 0
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
-						
+			# print sle.posting_date, sle.actual_qty, sle.incoming_rate, stock_queue, stock_value
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
@@ -128,7 +131,7 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, fo
 	if not args.get("posting_date"):
 		args["posting_date"] = "1900-01-01"
 	if not args.get("posting_time"):
-		args["posting_time"] = "12:00"
+		args["posting_time"] = "00:00"
 	
 	return webnotes.conn.sql("""select * from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
@@ -214,7 +217,6 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
-
 	if not stock_queue:
 		stock_queue.append([0, 0])
 

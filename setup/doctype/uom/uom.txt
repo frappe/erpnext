@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:26", 
+  "modified": "2013-07-05 15:02:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:uom_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-compass", 
   "module": "Setup", 
   "name": "__common__"
  }, 

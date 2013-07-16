@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt, cstr
+from webnotes.utils import flt, cstr, now
 from webnotes.model.doc import Document
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
@@ -109,5 +109,7 @@ def validate_total_debit_credit(total_debit, total_credit):
 		 	(total_debit - total_credit), raise_exception=1)
 
 def set_as_cancel(voucher_type, voucher_no):
-	webnotes.conn.sql("""update `tabGL Entry` set is_cancelled='Yes' 
-		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+	webnotes.conn.sql("""update `tabGL Entry` set is_cancelled='Yes',
+		modified=%s, modified_by=%s
+		where voucher_type=%s and voucher_no=%s""", 
+		(now(), webnotes.session.user, voucher_type, voucher_no))

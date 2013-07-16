@@ -3,14 +3,14 @@
 
 import os
 import webnotes
-import website.utils
+import webnotes.webutils
 
 def make():
 
 	if not webnotes.conn:
 		webnotes.connect()
 	
-	home_page = website.utils.get_home_page()
+	home_page = webnotes.webutils.get_home_page()
 
 	fname = 'js/wn-web.js'
 	if os.path.basename(os.path.abspath('.'))!='public':

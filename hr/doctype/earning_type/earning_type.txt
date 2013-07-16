@@ -1,15 +1,17 @@
 [
  {
-  "creation": "2013-01-10 16:34:13", 
+  "creation": "2013-01-24 11:03:32", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:32:07", 
+  "modified": "2013-07-05 14:36:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_rename": 1, 
   "autoname": "field:earning_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-flag", 
   "module": "HR", 
   "name": "__common__"
  }, 

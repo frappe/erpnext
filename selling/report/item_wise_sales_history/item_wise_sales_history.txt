@@ -1,0 +1,24 @@
+[
+ {
+  "creation": "2013-05-23 17:42:24", 
+  "docstatus": 0, 
+  "modified": "2013-05-24 12:20:17", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "disabled": 0, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select\n    so_item.item_code as \"Item Code:Link/Item:120\",\n\tso_item.item_name as \"Item Name::120\",\n\tso_item.description as \"Description::150\",\n\tso_item.qty as \"Qty:Float:100\",\n\tso_item.stock_uom as \"UOM:Link/UOM:80\",\n\tso_item.basic_rate as \"Rate:Currency:120\",\n\tso_item.amount as \"Amount:Currency:120\",\n\tso.name as \"Sales Order:Link/Sales Order:120\",\n\tso.transaction_date as \"Transaction Date:Date:140\",\n\tso.customer as \"Customer:Link/Customer:130\",\n\tso.territory as \"Territory:Link/Territory:130\",\n    so.project_name as \"Project:Link/Project:130\",\n\tifnull(so_item.delivered_qty, 0) as \"Delivered Qty:Float:120\",\n\tifnull(so_item.billed_amt, 0) as \"Billed Amount:Currency:120\"\nfrom\n\t`tabSales Order` so, `tabSales Order Item` so_item\nwhere\n\tso.name = so_item.parent\n\tand so.docstatus = 1\norder by so.name desc", 
+  "ref_doctype": "Sales Order", 
+  "report_name": "Item-wise Sales History", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Sales History"
+ }
+]

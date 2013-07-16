@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:17", 
+  "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-01-29 17:01:19", 
+  "modified": "2013-07-05 14:51:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "field:project_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-puzzle-piece", 
   "max_attachments": 4, 
   "module": "Projects", 
   "name": "__common__", 
@@ -26,19 +27,14 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Project", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "Projects User", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -166,19 +162,6 @@
   "search_index": 0
  }, 
  {
-  "description": "Tasks belonging to this Project.", 
-  "doctype": "DocField", 
-  "fieldname": "sb_tasks", 
-  "fieldtype": "Section Break", 
-  "label": "Tasks"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "project_tasks", 
-  "fieldtype": "HTML", 
-  "label": "Project Tasks"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
@@ -195,6 +178,14 @@
   "oldfieldname": "notes", 
   "oldfieldtype": "Text Editor", 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "percent_complete", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "Percent Complete", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -290,110 +281,18 @@
   "search_index": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "customer_name", 
-  "fieldtype": "Data", 
-  "in_filter": 1, 
-  "label": "Customer Name", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 1
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Projects User", 
+  "write": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "customer_address", 
-  "fieldtype": "Small Text", 
-  "label": "Customer Address", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_address", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_person", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Contact Person", 
-  "no_copy": 0, 
-  "oldfieldname": "contact_person", 
-  "oldfieldtype": "Link", 
-  "options": "Contact", 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Territory", 
-  "oldfieldname": "territory", 
-  "oldfieldtype": "Link", 
-  "options": "Territory", 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_no", 
-  "fieldtype": "Data", 
-  "label": "Contact No", 
-  "no_copy": 0, 
-  "oldfieldname": "contact_no", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "email_id", 
-  "fieldtype": "Data", 
-  "label": "Email Id", 
-  "no_copy": 0, 
-  "oldfieldname": "email_id", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_group", 
-  "fieldtype": "Link", 
-  "label": "Customer Group", 
-  "no_copy": 0, 
-  "oldfieldname": "customer_group", 
-  "oldfieldtype": "Link", 
-  "options": "Customer Group", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Trash Reason", 
-  "no_copy": 0, 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocPerm"
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All"
  }
 ]

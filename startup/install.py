@@ -7,14 +7,12 @@ def pre_import():
 	make_modules()
 	make_roles()
 	webnotes.conn.commit()
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper")
-	webnotes.reload_doc("utilities", "doctype", "gl_mapper_detail")
 	
 def make_modules():
 	modules = [
-		" Home", " System", " Utilities", " Website", " Setup",
-		" Selling", " Buying", " Projects", " Accounts", " Stock",
-		" Support", " HR", " Manufacturing"]
+		"Home", "System", "Utilities", "Website", "Setup",
+		"Selling", "Buying", "Projects", "Accounts", "Stock",
+		"Support", "HR", "Manufacturing"]
 	
 	for m in modules:
 		doc = webnotes.doc(fielddata = {
@@ -30,7 +28,7 @@ def make_roles():
 		"HR Manager", "HR User", "Leave Approver", "Maintenance Manager",
 		"Maintenance User", "Manufacturing Manager", "Manufacturing User",
 		"Material Manager", "Material Master Manager", "Material User",
-		"Partner", "Projects User", "Purchase Manager", "Purchase Master Manager",
+		"Partner", "Projects User", "Projects Manager", "Purchase Manager", "Purchase Master Manager",
 		"Purchase User", "Quality Manager", "Sales Manager",
 		"Sales Master Manager", "Sales User", "Supplier", "Support Manager",
 		"Support Team", "Website Manager"]
@@ -44,6 +42,7 @@ def make_roles():
 
 def post_import():
 	webnotes.conn.begin()
+
 	# feature setup
 	import_defaults()
 	import_country_and_currency()
@@ -101,8 +100,10 @@ def import_country_and_currency():
 def import_defaults():
 	records = [
 		# item group
-		{'doctype': 'Item Group', 'item_group_name': 'All Item Groups', 'is_group': 'Yes', 'name': 'All Item Groups', 'parent_item_group': ''},
-		{'doctype': 'Item Group', 'item_group_name': 'Default', 'is_group': 'No', 'name': 'Default', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'All Item Groups', 'is_group': 'Yes', 'parent_item_group': ''},
+		{'doctype': 'Item Group', 'item_group_name': 'Products', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Raw Material', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Services', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		
 		# deduction type
 		{'doctype': 'Deduction Type', 'name': 'Income Tax', 'description': 'Income Tax', 'deduction_name': 'Income Tax'},
@@ -129,45 +130,30 @@ def import_defaults():
 		
 		# territory
 		{'doctype': 'Territory', 'territory_name': 'All Territories', 'is_group': 'Yes', 'name': 'All Territories', 'parent_territory': ''},
-		{'doctype': 'Territory', 'territory_name': 'Default', 'is_group': 'No', 'name': 'Default', 'parent_territory': 'All Territories'},
 			
 		# customer group
 		{'doctype': 'Customer Group', 'customer_group_name': 'All Customer Groups', 'is_group': 'Yes', 	'name': 'All Customer Groups', 'parent_customer_group': ''},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Default Customer Group', 'is_group': 'No', 'name': 'Default Customer Group', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Individual', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Commercial', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Non Profit', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
+		{'doctype': 'Customer Group', 'customer_group_name': 'Government', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
 			
 		# supplier type
-		{'doctype': 'Supplier Type', 'name': 'Default Supplier Type', 'supplier_type': 'Default Supplier Type'},
-		
-		# Price List
-		{'doctype': 'Price List', 'name': 'Default Price List', 'price_list_name': 'Default Price List'},
-		{'doctype': 'Price List', 'name': 'Standard', 'price_list_name': 'Standard'},
-				
-		# warehouse type
-		{'doctype': 'Warehouse Type', 'name': 'Default Warehouse Type', 'warehouse_type': 'Default Warehouse Type'},
-		{'doctype': 'Warehouse Type', 'name': 'Fixed Asset', 'warehouse_type': 'Fixed Asset'},
-		{'doctype': 'Warehouse Type', 'name': 'Reserved', 'warehouse_type': 'Reserved'},
-		{'doctype': 'Warehouse Type', 'name': 'Rejected', 'warehouse_type': 'Rejected'},
-		{'doctype': 'Warehouse Type', 'name': 'Sample', 'warehouse_type': 'Sample'},
-		{'doctype': 'Warehouse Type', 'name': 'Stores', 'warehouse_type': 'Stores'},
-		{'doctype': 'Warehouse Type', 'name': 'WIP Warehouse', 'warehouse_type': 'WIP Warehouse'},
-		
-		# warehouse 
-		{'doctype': 'Warehouse', 'warehouse_name': 'Default Warehouse', 'name': 'Default Warehouse', 'warehouse_type': 'Default Warehouse Type'},
-			
-		# Workstation
-		{'doctype': 'Workstation', 'name': 'Default Workstation', 'workstation_name': 'Default Workstation', 'warehouse': 'Default Warehouse'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Services'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Local'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Raw Material'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Electrical'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Hardware'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Pharmaceutical'},
+		{'doctype': 'Supplier Type', 'supplier_type': 'Distributor'},
 		
 		# Sales Person
-		{'doctype': 'Sales Person', 'name': 'All Sales Persons', 'sales_person_name': 'All Sales Persons', 'is_group': "Yes", "parent_sales_person": ""},
+		{'doctype': 'Sales Person', 'sales_person_name': 'Sales Team', 'is_group': "Yes", "parent_sales_person": ""},
 		
 		# UOM
 		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit'}, 
 		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box'}, 
-		{'uom_name': 'Ft', 'doctype': 'UOM', 'name': 'Ft'}, 
 		{'uom_name': 'Kg', 'doctype': 'UOM', 'name': 'Kg'}, 
-		{'uom_name': 'Ltr', 'doctype': 'UOM', 'name': 'Ltr'}, 
-		{'uom_name': 'Meter', 'doctype': 'UOM', 'name': 'Meter'}, 
-		{'uom_name': 'Mtr', 'doctype': 'UOM', 'name': 'Mtr'}, 
 		{'uom_name': 'Nos', 'doctype': 'UOM', 'name': 'Nos'}, 
 		{'uom_name': 'Pair', 'doctype': 'UOM', 'name': 'Pair'}, 
 		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set'}, 
@@ -175,7 +161,13 @@ def import_defaults():
 		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'}, 
 	]
 	
+	from webnotes.modules import scrub
 	for r in records:
-		doc = webnotes.doc(r)
-		doc.insert()
-	
+		bean = webnotes.bean(r)
+		
+		# ignore mandatory for root
+		parent_link_field = ("parent_" + scrub(bean.doc.doctype))
+		if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
+			bean.ignore_mandatory = True
+		
+		bean.insert()

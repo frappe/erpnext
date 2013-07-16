@@ -14,66 +14,60 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript['onload_Financial Statements'] = function() {
-	
-	// header and toolbar
-	var h = new PageHeader('fs_header','Financial Statements','Profit & Loss and Balance Sheet Builder across multiple years');
-	//$y(h.toolbar_area,{padding:'8px'});
-	
-	var dv = $a(h.toolbar_area,'div','',{margin:'4px 0px'});
-	
-	var t = make_table(dv,1,4,'640px', [], {padding:'4px', width:'160px'});
-	
-	var sel = $a($td(t,0,0),'select','',{width:'160px'});
-	sel.id = 'stmt_type';
-	
-	var sel = $a($td(t,0,1),'select','',{width:'160px'});
-	sel.id = 'stmt_company';
-	
-	var sel = $a($td(t,0,2),'select','',{width:'160px'});
-	sel.id = 'stmt_period';
+erpnext.fs = {}
 
-	var sel = $a($td(t,0,3),'select','',{width:'160px'});
-	sel.id = 'stmt_fiscal_year';
-
-	h.add_button('Create',function(){ pscript.stmt_new(); },0,'ui-icon-document');
-	h.add_button('Print', function(){ _p.go($i('print_html').innerHTML); }, 0, 'ui-icon-print');
-/*	
-	var btn = $a($td(t,1,0),'button');
-	btn.onclick = function(){ pscript.stmt_new(); }
-	btn.innerHTML = 'Create';
+pscript['onload_Financial Statements'] = function(wrapper) {
+	wn.ui.make_app_page({
+		parent: wrapper,
+		"title": "Financial Statements",
+		"single_column": true,
+	});
 	
-	var btn = $a($td(t,1,1),'button');
-	btn.onclick = function(){ alert('print'); }
-	btn.innerHTML = 'Print';
+	erpnext.fs.stmt_type = wrapper.appframe.add_field({
+		fieldtype:"Select",
+		fieldname:"stmt_type",
+		options: ['Select Statement...','Balance Sheet','Profit & Loss']
+	})
 
-  //Button to create new
-  var btn = $a('stmt_new', 'button');
-  btn.onclick = function() { pscript.stmt_new(); }
-  btn.innerHTML = 'Create';*/
+	erpnext.fs.stmt_company = wrapper.appframe.add_field({
+		fieldtype:"Select",
+		fieldname:"stmt_company",
+		options: ['Loading Companies...']
+	})
 
-  // select for statement
-  add_sel_options($i('stmt_type'), ['Select Statement...','Balance Sheet','Profit & Loss']);
+	erpnext.fs.stmt_period = wrapper.appframe.add_field({
+		fieldtype:"Select",
+		fieldname:"stmt_period",
+		options: ['Select Period...', 'Annual', 'Quarterly', 'Monthly']
+	})
 
-  // select for companies
-  add_sel_options($i('stmt_company'), ['Loading Companies...']);
+	erpnext.fs.stmt_fiscal_year = wrapper.appframe.add_field({
+		fieldtype:"Select",
+		fieldname:"stmt_fiscal_year",
+		options: ['Loading...']
+	})
 
+	wrapper.appframe.add_button("Create", function() {
+		pscript.stmt_new();
+	}, "icon-refresh")
+
+	wrapper.appframe.add_button("Print", function() {
+		_p.go($i('print_html').innerHTML);
+	}, "icon-print")
+		
+	$(wrapper).find(".layout-main").html('<div id="print_html">\
+		<div id="stmt_title1" style="margin:16px 0px 4px 0px; font-size: 16px; font-weight: bold; color: #888;"></div>\
+		<div id="stmt_title2" style="margin:0px 0px 8px 0px; font-size: 16px; font-weight: bold;"></div>\
+		<div id="stmt_tree" style="margin: 0px 0px 16px; overflow: auto;">Please select options and click on Create</div>\
+	</div>').css({"min-height": "400px"});
 
   // load companies
   $c_obj('MIS Control','get_comp','', function(r,rt) {    
     // company
-    empty_select($i('stmt_company'));
-    add_sel_options($i('stmt_company'), add_lists(['Select Company...'], r.message.company), 'Select Company...');
-
-
-    // period
-    empty_select($i('stmt_period'));
-    //add_sel_options($i('stmt_period'), add_lists(['Select Period...'], r.message.period), 'Select period...');
-    add_sel_options($i('stmt_period'), add_lists(['Select Period...'], ['Annual', 'Quarterly', 'Monthly']), 'Select period...');
-    
-    // fiscal-year
-    empty_select($i('stmt_fiscal_year'));
-    add_sel_options($i('stmt_fiscal_year'), add_lists(['Select Year...'], r.message.fiscal_year), 'Select fiscal year...');
+	erpnext.fs.stmt_company.$input.empty()
+		.add_options(['Select Company...'].concat(r.message.company));
+	erpnext.fs.stmt_fiscal_year.$input.empty()
+		.add_options(['Select Year...'].concat(r.message.fiscal_year));
   });
 
 }
@@ -83,26 +77,27 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
   $i('stmt_tree').innerHTML = 'Refreshing....';
   $i('stmt_tree').style.display = 'block';
   
-  var company = sel_val($i('stmt_company'))
+  var company =erpnext.fs.stmt_company.get_value();
 
   var arg = {
-  	statement:sel_val($i('stmt_type')),
-  	company:company,
-  	period:sel_val($i('stmt_period')),
-  	year:sel_val($i('stmt_fiscal_year'))
+  	statement: erpnext.fs.stmt_type.get_value(),
+  	company: company,
+  	period: erpnext.fs.stmt_period.get_value(),
+  	year: erpnext.fs.stmt_fiscal_year.get_value()
   }
 
   $c_obj('MIS Control', 'get_statement', docstring(arg), function(r,rt) {
       var nl = r.message;
       var t = $i('stmt_tree');
-      var stmt_type = sel_val($i('stmt_type'));
+      var stmt_type = erpnext.fs.stmt_type.get_value();
       t.innerHTML = '';
       var tab = $a($a(t, 'div'),'table','stmt_table');
       tab.style.tableLayout = 'fixed';
       tab.style.width = '100%';
       
-      $i('stmt_title1').innerHTML = sel_val($i('stmt_company'));
-      $i('stmt_title2').innerHTML = sel_val($i('stmt_type')) + ' - ' +  sel_val($i('stmt_fiscal_year'));
+      $i('stmt_title1').innerHTML = erpnext.fs.stmt_company.get_value()
+      $i('stmt_title2').innerHTML = erpnext.fs.stmt_type.get_value() 
+		+ ' - ' + erpnext.fs.stmt_fiscal_year.get_value();
       for(i=0;i<nl.length;i++) {
         tab.insertRow(i);
         
@@ -110,8 +105,6 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
         
         // heads
         var per = tab.rows[i].insertCell(0);
- //       var acc_width = (sel_val($i('stmt_period'))=='Monthly')? 12 : 20;
- //       per.style.width = acc_width+'%';
         per.style.width = '150px';
         per.innerHTML = pscript.space_reqd(nl[i][0])+cstr(nl[i][1]);
         per.className = 'stmt_level' + nl[i][0];

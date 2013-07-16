@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-01-28 17:31:01", 
+  "modified": "2013-07-10 12:26:15", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
  {
   "autoname": "MV.#####", 
   "doctype": "DocType", 
+  "icon": "icon-file-text", 
   "is_submittable": 1, 
   "module": "Support", 
   "name": "__common__", 
@@ -47,7 +48,7 @@
   "fieldtype": "Section Break", 
   "label": "Customer Details", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -142,7 +143,7 @@
   "fieldtype": "Section Break", 
   "label": "Maintenance Details", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-wrench"
  }, 
  {
   "doctype": "DocField", 
@@ -154,6 +155,11 @@
   "oldfieldtype": "Select", 
   "options": "\nPartially Completed\nFully Completed", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_14", 
+  "fieldtype": "Column Break"
  }, 
  {
   "default": "Unscheduled", 
@@ -171,57 +177,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break2", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Sales Order No", 
-  "oldfieldname": "sales_order_no", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Order", 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_issue_no", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Customer Issue No", 
-  "oldfieldname": "customer_issue_no", 
-  "oldfieldtype": "Link", 
-  "options": "Customer Issue", 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "maintenance_schedule", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Maintenance Schedule", 
-  "options": "Maintenance Schedule"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "label": "Get Items", 
-  "oldfieldtype": "Button", 
-  "options": "fetch_items", 
-  "print_hide": 1, 
-  "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-wrench"
  }, 
  {
   "doctype": "DocField", 
@@ -237,7 +196,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "doctype": "DocField", 
@@ -279,17 +239,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "in_filter": 1, 
@@ -318,7 +267,8 @@
   "doctype": "DocField", 
   "fieldname": "contact_info_section", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info"
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
  }, 
  {
   "doctype": "DocField", 

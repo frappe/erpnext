@@ -6,10 +6,4 @@ def execute():
 		delete from `tabDocPerm`
 		where parent in ('Report', 'Search Criteria')""")
 	
-	webnotes.conn.commit()
-	
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'search_criteria')
-	webnotes.model.sync.sync('core', 'report')
-
-	webnotes.conn.begin()
+	webnotes.reload_doc('core', 'doctype', 'report')

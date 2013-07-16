@@ -18,7 +18,6 @@ from __future__ import unicode_literals
 import webnotes
 
 from utilities.transaction_base import TransactionBase
-from home import update_feed
 from webnotes.utils import now
 
 class DocType(TransactionBase):
@@ -44,13 +43,28 @@ class DocType(TransactionBase):
 	
 	def validate(self):
 		self.update_status()
+		self.set_lead_contact(self.doc.raised_by)
+		
+		if self.doc.status == "Closed":
+			from webnotes.widgets.form.assign_to import clear
+			clear(self.doc.doctype, self.doc.name)
 		
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
-		if comm.lead and not self.doc.lead:
-			webnotes.conn.set(self.doc, 'lead', comm.lead)
-		if comm.contact and not self.doc.contact:
-			webnotes.conn.set(self.doc, 'contact', comm.contact)
+		
+		
+	def set_lead_contact(self, email_id):
+		import email.utils
+		email_id = email.utils.parseaddr(email_id)
+		if email_id:
+			if not self.doc.lead:
+				self.doc.lead = webnotes.conn.get_value("Lead", {"email_id": email_id})
+			if not self.doc.contact:
+				self.doc.contact = webnotes.conn.get_value("Contact", {"email_id": email_id})
+				
+			if not self.doc.company:		
+				self.doc.company = webnotes.conn.get_value("Lead", self.doc.lead, "company") or \
+					webnotes.conn.get_default("company")
 			
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 
@@ -70,4 +84,28 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
-	
+
+@webnotes.whitelist()
+def get_tickets():
+	tickets = webnotes.conn.sql("""select 
+		name, subject, status 
+		from `tabSupport Ticket` 
+		where raised_by=%s 
+		order by modified desc
+		limit 20""", 
+			webnotes.session.user, as_dict=1)
+	return tickets
+
+def get_website_args():
+	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
+	if bean.doc.raised_by != webnotes.session.user:
+		return {
+			"doc": {"name": "Not Allowed"}
+		}
+	else:
+		return {
+			"doc": bean.doc,
+			"doclist": bean.doclist,
+			"webnotes": webnotes,
+			"utils": webnotes.utils
+		}

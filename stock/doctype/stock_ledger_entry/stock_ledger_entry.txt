@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-14 16:33:26", 
+  "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-01-29 16:27:57", 
+  "modified": "2013-07-10 18:34:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,6 +14,7 @@
   "doctype": "DocType", 
   "document_type": "Other", 
   "hide_toolbar": 1, 
+  "icon": "icon-list", 
   "in_create": 1, 
   "module": "Stock", 
   "name": "__common__"
@@ -24,13 +25,9 @@
   "parent": "Stock Ledger Entry", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read_only": 1
+  "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Stock Ledger Entry", 
@@ -39,9 +36,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "Material User", 
-  "submit": 0, 
-  "write": 0
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -57,6 +52,7 @@
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_width": "100px", 
+  "read_only": 1, 
   "reqd": 0, 
   "search_index": 1, 
   "width": "100px"
@@ -68,6 +64,7 @@
   "in_filter": 0, 
   "label": "Serial No", 
   "print_width": "100px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "100px"
  }, 
@@ -77,7 +74,8 @@
   "fieldtype": "Data", 
   "label": "Batch No", 
   "oldfieldname": "batch_no", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -89,19 +87,9 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_width": "100px", 
+  "read_only": 1, 
   "search_index": 1, 
   "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "warehouse_type", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Warehouse Type", 
-  "oldfieldname": "warehouse_type", 
-  "oldfieldtype": "Select", 
-  "options": "link:Warehouse Type", 
-  "search_index": 0
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 
@@ -113,6 +101,7 @@
   "oldfieldname": "posting_date", 
   "oldfieldtype": "Date", 
   "print_width": "100px", 
+  "read_only": 1, 
   "reqd": 0, 
   "search_index": 1, 
   "width": "100px"
@@ -126,6 +115,7 @@
   "oldfieldname": "posting_time", 
   "oldfieldtype": "Time", 
   "print_width": "100px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "100px"
  }, 
@@ -138,6 +128,7 @@
   "oldfieldname": "voucher_type", 
   "oldfieldtype": "Data", 
   "print_width": "150px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
  }, 
@@ -150,6 +141,7 @@
   "oldfieldname": "voucher_no", 
   "oldfieldtype": "Data", 
   "print_width": "150px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
  }, 
@@ -161,6 +153,7 @@
   "oldfieldname": "voucher_detail_no", 
   "oldfieldtype": "Data", 
   "print_width": "150px", 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -172,6 +165,7 @@
   "oldfieldname": "actual_qty", 
   "oldfieldtype": "Currency", 
   "print_width": "150px", 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -181,7 +175,8 @@
   "label": "Incoming Rate", 
   "oldfieldname": "incoming_rate", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
+  "options": "Company:company:default_currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -191,6 +186,7 @@
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
   "print_width": "150px", 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -202,6 +198,7 @@
   "oldfieldname": "bin_aqat", 
   "oldfieldtype": "Currency", 
   "print_width": "150px", 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -213,6 +210,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_width": "150px", 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -222,7 +220,8 @@
   "label": "Stock Value", 
   "oldfieldname": "stock_value", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
+  "options": "Company:company:default_currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -234,8 +233,16 @@
   "oldfieldname": "fcfs_stack", 
   "oldfieldtype": "Text", 
   "print_hide": 1, 
+  "read_only": 1, 
   "report_hide": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
+  "label": "Project", 
+  "options": "Project"
  }, 
  {
   "doctype": "DocField", 
@@ -247,6 +254,7 @@
   "oldfieldtype": "Data", 
   "options": "link:Company", 
   "print_width": "150px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
  }, 
@@ -259,6 +267,7 @@
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Data", 
   "print_width": "150px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
  }, 
@@ -272,10 +281,20 @@
   "oldfieldtype": "Select", 
   "options": "\nYes\nNo", 
   "print_width": "100px", 
+  "read_only": 1, 
   "search_index": 0, 
   "width": "100px"
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
  }
 ]

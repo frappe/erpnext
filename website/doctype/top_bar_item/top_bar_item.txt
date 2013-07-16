@@ -1,52 +1,51 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:28:08", 
   "docstatus": 0, 
-  "creation": "2012-04-02 16:02:43", 
+  "modified": "2013-07-10 14:54:25", 
   "modified_by": "Administrator", 
-  "modified": "2012-05-07 15:21:00"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Website", 
   "doctype": "DocType", 
-  "version": 1, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Website", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Top Bar Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Top Bar Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Top Bar Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Label", 
-  "width": "120px", 
   "fieldname": "label", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Label", 
+  "print_width": "120px", 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "URL", 
-  "width": "200px", 
   "fieldname": "url", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "URL", 
+  "print_width": "200px", 
+  "width": "200px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Target", 
   "fieldname": "target", 
   "fieldtype": "Select", 
+  "label": "Target", 
   "options": "\ntarget = \"_blank\""
  }, 
  {

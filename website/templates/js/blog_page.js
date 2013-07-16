@@ -36,9 +36,10 @@ $(document).ready(function() {
 			comment_by: $("[name='comment_by']").val(),
 			comment: $("[name='comment']").val(),
 			cmd: "website.helpers.blog.add_comment",
-			comment_doctype: "Blog",
+			comment_doctype: "Blog Post",
 			comment_docname: "{{ name }}",
-			page_name: "{{ page_name }}"
+			page_name: "{{ page_name }}",
+			_type: "POST"
 		}
 		
 		$("#comment-form .alert").toggle(false);

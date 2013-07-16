@@ -44,26 +44,27 @@ rss_item = u"""
         <description>%(content)s</description>
         <link>%(link)s</link>
         <guid>%(name)s</guid>
-        <pubDate>%(creation)s</pubDate>
+        <pubDate>%(published_on)s</pubDate>
 </item>"""
 
 def generate():
 	"""generate rss feed"""
-	import webnotes, os
+	import os, urllib
+	import webnotes
 	from webnotes.model.doc import Document
-	from website.helpers.blog import get_blog_content
+	from webnotes.utils import escape_html
 	
 	host = (os.environ.get('HTTPS') and 'https://' or 'http://') + os.environ.get('HTTP_HOST')
 	
 	items = ''
 	blog_list = webnotes.conn.sql("""\
-		select page_name as name, modified, creation, title from tabBlog 
+		select page_name as name, published_on, modified, title, content from `tabBlog Post` 
 		where ifnull(published,0)=1
-		order by creation desc, modified desc, name asc limit 100""", as_dict=1)
+		order by published_on desc limit 20""", as_dict=1)
 
 	for blog in blog_list:
-		blog.link = host + '/' + blog.name + '.html'
-		blog.content = get_blog_content(blog.name)
+		blog.link = urllib.quote(host + '/' + blog.name + '.html')
+		blog.content = escape_html(blog.content or "")
 		
 		items += rss_item % blog
 

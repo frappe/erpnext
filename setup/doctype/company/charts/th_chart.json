@@ -1,0 +1,4768 @@
+{
+ "name": "Thailand - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "name": "INDIRECTE KOSTEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Kantoorbenodigdheden"
+     }, 
+     {
+      "name": "Emballage"
+     }, 
+     {
+      "name": "Hulpstoffen 1"
+     }, 
+     {
+      "name": "Grondstoffen 2"
+     }, 
+     {
+      "name": "Goederen onderweg"
+     }, 
+     {
+      "name": "Goederen 1"
+     }, 
+     {
+      "name": "Hulpstoffen 2"
+     }, 
+     {
+      "name": "Gereed product 1"
+     }, 
+     {
+      "name": "Gereed product 2"
+     }, 
+     {
+      "name": "Onderhanden werk"
+     }, 
+     {
+      "name": "Zegels"
+     }, 
+     {
+      "name": "Goederen 2"
+     }, 
+     {
+      "name": "Goederen in consignatie"
+     }, 
+     {
+      "name": "Verpakkingsmateriaal"
+     }, 
+     {
+      "name": "Grondstoffen 1"
+     }, 
+     {
+      "name": "Halffabrikaten 2"
+     }, 
+     {
+      "name": "Halffabrikaten 1"
+     }
+    ], 
+    "name": "VOORRAAD GRONDSTOFFEN, HULPMATERIALEN EN HANDELSGOEDEREN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Btw te vorderen overig", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Premie WIR", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Af te dragen Btw-verlegd", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw oude jaren", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw te vorderen hoog", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw af te dragen laag", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Overige te betalen posten", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vooruit ontvangen bedr.", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw-afdracht", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Energiekosten", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Accountantskosten", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Telefoon/telefax", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Termijnen onderh. werk", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Rekening-courant inkoopvereniging", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Loonheffing", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Afdracht loonheffing", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vennootschapsbelasting", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw te vorderen laag", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw af te dragen hoog", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Te vorderen Btw-verlegd", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Btw af te dragen overig", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Investeringsaftrek", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Dividendbelasting", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Sociale lasten", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Pensioenpremies", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vakantiegeld", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vakantiedagen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vakantiezegels", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Rente", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Dividend", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Tanti\u00e8mes", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "KORTLOPENDE SCHULDEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Vooruitbetaalde kosten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Te ontvangen ziekengeld", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Overige vorderingen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Dubieuze debiteuren", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Rekening-courant directie", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Voorziening dubieuze debiteuren", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Voorschotten personeel", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "VORDERINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "BIZNER bank"
+       }, 
+       {
+        "name": "Kleine kas"
+       }, 
+       {
+        "name": "ABN-AMRO bank"
+       }, 
+       {
+        "name": "Bankbetaalkaarten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Effecten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Kas  valuta"
+       }, 
+       {
+        "name": "Kruisposten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Kas"
+       }, 
+       {
+        "name": "RABO bank"
+       }, 
+       {
+        "name": "Girobetaalkaarten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Postbank"
+       }
+      ], 
+      "name": "LIQUIDE MIDDELEN"
+     }
+    ], 
+    "name": "FINANCIELE REKENINGEN, KORTLOPENDE VORDERINGEN EN SCHULDEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Afschrijving Vrachtauto's", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Aanhangwagens", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Personenauto's", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Heftrucks", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanhangwagens", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Vrachtauto's", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Personenauto's", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Rijwielen en bromfietsen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Rijwielen en bromfietsen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Heftrucks", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "VERVOERMIDDELEN"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Aanschafwaarde Gereedschappen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Fabrieksinventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Bedrijfsinventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Magazijninventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Gereedschappen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Kantine-inventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Fabrieksinventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Magazijninventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Kantoorinventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Kantoormachines", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantoormachines", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantine-inventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantoorinventaris", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Bedrijfsinventaris", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INVENTARIS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Afschrijving Machines 4", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Machines 2", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 5", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 3", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 4", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 1", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 2", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Machines 5", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Machines 3", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Afschrijving Machines 1", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "MACHINES"
+       }
+      ], 
+      "name": "MACHINES EN INVENTARIS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Financieringskosten huurkoop", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Waarborgsommen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Hypotheken u/g 2", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Hypotheken u/g 1", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Hypotheken u/g 3", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Leningen u/g 1", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Leningen u/g 3", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Leningen u/g 2", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Leningen u/g 5", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Leningen u/g 4", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Vorderingen op deelnemingen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Financieringskosten", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "LANGLOPENDE VORDERINGEN"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Meerderheidsdeelnemingen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Minderheidsdeelnemingen", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aandeel inkoopcombinatie", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "FINANCIELE VASTE ACTIVA"
+       }
+      ], 
+      "name": "FINANCIELE VASTE ACTIVA EN LANGLOPENDE VORDERINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Hypotheek o/g 5", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Lease-verplichtingen", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Huurkoopverplichtingen", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheek o/g 1", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheek o/g 2", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheek o/g 4", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheek o/g 3", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "AFLOSSINGEN"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rekening-courant directie", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheken o/g 1", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheken o/g 3", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheken o/g 5", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Lease-verplichtingen", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Huurkoopverplichtingen", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheken o/g 2", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Hypotheken o/g 4", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Leningen o/g 5", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Leningen o/g 2", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Leningen o/g 1", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Leningen o/g 3", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Leningen o/g 4", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "LANGLOPENDE SCHULDEN"
+       }
+      ], 
+      "name": "LANGLOPENDE SCHULDEN EN AFLOSSINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Afschrijving Ontwikkelingskosten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Octrooien", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Goodwill", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Auteursrechten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Vergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanloopkosten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Licenties", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Tonnagevergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Drankvergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Vergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Auteursrechten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Drankvergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Tonnagevergunningen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Goodwill", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Octrooien", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Aanloopkosten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Ontwikkelingskosten", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMATERIELE ACTIVA"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Aanschafwaarde Gebouwen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Verbouwingen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Landerijen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Grondverbetering", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Pachtersinvesteringen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Bedrijfsgebouwen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Woon-winkelhuis", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Woon-winkelhuis", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Winkels", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Parkeerplaats", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Grondverbetering", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Ondergrond gebouwen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Bedrijfsgebouwen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Aanloopkosten", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Gebouwen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Afschrijving Winkels", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Pachtersinvesteringen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Parkeerplaats", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Verbouwingen", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanloopkosten", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "ONROERENDE GOEDEREN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Overige persoonlijke verplichtingen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Giften", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Buitengewone lasten", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Inkomstenbelasting", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vermogensbelasting", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Wettelijke reserves", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Overige reserves", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Aandelenkapitaal", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Overige priv\u00e9-uitgaven", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Huishoudgeld", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Premie lijfrenteverzekeringen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Premie volksverzekeringen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Assuranties", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Priv\u00e9-opnamen/stortingen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Kapitaal", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "WAO en ziekengeldverzekeringen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Priv\u00e9-gebruik", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Premie volksverzekeringen", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "EIGEN VERMOGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pens.voorz. eigen beheer", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Stamrechtverplichtingen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Backservice pensioenverpl.", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Pensioenverplichtingen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Egalisatierekening WIR", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Vervangingsreserve", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Garantieverplichtingen", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Egalisatieres. grootonderh.", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Assurantie eigen risico", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Latente belastingverpl.", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Voorziening deelnemingen", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "VOORZIENINGEN"
+     }
+    ], 
+    "name": "VASTE ACTIVA, EIGEN VERMOGEN, LANGLOPEND VREEMD VERMOGEN EN VOORZIENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Opbrengsten deelnemingen", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verlies verkoop deelnem.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Vpb bijzonder resultaat", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Winst", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Memoriaal"
+     }, 
+     {
+      "name": "Winst bij verkoop deelnem.", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Reorganisatiekosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Vpb normaal resultaat", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Voorz. Verlies deelnem.", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "OVERIGE RESULTATEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Income"
+     }
+    ], 
+    "name": "Income"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Tanti\u00e8mes de l'exercice"
+       }, 
+       {
+        "name": "Autres allocataires"
+       }, 
+       {
+        "name": "Dividendes et tanti\u00e8mes d'exercices ant\u00e9rieurs"
+       }, 
+       {
+        "name": "Dividendes de l'exercice"
+       }
+      ], 
+      "name": "DETTES DECOULANT DE L'AFFECTATION DES RESULTATS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es"
+       }, 
+       {
+        "name": "Compensation clients"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres entreprises avec lesquelles il existe un lien de participation"
+         }, 
+         {
+          "name": "Entreprises li\u00e9es"
+         }, 
+         {
+          "name": "Administrateurs et g\u00e9rants de l'entreprise"
+         }
+        ], 
+        "name": "Effets \u00e0 recevoir sur entreprises apparent\u00e9es et administrateurs et g\u00e9rants"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Entreprises li\u00e9es"
+         }, 
+         {
+          "name": "Administrateurs et g\u00e9rants d'entreprise"
+         }, 
+         {
+          "name": "Autres entreprises avec lesquelles il existe un lien de participation"
+         }
+        ], 
+        "name": "Clients, cr\u00e9ances courantes, entreprises apparent\u00e9es, administrateurs et g\u00e9rants"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Effets \u00e0 l'escompte"
+         }, 
+         {
+          "name": "Effets \u00e0 l'encaissement"
+         }, 
+         {
+          "name": "Effets \u00e0 recevoir"
+         }
+        ], 
+        "name": "Effets \u00e0 recevoir"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cr\u00e9ances r\u00e9sultant de livraisons de biens"
+         }, 
+         {
+          "name": "Rabais, remises, ristournes \u00e0 accorder et autres notes de cr\u00e9dit \u00e0 \u00e9tablir"
+         }
+        ], 
+        "name": "Clients"
+       }, 
+       {
+        "name": "Cr\u00e9ances douteuses"
+       }, 
+       {
+        "name": "Acomptes vers\u00e9s"
+       }, 
+       {
+        "name": "Clients : retenues sur garanties"
+       }, 
+       {
+        "name": "Produits \u00e0 recevoir"
+       }
+      ], 
+      "name": "CREANCES COMMERCIALES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acomptes re\u00e7us d'autres tiers \u00e0 moins d'un an"
+       }, 
+       {
+        "name": "Participation du personnel \u00e0 payer"
+       }, 
+       {
+        "name": "Actionnaires - capital \u00e0 rembourser"
+       }, 
+       {
+        "name": "Obligations et coupons \u00e9chus"
+       }, 
+       {
+        "name": "Emballages et mat\u00e9riel consign\u00e9s"
+       }, 
+       {
+        "name": "Autres dettes diverses"
+       }, 
+       {
+        "name": "Cautionnements re\u00e7us en num\u00e9raires"
+       }
+      ], 
+      "name": "DETTES DIVERSES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Charges \u00e0 reporter"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres produits d'exploitation"
+           }, 
+           {
+            "name": "Commissions \u00e0 obtenir"
+           }, 
+           {
+            "name": "Ristournes, rabais \u00e0 obtenir"
+           }
+          ], 
+          "name": "Produits d'exploitation"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats courus et non \u00e9chus sur pr\u00eats et d\u00e9bits"
+           }, 
+           {
+            "name": "Autres produits financiers"
+           }
+          ], 
+          "name": "Produits financiers"
+         }
+        ], 
+        "name": "Produits acquis"
+       }, 
+       {
+        "name": "Charges \u00e0 imputer"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Produits d'exploitation \u00e0 reporter"
+         }, 
+         {
+          "name": "Produits financiers \u00e0 reporter"
+         }
+        ], 
+        "name": "Produits \u00e0 reporter"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Compte de r\u00e9partition p\u00e9riodique des charges"
+         }, 
+         {
+          "name": "Compte d'attente"
+         }, 
+         {
+          "name": "Transferts d'exercice"
+         }
+        ], 
+        "name": "Comptes d'attente"
+       }
+      ], 
+      "name": "COMPTES DE REGULARISATION ET COMPTES D'ATTENTE"
+     }, 
+     {
+      "name": "ACOMPTES RECUS SUR COMMANDES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acomptes re\u00e7us"
+       }, 
+       {
+        "name": "Factures \u00e0 recevoir"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Fournisseurs importation"
+           }, 
+           {
+            "name": "Fournisseurs CEE"
+           }, 
+           {
+            "name": "Fournisseurs belges"
+           }
+          ], 
+          "name": "Fournisseurs ordinaires"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Entreprises li\u00e9es"
+           }, 
+           {
+            "name": "Entreprises avec lesquelles il existe un lien de participation"
+           }
+          ], 
+          "name": "Entreprises apparent\u00e9es"
+         }
+        ], 
+        "name": "Effets \u00e0 payer"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dettes envers les coparticipants"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournisseurs CEE"
+           }, 
+           {
+            "name": "Fournisseurs importation"
+           }, 
+           {
+            "name": "Fournisseurs belges"
+           }
+          ], 
+          "name": "Fournisseurs ordinaires"
+         }, 
+         {
+          "name": "Fournisseurs - retenues de garanties"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Entreprises avec lesquelles il existe un lien de participation"
+           }
+          ], 
+          "name": "Entreprises apparent\u00e9es"
+         }
+        ], 
+        "name": "Fournisseurs"
+       }, 
+       {
+        "name": "Compensations fournisseurs"
+       }
+      ], 
+      "name": "DETTES COMMERCIALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "1er trimestre"
+         }, 
+         {
+          "name": "Arri\u00e9r\u00e9s"
+         }, 
+         {
+          "name": "3\u00e8me trimestre"
+         }, 
+         {
+          "name": "2\u00e8me trimestre"
+         }, 
+         {
+          "name": "4\u00e8me trimestre"
+         }
+        ], 
+        "name": "Office National de la S\u00e9curit\u00e9 Sociale"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Employ\u00e9s"
+         }, 
+         {
+          "name": "Ouvriers"
+         }, 
+         {
+          "name": "Administrateurs, g\u00e9rants et commissaires"
+         }, 
+         {
+          "name": "Direction"
+         }
+        ], 
+        "name": "R\u00e9mun\u00e9rations"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ouvriers"
+         }, 
+         {
+          "name": "Employ\u00e9s"
+         }, 
+         {
+          "name": "Direction"
+         }
+        ], 
+        "name": "P\u00e9cules de vacances"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u00e0 4507 Autres imp\u00f4ts en Belgique"
+         }, 
+         {
+          "name": "\u00e0 4504 Imp\u00f4ts sur le r\u00e9sultat"
+         }, 
+         {
+          "name": "Imp\u00f4ts \u00e0 l'\u00e9tranger"
+         }
+        ], 
+        "name": "Dettes fiscales estim\u00e9es"
+       }, 
+       {
+        "children": [
+         {
+          "name": "T.V.A. \u00e0 payer - Import"
+         }, 
+         {
+          "name": "T.V.A. \u00e0 payer - Cocontractant"
+         }, 
+         {
+          "name": "T.V.A. \u00e0 payer - Intra-communautaire"
+         }, 
+         {
+          "name": "T.V.A. \u00e0 payer"
+         }, 
+         {
+          "name": "Compte courant administration T.V.A."
+         }, 
+         {
+          "name": "Taxe d'\u00e9galisation due"
+         }
+        ], 
+        "name": "T.V.A. \u00e0 payer"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres imp\u00f4ts sur le r\u00e9sultat"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres imp\u00f4ts et taxes \u00e0 payer"
+           }, 
+           {
+            "name": "Imp\u00f4ts provinciaux \u00e0 payer"
+           }, 
+           {
+            "name": "Imp\u00f4ts communaux \u00e0 payer"
+           }, 
+           {
+            "name": "Pr\u00e9compte immobilier"
+           }
+          ], 
+          "name": "Autres imp\u00f4ts et taxes en Belgique"
+         }, 
+         {
+          "name": "Imp\u00f4ts et taxes \u00e0 l'\u00e9tranger"
+         }
+        ], 
+        "name": "Imp\u00f4ts et taxes \u00e0 payer"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres pr\u00e9comptes retenus"
+         }, 
+         {
+          "name": "Pr\u00e9compte professionnel retenu sur r\u00e9mun\u00e9rations"
+         }, 
+         {
+          "name": "Pr\u00e9compte professionnel retenu sur tanti\u00e8mes"
+         }, 
+         {
+          "name": "Pr\u00e9compte mobilier retenu sur dividendes attribu\u00e9s"
+         }, 
+         {
+          "name": "Pr\u00e9compte mobilier retenu sur int\u00e9r\u00eats pay\u00e9s"
+         }
+        ], 
+        "name": "Pr\u00e9comptes retenus"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dettes et provisions sociales diverses"
+         }, 
+         {
+          "name": "Caisse d'assurances sociales pour travailleurs ind\u00e9pendants"
+         }, 
+         {
+          "name": "Oppositions sur r\u00e9mun\u00e9rations"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Assurance groupe "
+           }, 
+           {
+            "name": "Assurances individuelles"
+           }, 
+           {
+            "name": "Assurance loi"
+           }, 
+           {
+            "name": "Assurance salaire garanti "
+           }
+          ], 
+          "name": "Assurances relatives au personnel"
+         }, 
+         {
+          "name": "Provision pour gratifications de fin d'ann\u00e9e"
+         }, 
+         {
+          "name": "D\u00e9parts de personnel"
+         }
+        ], 
+        "name": "Autres dettes sociales"
+       }
+      ], 
+      "name": "DETTES FISCALES, SALARIALES ET SOCIALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Non convertibles"
+         }, 
+         {
+          "name": "Convertibles"
+         }
+        ], 
+        "name": "Emprunts obligataires non subordonn\u00e9s"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Non convertibles"
+         }, 
+         {
+          "name": "Convertibles"
+         }
+        ], 
+        "name": "Emprunts subordonn\u00e9s"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cr\u00e9dits d'acceptation"
+         }, 
+         {
+          "name": "Promesses"
+         }, 
+         {
+          "name": "Dettes en compte"
+         }
+        ], 
+        "name": "Etablissements de cr\u00e9dit"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Financement de biens immobiliers"
+         }, 
+         {
+          "name": "Financement de biens mobiliers"
+         }
+        ], 
+        "name": "Dettes de location-financement et assimil\u00e9es"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Effets \u00e0 payer"
+         }, 
+         {
+          "name": "Fournisseurs"
+         }
+        ], 
+        "name": "Dettes commerciales"
+       }, 
+       {
+        "name": "Autres emprunts"
+       }, 
+       {
+        "name": "Cautionnements re\u00e7us en num\u00e9raires"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Entreprises avec lesquelles il existe un lien de participation"
+         }, 
+         {
+          "name": "Entreprises li\u00e9es"
+         }, 
+         {
+          "name": "Administrateurs, g\u00e9rants, associ\u00e9s"
+         }, 
+         {
+          "name": "Autres dettes"
+         }
+        ], 
+        "name": "Dettes diverses"
+       }
+      ], 
+      "name": "DETTES A PLUS D'UN AN ECHEANT DANS L'ANNEE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Etablissements de cr\u00e9dit. Cr\u00e9dits d'acceptation"
+       }, 
+       {
+        "name": "Etablissements de cr\u00e9dit. Promesses"
+       }, 
+       {
+        "name": "Etablissements de cr\u00e9dit. Dettes en compte courant"
+       }, 
+       {
+        "name": "Etablissements de cr\u00e9dit. Emprunts en compte \u00e0 terme fixe"
+       }, 
+       {
+        "name": "Autres emprunts"
+       }
+      ], 
+      "name": "DETTES FINANCIERES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Cautionnements vers\u00e9s en num\u00e9raires"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Actionnaires d\u00e9faillants"
+         }, 
+         {
+          "name": "Appels de fonds"
+         }
+        ], 
+        "name": "Capital appel\u00e9, non vers\u00e9"
+       }, 
+       {
+        "children": [
+         {
+          "name": "T.V.A D\u00e9ductible"
+         }, 
+         {
+          "name": "Compte courant administration T.V.A."
+         }, 
+         {
+          "name": "Taxe d'\u00e9galisation due"
+         }
+        ], 
+        "name": "T.V.A. \u00e0 r\u00e9cup\u00e9rer"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Imp\u00f4ts \u00e9trangers"
+         }, 
+         {
+          "name": "\u00e0 4127 Autres imp\u00f4ts belges"
+         }, 
+         {
+          "name": "\u00e0 4124 Imp\u00f4ts belges sur le r\u00e9sultat"
+         }
+        ], 
+        "name": "Imp\u00f4ts et versements fiscaux \u00e0 r\u00e9cup\u00e9rer"
+       }, 
+       {
+        "name": "Produits \u00e0 recevoir"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Rabais, ristournes, remises \u00e0 obtenir et autres avoirs non encore re\u00e7us"
+         }, 
+         {
+          "name": "Compte courant des administrateurs et g\u00e9rants"
+         }, 
+         {
+          "name": "Compte courant des associ\u00e9s en S.P.R.L."
+         }, 
+         {
+          "name": "Avances et pr\u00eats au personnel"
+         }, 
+         {
+          "name": "Associ\u00e9s"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres cr\u00e9ances"
+           }, 
+           {
+            "name": "Subsides \u00e0 recevoir"
+           }
+          ], 
+          "name": "Etat et \u00e9tablissements publics"
+         }, 
+         {
+          "name": "Emballages et mat\u00e9riel \u00e0 rendre"
+         }, 
+         {
+          "name": "Cr\u00e9ances sur soci\u00e9t\u00e9s apparent\u00e9es"
+         }
+        ], 
+        "name": "Cr\u00e9ances diverses"
+       }, 
+       {
+        "name": "Cr\u00e9ances douteuses"
+       }
+      ], 
+      "name": "AUTRES CREANCES"
+     }
+    ], 
+    "name": "CLASSE 4. CREANCES ET DETTES A UN AN AU PLUS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Perte \u00e0 reporter", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Pr\u00e9l\u00e8vement sur les r\u00e9serves", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Pr\u00e9l\u00e8vement sur le capital et les primes d'\u00e9mission", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "B\u00e9n\u00e9fice report\u00e9 de l'exercice pr\u00e9c\u00e9dent", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Intervention d'associ\u00e9s", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "AFFECTATION AUX RESULTATS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "R\u00e9gularisations d'imp\u00f4ts estim\u00e9s", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "R\u00e9gularisations d'imp\u00f4ts dus ou vers\u00e9s", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Reprises de provisions fiscales", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Imp\u00f4ts belges sur le r\u00e9sultat"
+       }
+      ], 
+      "name": "REGULARISATIONS D'IMPOTS ET REPRISES DE PROVISIONS FISCALES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Reprises de provisions pour risques et charges exceptionnelles", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur immobilisations financi\u00e8res", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur immobilisations incorporelles", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur immobilisations corporelles", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Plus-values sur r\u00e9alisation d'actifs immobilis\u00e9s"
+       }, 
+       {
+        "name": "Reprises de r\u00e9ductions de valeur sur immobilisations financi\u00e8res", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Autres produits exceptionnels", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur immobilisations corporelles", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur immobilisations incorporelles", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Reprises d'amortissements et de r\u00e9ductions de valeur"
+       }
+      ], 
+      "name": "PRODUITS EXCEPTIONNELS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Escomptes obtenus", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produits des autres cr\u00e9ances", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Ecarts de conversion des devises", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Diff\u00e9rences de change", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Subsides en capital et en int\u00e9r\u00eats", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Plus-values sur r\u00e9alisations d'actifs circulants", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produits des actifs circulants", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "PRODUITS FINANCIERS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Locations diverses \u00e0 caract\u00e8re professionnel", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bonis sur reprises d'emballages consign\u00e9s", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Bonis sur travaux en associations momentan\u00e9es", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Produits divers"
+       }, 
+       {
+        "name": "Commissions et courtages", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Redevances pour brevets et licences", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Prestations de services", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Revenus des immeubles affect\u00e9s aux activit\u00e9s non professionnelles", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Subsides d'exploitation et montants compensatoires", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Plus-values sur r\u00e9alisations courantes d'immobilisations corporelles", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Plus-values sur r\u00e9alisations de cr\u00e9ances commerciales", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produits de services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "AUTRES PRODUITS D'EXPLOITATION"
+     }, 
+     {
+      "children": [
+       {
+        "name": "En immobilisations corporelles", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "En immobilisations en cours", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "En frais d'\u00e9tablissement", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "En immobilisations incorporelles", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "PRODUCTION IMMOBILISEE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Des produits finis", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Des en cours de fabrication", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Sur travaux en cours des associations momentan\u00e9es", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Sur commandes en cours d'ex\u00e9cution", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "B\u00e9n\u00e9fices port\u00e9s en compte sur commandes en cours"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Co\u00fbt des commandes en cours d'ex\u00e9cution", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Co\u00fbt des travaux en cours des associations momentan\u00e9es", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "Commandes en cours - Co\u00fbt de revient"
+         }
+        ], 
+        "name": "Des commandes en cours d'ex\u00e9cution"
+       }, 
+       {
+        "name": "Des immeubles construits destin\u00e9s \u00e0 la vente", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "VARIATION DES STOCKS ET DES COMMANDES EN COURS D'EXECUTION"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ventes d'emballages r\u00e9cup\u00e9rables", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ventes dans les pays membres de la C.E.E.", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ventes en Belgique", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ventes \u00e0 l'exportation", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Ventes de marchandises"
+       }, 
+       {
+        "name": "P\u00e9nalit\u00e9s et d\u00e9dits obtenus par l'entreprise", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ventes \u00e0 l'exportation", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ventes dans les pays membres de la C.E.E.", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Ventes de produits finis"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ventes \u00e0 l'exportation", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ventes dans les pays membres de la C.E.E.", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ventes en Belgique", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Ventes de d\u00e9chets et rebuts"
+       }, 
+       {
+        "name": "Facturations des travaux en cours", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Prestations de services dans les pays membres de la C.E.E.", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Prestations de services en vue de l'exportation", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Prestations de services en Belgique", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Prestations de services"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur prestations de services", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur ventes de produits finis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur ventes de marchandises", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sur ventes de d\u00e9chets et rebuts", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Mali sur travaux factur\u00e9s aux associations momentan\u00e9es", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Remises, ristournes et rabais accord\u00e9s"
+       }
+      ], 
+      "name": "CHIFFRE D'AFFAIRES"
+     }
+    ], 
+    "name": "CLASSE 7. - PRODUITS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Inkoopbonussen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Toevoeging voorz. incour. handelsgoed.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkoop import buiten EU hoog", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkoop import buiten EU overig", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen BTW verlegd", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen EU laag tarief", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen EU overig", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkoop import buiten EU laag", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Invoerkosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkoopkosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen EU hoog tarief", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Betalingskort. crediteuren", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen overig", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Garantiekosten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen hoog", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Toevoeging garantieverpl.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Tegenrekening inkoop", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Onttrekking uitgev.garantie", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Voorz. Incourourant grondst.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Kostprijs omzet grondstoffen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Toev. Voorz. incour. grondst.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Kosten inkoopvereniging", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Kostprijs omzet handelsgoederen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Voorz.incour. handelsgoed.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkoopprovisie", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkomende vrachten", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Hulpmaterialen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Uitbesteed werk", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Priv\u00e9-gebruik goederen", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen laag", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Inkopen nul", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "VOORRAAD GEREED PRODUCT EN ONDERHANDEN WERK"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Brandstoffen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige vervoerskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud personenauto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud vrachtauto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Leasing auto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Assuranties auto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Priv\u00e9-gebruik auto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Wegenbelasting", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "VERVOERSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Overige rentebaten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente hypotheek", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente leasecontracten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige rentelasten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente lening o/g", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente lening u/g", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente bankkrediet", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rente huurkoopcontracten", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "FINANCIERINGSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Vrachtauto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Tonnagevergunningen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Drankvergunningen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Auteursrechten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Octrooien", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Goodwill", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kantoorinventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kantoormachines", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gebouwen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bedrijfsgebouwen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Woon-winkelhuis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Winkels", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gereedschappen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kantine-inventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bedrijfsinventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Magazijninventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Machines", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Heftrucks", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Aanhangwagens", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rijwielen en bromfietsen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Vergunningen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Licenties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Aanloopkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ontwikkelingskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Personenauto's", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Pachtersinvestering", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Aankoopkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Parkeerplaats", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Grondverbetering", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Voorraadverschillen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Fabrieksinventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Verbouwingen", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AFSCHRIJVINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Betaalde schadevergoed.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Nadelige koersverschillen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kosten omzetbelasting", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Boekverlies vaste activa", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "K.O. regeling OB", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige lasten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kasverschillen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Boekwinst van vaste activa", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kosten loonbelasting", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Naheffing bedrijfsver.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige baten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ontvangen schadevergoed.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Voordelige koersverschil.", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "OVERIGE BATEN EN LASTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Reis en verblijfkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Representatiekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kascorrecties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Exportkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Beurskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Websitekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Provisie", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Etalagekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Veilingkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Reclame", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Advertenties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Verpakkingsmateriaal", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige verkoopkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Afschrijving dubieuze deb.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Relatiegeschenken", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Uitgaande vrachten", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "VERKOOPKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Juridische kosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bankkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige algemene kosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Advieskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Assuranties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Toev. Ass. eigen risico", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Accountantskosten", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "ALGEMENE KOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Uitkering ziekengeld", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige uitkeringen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Loonwerk", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Thuiswerkers", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Managementvergoedingen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gratificaties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Wervingskosten personeel", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Opleidingskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bedrijfskleding", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Geschenken personeel", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Toevoeging pensioenverpl.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Sociale lasten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Tanti\u00e8mes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Provisie", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gereedschapsgeld", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Reiskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Congressen, seminars en symposia", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Oprenting stamrechtverpl.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Toev. Backservice pens.verpl.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Inhouding pensioenpremies", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Pensioenpremies", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Inhouding sociale lasten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Belastingvrije uitkeringen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bedrijfskleding", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kantinekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Rijwielvergoeding", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Autokostenvergoeding", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Vergoeding studiekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Bijzondere beloningen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Uitzendkrachten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige kostenverg.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige personeelskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Vakantiebonnen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Vakantiegeld", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Lonen en salarissen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overhevelingstoeslag", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "PERSONEELSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Energiekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Schoonmaakkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Pacht", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Huur", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ontvangen huren", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Huurwaarde woongedeelte", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Groot onderhoud onr. Goed", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Overige huisvestingskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Assurantie onroerend goed", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Toevoeging egalisatieres. Groot onderhoud", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Belastingen onr. Goed", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud onroerend goed", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "HUISVESTINGSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Overige bedrijfskosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ophalen/vervoer afval", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Huur inventaris", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Energie (krachtstroom)", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Leasing invent.operational", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Hulpmaterialen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Assuranties", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Huur machines", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Leasing mach. operational", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gereedschappen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud machines", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud inventaris", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "BEDRIJFSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Overige kantoorkosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Huur kantoorapparatuur", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Kantoorbenodigdh./drukw.", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Contributies/abonnementen", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Administratiekosten", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Porti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Internetaansluiting", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Telefoon/telefax", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Onderhoud kantoorinvent.", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "KANTOORKOSTEN"
+     }
+    ], 
+    "name": "KOSTENREKENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Account Payable"
+     }, 
+     {
+      "name": "Uninvoiced Receipts"
+     }, 
+     {
+      "name": "Loans"
+     }, 
+     {
+      "name": "Withholding Tax"
+     }, 
+     {
+      "name": "Accrued Expenses"
+     }, 
+     {
+      "name": "Output VAT"
+     }
+    ], 
+    "name": "Liabilities"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Salary"
+     }, 
+     {
+      "name": "Rent"
+     }, 
+     {
+      "name": "Cost of goods sold"
+     }, 
+     {
+      "name": "Office Expenses"
+     }, 
+     {
+      "name": "Income tax expenses"
+     }, 
+     {
+      "name": "Interest expenses"
+     }
+    ], 
+    "name": "Expenses"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Inkopen binnen EU laag"
+     }, 
+     {
+      "name": "Tussenrek. autom. loonbetalingen"
+     }, 
+     {
+      "name": "Inkopen binnen EU hoog"
+     }, 
+     {
+      "name": "Inkopen binnen EU overig"
+     }, 
+     {
+      "name": "Betaalwijze contant"
+     }, 
+     {
+      "name": "Tussenrek. autom. betalingen"
+     }, 
+     {
+      "name": "Inkopen buiten EU overig"
+     }, 
+     {
+      "name": "Inkopen Nederland hoog"
+     }, 
+     {
+      "name": "Betaalwijze chipknip"
+     }, 
+     {
+      "name": "Tussenrekening chipknip"
+     }, 
+     {
+      "name": "Vraagposten"
+     }, 
+     {
+      "name": "Tussenrekening correcties"
+     }, 
+     {
+      "name": "Netto lonen"
+     }, 
+     {
+      "name": "Inkopen buiten EU hoog"
+     }, 
+     {
+      "name": "Inkopen buiten EU laag"
+     }, 
+     {
+      "name": "Tussenrek. cadeaubonbetalingen"
+     }, 
+     {
+      "name": "Betaalwijze cadeaubonnen"
+     }, 
+     {
+      "name": "Inkopen Nederland overig"
+     }, 
+     {
+      "name": "Inkopen Nederland laag"
+     }, 
+     {
+      "name": "Inkopen Nederland verlegd"
+     }, 
+     {
+      "name": "Betaalwijze pin"
+     }, 
+     {
+      "name": "Tussenrekening pin"
+     }, 
+     {
+      "name": "Kassa 2"
+     }, 
+     {
+      "name": "Kassa 1"
+     }, 
+     {
+      "name": "Inkopen Nederland onbelast"
+     }, 
+     {
+      "name": "Tussenrekening balans"
+     }, 
+     {
+      "name": "Tegenrekening Inkopen"
+     }
+    ], 
+    "name": "TUSSENREKENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Capital Stock"
+     }, 
+     {
+      "name": "Dividends"
+     }, 
+     {
+      "name": "Income Summary"
+     }, 
+     {
+      "name": "Retained Earnings"
+     }
+    ], 
+    "name": "Equity"
+   }, 
+   {
+    "children": [
+     {
+      "name": "TRANSFERTS AUX RESERVES IMMUNISEES", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Autres allocataires", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "R\u00e9mun\u00e9ration du capital", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Administrateurs ou g\u00e9rants", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Dotation aux autres r\u00e9serves", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "B\u00e9n\u00e9fice \u00e0 reporter", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Perte report\u00e9e de l'exercice pr\u00e9c\u00e9dent", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Dotation \u00e0 la r\u00e9serve l\u00e9gale", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AFFECTATION DES RESULTATS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Taxe sur le personnel occup\u00e9", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Taxe sur la force motrice", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Imp\u00f4ts provinciaux et communaux"
+         }, 
+         {
+          "name": "Taxes diverses", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Taxes sur autos et camions", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Taxes et imp\u00f4ts directs"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Timbres fiscaux pris en charge par la firme", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Droits d'enregistrement", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "T.V.A. non d\u00e9ductible", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Taxes et imp\u00f4ts indirects"
+         }
+        ], 
+        "name": "Charges fiscales d'exploitation"
+       }, 
+       {
+        "name": "\u00e0 648 Charges d'exploitations diverses", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Charges d'exploitation port\u00e9es \u00e0 l'actif au titre de restructuration", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Moins-values sur r\u00e9alisations courantes d'immobilisations corporelles", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Moins-values sur r\u00e9alisations de cr\u00e9ances commerciales", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AUTRES CHARGES D'EXPLOITATION"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Charges exceptionnelles transf\u00e9r\u00e9es \u00e0 l'actif en frais de restructuration", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Autres charges exceptionnelles", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Diff\u00e9rence de charge", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "P\u00e9nalit\u00e9s et amendes diverses", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur immeubles acquis ou construits en vue de la revente", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations corporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations incorporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations financi\u00e8res", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations d\u00e9tenues en location-financement et droits similaires", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Moins-values sur r\u00e9alisation d'actifs immobilis\u00e9s"
+       }, 
+       {
+        "name": "Provisions pour risques et charges exceptionnels", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur sur immobilisations financi\u00e8res", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur frais d'\u00e9tablissement", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations incorporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur immobilisations corporelles", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Amortissements et r\u00e9ductions de valeur exceptionnels"
+       }
+      ], 
+      "name": "CHARGES EXCEPTIONNELLES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Exc\u00e9dent de versements d'imp\u00f4ts et pr\u00e9comptes port\u00e9 \u00e0 l'actif", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Imp\u00f4ts et pr\u00e9comptes dus ou vers\u00e9s", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Charges fiscales estim\u00e9es", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Imp\u00f4ts belges sur le r\u00e9sultat de l'exercice"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Provisions fiscales constitu\u00e9es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Suppl\u00e9ments d'imp\u00f4ts dus ou vers\u00e9s", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Suppl\u00e9ments d'imp\u00f4ts estim\u00e9s", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Imp\u00f4ts belges sur le r\u00e9sultat d'exercices ant\u00e9rieurs"
+       }, 
+       {
+        "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat de l'exercice", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Imp\u00f4ts \u00e9trangers sur le r\u00e9sultat d'exercices ant\u00e9rieurs", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "IMPOTS SUR LE RESULTAT"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Achats de fournitures", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Achats de marchandises", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "De fournitures", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "De mati\u00e8res premi\u00e8res", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "D'immeubles destin\u00e9s \u00e0 la vente", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "De marchandises", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Variations de stocks"
+       }, 
+       {
+        "name": "Remises, ristournes et rabais obtenus sur achats", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Sous-traitances g\u00e9n\u00e9rales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Achats de services, travaux et \u00e9tudes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Achats d'immeubles destin\u00e9s \u00e0 la revente", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "APPROVISIONNEMENTS ET MARCHANDISES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Personnel int\u00e9rimaire et personnes mises \u00e0 la disposition  de l'entreprise", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "R\u00e9mun\u00e9rations, primes pour assurances extral\u00e9gales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Documentation", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Missions et r\u00e9ceptions", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Cadeaux \u00e0 la client\u00e8le", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Primes", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Foires et expositions", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Echantillons", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Catalogues et imprim\u00e9s", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Annonces et insertions", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Annonces, publicit\u00e9, propagande et documentation"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sous-traitants pour activit\u00e9s propres", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sous-traitants d'associations momentan\u00e9es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Quote-part b\u00e9n\u00e9ficiaire des coparticipants", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Sous-traitants"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Imprim\u00e9s et fournitures de bureau", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T\u00e9l\u00e9grammes", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "T\u00e9l\u00e9phone", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "T\u00e9lex et t\u00e9l\u00e9fax", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Frais postaux", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "T\u00e9l\u00e9phone, t\u00e9l\u00e9grammes, t\u00e9lex, t\u00e9l\u00e9fax, frais postaux"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Vapeur", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Eau", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Electricit\u00e9", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Gaz", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Eau, gaz, \u00e9lectricit\u00e9, vapeur"
+         }, 
+         {
+          "name": "Livres, biblioth\u00e8que", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Fournitures faites \u00e0 l'entreprise"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Personnel int\u00e9rimaire", 
+          "root_type": "Expense"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Publications l\u00e9gales", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Honoraires d'avocats, d'experts, etc ...", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Commissions aux tiers", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Dons, lib\u00e9ralit\u00e9s, ...", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Cotisations aux groupements professionnels", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Frais de contentieux", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Divers"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Transports de personnel", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Voyages, d\u00e9placements, repr\u00e9sentations", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Transports et d\u00e9placements"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres redevances", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Redevances pour brevets, licences, marques, accessoires", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Redevances et royalties"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Assurance incendie", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurance vol", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurance autos", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurance cr\u00e9dit", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurances frais g\u00e9n\u00e9raux", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Assurances non relatives au personnel"
+         }
+        ], 
+        "name": "R\u00e9tributions de tiers"
+       }, 
+       {
+        "name": "Entretien et r\u00e9paration", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "SERVICES ET BIENS DIVERS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Salaire hebdomadaire garanti", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Jours f\u00e9ri\u00e9s pay\u00e9s", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Allocations familiales compl\u00e9mentaires", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Charges sociales diverses"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Assurances individuelles", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurances loi, responsabilit\u00e9 civile, chemin du travail", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Assurance salaire garanti", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Assurances du personnel"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Allocations familiales compl\u00e9mentaires pour non salari\u00e9s", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Lois sociales pour ind\u00e9pendants", 
+            "root_type": "Expense"
+           }, 
+           {
+            "name": "Divers", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Charges sociales des administrateurs, g\u00e9rants et commissaires"
+         }
+        ], 
+        "name": "Autres frais de personnel"
+       }, 
+       {
+        "name": "Primes patronales pour assurances extral\u00e9gales", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur appointements et commissions", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sur salaires", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Cotisations patronales d'assurances sociales"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Administrateurs ou g\u00e9rants", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Personnel de direction", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Employ\u00e9s", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Autres membres du personnel", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Ouvriers", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9mun\u00e9rations et avantages sociaux directs"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Utilisations et reprises", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Provision pour p\u00e9cule de vacances"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Personnel", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Administrateurs et g\u00e9rants", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Pensions de retraite et de survie"
+       }
+      ], 
+      "name": "REMUNERATIONS, CHARGES SOCIALES ET PENSIONS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Dotations aux r\u00e9ductions de valeur sur immobilisations corporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations aux r\u00e9ductions de valeur sur immobilisations incorporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations aux amortissements sur immobilisations incorporelles", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations aux amortissements sur frais d'\u00e9tablissement", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations aux amortissements sur immobilisations corporelles", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Dotations aux amortissements et aux r\u00e9ductions de valeur sur immobilisations"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Reprises", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9ductions de valeur sur stocks"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reprises", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9ductions de valeur sur commandes en cours d'ex\u00e9cution"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Reprises", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9ductions de valeur sur cr\u00e9ances commerciales \u00e0 plus d'un an"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reprises", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9ductions de valeur sur cr\u00e9ances commerciales \u00e0 un an au plus"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Utilisations et reprises", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Provisions pour pensions et obligations similaires"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Utilisations et reprises", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Provisions pour grosses r\u00e9parations et gros entretiens"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dotations ", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Utilisations et reprises", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Provisions pour autres risques et charges"
+       }
+      ], 
+      "name": "AMORTISSEMENTS, REDUCTIONS DE VALEUR ET PROVISIONS POUR RISQUES ET CHARGES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Frais de vente des titres", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Moins-values sur r\u00e9alisation d'actifs circulants", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Charges d'escompte de cr\u00e9ances", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres charges de dettes", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Amortissements des agios et frais d'\u00e9mission d'emprunts", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Int\u00e9r\u00eats, commissions et frais aff\u00e9rents aux dettes", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Int\u00e9r\u00eats intercalaires port\u00e9s \u00e0 l'actif", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Charges des dettes"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reprises", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Dotations ", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "R\u00e9ductions de valeur sur actifs circulants"
+       }, 
+       {
+        "name": "Frais de banques, de ch\u00e8ques postaux", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Commissions sur ouvertures de cr\u00e9dit, cautions, avals", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Diff\u00e9rences de change", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Ecarts de conversion des devises", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "CHARGES FINANCIERES"
+     }
+    ], 
+    "name": "CLASSE 6. - CHARGES"
+   }, 
+   {
+    "name": "FABRIKAGEREKENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Verkopen Handel 0% niet-EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen Fabric. 0% niet-EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten fabric. 0% niet-EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten fabricage hoog", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten fabricage overig", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten fabricage 0% EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen fabricage overig", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen fabric. 0 % EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen fabricage laag", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen fabricage hoog", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten handel 0% EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten handel hoog tarief", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen handel laag", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten handel 0% niet-EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verleende Kredietbep. fabricage", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verleende Kredietbep. handel", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten handel laag tarief", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen handel 0% EU", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Diensten fabricage laag", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen handel hoog", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Verkopen handel overig", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "VERKOOPRESULTATEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Amortissements sur goodwill", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Co\u00fbt d'acquisition", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Goodwill", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Acomptes vers\u00e9s", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Concessions, brevets, licences, savoir-faire, marques, etc...", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es sur concessions, brevets, etc...", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur concessions, brevets, etc...", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Concessions, brevets, licences, savoir-faire, marques et droits similaires", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILISATIONS INCORPORELLES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Valeur d'acquisition", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Autres droits r\u00e9els sur des immeubles", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Frais d'acquisition des terrains \u00e0 b\u00e2tir", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Voies de transport et ouvrages d'art", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "B\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "B\u00e2timents industriels", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Valeur d'acquisition", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur voies de transport et ouvrages d'art", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur voies de transport et ouvrages d'art", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur frais d'acquisition des terrains b\u00e2tis", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Amortissements sur terrains b\u00e2tis", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Terrains b\u00e2tis", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Voies de transport et ouvrages d'art", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Autres b\u00e2timents d'exploitation", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "B\u00e2timents administratifs et commerciaux", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "B\u00e2timents industriels", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Frais d'acquisition sur constructions", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Constructions sur sol d'autrui", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur constructions sur sol d'autrui", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur voies de transport et ouvrages d'art", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur frais d'acquisition sur constructions", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Amortissements sur constructions", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur autres b\u00e2timents d'exploitation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur voies de transport et ouvrages d'art", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents industriels", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur b\u00e2timents administratifs et commerciaux", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Constructions", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "TERRAINS ET CONSTRUCTIONS", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Division A", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Division B", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Machines", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Division A", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Division B", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Outillage", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur outillage", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Sur machines", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Sur installations", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Plus-values act\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sur outillage", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Sur installations", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Sur machines", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Amortissements", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "INSTALLATIONS, MACHINES ET OUTILLAGE", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Idem sur mat\u00e9riel ferroviaire", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Amortissements sur mat\u00e9riel automobile", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel naval", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel fluvial", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel a\u00e9rien", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Amortissements sur mat\u00e9riel roulant", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Idem sur mat\u00e9riel naval", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Plus-values sur mat\u00e9riel automobile", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel ferroviaire", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel a\u00e9rien", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Idem sur mat\u00e9riel fluvial", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Plus-values sur mat\u00e9riel roulant", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mat\u00e9riel ferroviaire", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Voitures", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Camions", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Mat\u00e9riel automobile", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mat\u00e9riel naval", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mat\u00e9riel fluvial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mat\u00e9riel a\u00e9rien", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Mat\u00e9riel roulant", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "MOBILIER ET MATERIEL ROULANT", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Plus-values act\u00e9es sur installations, machines et outillage pris en leasing", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur installations, machines et outillage pris en leasing", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Installations", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Machines", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Outillage", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Installations, machines et outillage", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Mat\u00e9riel roulant", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mobilier", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur mobilier et mat\u00e9riel roulant en leasing", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es sur mobilier et mat\u00e9riel roulant en leasing", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Mobilier et mat\u00e9riel roulant", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILISATION DETENUES EN LOCATION-FINANCEMENT ET DROITS SIMILAIRES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Amortissements sur emballages r\u00e9cup\u00e9rables", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur mat\u00e9riel d'emballage", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur r\u00e9serve immobili\u00e8re", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur maison d'habitation", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Amortissements sur frais d'am\u00e9nagement des locaux pris en location", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Amortissements sur autres immobilisations corporelles", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Plus-values act\u00e9es sur autres immobilisations corporelles", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Mat\u00e9riel d'emballage", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "R\u00e9serve immobili\u00e8re", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Maison d'habitation", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Emballages r\u00e9cup\u00e9rables", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "AUTRES IMMOBILISATIONS CORPORELLES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Effets \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances en compte", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Titres \u00e0 revenu fixe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances douteuses", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Autres cr\u00e9ances", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valeur d'acquisition", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Montants non appel\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Autres actions et parts", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cr\u00e9ances douteuses", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Effets \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances en compte", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Titres \u00e0 revenu fixes", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeurs act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cr\u00e9ances sur des entreprises li\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Valeur d'acquisition", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Montants non appel\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeurs act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Participations dans des entreprises li\u00e9es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Titres \u00e0 revenu fixe", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Effets \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances en compte", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances douteuses", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeurs act\u00e9es", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cr\u00e9ances sur des entreprises avec lesquelles il existe un lien de participation", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Plus-values act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "R\u00e9ductions de valeurs act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valeur d'acquisition", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Montants non appel\u00e9s", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Participations dans des entreprises avec lesquelles il existe un lien de participation", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres cautionnements vers\u00e9s en num\u00e9raires", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Electricit\u00e9", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "T\u00e9l\u00e9phone, t\u00e9lefax, t\u00e9lex", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Gaz", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Eau", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cautionnements vers\u00e9s en num\u00e9raires", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILISATIONS FINANCIERES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Installations, machines et outillage", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Constructions", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mobilier et mat\u00e9riel roulant", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Autres immobilisations corporelles", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Immobilisations en cours", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Avances et acomptes vers\u00e9s sur immobilisations en cours", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILISATIONS CORPORELLES EN COURS ET ACOMPTES VERSES", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances entreprises avec lesquelles il existe un lien de participation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cr\u00e9ances entreprises li\u00e9es", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cr\u00e9ances autres d\u00e9biteurs", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Cr\u00e9ances en compte", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur entreprises li\u00e9es", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur autres d\u00e9biteurs", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Effets \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances r\u00e9sultant de la cession d'immobilisations donn\u00e9es en leasing", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances douteuses", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Autres cr\u00e9ances", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "R\u00e9ductions de valeur act\u00e9es", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cr\u00e9ances douteuses", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Acomptes vers\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Retenues sur garanties", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur clients exportation hors C.E.E.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur clients C.E.E.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur clients Belgique", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur entreprises li\u00e9es", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Effets \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur entreprises avec lesquelles il existe un lien de participation", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur clients Belgique", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur clients C.E.E.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cr\u00e9ances en compte sur entreprises li\u00e9es", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sur clients exportation hors C.E.E.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Cr\u00e9ances sur les coparticipants", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Clients", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cr\u00e9ances commerciales", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "CREANCES A PLUS D'UN AN", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "CLASSE 2. FRAIS D'ETABLISSEMENT. ACTIFS IMMOBILISES ET CREANCES A PLUS D'UN AN", 
+    "root_type": "Asset"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "D'un mois au plus"
+       }, 
+       {
+        "name": "De plus d'un mois et \u00e0 un an au plus"
+       }, 
+       {
+        "name": "De plus d'un an"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es"
+       }
+      ], 
+      "name": "DEPOTS A TERME"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Valeur d'acquisition"
+       }, 
+       {
+        "name": "R\u00e9ductions de valeur act\u00e9es"
+       }
+      ], 
+      "name": "TITRES A REVENUS FIXES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Comptes ouverts aupr\u00e8s des divers \u00e9tablissements"
+       }
+      ], 
+      "name": "ETABLISSEMENTS DE CREDIT."
+     }, 
+     {
+      "name": "VIREMENTS INTERNES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Coupons \u00e0 encaisser"
+       }
+      ], 
+      "name": "VALEURS ECHUES A L'ENCAISSEMENT"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Caisses - timbres"
+       }
+      ], 
+      "name": "CAISSES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ch\u00e8ques \u00e9mis"
+       }
+      ], 
+      "name": "OFFICE DES CHEQUES POSTAUX"
+     }
+    ], 
+    "name": "CLASSE 5. PLACEMENTS DE TRESORERIE ET DE VALEURS DISPONIBLES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Petty Cash"
+       }, 
+       {
+        "name": "Cash at Bank"
+       }
+      ], 
+      "name": "Cash"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Accumulated Depreciation - Equipment"
+       }
+      ], 
+      "name": "Equipment"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Accumulated Depreciation - Building"
+       }
+      ], 
+      "name": "Building"
+     }, 
+     {
+      "name": "Account Receivable"
+     }, 
+     {
+      "name": "Outstanding Cheques"
+     }, 
+     {
+      "name": "Input VAT"
+     }, 
+     {
+      "name": "Withholding Income Tax"
+     }, 
+     {
+      "name": "Inventory"
+     }
+    ], 
+    "name": "Assets"
+   }
+  ], 
+  "name": "Simple chart of accounts"
+ }
+}

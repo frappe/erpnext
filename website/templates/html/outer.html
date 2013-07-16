@@ -1,114 +1,35 @@
-{#
-	requires, brand_html, top_bar_items, footer_items, copyright, content, address
-#}
-
-{% extends "html/base.html" %}
+{% extends "lib/templates/base.html" %}
 
 {% block body %}
-	<header>
-	</header>
 	<div class="container">
+		<div class="pull-right" style="margin:4px;" id="user-tools">
+			{% if shopping_cart_enabled -%}
+			<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> 
+				<span class="cart-count"></span></a> |
+			{%- endif %}
+			<a id="login-link" href="login">Login</a>
+		</div>
+		<div class="pull-right hide" style="margin:4px;" id="user-tools-post-login">
+			<a href="profile" title="My Profile" id="user-full-name"></a> |
+			<a href="account" title="My Account">My Account</a> |
+			{% if shopping_cart_enabled -%}
+			<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> 
+				<span class="cart-count"></span></a> |
+			{%- endif %}
+			<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>
+		</div>
+		<div class="clearfix"></div>
+		{% if banner_html %}<div class="row banner">
+			<div class="col col-lg-12">{{ banner_html }}</div>
+		</div>{% endif %}
 		<div class="outer">
-			<div class="navbar{% if top_bar_background=="Black" %} navbar-inverse{% endif %}" 
-				style="margin-bottom: 0px;">
-				<div class="navbar-inner">
-					<a class="brand" href="index">{{ brand_html }}</a>
-					<div class="container">
-						<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-						</button>
-						<div class="nav-collapse collapse">
-							<ul class="nav">
-								{% for page in top_bar_items %}
-									{% if not page.parent_label %}
-									<li data-label="{{ page.label }}"
-										{% if page.child_items %}
-											class="dropdown"
-										{% endif %}>
-										<a href="{{ page.url or '#' }}" 
-											{% if page.child_items %}
-												class="dropdown-toggle"
-												onclick="return false;"
-												data-toggle="dropdown"
-											{% endif %}
-											{{ page.target or ''}}>
-										{{ page.label }}
-										{% if page.child_items %}
-											<b class="caret"></b>
-										</a>
-											<ul class="dropdown-menu">
-											{% for child in page.child_items %}
-												<li data-label="{{ child.label }}">
-													<a {% if child.indent %}
-														style="padding-left: 
-															{{(int(child.indent)+1)*15 }}px"
-													{% endif %}
-													href="{{ child.url }}" {{ child.target or '' }}>
-														{{ child.label }}
-													</a>
-												</li>
-											{% endfor %}
-											</ul>
-										{% else %}
-										</a>
-										{% endif %}
-										</li>
-									{% endif %}
-								{% endfor %}
-							</ul>
-							<ul class="nav pull-right">
-								<li id="login-topbar-item"><a href="login">Login</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<script>$('.dropdown-toggle').dropdown()</script>
+			{% include "app/website/templates/html/navbar.html" %}
 			<div class="content row" id="page-{{ name }}" style="display: block;">
-			{% block content %}
-			{% endblock %}
+			{%- block content -%}
+			{%- endblock -%}
 			</div>
 		</div>
 	</div>
-	<footer class="container"><div class="web-footer">
-		{% if facebook_share or google_plus_one or twitter_share or linked_in_share %}
-		<div class="social-icons" style="">
-			<span style="font-size: 11px;">{{ share_text or "Share this page on: "}}</span>
-			{% if google_plus_one %}
-				<a href="https://plus.google.com/share?url={{ url }}"
-				 	target="_blank"><i class="icon-google-plus"></i></a>
-			{% endif %}
-			{% if twitter_share %}
-				<a href="https://twitter.com/intent/tweet?url={{ url }}&text={{ encoded_title }}"
-					target="_blank" ><i class="icon-twitter"></i></a>
-			{% endif %}
-			{% if facebook_share %}
-				<a href="https://www.facebook.com/sharer.php?u={{ url }}&t={{ encoded_title }}&via={{ twitter_share_via }}"
-					target="_blank"><i class="icon-facebook"></i></a>
-			{% endif %}
-			{% if linked_in_share %}
-				<a href="http://www.linkedin.com/shareArticle?mini=true&url={{ url }}&title={{ encoded_title }}"
-					target="_blank"><i class="icon-linkedin"></i></a>
-			{% endif %}
-		</div>
-		{% endif %}
-		<p style="float: right; clear: right;">
-			<a style="font-size: 90%; color: #888;" href="attributions">ERPNext Powered</a></p>
-		<div class="web-footer-menu"><ul>
-		{% for item in footer_items %}
-			<li><a href="{{ item.url }}" {{ item.target }}
-				data-label="{{ item.label }}">{{ item.label }}</a></li>
-		{% endfor %}
-		</ul></div>
-		{% if copyright %}
-		<div class="web-footer-copyright">&copy; {{ copyright }}</div>
-		{% endif %}
-		{% if address %}
-		{{ address }}
-		{% endif %}
-		</div>
-	</footer>
+	{% include "app/website/templates/html/footer.html" %}
 
 {% endblock %}

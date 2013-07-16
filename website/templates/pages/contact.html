@@ -1,34 +1,38 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block javascript %}
-	{% include "js/contact.js" %}
+	{% include "app/website/templates/js/contact.js" %}
 {% endblock %}
 
 {% set title="Contact Us" %}
 
 {% block content %}
-<div class="span12">
+<div class="col col-lg-12">
+	<h3>{{ obj.doc.heading or "Contact Us"}}</h3>
 	<div class="row">
-		<div class="web-form span8">
-			{{ obj.doc.introduction or "<h3>Contact Us</h3>"}}
-			<div class="row">
-			<div class="span4">
-				<p id="contact-alert" class="alert" 
-					style="display: none;">&nbsp;</p>
-			</div>
-			</div>
-			<div class="clearfix"></div>
-			<p><select class="span4" name="subject">
-				{% for option in obj.doc.query_options %}
+		<div class="web-form col col-lg-8">
+			<p id="contact-alert" class="alert" 
+				style="display: none;">&nbsp;</p>
+			<p>
+				<select name="subject">
+				{% for option in obj.query_options %}
 					<option value="{{ option }}">{{ option }}</option>
 				{% endfor %}
-			</select></p>
-			<p><input class="span4" name="email" type="text" placeholder="Your Email Address" /></p>
-			<p><textarea class="span4" rows="10" name="message"></textarea></p>
-			<p><button class="btn btn-primary btn-send">Send</button></p>
+				</select>
+			</p>
+			<p>
+				<input name="email" type="text" 
+				placeholder="Your Email Address" />
+			</p>
+			<p>
+				<textarea rows="10" name="message"></textarea>
+			</p>
+			<p>
+				<button class="btn btn-primary btn-send">Send</button>
+			</p>
 		</div>
 		{% if obj.doc.address %}
-		<div class="span3 alert" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
+		<div class="col col-lg-3 col-offset-1 alert" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
 			<h4><i class="icon-map-marker"></i> {{ obj.address.address_title }}</h4>
 			{% if obj.address.address_line1 %}
 				<span itemprop="streetAddress">{{ obj.address.address_line1 }}</span><br>
@@ -51,5 +55,6 @@
 		</div>
 		{% endif %}
 	</div>
+	{{ obj.doc.introduction }}
 </div>
 {% endblock %}

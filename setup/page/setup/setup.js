@@ -1,198 +1,194 @@
-// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
-// GNU General Public License. See "license.txt"
+wn.pages['Setup'].onload = function(wrapper) { 
+	if(msg_dialog && msg_dialog.display) msg_dialog.hide();
+	wn.ui.make_app_page({
+		parent: wrapper,
+		title: 'Setup',
+		single_column: true
+	});
 
-wn.module_page["Setup"] = [
-	{
-		title: wn._("Organization"),
-		icon: "icon-building",
-		items: [
-			{
-				"label":wn._("Company"),
-				"doctype":"Company",
-				"description":wn._("List of companies (not customers / suppliers)")
-			},
-			{
-				"doctype":"Fiscal Year",
-				"label": wn._("Fiscal Year"),
-				"description":wn._("Financial Years for books of accounts")
-			},
-			{
-				"doctype":"Currency",
-				"label": wn._("Currency"),
-				"description": wn._("Enable / disable currencies.")
-			},
-		]
-	},
-	{
-		title: wn._("Users"),
-		icon: "icon-group",
-		right: true,
-		items: [
-			{
-				"doctype":"Profile",
-				"label": wn._("Profile"),
-				"description": wn._("Add/remove users, set roles, passwords etc")
-			},
-			{
-				"page":"permission-manager",
-				label: wn._("Permission Manager"),
-				"description": wn._("Set permissions on transactions / masters")
-			},
-			{
-				"page":"user-properties",
-				label: wn._("User Properties"),
-				"description":wn._("Set default values for users (also used for permissions).")
-			},
-			{
-				"doctype":"Workflow",
-				label:wn._("Workfow"),
-				"description":wn._("Set workflow rules.")
-			},
-			{
-				"doctype":"Authorization Rule",
-				label:wn._("Authorization Rule"),
-				"description":wn._("Restrict submission rights based on amount")
-			},
-		]
-	},
-	{
-		title: wn._("Data"),
-		icon: "icon-table",
-		items: [
-			{
-				"page":"data-import-tool",
-				label: wn._("Data Import"),
-				"description":wn._("Import data from spreadsheet (csv) files")
-			},
-			{
-				"route":"Form/Global Defaults",
-				doctype: "Global Defaults",
-				label: wn._("Global Defaults"),
-				"description":wn._("Set default values for entry"),
-			},
-			{
-				"route":"Form/Naming Series/Naming Series",
-				doctype: "Naming Series",
-				label: wn._("Manage numbering series"),
-				"description":wn._("Set multiple numbering series for transactions")
-			},
-		]
-	},
-	{
-		title: wn._("Branding and Printing"),
-		icon: "icon-print",
-		right: true,
-		items: [
-			{
-				"doctype":"Letter Head",
-				label:wn._("Letter Head"),
-				"description":wn._("Letter heads for print")
-			},
-			{
-				"doctype":"Print Format",
-				label:wn._("Print Format"),
-				"description":wn._("HTML print formats for quotes, invoices etc")
-			},
-			{
-				"doctype":"Print Heading",
-				label:wn._("Print Heading"),
-				"description":wn._("Add headers for standard print formats")
-			},
-			{
-				"route":"Form/Style Settings/Style Settings",
-				doctype:wn._("Style Settings"),
-				label:wn._("Style Settings"),
-				"description":wn._("Change background fonts etc")
+	wrapper.appframe.add_module_icon("Setup");
+	
+	var body = $(wrapper).find(".layout-main"),
+		total = 0,
+		completed = 0;
+
+	body.html('<div class="progress progress-striped active">\
+		<div class="progress-bar" style="width: 100%;"></div></div>')
+
+	wn.call({
+		method: "setup.page.setup.setup.get",
+		callback: function(r) {
+			if(r.message) {
+				body.empty();
+				if(wn.boot.expires_on) {
+					$(body).prepend("<div class='text-muted' style='text-align:right'>Account expires on "
+							+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
+				}
+
+				$completed = $('<h4>Setup Completed <span class="completed-percent"></span><h4>\
+					<div class="progress"><div class="progress-bar"></div></div>')
+					.appendTo(body);
+
+				$.each(r.message, function(i, item) {
+					render_item(item)
+				});
+				
+				var completed_percent = cint(flt(completed) / total * 100) + "%";
+				$completed
+					.find(".progress-bar")
+					.css({"width": completed_percent});
+				$(body)
+					.find(".completed-percent")
+					.html("(" + completed_percent + ")");
 			}
-		]
-	},
-	{
-		title: wn._("Email Settings"),
-		icon: "icon-envelope",
-		items: [
-			{
-				"route":"Form/Email Settings/Email Settings",
-				doctype:"Email Settings",
-				label: wn._("Email Settings"),
-				"description":wn._("Out going mail server and support ticket mailbox")
-			},
-			{
-				"route":"Form/Sales Email Settings",
-				doctype:"Sales Email Settings",
-				label: wn._("Sales Email Settings"),
-				"description":wn._("Extract Leads from sales email id e.g. sales@example.com")
-			},
-			{
-				"route":"Form/Jobs Email Settings",
-				doctype:"Jobs Email Settings",
-				label: wn._("Jobs Email Settings"),
-				"description":wn._("Extract Job Applicant from jobs email id e.g. jobs@example.com")
-			},
-			{
-				"route":"Form/Notification Control/Notification Control",
-				doctype:"Notification Control",
-				label: wn._("Notification Control"),
-				"description":wn._("Prompt email sending to customers and suppliers"),
-			},
-			{
-				"doctype":"Email Digest",
-				label: wn._("Email Digest"),
-				"description":wn._("Daily, weekly, monthly email Digests")
-			},
-			{
-				"route":"Form/SMS Settings/SMS Settings",
-				doctype:"SMS Settings",
-				label: wn._("SMS Settings"),
-				"description":wn._("Setup outgoing SMS via your bulk SMS provider")
-			},
-			{
-				"route":"Form/SMS Center/SMS Center",
-				doctype:"SMS Center",
-				label: wn._("SMS Center"),
-				"description":wn._("Send bulk SMS to leads, customers, contacts")
-			},
-		]
-	},
-	{
-		title: wn._("Customize"),
-		icon: "icon-wrench",
-		items: [			
-			{
-				"route":"Form/Customize Form/Customize Form",
-				doctype:"Customize Form",
-				label: wn._("Customize Form"),
-				"description":wn._("Change entry properties (hide fields, make mandatory etc)")
-			},
-			{
-				"doctype":"Custom Field",
-				label: wn._("Custom Field"),
-				"description":wn._("Add fields to forms")
-			},
-			{
-				"doctype":"Custom Script",
-				label: wn._("Custom Script"),
-				"description":wn._("Add custom code to forms")
-			},
-			{
-				"route":"Form/Features Setup/Features Setup",
-				"description":wn._("Simplify entry forms by disabling features"),
-				doctype:"Features Setup",
-				label: wn._("Features Setup"),
-			},
-			{
-				"page":"modules_setup",
-				label: wn._("Show / Hide Modules"),
-				"description":wn._("Show, hide modules")
-			},
-		]
-	},
-]
+		}
+	});
+	
+	var render_item = function(item, dependency) {		
+		if(item.type==="Section") {
+			$("<h3>")
+				.css({"margin": "20px 0px 15px 0px"})
+				.html('<i class="'+item.icon+'"></i> ' + item.title).appendTo(body);
+			return;
+		}
+		var row = $('<div class="row">')
+			.css({
+				"margin-bottom": "7px",
+				"padding-bottom": "7px",
+				"border-bottom": "1px solid #eee"
+			})
+			.appendTo(body);
 
-pscript['onload_Setup'] = function(wrapper) {
-	wn.views.moduleview.make(wrapper, "Setup");
-	if(wn.boot.expires_on) {
-		$(wrapper).find(".main-section")
-			.prepend("<div class='alert'>Your ERPNext account will expire on "
-				+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
+		$('<div class="col col-lg-1"></div>').appendTo(row);
+			
+		if(item.type==="Link") {
+			var col = $('<div class="col col-lg-5"><b><a href="#'
+				+item.route+'"><i class="'+item.icon+'"></i> '
+				+item.title+'</a></b></div>').appendTo(row);
+			
+		} else {
+			var col = $(repl('<div class="col col-lg-5">\
+					<span class="badge view-link">%(count)s</span>\
+					 <b><i class="%(icon)s"></i>\
+						<a class="data-link">%(title)s</a></b>\
+					</div>', {
+						count: item.count,
+						title: wn._(item.title || item.doctype),
+						icon: wn.boot.doctype_icons[item.doctype]
+					}))
+				.appendTo(row);
+
+			col.find(".badge")
+				.css({
+					"background-color": (item.count ? "green" : "orange"),
+					"display": "inline-block",
+					"min-width": "40px"
+				});
+
+			total += 1;
+			if(item.count)
+				completed += 1;
+		}
+
+		if(dependency) 
+			col.addClass("col-offset-1");
+		else
+			$('<div class="col col-lg-1"></div>').appendTo(row);
+			
+		if(item.doctype) {
+			var badge = col.find(".badge, .data-link")
+				.attr("data-doctype", item.doctype)
+				.css({"cursor": "pointer"})
+				
+			if(item.single) {
+				badge.click(function() {
+					wn.set_route("Form", $(this).attr("data-doctype"))
+				})
+			} else {
+				badge.click(function() {
+					wn.set_route(item.tree || "List", $(this).attr("data-doctype"))
+				})
+			}
+		}
+		
+		// tree
+		$links = $('<div class="col col-lg-5">').appendTo(row);
+		
+		if(item.tree) {
+			$('<a class="view-link"><i class="icon-sitemap"></i> Browse</a>\
+				<span class="text-muted">|</span> \
+				<a class="import-link"><i class="icon-upload"></i> Import</a>')
+				.appendTo($links)
+
+			var mylink = $links.find(".view-link")
+				.attr("data-doctype", item.doctype)
+
+			mylink.click(function() {
+				wn.set_route(item.tree, item.doctype);
+			})
+						
+		} else if(item.single) {
+			$('<a class="view-link"><i class="icon-edit"></i> Edit</a>')
+				.appendTo($links)
+
+			$links.find(".view-link")
+				.attr("data-doctype", item.doctype)
+				.click(function() {
+					wn.set_route("Form", $(this).attr("data-doctype"));
+				})
+		} else if(item.type !== "Link"){
+			$('<a class="new-link"><i class="icon-plus"></i> New</a> \
+				<span class="text-muted">|</span> \
+				<a class="view-link"><i class="icon-list"></i> View</a> \
+				<span class="text-muted">|</span> \
+				<a class="import-link"><i class="icon-upload"></i> Import</a>')
+				.appendTo($links)
+
+			$links.find(".view-link")
+				.attr("data-doctype", item.doctype)
+				.click(function() {
+					if($(this).attr("data-filter")) {
+						wn.route_options = JSON.parse($(this).attr("data-filter"));
+					}
+					wn.set_route("List", $(this).attr("data-doctype"));
+				})
+
+			if(item.filter)
+				$links.find(".view-link").attr("data-filter", JSON.stringify(item.filter))
+
+			if(wn.model.can_create(item.doctype)) {
+				$links.find(".new-link")
+					.attr("data-doctype", item.doctype)
+					.click(function() {
+						new_doc($(this).attr("data-doctype"))
+					})
+			} else {
+				$links.find(".new-link").remove();
+				$links.find(".text-muted:first").remove();
+			}
+
+		}
+
+		$links.find(".import-link")
+			.attr("data-doctype", item.doctype)
+			.click(function() {
+				wn.route_options = {doctype:$(this).attr("data-doctype")}
+				wn.set_route("data-import-tool");
+			})
+			
+		if(item.links) {
+			$.each(item.links, function(i, link) {
+				var newlinks = $('<span class="text-muted"> |</span> \
+				<a class="import-link" href="#'+link.route
+					+'"><i class="'+link.icon+'"></i> '+link.title+'</a>')
+					.appendTo($links)
+			})
+		}
+			
+		if(item.dependencies) {
+			$.each(item.dependencies, function(i, d) {
+				render_item(d, true);
+			})
+		}
 	}
 }

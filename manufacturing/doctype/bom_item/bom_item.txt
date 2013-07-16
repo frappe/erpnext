@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-10 16:34:16", 
+  "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:43:11", 
+  "modified": "2013-07-10 14:54:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,6 +41,7 @@
   "doctype": "DocField", 
   "fieldname": "operation_no", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Operation No", 
   "oldfieldname": "operation_no", 
   "oldfieldtype": "Data", 
@@ -51,6 +52,7 @@
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
@@ -63,10 +65,12 @@
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "BOM No", 
   "oldfieldname": "bom_no", 
   "oldfieldtype": "Link", 
   "options": "BOM", 
+  "print_width": "150px", 
   "reqd": 0, 
   "search_index": 1, 
   "width": "150px"
@@ -75,6 +79,7 @@
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Qty", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
@@ -84,6 +89,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
+  "in_list_view": 0, 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
@@ -91,18 +97,22 @@
   "reqd": 1
  }, 
  {
+  "description": "See \"Rate Of Materials Based On\" in Costing Section", 
   "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Rate"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "amount_as_per_mar", 
   "oldfieldtype": "Currency", 
+  "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
  }, 
@@ -122,6 +132,7 @@
   "label": "Item Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
+  "print_width": "250px", 
   "reqd": 0, 
   "width": "250px"
  }, 

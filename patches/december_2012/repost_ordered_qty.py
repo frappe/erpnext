@@ -10,8 +10,6 @@ def execute():
 			and po_item.item_code = %s and po_item.warehouse = %s
 		""", (d[0], d[1]))
 
-		if flt(d[3]) != flt(ordered_qty[0][0]):
-			print d[3], ordered_qty[0][0]
-			
+		if flt(d[3]) != flt(ordered_qty[0][0]):			
 			webnotes.conn.sql("""update `tabBin` set ordered_qty = %s where name = %s""",
 			 	(ordered_qty and ordered_qty[0][0] or 0, d[2]))

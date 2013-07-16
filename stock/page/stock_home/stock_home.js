@@ -4,21 +4,27 @@
 wn.module_page["Stock"] = [
 	{
 		title: wn._("Documents"),
+		top: true,
 		icon: "icon-copy",
 		items: [
 			{
+				label: wn._("Item"),
+				description: wn._("All Products or Services."),
+				doctype:"Item"
+			},
+			{
 				label: wn._("Material Request"),
-				description: wn._("Request Material for Transfer or Purchase."),
+				description: wn._("Requests for items."),
 				doctype:"Material Request"
 			},
 			{
 				label: wn._("Stock Entry"),
-				description: wn._("Transfer stock from one warehouse to another."),
+				description: wn._("Record item movement."),
 				doctype:"Stock Entry"
 			},
 			{
 				label: wn._("Delivery Note"),
-				description: wn._("Delivery (shipment) to customers."),
+				description: wn._("Shipments to customers."),
 				doctype:"Delivery Note"
 			},
 			{
@@ -32,11 +38,6 @@ wn.module_page["Stock"] = [
 		title: wn._("Masters"),
 		icon: "icon-book",
 		items: [
-			{
-				label: wn._("Item"),
-				description: wn._("All Products or Services."),
-				doctype:"Item"
-			},
 			{
 				label: wn._("Serial No"),
 				description: wn._("Single unit of an Item."),
@@ -95,12 +96,6 @@ wn.module_page["Stock"] = [
 				description: wn._("Change UOM for an Item."),
 				"doctype": "Stock UOM Replace Utility"
 			},
-			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label": wn._("Sales and Purchase Return Tool"),
-				doctype: "Sales and Purchase Return Tool",
-				description: wn._("Manage sales or purchase returns")
-			},
 		]
 	},
 	{
@@ -108,8 +103,15 @@ wn.module_page["Stock"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Stock Settings"),
+				"route": "Form/Stock Settings",
+				"doctype":"Stock Settings",
+				"description": "Settings for Stock Module"
+			},
+			{
 				"route":"Sales Browser/Item Group",
 				"label": wn._("Item Group"),
+				"doctype": "Item Group",
 				"description": wn._("Item classification.")
 			},
 			{
@@ -121,11 +123,6 @@ wn.module_page["Stock"] = [
 				"doctype":"Brand",
 				"label": wn._("Brand"),
 				"description": wn._("Brand master.")
-			},
-			{
-				"label": wn._("Warehouse Type"),
-				"doctype":"Warehouse Type",
-				"description": wn._("Types of warehouse")
 			}
 		]
 	},
@@ -170,7 +167,7 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				route: "Report2/Stock Ledger Entry/Stock Ledger",
+				route: "Report/Stock Ledger Entry/Stock Ledger",
 				doctype: "Stock Ledger Entry"
 			},
 			{
@@ -185,23 +182,59 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Serial No Service Contract Expiry"),
-				route: "Report2/Serial No/Serial No Service Contract Expiry",
+				route: "Report/Serial No/Serial No Service Contract Expiry",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Status"),
-				route: "Report2/Serial No/Serial No Status",
+				route: "Report/Serial No/Serial No Status",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Serial No Warranty Expiry"),
-				route: "Report2/Serial No/Serial No Warranty Expiry",
+				route: "Report/Serial No/Serial No Warranty Expiry",
 				doctype: "Serial No"
 			},
 			{
 				"label":wn._("Item-Wise Price List"),
 				route: "query-report/Item-Wise Price List",
 				doctype: "Item"
+			},
+			{
+				"label":wn._("Purchase In Transit"),
+				route: "query-report/Purchase In Transit",
+			},
+			{
+				"label":wn._("Requested Items To Be Transferred"),
+				route: "query-report/Requested Items To Be Transferred",
+			},
+			{
+				"label":wn._("Batch-Wise Balance History"),
+				route: "query-report/Batch-Wise Balance History",
+			},
+			{
+				"label":wn._("Warehouse-Wise Stock Balance"),
+				route: "query-report/Warehouse-Wise Stock Balance",
+			},
+			{
+				"label":wn._("Item Prices"),
+				route: "query-report/Item Prices",
+
+			},
+			{
+				"label":wn._("Itemwise Recommended Reorder Level"),
+				route: "query-report/Itemwise Recommended Reorder Level",
+				doctype: "Item"
+			},
+			{
+				"label":wn._("Delivery Note Trends"),
+				route: "query-report/Delivery Note Trends",
+				doctype: "Delivery Note"
+			},
+			{
+				"label":wn._("Purchase Receipt Trends"),
+				route: "query-report/Purchase Receipt Trends",
+				doctype: "Purchase Receipt"
 			},
 		]
 	}

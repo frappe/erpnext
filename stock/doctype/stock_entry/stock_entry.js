@@ -18,8 +18,81 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
+	onload: function() {
+		this.set_default_account();
+	}, 
+	
+	set_default_account: function() {
+		var me = this;
+		
+		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_adjustment_account) {
+			if (this.frm.doc.purpose == "Sales Return") 
+				account_for = "stock_in_hand_account";
+			else if (this.frm.doc.purpose == "Purchase Return") 
+				account_for = "stock_received_but_not_billed";
+			else account_for = "stock_adjustment_account";
+			
+			this.frm.call({
+				method: "accounts.utils.get_company_default",
+				args: {
+					"fieldname": account_for, 
+					"company": this.frm.doc.company
+				},
+				callback: function(r) {
+					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
+				}
+			});
+		}
+	},
+	
+	setup: function() {
+		var me = this;
+		
+		this.frm.fields_dict.delivery_note_no.get_query = function() {
+			return { query: "stock.doctype.stock_entry.stock_entry.query_sales_return_doc" };
+		};
+		
+		this.frm.fields_dict.sales_invoice_no.get_query = 
+			this.frm.fields_dict.delivery_note_no.get_query;
+		
+		this.frm.fields_dict.purchase_receipt_no.get_query = function() {
+			return { 
+				filters:{ 'docstatus': 1 }
+			};
+		};
+		
+		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
+			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) && 
+				me.get_doctype_docname()) {
+					return {
+						query: "stock.doctype.stock_entry.stock_entry.query_return_item",
+						filters: {
+							purpose: me.frm.doc.purpose,
+							delivery_note_no: me.frm.doc.delivery_note_no,
+							sales_invoice_no: me.frm.doc.sales_invoice_no,
+							purchase_receipt_no: me.frm.doc.purchase_receipt_no
+						}
+					};
+			} else {
+				return erpnext.queries.item({is_stock_item: "Yes"});
+			}
+		};
+		
+		if (sys_defaults.auto_inventory_accounting) {
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
+
+			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
+				return {
+					filters: { 
+						"company": me.frm.doc.company,
+						"group_or_ledger": "Ledger"
+					}
+				}
+			}
+		}
+	},
+	
 	onload_post_render: function() {
-		this._super();
 		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
 			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
 				// if production order / bom is mentioned, get items
@@ -28,12 +101,27 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	refresh: function() {
-		this._super();
+		var me = this;
+		erpnext.hide_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		if (this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
+			if(wn.boot.auto_inventory_accounting)
+				this.show_general_ledger();
 		}
+		
+		if(this.frm.doc.docstatus === 1 && 
+				wn.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
+			if(this.frm.doc.purpose === "Sales Return") {
+				this.frm.add_custom_button("Make Credit Note", function() { me.make_return_jv(); });
+				this.add_excise_button();
+			} else if(this.frm.doc.purpose === "Purchase Return") {
+				this.frm.add_custom_button("Make Debit Note", function() { me.make_return_jv(); });
+				this.add_excise_button();
+			}
+		}
+		
 	},
 	
 	on_submit: function() {
@@ -80,6 +168,70 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	
 	toggle_enable_bom: function() {
 		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
+	},
+	
+	get_doctype_docname: function() {
+		if(this.frm.doc.purpose === "Sales Return") {
+			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
+				// both specified
+				msgprint(wn._("You can not enter both Delivery Note No and Sales Invoice No. \
+					Please enter any one."));
+				
+			} else if(!(this.frm.doc.delivery_note_no || this.frm.doc.sales_invoice_no)) {
+				// none specified
+				msgprint(wn._("Please enter Delivery Note No or Sales Invoice No to proceed"));
+				
+			} else if(this.frm.doc.delivery_note_no) {
+				return {doctype: "Delivery Note", docname: this.frm.doc.delivery_note_no};
+				
+			} else if(this.frm.doc.sales_invoice_no) {
+				return {doctype: "Sales Invoice", docname: this.frm.doc.sales_invoice_no};
+				
+			}
+		} else if(this.frm.doc.purpose === "Purchase Return") {
+			if(this.frm.doc.purchase_receipt_no) {
+				return {doctype: "Purchase Receipt", docname: this.frm.doc.purchase_receipt_no};
+				
+			} else {
+				// not specified
+				msgprint(wn._("Please enter Purchase Receipt No to proceed"));
+				
+			}
+		}
+	},
+	
+	add_excise_button: function() {
+		if(wn.boot.control_panel.country === "India")
+			this.frm.add_custom_button("Make Excise Invoice", function() {
+				var excise = wn.model.make_new_doc_and_get_name('Journal Voucher');
+				excise = locals['Journal Voucher'][excise];
+				excise.voucher_type = 'Excise Voucher';
+				loaddoc('Journal Voucher', excise.name);
+			});
+	},
+	
+	make_return_jv: function() {
+		if(this.get_doctype_docname()) {
+			this.frm.call({
+				method: "make_return_jv",
+				args: {
+					stock_entry: this.frm.doc.name
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						var jv_name = wn.model.make_new_doc_and_get_name('Journal Voucher');
+						var jv = locals["Journal Voucher"][jv_name];
+						$.extend(jv, r.message[0]);
+						$.each(r.message.slice(1), function(i, jvd) {
+							var child = wn.model.add_child(jv, "Journal Voucher Detail", "entries");
+							$.extend(child, jvd);
+						});
+						loaddoc("Journal Voucher", jv_name);
+					}
+
+				}
+			});
+		}
 	},
 
 });
@@ -132,22 +284,16 @@ cur_frm.cscript.supplier = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
-	return 'select name from `tabProduction Order` \
-		where docstatus = 1 and qty > ifnull(produced_qty,0) AND %(key)s like "%s%%" \
-		order by name desc limit 50';
+	return{
+		filters:[
+			['Production Order', 'docstatus', '=', 1],
+			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty']
+		]
+	}
 }
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
-}
-
-// item code - only if quantity present in source warehosue
-var fld = cur_frm.fields_dict['mtn_details'].grid.get_field('item_code');
-fld.query_description = "If Source Warehouse is selected, items with existing stock \
-	for that warehouse will be selected";
-
-fld.get_query = function() {
-	return erpnext.queries.item({is_stock_item: "Yes"});
 }
 
 // copy over source and target warehouses
@@ -167,19 +313,14 @@ cur_frm.fields_dict['mtn_details'].grid.onrowadd = function(doc, cdt, cdn){
 cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];		
 	if(d.item_code) {
-		if (d.s_warehouse) {
-			return "select batch_no from `tabStock Ledger Entry` sle \
-				where item_code = '" + d.item_code + "' and warehouse = '" + d.s_warehouse +
-				"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
-				and exists(select * from `tabBatch` where \
-				name = sle.batch_no and expiry_date >= '" + doc.posting_date + 
-				"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
-				order by batch_no desc limit 50";
-		} else {
-			return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
-				d.item_code + "' and expiry_date >= '" + doc.posting_date + 
-				"' AND name like '%s' ORDER BY name DESC LIMIT 50";
-		}		
+		return{
+			query: "stock.doctype.stock_entry.stock_entry.get_batch_no",
+			filters:{
+				'item_code': d.item_code,
+				's_warehouse': d.s_warehouse,
+				'posting_date': doc.posting_date
+			}
+		}			
 	} else {
 		msgprint("Please enter Item Code to get batch no");
 	}
@@ -223,6 +364,8 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_items(doc);
+	if($.inArray(cur_frm.doc.purpose, ["Purchase Return", "Sales Return"])!==-1)
+		validated = cur_frm.cscript.get_doctype_docname() ? true : false;
 }
 
 cur_frm.cscript.validate_items = function(doc) {
@@ -233,6 +376,8 @@ cur_frm.cscript.validate_items = function(doc) {
 	}
 }
 
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+	return{ query:"controllers.queries.customer_query" } }
 
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+cur_frm.fields_dict.supplier.get_query = function(doc,cdt,cdn) {
+	return{	query:"controllers.queries.supplier_query" } }

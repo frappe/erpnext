@@ -35,15 +35,16 @@ class DocType:
 		self.check_credit_limit()
 		self.check_pl_account()
 
-	def on_update(self,adv_adj, cancel, update_outstanding = 'Yes'):
+	def on_update(self, adv_adj, cancel, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
+		self.validate_cost_center()
 		self.check_freezing_date(adv_adj)
 		self.check_negative_balance(adv_adj)
 
 		# Update outstanding amt on against voucher
-		if self.doc.against_voucher and self.doc.against_voucher_type not in \
-				('Journal Voucher','POS') and update_outstanding == 'Yes':
-			self.update_outstanding_amt()
+		if self.doc.against_voucher and self.doc.against_voucher_type != "POS" \
+			and update_outstanding == 'Yes':
+				self.update_outstanding_amt()
 
 	def check_mandatory(self):
 		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
@@ -97,30 +98,46 @@ class DocType:
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)
 		
 		if ret and ret[0]["group_or_ledger"]=='Group':
-			msgprint(_("Account: ") + self.doc.account + _(" is not a ledger"), raise_exception=1)
+			msgprint(_("Account") + ": " + self.doc.account + _(" is not a ledger"), raise_exception=1)
 
 		if ret and ret[0]["docstatus"]==2:
-			msgprint(_("Account: ") + self.doc.account + _(" is not active"), raise_exception=1)
+			msgprint(_("Account") + ": " + self.doc.account + _(" is not active"), raise_exception=1)
 			
 		# Account has been freezed for other users except account manager
 		if ret and ret[0]["freeze_account"]== 'Yes' and not adv_adj \
 				and not 'Accounts Manager' in webnotes.user.get_roles():
-			msgprint(_("Account: ") + self.doc.account + _(" has been freezed. \
+			msgprint(_("Account") + ": " + self.doc.account + _(" has been freezed. \
 				Only Accounts Manager can do transaction against this account"), raise_exception=1)
+		
+		if self.doc.is_cancelled in ("No", None) and ret and ret[0]["company"] != self.doc.company:
+			msgprint(_("Account") + ": " + self.doc.account + _(" does not belong to the company") \
+				+ ": " + self.doc.company, raise_exception=1)
+				
+	def validate_cost_center(self):
+		if not hasattr(self, "cost_center_company"):
+			self.cost_center_company = {}
+		
+		def _get_cost_center_company():
+			if not self.cost_center_company.get(self.doc.cost_center):
+				self.cost_center_company[self.doc.cost_center] = webnotes.conn.get_value("Cost Center",
+					self.doc.cost_center, "company")
 			
-		if ret and ret[0]["company"] != self.doc.company:
-			msgprint(_("Account: ") + self.doc.account + _(" does not belong to the company: ") + 
-				self.doc.company, raise_exception=1)
-
+			return self.cost_center_company[self.doc.cost_center]
+			
+		if self.doc.is_cancelled in ("No", None) and \
+			self.doc.cost_center and _get_cost_center_company() != self.doc.company:
+				msgprint(_("Cost Center") + ": " + self.doc.cost_center \
+					+ _(" does not belong to the company") + ": " + self.doc.company, raise_exception=True)
+		
 	def check_freezing_date(self, adv_adj):
 		"""
 			Nobody can do GL Entries where posting date is before freezing date 
 			except authorized person
 		"""
 		if not adv_adj:
-			acc_frozen_upto = webnotes.conn.get_value('Global Defaults', None, 'acc_frozen_upto')
+			acc_frozen_upto = webnotes.conn.get_value('Accounts Settings', None, 'acc_frozen_upto')
 			if acc_frozen_upto:
-				bde_auth_role = webnotes.conn.get_value( 'Global Defaults', None,'bde_auth_role')
+				bde_auth_role = webnotes.conn.get_value( 'Accounts Settings', None,'bde_auth_role')
 				if getdate(self.doc.posting_date) <= getdate(acc_frozen_upto) \
 						and not bde_auth_role in webnotes.user.get_roles():
 					msgprint(_("You are not authorized to do/modify back dated entries before ") + 
@@ -143,20 +160,29 @@ class DocType:
 	def update_outstanding_amt(self):
 		# get final outstanding amt
 		bal = flt(sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
-			where against_voucher=%s and against_voucher_type=%s 
-			and ifnull(is_cancelled,'No') = 'No'""", 
-			(self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
-		
-		if self.doc.against_voucher_type=='Purchase Invoice':
-			# amount to debit
+			where against_voucher=%s and against_voucher_type=%s and account = %s
+			and ifnull(is_cancelled,'No') = 'No'""", (self.doc.against_voucher, 
+			self.doc.against_voucher_type, self.doc.account))[0][0] or 0.0)
+
+		if self.doc.against_voucher_type == 'Purchase Invoice':
 			bal = -bal
+		
+		elif self.doc.against_voucher_type == "Journal Voucher":
+			against_voucher_amount = flt(webnotes.conn.sql("""select sum(debit) - sum(credit)
+				from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
+				and account = %s""", (self.doc.against_voucher, self.doc.account))[0][0])
+			
+			bal = against_voucher_amount + bal
+			if against_voucher_amount < 0:
+				bal = -bal
 			
 		# Validation : Outstanding can not be negative
 		if bal < 0 and self.doc.is_cancelled == 'No':
 			msgprint(_("Outstanding for Voucher ") + self.doc.against_voucher + 
-				_(" will become ") + fmt_money(bal) + _("Outstanding cannot be less than zero. \
+				_(" will become ") + fmt_money(bal) + _(". Outstanding cannot be less than zero. \
 				 	Please match exact outstanding."), raise_exception=1)
 			
 		# Update outstanding amt on against voucher
-		sql("update `tab%s` set outstanding_amount=%s where name='%s'"%
-		 	(self.doc.against_voucher_type, bal, self.doc.against_voucher))
+		if self.doc.against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+			sql("update `tab%s` set outstanding_amount=%s where name='%s'"%
+			 	(self.doc.against_voucher_type, bal, self.doc.against_voucher))

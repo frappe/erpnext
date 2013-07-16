@@ -1,36 +1,37 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-12-27 18:57:47", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:15", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-09 17:16:51"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Stock Balance", 
   "doctype": "Page", 
+  "icon": "icon-table", 
   "module": "Stock", 
+  "name": "__common__", 
+  "page_name": "stock-balance", 
   "standard": "Yes", 
-  "page_name": "stock-balance"
+  "title": "Stock Balance"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "stock-balance", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "stock-balance"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Material Manager"
  }, 
  {
-  "name": "stock-balance", 
-  "doctype": "Page"
- }, 
- {
-  "role": "Material Manager", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Analytics", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Analytics"
  }
 ]

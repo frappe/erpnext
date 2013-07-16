@@ -1,36 +1,37 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-09-21 20:15:14", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:08", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-04 17:34:24"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Stock Ageing", 
-  "module": "Stock", 
   "doctype": "Page", 
+  "icon": "icon-table", 
+  "module": "Stock", 
+  "name": "__common__", 
   "page_name": "stock-ageing", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Stock Ageing"
  }, 
  {
+  "doctype": "Page Role", 
   "name": "__common__", 
   "parent": "stock-ageing", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "stock-ageing"
+ }, 
+ {
   "doctype": "Page Role", 
-  "parenttype": "Page", 
-  "parentfield": "roles"
+  "role": "Analytics"
  }, 
  {
-  "name": "stock-ageing", 
-  "doctype": "Page"
- }, 
- {
-  "role": "Analytics", 
-  "doctype": "Page Role"
- }, 
- {
-  "role": "Material Manager", 
-  "doctype": "Page Role"
+  "doctype": "Page Role", 
+  "role": "Material Manager"
  }
 ]

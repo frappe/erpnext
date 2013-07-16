@@ -15,45 +15,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 var current_module;
-var is_system_manager = 0;
 
 wn.provide('erpnext.startup');
-
-erpnext.startup.set_globals = function() {
-	if(inList(user_roles,'System Manager')) is_system_manager = 1;
-}
 
 erpnext.startup.start = function() {
 	console.log('Starting up...');
 	$('#startup_div').html('Starting up...').toggle(true);
 	
-	erpnext.startup.set_globals();
-
 	if(user != 'Guest'){
-		erpnext.setup_mousetrap();
-		
-		// always allow apps
-		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
-			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
-		
 		// setup toolbar
 		erpnext.toolbar.setup();
 		
-		// set interval for updates
-		erpnext.startup.set_periodic_updates();
-
-		// border to the body
-		// ------------------
-		$('footer').html('<div class="web-footer erpnext-footer">\
-			<a href="#attributions">Attributions and License</a> | \
-			<a href="#latest-updates"><b>Latest Updates</b></a></div>');
-
 		// complete registration
-		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
+		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete==='No')) { 
 			wn.require("app/js/complete_setup.js");
 			erpnext.complete_setup.show(); 
-		}
-		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
+		} else if(!wn.boot.customer_count) {
+			if(wn.get_route()[0]!=="Setup") {
+				msgprint("<a class='btn btn-success' href='#Setup'>" 
+					+ wn._("Proceed to Setup") + "</a>\
+					<br><br><p class='text-muted'>"+
+					wn._("This message goes away after you create your first customer.")+
+					"</p>", wn._("Welcome"));
+			}
+		} else if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
 			var today = dateutil.str_to_obj(wn.boot.server_date);
 			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
 			var diff = dateutil.get_diff(expires_on, today);
@@ -72,97 +57,7 @@ erpnext.startup.start = function() {
 			}
 		}
 		erpnext.set_about();
-		if(wn.control_panel.custom_startup_code)
-			eval(wn.control_panel.custom_startup_code);		
 	}
-}
-
-
-// ========== Update Messages ============
-erpnext.update_messages = function(reset) {
-	// Updates Team Messages
-	
-	if(inList(['Guest'], user) || !wn.session_alive) { return; }
-
-	if(!reset) {
-		var set_messages = function(r) {
-			if(!r.exc) {
-				// This function is defined in toolbar.js
-				erpnext.toolbar.set_new_comments(r.message.unread_messages);
-				
-				var show_in_circle = function(parent_id, msg) {
-					var parent = $('#'+parent_id);
-					if(parent) {
-						if(msg) {
-							parent.find('span:first').text(msg);
-							parent.toggle(true);
-						} else {
-							parent.toggle(false);
-						}
-					}
-				}
-				
-				show_in_circle('unread_messages', r.message.unread_messages);
-				show_in_circle('open_support_tickets', r.message.open_support_tickets);
-				show_in_circle('things_todo', r.message.things_todo);
-				show_in_circle('todays_events', r.message.todays_events);
-				show_in_circle('open_tasks', r.message.open_tasks);
-				show_in_circle('unanswered_questions', r.message.unanswered_questions);
-				show_in_circle('open_leads', r.message.open_leads);
-
-			} else {
-				clearInterval(wn.updates.id);
-			}
-		}
-
-		wn.call({
-			method: 'startup.startup.get_global_status_messages',
-			type:"GET",
-			callback: set_messages
-		});
-	
-	} else {
-		erpnext.toolbar.set_new_comments(0);
-		$('#unread_messages').toggle(false);
-	}
-}
-
-erpnext.startup.set_periodic_updates = function() {
-	// Set interval for periodic updates of team messages
-	wn.updates = {};
-
-	if(wn.updates.id) {
-		clearInterval(wn.updates.id);
-	}
-
-	wn.updates.id = setInterval(erpnext.update_messages, 60000);
-}
-
-erpnext.hide_naming_series = function() {
-	if(cur_frm.fields_dict.naming_series) {
-		hide_field('naming_series');
-		if(cur_frm.doc.__islocal) {
-			unhide_field('naming_series');
-		}
-	}
-}
-
-erpnext.setup_mousetrap = function() {
-	Mousetrap.bind(["command+g", "ctrl+g"], function() {
-		wn.ui.toolbar.search.show();
-		return false;
-	});
-
-	Mousetrap.bind(["command+s", "ctrl+s"], function() {
-		if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===0)
-			cur_frm.save();
-		else if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===1
-				&& cur_frm.doc.__unsaved)
-			cur_frm.frm_head.appframe.buttons['Update'].click();
-		else if(wn.container.page.save_action)
-			wn.container.page.save_action();
-		return false;
-	});	
 }
 
 // start

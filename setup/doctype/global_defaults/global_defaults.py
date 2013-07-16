@@ -21,37 +21,26 @@ import webnotes.defaults
 from webnotes.utils import cint
 
 keydict = {
+	# "key in defaults": "key in Global Defaults"
+	"print_style": "print_style",
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',
 	'hide_currency_symbol':'hide_currency_symbol',
-	'price_list_name': 'default_price_list',
-	'price_list_currency': 'default_price_list_currency',
-	'item_group': 'default_item_group',
-	'customer_group': 'default_customer_group',
-	'cust_master_name': 'cust_master_name', 
-	'supplier_type': 'default_supplier_type',
-	'supp_master_name': 'supp_master_name', 
-	'territory': 'default_territory',
-	'stock_uom': 'default_stock_uom',
-	'valuation_method': 'default_valuation_method',
 	'date_format': 'date_format',
 	'number_format': 'number_format',
 	'float_precision': 'float_precision',
 	'account_url':'account_url',
-	'allow_negative_stock' : 'allow_negative_stock',
-	'maintain_same_rate' : 'maintain_same_rate',
 	'session_expiry': 'session_expiry',
-	'disable_rounded_total': 'disable_rounded_total',
+	'disable_rounded_total': 'disable_rounded_total'
 }
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-
+		
 	def on_update(self):
 		"""update defaults"""
-		
 		self.validate_session_expiry()
 		
 		for key in keydict:

@@ -17,15 +17,16 @@
 import webnotes
 from webnotes import msgprint, _
 import json
-from webnotes.utils import flt, cstr
+from webnotes.utils import flt, cstr, nowdate, add_days, cint
 from webnotes.defaults import get_global_default
+from webnotes.utils.email_lib import sendmail
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
 	
 	from webnotes.utils import getdate, now_datetime, formatdate
-	if end_of_life and getdate(end_of_life) > now_datetime().date():
+	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
 			" %(date)s. " + _("Please check") + ": %(end_of_life_label)s " + \
 			"in Item master") % {
@@ -163,4 +164,183 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 			elif webnotes.session.user in warehouse_users:
 				wlist.append([w])
 	return wlist
+
+def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, voucher_detail_no, 
+		stock_ledger_entries, item_sales_bom=None):
+	if item_sales_bom and item_sales_bom.get(item_code):
+		# sales bom item
+		buying_amount = 0.0
+		for bom_item in item_sales_bom[item_code]:
+			if bom_item.get("parent_detail_docname")==voucher_detail_no:
+				buying_amount += _get_buying_amount(voucher_type, voucher_no, voucher_detail_no,
+					bom_item.item_code, bom_item.warehouse or warehouse, 
+					bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
+		return buying_amount
+	else:
+		# doesn't have sales bom
+		return _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, 
+			item_code, warehouse, qty, stock_ledger_entries)
+		
+def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse, qty, 
+		stock_ledger_entries):
+	relevant_stock_ledger_entries = [sle for sle in stock_ledger_entries 
+		if sle.item_code == item_code and sle.warehouse == warehouse]
+		
+	for i, sle in enumerate(relevant_stock_ledger_entries):
+		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
+			sle.voucher_detail_no == item_row:
+				previous_stock_value = len(relevant_stock_ledger_entries) > i+1 and \
+					flt(relevant_stock_ledger_entries[i+1].stock_value) or 0.0
+				
+				buying_amount =  previous_stock_value - flt(sle.stock_value)						
+				
+				return buying_amount
+	return 0.0
 	
+
+def reorder_item():
+	""" Reorder item if stock reaches reorder level"""
+	if not hasattr(webnotes, "auto_indent"):
+		webnotes.auto_indent = webnotes.conn.get_value('Stock Settings', None, 'auto_indent')
+
+	if webnotes.auto_indent:
+		material_requests = {}
+		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
+			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
+			and exists (select name from `tabItem` 
+				where `tabItem`.name = `tabBin`.item_code and 
+				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
+				(ifnull(end_of_life, '')='') or end_of_life > now())""",
+			as_dict=True)
+		for bin in bin_list:
+			#check if re-order is required
+			item_reorder = webnotes.conn.get("Item Reorder", 
+				{"parent": bin.item_code, "warehouse": bin.warehouse})
+			if item_reorder:
+				reorder_level = item_reorder.warehouse_reorder_level
+				reorder_qty = item_reorder.warehouse_reorder_qty
+				material_request_type = item_reorder.material_request_type or "Purchase"
+			else:
+				reorder_level, reorder_qty = webnotes.conn.get_value("Item", bin.item_code,
+					["re_order_level", "re_order_qty"])
+				material_request_type = "Purchase"
+		
+			if flt(reorder_level) and flt(bin.projected_qty) < flt(reorder_level):
+				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
+					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
+					
+				company = webnotes.conn.get_value("Warehouse", bin.warehouse, "company") or \
+					webnotes.defaults.get_defaults()["company"] or \
+					webnotes.conn.sql("""select name from tabCompany limit 1""")[0][0]
+					
+				material_requests.setdefault(material_request_type, webnotes._dict()).setdefault(
+					company, []).append(webnotes._dict({
+						"item_code": bin.item_code,
+						"warehouse": bin.warehouse,
+						"reorder_qty": reorder_qty
+					})
+				)
+				
+		create_material_request(material_requests)
+
+def create_material_request(material_requests):
+	"""	Create indent on reaching reorder level	"""
+	mr_list = []
+	defaults = webnotes.defaults.get_defaults()
+	exceptions_list = []
+	for request_type in material_requests:
+		for company in material_requests[request_type]:
+			try:
+				items = material_requests[request_type][company]
+				if not items:
+					continue
+
+				mr = [{
+					"doctype": "Material Request",
+					"company": company,
+					"fiscal_year": defaults.fiscal_year,
+					"transaction_date": nowdate(),
+					"material_request_type": request_type,
+					"remark": _("This is an auto generated Material Request.") + \
+						_("""It was raised because the (actual + ordered + indented - reserved) 
+						quantity reaches re-order level when the following record was created""")
+				}]
+			
+				for d in items:
+					item = webnotes.doc("Item", d.item_code)
+					mr.append({
+						"doctype": "Material Request Item",
+						"parenttype": "Material Request",
+						"parentfield": "indent_details",
+						"item_code": d.item_code,
+						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
+						"uom":	item.stock_uom,
+						"warehouse": d.warehouse,
+						"item_name": item.item_name,
+						"description": item.description,
+						"item_group": item.item_group,
+						"qty": d.reorder_qty,
+						"brand": item.brand,
+					})
+			
+				mr_bean = webnotes.bean(mr)
+				mr_bean.insert()
+				mr_bean.submit()
+				mr_list.append(mr_bean)
+				
+			except:
+				if webnotes.message_log:
+					exceptions_list.append([] + webnotes.message_log)
+					webnotes.message_log = []
+				else:
+					exceptions_list.append(webnotes.getTraceback())
+
+	if mr_list:
+		if not hasattr(webnotes, "reorder_email_notify"):
+			webnotes.reorder_email_notify = webnotes.conn.get_value('Stock Settings', None, 
+				'reorder_email_notify')
+			
+		if(webnotes.reorder_email_notify):
+			send_email_notification(mr_list)
+
+	if exceptions_list:
+		notify_errors(exceptions_list)
+		
+def send_email_notification(mr_list):
+	""" Notify user about auto creation of indent"""
+	
+	email_list = webnotes.conn.sql_list("""select distinct r.parent 
+		from tabUserRole r, tabProfile p
+		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
+		and r.role in ('Purchase Manager','Material Manager') 
+		and p.name not in ('Administrator', 'All', 'Guest')""")
+	
+	msg="""<h3>Following Material Requests has been raised automatically \
+		based on item reorder level:</h3>"""
+	for mr in mr_list:
+		msg += "<p><b><u>" + mr.doc.name + """</u></b></p><table class='table table-bordered'><tr>
+			<th>Item Code</th><th>Warehouse</th><th>Qty</th><th>UOM</th></tr>"""
+		for item in mr.doclist.get({"parentfield": "indent_details"}):
+			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
+				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
+		msg += "</table>"
+
+	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
+	
+def notify_errors(exceptions_list):
+	subject = "[Important] [ERPNext] Error(s) while creating Material Requests based on Re-order Levels"
+	msg = """Dear System Manager,
+
+		An error occured for certain Items while creating Material Requests based on Re-order level.
+		
+		Please rectify these issues:
+		---
+
+		%s
+
+		---
+		Regards,
+		Administrator""" % ("\n\n".join(["\n".join(msg) for msg in exceptions_list]),)
+
+	from webnotes.profile import get_system_managers
+	sendmail(get_system_managers(), subject=subject, msg=msg)

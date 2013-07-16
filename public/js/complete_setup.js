@@ -40,26 +40,32 @@ $.extend(erpnext.complete_setup, {
 				{fieldname:'country', label: 'Country', reqd:1,
 					options: "", fieldtype: 'Select'},
 				{fieldname:'currency', label: 'Default Currency', reqd:1,
-					options: "Currency", fieldtype: 'Link'},
+					options: "", fieldtype: 'Select'},
 				{fieldname:'timezone', label: 'Time Zone', reqd:1,
 					options: "", fieldtype: 'Select'},
 				{fieldname:'industry', label: 'Industry', reqd:1,
-					options: erpnext.complete_setup.industry_list.join('\n'), fieldtype: 'Select'},
+					options: erpnext.complete_setup.domains.join('\n'), fieldtype: 'Select'},
 				{fieldname:'update', label:'Setup',fieldtype:'Button'},
 			],
 		});
-
+		
 		if(user != 'Administrator'){
 			$(d.appframe.$titlebar).find('.close').toggle(false); // Hide close image
 			$('header').toggle(false); // hide toolbar
 		}
 		
 		wn.call({
-			method:"webnotes.country_info.get_all",
+			method:"webnotes.country_info.get_country_timezone_info",
 			callback: function(data) {
-				erpnext.country_info = data.message;
+				erpnext.country_info = data.message.country_info;
+				erpnext.all_timezones = data.message.all_timezones;
 				d.get_input("country").empty()
-					.add_options([""].concat(keys(data.message).sort()));
+					.add_options([""].concat(keys(erpnext.country_info).sort()));
+				d.get_input("currency").empty()
+					.add_options(wn.utils.unique([""].concat($.map(erpnext.country_info, 
+						function(opts, country) { return opts.currency; }))).sort());
+				d.get_input("timezone").empty()
+					.add_options([""].concat(erpnext.all_timezones));
 			}
 		})
 		
@@ -69,32 +75,39 @@ $.extend(erpnext.complete_setup, {
 			if(!data) return;
 			$(this).set_working();
 			$c_obj('Setup Control','setup_account',data,function(r, rt){
-				sys_defaults = r.message;
-				user_fullname = r.message.user_fullname;
-				wn.boot.user_info[user].fullname = user_fullname;
-				d.hide();
-				$('header').toggle(true);
-				wn.container.wntoolbar.set_user_name();
+				$(this).done_working();
+				if(!r.exc) {
+					sys_defaults = r.message;
+					user_fullname = r.message.user_fullname;
+					wn.boot.user_info[user].fullname = user_fullname;
+					d.hide();
+					$('header').toggle(true);
+					wn.container.wntoolbar.set_user_name();
+					
+					setTimeout(function() { window.location.reload(); }, 3000);
+				}
 			});
 		};
-		
+
+		d.fields_dict.company_name.input.onchange = function() {
+			var parts = d.get_input("company_name").val().split(" ");
+			var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
+			d.get_input("company_abbr").val(abbr.toUpperCase());
+		}
+
 		d.fields_dict.country.input.onchange = function() {
 			var country = d.fields_dict.country.input.value;
 			var $timezone = $(d.fields_dict.timezone.input);
 			$timezone.empty();
+			// add country specific timezones first
 			if(country){
-				var timezone_list = erpnext.country_info[country].timezones;
-				if(timezone_list.length==0) {
-					timezone_list = $.map(erpnext.country_info, function(m) {
-						return m.timezones
-					});
-				}
-				$timezone.empty().add_options(timezone_list);
-				
-				console.log(d.get_input("currency"))
+				var timezone_list = erpnext.country_info[country].timezones || [];
+				$timezone.add_options(timezone_list.sort());
 				
 				d.get_input("currency").val(erpnext.country_info[country].currency);
 			}
+			// add all timezones at the end, so that user has the option to change it to any timezone
+			$timezone.add_options([""].concat(erpnext.all_timezones));
 			
 		};
 		
@@ -116,16 +129,10 @@ $.extend(erpnext.complete_setup, {
 			}
 		}
 		
-		return d;	
+		return d;
 	},
 	
 	fy_start_list: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'],
 
-	industry_list: ['', 'Aerospace and Defence', 'Agriculture', 'Apparel', 'Automobile',
-	'Banking', 'Biotechnology', 'Chemical', 'Communications', 'Consulting', 'Customer Service',
-	'Education', 'Electronics', 'Energy', 'Engineering', 'Entertainment', 'Environmental',
-	'Finance', 'Food and Beverage', 'Government', 'Healthcare', 'Hospitality',
-	'Information Technology', 'Insurance', 'Machinery', 'Manufacturing', 'Media',
-	'Not For Profit', 'Recreation', 'Retail', 'Shipping', 'Technology',
-	'Telecommunications', 'Transportation', 'Trading', 'Utilities', 'Other'],
+	domains: ['', "Manufacturing", "Retail", "Distribution", "Services"],	
 });

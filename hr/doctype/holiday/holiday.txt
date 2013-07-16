@@ -1,47 +1,44 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-02-22 01:27:46", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:57", 
+  "modified": "2013-07-10 14:54:09", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:57"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "HR", 
-  "show_in_menu": 0, 
-  "version": 2, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Holiday", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Holiday", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Holiday"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Description", 
-  "width": "300px", 
   "fieldname": "description", 
-  "fieldtype": "Small Text"
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "print_width": "300px", 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
+  "fieldname": "holiday_date", 
+  "fieldtype": "Date", 
   "label": "Date", 
   "oldfieldname": "holiday_date", 
-  "fieldname": "holiday_date", 
-  "fieldtype": "Date"
+  "oldfieldtype": "Date"
  }
 ]

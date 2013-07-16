@@ -3,6 +3,7 @@
 
 wn.module_page["Accounts"] = [
 	{
+		top: true,
 		title: wn._("Documents"),
 		icon: "icon-copy",
 		items: [
@@ -39,6 +40,32 @@ wn.module_page["Accounts"] = [
 				description: wn._("Structure cost centers for budgeting."),
 				doctype:"Cost Center"
 			},
+			{
+				label: wn._("Customer"),
+				description: wn._("Customer database."),
+				doctype:"Customer"
+			},
+			{
+				label: wn._("Supplier"),
+				description: wn._("Supplier database."),
+				doctype:"Supplier"
+			},
+		]
+	},
+	{
+		title: wn._("Setup"),
+		icon: "icon-wrench",
+		items: [
+			{
+				label: wn._("Company"),
+				description: wn._("Company Master."),
+				doctype:"Company"
+			},
+			{
+				label: wn._("Fiscal Year"),
+				description: wn._("Accounting Year."),
+				doctype:"Fiscal Year"
+			},
 		]
 	},
 	{
@@ -64,12 +91,6 @@ wn.module_page["Accounts"] = [
 				description: "Close Balance Sheet and book Profit or Loss."
 			},
 			{
-				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
-				"label": wn._("Sales and Purchase Return Tool"),
-				description: wn._("Manage sales or purchase returns"),
-				"doctype": "Sales and Purchase Return Tool"
-			},
-			{
 				"page":"voucher-import-tool",
 				"label": wn._("Voucher Import Tool"),
 				"description": "Import accounting entries from CSV."
@@ -81,6 +102,12 @@ wn.module_page["Accounts"] = [
 		icon: "icon-cog",
 		items: [
 			{
+				"label": wn._("Accounts Settings"),
+				"route": "Form/Accounts Settings",
+				"doctype":"Accounts Settings",
+				"description": "Settings for Accounts"
+			},
+			{
 				"label": wn._("Sales Taxes and Charges Master"),
 				"doctype":"Sales Taxes and Charges Master",
 				"description": wn._("Tax Template for Sales")
@@ -89,6 +116,16 @@ wn.module_page["Accounts"] = [
 				"label": wn._("Purchase Taxes and Charges Master"),
 				"doctype":"Purchase Taxes and Charges Master",
 				"description": wn._("Tax Template for Purchase")
+			},
+			{
+				"label": wn._("Shipping Rules"),
+				"doctype":"Shipping Rule",
+				"description": wn._("Rules to calculate shipping amount for a sale")
+			},
+			{
+				"label": wn._("Currency Exchange"),
+				"doctype":"Currency Exchange",
+				"description": wn._("Manage exchange rates for currency conversion")
 			},
 			{
 				"label": wn._("Point-of-Sale Setting"),
@@ -135,6 +172,26 @@ wn.module_page["Accounts"] = [
 				"page":"Financial Statements",
 				"label": wn._("Financial Statements")
 			},
+			{
+				"label":wn._("Accounts Receivable"),
+				route: "query-report/Accounts Receivable",
+				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Accounts Payable"),
+				route: "query-report/Accounts Payable",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Sales Register"),
+				route: "query-report/Sales Register",
+				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Purchase Register"),
+				route: "query-report/Purchase Register",
+				doctype: "Purchase Invoice"
+			},
 		]
 	},
 	{
@@ -147,8 +204,8 @@ wn.module_page["Accounts"] = [
 				page: "financial-analytics"
 			},
 			{
-				"label":wn._("Trend Analyzer"),
-				route: "Report/Profile/Trend Analyzer",
+				"label":wn._("Gross Profit"),
+				route: "query-report/Gross Profit",
 				doctype: "Sales Invoice"
 			},
 		]
@@ -159,13 +216,73 @@ wn.module_page["Accounts"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Delivered Items To Be Billed"),
-				route: "query-report/Delivered Items To Be Billed",
-				doctype: "Sales Invoice"
+				"label":wn._("Bank Reconciliation Statement"),
+				route: "query-report/Bank Reconciliation Statement",
+				doctype: "Journal Voucher"
 			},
 			{
 				"label":wn._("Ordered Items To Be Billed"),
 				route: "query-report/Ordered Items To Be Billed",
+				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Purchase Order Items To Be Billed"),
+				route: "query-report/Purchase Order Items To Be Billed",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Bank Clearance Summary"),
+				route: "query-report/Bank Clearance Summary",
+				doctype: "Journal Voucher"
+			},
+			{
+				"label":wn._("Payment Collection With Ageing"),
+				route: "query-report/Payment Collection With Ageing",
+				doctype: "Journal Voucher"
+			},
+			{
+				"label":wn._("Payment Made With Ageing"),
+				route: "query-report/Payment Made With Ageing",
+				doctype: "Journal Voucher"
+			},
+			{
+				"label":wn._("Sales Partners Commission"),
+				route: "query-report/Sales Partners Commission",
+				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Customer Account Head"),
+				route: "query-report/Customer Account Head",
+				doctype: "Account"
+			},
+			{
+				"label":wn._("Supplier Account Head"),
+				route: "query-report/Supplier Account Head",
+				doctype: "Account"
+			},
+			{
+				"label":wn._("Item-wise Sales Register"),
+				route: "query-report/Item-wise Sales Register",
+				doctype: "Sales Invoice"
+			},
+			{
+				"label":wn._("Item-wise Purchase Register"),
+				route: "query-report/Item-wise Purchase Register",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Budget Variance Report"),
+				route: "query-report/Budget Variance Report",
+				doctype: "Cost Center"
+			},
+			{
+				"label":wn._("Purchase Invoice Trends"),
+				route: "query-report/Purchase Invoice Trends",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Sales Invoice Trends"),
+				route: "query-report/Sales Invoice Trends",
 				doctype: "Sales Invoice"
 			},
 		]

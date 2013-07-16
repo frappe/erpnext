@@ -18,9 +18,8 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
-from webnotes.model.doc import addchild, make_autoname
+from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 from setup.utils import get_company_currency
 
@@ -34,21 +33,18 @@ class DocType(AccountsController):
 		self.credit_days_global = -1
 		self.is_approving_authority = -1
 
-	def autoname(self):
-		if not self.doc.naming_series:
-			webnotes.msgprint("""Naming Series is mandatory""", raise_exception=1)	
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-		
 	def validate(self):
 		if not self.doc.is_opening:
 			self.doc.is_opening='No'
 			
+		self.doc.clearance_date = None
+		
+		super(DocType, self).validate_date_with_fiscal_year()
+		
 		self.validate_debit_credit()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
 		self.validate_against_jv()
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, \
-			self.doc.posting_date, 'Posting Date')
 		
 		self.set_against_account()
 		self.create_remarks()
@@ -63,7 +59,15 @@ class DocType(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
+		
 		self.make_gl_entries(cancel=1)
+		
+	def on_trash(self):
+		pass
+		#if self.doc.amended_from:
+		#	webnotes.delete_doc("Journal Voucher", self.doc.amended_from)
 
 	def validate_debit_credit(self):
 		for d in getlist(self.doclist, 'entries'):
@@ -106,8 +110,8 @@ class DocType(AccountsController):
 		debit, credit = 0.0, 0.0
 		debit_list, credit_list = [], []
 		for d in getlist(self.doclist, 'entries'):
-			debit += flt(d.debit)
-			credit += flt(d.credit)
+			debit += flt(d.debit, 2)
+			credit += flt(d.credit, 2)
 			if flt(d.debit)>0 and (d.account not in debit_list): debit_list.append(d.account)
 			if flt(d.credit)>0 and (d.account not in credit_list): credit_list.append(d.account)
 
@@ -153,7 +157,7 @@ class DocType(AccountsController):
 		if r:
 			self.doc.remark = ("\n").join(r)
 		else:
-			webnotes.msgprint("Remarks is mandatory", raise_exception=1)
+			webnotes.msgprint("User Remarks is mandatory", raise_exception=1)
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
@@ -281,32 +285,32 @@ class DocType(AccountsController):
 		if not getlist(self.doclist,'entries'):
 			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
 		else:
-			flag, self.doc.total_debit, self.doc.total_credit = 0,0,0
-			diff = flt(self.doc.difference)
+			flag, self.doc.total_debit, self.doc.total_credit = 0, 0, 0
+			diff = flt(self.doc.difference, 2)
 			
 			# If any row without amount, set the diff on that row
 			for d in getlist(self.doclist,'entries'):
-				if not d.credit and not d.debit and flt(diff) != 0:
+				if not d.credit and not d.debit and diff != 0:
 					if diff>0:
-						d.credit = flt(diff)
+						d.credit = diff
 					elif diff<0:
-						d.debit = flt(diff)
+						d.debit = diff
 					flag = 1
 					
 			# Set the diff in a new row
-			if flag == 0 and (flt(diff) != 0):
+			if flag == 0 and diff != 0:
 				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 				if diff>0:
-					jd.credit = flt(abs(diff))
+					jd.credit = abs(diff)
 				elif diff<0:
-					jd.debit = flt(abs(diff))
+					jd.debit = abs(diff)
 					
 			# Set the total debit, total credit and difference
 			for d in getlist(self.doclist,'entries'):
-				self.doc.total_debit += flt(d.debit)
-				self.doc.total_credit += flt(d.credit)
+				self.doc.total_debit += flt(d.debit, 2)
+				self.doc.total_credit += flt(d.credit, 2)
 
-			self.doc.difference = flt(self.doc.total_debit) - flt(self.doc.total_credit)
+			self.doc.difference = flt(self.doc.total_debit, 2) - flt(self.doc.total_credit, 2)
 
 	def get_outstanding_invoices(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'entries')
@@ -341,7 +345,26 @@ class DocType(AccountsController):
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
 
+@webnotes.whitelist()
+def get_default_bank_cash_account(company, voucher_type):
+	from accounts.utils import get_balance_on
+	account = webnotes.conn.get_value("Company", company,
+		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+	if account:
+		return [{
+			"account": account,
+			"balance": get_balance_on(account)
+		}]
 
+@webnotes.whitelist()
+def get_opening_accounts(company):
+	"""get all balance sheet accounts for opening entry"""
+	from accounts.utils import get_balance_on
+	accounts = webnotes.conn.sql_list("""select name from tabAccount 
+		where group_or_ledger='Ledger' and is_pl_account='No' and company=%s""", company)
+	
+	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
+	
 def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
 		from `tabPurchase Invoice` where credit_to = %s and docstatus = 1 
@@ -357,9 +380,9 @@ def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filter
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 		
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, posting_date, user_remark 
+	return webnotes.conn.sql("""select jv.name, jv.posting_date, jv.user_remark 
 		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail 
-		where jv_detail.parent = jv.name and jv_detail.account = %s and docstatus = 1 
+		where jv_detail.parent = jv.name and jv_detail.account = %s and jv.docstatus = 1 
 		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))

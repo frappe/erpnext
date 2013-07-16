@@ -22,10 +22,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 	});
 	
 	new erpnext.StockLedger(wrapper);
-	
-	wrapper.appframe.add_home_breadcrumb()
-	wrapper.appframe.add_module_breadcrumb("Stock")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	wrapper.appframe.add_module_icon("Stock")
 }
 
 wn.require("app/js/stock_grid_report.js");
@@ -52,9 +49,12 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: '"Item"',
 				}},
+			{id: "description", name: "Description", field: "description", width: 200,
+				formatter: this.text_formatter},
 			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
 			{id: "brand", name: "Brand", field: "brand", width: 100},
+			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "qty", name: "Qty", field: "qty", width: 100,
 				formatter: this.currency_formatter},
 			{id: "balance", name: "Balance Qty", field: "balance", width: 100,
@@ -69,8 +69,6 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: "dataContext.voucher_type"
 				}},
-			{id: "description", name: "Description", field: "description", width: 200,
-				formatter: this.text_formatter},
 		];
 		
 	},
@@ -154,6 +152,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 		// initialize warehouse-item map
 		this.item_warehouse = {};
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
 		var from_datetime = dateutil.str_to_obj(me.from_date + " 00:00:00");
 		var to_datetime = dateutil.str_to_obj(me.to_date + " 23:59:59");
 		

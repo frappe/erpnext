@@ -18,6 +18,43 @@ wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
+	onload: function() {
+		this.set_default_expense_account();
+	}, 
+	
+	set_default_expense_account: function() {
+		var me = this;
+		
+		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_account) {
+			this.frm.call({
+				method: "accounts.utils.get_company_default",
+				args: {
+					"fieldname": "stock_adjustment_account", 
+					"company": this.frm.doc.company
+				},
+				callback: function(r) {
+					if (!r.exc) me.frm.set_value("expense_account", r.message);
+				}
+			});
+		}
+	},
+	
+	setup: function() {
+		var me = this;
+		if (sys_defaults.auto_inventory_accounting) {
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+		
+			this.frm.fields_dict["expense_account"].get_query = function() {
+				return {
+					"filters": {
+						'company': me.frm.doc.company,
+						'group_or_ledger': 'Ledger'
+					}
+				}
+			}
+		}
+	},
+	
 	refresh: function() {
 		if(this.frm.doc.docstatus===0) {
 			this.show_download_template();
@@ -29,7 +66,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 					attach the modified file.");
 			}
 		} else if(this.frm.doc.docstatus == 1) {
-			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify it's effect.");
+			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify its effect.");
 			this.show_stock_ledger();
 		} else {
 			this.frm.set_intro("");
@@ -63,22 +100,25 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	show_upload: function() {
 		var me = this;
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-		var upload_area = $('<div id="dit-upload-area"></div>').appendTo($wrapper);
 		
 		// upload
 		wn.upload.make({
-			parent: $('#dit-upload-area'),
+			parent: $wrapper,
 			args: {
 				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(r) {
-				$wrapper.find(".dit-progress-area").toggle(false);
 				me.frm.set_value("reconciliation_json", JSON.stringify(r));
 				me.show_reconciliation_data();
 				me.frm.save();
 			}
 		});
+
+		// rename button
+		$wrapper.find('form input[type="submit"]')
+			.attr('value', 'Upload')
+
 	},
 	
 	show_download_reconciliation_data: function() {

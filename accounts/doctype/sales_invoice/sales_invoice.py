@@ -8,7 +8,7 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
@@ -16,18 +16,19 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.defaults
 
-from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, sendmail
+from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+
+from webnotes.utils.email_lib import sendmail
 from webnotes.utils import comma_and
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
-session = webnotes.session
-
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
-
 
 from controllers.selling_controller import SellingController
 
@@ -37,65 +38,82 @@ class DocType(SellingController):
 		self.log = []
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
-
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
+		self.status_updater = [{
+			'source_dt': 'Sales Invoice Item',
+			'target_field': 'billed_amt',
+			'target_ref_field': 'export_amount',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_billed',
+			'source_field': 'export_amount',
+			'join_field': 'so_detail',
+			'percent_join_field': 'sales_order',
+			'status_field': 'billing_status',
+			'keyword': 'Billed'
+		}]
 		
+
 	def validate(self):
 		super(DocType, self).validate()
-		
+		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
+		self.validate_with_previous_doc()
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
 		sales_com_obj.validate_max_discount(self, 'entries')
-		sales_com_obj.get_allocated_sum(self)
-		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year, 
-			self.doc.posting_date,'Posting Date')
-		self.validate_customer()
 		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
 		self.add_remarks()
+
 		if cint(self.doc.is_pos):
 			self.validate_pos()
 			self.validate_write_off_account()
-			if cint(self.doc.update_stock):
-				sl = get_obj('Stock Ledger')
-				sl.validate_serial_no(self, 'entries')
-				sl.validate_serial_no(self, 'packing_details')
-				self.validate_item_code()
-				self.update_current_stock()
-				self.validate_delivery_note()
+
+		if cint(self.doc.update_stock):
+			sl = get_obj('Stock Ledger')
+			sl.validate_serial_no(self, 'entries')
+			sl.validate_serial_no(self, 'packing_details')
+			self.validate_item_code()
+			self.update_current_stock()
+			self.validate_delivery_note()
+
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
+
 		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
+		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
-		
+		self.validate_multiple_billing("Delivered Note", "dn_detail", "export_amount")
+
 	def on_submit(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl_obj = get_obj("Stock Ledger")
-				sl_obj.validate_serial_no_warehouse(self, 'entries')
-				sl_obj.validate_serial_no_warehouse(self, 'packing_details')
-				
-				sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
-				sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock=1)
+		if cint(self.doc.update_stock) == 1:
+			sl_obj = get_obj("Stock Ledger")
+			sl_obj.validate_serial_no_warehouse(self, 'entries')
+			sl_obj.validate_serial_no_warehouse(self, 'packing_details')
+			
+			sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
+			sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
+			
+			self.update_stock_ledger(update_stock=1)
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
 				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
 				 	self.doc.company, self.doc.grand_total, self)
-
+				
+		self.set_buying_amount()
 		self.check_prev_docstatus()
-		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -104,72 +122,119 @@ class DocType(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_c_form()
-		
+		self.update_time_log_batch(self.doc.name)
 		self.convert_to_recurring()
 
+	def before_cancel(self):
+		self.update_time_log_batch(None)
 
 	def on_cancel(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl = get_obj('Stock Ledger')
-				sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
-				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock = -1)
+		if cint(self.doc.update_stock) == 1:
+			sl = get_obj('Stock Ledger')
+			sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
+			sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+			
+			self.update_stock_ledger(update_stock = -1)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
-		sales_com_obj.update_prevdoc_detail(0, self)
+		
+		from accounts.utils import remove_against_link_from_jv
+		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
 
-		self.make_gl_entries(is_cancel=1)
-
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
+		
+		self.make_cancel_gl_entries()
+		
+	def update_status_updater_args(self):
+		if cint(self.doc.update_stock):
+			self.status_updater.append({
+				'source_dt':'Sales Invoice Item',
+				'target_dt':'Sales Order Item',
+				'target_parent_dt':'Sales Order',
+				'target_parent_field':'per_delivered',
+				'target_field':'delivered_qty',
+				'target_ref_field':'qty',
+				'source_field':'qty',
+				'join_field':'so_detail',
+				'percent_join_field':'sales_order',
+				'status_field':'delivery_status',
+				'keyword':'Delivered',
+				'second_source_dt': 'Delivery Note Item',
+				'second_source_field': 'qty',
+				'second_join_field': 'prevdoc_detail_docname'
+			})
+		
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
+		
+	def set_missing_values(self, for_validate=False):
+		super(DocType, self).set_missing_values(for_validate)
+		self.set_pos_fields(for_validate)
+		
+	def set_customer_defaults(self):
+		# TODO cleanup these methods
+		self.doc.fields.update(self.get_debit_to())
+		self.get_cust_and_due_date()
+		
+		super(DocType, self).set_customer_defaults()
+			
+	def update_time_log_batch(self, sales_invoice):
+		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+			if d.time_log_batch:
+				tlb = webnotes.bean("Time Log Batch", d.time_log_batch)
+				tlb.doc.sales_invoice = sales_invoice
+				tlb.update_after_submit()
 
-	def set_pos_fields(self):
+	def validate_time_logs_are_submitted(self):
+		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+			if d.time_log_batch:
+				status = webnotes.conn.get_value("Time Log Batch", d.time_log_batch, "status")
+				if status!="Submitted":
+					webnotes.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
+						raise_exception=True)
+
+	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from pos settings"""
-		pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
-		if not pos:
-			pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+		if cint(self.doc.is_pos) != 1:
+			return
+		
+		from selling.utils import get_pos_settings, apply_pos_settings	
+		pos = get_pos_settings(self.doc.company)
+			
 		if pos:
-			val = webnotes.conn.sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
-			val = val and val[0][0] or ''
-			if not val: val = pos and pos[0]['customer_account'] or ''
+			self.doc.conversion_rate = flt(pos.conversion_rate)
+			
 			if not self.doc.debit_to:
-				webnotes.conn.set(self.doc,'debit_to',val)
-			
-			lst = ['territory','naming_series','currency','charge','letter_head','tc_name','price_list_name','company','select_print_heading','cash_bank_account']
+				self.doc.debit_to = self.doc.customer and webnotes.conn.get_value("Account", {
+					"name": self.doc.customer + " - " + self.get_company_abbr(), 
+					"docstatus": ["!=", 2]
+				}) or pos.customer_account
 				
-			for i in lst:
-				val = pos and pos[0][i] or ''
-				self.doc.fields[i] = val
-			self.set_pos_item_values()
+			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
+				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account'):
+					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
+						self.doc.fields[fieldname] = pos.get(fieldname)
+						
+			if not for_validate:
+				self.doc.update_stock = cint(pos.get("update_stock"))
+
+			# set pos values in items
+			for item in self.doclist.get({"parentfield": "entries"}):
+				if item.fields.get('item_code'):
+					for fieldname, val in apply_pos_settings(pos, item.fields).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
+							item.fields[fieldname] = val
+
+			# fetch terms	
+			if self.doc.tc_name and not self.doc.terms:
+				self.doc.terms = webnotes.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
-			val = pos and flt(pos[0]['conversion_rate']) or 0	
-			self.doc.conversion_rate = val
-
-			#fetch terms	
-			if self.doc.tc_name:	 self.get_tc_details()
-			
-			#fetch charges
-			if self.doc.charge:		self.get_other_charges()
-
-
-	def set_pos_item_values(self):
-		"""Set default values related to pos for previously created sales invoice."""
-		if cint(self.doc.is_pos) ==1:
-			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
-			if not dtl:
-				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
-			for d in getlist(self.doclist,'entries'):
-				# overwrite if mentioned in item
-				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-				d.income_account = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or d.income_account
-				d.cost_center = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or d.cost_center
-				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or d.warehouse
-
+			# fetch charges
+			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
+				self.set_taxes("other_charges", "charge")
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -179,8 +244,9 @@ class DocType(SellingController):
 		if self.doc.customer:
 			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
 				where (name = %s or (master_name = %s and master_type = 'customer')) 
-				and docstatus != 2""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), self.doc.customer))
+				and docstatus != 2 and company = %s""", 
+				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), 
+				self.doc.customer, self.doc.company))
 			
 			if acc_head and acc_head[0][0]:
 				return acc_head[0][0]
@@ -211,94 +277,6 @@ class DocType(SellingController):
 		if self.doc.debit_to:
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
 
-
-	def pull_details(self):
-		"""Pull Details of Delivery Note or Sales Order Selected"""
-		if self.doc.delivery_note_main:
-			self.validate_prev_docname('delivery note')
-			self.doclist = self.doc.clear_table(self.doclist,'other_charges')			
-			self.doclist = get_obj('DocType Mapper', 'Delivery Note-Sales Invoice').dt_map(
-				'Delivery Note', 'Sales Invoice', self.doc.delivery_note_main, self.doc, 
-				self.doclist, """[['Delivery Note', 'Sales Invoice'],
-					['Delivery Note Item', 'Sales Invoice Item'],
-					['Sales Taxes and Charges','Sales Taxes and Charges'],
-					['Sales Team','Sales Team']]""")								
-			self.get_income_account('entries')
-			
-		elif self.doc.sales_order_main:
-			self.validate_prev_docname('sales order')
-			self.doclist = self.doc.clear_table(self.doclist,'other_charges')
-			get_obj('DocType Mapper', 'Sales Order-Sales Invoice').dt_map('Sales Order', 
-				'Sales Invoice', self.doc.sales_order_main, self.doc, self.doclist, 
-				"""[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'], 
-				['Sales Taxes and Charges','Sales Taxes and Charges'], 
-				['Sales Team', 'Sales Team']]""")
-			self.get_income_account('entries')
-			
-		ret = self.get_debit_to()
-		self.doc.debit_to = ret.get('debit_to')
-					
-					
-	def load_default_accounts(self):
-		"""
-			Loads default accounts from items, customer when called from mapper
-		"""
-		self.get_income_account('entries')
-		
-		
-	def get_income_account(self,doctype):		
-		for d in getlist(self.doclist, doctype):			
-			if d.item_code:
-				item = webnotes.conn.get_value("Item", d.item_code, 
-					["default_income_account", "default_sales_cost_center"], as_dict=True)
-				d.income_account = item['default_income_account'] or ""
-				d.cost_center = item['default_sales_cost_center'] or ""			
-
-
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			ret = get_obj('Sales Common').get_item_details(args, self)
-			return self.get_pos_details(args, ret)
-		else:
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {
-						'item_code':doc.fields.get('item_code'), 	
-						'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 
-						'warehouse': doc.fields.get('warehouse')
-					};
-
-					ret = self.get_pos_details(arg)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]		
-
-
-	def get_pos_details(self, args, ret = {}):
-		if args['item_code'] and cint(self.doc.is_pos) == 1:
-			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
-			if not dtl:
-				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
-
-			item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(args['item_code']), as_dict=1)
-
-			ret['income_account'] = item and item[0].get('default_income_account') \
-				or (dtl and dtl[0].get('income_account') or args.get('income_account'))
-
-			ret['cost_center'] = item and item[0].get('default_sales_cost_center') \
-				or (dtl and dtl[0].get('cost_center') or args.get('cost_center'))
-			
-			ret['warehouse'] = item and item[0].get('default_warehouse') \
-				or (dtl and dtl[0].get('warehouse') or args.get('warehouse'))
-
-			if ret['warehouse']:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], ret['warehouse']))
-				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
-		return ret
-
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
@@ -317,37 +295,12 @@ class DocType(SellingController):
 		"""Get Commission rate of Sales Partner"""
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)	
 	
-	
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
-
-
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
 			"Sales Invoice Advance", "advance_adjustment_details", "credit")
 		
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
-		
-		
-	def validate_prev_docname(self,doctype):
-		"""Check whether sales order / delivery note items already pulled"""
-		for d in getlist(self.doclist, 'entries'): 
-			if doctype == 'delivery note' and self.doc.delivery_note_main == d.delivery_note:
-				msgprint(cstr(self.doc.delivery_note_main) + " delivery note details have already been pulled.")
-				raise Exception , "Validation Error. Delivery note details have already been pulled."
-			elif doctype == 'sales order' and self.doc.sales_order_main == d.sales_order and not d.delivery_note:
-				msgprint(cstr(self.doc.sales_order_main) + " sales order details have already been pulled.")
-				raise Exception , "Validation Error. Sales order details have already been pulled."
-
 
 	def update_against_document_in_jv(self):
 		"""
@@ -376,19 +329,7 @@ class DocType(SellingController):
 		if lst:
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-	
-	
-	def validate_customer(self):
-		"""	Validate customer name with SO and DN"""
-		for d in getlist(self.doclist,'entries'):
-			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
-			if dt:
-				dt_no = d.delivery_note or d.sales_order
-				cust = webnotes.conn.sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
-				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
-					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
 			
-
 	def validate_customer_account(self):
 		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
@@ -424,6 +365,31 @@ class DocType(SellingController):
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
 				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code)
 				raise Exception
+				
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Sales Order": {
+				"ref_dn_field": "sales_order",
+				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+					["currency", "="]],
+			},
+			"Sales Order Item": {
+				"ref_dn_field": "so_detail",
+				"compare_fields": [["export_rate", "="]],
+				"is_child_table": True
+			},
+			"Delivery Note": {
+				"ref_dn_field": "delivery_note",
+				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+					["currency", "="]],
+			},
+			"Delivery Note Item": {
+				"ref_dn_field": "dn_detail",
+				"compare_fields": [["export_rate", "="]],
+				"is_child_table": True
+			}
+		})
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
@@ -450,7 +416,7 @@ class DocType(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:	
-			if webnotes.conn.get_value('Global Defaults', 'Global Defaults', dic[i]) == 'Yes':
+			if webnotes.conn.get_single_value('Selling Settings', dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
 					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
@@ -477,13 +443,13 @@ class DocType(SellingController):
 	def validate_item_code(self):
 		for d in getlist(self.doclist, 'entries'):
 			if not d.item_code:
-				msgprint("Please enter Item Code at line no : %s to update stock for POS or remove check from Update Stock in Basic Info Tab." % (d.idx))
-				raise Exception
+				msgprint("Please enter Item Code at line no : %s to update stock or remove check from Update Stock in Basic Info Tab." % (d.idx),
+				raise_exception=True)
 				
 	def validate_delivery_note(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.delivery_note:
-				msgprint("""POS can not be made against Delivery Note""", raise_exception=1)
+				msgprint("""Stock update can not be made against Delivery Note""", raise_exception=1)
 
 
 	def validate_write_off_account(self):
@@ -499,7 +465,6 @@ class DocType(SellingController):
 
 			webnotes.conn.set(self.doc, 'c_form_no', '')
 			
-
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code and d.warehouse:
@@ -513,13 +478,12 @@ class DocType(SellingController):
 	 
 	
 	def get_warehouse(self):
-		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (webnotes.session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
 			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
-				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.")
-				raise Exception
+				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
 			elif not ps[0][1]:
 				msgprint("Please enter warehouse in POS Setting")
 			else:
@@ -535,36 +499,28 @@ class DocType(SellingController):
 
 
 	def on_update(self):
-		# Set default warehouse from pos setting
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
+		if cint(self.doc.update_stock) == 1:
+			# Set default warehouse from pos setting
+			if cint(self.doc.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:
 					for d in getlist(self.doclist, 'entries'):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
-							
-				self.make_packing_list()
-			else:
-				self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 
-			if flt(self.doc.paid_amount) == 0:
-				if self.doc.cash_bank_account: 
-					webnotes.conn.set(self.doc, 'paid_amount', 
-						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
-				else:
-					# show message that the amount is not paid
-					webnotes.conn.set(self.doc,'paid_amount',0)
-					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+				if flt(self.doc.paid_amount) == 0:
+					if self.doc.cash_bank_account: 
+						webnotes.conn.set(self.doc, 'paid_amount', 
+							(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+					else:
+						# show message that the amount is not paid
+						webnotes.conn.set(self.doc,'paid_amount',0)
+						webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
 
+			self.make_packing_list()
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			webnotes.conn.set(self.doc,'paid_amount',0)
-
-		webnotes.conn.set(self.doc, 'outstanding_amount', 
-			flt(self.doc.grand_total) - flt(self.doc.total_advance) - 
-			flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
-
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
@@ -584,24 +540,23 @@ class DocType(SellingController):
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
 		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d['item_code'])
 		self.values.append({
-			'item_code'					 : d['item_code'],
-			'warehouse'					 : wh,
-			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Sales Invoice',
-			'voucher_no'					: cstr(self.doc.name),
-			'voucher_detail_no'	 		: cstr(d['name']), 
-			'actual_qty'					: qty, 
-			'stock_uom'					 : st_uom and st_uom[0][0] or '',
-			'incoming_rate'			 : in_value,
-			'company'						 : self.doc.company,
-			'fiscal_year'				 : self.doc.fiscal_year,
-			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'						: cstr(d['batch_no']),
-			'serial_no'					 : d['serial_no']
-		})	
-			
+			'item_code'			: d['item_code'],
+			'warehouse'			: wh,
+			'posting_date'		: self.doc.posting_date,
+			'posting_time'		: self.doc.posting_time,
+			'voucher_type'		: 'Sales Invoice',
+			'voucher_no'		: cstr(self.doc.name),
+			'voucher_detail_no'	: cstr(d['name']), 
+			'actual_qty'		: qty, 
+			'stock_uom'			: st_uom and st_uom[0][0] or '',
+			'incoming_rate'		: in_value,
+			'company'			: self.doc.company,
+			'fiscal_year'		: self.doc.fiscal_year,
+			'is_cancelled'		: (update_stock==1) and 'No' or 'Yes',
+			'batch_no'			: cstr(d['batch_no']),
+			'serial_no'			: d['serial_no'],
+			"project"			: self.doc.project_name
+		})			
 
 	def update_stock_ledger(self, update_stock):
 		self.values = []
@@ -616,27 +571,32 @@ class DocType(SellingController):
 
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-				
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-	
-
-	def get_actual_qty(self,args):
-		args = eval(args)
-		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
-		}
-		return ret
-
-
-	def make_gl_entries(self, is_cancel=0):
-		from accounts.general_ledger import make_gl_entries
-		gl_entries = []
-		auto_inventory_accounting = webnotes.conn.get_value("Global Defaults", None, 
-		 	"automatic_inventory_accounting")
-		abbr = self.get_company_abbr()
 		
-		# parent's gl entry
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+		
+	def make_gl_entries(self):
+		from accounts.general_ledger import make_gl_entries, merge_similar_entries
+		
+		gl_entries = []
+		
+		self.make_customer_gl_entry(gl_entries)
+	
+		self.make_tax_gl_entries(gl_entries)
+		
+		self.make_item_gl_entries(gl_entries)
+		
+		# merge gl entries before adding pos entries
+		gl_entries = merge_similar_entries(gl_entries)
+						
+		self.make_pos_gl_entries(gl_entries)
+		
+		update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account and 'No' or 'Yes'
+		
+		if gl_entries:
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
+				update_outstanding=update_outstanding, merge_entries=False)
+				
+	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
@@ -646,10 +606,10 @@ class DocType(SellingController):
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,
-				}, is_cancel)
+				})
 			)
-	
-		# tax table gl entries
+				
+	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
 			if flt(tax.tax_amount):
 				gl_entries.append(
@@ -658,13 +618,13 @@ class DocType(SellingController):
 						"against": self.doc.debit_to,
 						"credit": flt(tax.tax_amount),
 						"remarks": self.doc.remarks,
-						"cost_center": tax.cost_center_other_charges
-					}, is_cancel)
+						"cost_center": tax.cost_center
+					})
 				)
-		
-		# item gl entries
-		for item in getlist(self.doclist, 'entries'):
-			# income account gl entries
+				
+	def make_item_gl_entries(self, gl_entries):			
+		# income account gl entries	
+		for item in self.doclist.get({"parentfield": "entries"}):
 			if flt(item.amount):
 				gl_entries.append(
 					self.get_gl_dict({
@@ -673,35 +633,22 @@ class DocType(SellingController):
 						"credit": item.amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
-					}, is_cancel)
+					})
 				)
-			# if auto inventory accounting enabled and stock item, 
-			# then do stock related gl entries
-			if auto_inventory_accounting and item.delivery_note and \
-					webnotes.conn.get_value("Item", item.item_code, "is_stock_item")=="Yes":
-				# to-do
-				purchase_rate = webnotes.conn.get_value("Delivery Note Item", 
-					item.dn_detail, "purchase_rate")
-				valuation_amount =  purchase_rate * item.qty
-				# expense account gl entries
-				if flt(valuation_amount):
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account,
-							"against": "Stock Delivered But Not Billed - %s" % (abbr,),
-							"debit": valuation_amount,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock"
-						}, is_cancel)
-					)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": "Stock Delivered But Not Billed - %s" % (abbr,),
-							"against": item.expense_account,
-							"credit": valuation_amount,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock"
-						}, is_cancel)
-					)
-		if self.doc.is_pos and self.doc.cash_bank_account and self.doc.paid_amount:
+				
+		# expense account gl entries
+		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+				and cint(self.doc.update_stock):
+			
+			for item in self.doclist.get({"parentfield": "entries"}):
+				self.check_expense_account(item)
+			
+				if item.buying_amount:
+					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
+						-1*item.buying_amount, cost_center=item.cost_center)
+				
+	def make_pos_gl_entries(self, gl_entries):
+		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -711,7 +658,7 @@ class DocType(SellingController):
 					"remarks": self.doc.remarks,
 					"against_voucher": self.doc.name,
 					"against_voucher_type": self.doc.doctype,
-				}, is_cancel)
+				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -719,7 +666,7 @@ class DocType(SellingController):
 					"against": self.doc.debit_to,
 					"debit": self.doc.paid_amount,
 					"remarks": self.doc.remarks,
-				}, is_cancel)
+				})
 			)
 			# write off entries, applicable if only pos
 			if self.doc.write_off_account and self.doc.write_off_amount:
@@ -731,7 +678,7 @@ class DocType(SellingController):
 						"remarks": self.doc.remarks,
 						"against_voucher": self.doc.name,
 						"against_voucher_type": self.doc.doctype,
-					}, is_cancel)
+					})
 				)
 				gl_entries.append(
 					self.get_gl_dict({
@@ -740,30 +687,17 @@ class DocType(SellingController):
 						"debit": self.doc.write_off_amount,
 						"remarks": self.doc.remarks,
 						"cost_center": self.doc.write_off_cost_center
-					}, is_cancel)
+					})
 				)
-		
-		
-		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
-		merge_entries=cint(self.doc.is_pos)!=1 and 1 or 0
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=is_cancel, 
-				update_outstanding=update_outstanding, merge_entries=merge_entries)
-
+			
 	def update_c_form(self):
 		"""Update amended id in C-form"""
 		if self.doc.c_form_no and self.doc.amended_from:
 			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
-					invoice_date = %s, territory = %s, net_total = %s,
-					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
+				invoice_date = %s, territory = %s, net_total = %s,
+				grand_total = %s where invoice_no = %s and parent = %s""", 
+				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 
-
-	def check_next_docstatus(self):
-		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-	
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):
@@ -823,25 +757,18 @@ class DocType(SellingController):
 		
 		next_date = get_next_date(self.doc.posting_date,
 			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
+		
 		webnotes.conn.set(self.doc, 'next_date', next_date)
 	
 def get_next_date(dt, mcount, day=None):
-	import datetime
-	month = getdate(dt).month + mcount
-	year = getdate(dt).year
-	if not day:
-		day = getdate(dt).day
-	if month > 12:
-		month, year = month-12, year+1
-	try:
-		next_month_date = datetime.date(year, month, day)
-	except:
-		import calendar
-		last_day = calendar.monthrange(year, month)[1]
-		next_month_date = datetime.date(year, month, last_day)
-	return next_month_date.strftime("%Y-%m-%d")
-
-def manage_recurring_invoices(next_date=None):
+	dt = getdate(dt)
+	
+	from dateutil.relativedelta import relativedelta
+	dt += relativedelta(months=mcount, day=day)
+	
+	return dt
+	
+def manage_recurring_invoices(next_date=None, commit=True):
 	""" 
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
@@ -861,19 +788,22 @@ def manage_recurring_invoices(next_date=None):
 				ref_wrapper = webnotes.bean('Sales Invoice', ref_invoice)
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
-				webnotes.conn.commit()
+				if commit:
+					webnotes.conn.commit()
 			except:
-				webnotes.conn.rollback()
+				if commit:
+					webnotes.conn.rollback()
 
-				webnotes.conn.begin()
-				webnotes.conn.sql("update `tabSales Invoice` set \
-					convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
-				notify_errors(ref_invoice, ref_wrapper.doc.owner)
-				webnotes.conn.commit()
+					webnotes.conn.begin()
+					webnotes.conn.sql("update `tabSales Invoice` set \
+						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
+					notify_errors(ref_invoice, ref_wrapper.doc.owner)
+					webnotes.conn.commit()
 
 				exception_list.append(webnotes.getTraceback())
 			finally:
-				webnotes.conn.begin()
+				if commit:
+					webnotes.conn.begin()
 			
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
@@ -885,19 +815,27 @@ def make_new_invoice(ref_wrapper, posting_date):
 	new_invoice = clone(ref_wrapper)
 	
 	mcount = month_map[ref_wrapper.doc.recurring_type]
-		
+	
+	invoice_period_from_date = get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount)
+	
+	# get last day of the month to maintain period if the from date is first day of its own month 
+	# and to date is the last day of its own month
+	if (cstr(get_first_day(ref_wrapper.doc.invoice_period_from_date)) == \
+			cstr(ref_wrapper.doc.invoice_period_from_date)) and \
+		(cstr(get_last_day(ref_wrapper.doc.invoice_period_to_date)) == \
+			cstr(ref_wrapper.doc.invoice_period_to_date)):
+		invoice_period_to_date = get_last_day(get_next_date(ref_wrapper.doc.invoice_period_to_date,
+			mcount))
+	else:
+		invoice_period_to_date = get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount)
+	
 	new_invoice.doc.fields.update({
 		"posting_date": posting_date,
 		"aging_date": posting_date,
-		
 		"due_date": add_days(posting_date, cint(date_diff(ref_wrapper.doc.due_date,
 			ref_wrapper.doc.posting_date))),
-			
-		"invoice_period_from_date": \
-			get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount),
-			
-		"invoice_period_to_date": \
-			get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount),
+		"invoice_period_from_date": invoice_period_from_date,
+		"invoice_period_to_date": invoice_period_to_date,
 		"fiscal_year": get_fiscal_year(posting_date)[0],
 		"owner": ref_wrapper.doc.owner,
 	})
@@ -910,7 +848,7 @@ def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
 	subject = "Invoice : " + new_rv.doc.name
 
-	com = new_rv.doc.company   # webnotes.conn.get_value('Control Panel', '', 'letter_head')
+	com = new_rv.doc.company
 
 	hd = '''<div><h2>%s</h2></div>
 			<div><h3>Invoice: %s</h3></div>
@@ -1025,3 +963,16 @@ def get_bank_cash_account(mode_of_payment):
 	return {
 		"cash_bank_account": val
 	}
+
+def get_income_account(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
+			where (tabAccount.debit_or_credit="Credit" 
+					or tabAccount.account_type = "Income Account") 
+				and tabAccount.group_or_ledger="Ledger" 
+				and tabAccount.docstatus!=2 
+				and tabAccount.company = '%(company)s' 
+				and tabAccount.%(key)s LIKE '%(txt)s'
+				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})

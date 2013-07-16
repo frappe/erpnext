@@ -23,6 +23,15 @@ $(document).ready(function() {
 	$("#next-page").click(function() {
 		blog.get_list();
 	})
+	
+	if(get_url_arg("by_name")) {
+		$("#blot-subtitle").html("Posts by " + get_url_arg("by_name")).toggle(true);
+	}
+
+	if(get_url_arg("category")) {
+		$("#blot-subtitle").html("Posts filed under " + get_url_arg("category")).toggle(true);
+	}
+
 });
 
 var blog = {
@@ -33,10 +42,14 @@ var blog = {
 			url: "server.py",
 			data: {
 				cmd: "website.helpers.blog.get_blog_list",
-				start: blog.start
+				start: blog.start,
+				by: get_url_arg("by"),
+				category: get_url_arg("category")
 			},
 			dataType: "json",
 			success: function(data) {
+				$(".progress").toggle(false);
+				if(data.exc) console.log(data.exc);
 				blog.render(data.message);
 			}
 		});
@@ -51,19 +64,30 @@ var blog = {
 				b.comment_text = '1 comment.'
 			} else {
 				b.comment_text = b.comments + ' comments.'
-			} 
+			}
 			
-			$(repl('<h2><a href="%(page_name)s">%(title)s</a></h2>\
-				<div class="help">%(comment_text)s</div>\
-				%(content)s<br />\
-				<p><a href="%(page_name)s">Read with comments...</a></p>\
-				<hr /><br />', b)).appendTo($wrap);
+			b.page_name = encodeURIComponent(b.page_name);
+			
+			$(repl('<div class="row">\
+					<div class="col col-lg-1">\
+						<div class="avatar avatar-medium" style="margin-top: 6px;">\
+							<img src="%(avatar)s" />\
+						</div>\
+					</div>\
+					<div class="col col-lg-11">\
+						<h4><a href="%(page_name)s">%(title)s</a></h4>\
+						<p>%(content)s</p>\
+						<p style="color: #aaa; font-size: 90%">\
+							<a href="blog?by=%(blogger)s&by_name=%(full_name)s">\
+								%(full_name)s</a> wrote this on %(published)s / %(comment_text)s</p>\
+					</div>\
+				</div><hr>', b)).appendTo($wrap);
 		});
 		blog.start += (data.length || 0);
-		if(!data.length) {
+		if(!data.length || data.length < 20) {
 			if(blog.start) {
 				$("#next-page").toggle(false)
-					.parent().append("<div class='alert'>Nothing more to show.</div>");	
+					.parent().append("<div class='text-muted'>Nothing more to show.</div>");	
 			} else {
 				$("#next-page").toggle(false)
 					.parent().append("<div class='alert'>No blogs written yet.</div>");	

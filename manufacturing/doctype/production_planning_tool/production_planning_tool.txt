@@ -2,13 +2,14 @@
  {
   "creation": "2013-01-21 12:03:47", 
   "docstatus": 0, 
-  "modified": "2013-02-18 13:43:26", 
+  "modified": "2013-07-05 14:51:19", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
  {
   "default_print_format": "Standard", 
   "doctype": "DocType", 
+  "icon": "icon-calendar", 
   "in_create": 1, 
   "issingle": 1, 
   "module": "Manufacturing", 

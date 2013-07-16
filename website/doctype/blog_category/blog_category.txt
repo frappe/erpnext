@@ -1,0 +1,56 @@
+[
+ {
+  "creation": "2013-03-08 09:41:11", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:27:02", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:category_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-tag", 
+  "module": "Website", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "category_name", 
+  "fieldtype": "Data", 
+  "label": "Category Name", 
+  "name": "__common__", 
+  "parent": "Blog Category", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Blog Category", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Blog Category"
+ }, 
+ {
+  "doctype": "DocField"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Website Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Blogger"
+ }
+]

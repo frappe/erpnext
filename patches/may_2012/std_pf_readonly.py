@@ -27,5 +27,4 @@ def execute():
 		doc.save()
 	webnotes.conn.commit()
 	webnotes.conn.begin()
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'print_format')
+	webnotes.reload_doc('core', 'doctype', 'print_format')

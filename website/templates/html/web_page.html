@@ -1,4 +1,4 @@
-{% extends "html/page.html" %}
+{% extends "app/website/templates/html/page.html" %}
 
 {% block javascript %}
 	{% if insert_code %}
@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="span12" style="margin-top: 15px;">
-	{% include "html/slideshow.html" %}
+<div class="col col-lg-12" style="margin-top: 15px;">
+	{% include "app/website/templates/html/slideshow.html" %}
 	{{ main_section }}
 </div>
 {% endblock %}

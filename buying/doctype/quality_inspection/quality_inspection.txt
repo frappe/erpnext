@@ -1,14 +1,15 @@
 [
  {
-  "creation": "2013-01-10 16:34:11", 
+  "creation": "2013-04-30 13:13:03", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:57:21", 
+  "modified": "2013-07-05 14:52:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "autoname": "QAI/.######", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "icon": "icon-search", 
   "is_submittable": 1, 
   "module": "Buying", 
   "name": "__common__", 
@@ -209,17 +210,6 @@
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "label": "Amendment Date", 
-  "no_copy": 1, 
-  "oldfieldname": "amendment_date", 
-  "oldfieldtype": "Date", 
   "print_hide": 1, 
   "read_only": 1
  }, 

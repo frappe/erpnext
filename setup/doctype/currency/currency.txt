@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-01-29 14:55:36", 
+  "modified": "2013-07-05 14:33:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "field:currency_name", 
   "description": "**Currency** Master", 
   "doctype": "DocType", 
+  "icon": "icon-bitcoin", 
   "in_create": 0, 
   "module": "Setup", 
   "name": "__common__", 

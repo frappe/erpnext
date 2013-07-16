@@ -1,0 +1,59 @@
+[
+ {
+  "creation": "2013-03-05 09:11:06", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Time Log Batch Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Time Log Batch Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_log", 
+  "fieldtype": "Link", 
+  "label": "Time Log", 
+  "options": "Time Log", 
+  "print_width": "200px", 
+  "reqd": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "created_by", 
+  "fieldtype": "Link", 
+  "label": "Created By", 
+  "options": "Profile", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "activity_type", 
+  "fieldtype": "Data", 
+  "label": "Activity Type", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hours", 
+  "fieldtype": "Float", 
+  "label": "Hours"
+ }
+]

@@ -20,20 +20,19 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
+	cur_frm.dashboard.reset();
 	erpnext.hide_naming_series();
 	cur_frm.set_intro("");
 	cfn_set_fields(doc, dt, dn);
+
 	if(doc.docstatus===0 && !doc.__islocal) {
 		cur_frm.set_intro("Submit this Production Order for further processing.");
 	} else if(doc.docstatus===1) {
+		var percent = flt(doc.produced_qty) / flt(doc.qty) * 100;
+		cur_frm.dashboard.add_progress(cint(percent) + "% " + wn._("Complete"), percent);
+
 		if(doc.status === "Stopped") {
-			cur_frm.set_intro("This Production Order is Stopped.");
-		} else {
-			if(doc.produced_qty == doc.qty) {
-				cur_frm.set_intro("This Production Order is Completed.");
-			} else {
-				cur_frm.set_intro("This Production Order is in progress.");
-			}
+			cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
 		}
 	}
 }
@@ -88,6 +87,12 @@ cur_frm.cscript.make_se = function(doc, purpose) {
 	var se = wn.model.get_new_doc("Stock Entry");
 	se.purpose = purpose;
 	se.production_order = doc.name;
+	if(purpose==="Material Transfer") {
+		se.to_warehouse = doc.wip_warehouse;
+	} else {
+		se.from_warehouse = doc.wip_warehouse;
+		se.to_warehouse = doc.fg_warehouse;
+	}
 	se.company = doc.company;
 	se.fg_completed_qty = doc.qty - doc.produced_qty;
 	se.bom_no = doc.bom_no;
@@ -96,18 +101,27 @@ cur_frm.cscript.make_se = function(doc, purpose) {
 }
 
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
-	 return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.`description` FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.docstatus != 2 AND `tabItem`.is_pro_applicable = "Yes" AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.`name` LIMIT 50';
+	return {
+		filters:[
+			['Item', 'is_pro_applicable', '=', 'Yes']
+		]
+	}
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` \
-		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return{
+		filters:[
+			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}	
 }
 
 
 cur_frm.set_query("bom_no", function(doc) {
 	if (doc.production_item) {
-		return erpnext.queries.bom({item: cstr(doc.production_item)});
+		return{
+			query:"controllers.queries.bom",
+			filters: {item: cstr(doc.production_item)}
+		}
 	} else msgprint(" Please enter Production Item first");
 });

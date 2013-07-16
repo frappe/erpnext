@@ -1,13 +1,15 @@
 wn.pages['activity'].onload = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
-	wrapper.appframe.add_home_breadcrumb();
-	wrapper.appframe.add_breadcrumb(wn.modules["Activity"].icon);
-	wrapper.appframe.title('Activity');
+	wn.ui.make_app_page({
+		parent: wrapper,
+		title: "Activity",
+		single_column: true
+	})
+	wrapper.appframe.add_module_icon("Activity");
 	
 	var list = new wn.ui.Listing({
 		appframe: wrapper.appframe,
 		method: 'home.page.activity.activity.get_feed',
-		parent: $('#activity-list'),
+		parent: $(wrapper).find(".layout-main"),
 		render_row: function(row, data) {
 			new erpnext.ActivityFeed(row, data);
 		}
@@ -17,7 +19,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	// Build Report Button
 	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
 		wrapper.appframe.add_button('Build Report', function() {
-			wn.set_route('Report2', "Feed");
+			wn.set_route('Report', "Feed");
 		}, 'icon-th')
 	}
 }
@@ -54,7 +56,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// link
 		if(data.doc_name && data.feed_type!='Login') {
-			data.link = repl('<a href="#!Form/%(doc_type)s/%(doc_name)s">%(doc_name)s</a>', data)
+			data.link = wn.format(data.doc_name, {"fieldtype":"Link", "options":data.doc_type})
 		} else {
 			data.link = "";
 		}

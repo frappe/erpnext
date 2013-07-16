@@ -23,18 +23,21 @@ import webnotes
 
 lang_names = {
 	"हिंदी": "hi",
+	"deutsch": "de",
 	"english": "en",
 	"español": "es",
 	"français": "fr",
 	"português": "pt",
+	"português brasileiro": "pt-BR",
 	"nederlands": "nl",
 	"српски":"sr",
 	"தமிழ்": "ta",
 	"Hrvatski": "hr",
+	"ไทย": "th",
 	"العربية":"ar"
 }
 
-lang_list = ["ar", "en", "hi", "es", "fr", "pt", "nl", "hr"]
+lang_list = ["ar", "de", "en", "hi", "es", "fr", "pt-BR", "pt", "nl", "hr", "th"]
 
 product_name = "ERPNext"
 profile_defaults = {

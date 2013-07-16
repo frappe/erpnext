@@ -16,11 +16,14 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.utils
+import json
 
 from webnotes.utils import cstr, flt, getdate
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from webnotes.model.mapper import get_mapped_doclist
 
 sql = webnotes.conn.sql
 	
@@ -37,40 +40,12 @@ class DocType(SellingController):
 		self.person_tname = 'Target Detail'
 		self.partner_tname = 'Partner Target Detail'
 		self.territory_tname = 'Territory Target Detail'
-		
-	def pull_quotation_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'other_charges')
-		self.doclist = self.doc.clear_table(self.doclist, 'sales_order_details')
-		self.doclist = self.doc.clear_table(self.doclist, 'sales_team')
-		self.doclist = self.doc.clear_table(self.doclist, 'tc_details')
-		if self.doc.quotation_no:				
-			get_obj('DocType Mapper', 'Quotation-Sales Order').dt_map('Quotation', 'Sales Order', self.doc.quotation_no, self.doc, self.doclist, "[['Quotation', 'Sales Order'],['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team'],['TC Detail','TC Detail']]")			
-		else:
-			msgprint("Please select Quotation whose details need to pull")		
-
-		return cstr(self.doc.quotation_no)
 	
 	def get_contact_details(self):
 		get_obj('Sales Common').get_contact_details(self,0)
 
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
-
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
-					ret = obj.get_item_defaults(arg)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]					
 
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
@@ -81,45 +56,12 @@ class DocType(SellingController):
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	def load_default_taxes(self):
-		self.doclist = get_obj('Sales Common').load_default_taxes(self)
-
-	def get_other_charges(self):
-		self.doclist = get_obj('Sales Common').get_other_charges(self)
- 
-	def get_tc_details(self):
-		return get_obj('Sales Common').get_tc_details(self)
-
-	def check_maintenance_schedule(self):
-		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
-		nm = nm and nm[0][0] or ''
-		
-		if not nm:
-			return 'No'
-
-	def check_maintenance_visit(self):
-		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
-		nm = nm and nm[0][0] or ''
-		
-		if not nm:
-			return 'No'
-
-	def validate_fiscal_year(self):
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Sales Order Date')
-	
-	def validate_reference_value(self):
-		get_obj('DocType Mapper', 'Quotation-Sales Order', with_children = 1).validate_reference_value(self, self.doc.name)
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
 			if getdate(self.doc.transaction_date) > getdate(self.doc.delivery_date):
 				msgprint("Expected Delivery Date cannot be before Sales Order Date")
 				raise Exception
-		# amendment date is necessary if document is amended
-		if self.doc.amended_from and not self.doc.amendment_date:
-			msgprint("Please Enter Amendment Date")
-			raise Exception
 	
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -138,32 +80,20 @@ class DocType(SellingController):
 	def validate_for_items(self):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
-		# Sales Order Items Validations
 		for d in getlist(self.doclist, 'sales_order_details'):
-			if self.doc.quotation_no and cstr(self.doc.quotation_no) == cstr(d.prevdoc_docname):
-				flag = 1
-			if d.prevdoc_docname:
-				if self.doc.quotation_date and getdate(self.doc.quotation_date) > getdate(self.doc.transaction_date):
-					msgprint("Sales Order Date cannot be before Quotation Date")
-					raise Exception
-				# validates whether quotation no in doctype and in table is same
-				if not cstr(d.prevdoc_docname) == cstr(self.doc.quotation_no):
-					msgprint("Items in table does not belong to the Quotation No mentioned.")
-					raise Exception
-
-			# validates whether item is not entered twice
 			e = [d.item_code, d.description, d.reserved_warehouse, d.prevdoc_docname or '']
 			f = [d.item_code, d.description]
 
-			#check item is stock item
-			st_itm = sql("select is_stock_item from `tabItem` where name = '%s'"%d.item_code)
-
-			if st_itm and st_itm[0][0] == 'Yes':
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
+				if not d.reserved_warehouse:
+					msgprint("""Please enter Reserved Warehouse for item %s 
+						as it is stock Item""" % d.item_code, raise_exception=1)
+				
 				if e in check_list:
 					msgprint("Item %s has been entered twice." % d.item_code)
 				else:
 					check_list.append(e)
-			elif st_itm and st_itm[0][0]== 'No':
+			else:
 				if f in chk_dupl_itm:
 					msgprint("Item %s has been entered twice." % d.item_code)
 				else:
@@ -175,9 +105,6 @@ class DocType(SellingController):
 			tot_avail_qty = sql("select projected_qty from `tabBin` \
 				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
-		
-		if getlist(self.doclist, 'sales_order_details') and self.doc.quotation_no and flag == 0:
-			msgprint("There are no items of the quotation selected", raise_exception=1)
 
 	def validate_sales_mntc_quotation(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
@@ -188,7 +115,9 @@ class DocType(SellingController):
 						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
 
 	def validate_order_type(self):
-		#validate delivery date
+		super(DocType, self).validate_order_type()
+		
+	def validate_delivery_date(self):
 		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")
 			raise Exception
@@ -205,21 +134,24 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		self.validate_fiscal_year()
 		self.validate_order_type()
+		self.validate_delivery_date()
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()
-		#self.validate_reference_value()
-		self.validate_for_items()
+		
+		if self.doc.docstatus == 1:
+			self.validate_for_items()
+		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
 
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
-		sales_com_obj.get_allocated_sum(self)
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 		
+		self.validate_with_previous_doc()
+				
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
@@ -229,6 +161,15 @@ class DocType(SellingController):
 
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
+		
+	def validate_with_previous_doc(self):
+		super(DocType, self).validate_with_previous_doc(self.tname, {
+			"Quotation": {
+				"ref_dn_field": "prevdoc_docname",
+				"compare_fields": [["customer", "="], ["company", "="], ["currency", "="]]
+			}
+		})
+
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
@@ -261,9 +202,7 @@ class DocType(SellingController):
 	def on_submit(self):
 		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
-		# update customer's last sales order no.
-		sql("""update `tabCustomer` set last_sales_order = '%s', modified = '%s' 
-			where name = '%s'""" % (self.doc.name, self.doc.modified, self.doc.customer))
+
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
 		
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
@@ -320,28 +259,24 @@ class DocType(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = -1,clear = 1)
+		self.update_stock_ledger(update_stock = -1,is_stopped = 1)
 		webnotes.conn.set(self.doc, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
 			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = 1,clear = 1)
+		self.update_stock_ledger(update_stock = 1,is_stopped = 1)
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
 
 
-	def update_stock_ledger(self, update_stock, clear = 0):
-		for d in self.get_item_list(clear):
+	def update_stock_ledger(self, update_stock, is_stopped = 0):
+		for d in self.get_item_list(is_stopped):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				if not d['reserved_warehouse']:
-					msgprint("""Please enter Reserved Warehouse for item %s 
-						as it is stock Item""" % d['item_code'], raise_exception=1)
-						
 				args = {
 					"item_code": d['item_code'],
-					"reserved_qty": flt(update_stock) * flt(d['qty']),
+					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
 					"voucher_no": self.doc.name,
@@ -350,8 +285,220 @@ class DocType(SellingController):
 				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
 				
 				
-	def get_item_list(self, clear):
-		return get_obj('Sales Common').get_item_list( self, clear)
+	def get_item_list(self, is_stopped):
+		return get_obj('Sales Common').get_item_list( self, is_stopped)
 
 	def on_update(self):
 		pass
+		
+@webnotes.whitelist()
+def get_orders():
+	# find customer id
+	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
+		"customer")
+		
+	if customer:
+		orders = webnotes.conn.sql("""select 
+			name, creation, currency from `tabSales Order`
+			where customer=%s
+			and docstatus=1
+			order by creation desc
+			limit 20
+			""", customer, as_dict=1)
+		for order in orders:
+			order.items = webnotes.conn.sql("""select 
+				item_name, qty, export_rate, export_amount, delivered_qty, stock_uom
+				from `tabSales Order Item` 
+				where parent=%s 
+				order by idx""", order.name, as_dict=1)
+				
+		return orders
+	else:
+		return []
+		
+def get_website_args():	
+	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
+		"customer")
+	bean = webnotes.bean("Sales Order", webnotes.form_dict.name)
+	if bean.doc.customer != customer:
+		return {
+			"doc": {"name": "Not Allowed"}
+		}
+	else:
+		return {
+			"doc": bean.doc,
+			"doclist": bean.doclist,
+			"webnotes": webnotes,
+			"utils": webnotes.utils
+		}
+		
+def get_currency_and_number_format():
+	return {
+		"global_number_format": webnotes.conn.get_default("number_format") or "#,###.##",
+		"currency": webnotes.conn.get_default("currency"),
+		"currency_symbols": json.dumps(dict(webnotes.conn.sql("""select name, symbol
+			from tabCurrency where ifnull(enabled,0)=1""")))
+	}
+	
+def set_missing_values(source, target):
+	bean = webnotes.bean(target)
+	bean.run_method("onload_post_render")
+	
+@webnotes.whitelist()
+def make_material_request(source_name, target_doclist=None):	
+	def postprocess(source, doclist):
+		doclist[0].material_request_type = "Purchase"
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Material Request", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Material Request Item", 
+			"field_map": {
+				"parent": "sales_order_no", 
+				"reserved_warehouse": "warehouse", 
+				"stock_uom": "uom"
+			}
+		}
+	}, target_doclist, postprocess)
+	
+	return [d.fields for d in doclist]
+
+@webnotes.whitelist()
+def make_delivery_note(source_name, target_doclist=None):	
+	def update_item(obj, target, source_parent):
+		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
+		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
+		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Delivery Note", 
+			"field_map": {
+				"shipping_address": "address_display", 
+				"shipping_address_name": "customer_address", 
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Delivery Note Item", 
+			"field_map": {
+				"export_rate": "export_rate", 
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype", 
+				"reserved_warehouse": "warehouse"
+			},
+			"postprocess": update_item
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+			"add_if_empty": True
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team",
+			"add_if_empty": True
+		}
+	}, target_doclist, set_missing_values)
+	
+	return [d.fields for d in doclist]
+
+@webnotes.whitelist()
+def make_sales_invoice(source_name, target_doclist=None):	
+	def update_item(obj, target, source_parent):
+		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.amount = target.export_amount / flt(source_parent.conversion_rate)
+		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
+	
+	doclist = get_mapped_doclist("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Sales Invoice", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Order Item": {
+			"doctype": "Sales Invoice Item", 
+			"field_map": {
+				"name": "so_detail", 
+				"parent": "sales_order", 
+				"reserved_warehouse": "warehouse"
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+			"add_if_empty": True
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team", 
+			"add_if_empty": True
+		}
+	}, target_doclist, set_missing_values)
+	
+	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_maintenance_schedule(source_name, target_doclist=None):
+	maint_schedule = webnotes.conn.sql("""select t1.name 
+		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 
+		where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1""", source_name)
+		
+	if not maint_schedule:
+		doclist = get_mapped_doclist("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Maintenance Schedule", 
+				"field_map": {
+					"name": "sales_order_no"
+				}, 
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Sales Order Item": {
+				"doctype": "Maintenance Schedule Item", 
+				"field_map": {
+					"parent": "prevdoc_docname"
+				},
+				"add_if_empty": True
+			}
+		}, target_doclist)
+	
+		return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def make_maintenance_visit(source_name, target_doclist=None):
+	visit = webnotes.conn.sql("""select t1.name 
+		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 
+		where t2.parent=t1.name and t2.prevdoc_docname=%s 
+		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
+		
+	if not visit:
+		doclist = get_mapped_doclist("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Maintenance Visit", 
+				"field_map": {
+					"name": "sales_order_no"
+				},
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			}, 
+			"Sales Order Item": {
+				"doctype": "Maintenance Visit Purpose", 
+				"field_map": {
+					"parent": "prevdoc_docname", 
+					"parenttype": "prevdoc_doctype"
+				},
+				"add_if_empty": True
+			}
+		}, target_doclist)
+	
+		return [d.fields for d in doclist]

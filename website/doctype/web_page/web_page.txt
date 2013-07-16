@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-27 16:31:21", 
+  "creation": "2013-03-28 10:35:30", 
   "docstatus": 0, 
-  "modified": "2013-02-12 09:33:47", 
+  "modified": "2013-07-05 15:02:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Page to show on the website\n", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
+  "icon": "icon-file-alt", 
   "max_attachments": 20, 
   "module": "Website", 
   "name": "__common__"
@@ -24,18 +25,14 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Web Page", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
   "role": "Website Manager", 
-  "submit": 0, 
-  "write": 1
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -86,6 +83,13 @@
   "options": "Website Slideshow"
  }, 
  {
+  "description": "Description for page header.", 
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description"
+ }, 
+ {
   "description": "Content in markdown format that appears on the main side of your page", 
   "doctype": "DocField", 
   "fieldname": "main_section", 
@@ -134,15 +138,17 @@
   "options": "CSS"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List", 
-  "no_copy": 1, 
-  "print_hide": 1
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "write": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]

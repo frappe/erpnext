@@ -53,8 +53,8 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				formatter: this.check_formatter},
 			{id: "name", name: "Item", field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "brand", name: "Brand", field: "brand", width: 100},
+			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
@@ -134,6 +134,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		var data = wn.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
+		this.serialized_buying_rates = this.get_serialized_buying_rates();
 
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
@@ -161,6 +162,8 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				} else {
 					break;
 				}
+				
+				me.round_item_values(item);
 			}
 		}
 	},

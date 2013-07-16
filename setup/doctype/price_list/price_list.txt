@@ -1,20 +1,21 @@
 [
  {
-  "creation": "2013-01-10 16:34:23", 
+  "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:41", 
+  "modified": "2013-07-05 14:50:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
-  "allow_copy": 1, 
+  "allow_copy": 0, 
   "allow_email": 1, 
   "allow_print": 1, 
   "autoname": "field:price_list_name", 
   "description": "Price List Master", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-tags", 
   "max_attachments": 1, 
   "module": "Setup", 
   "name": "__common__"
@@ -53,19 +54,68 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "price_list_name", 
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "options": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "default": "Selling", 
+  "doctype": "DocField", 
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Specify a list of Territories, for which, this Price List is valid", 
+  "doctype": "DocField", 
+  "fieldname": "valid_for_territories", 
+  "fieldtype": "Table", 
+  "label": "Valid for Territories", 
+  "options": "For Territory", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_prices_section", 
+  "fieldtype": "Section Break", 
+  "hidden": 0, 
+  "label": "Item Prices"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_prices", 
+  "fieldtype": "HTML", 
+  "label": "Item Prices"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_10", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "section_break_1", 
+  "fieldtype": "Section Break", 
+  "label": "How to upload"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "how_to_upload", 
   "fieldtype": "HTML", 
   "label": "How to upload", 
-  "options": "<div class=\"help\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
-  "label": "File List"
+  "options": "<div class=\"well\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
  }, 
  {
   "cancel": 0, 

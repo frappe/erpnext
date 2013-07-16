@@ -1,15 +1,17 @@
 [
  {
-  "creation": "2013-01-10 16:34:32", 
+  "creation": "2013-03-19 12:02:15", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:12:16", 
+  "modified": "2013-07-05 14:23:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_attach": 1, 
   "description": "Settings for the About Us Page", 
   "doctype": "DocType", 
-  "document_type": "Master", 
+  "document_type": "Other", 
+  "icon": "icon-group", 
   "issingle": 1, 
   "module": "Website", 
   "name": "__common__"
@@ -20,7 +22,8 @@
   "parent": "About Us Settings", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "read_only": 0
  }, 
  {
   "create": 1, 
@@ -31,7 +34,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "Website Manager", 
   "submit": 0, 
   "write": 1
@@ -45,7 +48,7 @@
   "fieldname": "help", 
   "fieldtype": "HTML", 
   "label": "Help", 
-  "options": "<div class=\"alert\">Link for About Us Page is \"about.html\"</div>"
+  "options": "<div class=\"alert\">Link for About Us Page is \"/about\"</div>"
  }, 
  {
   "description": "Introduce your company to the website visitor.", 

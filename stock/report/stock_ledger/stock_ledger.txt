@@ -1,20 +1,22 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-14 15:26:21", 
   "docstatus": 0, 
-  "creation": "2012-12-03 10:31:11", 
+  "modified": "2013-02-22 15:53:01", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-14 10:50:15"
+  "owner": "Administrator"
  }, 
  {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "json": "{\"filters\":[[\"Stock Ledger Entry\",\"is_cancelled\",\"=\",\"No\"]],\"columns\":[[\"item_code\",\"Stock Ledger Entry\"],[\"warehouse\",\"Stock Ledger Entry\"],[\"posting_date\",\"Stock Ledger Entry\"],[\"posting_time\",\"Stock Ledger Entry\"],[\"actual_qty\",\"Stock Ledger Entry\"],[\"qty_after_transaction\",\"Stock Ledger Entry\"],[\"voucher_type\",\"Stock Ledger Entry\"],[\"voucher_no\",\"Stock Ledger Entry\"]],\"sort_by\":\"Stock Ledger Entry.posting_date\",\"sort_order\":\"desc\",\"sort_by_next\":\"Stock Ledger Entry.posting_time\",\"sort_order_next\":\"desc\"}", 
   "name": "__common__", 
   "ref_doctype": "Stock Ledger Entry", 
-  "doctype": "Report", 
-  "json": "{\"filters\":[[\"Stock Ledger Entry\",\"is_cancelled\",\"=\",\"No\"]],\"columns\":[[\"item_code\",\"Stock Ledger Entry\"],[\"warehouse\",\"Stock Ledger Entry\"],[\"posting_date\",\"Stock Ledger Entry\"],[\"posting_time\",\"Stock Ledger Entry\"],[\"actual_qty\",\"Stock Ledger Entry\"],[\"qty_after_transaction\",\"Stock Ledger Entry\"],[\"voucher_type\",\"Stock Ledger Entry\"],[\"voucher_no\",\"Stock Ledger Entry\"]],\"sort_by\":\"Stock Ledger Entry.posting_date\",\"sort_order\":\"desc\",\"sort_by_next\":\"Stock Ledger Entry.posting_time\",\"sort_order_next\":\"desc\"}", 
-  "is_standard": "Yes"
+  "report_name": "Stock Ledger", 
+  "report_type": "Report Builder"
  }, 
  {
-  "name": "Stock Ledger", 
-  "doctype": "Report"
+  "doctype": "Report", 
+  "name": "Stock Ledger"
  }
 ]

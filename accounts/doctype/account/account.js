@@ -82,7 +82,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 // -----------------------------------------
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button('Chart of Accounts', 
-		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-list')
+		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button('Convert to Ledger', 
@@ -92,7 +92,12 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 			
 		cur_frm.add_custom_button('View Ledger', function() {
-			wn.set_route("general-ledger", "account=" + doc.name);
+			wn.route_options = {
+				"account": doc.name,
+				"from_date": sys_defaults.year_start_date,
+				"to_date": sys_defaults.year_end_date
+			};
+			wn.set_route("general-ledger");
 		});
 	}
 }
@@ -119,6 +124,7 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 cur_frm.fields_dict['master_name'].get_query = function(doc) {
 	if (doc.master_type) {
 		return {
+			doctype: doc.master_type,
 			query: "accounts.doctype.account.account.get_master_name",
 			filters: {	"master_type": doc.master_type }
 		}
@@ -127,7 +133,9 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
-		query: "accounts.doctype.account.account.get_parent_account",
-		filters: { "company": doc.company}
+		filters: {
+			"group_or_ledger": "Group", 
+			"company": doc.company
+		}
 	}
 }

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-02-07 08:28:23", 
+  "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-02-11 08:13:11", 
+  "modified": "2013-07-10 14:54:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,11 +30,13 @@
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
   "options": "Item", 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 1, 
   "width": "100px"
@@ -44,10 +46,12 @@
   "fieldname": "item_name", 
   "fieldtype": "Data", 
   "in_filter": 0, 
+  "in_list_view": 0, 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
@@ -55,23 +59,34 @@
   "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Text", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Text", 
   "print_width": "300px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "received_and_accepted", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Received and Accepted"
  }, 
  {
   "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "received_qty", 
   "fieldtype": "Float", 
+  "in_list_view": 0, 
   "label": "Recd Quantity", 
   "oldfieldname": "received_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -80,10 +95,12 @@
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
+  "in_list_view": 1, 
   "label": "Accepted Quantity", 
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
@@ -92,11 +109,13 @@
   "fieldname": "rejected_qty", 
   "fieldtype": "Float", 
   "in_filter": 0, 
+  "in_list_view": 0, 
   "label": "Rejected Quantity", 
   "oldfieldname": "rejected_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "search_index": 0, 
   "width": "100px"
  }, 
@@ -104,47 +123,63 @@
   "doctype": "DocField", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "in_list_view": 0, 
   "label": "UOM", 
   "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
   "options": "UOM", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "rate_and_amount", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Rate and Amount"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "import_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate ", 
+  "in_list_view": 0, 
+  "label": "Price List Rate", 
   "options": "currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "discount_rate", 
   "fieldtype": "Float", 
+  "in_list_view": 0, 
   "label": "Discount  %", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "import_rate", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Rate", 
   "oldfieldname": "import_rate", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
   "print_hide": 0, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "import_amount", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "import_amount", 
   "oldfieldtype": "Currency", 
@@ -155,21 +190,25 @@
   "doctype": "DocField", 
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
-  "label": "Ref Rate*", 
+  "in_list_view": 0, 
+  "label": "Price List Rate (Company Currency)", 
   "options": "Company:company:default_currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "purchase_rate", 
   "fieldtype": "Currency", 
-  "label": "Rate*", 
+  "in_list_view": 0, 
+  "label": "Rate (Company Currency)", 
   "oldfieldname": "purchase_rate", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -178,37 +217,50 @@
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
-  "label": "Amount*", 
+  "in_list_view": 0, 
+  "label": "Amount (Company Currency)", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 0, 
   "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse_and_reference", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Warehouse and Reference"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "hidden": 0, 
+  "in_list_view": 0, 
   "label": "Accepted Warehouse", 
   "oldfieldname": "warehouse", 
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "conversion_factor", 
   "fieldtype": "Float", 
+  "in_list_view": 0, 
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 0, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -216,6 +268,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
+  "in_list_view": 0, 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
@@ -230,11 +283,13 @@
   "fieldname": "serial_no", 
   "fieldtype": "Text", 
   "in_filter": 1, 
+  "in_list_view": 1, 
   "label": "Serial No", 
   "no_copy": 1, 
   "oldfieldname": "serial_no", 
   "oldfieldtype": "Text", 
   "print_hide": 0, 
+  "read_only": 0, 
   "report_hide": 0
  }, 
  {
@@ -242,7 +297,8 @@
   "fieldname": "rejected_serial_no", 
   "fieldtype": "Text", 
   "label": "Rejected Serial No", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -252,7 +308,8 @@
   "oldfieldname": "batch_no", 
   "oldfieldtype": "Link", 
   "options": "Batch", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -278,6 +335,7 @@
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
+  "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0
  }, 
@@ -288,18 +346,20 @@
   "in_filter": 1, 
   "label": "Project Name", 
   "options": "Project", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "qa_no", 
   "fieldtype": "Link", 
-  "label": "QA No", 
+  "label": "Quality Inspection", 
   "no_copy": 1, 
   "oldfieldname": "qa_no", 
   "oldfieldtype": "Link", 
   "options": "Quality Inspection", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -336,6 +396,7 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
+  "read_only": 1, 
   "width": "100px"
  }, 
  {
@@ -344,9 +405,11 @@
   "fieldtype": "Data", 
   "hidden": 1, 
   "label": "Prevdoc Doctype", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_doctype", 
   "oldfieldtype": "Data", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -354,8 +417,8 @@
   "fieldtype": "Link", 
   "hidden": 0, 
   "in_filter": 1, 
-  "label": "PO No", 
-  "no_copy": 0, 
+  "label": "Purchase Order", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Link", 
   "options": "Purchase Order", 
@@ -372,7 +435,8 @@
   "fieldtype": "Date", 
   "hidden": 1, 
   "in_filter": 1, 
-  "label": "PO Date", 
+  "label": "Purchase Order Date", 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -418,7 +482,7 @@
   "hidden": 1, 
   "in_filter": 1, 
   "label": "Purchase Order Item No", 
-  "no_copy": 0, 
+  "no_copy": 1, 
   "oldfieldname": "prevdoc_detail_docname", 
   "oldfieldtype": "Data", 
   "print_hide": 1, 
@@ -426,20 +490,6 @@
   "read_only": 1, 
   "search_index": 1, 
   "width": "150px"
- }, 
- {
-  "default": "0.00", 
-  "doctype": "DocField", 
-  "fieldname": "billed_qty", 
-  "fieldtype": "Float", 
-  "label": "Billed Quantity", 
-  "no_copy": 1, 
-  "oldfieldname": "billed_qty", 
-  "oldfieldtype": "Currency", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
@@ -479,6 +529,7 @@
   "label": "Page Break", 
   "oldfieldname": "page_break", 
   "oldfieldtype": "Check", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 0
  }
 ]

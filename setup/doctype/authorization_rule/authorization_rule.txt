@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:51:17", 
+  "modified": "2013-07-05 14:25:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "AR.####", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-shield", 
   "module": "Setup", 
   "name": "__common__", 
   "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role"

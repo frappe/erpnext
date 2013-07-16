@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-01-29 14:35:42", 
+  "modified": "2013-07-05 14:57:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,6 +12,7 @@
   "description": "Supplier of Goods or Services.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-user", 
   "module": "Buying", 
   "name": "__common__", 
   "search_fields": "supplier_name,supplier_type"
@@ -46,7 +47,8 @@
   "fieldname": "basic_info", 
   "fieldtype": "Section Break", 
   "label": "Basic Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
  }, 
  {
   "doctype": "DocField", 
@@ -91,7 +93,8 @@
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
   "label": "Address & Contacts", 
-  "oldfieldtype": "Column Break"
+  "oldfieldtype": "Column Break", 
+  "options": "icon-map-marker"
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
@@ -132,7 +135,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "communication_history", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments"
  }, 
  {
   "doctype": "DocField", 
@@ -145,7 +150,8 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
  }, 
  {
   "description": "Enter the company name under which Account Head will be created for this Supplier", 

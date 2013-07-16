@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, validate_email_add
+from webnotes.utils import flt, validate_email_add
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -27,7 +27,12 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		
+	
+	def autoname(self):
+		suffix = " - " + webnotes.conn.get_value("Company", self.doc.company, "abbr")
+		if not self.doc.warehouse_name.endswith(suffix):
+			self.doc.name = self.doc.warehouse_name + suffix
+	
 	def get_bin(self, item_code, warehouse=None):
 		warehouse = warehouse or self.doc.name
 		bin = sql("select name from tabBin where item_code = %s and \
@@ -42,20 +47,12 @@ class DocType:
 			bin_wrapper.ignore_permissions = 1
 			bin_wrapper.insert()
 			
-			bin_obj = bin_wrapper.make_obj()
+			bin_obj = bin_wrapper.make_controller()
 		else:
 			bin_obj = get_obj('Bin', bin)
 		return bin_obj
 	
-
-	def validate_asset(self, item_code):
-		if webnotes.conn.get_value("Item", item_code, "is_asset_item") == 'Yes' \
-				and self.doc.warehouse_type != 'Fixed Asset':
-			msgprint("""Fixed Asset Item %s can only be transacted in a 
-				Fixed Asset type Warehouse""" % item_code, raise_exception=1)
-
 	def update_bin(self, args):
-		self.validate_asset(args.get("item_code"))
 		is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
 		if is_stock_item == 'Yes':
 			bin = self.get_bin(args.get("item_code"))
@@ -65,21 +62,10 @@ class DocType:
 			msgprint("[Stock Update] Ignored %s since it is not a stock item" 
 				% args.get("item_code"))
 
-	def check_state(self):
-		return "\n" + "\n".join([i[0] for i in sql("""
-			select state_name from `tabState` where country=%s""", self.doc.country)])
-
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
-		if not self.doc.warehouse_type:
-			msgprint("Warehouse Type is Mandatory", raise_exception=1)
-			
-		wt = sql("select warehouse_type from `tabWarehouse` where name ='%s'" % self.doc.name)
-		if wt and cstr(self.doc.warehouse_type) != cstr(wt[0][0]):
-			sql("""update `tabStock Ledger Entry` set warehouse_type = %s 
-				where warehouse = %s""", (self.doc.warehouse_type, self.doc.name))
-	
+
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
 		
@@ -207,3 +193,10 @@ class DocType:
 				exists for this warehouse.""", raise_exception=1)
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
+
+	def on_rename(self, newdn, olddn, merge=False):
+		if merge:
+			from stock.stock_ledger import update_entries_after
+			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 
+				where warehouse=%s""", newdn):
+					update_entries_after({"item_code": item_code, "warehouse": newdn})

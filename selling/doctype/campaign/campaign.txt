@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:55:58", 
+  "modified": "2013-07-05 14:29:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-bullhorn", 
   "module": "Selling", 
   "name": "__common__"
  }, 

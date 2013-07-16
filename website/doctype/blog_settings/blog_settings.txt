@@ -1,0 +1,62 @@
+[
+ {
+  "creation": "2013-03-11 17:48:16", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:27:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Blog Settings", 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "Website", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Blog Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Blog Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Website Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Blog Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "blog_title", 
+  "fieldtype": "Data", 
+  "label": "Blog Title"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "blog_introduction", 
+  "fieldtype": "Small Text", 
+  "label": "Blog Introduction"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "writers_introduction", 
+  "fieldtype": "Small Text", 
+  "label": "Writers Introduction"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

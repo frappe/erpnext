@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-01-23 16:43:17", 
+  "modified": "2013-07-05 15:04:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "autoname": "field:workstation_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-wrench", 
   "module": "Manufacturing", 
   "name": "__common__"
  }, 

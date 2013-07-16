@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-01-22 13:38:08", 
+  "modified": "2013-07-05 14:44:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,6 +13,7 @@
   "doctype": "DocType", 
   "hide_heading": 0, 
   "hide_toolbar": 0, 
+  "icon": "icon-cog", 
   "issingle": 1, 
   "module": "HR", 
   "name": "__common__", 

@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-06-05 11:00:31", 
+  "docstatus": 0, 
+  "modified": "2013-06-05 11:00:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report_name": "Warehouse-Wise Stock Balance", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Warehouse-Wise Stock Balance"
+ }
+]

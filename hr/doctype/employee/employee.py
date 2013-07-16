@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate, validate_email_add
+from webnotes.utils import getdate, validate_email_add, cstr
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
@@ -27,7 +27,7 @@ class DocType:
 	def __init__(self,doc,doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-
+		
 	def autoname(self):
 		ret = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'emp_created_by'")
 		if not ret:
@@ -36,7 +36,7 @@ class DocType:
 			if ret[0][0]=='Naming Series':
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
 			elif ret[0][0]=='Employee Number':
-				self.doc.name = make_autoname(self.doc.employee_number)
+				self.doc.name = self.doc.employee_number
 
 		self.doc.employee = self.doc.name
 
@@ -49,35 +49,38 @@ class DocType:
 		self.validate_email()
 		self.validate_name()
 		self.validate_status()
-				
-	def get_retirement_date(self):		
-		import datetime
-		ret = {}
-		if self.doc.date_of_birth:
-			dt = getdate(self.doc.date_of_birth) + datetime.timedelta(21915)
-			ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
-		return ret
-
-	def check_sal_structure(self, nm):
-		ret_sal_struct=sql("select name from `tabSalary Structure` where employee='%s' and is_active = 'Yes' and docstatus!= 2"%nm)
-		return ret_sal_struct and ret_sal_struct[0][0] or ''
-
+		self.validate_employee_leave_approver()
+		
 	def on_update(self):
 		if self.doc.user_id:
 			self.update_user_default()
 			self.update_profile()
-	
+				
 	def update_user_default(self):
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
 		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
 		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
+		self.set_default_leave_approver()
+	
+	def set_default_leave_approver(self):
+		employee_leave_approvers = self.doclist.get({"parentfield": "employee_leave_approvers"})
+
+		if len(employee_leave_approvers):
+			webnotes.conn.set_default("leave_approver", employee_leave_approvers[0].leave_approver,
+				self.doc.user_id)
 		
+		elif self.doc.reports_to:
+			from webnotes.profile import Profile
+			reports_to_user = webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id")
+			if "Leave Approver" in Profile(reports_to_user).get_roles():
+				webnotes.conn.set_default("leave_approver", reports_to_user, self.doc.user_id)
+
 	def update_profile(self):
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
 			from webnotes.profile import add_role
-			add_role(self.doc.user_id, "HR User")
+			add_role(self.doc.user_id, "Employee")
 			
 		profile_wrapper = webnotes.bean("Profile", self.doc.user_id)
 		
@@ -98,23 +101,23 @@ class DocType:
 		if self.doc.gender:
 			profile_wrapper.doc.gender = self.doc.gender
 			
-		if self.doc.image and self.doc.file_list:
-			# add to file list and user_image
-			for file_args in self.doc.file_list.split("\n"):
-				fname, fid = file_args.split(",")
-				if self.doc.image == fname:
-					new_file_args = fname + "," + fid
-					file_list = profile_wrapper.doc.file_list.split("\n")
-					if new_file_args not in file_list:
-						file_list += [new_file_args]
-					profile_wrapper.doc.file_list = "\n".join(file_list)
-					profile_wrapper.doc.user_image = fname
-					break
+		if self.doc.image:
+			if not profile_wrapper.doc.user_image == self.doc.image:
+				profile_wrapper.doc.user_image = self.doc.image
+				try:
+					webnotes.doc({
+						"doctype": "File Data",
+						"file_name": self.doc.image,
+						"attached_to_doctype": "Profile",
+						"attached_to_name": self.doc.user_id
+					}).insert()
+				except webnotes.DuplicateEntryError, e:
+					# already exists
+					pass
 			
 		profile_wrapper.save()
 		
 	def validate_date(self):
-		import datetime
 		if self.doc.date_of_birth and self.doc.date_of_joining and getdate(self.doc.date_of_birth) >= getdate(self.doc.date_of_joining):
 			msgprint('Date of Joining must be greater than Date of Birth')
 			raise Exception
@@ -165,3 +168,21 @@ class DocType:
 		if self.doc.status == 'Left' and not self.doc.relieving_date:
 			msgprint("Please enter relieving date.")
 			raise Exception
+			
+	def validate_employee_leave_approver(self):
+		from webnotes.profile import Profile
+		from hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
+		
+		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
+			if "Leave Approver" not in Profile(l.leave_approver).get_roles():
+				msgprint(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
+					raise_exception=InvalidLeaveApproverError)
+
+@webnotes.whitelist()
+def get_retirement_date(date_of_birth=None):
+	import datetime
+	ret = {}
+	if date_of_birth:
+		dt = getdate(date_of_birth) + datetime.timedelta(21915)
+		ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
+	return ret

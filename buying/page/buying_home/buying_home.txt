@@ -1,21 +1,22 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2012-02-21 13:22:54", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:41:50", 
   "modified_by": "Administrator", 
-  "modified": "2012-02-21 13:22:54"
+  "owner": "Administrator"
  }, 
  {
-  "name": "__common__", 
-  "title": "Buying Home", 
-  "module": "Buying", 
   "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "Buying", 
+  "name": "__common__", 
   "page_name": "buying-home", 
-  "standard": "Yes"
+  "standard": "Yes", 
+  "title": "Buying Home"
  }, 
  {
-  "name": "buying-home", 
-  "doctype": "Page"
+  "doctype": "Page", 
+  "name": "buying-home"
  }
 ]
