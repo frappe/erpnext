@@ -246,4 +246,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('accounts', 'DocType Mapper', 'Purchase Order-Purchase Invoice') # 2013-07-04 3:00",
 	"execute:webnotes.reload_doc('accounts', 'DocType Mapper', 'Purchase Receipt-Purchase Invoice') # 2013-07-04 3:00",
 	"execute:webnotes.delete_doc('Report', 'Sales Orders Pending To Be Delivered')",
+	"patches.july_2013.p01_same_sales_rate_patch",
 ]

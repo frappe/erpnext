@@ -558,13 +558,14 @@ class DocType(SellingController):
 			
 	def validate_rate_with_refdoc(self):
 		"""Validate values with reference document with previous document"""
-		for d in self.doclist.get({"parentfield": "entries"}):
-			if d.so_detail:
-				self.check_value("Sales Order", d.sales_order, d.so_detail, 
-					d.export_rate, d.item_code)
-			if d.dn_detail:
-				self.check_value("Delivery Note", d.delivery_note, d.dn_detail, 
-					d.export_rate, d.item_code)
+		if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+			for d in self.doclist.get({"parentfield": "entries"}):
+				if d.so_detail:
+					self.check_value("Sales Order", d.sales_order, d.so_detail, 
+						d.export_rate, d.item_code)
+				if d.dn_detail:
+					self.check_value("Delivery Note", d.delivery_note, d.dn_detail, 
+						d.export_rate, d.item_code)
 				
 	def check_value(self, ref_dt, ref_dn, ref_item_dn, val, item_code):
 		ref_val = webnotes.conn.get_value(ref_dt + " Item", ref_item_dn, "export_rate")

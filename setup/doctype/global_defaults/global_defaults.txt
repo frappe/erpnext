@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-02 17:53:24", 
+  "creation": "2013-07-16 18:18:01", 
   "docstatus": 0, 
-  "modified": "2013-05-22 15:57:26", 
+  "modified": "2013-07-16 18:23:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,8 +27,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
@@ -441,6 +439,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "maintain_same_sales_rate", 
+  "fieldtype": "Check", 
+  "label": "Maintain same rate throughout sales cycle"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "buying", 
   "fieldtype": "Section Break", 
   "label": "Buying", 
@@ -525,6 +529,11 @@
   "fieldtype": "Data", 
   "label": "SMS Sender Name", 
   "read_only": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm"

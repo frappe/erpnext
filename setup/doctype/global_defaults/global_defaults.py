@@ -48,6 +48,7 @@ keydict = {
 	'disable_rounded_total': 'disable_rounded_total',
 	"update_stock": "update_stock",
 	"auto_inventory_accounting": "auto_inventory_accounting",
+	'maintain_same_sales_rate' : 'maintain_same_sales_rate',
 }
 
 class DocType:
