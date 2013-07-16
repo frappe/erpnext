@@ -197,7 +197,6 @@ patch_list = [
 	"execute:webnotes.reload_doc('website', 'doctype', 'blog_post') #2013-03-25",
 	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-03-25",
 	"execute:webnotes.reload_doc('setup', 'doctype', 'sales_partner') #2013-06-25",
-	"execute:webnotes.bean('Style Settings').save() #2013-03-25",
 	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)",
 	"patches.march_2013.p09_unset_user_type_partner",
 	"patches.march_2013.p10_set_fiscal_year_for_stock",
@@ -251,4 +250,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('Report', 'Received Items To Be Billed')",
 	"patches.july_2013.p02_copy_shipping_address",
 	"patches.july_2013.p03_cost_center_company",
+	"execute:webnotes.bean('Style Settings').save() #2013-07-16",
 ]
