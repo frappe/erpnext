@@ -17,7 +17,7 @@ Install ERPNext in one command!
 1. Switch to root user using `sudo su`
 1. create a folder where you want to install erpnext
 1. go to the new folder
-1. `wget https://gist.github.com/anandpdoshi/5991402/raw/5b3b451720a8575f8708e58a640b9a760d048392/install_erpnext.py`
+1. `wget https://raw.github.com/webnotes/erpnext/master/install_erpnext.py`
 1. `python install_erpnext.py`
 
 > If you are installing on your server for deployment, remember to change Administrator's password!
