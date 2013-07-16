@@ -9,6 +9,9 @@ from webnotes.model.controller import DocListController
 class ShoppingCartSetupError(webnotes.ValidationError): pass
 
 class DocType(DocListController):
+	def onload(self):
+		self.doc.fields["__quotation_series"] = webnotes.get_doctype("Quotation").get_options("naming_series")
+	
 	def validate(self):
 		if self.doc.enabled:
 			self.validate_price_lists()
@@ -17,6 +20,7 @@ class DocType(DocListController):
 			
 	def on_update(self):
 		webnotes.conn.set_default("shopping_cart_enabled", self.doc.fields.get("enabled") or 0)
+		webnotes.conn.set_default("shopping_cart_quotation_series", self.doc.fields.get("quotation_series"))
 			
 	def validate_overlapping_territories(self, parentfield, fieldname):
 		# for displaying message
@@ -91,16 +95,17 @@ class DocType(DocListController):
 		expected_to_exist = [currency + "-" + company_currency 
 			for currency in price_list_currency_map.values()
 			if currency != company_currency]
-
-		exists = webnotes.conn.sql_list("""select name from `tabCurrency Exchange`
-			where name in (%s)""" % (", ".join(["%s"]*len(expected_to_exist)),),
-			tuple(expected_to_exist))
+			
+		if expected_to_exist:
+			exists = webnotes.conn.sql_list("""select name from `tabCurrency Exchange`
+				where name in (%s)""" % (", ".join(["%s"]*len(expected_to_exist)),),
+				tuple(expected_to_exist))
 		
-		missing = list(set(expected_to_exist).difference(exists))
+			missing = list(set(expected_to_exist).difference(exists))
 		
-		if missing:
-			msgprint(_("Missing Currency Exchange Rates for" + ": " + comma_and(missing)),
-				raise_exception=ShoppingCartSetupError)
+			if missing:
+				msgprint(_("Missing Currency Exchange Rates for" + ": " + comma_and(missing)),
+					raise_exception=ShoppingCartSetupError)
 				
 	def get_name_from_territory(self, territory, parentfield, fieldname):
 		name = None

@@ -30,11 +30,6 @@ class AccountsController(TransactionBase):
 		self.validate_date_with_fiscal_year()
 		
 		if self.meta.get_field("currency"):
-			self.company_currency = get_company_currency(self.doc.company)
-			
-			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
-				self.meta.get_label("conversion_rate"), self.doc.company)
-			
 			self.calculate_taxes_and_totals()
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
@@ -66,7 +61,7 @@ class AccountsController(TransactionBase):
 					"price_list_name": self.doc.price_list_name, 
 					"buying_or_selling": buying_or_selling
 				}))
-
+				
 				if self.doc.price_list_currency:
 					if not self.doc.plc_conversion_rate:
 						company_currency = get_company_currency(self.doc.company)
@@ -129,6 +124,14 @@ class AccountsController(TransactionBase):
 				self.doclist.append(tax)
 					
 	def calculate_taxes_and_totals(self):
+		# validate conversion rate
+		if not self.doc.currency:
+			self.doc.currency = get_company_currency(self.doc.company)
+			self.doc.conversion_rate = 1.0
+		else:
+			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
+				self.meta.get_label("conversion_rate"), self.doc.company)
+		
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 		self.item_doclist = self.doclist.get({"parentfield": self.fname})
 		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
