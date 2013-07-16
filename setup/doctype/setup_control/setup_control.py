@@ -186,25 +186,21 @@ class DocType:
 		from webnotes.model.doc import Document
 		for company in companies_list:
 			if company and company[0]:
-				edigest = Document('Email Digest')
-				edigest.name = "Default Weekly Digest - " + company[0]
-				edigest.company = company[0]
-				edigest.frequency = 'Weekly'
-				edigest.recipient_list = "\n".join(system_managers)
-				for f in ['new_leads', 'new_enquiries', 'new_quotations',
-						'new_sales_orders', 'new_purchase_orders',
-						'new_transactions', 'payables', 'payments',
-						'expenses_booked', 'invoiced_amount', 'collections',
-						'income', 'bank_balance', 'stock_below_rl',
-						'income_year_to_date', 'enabled']:
-					edigest.fields[f] = 1
-				exists = webnotes.conn.sql("""\
-					SELECT name FROM `tabEmail Digest`
-					WHERE name = %s""", edigest.name)
-				if (exists and exists[0]) and exists[0][0]:
+				edigest = webnotes.bean({
+					"doctype": "Email Digest",
+					"name": "Default Weekly Digest - " + company[0],
+					"company": company[0],
+					"frequency": "Weekly",
+					"recipient_list": "\n".join(system_managers)
+				})
+				
+				if webnotes.conn.sql("""select name from `tabEmail Digest` where name=%s""", edigest.doc.name):
 					continue
-				else:
-					edigest.save(1)
+				
+				for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
+					edigest.doc.fields[fieldname] = 1
+					
+				edigest.insert()
 		
 	# Get Fiscal year Details
 	# ------------------------

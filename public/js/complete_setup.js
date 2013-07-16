@@ -50,7 +50,7 @@ $.extend(erpnext.complete_setup, {
 		});
 		
 		if(user != 'Administrator'){
-			$(d.appframe.$titlebar).find('.close').toggle(false); // Hide close image
+			d.$wrapper.find('.close').toggle(false); // Hide close image
 			$('header').toggle(false); // hide toolbar
 		}
 		
@@ -116,6 +116,7 @@ $.extend(erpnext.complete_setup, {
 			var inp = d.fields_dict.company_name.input;
 			inp.value = wn.control_panel.company_name;
 			inp.disabled = true;
+			d.fields_dict.company_name.$input.trigger("change");
 		}
 
 		// set first name, last name
