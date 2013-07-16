@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -26,9 +25,9 @@ def execute(filters=None):
 	
 	data = []
 	for d in item_list:
-		data.append([d.item_code, d.item_name, d.item_group, d.name, d.posting_date, d.customer, 
-			d.debit_to, d.territory, d.project_name, d.company, d.sales_order, d.delivery_note,
-			d.income_account, d.qty, d.basic_rate, d.amount])
+		data.append([d.item_code, d.item_name, d.item_group, d.name, d.posting_date, 
+			d.customer_name, d.debit_to, d.territory, d.project_name, d.company, d.sales_order, 
+			d.delivery_note, d.income_account, d.qty, d.basic_rate, d.amount])
 	
 	return columns, data
 	
@@ -61,7 +60,7 @@ def get_items(filters):
 	return webnotes.conn.sql("""select si.name, si.posting_date, si.debit_to, si.project_name, 
 		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name, 
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account, 
-		si_item.qty, si_item.basic_rate, si_item.amount
+		si_item.qty, si_item.basic_rate, si_item.amount, si.customer_name
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item 
 		where si.name = si_item.parent and si.docstatus = 1 %s 
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)

@@ -26,9 +26,9 @@ def execute(filters=None):
 	data = []
 	for d in item_list:
 		expense_head = d.expense_head or aii_account_map.get(d.company)
-		data.append([d.item_code, d.item_name, d.item_group, d.name, d.posting_date, d.supplier, 
-			d.credit_to, d.project_name, d.company, d.purchase_order, d.purchase_receipt,
-			expense_head, d.qty, d.rate, d.amount])
+		data.append([d.item_code, d.item_name, d.item_group, d.name, d.posting_date, 
+			d.supplier_name, d.credit_to, d.project_name, d.company, d.purchase_order, 
+			d.purchase_receipt, expense_head, d.qty, d.rate, d.amount])
 	
 	return columns, data
 	
@@ -59,7 +59,7 @@ def get_items(filters):
 	return webnotes.conn.sql("""select pi.name, pi.posting_date, pi.credit_to, pi.company, 
 		pi.supplier, pi.remarks, pi_item.item_code, pi_item.item_name, pi_item.item_group, 
 		pi_item.project_name, pi_item.purchase_order, pi_item.purchase_receipt, 
-		pi_item.expense_head, pi_item.qty, pi_item.rate, pi_item.amount
+		pi_item.expense_head, pi_item.qty, pi_item.rate, pi_item.amount, pi.supplier_name
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item 
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s 
 		order by pi.posting_date desc, pi_item.item_code desc""" % conditions, filters, as_dict=1)

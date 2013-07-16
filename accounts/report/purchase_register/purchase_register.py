@@ -31,7 +31,7 @@ def execute(filters=None):
 		return columns, invoice_list
 	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
-	invoice_tax_map = get_invoice_tax_map(invoice_list)
+	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list, invoice_expense_map)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	account_map = get_account_details(invoice_list)
 
@@ -42,25 +42,32 @@ def execute(filters=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.credit_to, 
+		row = [inv.name, inv.posting_date, inv.supplier_name, inv.credit_to, 
 			account_map.get(inv.credit_to), ", ".join(project_name), inv.bill_no, inv.bill_date, 
 			inv.remarks, ", ".join(purchase_order), ", ".join(purchase_receipt)]
 		
 		# map expense values
+		net_total = 0
 		for expense_acc in expense_accounts:
-			row.append(invoice_expense_map.get(inv.name, {}).get(expense_acc))
+			expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
+			net_total += expense_amount
+			row.append(expense_amount)
 		
 		# net total
-		row.append(inv.net_total)
+		row.append(net_total)
 			
 		# tax account
+		total_tax = 0
 		for tax_acc in tax_accounts:
-			row.append(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+			if tax_acc not in expense_accounts:
+				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+				total_tax += tax_amount
+				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [inv.total_tax, inv.grand_total, flt(inv.grand_total, 2), \
-			inv.outstanding_amount]
+		row += [total_tax, inv.grand_total, flt(inv.grand_total, 2), inv.outstanding_amount]
 		data.append(row)
+		# raise Exception
 	
 	return columns, data
 	
@@ -68,12 +75,13 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier:Link/Supplier:120", 
+		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier::120", 
 		"Supplier Account:Link/Account:120", "Account Group:LInk/Account:120", 
 		"Project:Link/Project:80", "Bill No::120", "Bill Date:Date:80", "Remarks::150", 
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
 	]
-	expense_accounts = tax_accounts = []
+	expense_accounts = tax_accounts = expense_columns = tax_columns = []
+	
 	if invoice_list:	
 		expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
 			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
@@ -85,9 +93,15 @@ def get_columns(invoice_list):
 			and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
 			order by account_head""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
+			
+				
+	expense_columns = [(account + ":Currency:120") for account in expense_accounts]
+	for account in tax_accounts:
+		if account not in expense_accounts:
+			tax_columns.append(account + ":Currency:120")
 	
-	columns = columns + [(account + ":Currency:120") for account in expense_accounts] + \
-		["Net Total:Currency:120"] + [(account + ":Currency:120") for account in tax_accounts] + \
+	columns = columns + expense_columns + \
+		["Net Total:Currency:120"] + tax_columns + \
 		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
 		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
@@ -106,9 +120,8 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, posting_date, credit_to, 
-		supplier, bill_no, bill_date, remarks, net_total, 
-		total_tax, grand_total, outstanding_amount 
+	return webnotes.conn.sql("""select name, posting_date, credit_to, supplier, supplier_name, 
+		bill_no, bill_date, remarks, grand_total, outstanding_amount 
 		from `tabPurchase Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
@@ -125,17 +138,20 @@ def get_invoice_expense_map(invoice_list):
 	
 	return invoice_expense_map
 	
-def get_invoice_tax_map(invoice_list):
+def get_invoice_tax_map(invoice_list, invoice_expense_map):
 	tax_details = webnotes.conn.sql("""select parent, account_head, sum(tax_amount) as tax_amount
 		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_tax_map = {}
 	for d in tax_details:
-		invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
-		invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
+		if d.account_head in invoice_expense_map.get(d.parent):
+			invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
+		else:
+			invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
+			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
 	
-	return invoice_tax_map
+	return invoice_expense_map, invoice_tax_map
 	
 def get_invoice_po_pr_map(invoice_list):
 	pi_items = webnotes.conn.sql("""select parent, purchase_order, purchase_receipt, 

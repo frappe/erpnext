@@ -27,11 +27,11 @@ def execute(filters=None):
 				and si_due_date_map.get(gle.voucher_no) or ""
 		
 			invoiced_amount = gle.debit > 0 and gle.debit or 0		
-			payment_amount = get_payment_amount(gle, filters.get("report_date") or nowdate(), 
-				entries_after_report_date)
-			outstanding_amount = invoiced_amount - payment_amount
+			outstanding_amount = get_outstanding_amount(gle, 
+				filters.get("report_date") or nowdate())
 		
 			if abs(flt(outstanding_amount)) > 0.01:
+				payment_amount = invoiced_amount - outstanding_amount
 				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
 					gle.remarks, due_date, account_territory_map.get(gle.account), 
 					invoiced_amount, payment_amount, outstanding_amount]
@@ -103,6 +103,16 @@ def get_si_due_date_map():
 		si_due_date_map[t[0]] = t[1]
 		
 	return si_due_date_map
+
+def get_outstanding_amount(gle, report_date):
+	payment_amount = webnotes.conn.sql("""
+		select sum(ifnull(credit, 0)) - sum(ifnull(debit, 0)) 
+		from `tabGL Entry` 
+		where account = %s and posting_date <= %s and against_voucher_type = %s 
+		and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
+		(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
+		
+	return flt(gle.debit) - flt(gle.credit) - flt(payment_amount)
 
 def get_payment_amount(gle, report_date, entries_after_report_date):
 	payment_amount = 0
