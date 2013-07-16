@@ -143,7 +143,7 @@ $.extend(wn.cart, {
 			'<div style="height: 120px; overflow: hidden;"><img src="' + doc.image + '" /></div>' :
 			'{% include "app/website/templates/html/product_missing_image.html" %}';
 			
-		if(!doc.web_short_description) doc.web_short_description = doc.description;
+		if(doc.description === doc.item_name) doc.description = "";
 		
 		$(repl('<div class="row">\
 			<div class="col col-lg-9 col-sm-9">\
@@ -151,7 +151,7 @@ $.extend(wn.cart, {
 					<div class="col col-lg-3">%(image_html)s</div>\
 					<div class="col col-lg-9">\
 						<h4><a href="%(page_name)s">%(item_name)s</a></h4>\
-						<p>%(web_short_description)s</p>\
+						<p>%(description)s</p>\
 					</div>\
 				</div>\
 			</div>\

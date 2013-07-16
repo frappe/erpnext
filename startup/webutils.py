@@ -82,10 +82,10 @@ def get_profile_args():
 		phone = party.phone
 	else:
 		mobile_no, phone = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user, 
-			"customer": party.name})
+			"customer": party.name}, ["mobile_no", "phone"])
 		
 	return {
-		"company_name": party.customer_name if party.doctype == "Customer" else party.company_name,
-		"mobile_no": mobile_no,
-		"phone": phone
+		"company_name": cstr(party.customer_name if party.doctype == "Customer" else party.company_name),
+		"mobile_no": cstr(mobile_no),
+		"phone": cstr(phone)
 	}

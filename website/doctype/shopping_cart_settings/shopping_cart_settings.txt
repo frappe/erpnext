@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-07-10 18:42:29", 
+  "modified": "2013-07-15 17:33:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,6 +76,13 @@
   "fieldtype": "Link", 
   "label": "Default Customer Group", 
   "options": "Customer Group", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quotation_series", 
+  "fieldtype": "Select", 
+  "label": "Quotation Series", 
   "reqd": 1
  }, 
  {

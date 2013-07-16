@@ -32,8 +32,7 @@
 				<p class="help">Item Code: <span itemprop="productID">{{ name }}</span></p>
 				<h4>Product Description</h4>
 				<div itemprop="description">
-				{{ web_long_description or web_short_description or description or 
-					"[No description given]" }}
+				{{ web_long_description or description or "[No description given]" }}
 				</div>
 				<div style="min-height: 100px; margin: 10px 0;">
 					<div class="item-price-info" style="display: none;">
