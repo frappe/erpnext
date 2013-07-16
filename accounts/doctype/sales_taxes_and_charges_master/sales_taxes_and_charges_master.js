@@ -139,11 +139,12 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
 	return{
-		filters:[
-			['Account', 'group_or_ledger', '=', 'Ledger'],
-			['Account', 'account_type', 'in', 'Tax, Chargeable, Income Account'],
-			['Account', 'company', '=', doc.company]
-		]
+		query: "controllers.queries.tax_account_query",
+    	filters: {
+			"account_type": ["Tax", "Chargeable", "Income Account"],
+			"debit_or_credit": "Credit",
+			"company": doc.company
+		}
 	}	
 }
 
