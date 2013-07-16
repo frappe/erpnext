@@ -23,7 +23,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 
 	invoice_list = get_invoices(filters)
-	columns, expense_accounts, tax_accounts, renamed_columns = get_columns(invoice_list)
+	columns, expense_accounts, tax_accounts = get_columns(invoice_list)
 	
 	
 	if not invoice_list:
@@ -31,7 +31,7 @@ def execute(filters=None):
 		return columns, invoice_list
 	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
-	invoice_tax_map = get_invoice_tax_map(invoice_list, renamed_columns)
+	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list, invoice_expense_map)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	account_map = get_account_details(invoice_list)
 
@@ -47,20 +47,27 @@ def execute(filters=None):
 			inv.remarks, ", ".join(purchase_order), ", ".join(purchase_receipt)]
 		
 		# map expense values
+		net_total = 0
 		for expense_acc in expense_accounts:
-			row.append(invoice_expense_map.get(inv.name, {}).get(expense_acc))
+			expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
+			net_total += expense_amount
+			row.append(expense_amount)
 		
 		# net total
-		row.append(inv.net_total)
+		row.append(net_total)
 			
 		# tax account
+		total_tax = 0
 		for tax_acc in tax_accounts:
-			row.append(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+			if tax_acc not in expense_accounts:
+				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+				total_tax += tax_amount
+				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [inv.total_tax, inv.grand_total, flt(inv.grand_total, 2), \
-			inv.outstanding_amount]
+		row += [total_tax, inv.grand_total, flt(inv.grand_total, 2), inv.outstanding_amount]
 		data.append(row)
+		# raise Exception
 	
 	return columns, data
 	
@@ -74,7 +81,6 @@ def get_columns(invoice_list):
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
 	]
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []
-	renamed_columns = {}
 	
 	if invoice_list:	
 		expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
@@ -91,11 +97,7 @@ def get_columns(invoice_list):
 				
 	expense_columns = [(account + ":Currency:120") for account in expense_accounts]
 	for account in tax_accounts:
-		if account in expense_accounts:
-			new_account = account + " (Tax)"
-			renamed_columns[account] = new_account
-			tax_columns.append(new_account + ":Currency:120")
-		else:
+		if account not in expense_accounts:
 			tax_columns.append(account + ":Currency:120")
 	
 	columns = columns + expense_columns + \
@@ -103,7 +105,7 @@ def get_columns(invoice_list):
 		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
 		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
-	return columns, expense_accounts, tax_accounts, renamed_columns
+	return columns, expense_accounts, tax_accounts
 
 def get_conditions(filters):
 	conditions = ""
@@ -119,7 +121,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select name, posting_date, credit_to, supplier, supplier_name, 
-		bill_no, bill_date, remarks, net_total, total_tax, grand_total, outstanding_amount 
+		bill_no, bill_date, remarks, grand_total, outstanding_amount 
 		from `tabPurchase Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	
@@ -136,18 +138,20 @@ def get_invoice_expense_map(invoice_list):
 	
 	return invoice_expense_map
 	
-def get_invoice_tax_map(invoice_list, renamed_columns):
+def get_invoice_tax_map(invoice_list, invoice_expense_map):
 	tax_details = webnotes.conn.sql("""select parent, account_head, sum(tax_amount) as tax_amount
 		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_tax_map = {}
 	for d in tax_details:
-		account = renamed_columns.get(d.account_head) or d.account_head
-		invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(account, [])
-		invoice_tax_map[d.parent][account] = flt(d.tax_amount)
+		if d.account_head in invoice_expense_map.get(d.parent):
+			invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
+		else:
+			invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
+			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
 	
-	return invoice_tax_map
+	return invoice_expense_map, invoice_tax_map
 	
 def get_invoice_po_pr_map(invoice_list):
 	pi_items = webnotes.conn.sql("""select parent, purchase_order, purchase_receipt, 
