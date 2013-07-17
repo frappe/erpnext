@@ -2,7 +2,7 @@ import webnotes
 from webnotes.model import no_value_fields
 
 def execute():
-	for dt in webnotes.conn.sql("""select name from `tabDocType` where custom=1"""):
+	for dt in webnotes.conn.sql_list("""select name from `tabDocType` where custom=1"""):
 		dtbean = webnotes.bean("DocType", dt)
 		
 		if any((df.in_list_view for df in dtbean.doclist.get({"doctype": "DocField", "parent": dt}))):
