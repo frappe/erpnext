@@ -1,5 +1,12 @@
 # Contributing to ERPNext
 
+### Reporting issues
+
+We only accept issues that are bug reports or feature requests. Bugs must be isolated and reproducible problems. Please read the following guidelines before opening any issue.
+
+1. **Search for existing issues.** We want to avoid duplication, and you'd help us out a lot by first checking if someone else has reported the same issue. Moreover, the issue may have already been resolved with a fix available.
+1. **Share as much information as possible.** Include operating system and version, browser and version, when did you last update ERPNext, how is it customized, etc. where appropriate. Also include steps to reproduce the bug.
+
 ### New Features
 
 #### Don't Repeat Yourself (DRY)
