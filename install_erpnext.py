@@ -134,7 +134,7 @@ def update_config_for_debian():
 		exec_in_shell("service %s restart" % service)
 	
 def install_python_modules():
-	python_modules = "pytz python-dateutil jinja2 markdown2 termcolor python-memcached requests chardet dropbox google-api-python-client pygeoip gitpython"
+	python_modules = "pytz python-dateutil jinja2 markdown2 termcolor python-memcached requests chardet dropbox google-api-python-client pygeoip"
 
 	print "-"*80
 	print "Installing Python Modules: (This may take some time)"
@@ -143,7 +143,7 @@ def install_python_modules():
 	
 	exec_in_shell("easy_install pip")
 	exec_in_shell("pip install -q %s" % python_modules)
-
+	
 def install_erpnext(install_path):
 	print
 	print "-"*80
@@ -188,18 +188,16 @@ def test_root_connection(root_pwd):
 		raise Exception("Incorrect MySQL Root user's password")
 		
 def setup_folders(install_path):
-	from git import Repo
-	
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
-		Repo.clone_from("https://github.com/webnotes/erpnext.git", app)
+		exec_in_shell("cd %s && git clone https://github.com/webnotes/erpnext.git app" % install_path)
 		exec_in_shell("cd app && git config core.filemode false")
 	
 	lib = os.path.join(install_path, "lib")
 	if not os.path.exists(lib):
 		print "Cloning wnframework"
-		Repo.clone_from("https://github.com/webnotes/wnframework.git", lib)
+		exec_in_shell("cd %s && git clone https://github.com/webnotes/wnframework.git lib" % install_path)
 		exec_in_shell("cd lib && git config core.filemode false")
 	
 	public = os.path.join(install_path, "public")
@@ -228,22 +226,14 @@ def setup_conf(install_path, db_name):
 	return db_password
 	
 def setup_db(install_path, root_password, db_name):
-	master_sql = os.path.join(install_path, "app", "master.sql")
-	exec_in_shell("gunzip -c %s.gz > %s" % (master_sql, master_sql))
-	
 	from webnotes.install_lib.install import Installer
 	inst = Installer("root", root_password)
-	inst.import_from_db(db_name, source_path=master_sql, verbose=1)
+	inst.import_from_db(db_name, verbose=1)
 
-	exec_in_shell("rm -f %s" % (master_sql,))
-	
 	# run patches and sync
-	exec_in_shell("./lib/wnf.py -b --no_cms")
 	exec_in_shell("./lib/wnf.py --patch_sync_build")
 	
 def setup_cron(install_path):
-	
-		
 	erpnext_cron_entries = [
 		"*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> /var/log/erpnext-sch.log 2>&1" % install_path,
 		"0 */6 * * * cd %s && python lib/wnf.py --backup >> /var/log/erpnext-backup.log 2>&1" % install_path
