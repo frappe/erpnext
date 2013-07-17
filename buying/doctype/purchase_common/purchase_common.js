@@ -129,7 +129,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							me.import_ref_rate(me.frm.doc, cdt, cdn);
+							me.frm.script_manager.trigger("import_ref_rate", cdt, cdn);
 						}
 					}
 				});

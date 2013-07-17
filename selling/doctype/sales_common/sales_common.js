@@ -202,7 +202,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							me.ref_rate(me.frm.doc, cdt, cdn);
+							me.frm.script_manager.trigger("ref_rate", cdt, cdn);
 						}
 					}
 				});
