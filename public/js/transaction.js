@@ -333,7 +333,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
 				item_name: item.item_name,
 				taxes: $.map(tax_accounts, function(head) {
-					return "<td>(" + item_tax_record[head][0] + ") " + item_tax_record[head][1] + "</td>"
+					return item_tax_record[head] ?
+						"<td>(" + item_tax_record[head][0] + ") " + item_tax_record[head][1] + "</td>" :
+						"<td></td>";
 				}).join("\n")
 			});
 		}).join("\n");
