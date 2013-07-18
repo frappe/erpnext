@@ -17,7 +17,7 @@ wn.modules_path = 'erpnext';
 $(document).bind('toolbar_setup', function() {
 	$('.navbar-brand').html('<div style="display: inline-block; cursor: pointer;">\
 			<object type="image/svg+xml" data="app/images/splash.svg" class="toolbar-splash"></object>\
-		</div>' + (wn.boot.website_settings.brand_html || 'erpnext'))
+		</div>' + ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext'))
 	.addClass("navbar-icon-home")
 	.css('max-width', '200px').css('overflow', 'hidden');
 });
