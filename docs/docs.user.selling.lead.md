@@ -8,9 +8,9 @@ To get the customer through the door, you may be doing all or any of the followi
 - Listing your product on directories.
 - Maintaining an updated and searchable website.
 - Meeting people at trade events.
-- Advertising your product or service.
+- Advertising your product or services.
 
-When you send out the word that you are around and have something valuable offer, people will come in to check out your product. These are your Leads.
+When you send out the word that you are around and have something valuable to offer, people will come in to check out your product. These are your Leads.
 
 They are called Leads because they may lead you to sale. Sales people usually work on leads by calling them, building a relationship and sending information about your products or services. It is important to track all this conversation so that in case another person has to follow-up that person knows the history of this Lead.
 
