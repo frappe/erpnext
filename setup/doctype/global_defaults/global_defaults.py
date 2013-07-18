@@ -33,7 +33,6 @@ keydict = {
 	'account_url':'account_url',
 	'session_expiry': 'session_expiry',
 	'disable_rounded_total': 'disable_rounded_total',
-	'maintain_same_sales_rate' : 'maintain_same_sales_rate',
 }
 
 class DocType:
