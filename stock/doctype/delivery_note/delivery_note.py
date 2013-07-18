@@ -118,12 +118,16 @@ class DocType(SellingController):
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
 					["currency", "="]],
 			},
-			"Sales Order Item": {
-				"ref_dn_field": "prevdoc_detail_docname",
-				"compare_fields": [["export_rate", "="]],
-				"is_child_table": True
-			}
 		})
+		if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+			super(DocType, self).validate_with_previous_doc(self.tname, {
+				"Sales Order Item": {
+					"ref_dn_field": "prevdoc_detail_docname",
+					"compare_fields": [["export_rate", "="]],
+					"is_child_table": True
+				}
+			})
+			
 		
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

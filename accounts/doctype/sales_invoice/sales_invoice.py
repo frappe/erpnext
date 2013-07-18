@@ -374,22 +374,27 @@ class DocType(SellingController):
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
 					["currency", "="]],
 			},
-			"Sales Order Item": {
-				"ref_dn_field": "so_detail",
-				"compare_fields": [["export_rate", "="]],
-				"is_child_table": True
-			},
 			"Delivery Note": {
 				"ref_dn_field": "delivery_note",
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
 					["currency", "="]],
 			},
-			"Delivery Note Item": {
-				"ref_dn_field": "dn_detail",
-				"compare_fields": [["export_rate", "="]],
-				"is_child_table": True
-			}
 		})
+		
+		if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+			super(DocType, self).validate_with_previous_doc(self.tname, {
+				"Sales Order Item": {
+					"ref_dn_field": "so_detail",
+					"compare_fields": [["export_rate", "="]],
+					"is_child_table": True
+				},
+				"Delivery Note Item": {
+					"ref_dn_field": "dn_detail",
+					"compare_fields": [["export_rate", "="]],
+					"is_child_table": True
+				}
+			})
+			
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':

@@ -253,4 +253,5 @@ patch_list = [
 	"execute:webnotes.bean('Style Settings').save() #2013-07-16",
 	"patches.july_2013.p04_merge_duplicate_leads",
 	"patches.july_2013.p05_custom_doctypes_in_list_view",
+	"patches.july_2013.p06_same_sales_rate",
 ]
