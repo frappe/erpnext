@@ -358,12 +358,7 @@ class DocType(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 @webnotes.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):	
-	def update_item(obj, target, source_parent):
-		target.export_amount = flt(obj.amount)
-		target.amount = target.export_amount / flt(source_parent.conversion_rate)
-		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
-		
+def make_sales_invoice(source_name, target_doclist=None):
 	def update_accounts(source, target):
 		si = webnotes.bean(target)
 		si.run_method("onload_post_render")
@@ -384,7 +379,6 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "sales_order", 
 				"serial_no": "serial_no"
 			},
-			"postprocess": update_item
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

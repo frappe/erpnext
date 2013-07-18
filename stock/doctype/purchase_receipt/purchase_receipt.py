@@ -352,10 +352,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
-		target.import_amount = flt(obj.import_amount)
-		target.amount = target.import_amount / flt(source_parent.conversion_rate)
-		if flt(obj.purchase_rate):
-			target.qty = target.amount / flt(obj.purchase_rate)
 
 	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
