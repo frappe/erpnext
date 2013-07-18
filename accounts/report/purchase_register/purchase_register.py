@@ -54,7 +54,7 @@ def execute(filters=None):
 			row.append(expense_amount)
 		
 		# net total
-		row.append(net_total)
+		row.append(net_total or inv.net_total)
 			
 		# tax account
 		total_tax = 0
@@ -121,7 +121,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return webnotes.conn.sql("""select name, posting_date, credit_to, supplier, supplier_name, 
-		bill_no, bill_date, remarks, grand_total, outstanding_amount 
+		bill_no, bill_date, remarks, net_total, grand_total, outstanding_amount 
 		from `tabPurchase Invoice` where docstatus = 1 %s 
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 	

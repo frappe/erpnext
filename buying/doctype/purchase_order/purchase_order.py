@@ -249,7 +249,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
 		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
-		target.amount = target.import_amount / flt(source_parent.conversion_rate)
+		target.amount = target.import_amount * flt(source_parent.conversion_rate)
 		if flt(obj.purchase_rate):
 			target.qty = target.amount / flt(obj.purchase_rate)
 

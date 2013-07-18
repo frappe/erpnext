@@ -412,9 +412,9 @@ def make_delivery_note(source_name, target_doclist=None):
 @webnotes.whitelist()
 def make_sales_invoice(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
-		target.export_amount = flt(obj.amount) - flt(obj.billed_amt)
-		target.amount = target.export_amount / flt(source_parent.conversion_rate)
-		target.qty = obj.basic_rate and target.amount / flt(obj.basic_rate) or obj.qty
+		target.export_amount = flt(obj.export_amount) - flt(obj.billed_amt)
+		target.amount = target.export_amount * flt(source_parent.conversion_rate)
+		target.qty = obj.export_rate and target.export_amount / flt(obj.export_rate) or obj.qty
 	
 	doclist = get_mapped_doclist("Sales Order", source_name, {
 		"Sales Order": {

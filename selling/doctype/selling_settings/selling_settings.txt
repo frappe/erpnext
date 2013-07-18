@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 10:25:16", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:54:47", 
+  "modified": "2013-07-18 12:03:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -87,6 +87,12 @@
   "fieldtype": "Select", 
   "label": "Delivery Note Required", 
   "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintain_same_sales_rate", 
+  "fieldtype": "Check", 
+  "label": "Maintain Same Rate Throughout Sales Cycle"
  }, 
  {
   "doctype": "DocPerm"

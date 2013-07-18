@@ -32,7 +32,7 @@ keydict = {
 	'float_precision': 'float_precision',
 	'account_url':'account_url',
 	'session_expiry': 'session_expiry',
-	'disable_rounded_total': 'disable_rounded_total'
+	'disable_rounded_total': 'disable_rounded_total',
 }
 
 class DocType:
