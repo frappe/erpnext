@@ -16,11 +16,13 @@
 
 from __future__ import unicode_literals
 patch_list = [
-	"execute:webnotes.reload_doc('core', 'doctype', 'docfield') #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype') #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'page') #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'report') #2013-07-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'page') #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'report') #2013-07-16",
 	"patches.mar_2012.clean_property_setter", 
 	"patches.april_2012.naming_series_patch", 
 	"patches.mar_2012.cleanup_control_panel", 
