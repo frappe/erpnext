@@ -256,4 +256,5 @@ patch_list = [
 	"patches.july_2013.p04_merge_duplicate_leads",
 	"patches.july_2013.p05_custom_doctypes_in_list_view",
 	"patches.july_2013.p06_same_sales_rate",
+	"patches.july_2013.p07_repost_billed_amt_in_sales_cycle",
 ]
