@@ -25,7 +25,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 // For customizing print
-cur_frm.pformat.net_total = function(doc) {
+cur_frm.pformat.net_total_export = function(doc) {
 	return '';
 }
 
@@ -70,8 +70,8 @@ cur_frm.pformat.other_charges= function(doc){
 		// main table
 
 		out +='<table class="noborder" style="width:100%">';
-		if(!print_hide('net_total')) {
-			out +=make_row('Net Total',convert_rate(doc.net_total),1);
+		if(!print_hide('net_total_export')) {
+			out += make_row('Net Total', doc.net_total_export, 1);
 		}
 
 		// add rows
