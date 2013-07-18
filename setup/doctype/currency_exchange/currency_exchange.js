@@ -15,6 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $.extend(cur_frm.cscript, {
+	onload: function() {
+		if(cur_frm.doc.__islocal) {
+			cur_frm.set_value("to_currency", wn.defaults.get_global_default("currency"));
+		}
+	},
+	
 	refresh: function() {
 		cur_frm.cscript.set_exchange_rate_label();
 	},
