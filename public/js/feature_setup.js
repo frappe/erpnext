@@ -127,13 +127,12 @@ pscript.feature_dict = {
 		'Sales Order': {'sales_order_details':['page_break']}
 	},
 	'fs_exports': {
-		'Delivery Note': {'fields':['Note','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','amount','basic_rate']},
+		'Delivery Note': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','amount','basic_rate']},
 		'POS Setting': {'fields':['conversion_rate','currency']},
-		'Quotation': {'fields':['Note HTML','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'quotation_details':['base_ref_rate','amount','basic_rate']},
+		'Quotation': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'quotation_details':['base_ref_rate','amount','basic_rate']},
 		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'entries':['base_ref_rate','amount','basic_rate']},
-		'Item': {'ref_rate_details':['ref_currency']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','amount','basic_rate']}
+		'Sales Order': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','amount','basic_rate']}
 	},
 	
 	'fs_imports': {
@@ -144,7 +143,7 @@ pscript.feature_dict = {
 			'entries': ['purchase_ref_rate', 'amount','rate']
 		},
 		'Purchase Order': {
-			'fields': ['Note HTML', 'conversion_rate','currency', 'grand_total',
+			'fields': ['conversion_rate','currency', 'grand_total',
 			'in_words', 'net_total', 'other_charges_added',
 			 'other_charges_deducted'],
 			'po_details': ['purchase_ref_rate', 'amount','purchase_rate']
@@ -186,27 +185,27 @@ pscript.feature_dict = {
 		'Delivery Note': {'fields':['more_info']},
 	},
 	'fs_quality': {
-		'Item': {'fields':['Item Inspection Criteria','inspection_required']},
+		'Item': {'fields':['inspection_criteria','inspection_required']},
 		'Purchase Receipt': {'purchase_receipt_details':['qa_no']}
 	},
 	'fs_manufacturing': {
-		'Item': {'fields':['Manufacturing']}
+		'Item': {'fields':['manufacturing']}
 	},
 	'fs_pos': {
 		'Sales Invoice': {'fields':['is_pos']}
 	},
 	'fs_recurring_invoice': {
-		'Sales Invoice': {'fields': ['Recurring Invoice']}
+		'Sales Invoice': {'fields': ['recurring_invoice']}
 	}
 }
 
 $(document).bind('form_refresh', function() {
-	for(sys_feat in sys_defaults) {
+	for(var sys_feat in sys_defaults) {
 		if(sys_defaults[sys_feat]=='0' 
 			&& (sys_feat in pscript.feature_dict)) { //"Features to hide" exists
 
-			if(cur_frm.doc.doctype in  pscript.feature_dict[sys_feat]) {
-				for(fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype]) {
+			if(cur_frm.doc.doctype in pscript.feature_dict[sys_feat]) {
+				for(var fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype]) {
 					if(fort=='fields') {
 						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
 					} else if(cur_frm.fields_dict[fort]) {
