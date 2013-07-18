@@ -31,9 +31,6 @@ class DocType:
 	def __init__(self, d, dl=[]):
 		self.doc, self.doclist = d,dl
 
-	def get_stock_uom(self, item_code):
-		return {'current_stock_uom': cstr(webnotes.conn.get_value('Item', item_code, 'stock_uom'))}
-	
 	def validate_mandatory(self):
 		if not cstr(self.doc.item_code):
 			msgprint("Please Enter an Item.")
@@ -111,3 +108,8 @@ class DocType:
 		self.update_bin()
 
 		get_obj("Item", self.doc.item_code).on_update()
+
+@webnotes.whitelist()
+def get_stock_uom(item_code):
+	return { 'current_stock_uom': cstr(webnotes.conn.get_value('Item', item_code, 'stock_uom')) }
+	

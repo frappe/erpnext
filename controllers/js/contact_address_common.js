@@ -2,11 +2,11 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
 	cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name');
 
-	cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
-	cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+	cur_frm.fields_dict.customer.get_query = erpnext.queries.customer;
+	cur_frm.fields_dict.supplier.get_query = erpnext.queries.supplier;
 	
 	if(cur_frm.fields_dict.lead) {
-		cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;
+		cur_frm.fields_dict.lead.get_query = erpnext.queries.lead;
 		cur_frm.add_fetch('lead', 'lead_name', 'lead_name');
 	}
 	

@@ -145,20 +145,6 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 'start': start, 
 		'page_len': page_len})
 
-def item_std(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select tabItem.name, 
-		if(length(tabItem.item_name) > 40, 
-			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name, 
-		if(length(tabItem.description) > 40, 
-			concat(substr(tabItem.description, 1, 40), "..."), description) as decription 
-		FROM tabItem 
-		WHERE tabItem.docstatus!=2 
-			and tabItem.%(key)s LIKE "%(txt)s" 
-			%(mcond)s 
-		limit %(start)s, %(page_len)s """ % {'key': searchfield, 'txt': "%%%s%%" % txt, 
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 
-		'page_len': page_len})
-
 def account_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	if not filters:

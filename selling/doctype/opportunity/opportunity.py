@@ -198,13 +198,3 @@ def make_quotation(source_name, target_doclist=None):
 	}, target_doclist)
 		
 	return [d.fields for d in doclist]
-
-def get_lead(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
-	return webnotes.conn.sql ("""select `tabLead`.name, `tabLead`.lead_name FROM `tabLead` 
-			where `tabLead`.%(key)s like "%(txt)s" 
-				%(mcond)s	
-			order by `tabLead`.`name` asc 
-			limit %(start)s, %(page_len)s """ % {'key': searchfield, 
-			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield),
-			'start': start, 'page_len': page_len})

@@ -14,15 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.fields_dict['item_code'].get_query = function(doc) {
- 	return {
- 		query: "controllers.queries.item_std"
- 	}	
-}
-
-//==================== Get Items Stock UOM =====================================================
-cur_frm.cscript.item_code = function(doc,cdt,cdn) {
- if (doc.item_code) {
-    get_server_fields('get_stock_uom', doc.item_code, '', doc, cdt, cdn, 1);
-  }
-}
+$.extend(cur_frm.cscript, {
+	onload: function() {
+		cur_frm.set_query("item_code", erpnext.queries.item);
+	},
+	
+	item_code: function() {
+		if(cur_frm.doc.item_code) {
+			cur_frm.call({
+				method: "get_stock_uom",
+				args: { item_code: cur_frm.doc.item_code }
+			});
+		}
+	}
+});
