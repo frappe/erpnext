@@ -39,6 +39,8 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
 			});
+			
+			me.frm.script_manager.trigger("company");
 		}
 	},
 	
@@ -75,9 +77,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 			var me = this;
 			var company_currency = this.get_company_currency();
 			$.each(["currency", "price_list_currency"], function(i, fieldname) {
-				if(!me.doc[fieldname]) {
+				if(!me.frm.doc[fieldname]) {
 					me.frm.set_value(fieldname, company_currency);
-					me[fieldname]();
+					me.script_manager.trigger(fieldname);
 				}
 			});
 		}
@@ -106,9 +108,8 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	},
 	
 	conversion_rate: function() {
-		if(this.frm.doc.currency === this.get_company_currency() &&
-			this.frm.doc.conversion_rate !== 1.0) {
-				this.frm.set_value("conversion_rate", 1.0);
+		if(this.frm.doc.currency === this.get_company_currency()) {
+			this.frm.set_value("conversion_rate", 1.0);
 		} else if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
