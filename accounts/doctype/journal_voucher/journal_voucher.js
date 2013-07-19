@@ -163,7 +163,7 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 			method: "accounts.utils.get_balance_on",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
-				d.balance = format_currency(r.message, erpnext.get_currency(doc.company));
+				d.balance = r.message;
 				refresh_field('balance', d.name, 'entries');
 			}
 		});

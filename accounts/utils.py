@@ -119,7 +119,7 @@ def get_balance_on(account=None, date=None):
 		bal = -bal
 
 	# if bal is None, return 0
-	return bal or 0
+	return flt(bal)
 
 @webnotes.whitelist()
 def add_ac(args=None):
