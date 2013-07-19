@@ -17,7 +17,6 @@
 from __future__ import unicode_literals
 
 import webnotes
-from core.doctype.communication.communication import make
 from webnotes.utils import now
 
 max_communications_per_hour = 300
