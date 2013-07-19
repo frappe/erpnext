@@ -1,6 +1,7 @@
 import webnotes
 def execute():
 	webnotes.reload_doc("setup", "doctype", "company")
+	webnotes.reload_doc("accounts", "doctype", "cost_center")
 	create_chart_of_accounts_if_not_exists()
 	add_group_accounts()
 	add_ledger_accounts()
