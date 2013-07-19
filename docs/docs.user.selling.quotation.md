@@ -11,11 +11,11 @@ To create a new Quotation go to:
 
 A Quotation contains details about:
 
-- Who is the recipient of the Quotation
+- The recipient of the Quotation
 - The Items and quantities you are offering.
 - The rates at which they are offered.
 - The taxes applicable.
-- Other charges (like shipping, insurance) if they are applicable.
+- Other charges (like shipping, insurance) if applicable.
 - The validity of contract.
 - The time of delivery.
 - Other conditions.
@@ -28,7 +28,7 @@ A Quotation contains details about:
 The rates you quote may depend on two things.
 
 - The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List.
-- The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates so that ERPNext will also save the information in your standard Currency. This will help you to analyze the value of your Quotations in reports in your standard Currency.
+- The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in reports in your standard Currency.
 
 ### Taxes
 
@@ -70,5 +70,5 @@ The second way to apply discount is to add it in your Taxes and Charges table. T
 
 There is a third way to do it. Create an Item called “Discount” and make sure that all the taxes apply in the same way as the main Items. (This method is useful if only one type of tax is applicable on the sale). This way your “Discount” will appear as an expense. You will see a slightly higher income and expense but your profits will still remain the same. This method might be interesting where you want detailed accounting of your discounts.
 
-> Note: The maximum Discount that can be applied on an Item can up fixed in the Item master.
+> Note: The maximum Discount that can be applied on an Item can be fixed in the Item master.
 
