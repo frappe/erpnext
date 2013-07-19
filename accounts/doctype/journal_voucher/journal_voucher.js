@@ -14,9 +14,57 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	cur_frm.cscript.load_defaults(doc, cdt, cdn);
-}
+wn.provide("erpnext.accounts");
+
+erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
+	onload: function() {
+		this.load_defaults(this.frm.doc);
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
+		var me = this;
+		
+		$.each(["account", "cost_center"], function(i, fieldname) {
+			me.frm.set_query(fieldname, "entries", function() {
+				wn.model.validate_missing(me.frm.doc, "company");
+				return {
+					filters: {
+						company: me.frm.doc.company,
+						group_or_ledger: "Ledger"
+					}
+				};
+			});
+		});
+		
+		$.each([["against_voucher", "Purchase Invoice", "credit_to"], 
+			["against_invoice", "Sales Invoice", "debit_to"]], function(i, opts) {
+				me.frm.set_query(opts[0], "entries", function(doc, cdt, cdn) {
+					var jvd = wn.model.get_doc(cdt, cdn);
+					wn.model.validate_missing(jvd, "account");
+					return {
+						filters: [
+							[opts[1], opts[2], "=", jvd.account],
+							[opts[1], "docstatus", "=", 1],
+							[opts[1], "outstanding_amount", ">", 0]
+						]
+					};
+				});
+		});
+		
+		this.frm.set_query("against_jv", "entries", function(doc, cdt, cdn) {
+			var jvd = wn.model.get_doc(cdt, cdn);
+			wn.model.validate_missing(jvd, "account");
+			
+			return {
+				query: "accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
+				filters: { account: jvd.account }
+			};
+		});
+	},
+});
+
+cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
 
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.is_opening(doc)
@@ -34,7 +82,7 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 }
 
-cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
+cur_frm.cscript.load_defaults = function(doc) {
 	if(!cur_frm.doc.__islocal || !cur_frm.doc.company) { return; }
 
 	doc = locals[doc.doctype][doc.name];
@@ -110,14 +158,16 @@ cur_frm.cscript.get_balance = function(doc,dt,dn) {
 
 cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	wn.call({
-		method: "accounts.utils.get_balance_on",
-		args: {account: d.account, date: doc.posting_date},
-		callback: function(r) {
-			d.balance = format_currency(r.message, erpnext.get_currency(doc.company));
-			refresh_field('balance', d.name, 'entries');
-		}
-	});
+	if(d.account) {
+		wn.call({
+			method: "accounts.utils.get_balance_on",
+			args: {account: d.account, date: doc.posting_date},
+			callback: function(r) {
+				d.balance = format_currency(r.message, erpnext.get_currency(doc.company));
+				refresh_field('balance', d.name, 'entries');
+			}
+		});
+	}
 } 
 
 cur_frm.cscript.validate = function(doc,cdt,cdn) {
@@ -180,61 +230,5 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				cur_frm.set_value("is_opening", "Yes")
 			}
 		})
-	}
-}
-
-// get_query
-
-cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
-	return {
-		filters: { 
-			group_or_ledger: "Ledger",
-			company: doc.company
-		}
-	}
-}
-
-cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
-	return {
-		filters: { 
-			'company': doc.company,
-			'group_or_ledger': 'Ledger'
-		}
-	}
-}
-
-cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {	
-	var d = locals[this.doctype][this.docname];
-	return {
-		filters: [
-			['Purchase Invoice', 'credit_to', '=', d.account],
-			['Purchase Invoice', 'docstatus', '=', 1],
-			['Purchase Invoice', 'outstanding_amount', '>', 0]
-		]
-	}
-}
-
-cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
-	return {
-		filters: [
-			['Sales Invoice', 'debit_to', '=', d.account],
-			['Sales Invoice', 'docstatus', '=', 1],
-			['Sales Invoice', 'outstanding_amount', '>', 0]
-		]
-	}
-}
-
-cur_frm.fields_dict['entries'].grid.get_field('against_jv').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
-	
-	if(!d.account) {
-		msgprint("Please select Account first!")
-		throw "account not selected"
-	}
-	
-	return {
-		query: "accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
-		filters: { account: d.account }
 	}
 }
