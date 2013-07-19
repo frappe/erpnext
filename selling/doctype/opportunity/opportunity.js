@@ -67,10 +67,10 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		}
 		
 		this.frm.set_query("item_code", "enquiry_details", function() {
-			var key = (me.frm.doc.enquiry_type === "Maintenance" ? "is_service_item" : "is_sales_item");
 			return {
 				query: "controllers.queries.item_query",
-				filters: { key: "Yes" }
+				filters: me.frm.doc.enquiry_type === "Maintenance" ? 
+					{"is_service_item": "Yes"} : {"is_sales_item": "Yes"}
 			};
 		});
 		
