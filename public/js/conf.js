@@ -15,9 +15,16 @@ wn.modules_path = 'erpnext';
 
 // add toolbar icon
 $(document).bind('toolbar_setup', function() {
-	$('.navbar-brand').html('<div style="display: inline-block; cursor: pointer;">\
+	var brand = ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext');
+	$('.navbar-brand').html('<div style="display: inline-block;">\
 			<object type="image/svg+xml" data="app/images/splash.svg" class="toolbar-splash"></object>\
-		</div>' + ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext'))
+		</div>' + brand)
+	.attr("title", brand)
 	.addClass("navbar-icon-home")
-	.css('max-width', '200px').css('overflow', 'hidden');
+	.css({
+		"max-width": "200px",
+		"overflow": "hidden",
+		"text-overflow": "ellipsis",
+		"white-space": "nowrap"
+	});
 });
