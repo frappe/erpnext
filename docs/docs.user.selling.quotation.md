@@ -3,7 +3,7 @@
 	"_label": "Quotation"
 }
 ---
-During a sale, the customer may want you to give a written note about the products or services you are planning to offer along with the prices and other terms of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma Invoice”or a Quotation.
+During a sale, the customer may want you to give him a written note about the products or services you are planning to offer, along with the prices and other terms of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma Invoice”or a Quotation.
 
 To create a new Quotation go to:
 
@@ -11,7 +11,7 @@ To create a new Quotation go to:
 
 A Quotation contains details about:
 
-- Who is the recipient of the Quotation.
+- Who is the recipient of the Quotation
 - The Items and quantities you are offering.
 - The rates at which they are offered.
 - The taxes applicable.
@@ -60,7 +60,7 @@ Quotation is a “Submittable” transaction. Since you send this Quotation to y
 
 > Tip: Quotations can also be titled as “Proforma Invoice” or “Proposal”. Select the right heading in the “Print Heading” field in the “More Info” section. To create new Print Headings go to Setup > Branding and Printing > Print Headings.
 
-## Dicounts
+## Discounts
 
 While making your sales transactions like a Quotation (or Sales Order) you would already have noticed that there is a “Discount” column. On the left is the “Price List Rate” on the right is the “Basic Rate”.  You can add a “Discount” value to update the basic rate.
 
