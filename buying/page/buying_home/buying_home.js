@@ -66,6 +66,11 @@ wn.module_page["Buying"] = [
 				"description": wn._("Tax Template for Purchase")
 			},
 			{
+				label: wn._("Price List"),
+				description: wn._("Mupltiple Item prices."),
+				doctype:"Price List"
+			},
+			{
 				"doctype":"Supplier Type",
 				"label": wn._("Supplier Type"),
 				"description": wn._("Supplier classification.")
