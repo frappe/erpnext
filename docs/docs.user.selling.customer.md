@@ -42,7 +42,7 @@ You can set “Credit Days” so that it is automatically set in the Sales Invoi
 
 You can set how much credit you want to allow for a Customer by adding the “Credit Limit”. You can also set a global “Credit Limit” in the Company master.Classifying Customers
 
-ERPNext allows you to group your Customers and also divide them into Territories. Grouping will help you get better analysis of your data and identify what Customers are profitable and which are not and Territories will help you set sales targets for the territories.
+ERPNext allows you to group your Customers and also divide them into Territories. Grouping will help you get better analysis of your data and identify which Customers are profitable and which are not. Territories will help you set sales targets for the respective territories.
 
 ### Customer Group
 
