@@ -99,6 +99,31 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 	
+	supplier_address: function() {
+		var me = this;
+		if (this.frm.doc.supplier) {
+			wn.call({
+				doc: this.frm.doc,
+				method: "get_supplier_address",
+				freeze: true,
+				args: {
+					supplier: this.frm.doc.supplier,
+					address: this.frm.doc.supplier_address, 
+					contact: this.frm.doc.contact_person
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						me.frm.refresh_fields();
+					}
+				}
+			});
+		}
+	},
+	
+	contact_person: function() { 
+		this.supplier_address();
+	},
+	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = wn.model.get_doc(cdt, cdn);

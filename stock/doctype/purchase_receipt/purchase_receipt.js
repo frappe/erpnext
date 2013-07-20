@@ -111,10 +111,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
 
-cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
-}
-
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'supplier': doc.supplier}

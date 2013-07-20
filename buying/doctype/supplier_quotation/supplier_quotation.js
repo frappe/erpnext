@@ -72,14 +72,6 @@ cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query 
 		}
 	}
 
-cur_frm.cscript.supplier_address = function(doc, dt, dn) {
-	if (doc.supplier) {
-		get_server_fields("get_supplier_address", JSON.stringify({supplier: doc.supplier,
-			address: doc.supplier_address, contact: doc.contact_person}), '', doc, dt, dn, 1);
-	}
-}
-cur_frm.cscript.contact_person = cur_frm.cscript.supplier_address;
-
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
 	return {
 		filters:{'supplier': doc.supplier}
