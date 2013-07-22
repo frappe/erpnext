@@ -254,7 +254,7 @@ def create_material_request(material_requests):
 				items = material_requests[request_type][company]
 				if not items:
 					continue
-
+					
 				mr = [{
 					"doctype": "Material Request",
 					"company": company,
@@ -287,7 +287,7 @@ def create_material_request(material_requests):
 				mr_bean.insert()
 				mr_bean.submit()
 				mr_list.append(mr_bean)
-				
+
 			except:
 				if webnotes.message_log:
 					exceptions_list.append([] + webnotes.message_log)

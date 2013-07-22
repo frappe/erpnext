@@ -36,7 +36,7 @@ class StockOverReturnError(webnotes.ValidationError): pass
 from controllers.stock_controller import StockController
 
 class DocType(StockController):
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
 		self.fname = 'mtn_details' 
