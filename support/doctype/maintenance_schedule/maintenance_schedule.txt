@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-10 12:18:19", 
+  "modified": "2013-07-22 15:32:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,6 +35,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Maintenance Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -249,11 +250,6 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Maintenance Manager"
+  "doctype": "DocPerm"
  }
 ]

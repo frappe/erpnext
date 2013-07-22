@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:28:09", 
+  "modified": "2013-07-22 15:30:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,10 +58,6 @@
   "oldfieldname": "branch", 
   "oldfieldtype": "Data", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 

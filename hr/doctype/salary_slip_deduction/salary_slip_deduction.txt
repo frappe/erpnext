@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:48", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:18", 
+  "modified": "2013-07-22 15:27:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,20 +20,6 @@
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "name": "__common__", 
-  "parent": "Salary Slip Deduction", 
-  "parentfield": "permissions", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -72,8 +58,5 @@
   "fieldname": "d_depends_on_lwp", 
   "fieldtype": "Check", 
   "label": "Depends on LWP"
- }, 
- {
-  "doctype": "DocPerm"
  }
 ]

@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-07-15 17:09:08", 
+  "modified": "2013-07-22 15:23:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,7 +29,8 @@
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "read": 1, 
-  "report": 1
+  "report": 1, 
+  "role": "Sales User"
  }, 
  {
   "doctype": "DocType", 
@@ -255,7 +256,6 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "role": "System Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -265,45 +265,6 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "permlevel": 1, 
-  "role": "System Manager", 
-  "submit": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales User", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales User", 
-  "submit": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales Manager", 
   "submit": 0
  }
 ]

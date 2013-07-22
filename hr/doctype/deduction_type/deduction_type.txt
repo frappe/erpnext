@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:34:46", 
+  "modified": "2013-07-22 15:25:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,6 +34,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "HR User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -69,15 +70,6 @@
   "width": "300px"
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR Manager"
+  "doctype": "DocPerm"
  }
 ]

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:29:23", 
+  "modified": "2013-07-22 15:30:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "parenttype": "DocType", 
   "read": 1, 
   "report": 1, 
+  "role": "Accounts Manager", 
   "submit": 0
  }, 
  {
@@ -77,30 +78,15 @@
   "read_only": 1
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "System Manager"
- }, 
- {
   "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "permlevel": 0, 
-  "role": "Accounts Manager", 
   "write": 1
  }, 
  {
   "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "Accounts Manager"
+  "permlevel": 2
  }
 ]

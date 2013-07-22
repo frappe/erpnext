@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-05 11:48:26", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:35:06", 
+  "modified": "2013-07-22 15:25:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -33,6 +33,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "HR User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -67,15 +68,6 @@
   "options": "Leave Block List"
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR Manager"
+  "doctype": "DocPerm"
  }
 ]
