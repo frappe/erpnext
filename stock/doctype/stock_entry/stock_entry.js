@@ -234,9 +234,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
+	mtn_details_add: function(doc, cdt, cdn) {
+		var row = wn.model.get_doc(cdt, cdn);
+		
+		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
+		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
+	},
 });
 
-cur_frm.cscript = new erpnext.stock.StockEntry({frm: cur_frm});
+cur_frm.script_manager.make(erpnext.stock.StockEntry);
 
 cur_frm.cscript.toggle_related_fields = function(doc) {
 	disable_from_warehouse = inList(["Material Receipt", "Sales Return"], doc.purpose);
@@ -294,19 +300,6 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
-}
-
-// copy over source and target warehouses
-cur_frm.fields_dict['mtn_details'].grid.onrowadd = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(!d.s_warehouse && doc.from_warehouse) {
-		d.s_warehouse = doc.from_warehouse
-		refresh_field('s_warehouse', cdn, 'mtn_details')
-	}
-	if(!d.t_warehouse && doc.to_warehouse) {
-		d.t_warehouse = doc.to_warehouse
-		refresh_field('t_warehouse', cdn, 'mtn_details')
-	}
 }
 
 // Overloaded query for link batch_no

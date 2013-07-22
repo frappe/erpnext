@@ -104,14 +104,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(d.idx == 1){
-		d.debit = 0;
-		d.credit = 0;
-	}
-}
-
 cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_voucher && !flt(d.debit)) {

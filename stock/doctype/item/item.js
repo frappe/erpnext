@@ -14,8 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.add_fetch("price_list_name", "currency", "ref_currency");
-cur_frm.add_fetch("price_list_name", "buying_or_selling", "buying_or_selling");
+wn.provide("erpnext.stock");
+
+erpnext.stock.Item = wn.ui.form.Controller.extend({
+	onload: function() {
+		this.frm.add_fetch("price_list_name", "currency", "ref_currency");
+		this.frm.add_fetch("price_list_name", "buying_or_selling", "buying_or_selling");
+	},
+	
+	ref_rate_details_add: function(doc, cdt, cdn) {
+		var row = wn.model.get_doc(cdt, cdn);
+		if(row.price_list_name && !row.ref_currency) {
+			// execute fetch
+			var df = wn.meta.get_docfield(row.doctype, "price_list_name", row.parent);
+			this.frm.script_manager.validate_link_and_fetch(df, row.name, row.price_list_name);
+		}
+	}
+});
+
+cur_frm.script_manager.make(erpnext.stock.Item);
 
 cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
@@ -155,11 +172,6 @@ cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 
 cur_frm.cscript.validate = function(doc,cdt,cdn){
   cur_frm.cscript.weight_to_validate(doc,cdt,cdn);
-}
-
-cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
-	locals[cdt][cdn].ref_currency = sys_defaults.currency;
-	refresh_field('ref_currency',cdn,'ref_rate_details');
 }
 
 cur_frm.fields_dict.item_customer_details.grid.get_field("customer_name").get_query = 

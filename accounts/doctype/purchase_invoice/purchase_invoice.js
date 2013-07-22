@@ -22,7 +22,7 @@ wn.provide("erpnext.accounts");
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
-erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.extend({
+erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {
 		this._super();
 		
@@ -103,29 +103,14 @@ erpnext.accounts.PurchaseInvoiceController = erpnext.buying.BuyingController.ext
 	tc_name: function() {
 		this.get_terms();
 	},
-
+	
+	entries_add: function(doc, cdt, cdn) {
+		var row = wn.model.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_head", "cost_center"]);
+	}
 });
 
-// for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.accounts.PurchaseInvoiceController({frm: cur_frm}));
-
-cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
-	
-	cl = getchildren('Purchase Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-	acc = '';
-	cc = '';
-
-	for(var i = 0; i<cl.length; i++) {
-		if (cl[i].idx == 1){
-			acc = cl[i].expense_head;
-			cc = cl[i].cost_center;
-		}
-		else{
-			if (! cl[i].expense_head) { cl[i].expense_head = acc; refresh_field('expense_head', cl[i].name, 'entries');}
-			if (! cl[i].cost_center)	{cl[i].cost_center = cc; refresh_field('cost_center', cl[i].name, 'entries');}
-		}
-	}
-}
+cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	hide_field('aging_date');
