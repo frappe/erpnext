@@ -7,7 +7,7 @@ As we discussed in the **Item** section, if an **Item** is *serialized*, a **Ser
 
 **Serial Nos** are also useful to maintain fixed assets. **Maintenance Schedules** can also be created against serial numbers for planning and scheduling maintenance activity for these assets (if they require maintenance).
 
-You can also track from which **Supplier** your purchased the **Serial No** and to which **Customer** you have sold it. The **Serial No** status will tell you its current inventory status.
+You can also track from which **Supplier** you purchased the **Serial No** and to which **Customer** you have sold it. The **Serial No** status will tell you its current inventory status.
 
 If your Item is *serialized* you will have to enter the Serial Nos in the related column with each Serial No in a new line.
 
