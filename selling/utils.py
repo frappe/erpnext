@@ -66,6 +66,8 @@ def get_item_details(args):
 		
 		if args.price_list_name and args.price_list_currency:
 			out.update(_get_price_list_rate(args, item_bean, meta))
+			
+	out.update(_get_item_discount(out.item_group, args.customer))
 	
 	if out.warehouse or out.reserved_warehouse:
 		out.update(get_available_qty(args.item_code, out.warehouse or out.reserved_warehouse))
@@ -119,7 +121,6 @@ def _get_basic_details(args, item_bean):
 				or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
 			"cost_center": item.default_sales_cost_center or args.cost_center,
 			"qty": 1.0,
-			"adj_rate": 0.0,
 			"export_amount": 0.0,
 			"amount": 0.0,
 			"batch_no": None,
@@ -147,6 +148,23 @@ def _get_price_list_rate(args, item_bean, meta):
 	validate_currency(args, item_bean.doc, meta)
 	
 	return {"ref_rate": flt(base_ref_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)}
+	
+def _get_item_discount(item_group, customer):
+	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 
+		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
+		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
+		GROUP BY parent.name 
+		ORDER BY parent.lft desc""", item_group)]
+		
+	discount = 0
+	for d in parent_item_groups:
+		res = webnotes.conn.sql("""select discount, name from `tabCustomer Discount` 
+			where parent = %s and item_group = %s""", (customer, d))
+		if res:
+			discount = flt(res[0][0])
+			break
+			
+	return {"adj_rate": discount}
 
 @webnotes.whitelist()
 def get_available_qty(item_code, warehouse):
@@ -162,7 +180,7 @@ def _get_customer_item_code(args, item_bean):
 def get_pos_settings(company):
 	pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
 		and company = %s""", (webnotes.session['user'], company), as_dict=1)
-		
+	
 	if not pos_settings:
 		pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` 
 			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
