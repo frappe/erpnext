@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:48:10", 
+  "modified": "2013-07-22 15:31:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -184,10 +184,6 @@
   "fieldname": "amt_less_than", 
   "fieldtype": "Data", 
   "label": "Amount <="
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 

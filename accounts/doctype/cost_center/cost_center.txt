@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-07-09 14:43:41", 
+  "modified": "2013-07-22 15:23:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Cost Center", 
@@ -179,7 +180,6 @@
   "report_hide": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -187,18 +187,10 @@
   "write": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User", 
   "write": 0
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
  }
 ]

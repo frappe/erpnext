@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:09", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:54:37", 
+  "modified": "2013-07-22 15:22:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,6 +24,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Sales Taxes and Charges Master", 
@@ -97,7 +98,6 @@
   "reqd": 1
  }, 
  {
-  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
@@ -105,7 +105,6 @@
   "write": 0
  }, 
  {
-  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -113,14 +112,6 @@
   "write": 1
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 

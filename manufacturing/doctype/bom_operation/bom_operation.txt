@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:05", 
+  "modified": "2013-07-22 15:28:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,19 +20,6 @@
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "name": "__common__", 
-  "parent": "BOM Operation", 
-  "parentfield": "permissions", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -93,8 +80,5 @@
   "oldfieldname": "operating_cost", 
   "oldfieldtype": "Currency", 
   "reqd": 0
- }, 
- {
-  "doctype": "DocPerm"
  }
 ]

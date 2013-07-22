@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-07-10 12:26:15", 
+  "modified": "2013-07-22 15:24:40", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -35,6 +35,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Maintenance User", 
   "submit": 1, 
   "write": 1
  }, 
@@ -308,15 +309,6 @@
   "print_hide": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Maintenance Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Maintenance User"
+  "doctype": "DocPerm"
  }
 ]
