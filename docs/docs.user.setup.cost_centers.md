@@ -35,7 +35,7 @@ Cost centers help you in one more activity, budgeting.
 
 ERPNext will help you set and manage budgets on your Cost Centers. This is useful when, for example, you are doing online sales. You have a budget for search ads, and you want ERPNext to stop or warn you from over spending, based on that budget. 
 
-Budgets are also great for planning purposes. When you are making your plans for the next financial year, you would typically target a revenue and based on that you would set your expenses. Setting a budget will ensure that your expenses do not get out of hand, at any point,based on your plans.
+Budgets are also great for planning purposes. When you are making your plans for the next financial year, you would typically target a revenue based on which you would set your expenses. Setting a budget will ensure that your expenses do not get out of hand, at any point,as per your plans.
 
 You can define it in the Cost Center. If you have seasonal sales you can also define a budget distribution that the budget will follow.
 ￼
