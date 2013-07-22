@@ -77,12 +77,6 @@ class DocType:
 				website_settings.doclist.append({
 					"doctype": "Top Bar Item",
 					"parentfield": "top_bar_items",
-					"label":"Home",
-					"url": webpage.doc.name
-				})
-				website_settings.doclist.append({
-					"doctype": "Top Bar Item",
-					"parentfield": "top_bar_items",
 					"label":"Contact",
 					"url": "contact"
 				})
