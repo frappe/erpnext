@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:54:52", 
+  "modified": "2013-07-22 15:29:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -519,13 +519,6 @@
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 1
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
  }, 
  {
   "cancel": 1, 

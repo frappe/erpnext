@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:56:37", 
+  "modified": "2013-07-22 15:22:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -41,6 +42,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Material Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -156,12 +158,6 @@
   "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "role": "Material Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
+  "doctype": "DocPerm"
  }
 ]

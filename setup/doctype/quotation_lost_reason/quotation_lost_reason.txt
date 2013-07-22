@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:52:43", 
+  "modified": "2013-07-22 15:29:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,6 +23,7 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -33,6 +34,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Sales Master Manager", 
   "submit": 0, 
   "write": 1
  }, 
@@ -59,12 +61,6 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "role": "Sales Master Manager"
+  "doctype": "DocPerm"
  }
 ]

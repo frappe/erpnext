@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:36:27", 
+  "modified": "2013-07-22 15:31:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,10 +57,6 @@
   "oldfieldname": "trash_reason", 
   "oldfieldtype": "Small Text", 
   "read_only": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 

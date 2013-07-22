@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:50:27", 
+  "modified": "2013-07-22 15:31:33", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
@@ -35,6 +35,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
+  "role": "Accounts Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -130,11 +131,6 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts Manager"
+  "doctype": "DocPerm"
  }
 ]

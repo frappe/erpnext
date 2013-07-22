@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:52:17", 
+  "modified": "2013-07-22 15:22:25", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -80,13 +80,6 @@
   "doctype": "DocPerm", 
   "role": "Purchase Manager", 
   "write": 0
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "role": "System Manager", 
-  "write": 1
  }, 
  {
   "cancel": 1, 

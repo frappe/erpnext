@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-07-08 16:18:33", 
+  "modified": "2013-07-22 15:28:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -258,10 +258,6 @@
   "options": "BOM Explosion Item", 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
  }, 
  {
   "doctype": "DocPerm", 

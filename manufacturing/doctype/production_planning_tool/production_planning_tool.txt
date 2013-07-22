@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-21 12:03:47", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:51:19", 
+  "modified": "2013-07-22 15:26:45", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
@@ -34,6 +34,7 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 0, 
+  "role": "Manufacturing User", 
   "submit": 0, 
   "write": 1
  }, 
@@ -215,15 +216,6 @@
   "options": "raise_purchase_request"
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "System Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Manufacturing User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Manufacturing Manager"
+  "doctype": "DocPerm"
  }
 ]
