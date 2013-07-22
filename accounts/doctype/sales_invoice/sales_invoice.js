@@ -150,6 +150,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	paid_amount: function() {
 		this.write_off_outstanding_amount_automatically();
 	},
+	
+	entries_add: function(doc, cdt, cdn) {
+		var row = wn.model.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
+	}
 });
 
 // for backward compatibility: combine new and previous states
@@ -195,25 +200,6 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
-}
-
-cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
-
-	cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-	acc = '';
-	cc = '';
-
-	for(var i = 0; i<cl.length; i++) {
-
-		if (cl[i].idx == 1){
-			acc = cl[i].income_account;
-			cc = cl[i].cost_center;
-		}
-		else{
-			if (! cl[i].income_account) { cl[i].income_account = acc; refresh_field('income_account', cl[i].name, 'entries');}
-			if (! cl[i].cost_center)	{cl[i].cost_center = cc;refresh_field('cost_center', cl[i].name, 'entries');}
-		}
-	}
 }
 
 cur_frm.cscript.is_opening = function(doc, dt, dn) {
