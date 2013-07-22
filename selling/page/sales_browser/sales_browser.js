@@ -122,16 +122,24 @@ erpnext.SalesChart = Class.extend({
 	},
 	new_node: function() {
 		var me = this;
-
+		
+		var fields = [
+			{fieldtype:'Data', fieldname: 'name_field', 
+				label:'New ' + me.ctype + ' Name', reqd:true},
+			{fieldtype:'Select', fieldname:'is_group', label:'Group Node', options:'No\nYes', 
+				description: "Further nodes can be only created under 'Group' type nodes"}, 
+			{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+		]
+		
+		if(me.ctype == "Sales Person") {
+			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:'Employee',
+				options:'Employee', description: "Please enter Employee Id of this sales parson"});
+		}
+		
 		// the dialog
 		var d = new wn.ui.Dialog({
 			title:'New ' + me.ctype,
-			fields: [
-				{fieldtype:'Data', fieldname: 'name_field', label:'New ' + me.ctype + ' Name', reqd:true},
-				{fieldtype:'Select', fieldname:'is_group', label:'Group Node',
-					options:'No\nYes', description: "Further nodes can be only created under 'Group' type nodes"},
-				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
-			]
+			fields: fields
 		})		
 	
 		d.set_value("is_group", "No");
