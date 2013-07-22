@@ -29,7 +29,7 @@ If your Purchase Order for an Item is in a different Unit of Measure (UOM) than 
 
 ### Currency Conversions
 
-Since the incoming Item affects the value of your inventory, it is important to convert it into your base Currency if you have ordered in another Currency. You will need to update the Currency Conversion Rate if applicable.
+Since the incoming Item affects the value of your inventory, it is important to convert it into your base Currency, if you have ordered in another Currency. You will need to update the Currency Conversion Rate if applicable.
 
 ### Taxes and Valuation
 
