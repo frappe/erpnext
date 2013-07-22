@@ -37,7 +37,7 @@ cur_frm.fields_dict['parent_item_group'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:[
 			['Item Group', 'is_group', '=', 'Yes'],
-			['Item Group', 'naem', '!=', doc.item_group_name]
+			['Item Group', 'name', '!=', doc.item_group_name]
 		]
 	}
 }
