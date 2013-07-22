@@ -286,7 +286,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = webnotes.get_doc(cdt, cdn);
+		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && (item.warehouse || item.reserved_warehouse)) {
 			this.frm.call({
 				method: "selling.utils.get_available_qty",
