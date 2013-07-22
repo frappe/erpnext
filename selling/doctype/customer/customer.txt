@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-07-11 16:53:18", 
+  "modified": "2013-07-22 12:47:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -331,6 +331,21 @@
   "oldfieldname": "sales_team", 
   "oldfieldtype": "Table", 
   "options": "Sales Team", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_discount_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer Discount", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_discounts", 
+  "fieldtype": "Table", 
+  "label": "Customer Discounts", 
+  "options": "Customer Discount", 
   "permlevel": 0
  }, 
  {
