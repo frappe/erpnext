@@ -11,7 +11,7 @@ Before you start implementation, lets get familiar with the terminology used and
 
 #### Company
 
-This represents the Company records for which ERPNext is setup. With the same setup, you can create multiple Company records, each representing a different legal entity. The accounting for each Company will be different, but they will share Customer, Supplier and Item records.
+This represents the Company records for which ERPNext is setup. With this same setup, you can create multiple Company records, each representing a different legal entity. The accounting for each Company will be different, but they will share the Customer, Supplier and Item records.
 
 > Setup > Company > Companies
 
@@ -35,7 +35,7 @@ A Product, sub-product or Service that is either bought, sold or manufactured an
 
 #### Account
 
-An Account is heading under which financial and business transactions are carried on. For example, “Travel Expense” is an account, “Customer Zoe”, “Supplier Mae” are accounts. ERPNext creates accounts for Customers and Suppliers automatically.
+An Account is a heading under which financial and business transactions are carried on. For example, “Travel Expense” is an account, “Customer Zoe”, “Supplier Mae” are accounts. ERPNext creates accounts for Customers and Suppliers automatically.
 
 > Accounts > Chart of Accounts
 
@@ -47,7 +47,7 @@ An address represents location details of a Customer or Supplier. These can be o
 
 #### Contact
 
-An individual Contact that belongs to a Customer or Supplier or is just independent. A Contact has name and contact details like email and phone number.
+An individual Contact belongs to a Customer or Supplier or is just an independent. A Contact has a name and contact details like email and phone number.
 
 > Selling > Contact
 
@@ -71,13 +71,13 @@ A table of sale price for an Item. An Item can have multiple prices based on Cus
 
 #### Fiscal Year
 
-Represents a Financial Year or Accounting Year. You can operate multiple Fiscal Years at the same time. Each Fiscal Year has a start and end date and transactions can only be recorded in this period. When you “close” a fiscal year, its balances are transferred as “opening” balances for the next fiscal year.
+Represents a Financial Year or Accounting Year. You can operate multiple Fiscal Years at the same time. Each Fiscal Year has a start date and an end date and transactions can only be recorded in this period. When you “close” a fiscal year, it's balances are transferred as “opening” balances for the next fiscal year.
 
 > Setup > Company > Fiscal Years
 
 #### Cost Center
 
-A Cost Center is like an Account, but the only different is that its structure represents your business more closely than Accounts. For example in your Chart of Accounts, you separate your expenses by type (say travel, marketing etc). In your Chart of Cost Centers, you can separate them by product line or business group (for example online sales, retail sales)
+A Cost Center is like an Account, but the only difference is that it's structure represents your business more closely than Accounts. For example in your Chart of Accounts, you separate your expenses by type (say travel, marketing etc). In your Chart of Cost Centers, you can separate them by product line or business group (for example online sales, retail sales)
 
 > Accounts > Chart of Cost Centers
 
@@ -147,7 +147,7 @@ A third party distributer / dealer / affiliate / commission agent who sells the 
 
 #### Sales Person
 
-Someone who pitches the Customer and closes deals. You can set targets for Sales Persons and tag them in transactions.
+Someone who pitches to the Customer and closes deals. You can set targets for Sales Persons and tag them in transactions.
 
 > Selling > Setup > Sales Person
 
@@ -219,7 +219,7 @@ Update Stock of multiple Items from a spreadsheet (CSV) file.
 
 #### Quality Inspection
 
-A note prepared to record certain parameters of an Item at time of Receipt from Supplier or Delivery to Customer.
+A note prepared to record certain parameters of an Item at the time of Receipt from Supplier, or Delivery to Customer.
 
 > Stock > Tools > Quality Inspection
 
@@ -277,7 +277,7 @@ A record of the performance of an Employee over a specified period based on cert
 
 #### Appraisal Template
 
-A template recording the different parameters of Employee performance and their weights for a particular role.
+A template recording the different parameters of Employee performance and their weightage for a particular role.
 
 > Human Resources > Employee Setup > Appraisal Template
 
@@ -293,13 +293,13 @@ A record indicating presence or absence of an Employee on a particular day.
 
 #### Bill of Materials (BOM)
 
-A list of Operations and Items with their quantities that are required to produce another Item. A Bill of Materials (BOM) is used to plan purchases and do product costing.
+A list of Operations and Items with their quantities, that are required to produce another Item. A Bill of Materials (BOM) is used to plan purchases and do product costing.
 
 > Manufacturing > BOM
 
 #### Workstation
 
-A place where an BOM operation takes place. Is useful to calculate the direct cost of the product.
+A place where a BOM operation takes place. It is useful to calculate the direct cost of the product.
 
 > Manufacturing > Workstation
 

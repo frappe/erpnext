@@ -14,7 +14,7 @@ Some definitions:
 - Fiscal Year: is your financial year, the fiscal year usually starts on 1st Jan or 1st March for most regions. If you are not sure, consult an accountant.
 - Abbreviation: In a multi-company setup, the abbreviation is appended to each account, so keep it small (2-4) characters and all caps.
 
-This will also set the default **Currency** and time zone for your account. Once your complete this, your first **Company** and **Chart of Accounts** will be created.
+This will also set the default **Currency** and time zone for your account. Once you complete this, your first **Company** and **Chart of Accounts** will be created.
 
 Congrats! You are already on your way.
 

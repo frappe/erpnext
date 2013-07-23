@@ -3,14 +3,14 @@
 	"_label": "Subcontracting"
 }
 ---
-If you business involves outsourcing certain processes to a third party Supplier, where you buy the raw material, you can track this by using the sub-contracting feature of ERPNext.
+If your business involves outsourcing certain processes to a third party Supplier, where you buy the raw material from, you can track this by using the sub-contracting feature of ERPNext.
 
 To setup sub-contracting:
 
 1. Create separate Items for the unprocessed and the processed product. For example if you supply unpainted X to your Supplier and the Supplier returns you X, you can create two Items: “X-unpainted” and “X”.
-1. Create a Warehouse for your Supplier so that you can keep track of Items supplied. (you may supply a month’s worth of Items in one go).
-1. For the processed Item, in the Item master set “Is Sub Contracted Item” to “Yes”.
-1. Make a Bill of Materials for the processed Item, with the unprocessed Items as a sub-items.
+1. Create a Warehouse for your Supplier so that you can keep track of Items supplied. (you may supply a months worth of Items in one go).
+1. For the processed Item, in the Item master, set “Is Sub Contracted Item” to “Yes”.
+1. Make a Bill of Materials for the processed Item, with the unprocessed Items as sub-items.
 1. Make a Purchase Order for the processed Item. When you “Save”, in the “Raw Materials Detail”, all your un-processed Items will be updated based on your Bill of Materials.
 	1. Make sure that the “Rate” of this Item is the processing rate (excluding the raw material rate).
 	1. ERPNext will automatically add the raw material rate for your valuation purpose when you receive the finished Item in your stock. 

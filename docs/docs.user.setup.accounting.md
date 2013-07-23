@@ -13,11 +13,11 @@ The Chart of Accounts helps you answer:
 
 - What is your organization worth?
 - How much debt have you taken?
-- How much profit you are making (and hence paying tax)?
-- How much is are you selling?
+- How much profit are you making (and hence paying tax)?
+- How much are you selling?
 - How are your expenses broken up?
 
-As you can see, it is very valuable to you as a business manager to see how well your business is doing. 
+ You may note that as a business manager,it is very valuable  to see how well your business is doing. 
 
 > Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) its a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
 
@@ -37,7 +37,7 @@ Let us understand the main groups of the Chart of Accounts.
 
 The Balance Sheet has Application of Funds (Assets) and Sources of Funds (Liabilities) that signify the net-worth of your company at any given time. When you begin or end a financial period, all the Assets are equal to the Liabilities.
 
-> Accounting: If you are new to accounting, you might be wondering, how can Assets be equal to Liabilities? That would mean the company has nothing of its own. Thats right. All the “investment” made in the company to buy assets (like land, furniture, machines) is made by the owners and is a liability to the company. If the company would to shut down, it would need to sell all the assets and pay back all the liabilities (including profits) to the owners, leaving itself with nothing.
+> Accounting: If you are new to accounting, you might be wondering, how can Assets be equal to Liabilities? That would mean the company has nothing of its own. Thats right. All the “investment” made in the company to buy assets (like land, furniture, machines) is made by the owners and is a liability to the company. If the company would want to shut down, it would need to sell all the assets and pay back all the liabilities (including profits) to the owners, leaving itself with nothing.
 
 All the accounts under this represent an asset owned by company like "Bank Account", "Land and Property", "Furniture" or a liability (funds that the company owes to others) like "Owners funds", "Debt" etc.
 
@@ -47,7 +47,7 @@ Two special accounts to note here are Accounts Receivable (money you have to col
 
 Profit and Loss is the group of Income and Expense accounts that represent your accounting transactions over a period.
 
-Unlike Balance sheet accounts, Profit and Loss accounts (or PL accounts) do not represent net worth (assets), but rather the amount of money spent and collected in servicing customers during the period. Hence at the beginning and end of your Fiscal Year, they become zero.
+Unlike Balance sheet accounts, Profit and Loss accounts (or PL accounts) do not represent net worth (assets), but rather represent the amount of money spent and collected in servicing customers during the period. Hence at the beginning and end of your Fiscal Year, they become zero.
 
 (On the first day of the year you have not made any profit or loss, but you still have assets, hence balance sheet accounts never become zero at the beginning or end of a period)
 
@@ -71,7 +71,7 @@ You can also tag if an account represents a Customer, Supplier or Employee in "M
 
 ### Creating / Editing Accounts
 
-To create new Accounts, explore your Chart of Accounts and click on an Account group under which you want to create the new Account. On the right side, you will see a options to “Edit” or “Add” a new Account.
+To create new Accounts, explore your Chart of Accounts and click on an Account group under which you want to create the new Account. On the right side, you will see an option to “Edit” or “Add” a new Account.
 
 ![Chart of Accounts: New Account](img/chart-of-accounts-2.png)
 

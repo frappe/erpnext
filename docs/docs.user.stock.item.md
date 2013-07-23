@@ -6,13 +6,13 @@
 ---
 Items, Customers and Suppliers form the foundation of any ERP system.
 
-It is very likely you will have your masters ready in another system or a spread sheet and you would just need to import them. Before importing, it might be a good idea to understand how ERPNext treats them a bit first.
+It is very likely that you will have your masters ready in another system or a spread sheet  saved somewhere else. You may just need to import them. Before importing, it might be a good idea to understand how ERPNext manages these records.
 
 ---
 
 ## Items
 
-An Item is simply a product or service you sell or buy from your Customers or Suppliers. ERPNext is optimized for itemized management of your sales and purchase though you can skip creating Items. If you are in services, you can create an Item for each service that your offer.
+An Item is simply a product or service which you sell or buy from your Customers or Suppliers. ERPNext is optimized for itemized management of your sales and purchase. However, you can skip creating Items. If you are in services, you can create an Item for each services that your offer.
 
 > Items are mandatory if you want to track inventory.
 
@@ -40,7 +40,7 @@ There are two main Warehouse Types that are significant in ERPNext.
 
 Stores: These are where your incoming Items are kept before they are consumed or sold. You can have as many “Stores” type Warehouses as you wish. Stores type warehouses are significant because if you set an Item for automatic re-order, ERPNext will check its quantities in all “Stores” type Warehouses when deciding whether to re-order or not.
 
-Asset: Items marked as type “Fixed Asset” are maintained in Asset Type Warehouses. This helps you separate them for the Items that are consumed as a part of your regular operations or “Cost of Goods Sold”.
+Asset: Items marked as type “Fixed Asset” are maintained in Asset Type Warehouses. This helps you to separate them for the Items that are consumed as a part of your regular operations or “Cost of Goods Sold”.
 
 ### Item Taxes
 
@@ -52,7 +52,7 @@ For example, you have a tax Account, “VAT 10%” and this particular item is e
 
 Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase Receipt is submitted.
 
-Inspection Criterial: If a Quality Inspection is prepared for this Item, then this template of criteria can will automatically be updated in the Quality Inspection table of the Quality Inspection.  Examples of Criteria are: Weight, Length, Finish etc.
+Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection.  Examples of Criteria are: Weight, Length, Finish etc.
 
 ### Item Pricing and Price Lists
 
@@ -77,7 +77,7 @@ You may encounter these terms, so lets clarify:
 
 There are two major ways in which ERPNext values your items.
 
-- **FIFO (First In First Out):** In this system, ERPNext assumes that you will consume / sell those Items first that you bought first. For example, if you buy an Item at price X and then after a few days at price Y. So when sell your Item, ERPNext will reduce the quantity of the Item priced at X first and then Y.
+- **FIFO (First In First Out):** In this system, ERPNext assumes that you will consume / sell those Items first that you bought first. For example, if you buy an Item at price X and then after a few days at price Y. Thus when you sell your Item, ERPNext will reduce the quantity of the Item priced at X first and then Y.
 
 ￼
 
@@ -103,4 +103,4 @@ Why is this useful?
 
 In ERPNext, Serial Number and Batch are separate entities and all stock transactions for Items that serialized or batches must be tagged with either the Batch or Serial Number.
 
-> Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have make any stock entry.
+> Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.

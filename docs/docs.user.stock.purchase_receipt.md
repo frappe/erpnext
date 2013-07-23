@@ -15,13 +15,13 @@ or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receip
 
 ### Rejections
 
-In the Purchase Receipt, you will need to enter if all the materials you receive are of accepted quality (if you check). If you have any rejections, update the “Rejected Quantity” column in the Items table.
+In the Purchase Receipt, you are required to enter whether all the materials you receive are of accepted quality (in case you check). If you have any rejections, update the “Rejected Quantity” column in the Items table.
 
-If you reject, you will need to enter a “Rejected Warehouse” to indicate where you are storing the rejected Items.
+If you reject, you are required to enter a “Rejected Warehouse” to indicate where you are storing the rejected Items.
 
 ### Quality Inspections
 
-If for certain Items it is mandatory for your to record Quality Inspections (you have set it in your Item master), you will need to update the “Quality Inspection No” (QA No) column. The system will only allow you to “Submit” the Purchase Receipt if you update the “Quality Inspection No”.
+If for certain Items it is mandatory for you to record Quality Inspections (you have set it in your Item master), you will need to update the “Quality Inspection No” (QA No) column. The system will only allow you to “Submit” the Purchase Receipt if you update the “Quality Inspection No”.
 
 ### UOM Conversions
 
@@ -29,7 +29,7 @@ If your Purchase Order for an Item is in a different Unit of Measure (UOM) than 
 
 ### Currency Conversions
 
-Since the incoming Item affects the value of your inventory, it is important to convert it into your base Currency if you have ordered in another Currency. You will need to update the Currency Conversion Rate if applicable.
+Since the incoming Item affects the value of your inventory, it is important to convert it into your base Currency, if you have ordered in another Currency. You will need to update the Currency Conversion Rate if applicable.
 
 ### Taxes and Valuation
 

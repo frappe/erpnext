@@ -25,7 +25,7 @@ ERPNext has an expanding partner community so check this page out if there is a 
 
 ### 4. Buy Commercial Support / Hosting
 
-You can buy affordable hosting from Web Notes or buy commercial support where you get:
+You can buy affordable hosting from Web Notes or buy commercial support which offers:
 
 1. One-on-one sessions via screen sharing.
 1. Priority bug fixing
