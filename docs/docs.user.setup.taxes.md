@@ -13,7 +13,7 @@ For Tax Accounts that you want to use in the tax templates, you must mention the
 
 You must usually collect taxes from your Customer and pay them to the government. At times there may be multiple taxes for multiple government bodies like local government, state or provincial and federal or central government.
 
-The way ERPNext sets up taxes is via templates. Other types of charges that you may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.
+The way ERPNext sets up taxes is via templates. Other types of charges that may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.
 
 To create a new sales tax template called Sales Taxes and Charges Master, you have to go to:
 

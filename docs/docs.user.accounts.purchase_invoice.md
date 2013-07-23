@@ -3,7 +3,7 @@
 	"_label": "Purchase Invoice"
 }
 ---
-Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill that your Supplier sends your for products or services delivered. Here you accrue expenses to your Supplier. Making a Purchase Invoice is very similar to making a Purchase Order.
+Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill that your Supplier sends you for products or services delivered. Here you accrue expenses to your Supplier. Making a Purchase Invoice is very similar to making a Purchase Order.
 
 To make a new Purchase Invoice, go to:
 
@@ -11,7 +11,7 @@ To make a new Purchase Invoice, go to:
 
 or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 
-The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and “Bill Date” help you track the bill number as set by your Supplier for reference.
+The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and “Bill Date” help you  to track the bill number as set by your Supplier for reference.
 
 #### Accounting Impact
 
@@ -38,7 +38,7 @@ To see entries in your Purchase Invoice after you “Submit”, click on “View
 
 If the Item is consumed immediately on purchase or if it is a service, then the purchase becomes an “Expense”. For example, a telephone bill or travel bill is an “Expense” - it is already consumed.
 
-For inventory Items, that have a value, these purchases are not yet “Expense”, because they still have a value while they remain in your stock. They are “Assets”. If they are raw-materials (used in a process), they will become “Expense” the moment they are consumed in the process. If they are to be sold to a Customer, the become “Expense” when you ship them to the Customer.
+For inventory Items, that have a value, these purchases are not yet “Expense”, because they still have a value while they remain in your stock. They are “Assets”. If they are raw-materials (used in a process), they will become “Expense” the moment they are consumed in the process. If they are to be sold to a Customer, they become “Expense” when you ship them to the Customer.
 
 Note: In ERPNext, this conversion from “Asset” to “Expense” is not clear. As of the current version, you will have to manually convert an item from an “Asset” to “Expense” via a Journal Voucher. We know its a shortcoming and will be fixed in an upcoming version pretty soon.
 

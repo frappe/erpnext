@@ -21,9 +21,9 @@ You will notice that all the information about unshipped Items and other details
 
 If you are shipping Items that have a Sales BOM, ERPNext will automatically create a “Packing List” table for you based on the sub-Items in that Item. (See the Item explanation for more information).
 
-If your Items are serialized, then you for Sales BOM type of Items, you will have to update the Serial Number in the “Packing List” table.
+If your Items are serialized, then for Sales BOM type of Items, you will have to update the Serial Number in the “Packing List” table.
 
-### Packing Items in to Cases for Container Shipment
+### Packing Items in to Cases, for Container Shipment
 
 If you are doing container shipment or by weight, then you can use the Packing Slip to breakup your Delivery Note into smaller units. To make a Packing Slip go to:
 

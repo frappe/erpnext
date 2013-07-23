@@ -11,10 +11,10 @@ Once your customer confirms the Quotation you can convert your Quotation into a 
 
 > Selling > Sales Order > New Sales Order
 
-Most of the information in your Sales Order is the same as the Quotation. There are a few of more things a Sales Order will ask you to update.
+Most of the information in your Sales Order is the same as the Quotation. There are a few amongst other things that a Sales Order will ask you to update.
 
 - Expected date of delivery.
-- Customer Purchase Order number: If you customer has sent you a Purchase Order, you can update its number for future reference (in billing).
+- Customer Purchase Order number: If your customer has sent you a Purchase Order, you can update its number for future reference (in billing).
 
 #### Packing List
 
@@ -30,13 +30,13 @@ This “reserved” quantity will help you project what is the quantity you need
 
 **Sales Partner:** If this Sale was booked via a Sales Partner, you can update the Sales Partner’s details with commission and other info that you can aggregate.
 
-**Sales Persons:** ERPNext allows you to tag multiple Sales Persons who may have worked on this deal. You can also split the amount in targets of different Sales Persons and track how much invectives they earned on this deal.
+**Sales Persons:** ERPNext allows you to tag multiple Sales Persons who may have worked on this deal. You can also split the amount in targets of different Sales Persons and track how much incentives they earned on this deal.
 
 #### Next Steps
 
 Once your “Submit” your Sales Order, you can now trigger different aspects of your organization:
 
-- To being purchase click on “Make Purchase Request”
+- To begin purchase click on “Make Purchase Request”
 - To make a shipment entry click on “Make Delivery Note”
 - To bill, make “Make Sales Invoice”
 - To stop further process on this Sales Order, click on “Stop”
