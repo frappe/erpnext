@@ -261,4 +261,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Modern') # 2013-07-22",
 	"execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Spartan') # 2013-07-22",
 	"patches.july_2013.p08_custom_print_format_net_total_export",
+	"patches.july_2013.p09_remove_website_pyc",
 ]
