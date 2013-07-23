@@ -23,8 +23,8 @@
 }
 ---
 Setting up an ERP system is like starting your business all over again, but in the virtual
-world. Thankfully its not as hard as the real thing and you get to do a trial too.
+world. Thankfully it is not as hard as the real thing and you get to do a trial too.
 
-Implementation requires the implementer to a step back and set aside some time to do this right. This is usually not couple-of-hours after work kind of a project.
+Implementation requires the implementer to take a step back and set aside some time to do this right. This is usually not a couple-of-hours after-work kind of a project.
 
-Let us start with the screen you see the first time you login.
+Let us start with the screen which you see the first time you login.

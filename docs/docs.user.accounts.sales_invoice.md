@@ -37,7 +37,7 @@ When booking a sale (accrual):
 
 Posting Date: The date on which the Sales Invoice will affect your books of accounts i.e. your General Ledger. This will affect all your balances in that accounting period. 
 
-Due Date: The date on which the payment is due (if you have sold on credit). This can be automatically be set from the Customer master.
+Due Date: The date on which the payment is due (if you have sold on credit). This can be automatically set from the Customer master.
 
 #### Recurring Invoices
 

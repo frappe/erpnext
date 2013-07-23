@@ -23,7 +23,7 @@ In this form,
 
 1. Select the transaction for which you want to make the series
 The system will update the current series in the text box.
-1. Edit the the series as you want with unique prefixes for each series. Each prefix must be on a new line.
+1. Edit the series as required with unique prefixes for each series. Each prefix must be on a new line.
 1. The first prefix will be the default prefix. If you want the user to explicitly select a series instead of the default one, check the “User must always select” check box.
 
 You can also update the starting point for a series by entering the series name and the starting point in the “Update Series” section.

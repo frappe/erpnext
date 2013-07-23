@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:33:39", 
+  "modified": "2013-07-23 12:05:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,7 +25,6 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Currency", 
@@ -33,9 +32,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -92,19 +89,32 @@
  }, 
  {
   "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Accounts Manager"
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "amend": 0, 
   "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Master Manager"
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "amend": 0, 
   "cancel": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Purchase Master Manager"
+  "role": "Purchase Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
  }
 ]

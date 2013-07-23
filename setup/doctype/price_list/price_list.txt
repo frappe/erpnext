@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:50:47", 
+  "modified": "2013-07-23 12:03:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -29,7 +29,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Price List", 
@@ -37,8 +36,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -118,24 +116,32 @@
   "options": "<div class=\"well\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
  }, 
  {
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "Sales Manager", 
-  "write": 0
- }, 
- {
+  "amend": 0, 
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User", 
+  "submit": 0, 
   "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
  }, 
  {
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Master Manager", 
+  "role": "Purchase Master Manager", 
   "write": 1
  }
 ]
