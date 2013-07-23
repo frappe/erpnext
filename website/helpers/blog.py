@@ -92,14 +92,15 @@ def add_comment(args=None):
 		comment_doctype='Blog Post' and comment_docname=%s and
 		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
 	
-	blog = webnotes.conn.sql("""select * from `tabBlog Post` where name=%s""", 
-		args.get('comment_docname'), as_dict=1)[0]
+	blog = webnotes.doc("Blog Post", args.get("comment_docname"))
+	blogger_profile = webnotes.conn.get_value("Blogger", blog.blogger, "profile")
+	blogger_email = webnotes.conn.get_value("Profile", blogger_profile, "email")
 	
 	from webnotes.utils.email_lib.bulk import send
-	send(recipients=list(set(commentors + [blog['owner']])), 
+	send(recipients=list(set(commentors + [blogger_email])), 
 		doctype='Comment', 
 		email_field='comment_by', 
-		subject='New Comment on Blog: ' + blog['title'], 
+		subject='New Comment on Blog: ' + blog.title, 
 		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
 	
 	return comment_html.replace("\n", "")
