@@ -5,7 +5,7 @@
 ---
 A Stock Entry is a simple document that lets you record Item movement from a Warehouse, to a Warehouse and between Warehouses.
 
-This can be useful in also tracking:
+This can also be useful in tracking:
 
 - Material Issues from Stores
 - Sales and Purchase Returns

@@ -7,13 +7,13 @@ Emails are the nervous system of business communication and ERPNext has been des
 
 ## Sending Emails
 
-You can email any document from the system, by click on the “Email” button in the right sidebar. Before that you will need to set your outgoing email settings (SMTP server).
+You can email any document from the system, by clicking on the “Email” button on the right sidebar. Before that you will need to set your outgoing email settings (SMTP server).
 
 All emails sent from the system are added to the Communication table.
 
-> **Info:** What is SMTP? There are two types of email services, sending and receiving emails. Sending is done via a protocol called SMTP (Simple Mail Transfer Protocol) and the server (computer) that sends your email to its destination is called and SMTP Server.
+> **Info:** What is SMTP? There are two types of email services, sending and receiving emails. Sending is done via a protocol called SMTP (Simple Mail Transfer Protocol) and the server (computer) that sends your email to its destination is called SMTP Server.
 
-> **Info:** Bulk Emails: Bulk Emails, especially those that are sent without consent (spam), are considered as bad behavior. While it may be okay to send emails to those who have “opted-in” to receive mails, it is very difficult for the internet community to know what is spam and what is allowed. To overcome this problem, most email servers share a black and whitelist of email senders. If your emails have been marked as spam, you will be blacklisted. So be careful. Many times, it may be a good idea to send email via whitelisted services also called SMTP relay services that are paid services. These services will block you from sending spam while ensuring that most of your email does not go in the spam folder. There are many such services available like SendGrid and SMTP.com
+> **Info:** Bulk Emails: Bulk Emails, especially those that are sent without consent (spam), are considered as bad behavior. While it may be okay to send emails to those who have “opted-in” to receive mails, it is very difficult for the internet community to know what is spam and what is allowed. To overcome this problem, most email servers share a black and white list of email senders. If your emails have been marked as spam, you will be blacklisted. So be careful. Many times, it may be a good idea to send email via whitelisted services also known as SMTP relay services which are paid services. These services will block you from sending spam while ensuring that most of your email does not go in the spam folder. There are many such services available like SendGrid and SMTP.com
 
 To setup your outgoing mails, go to
 
@@ -34,7 +34,7 @@ To setup your Support integration, go to:
 > Setup > Email and Notifications > Email Settings > Incoming Mail Settings
 
 To make ERPNext pull emails from your mail box, enter the POP3 settings. (POP3 is a way of extracting emails from your mailbox. It should be fairly easy to find out what your POP3 settings are. If you have problems, contact your email service provider).
-If you want to setup an auto reply, check on the “Send Autoreply” box and when ever someone sends an email, an autoreply will be sent.
+If you want to setup an auto reply, check on the “Send Autoreply” box and whenever someone sends an email, an autoreply will be sent.
 Add a custom signature you want to send with your replies. 
 
 ### Setting Auto-notification on Documents

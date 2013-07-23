@@ -3,7 +3,7 @@
 	"_label": "Setting up Users, Roles and Permissions"
 }
 ---
-ERPNext has a role-based permission system, which means that you can assign Roles to Users and permissions on Roles.
+ERPNext has a role-based permission system, which means that you can assign Roles to Users, and permissions on Roles.
 
 ## Users (Profile)
 
@@ -20,11 +20,11 @@ To add a new user, click on “Add” button and enter the user’s
 - Last Name
 - Password
 
-An invitation email will will be sent to the user with the login details.
+An invitation email will be sent to the user with the login details.
 
 #### Setting Roles
 
-ERPNext comes with a bunch of predefined roles. Each role comes with predefined permissions. See the Preset Permission Chart to find out what permission each roles comes with.
+ERPNext comes with a bunch of predefined roles. Each role comes with predefined permissions. See the Preset Permission Chart to find out what permission each role comes with.
 
 After creating the User, you can add / remove Roles for that User by clicking on “Roles” button. To find out what permission each role has, click on the “?” sign next to the Role.
 
@@ -64,7 +64,7 @@ When you select a document type from the drop-down. You will see the rules that 
 
 To add a new rule, click on “Add a New Rule” button and a pop-up box will ask you to select a Role and a Permission Level. Once you select this and click on “Add”, this will add a new row to your rules table.
 
-To edit rules, just check or uncheck the boxes relating the the permission level and Role and click on “Update”.
+To edit rules, just check or uncheck the boxes stating the permission level and Role and click on “Update”.
 
 To delete a rule, just uncheck all the boxes of the row and click on “Update” 
 

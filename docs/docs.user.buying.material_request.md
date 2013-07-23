@@ -19,7 +19,7 @@ To generate a Material Request manually go to:
 In the Material Request form, 
 
 - Fill in the Items you want and their quantities.
-- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered to. This helps you keep track of Projected Quantity for this Item.
+- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered to. This helps you to keep track of the Projected Quantity for this Item.
 - You can also automatically get the Items from a Sales Order.
 - You can optionally add the Terms, using the Terms and Conditions master and also the reason.
 
@@ -27,5 +27,5 @@ In the Material Request form,
 
 #### Authorization
 
-If you want your Material Request to be authorized by a senior person like a Purchase Manger then you can give “Submit” rights to only that person. So everyone can create requests, but only the authorized person can “Submit”.
+If you want your Material Request to be authorized by a senior person like a Purchase Manager then you can give “Submit” rights only to that person. Everyone can create requests, but only the authorized person can “Submit”.
 
