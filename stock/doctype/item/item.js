@@ -182,13 +182,6 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 	function(doc,cdt,cdn) {
 		return{ query:"controllers.queries.supplier_query" } }
 
-cur_frm.cscript.on_remove_attachment = function(doc) {
-	if(!inList(cur_frm.fields_dict.image.df.options.split("\n"), doc.image)) {
-		msgprint(wn._("Attachment removed. You may need to update: ") 
-			+ wn.meta.get_docfield(doc.doctype, "description_html").label);
-	}
-};
-
 cur_frm.cscript.copy_from_item_group = function(doc) {
 	wn.model.with_doc("Item Group", doc.item_group, function() {
 		$.each(wn.model.get("Item Website Specification", {parent:doc.item_group}), 
@@ -206,5 +199,10 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 cur_frm.cscript.image = function() {
 	refresh_field("image_view");
 	
-	if(!cur_frm.doc.description_html) cur_frm.cscript.add_image(cur_frm.doc);
+	if(!cur_frm.doc.description_html) {
+		cur_frm.cscript.add_image(cur_frm.doc);
+	} else {
+		msgprint(wn._("You may need to update: ") + 
+			wn.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
+	}
 }
