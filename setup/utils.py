@@ -44,20 +44,6 @@ def get_ancestors_of(doctype, name):
 	return result or []
 
 @webnotes.whitelist()
-def get_price_list_currency(args):
-	"""
-		args = {
-			"price_list_name": "Something",
-			"buying_or_selling": "Buying" or "Selling"
-		}
-	"""
-	if isinstance(args, basestring):
-		args = json.loads(args)
-	
-	result = webnotes.conn.sql("""select distinct ref_currency from `tabItem Price`
-		where price_list_name=%s and buying_or_selling=%s""",
-		(args.get("price_list_name"), args.get("buying_or_selling")))
-	if result and len(result)==1:
-		return {"price_list_currency": result[0][0]}
-	else:
-		return {}
+def get_price_list_currency(price_list_name):
+	return {"price_list_currency": webnotes.conn.get_value("Price List", price_list_name, 
+		"currency")}

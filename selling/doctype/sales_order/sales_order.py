@@ -366,7 +366,7 @@ def make_material_request(source_name, target_doclist=None):
 		}
 	}, target_doclist, postprocess)
 	
-	return [d.fields for d in doclist]
+	return [(d if isinstance(d, dict) else d.fields) for d in doclist]
 
 @webnotes.whitelist()
 def make_delivery_note(source_name, target_doclist=None):	
