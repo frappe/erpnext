@@ -112,6 +112,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
+		
+		if(this.frm.fields_dict.sales_team && this.frm.fields_dict.sales_team.grid.get_field("sales_person")) {
+			this.frm.set_query("sales_person", "sales_team", function() {
+				return {
+					filters: { is_group: "No" }
+				};
+			});
+		}
 	},
 	
 	refresh: function(doc) {
