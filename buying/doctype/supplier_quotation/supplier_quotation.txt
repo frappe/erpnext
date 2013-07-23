@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-07-09 12:49:31", 
+  "modified": "2013-07-23 15:27:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -222,7 +222,8 @@
   "fieldtype": "Link", 
   "label": "Price List Currency", 
   "options": "Currency", 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "depends_on": "price_list_name", 
