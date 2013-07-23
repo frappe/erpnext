@@ -58,9 +58,15 @@ def get_item_details(args):
 	
 	_validate_item_details(args, item_bean.doc)
 	
-	out = _get_basic_details(args, item_bean)
-	
 	meta = webnotes.get_doctype(args.doctype)
+
+	# hack! for Sales Order Item
+	warehouse_fieldname = "warehouse"
+	if meta.get_field("reserved_warehouse", parentfield=args.parentfield):
+		warehouse_fieldname = "reserved_warehouse"
+	
+	out = _get_basic_details(args, item_bean, warehouse_fieldname)
+	
 	if meta.get_field("currency"):
 		out.base_ref_rate = out.basic_rate = out.ref_rate = out.export_rate = 0.0
 		
@@ -69,8 +75,8 @@ def get_item_details(args):
 			
 	out.update(_get_item_discount(out.item_group, args.customer))
 	
-	if out.warehouse or out.reserved_warehouse:
-		out.update(get_available_qty(args.item_code, out.warehouse or out.reserved_warehouse))
+	if out.get(warehouse_fieldname):
+		out.update(get_available_qty(args.item_code, out.get(warehouse_fieldname)))
 	
 	out.customer_item_code = _get_customer_item_code(args, item_bean)
 	
@@ -108,13 +114,13 @@ def _validate_item_details(args, item):
 		msgprint(_("Item") + (" %s: " % item.name) + _("not a sales item"),
 			raise_exception=True)
 			
-def _get_basic_details(args, item_bean):
+def _get_basic_details(args, item_bean, warehouse_fieldname):
 	item = item_bean.doc
+	
 	out = webnotes._dict({
 			"item_code": item.name,
 			"description": item.description_html or item.description,
-			"reserved_warehouse": item.default_warehouse or args.warehouse or args.reserved_warehouse,
-			"warehouse": item.default_warehouse or args.warehouse,
+			warehouse_fieldname: item.default_warehouse or args.get(warehouse_fieldname),
 			"income_account": item.default_income_account or args.income_account \
 				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
 			"expense_account": item.purchase_account or args.expense_account \
