@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:29:54", 
+  "modified": "2013-07-23 12:00:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,8 +37,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -180,6 +179,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Material Manager", 
+  "submit": 0, 
   "write": 0
  }, 
  {
@@ -188,6 +188,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Material User", 
+  "submit": 0, 
   "write": 0
  }, 
  {
@@ -195,6 +196,19 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Material Master Manager", 
+  "submit": 0, 
   "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]

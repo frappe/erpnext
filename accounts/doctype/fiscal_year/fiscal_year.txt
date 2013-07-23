@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:25", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:38:22", 
+  "modified": "2013-07-23 11:59:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,19 +24,13 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Fiscal Year", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -76,6 +70,16 @@
   "reqd": 0
  }, 
  {
-  "doctype": "DocPerm"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
  }
 ]

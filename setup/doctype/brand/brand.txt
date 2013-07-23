@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:54", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:28:33", 
+  "modified": "2013-07-23 12:06:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,5 +71,17 @@
   "role": "Material User", 
   "submit": 0, 
   "write": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:33:19", 
+  "modified": "2013-07-23 12:05:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,7 +25,6 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Country", 
@@ -33,9 +32,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0, 
-  "write": 1
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -65,19 +62,35 @@
  {
   "amend": 0, 
   "cancel": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Master Manager"
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "HR Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocPerm", 
-  "role": "Purchase Master Manager"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "HR Manager"
+  "role": "All"
  }
 ]
