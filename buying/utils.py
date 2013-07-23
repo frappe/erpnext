@@ -207,7 +207,7 @@ def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 @webnotes.whitelist()
 def get_conversion_factor(item_code, uom):
 	return {"conversion_factor": webnotes.conn.get_value("UOM Conversion Detail",
-		{"parent": item_code, "uom": uom})}
+		{"parent": item_code, "uom": uom}, "conversion_factor")}
 		
 @webnotes.whitelist()
 def get_projected_qty(item_code, warehouse):

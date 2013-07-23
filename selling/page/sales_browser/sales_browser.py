@@ -30,4 +30,7 @@ def add_node():
 		parent_field: webnotes.form_dict['parent'],
 		"is_group": webnotes.form_dict['is_group']
 	}]
+	if ctype == "Sales Person":
+		doclist[0]["employee"] = webnotes.form_dict.get('employee')
+		
 	webnotes.bean(doclist).save()
