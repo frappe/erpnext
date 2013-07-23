@@ -105,24 +105,12 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		this.accounts_by_company = this.make_accounts_by_company();
 		
 		// filter accounts options by company
-		this.filter_inputs.company.change(function() {
+		this.filter_inputs.company.on("change", function() {
 			me.setup_account_filter(this);
-			me.refresh()
+			me.refresh();
 		});
 		
-		this.filter_inputs.account.change(function() {
-			me.make_account_by_name();
-			me.filter_inputs.group_by_ledger
-				.parent().toggle(!!(me.account_by_name[$(this).val()] 
-					&& me.account_by_name[$(this).val()].group_or_ledger==="Group"));
-					
-			me.filter_inputs.group_by_voucher
-				.parent().toggle(!!(me.account_by_name[$(this).val()] 
-					&& me.account_by_name[$(this).val()].group_or_ledger==="Ledger"));
-		});
-		
-		this.trigger_refresh_on_change(["group_by_ledger"]);
-		this.trigger_refresh_on_change(["group_by_voucher"]);
+		this.trigger_refresh_on_change(["group_by_ledger", "group_by_voucher"]);
 	},
 	setup_account_filter: function(company_filter) {
 		var me = this;
@@ -142,17 +130,12 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 	init_filter_values: function() {
 		this._super();
-		this.filter_inputs.group_by_ledger.parent().toggle(false);
-		this.filter_inputs.group_by_voucher.parent().toggle(false);
-		this.filter_inputs.company.change();
-		this.filter_inputs.account.change();
+		this.toggle_group_by_checks();
+		this.filter_inputs.company.trigger("change");
 	},
 	apply_filters_from_route: function() {
 		this._super();
-		this.filter_inputs.group_by_ledger.parent().toggle(false);
-		this.filter_inputs.group_by_voucher.parent().toggle(false);
-		this.filter_inputs.company.change();
-		this.filter_inputs.account.change();
+		this.toggle_group_by_checks();
 	},
 	make_accounts_by_company: function() {
 		var accounts_by_company = {};
@@ -164,21 +147,27 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		return accounts_by_company;
 	},
 	is_child_account: function(account, item_account) {
-		var opts = [account, item_account];
 		account = this.account_by_name[account];
 		item_account = this.account_by_name[item_account];
-		
 		return ((item_account.lft >= account.lft) && (item_account.rgt <= account.rgt));
 	},
+	toggle_group_by_checks: function() {
+		this.make_account_by_name();
+		
+		this.filter_inputs.group_by_ledger
+			.parent().toggle(!!(this.account_by_name[this.account] 
+				&& this.account_by_name[this.account].group_or_ledger==="Group"));
+				
+		this.filter_inputs.group_by_voucher
+			.parent().toggle(!!(this.account_by_name[this.account] 
+				&& this.account_by_name[this.account].group_or_ledger==="Ledger"));
+	},
 	prepare_data: function() {
-		// add Opening, Closing, Totals rows
-		// if filtered by account and / or voucher
+		var me = this;
 		var data = wn.report_dump.data["GL Entry"];
 		var out = [];
 		
-		this.make_account_by_name();
-		
-		var me = this;
+		this.toggle_group_by_checks();
 		
 		var from_date = dateutil.str_to_obj(this.from_date);
 		var to_date = dateutil.str_to_obj(this.to_date);
@@ -188,12 +177,14 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			return;
 		}
 		
+		// add Opening, Closing, Totals rows
+		// if filtered by account and / or voucher
 		var opening = this.make_summary_row("Opening", this.account);
 		var totals = this.make_summary_row("Totals", this.account);
 
 		var grouped_ledgers = {};
 		$.each(data, function(i, item) {
-			if((me.is_default("company") ? true : me.apply_filter(item, "company")) &&
+			if(me.apply_filter(item, "company") &&
 				(me.account ? me.is_child_account(me.account, item.account) 
 				: true) && (me.voucher_no ? item.voucher_no==me.voucher_no : true)) {
 				var date = dateutil.str_to_obj(item.posting_date);
@@ -247,7 +238,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					
 					if(grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no].row){
 						grouped_ledgers[item.account].entries_group_by_voucher[item.voucher_no]
-							.row = jQuery.extend({}, item);
+							.row = $.extend({}, item);
 					}
 				}
 			}
@@ -307,10 +298,10 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					.concat(grouped_ledgers[account].entries)
 					.concat([grouped_ledgers[account].totals, 
 						grouped_ledgers[account].closing,
-						{id: "_blank" + i, _no_format: true, debit: "", credit: ""}]);
+						{id: "_blank" + i, debit: "", credit: ""}]);
 			}
 		});
-		return [{id: "_blank_first", _no_format: true, debit: "", credit: ""}].concat(out);
+		return [{id: "_blank_first", debit: "", credit: ""}].concat(out);
 	},
 	
 	group_data_by_voucher: function(grouped_ledgers) {
@@ -331,7 +322,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				});
 			}
 		});
-		return [{id: "_blank_first", _no_format: true, debit: "", credit: ""}].concat(out);
+		return out;
 	},
 	
 	get_balance: function(debit_or_credit, balance) {
