@@ -189,6 +189,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							barcode: item.barcode,
 							warehouse: item.warehouse,
 							doctype: me.frm.doc.doctype,
+							parentfield: item.parentfield,
 							customer: me.frm.doc.customer,
 							currency: me.frm.doc.currency,
 							conversion_rate: me.frm.doc.conversion_rate,
@@ -287,13 +288,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		if(item.item_code && (item.warehouse || item.reserved_warehouse)) {
+		if(item.item_code && item.warehouse) {
 			this.frm.call({
 				method: "selling.utils.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
-					warehouse: item.warehouse || item.reserved_warehouse,
+					warehouse: item.warehouse,
 				},
 			});
 		}
