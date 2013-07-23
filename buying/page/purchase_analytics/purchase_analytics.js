@@ -121,7 +121,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 		var me = this;
 		this._super();
 		
-		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on"]);
+		this.trigger_refresh_on_change(["value_or_qty", "tree_type", "based_on", "company"]);
 
 		this.show_zero_check()		
 		this.setup_plot_check();
@@ -216,7 +216,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 		var is_val = this.value_or_qty == 'Value';
 		
 		$.each(this.tl[this.based_on], function(i, tl) {
-			if (me.is_default('company') ? true : me.apply_filter(tl, "company")) { 
+			if (me.is_default('company') ? true : tl.company === me.company) { 
 				var posting_date = dateutil.str_to_obj(tl.posting_date);
 				if (posting_date >= from_date && posting_date <= to_date) {
 					var item = me.item_by_name[tl[me.tree_grid.item_key]] || 
