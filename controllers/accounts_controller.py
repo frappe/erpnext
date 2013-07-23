@@ -57,10 +57,7 @@ class AccountsController(TransactionBase):
 		# TODO - change this, since price list now has only one currency allowed
 		if self.meta.get_field("price_list_name") and self.doc.price_list_name and \
 			not self.doc.price_list_currency:
-				self.doc.fields.update(get_price_list_currency({
-					"price_list_name": self.doc.price_list_name, 
-					"buying_or_selling": buying_or_selling
-				}))
+				self.doc.fields.update(get_price_list_currency(self.doc.price_list_name))
 				
 				if self.doc.price_list_currency:
 					if not self.doc.plc_conversion_rate:

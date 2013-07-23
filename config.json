@@ -84,6 +84,7 @@
 				"args_method": "website.doctype.about_us_settings.about_us_settings.get_args"
 			},
 			"account": {
+				"no_cache": true,
 				"template": "app/website/templates/pages/account"
 			},
 			"attributions": {
@@ -106,6 +107,7 @@
 				"args_method": "selling.doctype.sales_order.sales_order.get_website_args"
 			},
 			"orders": {
+				"no_cache": true,
 				"template": "app/website/templates/pages/orders",
 				"args_method": "selling.doctype.sales_order.sales_order.get_currency_and_number_format"
 			},

@@ -74,14 +74,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
-			var me = this;
 			var company_currency = this.get_company_currency();
-			$.each(["currency", "price_list_currency"], function(i, fieldname) {
-				if(!me.frm.doc[fieldname]) {
-					me.frm.set_value(fieldname, company_currency);
-					me.script_manager.trigger(fieldname);
-				}
-			});
+			this.frm.set_value("currency", company_currency);
+			this.frm.script_manager.trigger("currency");
 		}
 	},
 	
@@ -123,10 +118,9 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		if(this.frm.doc.price_list_name) {
 			this.frm.call({
 				method: "setup.utils.get_price_list_currency",
-				args: { args: {
+				args: { 
 					price_list_name: this.frm.doc.price_list_name,
-					buying_or_selling: buying_or_selling
-				}},
+				},
 				callback: function(r) {
 					if(!r.exc) {
 						me.price_list_currency();
