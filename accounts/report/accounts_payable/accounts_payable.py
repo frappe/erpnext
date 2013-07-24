@@ -7,8 +7,10 @@ from accounts.report.accounts_receivable.accounts_receivable import get_ageing_d
 def execute(filters=None):
 	if not filters: filters = {}
 	columns = get_columns()
-	
 	entries = get_gl_entries(filters)
+	account_supplier = dict(webnotes.conn.sql("""select account.name, supplier.supplier_name
+		from `tabAccount` account, `tabSupplier` supplier 
+		where account.master_type="Supplier" and supplier.name=account.master_name"""))
 	
 	entries_after_report_date = [[gle.voucher_type, gle.voucher_no] 
 		for gle in get_gl_entries(filters, before_report_date=False)]
@@ -38,7 +40,8 @@ def execute(filters=None):
 
 			if abs(flt(outstanding_amount)) > 0.01:
 				paid_amount = invoiced_amount - outstanding_amount
-				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
+				row = [gle.posting_date, gle.account, account_supplier.get(gle.account, ""),
+					gle.voucher_type, gle.voucher_no, 
 					gle.remarks, account_supplier_type_map.get(gle.account), due_date, bill_no, 
 					bill_date, invoiced_amount, paid_amount, outstanding_amount]
 				
@@ -55,7 +58,7 @@ def execute(filters=None):
 	
 def get_columns():
 	return [
-		"Posting Date:Date:80", "Account:Link/Account:150", "Voucher Type::110", 
+		"Posting Date:Date:80", "Account:Link/Account:150", "Supplier::150", "Voucher Type::110", 
 		"Voucher No::120", "Remarks::150", "Supplier Type:Link/Supplier Type:120", 
 		"Due Date:Date:80", "Bill No::80", "Bill Date:Date:80", 
 		"Invoiced Amount:Currency:100", "Paid Amount:Currency:100", 
