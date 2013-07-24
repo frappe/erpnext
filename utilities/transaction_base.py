@@ -396,20 +396,22 @@ def map_party_contact_details(contact_name=None, party_field=None, party_name=No
 	if not contact_name and party_field:
 		contact_name = get_default_contact(party_field, party_name)
 	
-	contact = webnotes.conn.sql("""select * from `tabContact` where name=%s""", contact_name, as_dict=True)
+	if contact_name:
+		contact = webnotes.conn.sql("""select * from `tabContact` where name=%s""", 
+			contact_name, as_dict=True)
 
-	if contact:
-		contact = contact[0]
-		out.update({
-			"contact_person": contact.get("name"),
-			"contact_display": " ".join(filter(None, 
-				[contact.get("first_name"), contact.get("last_name")])),
-			"contact_email": contact.get("email_id"),
-			"contact_mobile": contact.get("mobile_no"),
-			"contact_phone": contact.get("phone"),
-			"contact_designation": contact.get("designation"),
-			"contact_department": contact.get("department")
-		})
+		if contact:
+			contact = contact[0]
+			out.update({
+				"contact_person": contact.get("name"),
+				"contact_display": " ".join(filter(None, 
+					[contact.get("first_name"), contact.get("last_name")])),
+				"contact_email": contact.get("email_id"),
+				"contact_mobile": contact.get("mobile_no"),
+				"contact_phone": contact.get("phone"),
+				"contact_designation": contact.get("designation"),
+				"contact_department": contact.get("department")
+			})
 
 	return out
 	
