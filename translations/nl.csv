@@ -7,6 +7,7 @@
  cannot be 0,mag niet 0
  cannot be deleted.,kunnen niet worden verwijderd.
  does not belong to the company,behoort niet tot de onderneming
+ has already been submitted.,al is ingediend.
  has been freezed. \				Only Accounts Manager can do transaction against this account,is bevroren. \ Accounts Manager kan doen transactie tegen deze account
 " is less than equals to zero in the system, \						valuation rate is mandatory for this item","is minder dan gelijk aan nul in het systeem, \ taxatie tarief is verplicht voor dit item"
  is mandatory,is verplicht
@@ -17,6 +18,7 @@
  is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,is nu de standaard boekjaar. \ Vernieuw uw browser om de wijziging door te voeren.
  is present in one or many Active BOMs,aanwezig is in een of vele Actieve stuklijsten
  not active or does not exists in the system,niet actief of niet bestaat in het systeem
+ not submitted,niet ingediend
  or the BOM is cancelled or inactive,of de BOM wordt geannuleerd of inactief
  should be 'Yes'. As Item: ,zou moeten zijn &#39;Yes&#39;. Als Item:
  should be same as that in ,dezelfde als die moeten worden in
@@ -56,6 +58,7 @@
 15px,15px
 16px,16px
 2 days ago,2 dagen geleden
+: Duplicate row from same ,: Dubbele rij van dezelfde
 : It is linked to other active BOM(s),: Het is gekoppeld aan andere actieve BOM (s)
 : Mandatory for a Recurring Invoice.,: Verplicht voor een terugkerende factuur.
 "<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Sales Browser/Customer Group"">Om Doelgroepen beheren, klik hier</a>"
@@ -114,6 +117,7 @@ Accounts Settings,Accounts Settings
 Action,Actie
 Active,Actief
 Active: Will extract emails from ,Actief: Zal ​​e-mails uittreksel uit
+Activity,Activiteit
 Activity Log,Activiteitenlogboek
 Activity Type,Activiteit Type
 Actual,Daadwerkelijk
@@ -148,9 +152,6 @@ Add Total Row,Voeg Totaal Row
 Add a banner to the site. (small banners are usually good),Plaats ook een banner op de site. (Kleine banners zijn meestal goed)
 Add attachment,Bijlage toevoegen
 Add code as &lt;script&gt;,Voeg code als &lt;script&gt;
-Add custom code to forms,Voeg aangepaste code aan formulieren
-Add fields to forms,Velden toevoegen aan formulieren
-Add headers for standard print formats,Voeg headers voor standaard afdrukformaten
 Add new row,Voeg een nieuwe rij
 Add or Deduct,Toevoegen of aftrekken
 Add rows to set annual budgets on Accounts.,Rijen toevoegen aan jaarlijkse begrotingen op Accounts in te stellen.
@@ -158,7 +159,6 @@ Add rows to set annual budgets on Accounts.,Rijen toevoegen aan jaarlijkse begro
 Add to To Do,Toevoegen aan To Do
 Add to To Do List of,Toevoegen aan To Do List van Do
 Add/Remove Recipients,Toevoegen / verwijderen Ontvangers
-"Add/remove users, set roles, passwords etc","Gebruikers toevoegen / verwijderen, set rollen, wachtwoorden enz."
 Additional Info,Extra informatie
 Address,Adres
 Address & Contact,Adres &amp; Contact
@@ -174,7 +174,6 @@ Address and other legal information you may want to put in the footer.,Adres-en 
 Address to be displayed on the Contact Page,Adres moet worden weergegeven op de Contact Pagina
 Adds a custom field to a DocType,Voegt een aangepast veld aan een DocType
 Adds a custom script (client or server) to a DocType,Hiermee wordt een aangepast script (client of server) om een ​​DocType
-Administration,Administratie
 Advance Amount,Advance Bedrag
 Advance amount,Advance hoeveelheid
 Advanced Scripting,Geavanceerde Scripting
@@ -269,7 +268,6 @@ Applies to Company,Geldt voor Bedrijf
 Apply / Approve Leaves,Toepassen / goedkeuren Leaves
 Apply Shipping Rule,Solliciteer Scheepvaart Rule
 Apply Taxes and Charges Master,Toepassing en-heffingen Master
-Apply latest updates and patches to this app,Solliciteer nieuwste updates en patches om deze app
 Appraisal,Taxatie
 Appraisal Goal,Beoordeling Doel
 Appraisal Goals,Beoordeling Doelen
@@ -300,7 +298,6 @@ Attach Document Print,Bevestig Document Print
 Attached To DocType,Bijlage Aan DocType
 Attached To Name,Gehecht Aan Naam
 Attachment,Gehechtheid
-Attachment removed. You may need to update: ,Gehechtheid verwijderd. U kan nodig zijn om bij te werken:
 Attachments,Toebehoren
 Attempted to Contact,Geprobeerd om contact
 Attendance,Opkomst
@@ -422,7 +419,6 @@ Brand HTML,Brand HTML
 Brand Name,Merknaam
 "Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px","Brand is wat er op de rechterbovenhoek van de werkbalk. Als het een afbeelding, zorg ervoor dat ithas een transparante achtergrond en gebruik de &lt;img /&gt; tag. Houd grootte als 200px x 30px"
 Brand master.,Brand meester.
-Branding and Printing,Branding en afdrukken
 Brands,Merken
 Breakdown,Storing
 Budget,Begroting
@@ -490,7 +486,6 @@ Cell Number,Mobiele nummer
 Center,Centrum
 "Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.","Bepaalde documenten mogen niet worden gewijzigd zodra de definitieve, zoals een factuur bijvoorbeeld. De eindtoestand van deze documenten wordt genoemd <b>Ingediend.</b> U kunt beperken welke rollen kunnen op Verzenden."
 Change UOM for an Item.,Wijzig Verpakking voor een item.
-"Change entry properties (hide fields, make mandatory etc)","Wijzig eigenschappen van een item (verberg velden, een verplichtend karakter, enz.)"
 Change the starting / current sequence number of an existing series.,Wijzig de start-/ huidige volgnummer van een bestaande serie.
 Channel Partner,Channel Partner
 Charge,Lading
@@ -688,6 +683,8 @@ Customer Addresses And Contacts,Klant adressen en contacten
 Customer Code,Klantcode
 Customer Codes,Klant Codes
 Customer Details,Klant Details
+Customer Discount,Klanten Korting
+Customer Discounts,Klant Kortingen
 Customer Feedback,Klantenfeedback
 Customer Group,Klantengroep
 Customer Group Name,Klant Groepsnaam
@@ -718,10 +715,8 @@ DN,DN
 DN Detail,DN Detail
 Daily,Dagelijks
 Daily Time Log Summary,Daily Time Log Samenvatting
-"Daily, weekly, monthly email Digests","Dagelijks, wekelijks, maandelijks e-mail Digests"
 Danger,Gevaar
 Data,Gegevens
-Data Import,Gegevens importeren
 Data missing in table,Ontbreekt in tabel data
 Database,Database
 Database Folder ID,Database Folder ID
@@ -944,7 +939,6 @@ Employee: ,Werknemer:
 Employees Email Id,Medewerkers E-mail Identiteitskaart
 Employment Details,Werkgelegenheid Details
 Employment Type,Type baan
-Enable / disable currencies.,Inschakelen / uitschakelen valuta.
 Enable Auto Inventory Accounting,Enable Auto Inventory Accounting
 Enable Shopping Cart,Enable Winkelwagen
 Enabled,Ingeschakeld
@@ -1019,8 +1013,6 @@ Export,Exporteren
 Exports,Export
 External,Extern
 Extract Emails,Extract Emails
-Extract Job Applicant from jobs email id e.g. jobs@example.com,Uittreksel sollicitant van banen e-id bijvoorbeeld jobs@example.com
-Extract Leads from sales email id e.g. sales@example.com,Uittreksel Leads uit de verkoop e-id bijvoorbeeld sales@example.com
 FCFS Rate,FCFS Rate
 FIFO,FIFO
 Facebook Share,Facebook Share
@@ -1044,7 +1036,6 @@ Fields,Velden
 "Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box","Velden gescheiden door komma (,) opgenomen in de <br /> <b>Zoeken op</b> lijst van dialoogvenster Zoeken"
 File,Bestand
 File Data,File Data
-File Manager,File Manager
 File Name,Bestandsnaam
 File Size,Bestand Grootte
 File URL,File-URL
@@ -1063,7 +1054,6 @@ Filter based on item,Filteren op basis van artikel
 Final Confirmation Date,Definitieve bevestiging Datum
 Financial Analytics,Financiële Analytics
 Financial Statements,Jaarrekening
-Financial Years for books of accounts,Financiële Jaren voor boeken van de rekeningen
 First Name,Voornaam
 First Responded On,Eerste reageerden op
 Fiscal Year,Boekjaar
@@ -1117,6 +1107,7 @@ From Date,Van Datum
 From Date must be before To Date,Van datum moet voor-to-date
 From Delivery Note,Van Delivery Note
 From Employee,Van Medewerker
+From Lead,Van Lood
 From PR Date,Van PR Datum
 From Package No.,Van Pakket No
 From Purchase Order,Van Purchase Order
@@ -1151,7 +1142,6 @@ Get Current Stock,Get Huidige voorraad
 Get From ,Get Van
 Get Items,Get Items
 Get Last Purchase Rate,Get Laatst Purchase Rate
-Get Latest Updates,Ontvang de meest recente updates
 Get Non Reconciled Entries,Get Niet Reconciled reacties
 Get Outstanding Invoices,Get openstaande facturen
 Get Purchase Receipt,Get Aankoop Ontvangst
@@ -1161,7 +1151,6 @@ Get Stock and Rate,Get voorraad en Rate
 Get Template,Get Sjabloon
 Get Terms and Conditions,Get Algemene Voorwaarden
 Get Weekly Off Dates,Ontvang wekelijkse Uit Data
-Get a list of errors encountered by the Scheduler,Hier krijg je een lijst van fouten die door de Scheduler
 "Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Get waardering tarief en beschikbare voorraad bij de bron / doel pakhuis op de genoemde plaatsen van datum-tijd. Als geserialiseerde item, drukt u op deze toets na het invoeren van seriële nos."
 Give additional details about the indent.,Geven extra informatie over het streepje.
 Global Defaults,Global Standaardwaarden
@@ -1195,7 +1184,6 @@ Groups,Groepen
 HR,HR
 HTML,HTML
 HTML / Banner that will show on the top of product list.,HTML / Banner dat zal laten zien op de bovenkant van het product lijst.
-"HTML print formats for quotes, invoices etc","HTML afdrukformaten voor offertes, facturen enz."
 Half Day,Halve dag
 Half Yearly,Halfjaarlijkse
 Half-yearly,Halfjaarlijks
@@ -1251,6 +1239,7 @@ How frequently?,Hoe vaak?
 "How should this currency be formatted? If not set, will use system defaults","Hoe moet deze valuta worden geformatteerd? Indien niet ingesteld, zal gebruik maken van het systeem standaard"
 How to upload,Hoe om te uploaden
 Hrvatski,Hrvatski
+Human Resources,Human Resources
 Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,Hoera! De dag (en) waarop u een aanvraag voor verlof \ samenvallen met vakantie (s). Je moet niet van toepassing voor verlof.
 I,Ik
 ID (name) of the entity whose property is to be set,ID (naam) van de entiteit waarvan de eigenschap moet worden ingesteld
@@ -1305,7 +1294,6 @@ Implementation Partner,Implementatie Partner
 Import,Importeren
 Import Attendance,Import Toeschouwers
 Import Log,Importeren Inloggen
-Import data from spreadsheet (csv) files,Gegevens importeren uit spreadsheet (csv-bestanden)
 Important dates and commitments in your project life cycle,Belangrijke data en verplichtingen in uw project levenscyclus
 Imports,Invoer
 In Dialog,In Dialog
@@ -1511,7 +1499,6 @@ Lead Details,Lood Details
 Lead Lost,Lood Verloren
 Lead Name,Lead Naam
 Lead Owner,Lood Owner
-Lead Ref,Lood Ref
 Lead Source,Lood Bron
 Lead Status,Lead Status
 Lead Time Date,Lead Tijd Datum
@@ -1553,7 +1540,6 @@ Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Org
 Letter Head,Brief Hoofd
 Letter Head Image,Brief Hoofd afbeelding
 Letter Head Name,Brief Hoofd Naam
-Letter heads for print,Briefpapier voor print
 Level,Niveau
 "Level 0 is for document level permissions, higher levels for field level permissions.","Niveau 0 is voor document niveau machtigingen, hogere niveaus voor veldniveau machtigingen."
 Lft,Lft
@@ -1563,13 +1549,11 @@ Linked In Share,Linked In delen
 Linked With,Linked Met
 List,Lijst
 List items that form the package.,Lijst items die het pakket vormen.
-List of companies (not customers / suppliers),Lijst van bedrijven (niet klanten / leveranciers)
 List of holidays.,Lijst van feestdagen.
 List of patches executed,Lijst van de uitgevoerde stukken
 List of records in which this document is linked,Lijst van records waarin dit document wordt gekoppeld
 List of users who can edit a particular Note,Lijst van gebruikers die een bepaalde Note kan bewerken
 List this Item in multiple groups on the website.,Lijst deze post in meerdere groepen op de website.
-"List, delete uploaded files.","Lijst, geüploade bestanden verwijderen."
 Live Chat,Live Chat
 Load Print View on opening of an existing form,Laad Print Bekijk op opening van een bestaand formulier
 Loading,Het laden
@@ -1596,6 +1580,7 @@ Mail Port,Mail Port
 Mail Server,Mail Server
 Main Reports,Belangrijkste Rapporten
 Main Section,Hoofd Sectie
+Maintain Same Rate Throughout Sales Cycle,Onderhouden Zelfde Rate Gedurende Salescyclus
 Maintain same rate throughout purchase cycle,Handhaaf dezelfde snelheid gedurende aankoop cyclus
 Maintenance,Onderhoud
 Maintenance Date,Onderhoud Datum
@@ -1616,7 +1601,6 @@ Make Time Log Batch,Maak Time Log Batch
 Make a new,Maak een nieuw
 Make sure that the transactions you want to restrict have a Link field 'territory' that maps to a 'Territory' master.,Zorg ervoor dat de transacties die u wilt beperken een link veld &#39;grondgebied&#39; hebben die verwijst naar een &#39;Territory&#39; meester.
 Male,Mannelijk
-Manage Numbering Series,Beheren Nummering Series
 Manage cost of operations,Beheer kosten van de operaties
 Manage exchange rates for currency conversion,Beheer wisselkoersen voor valuta-omrekening
 Mandatory,Verplicht
@@ -1795,6 +1779,7 @@ No of Requested SMS,Geen van de gevraagde SMS
 No of Sent SMS,Geen van Sent SMS
 No of Visits,Geen van bezoeken
 No one,Niemand
+No permission to write / remove.,Geen toestemming om te schrijven / te verwijderen.
 No record found,Geen record gevonden
 No records tagged.,Geen records gelabeld.
 No salary slip found for month: ,Geen loonstrook gevonden voor de maand:
@@ -1876,13 +1861,11 @@ Ordered Items To Be Billed,Bestelde artikelen te factureren
 Ordered Items To Be Delivered,Besteld te leveren zaken
 Ordered Quantity,Bestelde hoeveelheid
 Orders released for production.,Bestellingen vrijgegeven voor productie.
-Organization,Organisatie
 Organization Profile,Organisatie Profiel
 Original Message,Oorspronkelijk bericht
 Other,Ander
 Other Details,Andere Details
 Out,Uit
-Out going mail server and support ticket mailbox,Out gaan mailserver en support ticket mailbox
 Out of AMC,Uit AMC
 Out of Warranty,Out of Warranty
 Outgoing,Uitgaande
@@ -2055,6 +2038,7 @@ Please specify,Gelieve te specificeren
 Please specify Company,Specificeer Company
 Please specify Company to proceed,Specificeer Company om verder te gaan
 Please specify Default Currency in Company Master \			and Global Defaults,Geef Standaard valuta in Bedrijf Master \ en Global Standaardwaarden
+Please specify a,Geef een
 Please specify a Price List which is valid for Territory,Geef een prijslijst die geldig is voor het grondgebied
 Please specify a valid,Geef een geldige
 Please specify a valid 'From Case No.',Geef een geldige &#39;Van Case No&#39;
@@ -2081,7 +2065,6 @@ Preview,Voorbeeld
 Previous Work Experience,Vorige Werkervaring
 Price,Prijs
 Price List,Prijslijst
-Price List Country,Prijslijst Land
 Price List Currency,Prijslijst Valuta
 Price List Currency Conversion Rate,Prijslijst Currency Conversion Rate
 Price List Exchange Rate,Prijslijst Wisselkoers
@@ -2134,7 +2117,6 @@ Project will get saved and will be searchable with project name given,Project za
 Project wise Stock Tracking,Project verstandig Stock Tracking
 Projected Qty,Verwachte Aantal
 Projects,Projecten
-Prompt email sending to customers and suppliers,Prompt e-mail verzenden naar klanten en leveranciers
 Prompt for Email on Submission of,Vragen om E-mail op Indiening van
 Properties,Eigenschappen
 Property,Eigendom
@@ -2229,6 +2211,7 @@ Quotation Items,Offerte Items
 Quotation Lost Reason,Offerte Verloren Reden
 Quotation Message,Offerte Bericht
 Quotation Sent,Offerte Verzonden
+Quotation Series,Offerte Series
 Quotation To,Offerte Voor
 Quotation Trend,Offerte Trend
 Quotations received from Suppliers.,Offertes ontvangen van leveranciers.
@@ -2322,7 +2305,6 @@ Remarks,Opmerkingen
 Remove Bookmark,Bladwijzer verwijderen
 Rename Log,Hernoemen Inloggen
 Rename Tool,Wijzig de naam van Tool
-Rename multiple items in one go,Hernoemen meerdere items in een keer
 Rename...,Hernoemen ...
 Rented,Verhuurd
 Repeat on Day of Month,Herhaal dit aan Dag van de maand
@@ -2364,7 +2346,6 @@ Resolution Date,Resolutie Datum
 Resolution Details,Resolutie Details
 Resolved By,Opgelost door
 Restrict IP,Beperken IP
-Restrict submission rights based on amount,Beperk de indiening rechten op basis van hoeveelheid
 Restrict user from this IP address only. Multiple IP addresses can be added by separating with commas. Also accepts partial IP addresses like (111.111.111),"Beperk de gebruiker van dit IP-adres alleen. Meerdere IP-adressen kunnen worden toegevoegd door het scheiden van met komma&#39;s. Ook aanvaardt gedeeltelijke IP-adres, zoals (111.111.111)"
 Restricting By User,Het beperken van deze gebruiker
 Retail,Kleinhandel
@@ -2484,7 +2465,6 @@ Schedule Details,Schema Details
 Scheduled,Geplande
 Scheduled Confirmation Date,Geplande Bevestiging Datum
 Scheduled Date,Geplande Datum
-Scheduler Error Log,Planner Foutenlog
 Scheduler Log,Scheduler Inloggen
 School/University,School / Universiteit
 Score (0-5),Score (0-5)
@@ -2563,7 +2543,6 @@ Send SMS,SMS versturen
 Send To,Verzenden naar
 Send To Type,Verzenden naar type
 Send automatic emails to Contacts on Submitting transactions.,Stuur automatische e-mails naar Contacten op Indienen van transacties.
-"Send bulk SMS to leads, customers, contacts","Stuur bulk SMS naar leads, klanten, contacten"
 Send mass SMS to your contacts,Stuur massa SMS naar uw contacten
 Send regular summary reports via Email.,Stuur regelmatig beknopte verslagen via e-mail.
 Send to this list,Stuur deze lijst
@@ -2596,13 +2575,8 @@ Set Login and Password if authentication is required.,Aanmelding en wachtwoorden
 Set New Password,Set Nieuw wachtwoord
 Set Value,Set Value
 "Set a new password and ""Save""",Stel een nieuw wachtwoord in en &quot;Opslaan&quot;
-Set default values for entry,Stel standaardwaarden voor de toegang
-Set default values for users (also used for permissions).,Stel standaardwaarden voor gebruikers (ook gebruikt voor permissies).
-Set multiple numbering series for transactions,Stel meerdere nummerreeks voor transacties
-Set permissions on transactions / masters,Machtigingen voor transacties / masters
 Set prefix for numbering series on your transactions,Stel prefix voor het nummeren van serie over uw transacties
 Set targets Item Group-wise for this Sales Person.,Set richt Item Group-wise voor deze verkoper.
-Set workflow rules.,Stel workflow regels.
 "Set your background color, font and image (tiled)","Zet je achtergrond kleur, lettertype en afbeelding (tegel)"
 "Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.","Stel hier uw uitgaande e-mail SMTP-instellingen. Alle systeem gegenereerde meldingen, zal e-mails gaan van deze e-mail server. Als u niet zeker bent, laat dit leeg om ERPNext servers (e-mails worden nog steeds verzonden vanaf uw e-id) te gebruiken of uw e-mailprovider te contacteren."
 Setting Account Type helps in selecting this Account in transactions.,Instellen Account Type helpt bij het selecteren van deze account in transacties.
@@ -2621,7 +2595,6 @@ Setup Series,Setup-serie
 Setup of Shopping Cart.,Setup van de Winkelwagen.
 Setup of fonts and background.,Instellen van lettertypen en de achtergrond.
 "Setup of top navigation bar, footer and logo.",Instellen van bovenste navigatiebalk voettekst en logo.
-Setup outgoing SMS via your bulk SMS provider,Stel uitgaande SMS via uw bulk SMS-aanbieder
 Setup to pull emails from support email account,Setup om e-mails te trekken van ondersteuning e-mailaccount
 Share,Aandeel
 Share With,Delen
@@ -2650,7 +2623,6 @@ Short Name,Korte Naam
 Short biography for website and other publications.,Korte biografie voor website en andere publicaties.
 Shortcut,Kortere weg
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Toon &quot;Op voorraad&quot; of &quot;Niet op voorraad&quot; op basis van de beschikbare voorraad in dit magazijn.
-Show / Hide Modules,Weergeven / verbergen Modules
 Show Details,Show Details
 Show In Website,Toon in Website
 Show Print First,Eerste Show Print
@@ -2658,11 +2630,9 @@ Show a slideshow at the top of the page,Laat een diavoorstelling aan de bovenkan
 Show in Website,Toon in Website
 Show rows with zero values,Toon rijen met nulwaarden
 Show this slideshow at the top of the page,Laat deze slideshow aan de bovenkant van de pagina
-"Show, hide modules","Weergeven, verbergen modules"
 Showing only for,Resultaat alleen voor
 Signature,Handtekening
 Signature to be appended at the end of every email,Handtekening moet worden toegevoegd aan het einde van elke e-mail
-Simplify entry forms by disabling features,Vereenvoudig inschrijfformulieren door het uitschakelen van functies
 Single,Single
 Single Post (article).,Los bericht (artikel).
 Single unit of an Item.,Enkele eenheid van een item.
@@ -2792,7 +2762,6 @@ Support queries from customers.,Ondersteuning vragen van klanten.
 Symbol,Symbool
 Sync Inbox,Sync Inbox
 Sync Support Mails,Sync Ondersteuning Mails
-Sync backups with remote tools like Dropbox etc.,"Synchroniseren backups met remote tools zoals Dropbox, enz."
 Sync with Dropbox,Synchroniseren met Dropbox
 Sync with Google Drive,Synchroniseren met Google Drive
 System,Systeem
@@ -2927,6 +2896,7 @@ To,Naar
 To Currency,Naar Valuta
 To Date,To-date houden
 To Discuss,Om Bespreek
+To Do,Te doen
 To Do List,To Do List
 To PR Date,Om PR Datum
 To Package No.,Op Nee Pakket
@@ -3052,7 +3022,6 @@ Update Series,Update Series
 Update Series Number,Update Serie Nummer
 Update Stock,Werk Stock
 Update Stock should be checked.,Update Stock moeten worden gecontroleerd.
-Update This Application,Update Deze Application
 Update Value,Werk Value
 "Update allocated amount in the above table and then click ""Allocate"" button",Werk toegewezen bedrag in de bovenstaande tabel en klik vervolgens op &quot;Toewijzen&quot; knop
 Update bank payment dates with journals.,Update bank betaaldata met tijdschriften.
@@ -3078,7 +3047,6 @@ User Cannot Search,Gebruiker kan niet zoeken
 User ID,Gebruikers-ID
 User Image,GEBR.AFB
 User Name,Gebruikersnaam
-User Properties,Gebruikerseigenschappen
 User Remark,Gebruiker Opmerking
 User Remark will be added to Auto Remark,Gebruiker Opmerking zal worden toegevoegd aan Auto Opmerking
 User Tags,Gebruiker-tags
@@ -3088,7 +3056,6 @@ User not allowed entry in the Warehouse,Gebruiker niet toegestaan ​​vermeldi
 User not allowed to delete.,Gebruiker niet toegestaan ​​om te verwijderen.
 UserRole,UserRole
 Username,Gebruikersnaam
-Users,Gebruikers
 Users who can approve a specific employee's leave applications,Gebruikers die verlofaanvragen van een specifieke werknemer kan goedkeuren
 Users with this role are allowed to do / modify accounting entry before frozen date,Gebruikers met deze rol mogen doen / inschrijving in de boekhouding aanpassen voordat bevroren datum
 Utilities,Utilities
@@ -3221,6 +3188,7 @@ You can not enter both Delivery Note No and Sales Invoice No. \					Please enter
 You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,U kunt verschillende &#39;eigenschappen&#39; om gebruikers op de standaardwaarden in te stellen en toestemming regels op basis van de waarde van deze eigenschappen in verschillende vormen toe te passen.
 You can start by selecting backup frequency and \					granting access for sync,U kunt beginnen door het selecteren van back-up frequentie en \ verlenen van toegang voor synchronisatie
 You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,U kunt gebruik maken <a href='#Form/Customize Form'>Customize Form</a> om in te stellen op velden.
+You may need to update: ,U kan nodig zijn om bij te werken:
 Your Customer's TAX registration numbers (if applicable) or any general information,Uw klant fiscale nummers (indien van toepassing) of een algemene informatie
 "Your download is being built, this may take a few moments...","Uw download wordt gebouwd, kan dit enige tijd duren ..."
 Your letter head content in HTML.,Uw brief hoofd-inhoud in HTML.
