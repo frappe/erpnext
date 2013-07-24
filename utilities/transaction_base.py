@@ -135,10 +135,7 @@ class TransactionBase(StatusUpdater):
 		
 	def set_lead_defaults(self):
 		self.doc.fields.update(self.get_lead_defaults())
-			
 	
-	# Get Customer Address
-	# -----------------------
 	def get_customer_address(self, args):
 		args = load_json(args)		
 		ret = {
@@ -396,14 +393,10 @@ def map_party_contact_details(contact_name=None, party_field=None, party_name=No
 		"contact_mobile", "contact_phone", "contact_designation", "contact_department"]:
 			out[fieldname] = None
 			
-	condition = ""
-	if contact_name:
-		condition = " name = '%s'" % contact_name
-	elif party_field and party_name:
-		condition = " `%s`='%s'" % (party_field, party_name)
-		
-	contact = webnotes.conn.sql("""select * from `tabContact` where %s
-		order by is_primary_contact desc, name asc limit 1""" % condition, as_dict=True)
+	if not contact_name and party_field:
+		contact_name = get_default_contact(party_field, party_name)
+	
+	contact = webnotes.conn.sql("""select * from `tabContact` where name=%s""", contact_name, as_dict=True)
 
 	if contact:
 		contact = contact[0]
@@ -417,7 +410,7 @@ def map_party_contact_details(contact_name=None, party_field=None, party_name=No
 			"contact_designation": contact.get("designation"),
 			"contact_department": contact.get("department")
 		})
-		
+
 	return out
 	
 def get_address_territory(address_doc):

@@ -111,11 +111,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					address: this.frm.doc.supplier_address, 
 					contact: this.frm.doc.contact_person
 				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.frm.refresh_fields();
-					}
-				}
 			});
 		}
 	},

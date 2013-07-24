@@ -165,9 +165,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				},
 				method: "set_customer_address",
 				freeze: true,
-				callback: function(r) {
-					me.frm.refresh_fields();
-				}
 			});
 		}
 	},
