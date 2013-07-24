@@ -166,7 +166,7 @@ class DocType(SellingController):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["customer", "="], ["company", "="], ["currency", "="]]
+				"compare_fields": [["company", "="], ["currency", "="]]
 			}
 		})
 
