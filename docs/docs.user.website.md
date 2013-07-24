@@ -17,9 +17,9 @@ Websites are a core component of any business and having a good website usually 
 
 Unless you are a web designer yourself. 
 
-Would not it be nice if there was a way to update your product catalog on your site automatically from your ERP? 
+Wouldn't it be nice if there was a way to update your product catalog on your site automatically from your ERP? 
 
-We thought exactly the same and hence built a small Website Development app right inside or ERPNext! Using ERPNext’s Website module, you can
+We thought exactly the same and hence built a small Website Development app right inside ERPNext! Using ERPNext’s Website module, you can
 
 1. Create Web Pages
 1. Write a Blog
