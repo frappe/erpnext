@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "ERPNext Translations"
+	"_label": "Managing Translations"
 }
 ---
 This document shows how to translations are managed in ERPNext and how to add a new language or update translations of an existing language.

@@ -7,7 +7,8 @@
 		"docs.dev.framework",
 		"docs.dev.api",
 		"docs.dev.modules",
-		"docs.dev.translate"
+		"docs.dev.translate",
+		"docs.dev.docs"
 	]
 }
 ---
