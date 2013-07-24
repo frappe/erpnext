@@ -50,8 +50,9 @@ class DocType(TransactionBase):
 			clear(self.doc.doctype, self.doc.name)
 		
 	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
-		
+		self.doc.status = "Waiting for Customer"
+		self.update_status()
+		self.doc.save()
 		
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -72,7 +73,7 @@ class DocType(TransactionBase):
 
 	def update_status(self):
 		status = webnotes.conn.get_value("Support Ticket", self.doc.name, "status")
-		if self.doc.status!="Open" and status =="Open":
+		if self.doc.status!="Open" and status =="Open" and not self.doc.first_responded_on:
 			self.doc.first_responded_on = now()
 		if self.doc.status=="Closed" and status !="Closed":
 			self.doc.resolution_date = now()
