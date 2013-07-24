@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "ERPNext API"
+	"_label": "Web Service API"
 }
 ---
 All communication with the ERPNext server happens via web services using HTTP requests and passing data via JSON (Javascript Object Notation). Using web requests you can insert, update, query, run public triggers etc. The basic scheme is as follows:
