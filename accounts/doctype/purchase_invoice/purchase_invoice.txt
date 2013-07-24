@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-23 15:27:03", 
+  "modified": "2013-07-24 21:44:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -70,7 +70,7 @@
   "reqd": 1
  }, 
  {
-  "description": "The account to which you will pay (have paid) the money to.", 
+  "description": "Supplier (Payable) Account", 
   "doctype": "DocField", 
   "fieldname": "credit_to", 
   "fieldtype": "Link", 
@@ -771,22 +771,22 @@
   "reqd": 0
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User", 
-  "submit": 1, 
-  "write": 1
+  "submit": 0, 
+  "write": 0
  }, 
  {
   "amend": 0, 
   "cancel": 0, 
-  "create": 1, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase User", 
   "submit": 0, 
-  "write": 1
+  "write": 0
  }, 
  {
   "amend": 0, 
