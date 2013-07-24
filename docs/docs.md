@@ -21,18 +21,14 @@
 
 ### What is ERPNext?
 
-ERPNext is an information system that links together entire organization's operations. It is a software package that offers convenience of managing all the business functions from a single platform. No need of going to different applications to process different requests. No need of saving data in different functional packages. Under one ERP "roof" you can manage Accounting, Warehouse Management, CRM, Human Resources, Supply Chain Management, Sales Management, and Website Design.
+ERPNext is an information system that links together  an entire organization's operations. It is a software package that offers convenience of managing all the business functions from a single platform. No need of going to different applications to process different requests. No need of saving data in different functional packages. Under one ERP "roof" you can manage Accounting, Warehouse Management, CRM, Human Resources, Supply Chain Management, Sales Management, and Website Design.
 
 ERPNext is written by Web Notes Technologies keeping small and medium businesses in mind. 
 
-	It gives better access to crucial information as a whole rather than in fragments of different versions.
+- It gives better access to crucial information as a whole rather than in fragments of different versions.
+- It provides comparable financial reports.
+- It avoids duplication of reports and redundant data.
+- It allows better alignment across cross-functional departments.
+- It facilitates Website Design and provides shopping cart facility.
+- It gives better deployment on mobiles, tablets, desktops and large screens. 
 
-	It provides comparable financial reports.
-
-	It avoids duplication of reports and redundant data.
-
-	It allows better alignment across cross-functional departments.
-
-	It facilitates Website Design and provides shopping cart facility.
-
-	It gives better deployment on mobiles, tablets, desktops and large screens. 
