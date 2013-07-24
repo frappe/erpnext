@@ -62,9 +62,9 @@ function SMSManager() {
 			var btn = d.fields_dict.send.input;
 			var v = me.dialog.get_values();
 			if(v) {
-				btn.set_working();
+				$(this).set_working();
 				$c_obj('SMS Control', 'send_form_sms', v, function(r,rt) {
-					btn.done_working();
+					$(this).done_working();
 					if(r.exc) {msgprint(r.exc); return; }
 					msgprint('Message Sent');
 					me.dialog.hide();

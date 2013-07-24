@@ -7,6 +7,9 @@ def execute(filters=None):
 	if not filters: filters = {}
 	columns = get_columns()
 	entries = get_gl_entries(filters)
+	account_customer = dict(webnotes.conn.sql("""select account.name, customer.customer_name
+		from `tabAccount` account, `tabCustomer` customer 
+		where account.master_type="Customer" and customer.name=account.master_name"""))
 	
 	entries_after_report_date = [[gle.voucher_type, gle.voucher_no] 
 		for gle in get_gl_entries(filters, upto_report_date=False)]
@@ -32,7 +35,8 @@ def execute(filters=None):
 		
 			if abs(flt(outstanding_amount)) > 0.01:
 				payment_amount = invoiced_amount - outstanding_amount
-				row = [gle.posting_date, gle.account, gle.voucher_type, gle.voucher_no, 
+				row = [gle.posting_date, gle.account, account_customer.get(gle.account, ""), 
+					gle.voucher_type, gle.voucher_no, 
 					gle.remarks, due_date, account_territory_map.get(gle.account), 
 					invoiced_amount, payment_amount, outstanding_amount]
 				# Ageing
@@ -48,7 +52,7 @@ def execute(filters=None):
 	
 def get_columns():
 	return [
-		"Posting Date:Date:80", "Account:Link/Account:150", "Voucher Type::110", 
+		"Posting Date:Date:80", "Account:Link/Account:150", "Customer::150", "Voucher Type::110", 
 		"Voucher No::120", "Remarks::150", "Due Date:Date:80", "Territory:Link/Territory:80", 
 		"Invoiced Amount:Currency:100", "Payment Received:Currency:100", 
 		"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100", 
