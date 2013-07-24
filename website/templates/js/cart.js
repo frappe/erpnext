@@ -249,11 +249,11 @@ $.extend(wn.cart, {
 				});
 			
 		$address_wrapper.find('input[type="checkbox"]').on("click", function() {
-			if($(this).is(":checked")) {
+			if($(this).prop("checked")) {
 				var me = this;
 				$address_wrapper.find('input[type="checkbox"]').each(function(i, chk) {
 					if($(chk).attr("data-address-name")!=$(me).attr("data-address-name")) {
-						$(chk).removeAttr("checked");
+						$(chk).prop("checked", false);
 					}
 				});
 				
@@ -276,7 +276,7 @@ $.extend(wn.cart, {
 		});
 		
 		$address_wrapper.find('input[type="checkbox"][data-address-name="'+ address_name +'"]')
-			.attr("checked", "checked");
+			.prop("checked", true);
 			
 		$address_wrapper.find(".accordion-body").collapse({
 			parent: $address_wrapper,
