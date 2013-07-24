@@ -163,7 +163,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					address: this.frm.doc.customer_address, 
 					contact: this.frm.doc.contact_person
 				},
-				method: "get_customer_address",
+				method: "set_customer_address",
 				freeze: true,
 				callback: function(r) {
 					me.frm.refresh_fields();

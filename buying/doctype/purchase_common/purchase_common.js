@@ -104,7 +104,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if (this.frm.doc.supplier) {
 			wn.call({
 				doc: this.frm.doc,
-				method: "get_supplier_address",
+				method: "set_supplier_address",
 				freeze: true,
 				args: {
 					supplier: this.frm.doc.supplier,
