@@ -17,15 +17,13 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, now
+from webnotes.utils import cstr, flt, now, cint
 from webnotes.model import db_exists
 from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
-	
-
 
 class DocType:
 	def __init__(self, d, dl=[]):
@@ -97,7 +95,8 @@ class DocType:
 	def update_stock_uom(self):
 		# validate mandatory
 		self.validate_mandatory()
-		
+		self.validate_uom_integer_type()
+			
 		# update item master
 		self.update_item_master()
 		
@@ -108,6 +107,19 @@ class DocType:
 		self.update_bin()
 
 		get_obj("Item", self.doc.item_code).on_update()
+		
+	def validate_uom_integer_type(self):
+		current_is_integer = webnotes.conn.get_value("UOM", self.doc.current_stock_uom, "must_be_whole_number")
+		new_is_integer = webnotes.conn.get_value("UOM", self.doc.new_stock_uom, "must_be_whole_number")
+		
+		if current_is_integer and not new_is_integer:
+			webnotes.msgprint("New UOM must be of type Whole Number", raise_exception=True)
+
+		if not current_is_integer and new_is_integer:
+			webnotes.msgprint("New UOM must NOT be of type Whole Number", raise_exception=True)
+
+		if current_is_integer and new_is_integer and cint(self.doc.conversion_factor)!=self.doc.conversion_factor:
+			webnotes.msgprint("Conversion Factor cannot be fraction", raise_exception=True)
 
 @webnotes.whitelist()
 def get_stock_uom(item_code):

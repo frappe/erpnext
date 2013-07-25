@@ -49,6 +49,9 @@ class DocType(StockController):
 			get_obj('Production Order', self.doc.production_order) or None
 
 		self.validate_item()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
+
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order(pro_obj)
 		self.get_stock_and_rate()

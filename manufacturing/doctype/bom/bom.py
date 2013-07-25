@@ -43,6 +43,10 @@ class DocType:
 	def validate(self):
 		self.clear_operations()
 		self.validate_main_item()
+
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "stock_uom", "qty")
+
 		self.validate_operations()
 		self.validate_materials()
 		self.set_bom_material_details()

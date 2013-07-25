@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:56:45", 
+  "modified": "2013-07-25 17:39:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -64,16 +64,16 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "label": "Conversion Factor"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "update", 
   "fieldtype": "Button", 
   "label": "Update", 
   "options": "update_stock_uom"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Float", 
-  "label": "Conversion Factor"
  }, 
  {
   "doctype": "DocPerm", 

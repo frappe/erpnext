@@ -36,6 +36,7 @@ class DocType(BuyingController):
 		
 		self.validate_common()
 		self.validate_with_previous_doc()
+		self.validate_uom_is_integer("uom", "qty")
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")

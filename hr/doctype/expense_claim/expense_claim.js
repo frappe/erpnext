@@ -14,10 +14,46 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
+wn.provide("erpnext.hr");
+
+erpnext.hr.ExpenseClaimController = wn.ui.form.Controller.extend({
+	make_bank_voucher: function() {
+		var me = this;
+		wn.call({
+			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			args: {
+				"company": cur_frm.doc.company,
+				"voucher_type": "Bank Voucher"
+			},
+			callback: function(r) {
+				var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
+				jv = locals['Journal Voucher'][jv];
+				jv.voucher_type = 'Bank Voucher';
+				jv.company = cur_frm.doc.company;
+				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
+				jv.fiscal_year = cur_frm.doc.fiscal_year;
+
+				var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				d1.debit = cur_frm.doc.total_sanctioned_amount;
+
+				// credit to bank
+				var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				d1.account = r.message[0].account;
+				d1.credit = cur_frm.doc.total_sanctioned_amount;
+				d1.balance = r.message[0].balance;
+
+				loaddoc('Journal Voucher', jv.name);
+			}
+		});
+	}
+})
+
+$.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
+
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
-cur_frm.cscript.onload = function(doc,cdt,cdn){
+cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)
 		cur_frm.set_value("approval_status", "Draft")
 			
@@ -71,15 +107,15 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		} else {
 			if(doc.approval_status=="Approved") {
 				cur_frm.set_intro("Expense Claim has been approved.");
+				if(doc.docstatus==0) cur_frm.savesubmit();
+				if(doc.docstatus==1) cur_frm.add_custom_button("Make Bank Voucher", 
+					cur_frm.cscript.make_bank_voucher);
 			} else if(doc.approval_status=="Rejected") {
 				cur_frm.set_intro("Expense Claim has been rejected.");
 			}
 		}
 	}
-	
-	if(doc.approval_status=="Approved" && doc.docstatus==0) {
-		cur_frm.savesubmit()
-	}}
+}
 
 cur_frm.cscript.validate = function(doc) {
 	cur_frm.cscript.calculate_total(doc);

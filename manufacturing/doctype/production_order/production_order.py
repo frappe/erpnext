@@ -23,8 +23,6 @@ from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
-	
-
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -57,7 +55,10 @@ class DocType:
 				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
 				
 			self.validate_production_order_against_so()
-				
+
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
+
 	
 	def validate_production_order_against_so(self):
 		# already ordered qty

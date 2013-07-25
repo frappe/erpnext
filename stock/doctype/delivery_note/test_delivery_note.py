@@ -141,7 +141,7 @@ test_records = [
 			"export_rate": 100.0,
 			"amount": 500.0,
 			"warehouse": "_Test Warehouse - _TC",
-			"stock_uom": "No."
+			"stock_uom": "_Test UOM"
 		}
 	]
 	

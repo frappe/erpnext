@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-24 21:44:41", 
+  "modified": "2013-07-25 16:08:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -68,21 +68,6 @@
   "read_only": 0, 
   "report_hide": 0, 
   "reqd": 1
- }, 
- {
-  "description": "Supplier (Payable) Account", 
-  "doctype": "DocField", 
-  "fieldname": "credit_to", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Credit To", 
-  "oldfieldname": "credit_to", 
-  "oldfieldtype": "Link", 
-  "options": "Account", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
@@ -674,6 +659,21 @@
   "options": "icon-file-text", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "description": "Supplier (Payable) Account", 
+  "doctype": "DocField", 
+  "fieldname": "credit_to", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Credit To", 
+  "oldfieldname": "credit_to", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
   "default": "No", 

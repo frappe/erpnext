@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-08 13:10:16", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:11", 
+  "modified": "2013-07-25 16:37:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,9 +61,10 @@
  {
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
-  "fieldtype": "Data", 
+  "fieldtype": "Link", 
   "in_list_view": 0, 
   "label": "UOM", 
+  "options": "UOM", 
   "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"

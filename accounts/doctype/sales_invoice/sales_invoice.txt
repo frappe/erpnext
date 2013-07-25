@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-24 21:44:15", 
+  "modified": "2013-07-25 16:08:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,21 +60,6 @@
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1
- }, 
- {
-  "description": "Customer (Receivable) Account", 
-  "doctype": "DocField", 
-  "fieldname": "debit_to", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Debit To", 
-  "oldfieldname": "debit_to", 
-  "oldfieldtype": "Link", 
-  "options": "Account", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "reqd": 1, 
-  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
@@ -820,6 +805,21 @@
   "options": "icon-file-text", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "description": "Customer (Receivable) Account", 
+  "doctype": "DocField", 
+  "fieldname": "debit_to", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Debit To", 
+  "oldfieldname": "debit_to", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
   "description": "Track this Sales Invoice against any Project", 
