@@ -118,14 +118,6 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	}
 }
 
-//get query select Territory
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-  	return{
-    	filters:{
-      		'is_group': "No"
-    	}
-  	}
-}
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return {query: "controllers.queries.customer_query" }

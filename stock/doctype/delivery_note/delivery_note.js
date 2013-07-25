@@ -130,14 +130,6 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 	loaddoc('Packing Slip', n);
 }
 
-
-//get query select Territory
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return{
-		filters: { 'is_group': "No" }
-	}
-}
-
 var set_print_hide= function(doc, cdt, cdn){
 	var dn_fields = wn.meta.docfield_map['Delivery Note'];
 	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];

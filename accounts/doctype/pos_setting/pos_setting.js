@@ -60,17 +60,6 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc,cdt,cdn) {
 	}	
 }
 
-//get query select Territory
-//=================================================================
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return{
-		filters:{
-			'is_group': "No"
-		}
-	}	
-}
-
-
 // ------------------ Get Print Heading ------------------------------------
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return{

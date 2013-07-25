@@ -283,14 +283,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	}	
 }
 
-//Territory
-//-----------------------------
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-	return{
-		filters: {'is_group': 'NO'}
-	}	
-}
-
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "entries", function(doc) {
