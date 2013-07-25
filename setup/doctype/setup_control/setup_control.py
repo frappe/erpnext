@@ -256,7 +256,7 @@ def create_territories():
 		if name and not webnotes.conn.exists("Territory", name):
 			webnotes.bean({
 				"doctype": "Territory",
-				"territory_name": name,
+				"territory_name": name.replace("'", ""),
 				"parent_territory": root_territory,
 				"is_group": "No"
 			}).insert()
