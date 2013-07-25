@@ -16,8 +16,9 @@ def execute():
 				except ValueError:
 					out = {}
 					for t in item_wise_tax_detail.split("\n"):
-						if ":" in t:
-							account_head, amount = t.split(":")
+						if " : " in t:
+							split_index = t.rfind(" : ")
+							account_head, amount = t[:split_index], t[split_index+3:]
 							out[account_head.strip()] = flt(amount.strip())
 							
 					if out:
