@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:42", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:17", 
+  "modified": "2013-07-25 16:34:11", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -130,10 +130,11 @@
  {
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
-  "fieldtype": "Data", 
+  "fieldtype": "Link", 
   "label": "Stock Uom", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Data", 
+  "options": "UOM", 
   "read_only": 1
  }, 
  {

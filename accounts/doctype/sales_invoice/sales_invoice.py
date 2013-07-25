@@ -60,6 +60,8 @@ class DocType(SellingController):
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
+		self.validate_uom_is_integer("stock_uom", "qty")
+
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)

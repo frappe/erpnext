@@ -151,13 +151,13 @@ def import_defaults():
 		{'doctype': 'Sales Person', 'sales_person_name': 'Sales Team', 'is_group': "Yes", "parent_sales_person": ""},
 		
 		# UOM
-		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit'}, 
-		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box'}, 
+		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit', "must_be_whole_number": 1}, 
+		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box', "must_be_whole_number": 1}, 
 		{'uom_name': 'Kg', 'doctype': 'UOM', 'name': 'Kg'}, 
-		{'uom_name': 'Nos', 'doctype': 'UOM', 'name': 'Nos'}, 
-		{'uom_name': 'Pair', 'doctype': 'UOM', 'name': 'Pair'}, 
-		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set'}, 
-		{'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'}, 
+		{'uom_name': 'Nos', 'doctype': 'UOM', 'name': 'Nos', "must_be_whole_number": 1}, 
+		{'uom_name': 'Pair', 'doctype': 'UOM', 'name': 'Pair', "must_be_whole_number": 1}, 
+		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set', "must_be_whole_number": 1}, 
+		{'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'},
 		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'}, 
 	]
 	

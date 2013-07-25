@@ -58,6 +58,9 @@ class DocType(BuyingController):
 		pc_obj.get_prevdoc_date(self)
 		self.check_for_stopped_status(pc_obj)
 
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
+
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.update_raw_materials_supplied("po_raw_material_details")

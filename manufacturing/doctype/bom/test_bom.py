@@ -36,7 +36,7 @@ test_records = [
 			"qty": 1.0, 
 			"rate": 5000.0, 
 			"amount": 5000.0, 
-			"stock_uom": "No."
+			"stock_uom": "_Test UOM"
 		}, 
 		{
 			"doctype": "BOM Item", 
@@ -45,7 +45,7 @@ test_records = [
 			"qty": 2.0, 
 			"rate": 1000.0,
 			"amount": 2000.0,
-			"stock_uom": "No."
+			"stock_uom": "_Test UOM"
 		}
 	]
 ]

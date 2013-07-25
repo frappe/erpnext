@@ -31,6 +31,9 @@ class DocType:
 		self.check_duplicate()
 		self.validate_main_item()
 
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "uom", "qty")
+
 	def validate_main_item(self):
 		"""main item must have Is Stock Item as No and Is Sales Item as Yes"""
 		if not webnotes.conn.sql("""select name from tabItem where name=%s and

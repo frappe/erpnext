@@ -210,7 +210,7 @@ class SellingController(StockController):
 						
 			item.export_amount = flt(item.export_rate * item.qty,
 				self.precision("export_amount", item))
-				
+
 			self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
 			self._set_in_company_currency(item, "export_rate", "basic_rate")
 			self._set_in_company_currency(item, "export_amount", "amount")

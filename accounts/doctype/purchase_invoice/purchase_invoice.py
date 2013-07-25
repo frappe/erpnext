@@ -58,6 +58,7 @@ class DocType(BuyingController):
 		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
+		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'

@@ -135,6 +135,9 @@ class DocType(SellingController):
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
+
+		self.validate_uom_is_integer("stock_uom", "qty")
+
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.validate_max_discount(self,'quotation_details')

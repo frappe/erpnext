@@ -99,6 +99,7 @@ class DocType(SellingController):
 		sales_com_obj.get_prevdoc_date(self)
 		self.validate_for_items()
 		self.validate_warehouse()
+		self.validate_uom_is_integer("stock_uom", "qty")
 		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
 		sales_com_obj.check_conversion_rate(self)

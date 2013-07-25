@@ -120,7 +120,10 @@ class DocType(BuyingController):
 
 		self.validate_with_previous_doc()
 		self.validate_accepted_rejected_qty()
-		self.validate_inspection()						 # Validate Inspection
+		self.validate_inspection()
+		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+
 		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
 		self.validate_challan_no()
 
