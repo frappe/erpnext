@@ -113,14 +113,17 @@ wn.module_page["Buying"] = [
 			{
 				"label":wn._("Item-wise Purchase History"),
 				route: "query-report/Item-wise Purchase History",
+				doctype: "Item"
 			},
 			{
 				"label":wn._("Purchase In Transit"),
 				route: "query-report/Purchase In Transit",
+				doctype: "Purchase Order"
 			},
 			{
 				"label":wn._("Requested Items To Be Ordered"),
 				route: "query-report/Requested Items To Be Ordered",
+				doctype: "Material Request"
 			},
 			{
 				"label":wn._("Purchase Order Trends"),
@@ -130,6 +133,7 @@ wn.module_page["Buying"] = [
 			{
 				"label":wn._("Item-wise Last Purchase Rate"),
 				route: "query-report/Item-wise Last Purchase Rate",
+				doctype: "Item"
 			}
 		]
 	}

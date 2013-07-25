@@ -203,23 +203,27 @@ wn.module_page["Stock"] = [
 			{
 				"label":wn._("Purchase In Transit"),
 				route: "query-report/Purchase In Transit",
+				doctype: "Purchase Order"
 			},
 			{
 				"label":wn._("Requested Items To Be Transferred"),
 				route: "query-report/Requested Items To Be Transferred",
+				doctype: "Material Request"
 			},
 			{
 				"label":wn._("Batch-Wise Balance History"),
 				route: "query-report/Batch-Wise Balance History",
+				doctype: "Batch"
 			},
 			{
 				"label":wn._("Warehouse-Wise Stock Balance"),
 				route: "query-report/Warehouse-Wise Stock Balance",
+				doctype: "Warehouse"
 			},
 			{
 				"label":wn._("Item Prices"),
 				route: "query-report/Item Prices",
-
+				doctype: "Price List"
 			},
 			{
 				"label":wn._("Itemwise Recommended Reorder Level"),

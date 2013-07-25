@@ -168,23 +168,28 @@ wn.module_page["HR"] = [
 		items: [
 			{
 				"label":wn._("Employee Leave Balance"),
-				route: "query-report/Employee Leave Balance"
+				route: "query-report/Employee Leave Balance",
+				doctype: "Leave Application"
 			},
 			{
 				"label":wn._("Employee Birthday"),
-				route: "query-report/Employee Birthday"
+				route: "query-report/Employee Birthday",
+				doctype: "Employee"
 			},
 			{
 				"label":wn._("Employee Information"),
-				route: "Report/Employee/Employee Information"
+				route: "Report/Employee/Employee Information",
+				doctype: "Employee"
 			},
 			{
 				"label":wn._("Monthly Salary Register"),
-				route: "query-report/Monthly Salary Register"
+				route: "query-report/Monthly Salary Register",
+				doctype: "Salary Slip"
 			},
 			{
 				"label":wn._("Monthly Attendance Sheet"),
-				route: "query-report/Monthly Attendance Sheet"
+				route: "query-report/Monthly Attendance Sheet",
+				doctype: "Attendance"
 			},
 		]
 	}

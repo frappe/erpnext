@@ -28,9 +28,9 @@ cur_frm.cscript.setup_upload = function() {
 			select_doctype: cur_frm.doc.select_doctype
 		},
 		sample_url: "e.g. http://example.com/somefile.csv",
-		callback: function(r) {
+		callback: function(fid, filename, r) {
 			$log.empty().html("<hr>");
-			$.each(r, function(i, v) {
+			$.each(r.message, function(i, v) {
 				$("<div>" + v + "</div>").appendTo($log);
 			});
 		}
