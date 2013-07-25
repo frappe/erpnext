@@ -90,7 +90,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.refresh_fields();
 							if(me.frm.doc.price_list_name !== price_list_name) me.price_list_name();
 						}
 					}

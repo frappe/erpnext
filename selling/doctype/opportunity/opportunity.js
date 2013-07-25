@@ -89,9 +89,6 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 			this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
-				callback: function(r) {
-					if(!r.exc) me.frm.refresh_fields();
-				}
 			});
 			
 			// TODO shift this to depends_on
@@ -208,7 +205,6 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 					return;
 				}
 				dialog.hide();
-				cur_frm.refresh();
 			},
 			btn: this
 		})

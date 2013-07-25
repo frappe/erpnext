@@ -120,6 +120,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// TODO toggle display of fields
+		cur_frm.cscript.hide_fields(this.frm.doc);
 	},
 	
 	debit_to: function() {
@@ -162,7 +163,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 
 // Hide Fields
 // ------------
-cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
+cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['project_name', 'due_date', 'is_opening', 'conversion_rate',
 	'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
@@ -189,6 +190,8 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	var cp = wn.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
+	
+	cur_frm.refresh_fields();
 }
 
 
