@@ -485,11 +485,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
-		var show = this.frm.doc.currency != company_currency;
-		$.each(["purchase_rate", "purchase_ref_rate", "amount", "rate"], function(i, fname) {
-			if(wn.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, show);
+		var fieldnames = $.map(["purchase_rate", "purchase_ref_rate", "amount", "rate"], function(fname) {
+			return wn.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
 		});
+		
+		item_grid.set_column_disp(fieldnames, this.frm.doc.currency != company_currency);
 		
 		// set labels
 		var $wrapper = $(this.frm.wrapper);

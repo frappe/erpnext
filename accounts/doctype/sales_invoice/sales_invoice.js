@@ -176,13 +176,14 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
 		unhide_field('payments_section');
-		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], false);
+		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
 		unhide_field(par_flds);
-		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
+		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
-	for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], (cint(doc.update_stock)==1?true:false));
+	
+	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos, (cint(doc.update_stock)==1?true:false));
 
 	// India related fields
 	var cp = wn.control_panel;

@@ -209,8 +209,7 @@ $(document).bind('form_refresh', function() {
 					if(fort=='fields') {
 						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
 					} else if(cur_frm.fields_dict[fort]) {
-						for(grid_field in pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort])
-							cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort][grid_field], false);
+						cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);						
 					} else {
 						msgprint('Grid "'+fort+'" does not exists');
 					}
