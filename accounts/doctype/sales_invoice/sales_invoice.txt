@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-23 15:28:32", 
+  "modified": "2013-07-24 21:44:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,7 +62,7 @@
   "reqd": 1
  }, 
  {
-  "description": "The account to which you will pay (have paid) the money to.", 
+  "description": "Customer (Receivable) Account", 
   "doctype": "DocField", 
   "fieldname": "debit_to", 
   "fieldtype": "Link", 
