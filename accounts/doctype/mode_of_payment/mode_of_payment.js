@@ -16,9 +16,9 @@
 
 cur_frm.set_query("default_account", function(doc) {
 	return{
-		query: "controllers.queries.account_query",
 		filters: {
 			'account_type': "Bank or Cash",
+			"group_or_ledger": "Ledger",
 			'company': doc.company
 		}
 	}
