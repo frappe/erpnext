@@ -108,8 +108,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(r) {
-				me.frm.set_value("reconciliation_json", JSON.stringify(r));
+			callback: function(fid, filename, r) {
+				me.frm.set_value("reconciliation_json", JSON.stringify(r.message));
 				me.show_reconciliation_data();
 				me.frm.save();
 			}

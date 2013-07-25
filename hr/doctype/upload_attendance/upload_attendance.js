@@ -52,13 +52,13 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 				method: 'hr.doctype.upload_attendance.upload_attendance.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(r) {
+			callback: function(fid, filename, r) {
 				var $log_wrapper = $(cur_frm.fields_dict.import_log.wrapper).empty();
-				
+
 				if(!r.messages) r.messages = [];
 				// replace links if error has occured
 				if(r.exc || r.error) {
-					r.messages = $.map(r.messages, function(v) {
+					r.messages = $.map(r.message.messages, function(v) {
 						var msg = v.replace("Inserted", "Valid")
 							.replace("Updated", "Valid").split("<");
 						if (msg.length > 1) {
@@ -73,7 +73,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 						.concat(r.messages)
 				} else {
 					r.messages = ["<h4 style='color:green'>Import Successful!</h4>"].
-						concat(r.messages)
+						concat(r.message.messages)
 				}
 				
 				$.each(r.messages, function(i, v) {
