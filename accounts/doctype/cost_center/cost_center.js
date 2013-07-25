@@ -14,6 +14,40 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.provide("erpnext.accounts");
+erpnext.accounts.CostCenterController = wn.ui.form.Controller.extend({
+	onload: function() {
+		this.setup_queries();
+	},
+	
+	setup_queries: function() {
+		var me = this;
+		if(this.frm.fields_dict["budget_details"].grid.get_field("account")) {
+			this.frm.set_query("account", "budget_details", function() {
+				return {
+					filters:[
+						['Account', 'company', '=', me.frm.doc.company],
+						['Account', 'is_pl_account', '=', 'Yes'],
+						['Account', 'debit_or_credit', '=', 'Debit'],
+						['Account', 'group_or_ledger', '!=', 'Group'],
+					]
+				}
+			});
+		}
+		
+		this.frm.set_query("parent_cost_center", function() {
+			return {
+				filters:[			
+					['Cost Center', 'group_or_ledger', '=', 'Group'],
+					['Cost Center', 'company', '=', me.frm.doc.company],
+				]
+			}
+		});
+	}
+});
+
+$.extend(cur_frm.cscript, new erpnext.accounts.CostCenterController({frm: cur_frm}));
+
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
 	cur_frm.toggle_display('cost_center_name', doc.__islocal);
@@ -33,39 +67,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		function() { wn.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
-//Account filtering for cost center
-cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = function(doc) {
-	var mydoc = locals[this.doctype][this.docname];
-	return{
-		filters:[
-			['Account', 'company', '=', doc.company],
-			['Account', 'is_pl_account', '=', 'Yes'],
-			['Account', 'debit_or_credit', '=', 'Debit'],
-			['Account', 'group_or_ledger', '!=', 'Group'],
-			['Account', 'group_or_ledger', 'is not', 'NULL']
-		]
-	}
-}
-
-cur_frm.fields_dict['parent_cost_center'].get_query = function(doc){
-	return{
-		filters:[			
-			['Cost Center', 'group_or_ledger', '=', 'Group'],
-			['Cost Center', 'company', '=', doc.company],
-			['Cost Center', 'company', 'is not', 'NULL']
-		]
-	}
-}
-
-//parent cost center
 cur_frm.cscript.parent_cost_center = function(doc,cdt,cdn){
 	if(!doc.company){
 		alert('Please enter company name first');
 	}
 }
 
-// Hide/unhide group or ledger
-// -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button('Convert to Ledger', 
@@ -76,8 +83,6 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	}
 }
 
-// Convert group to ledger
-// -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 	$c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
 		if(r.message == 1) {
@@ -86,8 +91,6 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 	});
 }
 
-// Convert ledger to group
-// -----------------------------------------
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 	$c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
 		if(r.message == 1) {
