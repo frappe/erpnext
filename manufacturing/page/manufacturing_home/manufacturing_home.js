@@ -67,6 +67,7 @@ wn.module_page["Manufacturing"] = [
 			{
 				"label":wn._("Issued Items Against Production Order"),
 				route: "query-report/Issued Items Against Production Order",
+				doctype:"Production Order"
 			},
 		]
 	}
