@@ -194,7 +194,6 @@ patch_list = [
 	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-03-25",
 	"execute:webnotes.reload_doc('setup', 'doctype', 'sales_partner') #2013-06-25",
 	"execute:webnotes.conn.set_value('Email Settings', None, 'send_print_in_body_and_attachment', 1)",
-	"patches.march_2013.p09_unset_user_type_partner",
 	"patches.march_2013.p10_set_fiscal_year_for_stock",
 	"patches.march_2013.p10_update_against_expense_account",
 	"patches.march_2013.p11_update_attach_files",
@@ -262,4 +261,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Spartan') # 2013-07-22",
 	"patches.july_2013.p08_custom_print_format_net_total_export",
 	"patches.july_2013.p09_remove_website_pyc",
+	"patches.july_2013.p10_change_partner_user_to_website_user",
 ]
