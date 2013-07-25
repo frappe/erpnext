@@ -47,17 +47,12 @@ class BuyingController(StockController):
 		
 		# set contact and address details for supplier, if they are not mentioned
 		if self.doc.supplier and not (self.doc.contact_person and self.doc.supplier_address):
-			for fieldname, val in self.get_default_address_and_contact("supplier").items():
+			for fieldname, val in self.get_supplier_defaults().items():
 				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 					self.doc.fields[fieldname] = val
 
 		self.set_missing_item_details(get_item_details)
 
-	def set_supplier_defaults(self):
-		for fieldname, val in self.get_default_address_and_contact("supplier").items():
-			if self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = val
-						
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
 		self.set_taxes("purchase_tax_details", "purchase_other_charges")

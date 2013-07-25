@@ -94,8 +94,10 @@ class TransactionBase(StatusUpdater):
 			webnotes.conn.get_value("Customer Group", self.doc.customer_group, "default_price_list") or \
 			self.doc.price_list
 			
-		self.doc.fields.update(customer_defaults)
-		
+		for fieldname, val in customer_defaults.items():
+			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = val
+			
 		if self.meta.get_field("sales_team"):
 			self.set_sales_team_for_customer()
 			
@@ -121,7 +123,21 @@ class TransactionBase(StatusUpdater):
 			
 			# add child
 			self.doclist.append(sales_person)
-	
+			
+	def get_supplier_defaults(self):
+		out = self.get_default_address_and_contact("supplier")
+
+		supplier = webnotes.doc("Supplier", self.doc.supplier)
+		out["supplier_name"] = supplier.supplier_name
+		out["currency"] = supplier.default_currency
+		
+		return out
+		
+	def set_supplier_defaults(self):
+		for fieldname, val in self.get_supplier_defaults().items():
+			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+				self.doc.fields[fieldname] = val
+				
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")
 		

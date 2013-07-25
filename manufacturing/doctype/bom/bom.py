@@ -97,9 +97,10 @@ class DocType:
 		""" Get raw material details like uom, desc and rate"""
 		if not args:
 			args = webnotes.form_dict.get('args')
-			
-		import json
-		args = json.loads(args)
+		
+		if isinstance(args, basestring):
+			import json
+			args = json.loads(args)
 				
 		item = self.get_item_det(args['item_code'])
 		self.validate_rm_item(item)
