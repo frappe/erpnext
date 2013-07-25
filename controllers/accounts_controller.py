@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
-from webnotes.utils import flt, cint, today
+from webnotes.utils import flt, cint, today, cstr
 from setup.utils import get_company_currency, get_price_list_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
@@ -375,15 +375,15 @@ class AccountsController(TransactionBase):
 				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
 					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
 					item.fields[item_ref_dn])[0][0]
-				if already_billed:
-					max_allowed_amt = webnotes.conn.get_value(ref_dt + " Item", 
-						item.fields[item_ref_dn], based_on)
-					
-					if flt(already_billed) + flt(item.fields[based_on]) > max_allowed_amt:
-						webnotes.msgprint(_("Row ")+ item.idx + ": " + item.item_code + 
-							_(" will be over-billed against mentioned ") + ref_dt +  
-							_(". Max allowed " + based_on + ": " + max_allowed_amt), 
-							raise_exception=1)
+
+				max_allowed_amt = webnotes.conn.get_value(ref_dt + " Item", 
+					item.fields[item_ref_dn], based_on)
+				
+				if flt(already_billed) + flt(item.fields[based_on]) > max_allowed_amt:
+					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 
+						_(" will be over-billed against mentioned ") + cstr(ref_dt) +  
+						_(". Max allowed " + cstr(based_on) + ": " + cstr(max_allowed_amt)), 
+						raise_exception=1)
 		
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
