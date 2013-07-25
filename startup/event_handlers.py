@@ -30,7 +30,7 @@ def on_login_post_session(login_manager):
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
 		webnotes.conn.commit()
 		
-	if webnotes.conn.get_value("Profile", webnotes.session.user, "user_type") == "Partner":
+	if webnotes.conn.get_value("Profile", webnotes.session.user, "user_type") == "Website User":
 		from website.helpers.cart import set_cart_count
 		set_cart_count()
 		
