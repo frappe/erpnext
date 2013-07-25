@@ -7,7 +7,15 @@ wn.pages['Setup'].onload = function(wrapper) {
 	});
 
 	wrapper.appframe.add_module_icon("Setup");
+	wrapper.appframe.add_button("Refresh", function() {
+		wn.pages.Setup.make(wrapper);
+	}, "icon-refresh");
 	
+	wn.pages.Setup.make(wrapper);
+	
+}
+
+wn.pages.Setup.make = function(wrapper) {
 	var body = $(wrapper).find(".layout-main"),
 		total = 0,
 		completed = 0;
