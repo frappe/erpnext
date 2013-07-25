@@ -48,12 +48,6 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 			}
 		});
 		
-		this.frm.set_query("territory", function() {
-			return {
-				filters: {'is_group': "No" }
-			}
-		});
-		
 		this.frm.set_query("customer", function() {
 			return {
 				query: "controllers.queries.customer_query"
