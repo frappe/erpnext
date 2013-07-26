@@ -1,1 +1,0 @@
-wn.pages['markdown-reference'].onload = function(wrapper) { }
