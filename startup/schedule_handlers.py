@@ -39,6 +39,10 @@ def execute_all():
 	run_fn(flush)
 	
 def execute_daily():
+	# event reminders
+	from core.doctype.event.event import send_event_digest
+	run_fn(send_event_digest)
+	
 	# email digest
 	from setup.doctype.email_digest.email_digest import send
 	run_fn(send)
