@@ -31,7 +31,8 @@ def execute(filters=None):
 		return columns, invoice_list
 	
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
-	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list, invoice_expense_map)
+	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list, 
+		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
 	account_map = get_account_details(invoice_list)
 
@@ -138,15 +139,18 @@ def get_invoice_expense_map(invoice_list):
 	
 	return invoice_expense_map
 	
-def get_invoice_tax_map(invoice_list, invoice_expense_map):
+def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	tax_details = webnotes.conn.sql("""select parent, account_head, sum(tax_amount) as tax_amount
 		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_tax_map = {}
 	for d in tax_details:
-		if d.account_head in invoice_expense_map.get(d.parent):
-			invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
+		if d.account_head in expense_accounts:
+			if invoice_expense_map[d.parent].has_key(d.account_head):
+				invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
+			else:
+				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)
 		else:
 			invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
 			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
@@ -180,4 +184,4 @@ def get_account_details(invoice_list):
 		where name in (%s)""" % ", ".join(["%s"]*len(accounts)), tuple(accounts), as_dict=1):
 			account_map[acc.name] = acc.parent_account
 						
-	return account_map	
+	return account_map
