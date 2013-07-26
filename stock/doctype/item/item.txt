@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-07-23 11:54:52", 
+  "modified": "2013-07-26 16:26:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -36,7 +36,8 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1
+  "report": 1, 
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -401,6 +402,13 @@
   "options": "Yes\nNo", 
   "read_only": 0, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_supplier", 
+  "fieldtype": "Link", 
+  "label": "Default Supplier", 
+  "options": "Supplier"
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
@@ -876,7 +884,6 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "role": "Material Master Manager", 
-  "submit": 0, 
   "write": 1
  }, 
  {
@@ -885,7 +892,6 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Material Manager", 
-  "submit": 0, 
   "write": 0
  }, 
  {
@@ -894,19 +900,6 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "role": "Material User", 
-  "submit": 0, 
   "write": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Sales User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Purchase User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts User"
  }
 ]

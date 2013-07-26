@@ -80,7 +80,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			});
+			}
+		);
 
 		cur_frm.add_custom_button(wn._('From Supplier Quotation'), 
 			function() {
@@ -93,7 +94,20 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			});	
+			}
+		);	
+			
+		cur_frm.add_custom_button(wn._('For Supplier'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
+					source_doctype: "Supplier",
+					get_query_filters: {
+						docstatus: ["!=", 2],
+					}
+				})
+			}
+		);
 	},
 
 	tc_name: function() {
