@@ -41,14 +41,10 @@ def get_things_todo():
 
 def get_todays_events():
 	"""Returns a count of todays events in calendar"""
+	from core.doctype.event.event import get_events
 	from webnotes.utils import nowdate
-	todays_events = webnotes.conn.sql("""\
-		SELECT COUNT(*) FROM `tabEvent`
-		WHERE owner = %s
-		AND event_type != 'Cancel'
-		AND %s between date(starts_on) and date(ends_on)""", (
-		webnotes.session.user, nowdate()))
-	return todays_events[0][0]
+	today = nowdate()
+	return len(get_events(today, today))
 
 def get_unread_messages():
 	"returns unread (docstatus-0 messages for a user)"
