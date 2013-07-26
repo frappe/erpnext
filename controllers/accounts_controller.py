@@ -33,6 +33,8 @@ class AccountsController(TransactionBase):
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 			
+		self.validate_for_freezed_account()
+			
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
@@ -51,6 +53,18 @@ class AccountsController(TransactionBase):
 			if date_field and self.doc.fields[date_field]:
 				validate_fiscal_year(self.doc.fields[date_field], self.doc.fiscal_year, 
 					label=self.meta.get_label(date_field))
+					
+	def validate_for_freezed_account(self):
+		for fld in ["customer", "supplier"]:
+			if self.meta.get_field(fld):
+				accounts = webnotes.conn.get_values("Account", {"master_type": fld.upper(), 
+					"master_name": self.doc.fields[fld], "company": self.doc.company}, 
+					"freeze_account", as_dict=1)
+				
+				if accounts:
+					if not filter(lambda x: cstr(x.freeze_account) in ["", "No"], accounts):
+						msgprint(_("Account for this ") + fld + _(" has been freezed. ") + 
+							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
 	def set_price_list_currency(self, buying_or_selling):
 		# TODO - change this, since price list now has only one currency allowed
