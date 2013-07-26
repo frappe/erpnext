@@ -20,10 +20,21 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	
 	if (!doc.__islocal && doc.docstatus==0) {
 		cur_frm.set_intro("Submit the BOM to use it for manufacturing or repacking.");
+		cur_frm.add_custom_button("Update Cost", cur_frm.cscript.update_cost);
 	} else cur_frm.set_intro("");
 	
 	cur_frm.cscript.with_operations(doc);
 	set_operation_no(doc);
+}
+
+cur_frm.cscript.update_cost = function() {
+	wn.call({
+		doc: cur_frm.doc,
+		method: "update_cost",
+		callback: function(r) {
+			if(!r.exc) cur_frm.refresh_fields();
+		}
+	})
 }
 
 cur_frm.cscript.with_operations = function(doc) {

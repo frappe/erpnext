@@ -135,6 +135,17 @@ class DocType:
 				rate = arg['standard_rate']
 
 		return rate
+		
+	def update_cost(self):
+		for d in self.doclist.get({"parentfield": "bom_materials"}):
+			d.rate = self.get_bom_material_detail({
+				'item_code': d.item_code, 
+				'bom_no': d.bom_no,
+				'qty': d.qty
+			})["rate"]
+		
+		self.on_update()
+		
 
 	def get_bom_unitcost(self, bom_no):
 		bom = sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
