@@ -21,7 +21,7 @@ from webnotes.utils import flt
 def execute(filters=None):
 	if not filters: filters = {}
 	columns = get_columns()
-	last_col = len(columns) - 1
+	last_col = len(columns)
 	
 	item_list = get_items(filters)
 	item_tax, tax_accounts = get_tax_accounts(item_list, columns)
@@ -35,7 +35,9 @@ def execute(filters=None):
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 			
-		row.append(sum(row[last_col:]))
+		total_tax = sum(row[last_col:])
+		row += [total_tax, d.amount + total_tax]
+		
 		data.append(row)
 	
 	return columns, data
@@ -100,6 +102,6 @@ def get_tax_accounts(item_list, columns):
 	
 	tax_accounts.sort()
 	columns += [account_head + ":Currency:80" for account_head in tax_accounts]
-	columns.append("Total:Currency:80")
+	columns += ["Total Tax:Currency:80", "Total:Currency:80"]
 
 	return item_tax, tax_accounts
