@@ -26,9 +26,6 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 			this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
-				callback: function(r) {
-					if(!r.exc) me.frm.refresh_fields();
-				}
 			});			
 		}
 	}

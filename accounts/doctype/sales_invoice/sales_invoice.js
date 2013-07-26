@@ -120,6 +120,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// TODO toggle display of fields
+		cur_frm.cscript.hide_fields(this.frm.doc);
 	},
 	
 	debit_to: function() {
@@ -162,7 +163,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 
 // Hide Fields
 // ------------
-cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
+cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['project_name', 'due_date', 'is_opening', 'conversion_rate',
 	'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
@@ -176,18 +177,21 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
 		unhide_field('payments_section');
-		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], false);
+		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
 		unhide_field(par_flds);
-		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
+		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
-	for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], (cint(doc.update_stock)==1?true:false));
+	
+	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos, (cint(doc.update_stock)==1?true:false));
 
 	// India related fields
 	var cp = wn.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
+	
+	cur_frm.refresh_fields();
 }
 
 
