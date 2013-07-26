@@ -1,10 +1,10 @@
-wn.query_reports["Item-wise Sales Register"] = {
+wn.query_reports["Item-wise Sales Register"] = wn.query_reports["Sales Register"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
 			"label": "From Date",
 			"fieldtype": "Date",
-			"default": wn.defaults.get_user_default("year_start_date"),
+			"default": wn.defaults.get_default("year_start_date"),
 			"width": "80"
 		},
 		{
@@ -14,26 +14,29 @@ wn.query_reports["Item-wise Sales Register"] = {
 			"default": get_today()
 		},
 		{
-			"fieldname": "item_code",
-			"label": "Item",
-			"fieldtype": "Link",
-			"options": "Item",
-		},
-		{
 			"fieldname":"account",
 			"label": "Account",
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
+				var company = wn.query_report.filters_by_name.company.get_value();
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
 						"is_pl_account": "No",
 						"debit_or_credit": "Debit",
+						"company": company,
 						"master_type": "Customer"
 					}
 				}
 			}
+		},
+		{
+			"fieldname":"company",
+			"label": "Company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": wn.defaults.get_default("company")
 		}
 	]
 }
