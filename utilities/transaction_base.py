@@ -95,7 +95,7 @@ class TransactionBase(StatusUpdater):
 			self.doc.price_list
 			
 		for fieldname, val in customer_defaults.items():
-			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 			
 		if self.meta.get_field("sales_team"):
@@ -135,7 +135,7 @@ class TransactionBase(StatusUpdater):
 		
 	def set_supplier_defaults(self):
 		for fieldname, val in self.get_supplier_defaults().items():
-			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 				
 	def get_lead_defaults(self):
