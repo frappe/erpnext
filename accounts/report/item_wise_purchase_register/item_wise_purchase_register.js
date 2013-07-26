@@ -25,15 +25,24 @@ wn.query_reports["Item-wise Purchase Register"] = {
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
+				var company = wn.query_report.filters_by_name.company.get_value();
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
 						"is_pl_account": "No",
 						"debit_or_credit": "Credit",
+						"company": company,
 						"master_type": "Supplier"
 					}
 				}
 			}
+		},
+		{
+			"fieldname":"company",
+			"label": "Company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": wn.defaults.get_default("company")
 		}
 	]
 }

@@ -90,8 +90,8 @@ def get_columns(invoice_list):
 		
 		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
 			from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice' 
-			and docstatus = 1 and ifnull(account_head, '') != '' and parent in (%s) 
-			order by account_head""" % 
+			and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total') 
+			and parent in (%s) order by account_head""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 			
 				
