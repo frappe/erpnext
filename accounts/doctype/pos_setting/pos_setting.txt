@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:50:33", 
+  "modified": "2013-07-26 11:16:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -94,11 +94,11 @@
  {
   "doctype": "DocField", 
   "fieldname": "price_list_name", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 
   "oldfieldtype": "Select", 
-  "options": "link:Price List", 
+  "options": "Price List", 
   "read_only": 0, 
   "reqd": 1
  }, 
