@@ -60,6 +60,7 @@ class DocType(BuyingController):
 		super(DocType, self).validate()
 		
 		self.validate_schedule_date()
+		self.validate_uom_is_integer("uom", "qty")
 		
 		if not self.doc.status:
 			self.doc.status = "Draft"

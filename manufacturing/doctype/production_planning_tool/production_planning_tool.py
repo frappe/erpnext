@@ -185,6 +185,9 @@ class DocType:
 		self.validate_company()
 		self.validate_data()
 
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "stock_uom", "planned_qty")
+
 		items = self.get_distinct_items_and_boms()[1]
 		pro = self.create_production_order(items)
 		if pro:

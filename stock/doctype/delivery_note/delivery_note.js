@@ -46,8 +46,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	
 		// unhide expense_account and cost_center is auto_inventory_accounting enabled
 		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("expense_account", aii_enabled);
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp("cost_center", aii_enabled);
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(wn._('From Sales Order'), 

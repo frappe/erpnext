@@ -20,7 +20,7 @@ from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
 from setup.utils import get_company_currency, get_price_list_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
-from utilities.transaction_base import TransactionBase, validate_conversion_rate
+from utilities.transaction_base import TransactionBase, validate_conversion_rate, validate_uom_is_integer
 import json
 
 class AccountsController(TransactionBase):
@@ -28,7 +28,6 @@ class AccountsController(TransactionBase):
 		self.set_missing_values(for_validate=True)
 		
 		self.validate_date_with_fiscal_year()
-		
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 			self.validate_value("grand_total", ">=", 0)

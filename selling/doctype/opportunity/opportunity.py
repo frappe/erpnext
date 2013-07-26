@@ -24,6 +24,7 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
+
 class DocType(TransactionBase):
 	def __init__(self,doc,doclist):
 		self.doc = doc
@@ -138,6 +139,7 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.set_last_contact_date()
 		self.validate_item_details()
+		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
 		
 		from accounts.utils import validate_fiscal_year

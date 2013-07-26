@@ -139,6 +139,7 @@ class DocType(SellingController):
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()
+		self.validate_uom_is_integer("stock_uom", "qty")
 		
 		if self.doc.docstatus == 1:
 			self.validate_for_items()

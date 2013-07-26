@@ -81,9 +81,6 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 			this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
-				callback: function(r) {
-					if(!r.exc) me.frm.refresh_fields();
-				}
 			});
 			
 			// TODO shift this to depends_on
@@ -105,9 +102,6 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 				},
 				method: "get_customer_address",
 				freeze: true,
-				callback: function(r) {
-					me.frm.refresh_fields();
-				}
 			});
 		}
 	},

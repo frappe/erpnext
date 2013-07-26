@@ -37,6 +37,10 @@ class DocType:
 		self.validate_case_nos()
 		self.validate_qty()
 
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "stock_uom", "qty")
+		validate_uom_is_integer(self.doclist, "weight_uom", "net_weight")
+
 	def validate_delivery_note(self):
 		"""
 			Validates if delivery note has status as draft
