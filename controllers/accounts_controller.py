@@ -20,7 +20,7 @@ from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
 from setup.utils import get_company_currency, get_price_list_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
-from utilities.transaction_base import TransactionBase, validate_conversion_rate, validate_uom_is_integer
+from utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
 
 class AccountsController(TransactionBase):
@@ -55,15 +55,15 @@ class AccountsController(TransactionBase):
 					label=self.meta.get_label(date_field))
 					
 	def validate_for_freezed_account(self):
-		for fld in ["customer", "supplier"]:
-			if self.meta.get_field(fld):
-				accounts = webnotes.conn.get_values("Account", {"master_type": fld.upper(), 
-					"master_name": self.doc.fields[fld], "company": self.doc.company}, 
+		for fieldname in ["customer", "supplier"]:
+			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
+				accounts = webnotes.conn.get_values("Account", {"master_type": fieldname.title(), 
+					"master_name": self.doc.fields[fieldname], "company": self.doc.company}, 
 					"freeze_account", as_dict=1)
 				
 				if accounts:
 					if not filter(lambda x: cstr(x.freeze_account) in ["", "No"], accounts):
-						msgprint(_("Account for this ") + fld + _(" has been freezed. ") + 
+						msgprint(_("Account for this ") + fieldname + _(" has been freezed. ") + 
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
 	def set_price_list_currency(self, buying_or_selling):
