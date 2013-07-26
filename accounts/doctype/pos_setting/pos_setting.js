@@ -18,8 +18,10 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 	$c_obj(make_doclist(cdt,cdn),'get_series','',function(r,rt){
 		if(r.message) set_field_options('naming_series', r.message);
 	});
- 
 	
+	cur_frm.set_query("price_list_name", function() {
+		return { filters: { buying_or_selling: "Selling" } };
+	});
 }
 
 //cash bank account

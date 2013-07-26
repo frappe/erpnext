@@ -95,7 +95,7 @@ class TransactionBase(StatusUpdater):
 			self.doc.price_list
 			
 		for fieldname, val in customer_defaults.items():
-			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 			
 		if self.meta.get_field("sales_team"):
@@ -135,7 +135,7 @@ class TransactionBase(StatusUpdater):
 		
 	def set_supplier_defaults(self):
 		for fieldname, val in self.get_supplier_defaults().items():
-			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
+			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 				
 	def get_lead_defaults(self):
@@ -502,6 +502,8 @@ def delete_events(ref_type, ref_name):
 	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
+class UOMMustBeIntegerError(webnotes.ValidationError): pass
+
 def validate_uom_is_integer(doclist, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
@@ -520,4 +522,4 @@ def validate_uom_is_integer(doclist, uom_field, qty_fields):
 						webnotes.msgprint(_("For UOM") + " '" + d.fields[uom_field] \
 							+ "': " + _("Quantity cannot be a fraction.") \
 							+ " " + _("In Row") + ": " + str(d.idx),
-							raise_exception=True)
+							raise_exception=UOMMustBeIntegerError)

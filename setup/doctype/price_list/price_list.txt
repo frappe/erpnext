@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-07-23 12:03:25", 
+  "modified": "2013-07-26 11:19:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,6 +55,7 @@
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Currency", 
   "options": "Currency", 
   "reqd": 1
@@ -64,6 +65,7 @@
   "doctype": "DocField", 
   "fieldname": "buying_or_selling", 
   "fieldtype": "Select", 
+  "in_list_view": 1, 
   "label": "Valid for Buying or Selling?", 
   "options": "Buying\nSelling", 
   "reqd": 1

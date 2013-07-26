@@ -70,6 +70,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.fields_dict.lead && this.frm.set_query("lead", function(doc,cdt,cdn) {
 			return{	query:"controllers.queries.lead_query" } });
 			
+		if(this.frm.fields_dict.price_list_name) {
+			this.frm.set_query("price_list_name", function() {
+				return { filters: { buying_or_selling: "Selling" } };
+			});
+		
+			this.frm.set_query("price_list_currency", function() {
+				return {
+					query: "controllers.queries.get_price_list_currency",
+					filters: {
+						price_list_name: me.frm.doc.price_list_name,
+						buying_or_selling: "Selling"
+					}					
+				};
+			});
+		}
+			
 		if(!this.fname) {
 			return;
 		}

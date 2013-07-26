@@ -70,6 +70,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.doc.conversion_rate = 0.0167
 		self.assertRaises(WrongWarehouseCompany, po.insert)
 
+	def test_uom_integer_validation(self):
+		from utilities.transaction_base import UOMMustBeIntegerError
+		po = webnotes.bean(copy=test_records[0])
+		po.doclist[1].qty = 3.4
+		self.assertRaises(UOMMustBeIntegerError, po.insert)
+
 
 test_dependencies = ["BOM"]
 
@@ -101,7 +107,7 @@ test_records = [
 			"import_rate": 500.0,
 			"amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
-			"stock_uom": "Nos", 
+			"stock_uom": "_Test UOM", 
 			"uom": "_Test UOM",
 			"schedule_date": "2013-03-01"
 		}
