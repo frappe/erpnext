@@ -80,7 +80,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(sys_defaults.company || r[0]).change();
+			wrapper.$company_select.val(wn.defaults.get_default("company") || r[0]).change();
 		}
 	});
 }

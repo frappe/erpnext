@@ -26,7 +26,7 @@ wn.query_reports["Monthly Salary Register"] = {
 			"label": "Company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": sys_defaults.company
+			"default": wn.defaults.get_default("company")
 		}
 	]
 }

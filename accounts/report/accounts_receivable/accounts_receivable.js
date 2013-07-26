@@ -5,7 +5,7 @@ wn.query_reports["Accounts Receivable"] = {
 			"label": "Company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": sys_defaults.company
+			"default": wn.defaults.get_default("company")
 		},
 		{
 			"fieldname":"account",

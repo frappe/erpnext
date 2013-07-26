@@ -31,8 +31,8 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 			set_multiple(cdt,cdn,{status:'Draft'});
 		if(!this.frm.doc.date) 
 			this.frm.doc.transaction_date = date.obj_to_str(new Date());
-		if(!this.frm.doc.company && sys_defaults.company) 
-			set_multiple(cdt,cdn,{company:sys_defaults.company});
+		if(!this.frm.doc.company && wn.defaults.get_default("company")) 
+			set_multiple(cdt,cdn,{company:wn.defaults.get_default("company")});
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year) 
 			set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
 	

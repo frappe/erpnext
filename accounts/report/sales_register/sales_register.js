@@ -4,7 +4,7 @@ wn.query_reports["Sales Register"] = {
 			"fieldname":"from_date",
 			"label": "From Date",
 			"fieldtype": "Date",
-			"default": wn.defaults.get_user_default("year_start_date"),
+			"default": wn.defaults.get_default("year_start_date"),
 			"width": "80"
 		},
 		{
@@ -36,7 +36,7 @@ wn.query_reports["Sales Register"] = {
 			"label": "Company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": sys_defaults.company
+			"default": wn.defaults.get_default("company")
 		}
 	]
 }

@@ -33,7 +33,7 @@ var get_filters = function(){
 			"label": "Company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": sys_defaults.company
+			"default": wn.defaults.get_default("company")
 		},
 	];
 }

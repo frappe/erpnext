@@ -19,7 +19,7 @@ wn.query_reports["Budget Variance Report"] = {
 			label: "Company",
 			fieldtype: "Link",
 			options: "Company",
-			default: sys_defaults.company
+			default: wn.defaults.get_default("company")
 		},
 	]
 }

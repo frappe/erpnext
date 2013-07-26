@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	doc.company = sys_defaults.company;
+	doc.company = wn.defaults.get_default("company");
 	refresh_field("company");
 }
 
