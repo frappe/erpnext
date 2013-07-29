@@ -43,7 +43,7 @@ $.extend(cur_frm.cscript, {
 	
 	allow_dropbox_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
-			wn.call({
+			return wn.call({
 				method: "setup.doctype.backup_manager.backup_dropbox.get_dropbox_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
@@ -60,7 +60,7 @@ $.extend(cur_frm.cscript, {
 	
 	allow_gdrive_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
-			wn.call({
+			return wn.call({
 				method: "setup.doctype.backup_manager.backup_googledrive.get_gdrive_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
@@ -72,7 +72,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	validate_gdrive: function() {
-		wn.call({
+		return wn.call({
 			method: "setup.doctype.backup_manager.backup_googledrive.gdrive_callback",
 			args: {
 				verification_code: cur_frm.doc.verification_code

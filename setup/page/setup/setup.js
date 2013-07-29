@@ -23,7 +23,7 @@ wn.pages.Setup.make = function(wrapper) {
 	body.html('<div class="progress progress-striped active">\
 		<div class="progress-bar" style="width: 100%;"></div></div>')
 
-	wn.call({
+	return wn.call({
 		method: "setup.page.setup.setup.get",
 		callback: function(r) {
 			if(r.message) {

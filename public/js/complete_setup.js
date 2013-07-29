@@ -54,7 +54,7 @@ $.extend(erpnext.complete_setup, {
 			$('header').toggle(false); // hide toolbar
 		}
 		
-		wn.call({
+		return wn.call({
 			method:"webnotes.country_info.get_country_timezone_info",
 			callback: function(data) {
 				erpnext.country_info = data.message.country_info;
@@ -74,7 +74,7 @@ $.extend(erpnext.complete_setup, {
 			var data = d.get_values();
 			if(!data) return;
 			$(this).set_working();
-			$c_obj('Setup Control','setup_account',data,function(r, rt){
+			return $c_obj('Setup Control','setup_account',data,function(r, rt){
 				$(this).done_working();
 				if(!r.exc) {
 					sys_defaults = r.message;

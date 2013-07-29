@@ -135,7 +135,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				msgprint(wn._("Please specify Company"));
 			} else {
 				var price_list_name = this.frm.doc.price_list_name;
-				this.frm.call({
+				return this.frm.call({
 					doc: this.frm.doc,
 					method: "set_customer_defaults",
 					freeze: true,
@@ -154,7 +154,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	customer_address: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				args: {
 					customer: this.frm.doc.customer, 
@@ -183,7 +183,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				item.item_code = null;
 				refresh_field("item_code", item.name, item.parentfield);
 			} else {
-				this.frm.call({
+				return this.frm.call({
 					method: "selling.utils.get_item_details",
 					child: item,
 					args: {
@@ -292,7 +292,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
-			this.frm.call({
+			return this.frm.call({
 				method: "selling.utils.get_available_qty",
 				child: item,
 				args: {
@@ -484,7 +484,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	charge: function() {
 		var me = this;
 		if(this.frm.doc.charge) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "get_other_charges",
 				callback: function(r) {
@@ -499,7 +499,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	shipping_rule: function() {
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
 				callback: function(r) {

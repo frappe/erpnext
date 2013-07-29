@@ -29,7 +29,7 @@ erpnext.projects.Task = wn.ui.form.Controller.extend({
 
 	project: function() {
 		if(this.frm.doc.project) {
-			get_server_fields('get_project_details', '','', this.frm.doc, this.frm.doc.doctype, 
+			return get_server_fields('get_project_details', '','', this.frm.doc, this.frm.doc.doctype, 
 				this.frm.doc.name, 1);
 		}
 	},

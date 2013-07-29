@@ -33,7 +33,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 
 	wrapper.make_tree = function() {
 		var ctype = wn.get_route()[1] || 'Territory';
-		wn.call({
+		return wn.call({
 			method: 'selling.page.sales_browser.sales_browser.get_children',
 			args: {ctype: ctype},
 			callback: function(r) {
@@ -155,7 +155,7 @@ erpnext.SalesChart = Class.extend({
 			v.parent = node.data('label');
 			v.ctype = me.ctype;
 			
-			wn.call({
+			return wn.call({
 				method: 'selling.page.sales_browser.sales_browser.add_node',
 				args: v,
 				callback: function() {

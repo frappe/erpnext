@@ -17,7 +17,7 @@
 function SMSManager() {
 	var me = this;
 	this.get_contact_number = function(contact, key, value) {
-		$c_obj('SMS Control', 'get_contact_number', {
+		return $c_obj('SMS Control', 'get_contact_number', {
 				contact_name:contact, 
 				value:value,
 				key:key
@@ -63,7 +63,7 @@ function SMSManager() {
 			var v = me.dialog.get_values();
 			if(v) {
 				$(this).set_working();
-				$c_obj('SMS Control', 'send_form_sms', v, function(r,rt) {
+				return $c_obj('SMS Control', 'send_form_sms', v, function(r,rt) {
 					$(this).done_working();
 					if(r.exc) {msgprint(r.exc); return; }
 					msgprint('Message Sent');

@@ -26,6 +26,6 @@ cur_frm.cscript.merge = function(doc, cdt, cdn) {
 	var check = confirm("Are you sure you want to merge this warehouse into " 
 		+ doc.merge_with + "?");
 	if (check) {
-		$c_obj(make_doclist(cdt, cdn), 'merge_warehouses', '', '');
+		return $c_obj(make_doclist(cdt, cdn), 'merge_warehouses', '', '');
 	}
 }

@@ -16,7 +16,7 @@
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	if (doc.item_code)
-		get_server_fields('get_purchase_receipt_item_details','','',doc,cdt,cdn,1);
+		return get_server_fields('get_purchase_receipt_item_details','','',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.inspection_type = function(doc, cdt, cdn) {

@@ -26,7 +26,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		var me = this;
 		
 		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_account) {
-			this.frm.call({
+			return this.frm.call({
 				method: "accounts.utils.get_company_default",
 				args: {
 					"fieldname": "stock_adjustment_account", 

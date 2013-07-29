@@ -24,7 +24,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 // Validation For To Date
 // ================================================================================================
 cur_frm.cscript.to_date = function(doc, cdt, cdn) {
-  $c('runserverobj', args={'method':'to_date_validation','docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
+  return $c('runserverobj', args={'method':'to_date_validation','docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
     function(r, rt) {
     var doc = locals[cdt][cdn];
     if (r.message) {

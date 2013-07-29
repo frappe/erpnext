@@ -101,7 +101,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	reserved_warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.reserved_warehouse) {
-			this.frm.call({
+			return this.frm.call({
 				method: "selling.utils.get_available_qty",
 				child: item,
 				args: {
@@ -173,7 +173,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 	var check = confirm("Are you sure you want to STOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', {
+		return $c('runserverobj', {
 			'method':'stop_sales_order', 
 			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
 			}, function(r,rt) {
@@ -188,7 +188,7 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 	var check = confirm("Are you sure you want to UNSTOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', {
+		return $c('runserverobj', {
 			'method':'unstop_sales_order', 
 			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
 		}, function(r,rt) {

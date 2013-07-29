@@ -19,7 +19,7 @@ cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved
 			&& inList(wn.boot.profile.can_write, doc.doctype)) {
 		cur_frm.add_custom_button('Send', function() {
-			$c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
+			return $c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
 				cur_frm.refresh();
 			});
 		})
@@ -30,7 +30,7 @@ cur_frm.cscript.refresh = function(doc) {
 			repl("%(fullname)s <%(email)s>", wn.user_info(doc.owner)));
 	}
 	
-	wn.call({
+	return wn.call({
 		method: "support.doctype.newsletter.newsletter.get_lead_options",
 		type: "GET",
 		callback: function(r) {

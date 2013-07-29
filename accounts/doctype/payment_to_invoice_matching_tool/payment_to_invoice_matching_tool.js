@@ -49,11 +49,11 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 }
 
 cur_frm.cscript.voucher_no  =function(doc, cdt, cdn) {
-	get_server_fields('get_voucher_details', '', '', doc, cdt, cdn, 1)
+	return get_server_fields('get_voucher_details', '', '', doc, cdt, cdn, 1)
 }
 
 cur_frm.cscript.account = function(doc, cdt, cdn) {
-	wn.call({
+	return wn.call({
 		doc: this.frm.doc,
 		method: "set_account_type",
 		callback: function(r) {

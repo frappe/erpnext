@@ -23,7 +23,7 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
 			});			
@@ -93,7 +93,7 @@ $.extend(cur_frm.cscript, {
 	},
 
 	set_status: function(status) {
-		wn.call({
+		return wn.call({
 			method:"support.doctype.support_ticket.support_ticket.set_status",
 			args: {
 				name: cur_frm.doc.name,

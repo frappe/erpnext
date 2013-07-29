@@ -54,7 +54,7 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 // Supplier
 //-------------
 cur_frm.cscript.supplier = function(doc,dt,dn) {
-	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
+	if(doc.supplier) return get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
 	if(doc.supplier) unhide_field(['supplier_name','address_display']);
 }
 

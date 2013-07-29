@@ -26,7 +26,7 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
 			});
@@ -56,7 +56,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) 
-		get_server_fields('get_customer_address', 
+		return get_server_fields('get_customer_address', 
 			JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 

@@ -5,7 +5,7 @@ var wn = {};
 // Add / update a new Lead / Communication
 // subject, sender, description
 erpnext.send_message = function(opts) {
-	wn.call({
+	return wn.call({
 		type: "POST",
 		method: "website.helpers.contact.send_message",
 		args: opts,
@@ -202,7 +202,7 @@ $.extend(wn.cart, {
 			}
 			window.location.href = "login";
 		} else {
-			wn.call({
+			return wn.call({
 				type: "POST",
 				method: "website.helpers.cart.update_cart",
 				args: {

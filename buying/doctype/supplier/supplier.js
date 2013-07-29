@@ -55,7 +55,7 @@ cur_frm.cscript.make_dashboard = function(doc) {
 	cur_frm.dashboard.add_doctype_badge("Purchase Receipt", "supplier");
 	cur_frm.dashboard.add_doctype_badge("Purchase Invoice", "supplier");
 
-	wn.call({
+	return wn.call({
 		type: "GET",
 		method:"buying.doctype.supplier.supplier.get_dashboard_info",
 		args: {

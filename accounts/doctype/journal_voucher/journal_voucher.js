@@ -108,7 +108,7 @@ cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_voucher && !flt(d.debit)) {
 		args = {'doctype': 'Purchase Invoice', 'docname': d.against_voucher }
-		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
+		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
 
@@ -116,7 +116,7 @@ cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_invoice && !flt(d.credit)) {
 		args = {'doctype': 'Sales Invoice', 'docname': d.against_invoice }
-		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
+		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
 
@@ -141,7 +141,7 @@ cur_frm.cscript.credit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc
 
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc); 
-	$c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
+	return $c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
 	cur_frm.refresh();
 	});
 }
@@ -151,7 +151,7 @@ cur_frm.cscript.get_balance = function(doc,dt,dn) {
 cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
-		wn.call({
+		return wn.call({
 			method: "accounts.utils.get_balance_on",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
@@ -193,7 +193,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	}
 	
 	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
-		wn.call({
+		return wn.call({
 			type: "GET",
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
@@ -207,7 +207,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			}
 		})
 	} else if(doc.voucher_type=="Opening Entry") {
-		wn.call({
+		return wn.call({
 			type:"GET",
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
 			args: {

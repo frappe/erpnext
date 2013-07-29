@@ -124,7 +124,7 @@ cur_frm.cscript['Stop Material Request'] = function() {
 	var check = confirm("Do you really want to STOP this Material Request?");
 
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
@@ -135,7 +135,7 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 	var check = confirm("Do you really want to UNSTOP this Material Request?");
 	
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}

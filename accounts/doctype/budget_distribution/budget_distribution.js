@@ -20,7 +20,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
       refresh_field('budget_distribution_details');
     }
     
-    $c('runserverobj',args={'method' : 'get_months', 'docs' : 
+    return $c('runserverobj',args={'method' : 'get_months', 'docs' : 
 		wn.model.compress(make_doclist(doc.doctype, doc.name))},callback1);
   }
 }

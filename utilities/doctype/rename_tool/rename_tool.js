@@ -1,5 +1,5 @@
 cur_frm.cscript.refresh = function(doc) {
-	wn.call({
+	return wn.call({
 		method:"utilities.doctype.rename_tool.rename_tool.get_doctypes",
 		callback: function(r) {
 			cur_frm.set_df_property("select_doctype", "options", r.message);

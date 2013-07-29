@@ -139,7 +139,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				msgprint(wn._("Please specify Company to proceed"));
 			} else {
 				var me = this;
-				this.frm.call({
+				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
 				});
@@ -222,7 +222,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 
 cur_frm.cscript.mode_of_payment = function(doc) {
-	cur_frm.call({
+	return cur_frm.call({
 		method: "get_bank_cash_account",
 		args: { mode_of_payment: doc.mode_of_payment }
 	});
@@ -248,7 +248,7 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
-	wn.call({
+	return wn.call({
 		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 		args: {
 			"company": cur_frm.doc.company,

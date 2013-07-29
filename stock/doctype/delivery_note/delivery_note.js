@@ -112,7 +112,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.serial_no) {
-		 get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
+		 return get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
 	}
 }
 

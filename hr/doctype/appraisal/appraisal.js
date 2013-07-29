@@ -44,7 +44,7 @@ cur_frm.cscript.kra_template = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
-	//get_server_fields('calculate_total','','',doc,cdt,cdn,1);
+	//return get_server_fields('calculate_total','','',doc,cdt,cdn,1);
 	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
 	var total =0;
 	for(var i = 0; i<val.length; i++){

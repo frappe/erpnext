@@ -32,7 +32,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				account_for = "stock_received_but_not_billed";
 			else account_for = "stock_adjustment_account";
 			
-			this.frm.call({
+			return this.frm.call({
 				method: "accounts.utils.get_company_default",
 				args: {
 					"fieldname": account_for, 
@@ -142,7 +142,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	get_items: function() {
-		this.frm.call({
+		return this.frm.call({
 			doc: this.frm.doc,
 			method: "get_items",
 			callback: function(r) {
@@ -160,7 +160,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	production_order: function() {
 		this.toggle_enable_bom();
 		
-		this.frm.call({
+		return this.frm.call({
 			method: "get_production_order_details",
 			args: {production_order: this.frm.doc.production_order}
 		});
@@ -212,7 +212,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	
 	make_return_jv: function() {
 		if(this.get_doctype_docname()) {
-			this.frm.call({
+			return this.frm.call({
 				method: "make_return_jv",
 				args: {
 					stock_entry: this.frm.doc.name
@@ -269,23 +269,23 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 }
 
 cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){
-	if(doc.delivery_note_no) get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
+	if(doc.delivery_note_no) return get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.sales_invoice_no = function(doc,cdt,cdn){
-	if(doc.sales_invoice_no) get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
+	if(doc.sales_invoice_no) return get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.customer = function(doc,cdt,cdn){
-	if(doc.customer) get_server_fields('get_cust_addr','','',doc,cdt,cdn,1);
+	if(doc.customer) return get_server_fields('get_cust_addr','','',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.purchase_receipt_no = function(doc,cdt,cdn){
-	if(doc.purchase_receipt_no)	get_server_fields('get_supp_values','','',doc,cdt,cdn,1);
+	if(doc.purchase_receipt_no)	return get_server_fields('get_supp_values','','',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.supplier = function(doc,cdt,cdn){
-	if(doc.supplier) get_server_fields('get_supp_addr','','',doc,cdt,cdn,1);
+	if(doc.supplier) return get_server_fields('get_supp_addr','','',doc,cdt,cdn,1);
 
 }
 
@@ -328,7 +328,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 		'serial_no'		: d.serial_no,
 		'bom_no'		: d.bom_no
 	};
-	get_server_fields('get_item_details',JSON.stringify(args),'mtn_details',doc,cdt,cdn,1);
+	return get_server_fields('get_item_details',JSON.stringify(args),'mtn_details',doc,cdt,cdn,1);
 }
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
@@ -341,7 +341,7 @@ cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 		'bom_no'		: d.bom_no,
 		'qty'			: d.s_warehouse ? -1* d.qty : d.qty
 	}
-	get_server_fields('get_warehouse_details', JSON.stringify(args), 
+	return get_server_fields('get_warehouse_details', JSON.stringify(args), 
 		'mtn_details', doc, cdt, cdn, 1);
 }
 
@@ -351,7 +351,7 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.uom && d.item_code){
 		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
-		get_server_fields('get_uom_details',JSON.stringify(arg),'mtn_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_uom_details',JSON.stringify(arg),'mtn_details', doc, cdt, cdn, 1);
 	}
 }
 

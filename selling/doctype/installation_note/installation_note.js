@@ -78,7 +78,7 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
 			});
@@ -93,7 +93,7 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 	customer_address: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				args: {
 					customer: this.frm.doc.customer, 

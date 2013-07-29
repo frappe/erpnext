@@ -24,7 +24,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.set_as_default = function() {
-	wn.call({
+	return wn.call({
 		doc: cur_frm.doc,
 		method: "set_as_default"
 	});

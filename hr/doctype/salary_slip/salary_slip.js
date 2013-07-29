@@ -34,7 +34,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 // Get leave details
 //---------------------------------------------------------------------
 cur_frm.cscript.fiscal_year = function(doc,dt,dn){
-		$c_obj(make_doclist(doc.doctype,doc.name), 'get_emp_and_leave_details','',function(r, rt) {
+		return $c_obj(make_doclist(doc.doctype,doc.name), 'get_emp_and_leave_details','',function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);
@@ -45,7 +45,7 @@ cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {
-		$c_obj(make_doclist(doc.doctype,doc.name), 'get_leave_details',doc.leave_without_pay,function(r, rt) {
+		return $c_obj(make_doclist(doc.doctype,doc.name), 'get_leave_details',doc.leave_without_pay,function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);

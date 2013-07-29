@@ -44,7 +44,7 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
 			});
@@ -64,7 +64,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {    
-  if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+  if(doc.customer) return get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
@@ -90,7 +90,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
   var fname = cur_frm.cscript.fname;
   var d = locals[cdt][cdn];
   if (d.item_code) {
-    get_server_fields('get_item_details',d.item_code, 'item_maintenance_detail',doc,cdt,cdn,1);
+    return get_server_fields('get_item_details',d.item_code, 'item_maintenance_detail',doc,cdt,cdn,1);
   }
 }
 
@@ -101,7 +101,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
     arg.start_date = d.start_date;
     arg.end_date = d.end_date;
     arg.periodicity = d.periodicity;
-    get_server_fields('get_no_of_visits',docstring(arg),'item_maintenance_detail',doc, cdt, cdn, 1);
+    return get_server_fields('get_no_of_visits',docstring(arg),'item_maintenance_detail',doc, cdt, cdn, 1);
   }
   else{
     msgprint("Please enter Start Date and End Date");
@@ -110,7 +110,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
 
 cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
   if (!doc.__islocal) {
-    $c('runserverobj', args={'method':'generate_schedule', 'docs':wn.model.compress(make_doclist(cdt,cdn))},
+    return $c('runserverobj', args={'method':'generate_schedule', 'docs':wn.model.compress(make_doclist(cdt,cdn))},
       function(r,rt){
         refresh_field('maintenance_schedule_detail');
       }
