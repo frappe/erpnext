@@ -190,7 +190,7 @@ def get_pos_settings(company):
 	if not pos_settings:
 		pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` 
 			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
-
+			
 	return pos_settings and pos_settings[0] or None
 	
 def apply_pos_settings(pos_settings, opts):
