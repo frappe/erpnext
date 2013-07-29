@@ -113,21 +113,24 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
-			"Sales Order": {
-				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
-					["currency", "="]],
-			},
-		})
-		if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+		prev_doctype = [d.prevdoc_doctype for d in self.doclist.get({
+			"parentfield": "delivery_note_details", "prevdoc_doctype": ["!=", ""]})]
+		if prev_doctype:
 			super(DocType, self).validate_with_previous_doc(self.tname, {
-				"Sales Order Item": {
-					"ref_dn_field": "prevdoc_detail_docname",
-					"compare_fields": [["export_rate", "="]],
-					"is_child_table": True
-				}
+				prev_doctype[0]: {
+					"ref_dn_field": "prevdoc_docname",
+					"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+						["currency", "="]],
+				},
 			})
+			if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+				super(DocType, self).validate_with_previous_doc(self.tname, {
+					prev_doctype[0] + " Item": {
+						"ref_dn_field": "prevdoc_detail_docname",
+						"compare_fields": [["export_rate", "="]],
+						"is_child_table": True
+					}
+				})
 			
 		
 	def validate_proj_cust(self):

@@ -60,7 +60,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
-			if(doc.is_pos==1 && doc.update_stock!=1)
+			if(cint(doc.update_stock)!=1)
 				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 
 			if(doc.outstanding_amount!=0)
