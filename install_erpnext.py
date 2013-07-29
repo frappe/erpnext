@@ -47,7 +47,7 @@ def validate_install():
 	# check distribution
 	distribution = platform.linux_distribution()[0].lower().replace('"', '')
 	print "Distribution = ", distribution
-	is_redhat = distribution in ("redhat", "centos", "fedora")
+	is_redhat = distribution in ("redhat", "centos", "centos linux", "fedora")
 	is_debian = distribution in ("debian", "ubuntu", "elementary os")
 	
 	if not (is_redhat or is_debian):
@@ -104,6 +104,7 @@ def update_config_for_redhat():
 		exec_in_shell("service %s restart" % service)
 	
 def install_using_apt():
+	exec_in_shell("apt-get update")
 	packages = "python python-setuptools python-mysqldb apache2 git memcached ntp vim screen htop"
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
