@@ -94,11 +94,21 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "prevdoc_detail_docname",
-				"compare_fields": [["import_rate", "="], ["project_name", "="], ["warehouse", "="], 
+				"compare_fields": [["project_name", "="], ["warehouse", "="], 
 					["uom", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
+		
+		if cint(webnotes.defaults.get_global_default('maintain_same_rate')):
+			super(DocType, self).validate_with_previous_doc(self.tname, {
+				"Purchase Order Item": {
+					"ref_dn_field": "prevdoc_detail_docname",
+					"compare_fields": [["import_rate", "="]],
+					"is_child_table": True
+				}
+			})
+			
 
 	def po_required(self):
 		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':

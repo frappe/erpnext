@@ -195,8 +195,7 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "po_detail",
-				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
-					["uom", "="]],
+				"compare_fields": [["project_name", "="], ["item_code", "="], ["uom", "="]],
 				"is_child_table": True
 			},
 			"Purchase Receipt": {
@@ -205,11 +204,25 @@ class DocType(BuyingController):
 			},
 			"Purchase Receipt Item": {
 				"ref_dn_field": "pr_detail",
-				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
-					["uom", "="]],
+				"compare_fields": [["project_name", "="], ["item_code", "="], ["uom", "="]],
 				"is_child_table": True
 			}
 		})
+		
+		if cint(webnotes.defaults.get_global_default('maintain_same_rate')):
+			super(DocType, self).validate_with_previous_doc(self.tname, {
+				"Purchase Order Item": {
+					"ref_dn_field": "po_detail",
+					"compare_fields": [["import_rate", "="]],
+					"is_child_table": True
+				},
+				"Purchase Receipt Item": {
+					"ref_dn_field": "pr_detail",
+					"compare_fields": [["import_rate", "="]],
+					"is_child_table": True
+				}
+			})
+			
 					
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
