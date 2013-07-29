@@ -169,15 +169,13 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if(length(tabItem.description) > 40, \
 			concat(substr(tabItem.description, 1, 40), "..."), description) as decription 
 		from tabItem 
-		where tabItem.docstatus!=2 
-			and (ifnull(`tabItem`.`end_of_life`,"") in ("", "0000-00-00") 
-				or `tabItem`.`end_of_life` > NOW()) 
+		where tabItem.docstatus<2 
 			and (tabItem.%(key)s LIKE "%(txt)s" 
 				or tabItem.item_name LIKE "%(txt)s")  
 			%(fcond)s %(mcond)s 
 		limit %(start)s,%(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
 		'fcond': get_filters_cond(doctype, filters, conditions), 
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		'mcond': get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []	
