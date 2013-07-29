@@ -388,7 +388,8 @@ class DocType(SellingController):
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
 					"compare_fields": [["export_rate", "="]],
-					"is_child_table": True
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",

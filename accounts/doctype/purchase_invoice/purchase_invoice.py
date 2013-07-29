@@ -196,7 +196,8 @@ class DocType(BuyingController):
 			"Purchase Order Item": {
 				"ref_dn_field": "po_detail",
 				"compare_fields": [["project_name", "="], ["item_code", "="], ["uom", "="]],
-				"is_child_table": True
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
 			},
 			"Purchase Receipt": {
 				"ref_dn_field": "purchase_receipt",
@@ -214,7 +215,8 @@ class DocType(BuyingController):
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
 					"compare_fields": [["import_rate", "="]],
-					"is_child_table": True
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True
 				},
 				"Purchase Receipt Item": {
 					"ref_dn_field": "pr_detail",
