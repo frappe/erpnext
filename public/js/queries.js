@@ -58,6 +58,15 @@ $.extend(erpnext.queries, {
 		return { filters: { customer: doc.customer } };
 	},
 	
+	supplier_filter: function(doc) {
+		if(!doc.supplier) {
+			wn.throw(wn._("Please specify a") + " " + 
+				wn._(wn.meta.get_label(doc.doctype, "supplier", doc.name)));
+		}
+		
+		return { filters: { supplier: doc.supplier } };
+	},
+	
 	not_a_group_filter: function() {
 		return { filters: { is_group: "No" } };
 	},

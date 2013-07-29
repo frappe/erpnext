@@ -49,6 +49,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		}
 		
+		$.each([["supplier", "supplier"], 
+			["contact_person", "supplier_filter"],
+			["supplier_address", "supplier_filter"]], 
+			function(i, opts) {
+				if(me.frm.fields_dict[opts[0]]) 
+					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
+			});
+		
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
 				return{	query:"controllers.queries.supplier_query" }});

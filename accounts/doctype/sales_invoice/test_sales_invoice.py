@@ -607,8 +607,6 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(new_si.doc.invoice_period_to_date, 
 					unicode(add_months(base_si.doc.invoice_period_to_date, no_of_months)))
 					
-			self.assertEquals(getdate(new_si.doc.posting_date).day, 
-				base_si.doc.repeat_on_day_of_month)
 			
 			return new_si
 		

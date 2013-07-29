@@ -65,7 +65,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
-			if(doc.is_pos==1 && doc.update_stock!=1)
+			if(cint(doc.update_stock)!=1)
 				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 
 			if(doc.outstanding_amount!=0)
@@ -198,8 +198,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 	'total_commission', 'advances'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
-	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 
-		'delivered_qty', 'expense_account']
+	item_flds_pos = ['serial_no', 'batch_no', 'actual_qty', 'expense_account']
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
@@ -212,7 +211,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 	}
 	
 	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos, (cint(doc.update_stock)==1?true:false));
-
+	
 	// India related fields
 	var cp = wn.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);

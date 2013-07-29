@@ -388,7 +388,8 @@ class DocType(SellingController):
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
 					"compare_fields": [["export_rate", "="]],
-					"is_child_table": True
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",
@@ -983,3 +984,49 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
 			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})
+
+
+@webnotes.whitelist()
+def make_delivery_note(source_name, target_doclist=None):
+	from webnotes.model.mapper import get_mapped_doclist
+	
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.run_method("onload_post_render")
+		
+	def update_item(obj, target, source_parent):
+		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
+		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
+		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
+	
+	doclist = get_mapped_doclist("Sales Invoice", source_name, 	{
+		"Sales Invoice": {
+			"doctype": "Delivery Note", 
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		}, 
+		"Sales Invoice Item": {
+			"doctype": "Delivery Note Item", 
+			"field_map": {
+				"name": "prevdoc_detail_docname", 
+				"parent": "prevdoc_docname", 
+				"parenttype": "prevdoc_doctype",
+				"serial_no": "serial_no"
+			},
+			"postprocess": update_item
+		}, 
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges", 
+			"add_if_empty": True
+		}, 
+		"Sales Team": {
+			"doctype": "Sales Team", 
+			"field_map": {
+				"incentives": "incentives"
+			},
+			"add_if_empty": True
+		}
+	}, target_doclist, set_missing_values)
+	
+	return [d.fields for d in doclist]

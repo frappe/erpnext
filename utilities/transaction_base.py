@@ -308,7 +308,7 @@ class TransactionBase(StatusUpdater):
 						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
-						else:
+						elif not val.get("allow_duplicate_prev_row_id"):
 							webnotes.msgprint(_("Row ") + cstr(d.idx + 1) + 
 								_(": Duplicate row from same ") + key, raise_exception=1)
 					elif ref_dn:
