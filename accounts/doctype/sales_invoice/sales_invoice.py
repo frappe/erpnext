@@ -93,7 +93,8 @@ class DocType(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "export_amount")
+		self.validate_multiple_billing("Delivery Note", "dn_detail", "export_amount", 
+			"delivery_note_details")
 
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:
