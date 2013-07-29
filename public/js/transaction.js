@@ -49,7 +49,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 		erpnext.hide_naming_series();
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
-		this.frm.fields_dict.currency ? this.currency() : this.set_dynamic_labels();
+		this.set_dynamic_labels();
 	},
 	
 	onload_post_render: function() {
