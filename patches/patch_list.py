@@ -262,5 +262,6 @@ patch_list = [
 	"patches.july_2013.p08_custom_print_format_net_total_export",
 	"patches.july_2013.p09_remove_website_pyc",
 	"patches.july_2013.p10_change_partner_user_to_website_user",
-	"execute:webnotes.bean('Selling Settings').save()",
+	"patches.july_2013.p11_update_price_list_currency",
+	"execute:webnotes.bean('Selling Settings').save() #2013-07-29",
 ]
