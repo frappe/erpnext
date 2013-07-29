@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:27:26", 
+  "modified": "2013-07-26 15:24:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,11 +16,17 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "grade_name", 
+  "fieldtype": "Data", 
+  "label": "Grade", 
   "name": "__common__", 
+  "oldfieldname": "grade_name", 
+  "oldfieldtype": "Data", 
   "parent": "Grade", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
   "cancel": 1, 
@@ -42,22 +48,7 @@
   "name": "Grade"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "grade_name", 
-  "fieldtype": "Data", 
-  "label": "Grade", 
-  "oldfieldname": "grade_name", 
-  "oldfieldtype": "Data", 
-  "reqd": 1
+  "doctype": "DocField"
  }, 
  {
   "doctype": "DocPerm"
