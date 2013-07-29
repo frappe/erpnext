@@ -129,7 +129,8 @@ class TransactionBase(StatusUpdater):
 
 		supplier = webnotes.doc("Supplier", self.doc.supplier)
 		out["supplier_name"] = supplier.supplier_name
-		out["currency"] = supplier.default_currency
+		if supplier.default_currency:
+			out["currency"] = supplier.default_currency
 		
 		return out
 		
