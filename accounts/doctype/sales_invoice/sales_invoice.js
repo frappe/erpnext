@@ -25,7 +25,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+// wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
