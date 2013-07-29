@@ -144,8 +144,12 @@ class DocType:
 				'qty': d.qty
 			})["rate"]
 		
-		self.on_update()
-		
+		if self.doc.docstatus == 0:
+			webnotes.bean(self.doclist).save()
+		elif self.doc.docstatus == 1:
+			self.calculate_cost()
+			self.update_exploded_items()
+			webnotes.bean(self.doclist).update_after_submit()
 
 	def get_bom_unitcost(self, bom_no):
 		bom = sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
