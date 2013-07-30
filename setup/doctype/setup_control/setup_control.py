@@ -28,7 +28,8 @@ class DocType:
 	
 	def setup_account(self, args):
 		import webnotes, json
-		args = json.loads(args)
+		if isinstance(args, basestring):
+			args = json.loads(args)
 		webnotes.conn.begin()
 
 		self.update_profile_name(args)
