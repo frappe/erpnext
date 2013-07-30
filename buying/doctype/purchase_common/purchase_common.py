@@ -76,7 +76,11 @@ class DocType(BuyingController):
 			elif is_submit == 1:
 				# even if this transaction is the latest one, it should be submitted
 				# for it to be considered for latest purchase rate
-				last_purchase_rate = flt(d.purchase_rate) / flt(d.conversion_factor)
+				if flt(d.conversion_factor):
+					last_purchase_rate = flt(d.purchase_rate) / flt(d.conversion_factor)
+				else:
+					msgprint(_("Row ") + cstr(d.idx) + ": " + 
+						_("UOM Conversion Factor is mandatory"), raise_exception=1)
 
 			# update last purchsae rate
 			if last_purchase_rate:
