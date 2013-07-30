@@ -86,15 +86,15 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_customer_defaults",
-			});
-			
 			// TODO shift this to depends_on
 			unhide_field(['customer_address', 'contact_person', 'customer_name',
 				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
 				'territory', 'customer_group']);
+				
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+			});
 		}
 	}, 
 	

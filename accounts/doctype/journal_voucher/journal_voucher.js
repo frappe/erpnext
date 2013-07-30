@@ -18,8 +18,18 @@ wn.provide("erpnext.accounts");
 
 erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	onload: function() {
-		this.load_defaults(this.frm.doc);
+		this.load_defaults();
 		this.setup_queries();
+	},
+	
+	load_defaults: function() {
+		if(this.frm.doc.__islocal && this.frm.doc.company) {
+			wn.model.set_default_values(this.frm.doc);
+			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: "entries"}),
+				function(i, jvd) { wn.model.set_default_values(jvd); });
+			
+			this.frm.doc.posting_date = get_today();
+		}
 	},
 	
 	setup_queries: function() {
@@ -81,23 +91,6 @@ cur_frm.cscript.refresh = function(doc) {
 		});
 	}
 }
-
-cur_frm.cscript.load_defaults = function(doc) {
-	if(!cur_frm.doc.__islocal || !cur_frm.doc.company) { return; }
-
-	doc = locals[doc.doctype][doc.name];
-	var fields_to_refresh = wn.model.set_default_values(doc);
-	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
-
-	fields_to_refresh = null;
-	var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
-	if(!children) { return; }
-	for(var i=0; i<children.length; i++) {
-		wn.model.set_default_values(children[i]);
-	}
-	refresh_field('entries');
-}
-
 
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');

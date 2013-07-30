@@ -33,6 +33,9 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					this.make_purchase_invoice);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+			
+			this.show_stock_ledger();
+			this.show_general_ledger();
 		}
 
 		cur_frm.add_custom_button(wn._('From Purchase Order'), 
@@ -67,6 +70,10 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	qty: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
 		wn.model.round_floats_in(item, ["qty", "received_qty"]);
+		
+		if(!(item.received_qty || item.rejected_qty) && item.qty) {
+			item.received_qty = item.qty;
+		}
 		
 		if(item.qty > item.received_qty) {
 			msgprint(wn._("Error") + ": " + wn._(wn.meta.get_label(item.doctype, "qty", item.name))

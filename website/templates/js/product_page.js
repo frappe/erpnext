@@ -18,7 +18,7 @@ $(document).ready(function() {
 	var item_code = $('[itemscope] [itemprop="name"]').text().trim();
 	var qty = 0;
 	
-	return wn.call({
+	wn.call({
 		type: "POST",
 		method: "website.helpers.product.get_product_info",
 		args: {

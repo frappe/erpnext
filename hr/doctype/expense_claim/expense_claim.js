@@ -63,6 +63,12 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
+	
+	cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+		return{
+			query:"controllers.queries.employee_query"
+		}	
+	}
 
 	return cur_frm.call({
 		method:"hr.utils.get_expense_approver_list",
@@ -70,12 +76,6 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 			cur_frm.set_df_property("exp_approver", "options", r.message);
 		}
 	});
-	
-	cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-		return{
-			query:"controllers.queries.employee_query"
-		}	
-	}
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {

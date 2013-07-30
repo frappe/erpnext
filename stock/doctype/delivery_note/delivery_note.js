@@ -36,6 +36,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		if (doc.docstatus==1) {
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			this.show_stock_ledger();
+			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {

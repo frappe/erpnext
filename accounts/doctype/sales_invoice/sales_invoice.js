@@ -133,6 +133,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	is_pos: function() {
+		cur_frm.cscript.hide_fields(this.frm.doc);
+		
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
@@ -145,9 +147,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
-		
-		// TODO toggle display of fields
-		cur_frm.cscript.hide_fields(this.frm.doc);
 	},
 	
 	debit_to: function() {
@@ -191,8 +190,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	par_flds = ['project_name', 'due_date', 'is_opening', 'conversion_rate',
-	'source', 'total_advance', 'gross_profit',
+	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
 	'total_commission', 'advances'];

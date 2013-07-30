@@ -15,8 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.provide("erpnext");
+wn.require("app/js/controllers/stock_controller.js");
 
-erpnext.TransactionController = wn.ui.form.Controller.extend({
+erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
 		if(this.frm.doc.__islocal) {
 			var me = this,

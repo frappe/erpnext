@@ -26,13 +26,13 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
+			// TODO shift this to depends_on
+			unhide_field(['customer_address', 'contact_person']);
+			
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "set_customer_defaults",
 			});
-			
-			// TODO shift this to depends_on
-			unhide_field(['customer_address', 'contact_person']);
 		}
 	}, 
 	

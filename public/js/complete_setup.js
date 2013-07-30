@@ -54,7 +54,7 @@ $.extend(erpnext.complete_setup, {
 			$('header').toggle(false); // hide toolbar
 		}
 		
-		return wn.call({
+		wn.call({
 			method:"webnotes.country_info.get_country_timezone_info",
 			callback: function(data) {
 				erpnext.country_info = data.message.country_info;

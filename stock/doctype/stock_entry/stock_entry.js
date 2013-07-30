@@ -25,8 +25,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function() {
 		var me = this;
 		
-		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_adjustment_account) {
-			if (this.frm.doc.purpose == "Sales Return") 
+		if (cint(wn.defaults.get_default("auto_inventory_accounting")) && !this.frm.doc.expense_adjustment_account) {
+			if (this.frm.doc.purpose == "Sales Return")
 				account_for = "stock_in_hand_account";
 			else if (this.frm.doc.purpose == "Purchase Return") 
 				account_for = "stock_received_but_not_billed";
@@ -78,7 +78,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		};
 		
-		if (sys_defaults.auto_inventory_accounting) {
+		if(cint(wn.defaults.get_default("auto_inventory_accounting"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
@@ -105,11 +105,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		erpnext.hide_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
-		if (this.frm.doc.docstatus==1) {
-			this.show_stock_ledger();
-			if(wn.boot.auto_inventory_accounting)
-				this.show_general_ledger();
-		}
+		this.show_stock_ledger();
+		this.show_general_ledger();
 		
 		if(this.frm.doc.docstatus === 1 && 
 				wn.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
