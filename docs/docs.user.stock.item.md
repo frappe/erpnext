@@ -1,20 +1,13 @@
 ---
 {
 	"_label": "Item Master",
-	"_title_image": "img/items.png"
+	"_toc": [
+		"docs.user.stock.valuation",
+		"docs.user.setup.codification"
+	]
 }
 ---
-Items, Customers and Suppliers form the foundation of any ERP system.
-
-It is very likely that you will have your masters ready in another system or a spread sheet  saved somewhere else. You may just need to import them. Before importing, it might be a good idea to understand how ERPNext manages these records.
-
----
-
-## Items
-
 An Item is simply a product or service which you sell or buy from your Customers or Suppliers. ERPNext is optimized for itemized management of your sales and purchase. However, you can skip creating Items. If you are in services, you can create an Item for each services that your offer.
-
-> Items are mandatory if you want to track inventory.
 
 There are two main categories of Items in ERPNext
 
@@ -23,10 +16,6 @@ There are two main categories of Items in ERPNext
 
 As you may have guessed, inventory balances are tracked for stock items and not for
 non-stock items. Non-stock items could be services or consumables that are not tracked.
-
-### Naming Items
-
-This is a complex topic [coming up next]. In ERPNext you can use item codes or names. If you do not want to codify, you can keep the item name and item code as the same.
 
 ### Item Groups
 
@@ -59,31 +48,6 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a name you can give to a set of Item prices.
 ￼
 Why would you want Price Lists? You have different prices for different zones (based on the shipping costs), for different currencies, regions etc.
-
-### Item Valuation
-
-How are Items Valued?
-
-One of the major features of any inventory system is that you can find out the value of any item based on its historic or average price. You can also find the value of all your items for your balance sheet. Why is valuation important?
-
-- The buying price fluctuates.
-- The value changes because of some process (value add).
-- The value changes because of decay, loss etc.
-
-You may encounter these terms, so lets clarify:
-
-- Rate: Rate at which the transaction takes place.
-- Valuation Rate: Rate at which the items value is set for your valuation.
-
-There are two major ways in which ERPNext values your items.
-
-- **FIFO (First In First Out):** In this system, ERPNext assumes that you will consume / sell those Items first that you bought first. For example, if you buy an Item at price X and then after a few days at price Y. Thus when you sell your Item, ERPNext will reduce the quantity of the Item priced at X first and then Y.
-
-￼
-
-- **Moving Average:** In this method, ERPNext assumes that the value of the item at any point is the average price of the units of that Item in stock. For example, if the value of an Item is X in a Warehouse with quantity Y and another quantity Y1 is added to the Warehouse at cost X1, the new value X2 would be:
-
-> New Value X2 = (X * Y + X1 * Y1) / (Y + Y1)
 
 #### Negative Stock
 
