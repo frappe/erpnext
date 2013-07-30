@@ -114,7 +114,8 @@ class DocType(SellingController):
 		
 	def validate_with_previous_doc(self):
 		prev_doctype = [d.prevdoc_doctype for d in self.doclist.get({
-			"parentfield": "delivery_note_details", "prevdoc_doctype": ["!=", ""]})]
+			"parentfield": "delivery_note_details"}) if cstr(d.prevdoc_doctype) != ""]
+			
 		if prev_doctype:
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				prev_doctype[0]: {

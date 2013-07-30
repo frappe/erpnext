@@ -382,18 +382,21 @@ class AccountsController(TransactionBase):
 				"allocate_amount": 0
 			})
 			
-	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
+	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
 				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
 					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
 					item.fields[item_ref_dn])[0][0]
-
-				max_allowed_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
-					item.fields[item_ref_dn], based_on))
 				
-				if max_allowed_amt and \
-						flt(already_billed) + flt(item.fields[based_on]) > max_allowed_amt:
+				max_allowed_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
+					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
+				
+				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
+					self.precision(based_on, item))
+				webnotes.errprint([max_allowed_amt, total_billed_amt])
+				
+				if max_allowed_amt and total_billed_amt - max_allowed_amt > 0.02:
 					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 
 						_(" will be over-billed against mentioned ") + cstr(ref_dt) +  
 						_(". Max allowed " + cstr(based_on) + ": " + cstr(max_allowed_amt)), 

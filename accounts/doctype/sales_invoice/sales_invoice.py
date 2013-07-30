@@ -93,7 +93,8 @@ class DocType(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "export_amount")
+		self.validate_multiple_billing("Delivery Note", "dn_detail", "export_amount", 
+			"delivery_note_details")
 
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:
@@ -173,8 +174,8 @@ class DocType(SellingController):
 		self.convert_to_recurring()
 		
 	def set_missing_values(self, for_validate=False):
-		super(DocType, self).set_missing_values(for_validate)
 		self.set_pos_fields(for_validate)
+		super(DocType, self).set_missing_values(for_validate)
 		
 	def set_customer_defaults(self):
 		# TODO cleanup these methods
@@ -214,6 +215,12 @@ class DocType(SellingController):
 					"name": self.doc.customer + " - " + self.get_company_abbr(), 
 					"docstatus": ["!=", 2]
 				}) or pos.customer_account
+				
+			if self.doc.debit_to and not self.doc.customer:
+				self.doc.customer = webnotes.conn.get_value("Account", {
+					"name": self.doc.debit_to,
+					"master_type": "Customer"
+				}, "master_name")
 				
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
 				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account'):
