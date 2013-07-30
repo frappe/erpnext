@@ -144,6 +144,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
+					callback: function(r) {
+						if(!r.exc) {
+							me.frm.script_manager.trigger("update_stock");
+						}
+					}
 				});
 			}
 		}
