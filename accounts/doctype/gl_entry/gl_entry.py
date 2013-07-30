@@ -151,7 +151,7 @@ class DocType:
 				balance = webnotes.conn.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
 					where account = %s and ifnull(is_cancelled, 'No') = 'No'""", self.doc.account)
 				balance = account["debit_or_credit"] == "Debit" and \
-					balance[0][0] or -1*balance[0][0]
+					flt(balance[0][0]) or -1*flt(balance[0][0])
 			
 				if flt(balance) < 0:
 					msgprint(_("Negative balance is not allowed for account ") + self.doc.account, 
