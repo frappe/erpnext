@@ -29,7 +29,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		
-		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+		if(!doc.__billing_complete && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
 			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);

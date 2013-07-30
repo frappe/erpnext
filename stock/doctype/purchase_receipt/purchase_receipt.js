@@ -28,7 +28,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 		
 		if(this.frm.doc.docstatus == 1) {
-			if(flt(this.frm.doc.per_billed, 2) < 100) {
+			if(!this.frm.doc.__billing_complete) {
 				cur_frm.add_custom_button('Make Purchase Invoice', 
 					this.make_purchase_invoice);
 			}

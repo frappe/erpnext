@@ -44,6 +44,13 @@ class DocType(BuyingController):
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 		}]
+		
+	def onload(self):
+		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
+			where purchase_receipt=%s""", self.doc.name)
+		if billed_qty:
+			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "purchase_receipt_details"})))
+			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
