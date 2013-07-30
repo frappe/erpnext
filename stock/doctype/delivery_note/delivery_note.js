@@ -29,13 +29,15 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		
-		if(flt(doc.per_billed, 2) < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+		if(!doc.__billing_complete && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
 			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
 
 		if (doc.docstatus==1) {
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			this.show_stock_ledger();
+			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
@@ -112,7 +114,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.serial_no) {
-		 get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
+		 return get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
 	}
 }
 

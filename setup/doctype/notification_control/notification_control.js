@@ -21,6 +21,6 @@ cur_frm.cscript.select_transaction = function(doc, cdt, cdn) {
       doc.custom_message = r.message;
       refresh_field('custom_message');
     }
-    $c_obj(make_doclist(cdt, cdn),'get_message',doc.select_transaction, callback)
+    return $c_obj(make_doclist(cdt, cdn),'get_message',doc.select_transaction, callback)
   }
 }

@@ -24,7 +24,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
 	cur_frm.set_df_property("leave_approver", "options", "");
-	cur_frm.call({
+	return cur_frm.call({
 		method:"hr.utils.get_leave_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("leave_approver", "options", $.map(r.message, 
@@ -105,7 +105,7 @@ cur_frm.cscript.to_date = function(doc, dt, dn) {
 	
 cur_frm.cscript.get_leave_balance = function(doc, dt, dn) {
 	if(doc.docstatus==0 && doc.employee && doc.leave_type && doc.fiscal_year) {
-		cur_frm.call({
+		return cur_frm.call({
 			method: "get_leave_balance",
 			args: {
 				employee: doc.employee,
@@ -121,7 +121,7 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 		if(cint(doc.half_day) == 1) set_multiple(dt,dn,{total_leave_days:0.5});
 		else{
 			// server call is done to include holidays in leave days calculations
-			get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
+			return get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
 		}
 	}
 }

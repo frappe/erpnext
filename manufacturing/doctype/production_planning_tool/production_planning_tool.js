@@ -26,19 +26,19 @@ cur_frm.cscript.refresh = function(doc) {
 cur_frm.cscript.sales_order = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sales_order) {
-		get_server_fields('get_so_details', d.sales_order, 'pp_so_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_so_details', d.sales_order, 'pp_so_details', doc, cdt, cdn, 1);
 	}
 }
 
 cur_frm.cscript.item_code = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		get_server_fields('get_item_details', d.item_code, 'pp_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_item_details', d.item_code, 'pp_details', doc, cdt, cdn, 1);
 	}
 }
 
 cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(cdt, cdn), 'validate_data', '', function(r, rt) {
+	return $c_obj(make_doclist(cdt, cdn), 'validate_data', '', function(r, rt) {
 		if (!r['exc'])
 			$c_obj_csv(make_doclist(cdt, cdn), 'download_raw_materials', '', '');
 	});

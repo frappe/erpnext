@@ -52,7 +52,7 @@ var cfn_set_fields = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.production_item = function(doc) {
-	cur_frm.call({
+	return cur_frm.call({
 		method: "get_item_details",
 		args: { item: doc.production_item }
 	});
@@ -62,7 +62,7 @@ cur_frm.cscript['Stop Production Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to stop production order: " + doc.name);
 	if (check) {
-		$c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
+		return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
 	}
 }
 
@@ -70,7 +70,7 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do really want to unstop production order: " + doc.name);
 	if (check)
-			$c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
+			return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
 
 cur_frm.cscript['Transfer Raw Materials'] = function() {

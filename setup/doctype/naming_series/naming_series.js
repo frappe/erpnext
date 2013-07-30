@@ -16,7 +16,7 @@
 
 // Settings
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn){
-	cur_frm.call({
+	return cur_frm.call({
 		doc: cur_frm.doc,
 		method: 'get_transactions',
 		callback: function(r) {
@@ -45,15 +45,15 @@ cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
 	}
 
 	if(doc.select_doc_for_series)
-		$c_obj(make_doclist(doc.doctype, doc.name),'get_options','',callback)
+		return $c_obj(make_doclist(doc.doctype, doc.name),'get_options','',callback)
 }
 
 cur_frm.cscript.update = function() {
-	cur_frm.call_server('update_series', '', cur_frm.cscript.update_selects)
+	return cur_frm.call_server('update_series', '', cur_frm.cscript.update_selects)
 }
 
 cur_frm.cscript.prefix = function(doc, dt, dn) {
-	cur_frm.call_server('get_current', '', function(r) {
+	return cur_frm.call_server('get_current', '', function(r) {
 		refresh_field('current_value');
 	})
 }

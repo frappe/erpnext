@@ -73,7 +73,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		})
 		
 	// load up companies
-	wn.call({
+	return wn.call({
 		method:'accounts.page.accounts_browser.accounts_browser.get_companies',
 		callback: function(r) {
 			wrapper.$company_select.empty();
@@ -265,7 +265,7 @@ erpnext.AccountsChart = Class.extend({
 			v.master_type = '';
 			v.company = me.company;
 			
-			wn.call({
+			return wn.call({
 				args: v,
 				method:'accounts.utils.add_ac',
 				callback: function(r) {
@@ -312,7 +312,7 @@ erpnext.AccountsChart = Class.extend({
 			v.parent_cost_center = node.data('label');
 			v.company = me.company;
 			
-			wn.call({
+			return wn.call({
 				args: v,
 				method:'accounts.utils.add_cc',
 				callback: function(r) {

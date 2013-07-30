@@ -104,7 +104,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 // Convert group to ledger
 // -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
-  $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
+  return $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
     if(r.message == 1) {  
 	  cur_frm.refresh();
     }
@@ -114,7 +114,7 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 // Convert ledger to group
 // -----------------------------------------
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
-  $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
+  return $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
     if(r.message == 1) {
 	  cur_frm.refresh();
     }

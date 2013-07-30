@@ -62,7 +62,7 @@ pscript['onload_Financial Statements'] = function(wrapper) {
 	</div>').css({"min-height": "400px"});
 
   // load companies
-  $c_obj('MIS Control','get_comp','', function(r,rt) {    
+  return $c_obj('MIS Control','get_comp','', function(r,rt) {    
     // company
 	erpnext.fs.stmt_company.$input.empty()
 		.add_options(['Select Company...'].concat(r.message.company));
@@ -86,7 +86,7 @@ pscript.stmt_new = function(stmt,company_name,level,period,year) {
   	year: erpnext.fs.stmt_fiscal_year.get_value()
   }
 
-  $c_obj('MIS Control', 'get_statement', docstring(arg), function(r,rt) {
+  return $c_obj('MIS Control', 'get_statement', docstring(arg), function(r,rt) {
       var nl = r.message;
       var t = $i('stmt_tree');
       var stmt_type = erpnext.fs.stmt_type.get_value();

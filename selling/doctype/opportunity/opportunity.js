@@ -86,15 +86,15 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
-			this.frm.call({
-				doc: this.frm.doc,
-				method: "set_customer_defaults",
-			});
-			
 			// TODO shift this to depends_on
 			unhide_field(['customer_address', 'contact_person', 'customer_name',
 				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
 				'territory', 'customer_group']);
+				
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "set_customer_defaults",
+			});
 		}
 	}, 
 	
@@ -140,7 +140,7 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		get_server_fields('get_item_details',d.item_code, 'enquiry_details',doc, cdt,cdn,1);
+		return get_server_fields('get_item_details',d.item_code, 'enquiry_details',doc, cdt,cdn,1);
 	}
 }
 
@@ -165,7 +165,7 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+	if(doc.customer) return get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
@@ -195,7 +195,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 	dialog.fields_dict.update.$input.click(function() {
 		args = dialog.get_values();
 		if(!args) return;
-		cur_frm.call({
+		return cur_frm.call({
 			doc: cur_frm.doc,
 			method: "declare_enquiry_lost",
 			args: args.reason,

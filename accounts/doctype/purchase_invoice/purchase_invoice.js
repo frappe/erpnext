@@ -118,7 +118,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
-	wn.call({
+	return wn.call({
 		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 		args: {
 			"company": cur_frm.doc.company,

@@ -50,6 +50,13 @@ class DocType(SellingController):
 			'keyword': 'Delivered'
 		}]
 		
+	def onload(self):
+		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
+			where delivery_note=%s""", self.doc.name)
+		if billed_qty:
+			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
+			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
+		
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 

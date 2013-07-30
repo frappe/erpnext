@@ -114,7 +114,8 @@ cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {
-		cur_frm.call({
+		unhide_field('territory');
+		return cur_frm.call({
 			doc: cur_frm.doc,
 			method: "set_lead_defaults",
 			callback: function(r) {
@@ -123,7 +124,6 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 				}
 			}
 		});
-		unhide_field('territory');
 	}
 }
 
@@ -152,7 +152,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	dialog.fields_dict.update.$input.click(function() {
 		args = dialog.get_values();
 		if(!args) return;
-		cur_frm.call({
+		return cur_frm.call({
 			method: "declare_order_lost",
 			doc: cur_frm.doc,
 			args: args.reason,

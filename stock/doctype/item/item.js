@@ -51,7 +51,7 @@ cur_frm.cscript.refresh = function(doc) {
 			var enabled = (r.message == 'exists') ? false : true;
 			cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'], enabled);
 		}
-		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
+		return $c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
 	}
 }
 
@@ -130,7 +130,7 @@ cur_frm.fields_dict['item_tax'].grid.get_field("tax_type").get_query = function(
 
 cur_frm.cscript.tax_type = function(doc, cdt, cdn){
   var d = locals[cdt][cdn];
-  get_server_fields('get_tax_rate',d.tax_type,'item_tax',doc, cdt, cdn, 1);
+  return get_server_fields('get_tax_rate',d.tax_type,'item_tax',doc, cdt, cdn, 1);
 }
 
 

@@ -554,7 +554,7 @@ class DocType(StockController):
 					`tabBOM Item`, `tabItem`
 				where 
 					`tabBOM Item`.parent = %s and 
-					`tabBOM Item`.item_code = tabItem.name
+					`tabBOM Item`.item_code = tabItem.name and
 					`tabBOM Item`.docstatus < 2 
 				group by item_code""", (qty, self.doc.bom_no), as_dict=1)
 			

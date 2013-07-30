@@ -18,7 +18,7 @@
 
 $(document).ready(function() {
 	wn.cart.bind_events();
-	wn.call({
+	return wn.call({
 		type: "POST",
 		method: "website.helpers.cart.get_cart_quotation",
 		callback: function(r) {
@@ -204,7 +204,7 @@ $.extend(wn.cart, {
 	},
 	
 	apply_shipping_rule: function(rule, btn) {
-		wn.call({
+		return wn.call({
 			btn: btn,
 			type: "POST",
 			method: "website.helpers.cart.apply_shipping_rule",
@@ -257,7 +257,7 @@ $.extend(wn.cart, {
 					}
 				});
 				
-				wn.call({
+				return wn.call({
 					type: "POST",
 					method: "website.helpers.cart.update_cart_address",
 					args: {
@@ -288,7 +288,7 @@ $.extend(wn.cart, {
 	},
 	
 	place_order: function() {
-		wn.call({
+		return wn.call({
 			type: "POST",
 			method: "website.helpers.cart.place_order",
 			callback: function(r) {

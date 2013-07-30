@@ -19,7 +19,7 @@ wn.provide("erpnext.hr");
 erpnext.hr.ExpenseClaimController = wn.ui.form.Controller.extend({
 	make_bank_voucher: function() {
 		var me = this;
-		wn.call({
+		return wn.call({
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
 				"company": cur_frm.doc.company,
@@ -63,19 +63,19 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
-
-	cur_frm.call({
-		method:"hr.utils.get_expense_approver_list",
-		callback: function(r) {
-			cur_frm.set_df_property("exp_approver", "options", r.message);
-		}
-	});
 	
 	cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
 		return{
 			query:"controllers.queries.employee_query"
 		}	
 	}
+
+	return cur_frm.call({
+		method:"hr.utils.get_expense_approver_list",
+		callback: function(r) {
+			cur_frm.set_df_property("exp_approver", "options", r.message);
+		}
+	});
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {

@@ -18,8 +18,18 @@ wn.provide("erpnext.accounts");
 
 erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	onload: function() {
-		this.load_defaults(this.frm.doc);
+		this.load_defaults();
 		this.setup_queries();
+	},
+	
+	load_defaults: function() {
+		if(this.frm.doc.__islocal && this.frm.doc.company) {
+			wn.model.set_default_values(this.frm.doc);
+			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: "entries"}),
+				function(i, jvd) { wn.model.set_default_values(jvd); });
+			
+			this.frm.doc.posting_date = get_today();
+		}
 	},
 	
 	setup_queries: function() {
@@ -82,23 +92,6 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 }
 
-cur_frm.cscript.load_defaults = function(doc) {
-	if(!cur_frm.doc.__islocal || !cur_frm.doc.company) { return; }
-
-	doc = locals[doc.doctype][doc.name];
-	var fields_to_refresh = wn.model.set_default_values(doc);
-	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
-
-	fields_to_refresh = null;
-	var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
-	if(!children) { return; }
-	for(var i=0; i<children.length; i++) {
-		wn.model.set_default_values(children[i]);
-	}
-	refresh_field('entries');
-}
-
-
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
@@ -108,7 +101,7 @@ cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_voucher && !flt(d.debit)) {
 		args = {'doctype': 'Purchase Invoice', 'docname': d.against_voucher }
-		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
+		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
 
@@ -116,7 +109,7 @@ cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_invoice && !flt(d.credit)) {
 		args = {'doctype': 'Sales Invoice', 'docname': d.against_invoice }
-		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
+		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
 
@@ -141,7 +134,7 @@ cur_frm.cscript.credit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc
 
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc); 
-	$c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
+	return $c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
 	cur_frm.refresh();
 	});
 }
@@ -151,7 +144,7 @@ cur_frm.cscript.get_balance = function(doc,dt,dn) {
 cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
-		wn.call({
+		return wn.call({
 			method: "accounts.utils.get_balance_on",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
@@ -193,7 +186,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	}
 	
 	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
-		wn.call({
+		return wn.call({
 			type: "GET",
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
@@ -207,7 +200,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			}
 		})
 	} else if(doc.voucher_type=="Opening Entry") {
-		wn.call({
+		return wn.call({
 			type:"GET",
 			method: "accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
 			args: {

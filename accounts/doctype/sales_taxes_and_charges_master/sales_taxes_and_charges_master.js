@@ -165,7 +165,7 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	}
 	else if(d.account_head && d.charge_type) {
 		arg = "{'charge_type' : '" + d.charge_type +"', 'account_head' : '" + d.account_head + "'}";
-		get_server_fields('get_rate', arg, 'other_charges', doc, cdt, cdn, 1);
+		return get_server_fields('get_rate', arg, 'other_charges', doc, cdt, cdn, 1);
 	}
 	refresh_field('account_head',d.name,'other_charges');
 }

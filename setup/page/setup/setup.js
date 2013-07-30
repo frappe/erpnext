@@ -21,36 +21,7 @@ wn.pages.Setup.make = function(wrapper) {
 		completed = 0;
 
 	body.html('<div class="progress progress-striped active">\
-		<div class="progress-bar" style="width: 100%;"></div></div>')
-
-	wn.call({
-		method: "setup.page.setup.setup.get",
-		callback: function(r) {
-			if(r.message) {
-				body.empty();
-				if(wn.boot.expires_on) {
-					$(body).prepend("<div class='text-muted' style='text-align:right'>Account expires on "
-							+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
-				}
-
-				$completed = $('<h4>Setup Completed <span class="completed-percent"></span><h4>\
-					<div class="progress"><div class="progress-bar"></div></div>')
-					.appendTo(body);
-
-				$.each(r.message, function(i, item) {
-					render_item(item)
-				});
-				
-				var completed_percent = cint(flt(completed) / total * 100) + "%";
-				$completed
-					.find(".progress-bar")
-					.css({"width": completed_percent});
-				$(body)
-					.find(".completed-percent")
-					.html("(" + completed_percent + ")");
-			}
-		}
-	});
+		<div class="progress-bar" style="width: 100%;"></div></div>');
 	
 	var render_item = function(item, dependency) {		
 		if(item.type==="Section") {
@@ -68,12 +39,12 @@ wn.pages.Setup.make = function(wrapper) {
 			.appendTo(body);
 
 		$('<div class="col col-lg-1"></div>').appendTo(row);
-			
+		
 		if(item.type==="Link") {
 			var col = $('<div class="col col-lg-5"><b><a href="#'
 				+item.route+'"><i class="'+item.icon+'"></i> '
 				+item.title+'</a></b></div>').appendTo(row);
-			
+		
 		} else {
 			var col = $(repl('<div class="col col-lg-5">\
 					<span class="badge view-link">%(count)s</span>\
@@ -102,12 +73,12 @@ wn.pages.Setup.make = function(wrapper) {
 			col.addClass("col-offset-1");
 		else
 			$('<div class="col col-lg-1"></div>').appendTo(row);
-			
+		
 		if(item.doctype) {
 			var badge = col.find(".badge, .data-link")
 				.attr("data-doctype", item.doctype)
 				.css({"cursor": "pointer"})
-				
+			
 			if(item.single) {
 				badge.click(function() {
 					wn.set_route("Form", $(this).attr("data-doctype"))
@@ -118,10 +89,10 @@ wn.pages.Setup.make = function(wrapper) {
 				})
 			}
 		}
-		
+	
 		// tree
 		$links = $('<div class="col col-lg-5">').appendTo(row);
-		
+	
 		if(item.tree) {
 			$('<a class="view-link"><i class="icon-sitemap"></i> Browse</a>\
 				<span class="text-muted">|</span> \
@@ -134,7 +105,7 @@ wn.pages.Setup.make = function(wrapper) {
 			mylink.click(function() {
 				wn.set_route(item.tree, item.doctype);
 			})
-						
+					
 		} else if(item.single) {
 			$('<a class="view-link"><i class="icon-edit"></i> Edit</a>')
 				.appendTo($links)
@@ -183,7 +154,7 @@ wn.pages.Setup.make = function(wrapper) {
 				wn.route_options = {doctype:$(this).attr("data-doctype")}
 				wn.set_route("data-import-tool");
 			})
-			
+		
 		if(item.links) {
 			$.each(item.links, function(i, link) {
 				var newlinks = $('<span class="text-muted"> |</span> \
@@ -192,11 +163,40 @@ wn.pages.Setup.make = function(wrapper) {
 					.appendTo($links)
 			})
 		}
-			
+		
 		if(item.dependencies) {
 			$.each(item.dependencies, function(i, d) {
 				render_item(d, true);
 			})
 		}
 	}
+
+	return wn.call({
+		method: "setup.page.setup.setup.get",
+		callback: function(r) {
+			if(r.message) {
+				body.empty();
+				if(wn.boot.expires_on) {
+					$(body).prepend("<div class='text-muted' style='text-align:right'>Account expires on "
+							+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
+				}
+
+				$completed = $('<h4>Setup Completed <span class="completed-percent"></span><h4>\
+					<div class="progress"><div class="progress-bar"></div></div>')
+					.appendTo(body);
+
+				$.each(r.message, function(i, item) {
+					render_item(item)
+				});
+				
+				var completed_percent = cint(flt(completed) / total * 100) + "%";
+				$completed
+					.find(".progress-bar")
+					.css({"width": completed_percent});
+				$(body)
+					.find(".completed-percent")
+					.html("(" + completed_percent + ")");
+			}
+		}
+	});
 }

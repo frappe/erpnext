@@ -27,7 +27,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 }
 
 cur_frm.cscript.update_cost = function() {
-	wn.call({
+	return wn.call({
 		doc: cur_frm.doc,
 		method: "update_cost",
 		callback: function(r) {
@@ -106,7 +106,7 @@ cur_frm.cscript.is_default = function(doc) {
 var get_bom_material_detail= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		wn.call({
+		return wn.call({
 			doc: cur_frm.doc,
 			method: "get_bom_material_detail",
 			args: {

@@ -375,7 +375,7 @@ def make_delivery_note(source_name, target_doclist=None):
 		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
 		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
 		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
-	
+			
 	doclist = get_mapped_doclist("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Delivery Note", 
@@ -396,7 +396,8 @@ def make_delivery_note(source_name, target_doclist=None):
 				"parenttype": "prevdoc_doctype", 
 				"reserved_warehouse": "warehouse"
 			},
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.delivered_qty < doc.qty
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 
@@ -416,7 +417,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 		target.export_amount = flt(obj.export_amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount * flt(source_parent.conversion_rate)
 		target.qty = obj.export_rate and target.export_amount / flt(obj.export_rate) or obj.qty
-	
+			
 	doclist = get_mapped_doclist("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice", 

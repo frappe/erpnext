@@ -133,21 +133,25 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	is_pos: function() {
+		cur_frm.cscript.hide_fields(this.frm.doc);
+		
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
 				msgprint(wn._("Please specify Company to proceed"));
 			} else {
 				var me = this;
-				this.frm.call({
+				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
+					callback: function(r) {
+						if(!r.exc) {
+							me.frm.script_manager.trigger("update_stock");
+						}
+					}
 				});
 			}
 		}
-		
-		// TODO toggle display of fields
-		cur_frm.cscript.hide_fields(this.frm.doc);
 	},
 	
 	debit_to: function() {
@@ -191,8 +195,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	par_flds = ['project_name', 'due_date', 'is_opening', 'conversion_rate',
-	'source', 'total_advance', 'gross_profit',
+	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
 	'total_commission', 'advances'];
@@ -222,7 +225,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 
 cur_frm.cscript.mode_of_payment = function(doc) {
-	cur_frm.call({
+	return cur_frm.call({
 		method: "get_bank_cash_account",
 		args: { mode_of_payment: doc.mode_of_payment }
 	});
@@ -248,7 +251,7 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
-	wn.call({
+	return wn.call({
 		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 		args: {
 			"company": cur_frm.doc.company,

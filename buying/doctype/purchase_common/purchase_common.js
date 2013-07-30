@@ -92,7 +92,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				var me = this;
 				var price_list_name = this.frm.doc.price_list_name;
 
-				this.frm.call({
+				return this.frm.call({
 					doc: this.frm.doc,
 					method: "set_supplier_defaults",
 					freeze: true,
@@ -109,7 +109,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	supplier_address: function() {
 		var me = this;
 		if (this.frm.doc.supplier) {
-			wn.call({
+			return wn.call({
 				doc: this.frm.doc,
 				method: "set_supplier_address",
 				freeze: true,
@@ -134,7 +134,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				item.item_code = null;
 				refresh_field("item_code", item.name, item.parentfield);
 			} else {
-				this.frm.call({
+				return this.frm.call({
 					method: "buying.utils.get_item_details",
 					child: item,
 					args: {
@@ -200,7 +200,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
-			this.frm.call({
+			return this.frm.call({
 				method: "buying.utils.get_conversion_factor",
 				child: item,
 				args: {
@@ -233,7 +233,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
-			this.frm.call({
+			return this.frm.call({
 				method: "buying.utils.get_projected_qty",
 				child: item,
 				args: {
@@ -267,7 +267,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	purchase_other_charges: function() {
 		var me = this;
 		if(this.frm.doc.purchase_other_charges) {
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "get_purchase_tax_details",
 				callback: function(r) {

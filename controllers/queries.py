@@ -36,12 +36,8 @@ def get_filters_cond(doctype, filters, conditions):
 	return cond
 
 def get_match_cond(doctype, searchfield = 'name'):
-	meta = webnotes.get_doctype(doctype)
-	from webnotes.widgets.search import get_std_fields_list
-	fields = get_std_fields_list(meta, searchfield)
-
 	from webnotes.widgets.reportview import build_match_conditions
-	cond = build_match_conditions(doctype, fields)
+	cond = build_match_conditions(doctype)
 
 	if cond:
 		cond = ' and ' + cond

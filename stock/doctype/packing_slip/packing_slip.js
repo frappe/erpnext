@@ -36,7 +36,7 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.get_items = function(doc, cdt, cdn) {
-	this.frm.call({
+	return this.frm.call({
 		doc: this.frm.doc,
 		method: "get_items",
 		callback: function(r) {

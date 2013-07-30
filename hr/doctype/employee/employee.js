@@ -40,7 +40,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	
 	setup_leave_approver_select: function() {
 		var me = this;
-		this.frm.call({
+		return this.frm.call({
 			method:"hr.utils.get_leave_approver_list",
 			callback: function(r) {
 				me.frm.fields_dict.employee_leave_approvers.grid
@@ -53,7 +53,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	},
 	
 	date_of_birth: function() {
-		cur_frm.call({
+		return cur_frm.call({
 			method: "get_retirement_date",
 			args: {date_of_birth: this.frm.doc.date_of_birth}
 		});
@@ -88,7 +88,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	
 	validate_salary_structure: function(btn, callback) {
 		var me = this;
-		this.frm.call({
+		return this.frm.call({
 			btn: btn,
 			method: "webnotes.client.get_value",
 			args: {

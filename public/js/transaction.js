@@ -15,8 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.provide("erpnext");
+wn.require("app/js/controllers/stock_controller.js");
 
-erpnext.TransactionController = wn.ui.form.Controller.extend({
+erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
 		if(this.frm.doc.__islocal) {
 			var me = this,
@@ -55,7 +56,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	onload_post_render: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			var me = this;
-			this.frm.call({
+			return this.frm.call({
 				doc: this.frm.doc,
 				method: "onload_post_render",
 				freeze: true,
@@ -116,7 +117,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	price_list_name: function(buying_or_selling) {
 		var me = this;
 		if(this.frm.doc.price_list_name) {
-			this.frm.call({
+			return this.frm.call({
 				method: "setup.utils.get_price_list_currency",
 				args: { 
 					price_list_name: this.frm.doc.price_list_name,
@@ -557,7 +558,7 @@ erpnext.TransactionController = wn.ui.form.Controller.extend({
 	get_terms: function() {
 		var me = this;
 		if(this.frm.doc.tc_name) {
-			this.frm.call({
+			return this.frm.call({
 				method: "webnotes.client.get_value",
 				args: {
 					doctype: "Terms and Conditions",

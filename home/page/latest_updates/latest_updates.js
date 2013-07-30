@@ -9,7 +9,7 @@ wn.pages['latest-updates'].onload = function(wrapper) {
 	parent.html('<div class="progress progress-striped active">\
 		<div class="progress-bar" style="width: 100%;"></div></div>')
 	
-	wn.call({
+	return wn.call({
 		method:"home.page.latest_updates.latest_updates.get",
 		callback: function(r) {
 			parent.empty();
