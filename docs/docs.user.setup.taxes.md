@@ -36,7 +36,7 @@ In each row, you have to mention:
 - Amount: Tax amount.
 - Total: Cumulative total to this point.
 - Enter Row: If based on "Previous Row Total" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-- Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the rate in your main item table. This is useful where you want to give a flat price (inclusive of all taxes) to your customers.
+- Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the rate in your main item table. This is useful when you want to give a flat price (inclusive of all taxes) to your customers.
 
 Once you setup your template, you can select this in your sales transactions.
 
