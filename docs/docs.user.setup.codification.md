@@ -3,9 +3,6 @@
 	"_label": "Item Codification"
 }
 ---
-
-> To Codify or Not To Codify, is the question.
-
 If you already have a running business with a number of physical items, you would have probably coded your items. If you have not, you have a choice. We recommend you should codify, but its your call.
 
 Item codification is always a sensitive topic and wars have been fought on this (not joking). In our experience, when you have items that cross a certain size, life without codification is a nightmare. 
