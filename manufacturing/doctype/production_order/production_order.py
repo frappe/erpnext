@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -63,8 +63,8 @@ class DocType:
 	def validate_production_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = webnotes.conn.sql("""select sum(qty) from `tabProduction Order`
-			where production_item = %s and sales_order = %s and docstatus < 2""", 
-			(self.doc.production_item, self.doc.sales_order))[0][0]
+			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""", 
+			(self.doc.production_item, self.doc.sales_order, self.doc.name))[0][0]
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
 		
@@ -80,11 +80,11 @@ class DocType:
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 				
 		if total_qty > so_qty:
-			webnotes.msgprint("""Total production order qty for item: %s against sales order: %s \
-			 	will be %s, which is greater than sales order qty (%s). 
-				Please reduce qty or remove the item.""" %
-				(self.doc.production_item, self.doc.sales_order, 
-					total_qty, so_qty), raise_exception=1)
+			webnotes.msgprint(_("Total production order qty for item") + ": " + 
+				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
+				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
+				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
+				_("Please reduce qty."), raise_exception=1)
 
 
 	def stop_unstop(self, status):
