@@ -1,0 +1,34 @@
+Data Import Template,,,,,
+Table:,Item Price,,,,
+Parent Table:,Item,,,,
+,,,,,
+Notes:,,,,,
+Please do not change the template headings.,,,,,
+First data column must be blank.,,,,,
+Only mandatory fields are necessary for new records. You can delete non-mandatory columns if you wish.,,,,,
+"For updating, you can update only selective columns.",,,,,
+"If you are uploading new records, leave the ""name"" (ID) column blank.",,,,,
+"If you are uploading new records, ""Naming Series"" becomes mandatory, if present.",,,,,
+You can only upload upto 5000 records in one go. (may be less in some cases),,,,,
+"""Parent"" signifies the parent table in which this row must be added",,,,,
+"If you are updating, please select ""Overwrite"" else existing rows will not be deleted.",,,,,
+,,,,,
+Column Labels,ID,Price List Name,Valid for Buying or Selling?,Ref Rate,Currency
+Column Name:,parent,price_list_name,buying_or_selling,ref_rate,ref_currency
+Mandatory:,Yes,Yes,Yes,No,No
+Type:,Data (text),Link,Select,Currency,Link
+Info:,,Valid Price List,"One of: Buying, Selling",,Valid Currency
+Start entering data below this line,,,,,
+,Base Bearing Plate,Standard Buying,Buying,750,INR
+,Base Plate,Standard Buying,Buying,1092,INR
+,Bearing Block,Standard Buying,Buying,355,INR
+,Bearing Collar,Standard Buying,Buying,980,INR
+,Bearing Pipe,Standard Buying,Buying,599,INR
+,Blade Rib,Standard Buying,Buying,430,INR
+,Disc Collars,Standard Buying,Buying,3000,INR
+,External Disc,Standard Buying,Buying,1200,INR
+,Internal Disc,Standard Buying,Buying,1000,INR
+,Shaft,Standard Buying,Buying,600,INR
+,Stand,Standard Buying,Buying,200,INR
+,Upper Bearing Plate,Standard Buying,Buying,400,INR
+,Wing Sheet,Standard Buying,Buying,20300,INR

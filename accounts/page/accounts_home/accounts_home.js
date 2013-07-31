@@ -226,8 +226,18 @@ wn.module_page["Accounts"] = [
 				doctype: "Sales Invoice"
 			},
 			{
+				"label":wn._("Delivered Items To Be Billed"),
+				route: "query-report/Delivered Items To Be Billed",
+				doctype: "Sales Invoice"
+			},
+			{
 				"label":wn._("Purchase Order Items To Be Billed"),
 				route: "query-report/Purchase Order Items To Be Billed",
+				doctype: "Purchase Invoice"
+			},
+			{
+				"label":wn._("Received Items To Be Billed"),
+				route: "query-report/Received Items To Be Billed",
 				doctype: "Purchase Invoice"
 			},
 			{

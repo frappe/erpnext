@@ -33,6 +33,7 @@ Contents
 	1. [Concepts](docs.user.implement.concepts.html)
 1. [Setup](docs.user.setup.html)
 	1. [First Login](docs.user.setup.first.html)
+	1. [Setting Up Masters (Item, Customer, Supplier)](docs.user.setup.masters.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)
 	1. [Company Setup](docs.user.setup.company.html)

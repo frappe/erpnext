@@ -3,6 +3,7 @@
 	"_label": "Setting Up",
 	"_toc": [
 		"docs.user.setup.first",
+		"docs.user.setup.masters",
 		"docs.user.setup.accounting",
 		"docs.user.setup.cost_centers",
 		"docs.user.setup.company",
