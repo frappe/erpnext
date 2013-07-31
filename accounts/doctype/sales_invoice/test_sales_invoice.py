@@ -1,6 +1,7 @@
 import webnotes
 import unittest, json
 from webnotes.utils import flt, cint
+from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -8,6 +9,32 @@ class TestSalesInvoice(unittest.TestCase):
 		w.insert()
 		w.submit()
 		return w
+		
+	def test_double_submission(self):
+		w = webnotes.bean(copy=test_records[0])
+		w.doc.docstatus = '0'
+		w.insert()
+		
+		w2 = [d for d in w.doclist]
+		w.submit()
+		
+		w = webnotes.bean(w2)
+		self.assertRaises(DocstatusTransitionError, w.submit)
+		
+	def test_timestamp_change(self):
+		w = webnotes.bean(copy=test_records[0])
+		w.doc.docstatus = '0'
+		w.insert()
+
+		w2 = webnotes.bean([d.fields.copy() for d in w.doclist])
+		
+		import time
+		time.sleep(1)
+		w.save()
+		
+		import time
+		time.sleep(1)
+		self.assertRaises(TimestampMismatchError, w2.save)
 		
 	def test_sales_invoice_calculation_base_currency(self):
 		si = webnotes.bean(copy=test_records[2])
