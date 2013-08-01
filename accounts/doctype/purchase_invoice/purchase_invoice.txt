@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:08:44", 
+  "modified": "2013-08-01 16:49:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -223,7 +223,6 @@
   "read_only": 0
  }, 
  {
-  "default": "1", 
   "description": "The rate at which Bill Currency is converted into company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
