@@ -39,9 +39,6 @@ $.extend(cur_frm.cscript, {
 			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
 				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
 		}
-		
-		if(doc.description)
-			doc.description = wn.utils.escape_script_and_style(doc.description);
 	},
 	
 	refresh: function(doc) {
