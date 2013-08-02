@@ -36,7 +36,7 @@ Then export your template or save it as a **Comma Separated Values** (CSV) file.
 
 ### 3. Upload the .csv File
 
-Finally attach the .csv file in the section section click on the "Attach" button.
+Finally attach the .csv file in the section section click on the "Upload and Import" button.
 
 ![Attach and Upload](img/import-5.png)
 
