@@ -91,19 +91,9 @@ class DocType(BuyingController):
 		return ret
 		
 	def set_supplier_defaults(self):
-		self.doc.fields.update(self.get_supplier())
 		self.doc.fields.update(self.get_credit_to())
 		super(DocType, self).set_supplier_defaults()
 		
-	def get_supplier(self):
-		ret = {}
-		if self.doc.credit_to:
-			acc = webnotes.conn.get_value('Account',self.doc.credit_to,['master_name', 'credit_days'])
-			ret['supplier'] = acc[0]
-			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
-			
-		return ret
-
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
