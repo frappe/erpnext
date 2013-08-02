@@ -394,7 +394,6 @@ class AccountsController(TransactionBase):
 				
 				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
 					self.precision(based_on, item))
-				webnotes.errprint([max_allowed_amt, total_billed_amt])
 				
 				if max_allowed_amt and total_billed_amt - max_allowed_amt > 0.02:
 					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 

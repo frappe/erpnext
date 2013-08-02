@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import nowdate, cstr, flt, now
+from webnotes.utils import nowdate, nowtime, cstr, flt, now
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
@@ -352,3 +352,41 @@ def fix_total_debit_credit():
 				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
 				(d.diff, d.voucher_type, d.voucher_no))
+
+def validate_stock_and_account_balance():
+	difference = get_stock_and_account_difference()
+	if difference:
+		msgprint(_("Account balance must be synced with stock balance, \
+				to enable perpetual accounting." + 
+				_(" Following accounts are not synced with stock balance") + ": \n" + 
+				"\n".join(difference.keys())), raise_exception=1)
+				
+def get_stock_and_account_difference(warehouse_list=None):
+	from stock.utils import get_latest_stock_balance
+	
+	if not warehouse_list:
+		warehouse_list = webnotes.conn.sql_list("""select name from tabWarehouse 
+			where docstatus<2""")
+	
+	account_warehouse_map = {}
+	warehouse_with_no_account = []
+	difference = {}
+	
+	warehouse_account = webnotes.conn.sql("""select name, account from tabWarehouse 
+		where name in (%s)""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list, as_dict=1)
+		
+	for wh in warehouse_account:
+			if not wh.account: warehouse_with_no_account.append(wh.name)
+			account_warehouse_map.setdefault(wh.account, []).append(wh.name)
+			
+	if warehouse_with_no_account:
+		msgprint(_("Please mention Perpetual Account in warehouse master for following warehouses")
+			 + ": " + '\n'.join(warehouse_with_no_account), raise_exception=1)
+
+	for account, warehouse in account_warehouse_map.items():
+		account_balance = get_balance_on(account)
+		stock_value = get_latest_stock_balance(warehouse)
+		
+		difference.setdefault(account, (account_balance - stock_value))
+	
+	return difference
