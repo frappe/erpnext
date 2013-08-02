@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:09", 
+  "modified": "2013-07-31 17:30:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -49,7 +49,7 @@
   "oldfieldname": "ref_rate", 
   "oldfieldtype": "Currency", 
   "options": "ref_currency", 
-  "reqd": 0, 
+  "reqd": 1, 
   "search_index": 0
  }, 
  {

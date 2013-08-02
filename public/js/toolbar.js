@@ -24,11 +24,14 @@ erpnext.toolbar.setup = function() {
 		+wn._("My Settings")+'...</a></li>');
 	$user.append('<li class="divider"></li>');
 	$user.append('<li><a href="https://erpnext.com/manual" target="_blank">\
-		<i class="icon-fixed-width icon-file"></i> '+wn._('Documentation')+'</a></li>')
+		<i class="icon-fixed-width icon-file"></i> '+wn._('Documentation')+'</a></li>');
 	$user.append('<li><a href="http://groups.google.com/group/erpnext-user-forum" target="_blank">\
-		<i class="icon-fixed-width icon-quote-left"></i> '+wn._('Forum')+'</a></li>')
-	$user.append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
-		<i class="icon-fixed-width icon-comments"></i> '+wn._('Live Chat')+'</a></li>')
+		<i class="icon-fixed-width icon-quote-left"></i> '+wn._('Forum')+'</a></li>');
+	
+	if(wn.boot.expires_on) {
+		$user.append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
+			<i class="icon-fixed-width icon-comments"></i> '+wn._('Live Chat')+'</a></li>');
+	}
 	
 	erpnext.toolbar.set_new_comments();
 

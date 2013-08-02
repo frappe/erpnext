@@ -153,7 +153,7 @@ def _get_price_list_rate(args, item_bean, meta):
 	from utilities.transaction_base import validate_currency
 	validate_currency(args, item_bean.doc, meta)
 	
-	return {"ref_rate": flt(base_ref_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)}
+	return {"ref_rate": flt(base_ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}
 	
 def _get_item_discount(item_group, customer):
 	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 

@@ -43,7 +43,7 @@ def execute(filters=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier_name, inv.credit_to, 
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, inv.credit_to, 
 			account_map.get(inv.credit_to), ", ".join(project_name), inv.bill_no, inv.bill_date, 
 			inv.remarks, ", ".join(purchase_order), ", ".join(purchase_receipt)]
 		
@@ -76,9 +76,10 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier::120", 
-		"Supplier Account:Link/Account:120", "Account Group:LInk/Account:120", 
-		"Project:Link/Project:80", "Bill No::120", "Bill Date:Date:80", "Remarks::150", 
+		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier Id::120", 
+		"Supplier Name::120", "Supplier Account:Link/Account:120", 
+		"Account Group:LInk/Account:120", "Project:Link/Project:80", "Bill No::120", 
+		"Bill Date:Date:80", "Remarks::150", 
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
 	]
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []

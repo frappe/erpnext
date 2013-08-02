@@ -33,7 +33,7 @@ wn.pages['voucher-import-tool'].onload = function(wrapper) {
 		callback: function(fid, filename, r) {
 			wrapper.waiting.toggle(false);
 			$(wrapper).find(".messages").toggle(true).html(
-				r.join("<div style='margin:4px; border-top:1px solid #aaa;'></div>"))
+				r.message.join("<div style='margin:4px; border-top:1px solid #aaa;'></div>"))
 		}
 	});
 	
