@@ -21,6 +21,35 @@ from webnotes.utils import flt, cstr, nowdate, add_days, cint
 from webnotes.defaults import get_global_default
 from webnotes.utils.email_lib import sendmail
 
+	
+def get_stock_balance_on(warehouse_list, posting_date=None):
+	if not posting_date: posting_date = nowdate()
+	
+	stock_ledger_entries = webnotes.conn.sql("""
+		SELECT 
+			item_code, warehouse, stock_value
+		FROM 
+			`tabStock Ledger Entry`
+		WHERE 
+			warehouse in (%s)
+			AND posting_date <= %s
+		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
+	""" % (', '.join(['%s']*len(warehouse_list)), '%s'), 
+		tuple(warehouse_list + [posting_date]), as_dict=1)
+	 
+	sle_map = {}
+	for sle in stock_ledger_entries:
+		sle_map.setdefault(sle.warehouse, {}).setdefault(sle.item_code, flt(sle.stock_value))
+		
+	return sum([sum(item_dict.values()) for item_dict in sle_map.values()])
+	
+def get_latest_stock_balance(warehouse_list):
+	return webnotes.conn.sql("""
+		SELECT sum(stock_value) 
+		FROM tabBin 
+		where warehouse in (%s)
+	""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list)[0][0]
+
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
