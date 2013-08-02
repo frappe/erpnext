@@ -4,6 +4,7 @@ from core.page.data_import_tool.data_import_tool import upload
 
 def make():
 	webnotes.connect()
+	webnotes.print_messages = True
 	webnotes.mute_emails = True
 	install()
 	complete_setup()
@@ -36,6 +37,9 @@ def complete_setup():
 def make_items():
 	print "Importing Items..."
 	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Item.csv")
+	upload()
+	print "Importing Item Prices..."
+	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Item_Price.csv")
 	upload()
 	
 def make_customers_suppliers_contacts():
