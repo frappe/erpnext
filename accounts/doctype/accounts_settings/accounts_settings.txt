@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 15:49:57", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:23:40", 
+  "modified": "2013-08-01 17:35:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -39,11 +39,12 @@
   "name": "Accounts Settings"
  }, 
  {
+  "default": "1", 
   "description": "If enabled, the system will post accounting entries for inventory automatically.", 
   "doctype": "DocField", 
-  "fieldname": "auto_inventory_accounting", 
+  "fieldname": "perpetual_accounting", 
   "fieldtype": "Check", 
-  "label": "Enable Auto Inventory Accounting"
+  "label": "Enable Perpetual Accounting for Inventory"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
