@@ -43,7 +43,7 @@ def execute(filters=None):
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
-		row = [inv.name, inv.posting_date, inv.customer_name, inv.debit_to, 
+		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name, inv.debit_to, 
 			account_map.get(inv.debit_to), customer_map.get(inv.customer), inv.project_name, 
 			inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 		
@@ -76,10 +76,10 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer::120", 
-		"Customer Account:Link/Account:120", "Account Group:LInk/Account:120",
-		"Territory:Link/Territory:80", "Project:Link/Project:80", 
-		"Remarks::150", "Sales Order:Link/Sales Order:100", "Delivery Note:Link/Delivery Note:100"
+		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer Id::120", 
+		"Customer Name::120", "Customer Account:Link/Account:120", "Account Group:LInk/Account:120",
+		"Territory:Link/Territory:80", "Project:Link/Project:80", "Remarks::150", 
+		"Sales Order:Link/Sales Order:100", "Delivery Note:Link/Delivery Note:100"
 	]
 	
 	income_accounts = tax_accounts = income_columns = tax_columns = []
