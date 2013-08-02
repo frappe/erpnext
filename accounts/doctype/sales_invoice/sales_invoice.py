@@ -555,7 +555,8 @@ class DocType(SellingController):
 		sl_entries = []
 		items = get_obj('Sales Common').get_item_list(self)
 		for d in items:
-			if d.item_code in self.stock_items and d.warehouse:
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d.qty),
 					"stock_uom": webnotes.conn.get_value("Item", d.item_code, "stock_uom")

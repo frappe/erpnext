@@ -295,7 +295,8 @@ class DocType(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if d.item_code in self.stock_items and d.warehouse:
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+					and d.warehouse:
 				if d['reserved_qty'] < 0 :
 					# Reduce reserved qty from reserved warehouse mentioned in so
 					args = {
@@ -312,7 +313,6 @@ class DocType(SellingController):
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d['qty']),
 				}))
-		
 		self.make_sl_entries(sl_entries)
 
 	def get_item_list(self):
@@ -331,14 +331,13 @@ class DocType(SellingController):
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
 			return
-			
+		
 		gl_entries = []	
 		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
 			self.check_expense_account(item)
-			
 			if item.buying_amount:
-				gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
-					cost_center=item.cost_center)
+				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
+					-1*item.buying_amount, cost_center=item.cost_center)
 				
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries

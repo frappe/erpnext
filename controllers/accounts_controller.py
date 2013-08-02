@@ -412,18 +412,16 @@ class AccountsController(TransactionBase):
 		return get_company_default(self.doc.company, fieldname)
 			
 		
-	@property
-	def stock_items(self):
-		if not hasattr(self, "_stock_items"):
-			self._stock_items = []
-			item_codes = list(set(item.item_code for item in 
-				self.doclist.get({"parentfield": self.fname})))
-			if item_codes:
-				self._stock_items = [r[0] for r in webnotes.conn.sql("""select name
-					from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
-					(", ".join((["%s"]*len(item_codes))),), item_codes)]
+	def get_stock_items(self):
+		stock_items = []
+		item_codes = list(set(item.item_code for item in 
+			self.doclist.get({"parentfield": self.fname})))
+		if item_codes:
+			stock_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 				
-		return self._stock_items
+		return stock_items
 		
 	@property
 	def company_abbr(self):

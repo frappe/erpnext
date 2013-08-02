@@ -113,13 +113,13 @@ class SellingController(StockController):
 			item_sales_bom.setdefault(d.parent_item, []).append(new_d)
 		
 		if stock_ledger_entries:
+			stock_items = self.get_stock_items()
 			for item in self.doclist.get({"parentfield": self.fname}):
-				if item.item_code in self.stock_items or \
+				if item.item_code in stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
 					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
 						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
 						item_sales_bom)
-					
 					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
 					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
 						item.buying_amount)

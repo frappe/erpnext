@@ -173,8 +173,9 @@ class DocType(BuyingController):
 	def update_stock(self):		
 		pc_obj = get_obj('Purchase Common')
 		sl_entries = []
+		stock_items = self.get_stock_items()
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if d.item_code in self.stock_items and d.warehouse:
+			if d.item_code in stock_items and d.warehouse:
 				ord_qty = 0
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -325,9 +326,9 @@ class DocType(BuyingController):
 		
 	def get_total_valuation_amount(self):
 		total_valuation_amount = 0.0
-		
+		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			if item.item_code in self.stock_items:
+			if item.item_code in stock_items:
 				total_valuation_amount += flt(item.valuation_rate) * \
 					flt(item.qty) * flt(item.conversion_factor)
 

@@ -283,7 +283,6 @@ class TestStockEntry(unittest.TestCase):
 		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		
 		actual_qty_0 = self._get_actual_qty()
-		
 		# make a delivery note based on this invoice
 		dn = webnotes.bean(copy=delivery_note_test_records[0])
 		dn.doclist[1].item_code = item_code

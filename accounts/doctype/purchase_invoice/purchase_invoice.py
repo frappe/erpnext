@@ -242,8 +242,9 @@ class DocType(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 		
 		against_accounts = []
+		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_inventory_accounting and item.item_code in self.stock_items:
+			if auto_inventory_accounting and item.item_code in stock_items:
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
 				item.expense_head = item.cost_center = None
@@ -381,9 +382,10 @@ class DocType(BuyingController):
 		stock_item_and_auto_inventory_accounting = False
 		if auto_inventory_accounting:
 			stock_account = self.get_company_default("stock_received_but_not_billed")
-			
+		
+		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_inventory_accounting and item.item_code in self.stock_items:
+			if auto_inventory_accounting and item.item_code in stock_items:
 				if flt(item.valuation_rate):
 					# if auto inventory accounting enabled and stock item, 
 					# then do stock related gl entries

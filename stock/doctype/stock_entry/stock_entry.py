@@ -93,8 +93,9 @@ class DocType(StockController):
 		sl_obj.validate_serial_no(self, 'mtn_details')
 		
 	def validate_item(self):
+		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
-			if item.item_code not in self.stock_items:
+			if item.item_code not in stock_items:
 				msgprint(_("""Only Stock Items are allowed for Stock Entry"""),
 					raise_exception=True)
 		
