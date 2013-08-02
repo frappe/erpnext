@@ -149,7 +149,7 @@ class DocType(TransactionBase):
 				for p in getlist(obj.doclist, 'packing_details'):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
-						il.append({
+						il.append(webnotes._dict({
 							'warehouse': p.warehouse,
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
@@ -159,9 +159,9 @@ class DocType(TransactionBase):
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
 							'name': d.name
-						})
+						}))
 			else:
-				il.append({
+				il.append(webnotes._dict({
 					'warehouse': d.warehouse,
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
@@ -171,7 +171,7 @@ class DocType(TransactionBase):
 					'batch_no': cstr(d.batch_no).strip(),
 					'serial_no': cstr(d.serial_no).strip(),
 					'name': d.name
-				})
+				}))
 		return il
 
 	def get_already_delivered_qty(self, dn, so, so_detail):
