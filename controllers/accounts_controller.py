@@ -67,6 +67,7 @@ class AccountsController(TransactionBase):
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
 	def set_price_list_currency(self, buying_or_selling):
+		company_currency = get_company_currency(self.doc.company)
 		# TODO - change this, since price list now has only one currency allowed
 		if self.meta.get_field("price_list_name") and self.doc.price_list_name and \
 			not self.doc.price_list_currency:
@@ -74,7 +75,6 @@ class AccountsController(TransactionBase):
 				
 				if self.doc.price_list_currency:
 					if not self.doc.plc_conversion_rate:
-						company_currency = get_company_currency(self.doc.company)
 						if self.doc.price_list_currency == company_currency:
 							self.doc.plc_conversion_rate = 1.0
 						else:
@@ -85,6 +85,12 @@ class AccountsController(TransactionBase):
 					if not self.doc.currency:
 						self.doc.currency = self.doc.price_list_currency
 						self.doc.conversion_rate = self.doc.plc_conversion_rate
+						
+		if self.meta.get_field("currency") and self.doc.currency != company_currency and \
+			not self.doc.conversion_rate:
+				exchange = self.doc.currency + "-" + company_currency
+				self.doc.conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
+					exchange, "exchange_rate"))
 						
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""
@@ -394,7 +400,6 @@ class AccountsController(TransactionBase):
 				
 				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
 					self.precision(based_on, item))
-				webnotes.errprint([max_allowed_amt, total_billed_amt])
 				
 				if max_allowed_amt and total_billed_amt - max_allowed_amt > 0.02:
 					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 

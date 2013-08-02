@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:10", 
+  "modified": "2013-08-01 12:23:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -47,7 +47,7 @@
   "fieldtype": "Date", 
   "in_list_view": 1, 
   "label": "Required Date", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 0, 

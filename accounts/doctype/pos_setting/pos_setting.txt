@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-07-26 11:16:53", 
+  "modified": "2013-08-01 16:50:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -81,7 +81,6 @@
   "reqd": 1
  }, 
  {
-  "default": "1", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
   "fieldtype": "Float", 

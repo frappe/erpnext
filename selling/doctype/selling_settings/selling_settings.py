@@ -8,5 +8,6 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
-		for key in ["cust_master_name", "customer_group", "territory", "maintain_same_sales_rate"]:
-			webnotes.conn.set_default(key, self.doc.fields.get(key, ""))
+		for key in ["cust_master_name", "customer_group", "territory", "maintain_same_sales_rate",
+			"editable_price_list_rate"]:
+				webnotes.conn.set_default(key, self.doc.fields.get(key, ""))

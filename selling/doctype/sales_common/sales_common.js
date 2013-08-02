@@ -29,6 +29,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super();
 		this.toggle_rounded_total();
 		this.setup_queries();
+		this.toggle_editable_price_list_rate();
 	},
 	
 	setup_queries: function() {
@@ -121,10 +122,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	refresh: function(doc) {
+	refresh: function() {
+		this._super();
 		this.frm.toggle_display("customer_name", 
 			(this.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		this._super();
+		if(this.frm.fields_dict.packing_details) {
+			var packing_list_exists = this.frm.get_doclist({parentfield: "packing_details"}).length;
+			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
+		}
 	},
 	
 	customer: function() {
@@ -310,6 +315,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				me.frm.set_df_property(fieldname, "print_hide", 1);
 				me.frm.toggle_display(fieldname, false);
 			});
+		}
+	},
+	
+	toggle_editable_price_list_rate: function() {
+		var df = wn.meta.get_docfield(this.tname, "ref_rate", this.frm.doc.name);
+		var editable_price_list_rate = cint(wn.defaults.get_default("editable_price_list_rate"));
+		
+		if(df && editable_price_list_rate) {
+			df.read_only = 0;
 		}
 	},
 	

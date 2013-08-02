@@ -369,11 +369,37 @@ class DocType(SellingController):
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
+def get_invoiced_qty_map(delivery_note):
+	"""returns a map: {dn_detail: invoiced_qty}"""
+	invoiced_qty_map = {}
+	
+	for dn_detail, qty in webnotes.conn.sql("""select dn_detail, qty from `tabSales Invoice Item`
+		where delivery_note=%s and docstatus=1""", delivery_note):
+			if not invoiced_qty_map.get(dn_detail):
+				invoiced_qty_map[dn_detail] = 0
+			invoiced_qty_map[dn_detail] += qty
+	
+	return invoiced_qty_map
+
 @webnotes.whitelist()
 def make_sales_invoice(source_name, target_doclist=None):
+	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	
 	def update_accounts(source, target):
 		si = webnotes.bean(target)
 		si.run_method("onload_post_render")
+		
+		si.set_doclist(si.doclist.get({"parentfield": ["!=", "entries"]}) +
+			si.doclist.get({"parentfield": "entries", "qty": [">", 0]}))
+		
+		if len(si.doclist.get({"parentfield": "entries"})) == 0:
+			webnotes.msgprint(_("Hey! All these items have already been invoiced."),
+				raise_exception=True)
+				
+		return si.doclist
+		
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
 	
 	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
 		"Delivery Note": {
@@ -391,6 +417,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "sales_order", 
 				"serial_no": "serial_no"
 			},
+			"postprocess": update_item
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

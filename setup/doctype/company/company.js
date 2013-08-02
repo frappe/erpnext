@@ -17,6 +17,10 @@
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.abbr && !doc.__islocal)
 		cur_frm.set_df_property("abbr", "read_only", 1)
+		
+	if(!doc.__islocal) {
+		cur_frm.toggle_enable("default_currency", !cur_frm.doc.__transactions_exist);
+	}
 }
 
 cur_frm.cscript.has_special_chars = function(t) {

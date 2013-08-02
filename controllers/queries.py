@@ -23,7 +23,7 @@ def get_filters_cond(doctype, filters, conditions):
 			filters = filters.items()
 			flt = []
 			for f in filters:
-				if f[1][0] == '!':
+				if isinstance(f[1], basestring) and f[1][0] == '!':
 					flt.append([doctype, f[0], '!=', f[1][1:]])
 				else:
 					flt.append([doctype, f[0], '=', f[1]])
@@ -205,3 +205,19 @@ def get_price_list_currency(doctype, txt, searchfield, start, page_len, filters)
 		("%s", "%s", searchfield, "%s", "%s", "%s"), 
 		(filters["price_list_name"], filters['buying_or_selling'], "%%%s%%" % txt, 
 			start, page_len))
+			
+def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
+	return webnotes.conn.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
+		from `tabDelivery Note` 
+		where `tabDelivery Note`.`%(key)s` like %(txt)s %(fcond)s and
+			(ifnull((select sum(qty) from `tabDelivery Note Item` where 
+					`tabDelivery Note Item`.parent=`tabDelivery Note`.name), 0) >
+				ifnull((select sum(qty) from `tabSales Invoice Item` where 
+					`tabSales Invoice Item`.delivery_note=`tabDelivery Note`.name), 0))
+			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
+			limit %(start)s, %(page_len)s""" % {
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, []),
+				"mcond": get_match_cond(doctype),
+				"start": "%(start)s", "page_len": "%(page_len)s", "txt": "%(txt)s"
+			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) }, debug=True)
