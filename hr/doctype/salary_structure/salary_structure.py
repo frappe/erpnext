@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.	If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -79,16 +66,8 @@ class DocType:
 				(cstr(ret), self.doc.employee), raise_exception=1)
 
 	def validate_amount(self):
-		if flt(self.doc.ctc) < 12*flt(self.doc.total_earning):
-			msgprint(_("Annual Cost To Company can not be less than 12 months of Total Earning"), 
-				raise_exception=1)
-				
 		if flt(self.doc.net_pay) < 0:
 			msgprint(_("Net pay can not be negative"), raise_exception=1)
-		elif flt(self.doc.net_pay)*12 > flt(self.doc.ctc):
-			msgprint(_("Net pay can not be greater than 1/12th of Annual Cost To Company"), 
-				raise_exception=1)
-		
 
 	def validate(self):	 
 		self.check_existing()

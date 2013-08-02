@@ -1,3 +1,6 @@
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
+
 cur_frm.add_fetch("time_log", "activity_type", "activity_type");
 cur_frm.add_fetch("time_log", "owner", "created_by");
 cur_frm.add_fetch("time_log", "hours", "hours");

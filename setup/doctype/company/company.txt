@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-07-23 11:58:36", 
+  "modified": "2013-08-05 15:39:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -157,15 +157,7 @@
   "width": "50%"
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cost_center", 
-  "fieldtype": "Link", 
-  "label": "Cost Center", 
-  "no_copy": 1, 
-  "options": "Cost Center"
- }, 
- {
+  "description": "To enable more currencies go to Setup > Currency", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 
@@ -173,6 +165,15 @@
   "options": "Currency", 
   "read_only": 0, 
   "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 

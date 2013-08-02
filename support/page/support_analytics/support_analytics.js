@@ -1,3 +1,6 @@
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
+
 wn.pages['support-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,

@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 def execute():
 	from webnotes.modules.import_file import import_files
 	import_files([["selling", "Print Format", "Quotation Classic"], 

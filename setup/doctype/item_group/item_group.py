@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.	If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -33,7 +20,6 @@ class DocType(DocTypeNestedSet):
 		
 		from website.helpers.product import invalidate_cache_for
 		
-		
 		if self.doc.show_in_website:
 			from webnotes.webutils import update_page_name
 			# webpage updates
@@ -50,6 +36,8 @@ class DocType(DocTypeNestedSet):
 			invalidate_cache_for(self.doc.name)
 			
 			webnotes.conn.set(self.doc, "page_name", None)
+		
+		self.validate_one_root()
 		
 	def validate_name_with_item(self):
 		if webnotes.conn.exists("Item", self.doc.name):

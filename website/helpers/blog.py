@@ -1,5 +1,5 @@
-# Copyright (c) 2012 Web Notes Technologies Pvt Ltd.
-# License: GNU General Public License (v3). For more information see license.txt
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -41,7 +41,7 @@ def get_blog_list(start=0, by=None, category=None):
 	import webnotes.utils
 	
 	for res in result:
-		from webnotes.utils import global_date_format, get_fullname
+		from webnotes.utils import global_date_format
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
 			res['content'] = webnotes.webutils.get_html(res['page_name'])
@@ -101,27 +101,10 @@ def add_comment(args=None):
 		doctype='Comment', 
 		email_field='comment_by', 
 		subject='New Comment on Blog: ' + blog.title, 
-		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
+		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args,
+		ref_doctype='Blog Post', ref_docname=blog.name)
 	
 	return comment_html.replace("\n", "")
-
-@webnotes.whitelist(allow_guest=True)
-def add_subscriber(name, email_id):
-	"""add blog subscriber to lead"""
-	name = webnotes.conn.sql("""select name from tabLead where email_id=%s""", email)
-	
-	from webnotes.model.doc import Document
-	if name:
-		lead = Document('Lead', name[0][0])
-	else:
-		lead = Document('Lead')
-	
-	if not lead.source: lead.source = 'Blog'
-	lead.unsubscribed = 0
-	lead.blog_subscriber = 1
-	lead.lead_name = name
-	lead.email_id = email
-	lead.save()
 
 def get_blog_content(blog_page_name):
 	import webnotes.webutils

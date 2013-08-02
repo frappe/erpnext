@@ -2,7 +2,7 @@
  {
   "creation": "2012-12-20 12:50:49", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:37:59", 
+  "modified": "2013-08-02 16:05:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -90,7 +90,7 @@
   "doctype": "DocField", 
   "fieldname": "fs_packing_details", 
   "fieldtype": "Check", 
-  "label": "Packing Detials"
+  "label": "Packing Details"
  }, 
  {
   "description": "To get Item Group in details table", 

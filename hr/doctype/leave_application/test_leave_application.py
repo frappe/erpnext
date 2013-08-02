@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 import webnotes
 import unittest
 
@@ -236,5 +239,15 @@ test_records = [
 		"fiscal_year": "_Test Fiscal Year 2013",
 		"employee": "_T-Employee-0002",
 		"company": "_Test Company"
+	}],
+	[{
+		"doctype": "Leave Application",
+		"leave_type": "_Test Leave Type LWP",
+		"from_date": "2013-01-15",
+		"to_date": "2013-01-15",
+		"posting_date": "2013-01-02",
+		"fiscal_year": "_Test Fiscal Year 2013",
+		"employee": "_T-Employee-0001",
+		"company": "_Test Company",
 	}]
 ]

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-08-01 16:50:05", 
+  "modified": "2013-08-06 13:09:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -131,12 +131,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "customer_account", 
+  "fieldname": "customer", 
   "fieldtype": "Link", 
-  "label": "Customer Account", 
+  "label": "Customer", 
   "oldfieldname": "customer_account", 
   "oldfieldtype": "Link", 
-  "options": "Account", 
+  "options": "Customer", 
   "read_only": 0, 
   "reqd": 0
  }, 

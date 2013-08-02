@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-07-26 16:26:15", 
+  "modified": "2013-08-05 18:23:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,9 +35,7 @@
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "submit": 0
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -596,17 +594,6 @@
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "fieldname": "sales_rate", 
-  "fieldtype": "Float", 
-  "hidden": 1, 
-  "label": "Sales Rate", 
-  "oldfieldname": "sales_rate", 
-  "oldfieldtype": "Currency", 
-  "read_only": 0
- }, 
- {
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "doctype": "DocField", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
@@ -883,7 +870,9 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "role": "Material Master Manager", 
+  "submit": 0, 
   "write": 1
  }, 
  {
@@ -891,7 +880,9 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "role": "Material Manager", 
+  "submit": 0, 
   "write": 0
  }, 
  {
@@ -899,7 +890,21 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "role": "Material User", 
+  "submit": 0, 
   "write": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]

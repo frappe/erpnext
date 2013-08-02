@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-07-10 12:51:58", 
+  "modified": "2013-08-05 18:11:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -69,7 +69,7 @@
   "oldfieldname": "parent_sales_person", 
   "oldfieldtype": "Link", 
   "options": "Sales Person", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
