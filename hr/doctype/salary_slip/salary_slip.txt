@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:53:44", 
+  "modified": "2013-08-02 19:23:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -190,7 +190,7 @@
   "doctype": "DocField", 
   "fieldname": "total_days_in_month", 
   "fieldtype": "Data", 
-  "label": "Total days in month", 
+  "label": "Total Working Days In The Month", 
   "oldfieldname": "total_days_in_month", 
   "oldfieldtype": "Int", 
   "read_only": 1, 
@@ -208,7 +208,7 @@
   "doctype": "DocField", 
   "fieldname": "payment_days", 
   "fieldtype": "Float", 
-  "label": "Payment days", 
+  "label": "Payment Days", 
   "oldfieldname": "payment_days", 
   "oldfieldtype": "Float", 
   "read_only": 1, 

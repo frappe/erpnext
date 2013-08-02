@@ -162,6 +162,18 @@ wn.module_page["HR"] = [
 		]
 	},
 	{
+		title: wn._("Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"label": wn._("HR Settings"),
+				"route": "Form/HR Settings",
+				"doctype":"HR Settings",
+				"description": "Settings for HR Module"
+			}
+		]
+	},
+	{
 		title: wn._("Reports"),
 		right: true,
 		icon: "icon-list",
