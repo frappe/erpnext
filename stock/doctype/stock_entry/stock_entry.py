@@ -65,13 +65,13 @@ class DocType(StockController):
 		
 	def on_submit(self):
 		self.update_serial_no(1)
-		self.update_stock_ledger(0)
+		self.update_stock_ledger()
 		self.update_production_order(1)
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_serial_no(0)
-		self.update_stock_ledger(1)
+		self.update_stock_ledger()
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()
 		
@@ -351,16 +351,24 @@ class DocType(StockController):
 						serial_doc.docstatus = is_submit and 2 or 0
 						serial_doc.save()
 						
-	def update_stock_ledger(self, is_cancelled=0):
-		self.values = []			
+	def update_stock_ledger(self):
+		sl_entries = []			
 		for d in getlist(self.doclist, 'mtn_details'):
 			if cstr(d.s_warehouse):
-				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.s_warehouse),
+					"actual_qty": -flt(d.transfer_qty),
+					"incoming_rate": flt(d.incoming_rate)
+				}))
+				
 			if cstr(d.t_warehouse):
-				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
-		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, 
-			self.doc.amended_from and 'Yes' or 'No')
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.t_warehouse),
+					"actual_qty": flt(d.transfer_qty),
+					"incoming_rate": flt(d.incoming_rate)
+				}))
+				
+		self.make_sl_entries(sl_entries, self.doc.amended_from and 'Yes' or 'No')
 
 	def update_production_order(self, is_submit):
 		if self.doc.production_order:
@@ -632,26 +640,6 @@ class DocType(StockController):
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
 
-	def add_to_values(self, d, wh, qty, is_cancelled):
-		self.values.append({
-			'item_code': d.item_code,
-			'warehouse': wh,
-			'posting_date': self.doc.posting_date,
-			'posting_time': self.doc.posting_time,
-			'voucher_type': 'Stock Entry',
-			'voucher_no': self.doc.name, 
-			'voucher_detail_no': d.name,
-			'actual_qty': qty,
-			'incoming_rate': flt(d.incoming_rate, 2) or 0,
-			'stock_uom': d.stock_uom,
-			'company': self.doc.company,
-			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
-			'batch_no': cstr(d.batch_no).strip(),
-			'serial_no': cstr(d.serial_no).strip(),
-			"project": self.doc.project_name,
-			"fiscal_year": self.doc.fiscal_year,
-		})
-	
 	def get_cust_values(self):
 		"""fetches customer details"""
 		if self.doc.delivery_note_no:

@@ -213,7 +213,7 @@ class DocType(SellingController):
 		self.update_prevdoc_status()
 		
 		# create stock ledger entry
-		self.update_stock_ledger(update_stock = 1)
+		self.update_stock_ledger()
 
 		self.credit_limit()
 		
@@ -258,7 +258,7 @@ class DocType(SellingController):
 		
 		self.update_prevdoc_status()
 		
-		self.update_stock_ledger(update_stock = -1)
+		self.update_stock_ledger()
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 		
@@ -292,56 +292,31 @@ class DocType(SellingController):
 			webnotes.msgprint(_("Packing Slip(s) Cancelled"))
 
 
-	def update_stock_ledger(self, update_stock):
-		self.values = []
+	def update_stock_ledger(self):
+		sl_entries = []
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				# this happens when item is changed from non-stock to stock item
-				if not d["warehouse"]:
-					continue
-				
+			if d.item_code in self.stock_items and d.warehouse:
 				if d['reserved_qty'] < 0 :
 					# Reduce reserved qty from reserved warehouse mentioned in so
 					args = {
 						"item_code": d['item_code'],
 						"voucher_type": self.doc.doctype,
 						"voucher_no": self.doc.name,
-						"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
+						"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
 						"posting_date": self.doc.posting_date,
 						"is_amended": self.doc.amended_from and 'Yes' or 'No'
 					}
 					get_obj("Warehouse", d["reserved_warehouse"]).update_bin(args)
 						
 				# Reduce actual qty from warehouse
-				self.make_sl_entry(d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+				}))
 		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-
+		self.make_sl_entries(sl_entries)
 
 	def get_item_list(self):
 	 return get_obj('Sales Common').get_item_list(self)
-
-
-	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		self.values.append({
-			'item_code'					: d['item_code'],
-			'warehouse'					: wh,
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Delivery Note',
-			'voucher_no'				: self.doc.name,
-			'voucher_detail_no'	 		: d['name'],
-			'actual_qty'				: qty,
-			'stock_uom'					: d['uom'],
-			'incoming_rate'			 	: in_value,
-			'company'					: self.doc.company,
-			'fiscal_year'				: self.doc.fiscal_year,
-			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'					: d['batch_no'],
-			'serial_no'					: d['serial_no'],
-			"project"					: self.doc.project_name
-		})
-
 
 	def credit_limit(self):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""

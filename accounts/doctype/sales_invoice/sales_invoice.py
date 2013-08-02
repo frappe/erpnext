@@ -105,7 +105,7 @@ class DocType(SellingController):
 			sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
 			sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
 			
-			self.update_stock_ledger(update_stock=1)
+			self.update_stock_ledger()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -137,7 +137,7 @@ class DocType(SellingController):
 			sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
 			sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
 			
-			self.update_stock_ledger(update_stock = -1)
+			self.update_stock_ledger()
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -549,45 +549,19 @@ class DocType(SellingController):
 				submitted = webnotes.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
-					raise Exception , "Validation Error."
+					raise Exception , "Validation Error."		
 
-
-	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d['item_code'])
-		self.values.append({
-			'item_code'			: d['item_code'],
-			'warehouse'			: wh,
-			'posting_date'		: self.doc.posting_date,
-			'posting_time'		: self.doc.posting_time,
-			'voucher_type'		: 'Sales Invoice',
-			'voucher_no'		: cstr(self.doc.name),
-			'voucher_detail_no'	: cstr(d['name']), 
-			'actual_qty'		: qty, 
-			'stock_uom'			: st_uom and st_uom[0][0] or '',
-			'incoming_rate'		: in_value,
-			'company'			: self.doc.company,
-			'fiscal_year'		: self.doc.fiscal_year,
-			'is_cancelled'		: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'			: cstr(d['batch_no']),
-			'serial_no'			: d['serial_no'],
-			"project"			: self.doc.project_name
-		})			
-
-	def update_stock_ledger(self, update_stock):
-		self.values = []
+	def update_stock_ledger(self):
+		sl_entries = []
 		items = get_obj('Sales Common').get_item_list(self)
 		for d in items:
-			stock_item = webnotes.conn.sql("SELECT is_stock_item, is_sample_item \
-				FROM tabItem where name = '%s'"%(d['item_code']), as_dict = 1)
-			if stock_item[0]['is_stock_item'] == "Yes":
-				if not d['warehouse']:
-					msgprint("Message: Please enter Warehouse for item %s as it is stock item." \
-						% d['item_code'], raise_exception=1)
-
-				# Reduce actual qty from warehouse
-				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+			if d.item_code in self.stock_items and d.warehouse:
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d.qty),
+					"stock_uom": webnotes.conn.get_value("Item", d.item_code, "stock_uom")
+				}))
+	
+		self.make_sl_entries(sl_entries)
 		
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries, merge_similar_entries

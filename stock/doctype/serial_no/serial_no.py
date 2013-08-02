@@ -75,8 +75,7 @@ class DocType(StockController):
 			self.make_gl_entries()
 
 	def make_stock_ledger_entry(self, qty):
-		from webnotes.model.code import get_obj
-		values = [{
+		sl_entries = [{
 			'item_code'				: self.doc.item_code,
 			'warehouse'				: self.doc.warehouse,
 			'posting_date'			: self.doc.purchase_date or (self.doc.creation and self.doc.creation.split(' ')[0]) or nowdate(),
@@ -93,8 +92,8 @@ class DocType(StockController):
 			'batch_no'				: '',
 			'serial_no'				: self.doc.name
 		}]
-		get_obj('Stock Ledger').update_stock(values)
-
+		
+		self.make_sl_entries(sl_entries)
 
 	def on_trash(self):
 		if self.doc.status == 'Delivered':

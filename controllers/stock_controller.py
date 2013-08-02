@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
+from webnotes.utils import cint, flt, cstr
 import webnotes.defaults
 from controllers.accounts_controller import AccountsController
 
@@ -49,6 +49,35 @@ class StockController(AccountsController):
 			]
 			
 			return gl_entries
+			
+			
+	def get_sl_entries(self, d, args):		
+		sl_dict = {
+			"item_code": d.item_code,
+			"warehouse": d.warehouse,
+			"posting_date": self.doc.posting_date,
+			"posting_time": self.doc.posting_time,
+			"voucher_type": self.doc.doctype,
+			"voucher_no": self.doc.name,
+			"voucher_detail_no": d.name,
+			"actual_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d.stock_qty),
+			"stock_uom": d.stock_uom,
+			"incoming_rate": 0,
+			"company": self.doc.company,
+			"fiscal_year": self.doc.fiscal_year,
+			"is_cancelled": self.doc.docstatus==2 and "Yes" or "No",
+			"batch_no": cstr(d.batch_no).strip(),
+			"serial_no": d.serial_no,
+			"project": d.project_name
+		}
+		
+		sl_dict.update(args)
+		return sl_dict
+		
+	def make_sl_entries(self, sl_entries, is_amended=None):
+		if sl_entries:
+			from webnotes.model.code import get_obj
+			get_obj('Stock Ledger').update_stock(sl_entries, is_amended)
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
 		if not (item_list and warehouse_list):

@@ -170,14 +170,11 @@ class DocType(BuyingController):
 				d.rejected_serial_no = cstr(d.rejected_serial_no).strip().replace(',', '\n')
 				d.save()
 
-	def update_stock(self, is_submit):
+	def update_stock(self):		
 		pc_obj = get_obj('Purchase Common')
-		self.values = []
+		sl_entries = []
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				if not d.warehouse:
-					continue
-				
+			if d.item_code in self.stock_items and d.warehouse:
 				ord_qty = 0
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -200,51 +197,27 @@ class DocType(BuyingController):
 					args = {
 						"item_code": d.item_code,
 						"posting_date": self.doc.posting_date,
-						"ordered_qty": (is_submit and 1 or -1) * flt(ord_qty)
+						"ordered_qty": (self.doc.docstatus==1 and 1 or -1) * flt(ord_qty)
 					}
 					get_obj("Warehouse", d.warehouse).update_bin(args)
 
-				# UPDATE actual qty to warehouse by pr_qty
 				if pr_qty:
-					self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
-				
-				# UPDATE actual to rejected warehouse by rejected qty
+					sl_entries.append(self.get_sl_entries(d, {
+						"actual_qty": flt(pr_qty),
+						"serial_no": cstr(d.serial_no).strip()
+					}))
+					
 				if flt(d.rejected_qty) > 0:
-					self.make_sl_entry(d, self.doc.rejected_warehouse, flt(d.rejected_qty) * flt(d.conversion_factor), d.valuation_rate, is_submit, rejected = 1)
+					sl_entries.append(self.get_sl_entries(d, {
+						"warehouse": self.doc.rejected_warehouse,
+						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+						"serial_no": cstr(d.rejected_serial_no).strip()
+					}))
 
-		self.bk_flush_supp_wh(is_submit)
-
-		if self.values:
-			get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-
-
-	# make Stock Entry
-	def make_sl_entry(self, d, wh, qty, in_value, is_submit, rejected = 0):
-		if rejected:
-			serial_no = cstr(d.rejected_serial_no).strip()
-		else:
-			serial_no = cstr(d.serial_no).strip()
-
-		self.values.append({
-			'item_code'			: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
-			'warehouse'			: wh,
-			'posting_date'		: self.doc.posting_date,
-			'posting_time'		: self.doc.posting_time,
-			'voucher_type'		: 'Purchase Receipt',
-			'voucher_no'		: self.doc.name,
-			'voucher_detail_no'	: d.name,
-			'actual_qty'		: qty,
-			'stock_uom'			: d.stock_uom,
-			'incoming_rate'		: in_value,
-			'company'			: self.doc.company,
-			'fiscal_year'		: self.doc.fiscal_year,
-			'is_cancelled'		: (is_submit==1) and 'No' or 'Yes',
-			'batch_no'			: cstr(d.batch_no).strip(),
-			'serial_no'			: serial_no,
-			"project"			: d.project_name
-			})
-
-
+		self.bk_flush_supp_wh(sl_entries)
+		
+		self.make_sl_entries(sl_entries)
+		
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
 			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
@@ -278,7 +251,7 @@ class DocType(BuyingController):
 		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 1, is_incoming = 1)
 
 		# Update Stock
-		self.update_stock(is_submit = 1)
+		self.update_stock()
 
 		# Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, 1)
@@ -310,23 +283,23 @@ class DocType(BuyingController):
 		# 3. Cancel Serial No
 		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 0, is_incoming = 1)
 
-		# 4.Update Bin
-		self.update_stock(is_submit = 0)
-
+		self.update_stock()
 		self.update_prevdoc_status()
-
-		# 6. Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, 0)
 		
 		self.make_cancel_gl_entries()
 
-	def bk_flush_supp_wh(self, is_submit):
+	def bk_flush_supp_wh(self, sl_entries):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			# negative quantity is passed as raw material qty has to be decreased 
 			# when PR is submitted and it has to be increased when PR is cancelled
-			consumed_qty = - flt(d.consumed_qty)
-			self.make_sl_entry(d, self.doc.supplier_warehouse, flt(consumed_qty), 0, is_submit)
-
+			sl_entries.append(self.get_sl_entries(d, {
+				"item_code": d.rm_item_code,
+				"warehouse": self.doc.supplier_warehouse,
+				"actual_qty": -1*flt(consumed_qty),
+				"incoming_rate": 0
+			}))
+			
 	def get_current_stock(self):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			if self.doc.supplier_warehouse:

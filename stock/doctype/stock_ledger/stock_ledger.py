@@ -190,7 +190,7 @@ class DocType:
 					self.update_serial_purchase_details(obj, d, a, is_submit, rejected=True)
 				
 				
-	def update_stock(self, values, is_amended = 'No'):
+	def update_stock(self, values, is_amended='No'):
 		for v in values:
 			sle_id, valid_serial_nos = '', ''
 			# get serial nos
