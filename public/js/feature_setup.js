@@ -127,12 +127,12 @@ pscript.feature_dict = {
 		'Sales Order': {'sales_order_details':['page_break']}
 	},
 	'fs_exports': {
-		'Delivery Note': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','amount','basic_rate']},
+		'Delivery Note': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'delivery_note_details':['base_ref_rate','amount','basic_rate']},
 		'POS Setting': {'fields':['conversion_rate','currency']},
-		'Quotation': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'quotation_details':['base_ref_rate','amount','basic_rate']},
-		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'entries':['base_ref_rate','amount','basic_rate']},
+		'Quotation': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'quotation_details':['base_ref_rate','amount','basic_rate']},
+		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'entries':['base_ref_rate','amount','basic_rate']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','amount','basic_rate']}
+		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'sales_order_details':['base_ref_rate','amount','basic_rate']}
 	},
 	
 	'fs_imports': {

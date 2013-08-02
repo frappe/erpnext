@@ -121,10 +121,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	refresh: function(doc) {
+	refresh: function() {
+		this._super();
 		this.frm.toggle_display("customer_name", 
 			(this.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		this._super();
+		if(this.frm.fields_dict.packing_details) {
+			var packing_list_exists = this.frm.get_doclist({parentfield: "packing_details"}).length;
+			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
+		}
 	},
 	
 	customer: function() {

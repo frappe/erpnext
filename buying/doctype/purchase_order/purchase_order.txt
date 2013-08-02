@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-23 15:26:28", 
+  "modified": "2013-08-01 16:49:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -191,7 +191,6 @@
   "reqd": 1
  }, 
  {
-  "default": "1", 
   "description": "Rate at which supplier's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
@@ -313,7 +312,7 @@
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
   "label": "Purchase Taxes and Charges", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
   "options": "Purchase Taxes and Charges Master", 

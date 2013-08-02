@@ -1001,10 +1001,12 @@ def make_delivery_note(source_name, target_doclist=None):
 		bean = webnotes.bean(target)
 		bean.run_method("onload_post_render")
 		
-	def update_item(obj, target, source_parent):
-		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)
-		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)
-		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
+			flt(source_doc.basic_rate)
+		target_doc.export_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
+			flt(source_doc.export_rate)
+		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 	
 	doclist = get_mapped_doclist("Sales Invoice", source_name, 	{
 		"Sales Invoice": {

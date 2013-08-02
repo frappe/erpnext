@@ -93,12 +93,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					wn.model.map_current_doc({
 						method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 						source_doctype: "Delivery Note",
-						get_query_filters: {
-							docstatus: 1,
-							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
+						get_query: function() {
+							var filters = {
+								docstatus: 1,
+								company: cur_frm.doc.company
+							};
+							if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
+							return {
+								query: "controllers.queries.get_delivery_notes_to_be_billed",
+								filters: filters
+							};
 						}
-					})
+					});
 				});
 				
 			// cur_frm.add_custom_button(wn._("POS View"), function() {

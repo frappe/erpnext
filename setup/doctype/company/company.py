@@ -29,10 +29,30 @@ class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
 		
+	def onload(self):
+		self.doc.fields["__transactions_exist"] = self.check_if_transactions_exist()
+		
+	def check_if_transactions_exist(self):
+		exists = False
+		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
+			"Purchase Invoice", "Purchase Receipt", "Purchase Order", "Supplier Quotation"]:
+				if webnotes.conn.sql("""select name from `tab%s` where company=%s and docstatus=1
+					limit 1""" % (doctype, "%s"), self.doc.name):
+						exists = True
+						break
+		
+		return exists
+		
 	def validate(self):
 		if self.doc.fields.get('__islocal') and len(self.doc.abbr) > 5:
 			webnotes.msgprint("Abbreviation cannot have more than 5 characters",
 				raise_exception=1)
+				
+		self.previous_default_currency = webnotes.conn.get_value("Company", self.doc.name, "default_currency")
+		if self.doc.default_currency and self.previous_default_currency and \
+			self.doc.default_currency != self.previous_default_currency and \
+			self.check_if_transactions_exist():
+				msgprint(_("Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency."), raise_exception=True)
 
 	def on_update(self):
 		if not webnotes.conn.sql("""select name from tabAccount 

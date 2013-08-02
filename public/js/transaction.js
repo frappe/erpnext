@@ -75,8 +75,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
-			var company_currency = this.get_company_currency();
-			this.frm.set_value("currency", company_currency);
+			if(!this.frm.doc.currency) {
+				this.frm.set_value("currency", this.get_company_currency());
+			}
+			
 			this.frm.script_manager.trigger("currency");
 		}
 	},
