@@ -61,7 +61,7 @@ class DocType(TransactionBase):
 			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
 		if emp:
 			self.doc.bank_name = emp.bank_name
-			self.doc.bank_ac_no = emp.bank_ac_no
+			self.doc.bank_account_no = emp.bank_ac_no
 			self.doc.esic_no = emp.esic_card_no
 			self.doc.pf_no = emp.pf_number
 
@@ -72,9 +72,17 @@ class DocType(TransactionBase):
 			self.doc.month = "%02d" % getdate(nowdate()).month
 			
 		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
+		holidays = self.get_holidays_for_employee(m)
 		
+		if not cint(webnotes.conn.get_value("HR Settings", "HR Settings",
+			"include_holidays_in_total_working_days")):
+				m["month_days"] -= len(holidays)
+				if m["month_days"] < 0:
+					msgprint(_("Bummer! There are more holidays than working days this month."),
+						raise_exception=True)
+			
 		if not lwp:
-			lwp = self.calculate_lwp(m)
+			lwp = self.calculate_lwp(holidays, m)
 		self.doc.total_days_in_month = m['month_days']
 		self.doc.leave_without_pay = lwp
 		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
@@ -103,11 +111,8 @@ class DocType(TransactionBase):
 				payment_days = 0
 
 		return payment_days
-
-
-
-
-	def calculate_lwp(self, m):
+		
+	def get_holidays_for_employee(self, m):
 		holidays = sql("""select t1.holiday_date 
 			from `tabHoliday` t1, tabEmployee t2 
 			where t1.parent = t2.holiday_list and t2.name = %s 
@@ -117,8 +122,13 @@ class DocType(TransactionBase):
 			holidays = sql("""select t1.holiday_date 
 				from `tabHoliday` t1, `tabHoliday List` t2 
 				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1 
-				and t2.fiscal_year = %s""", self.doc.fiscal_year)
+				and t2.fiscal_year = %s
+				and t1.holiday_date between %s and %s""", (self.doc.fiscal_year, 
+					m['month_start_date'], m['month_end_date']))
 		holidays = [cstr(i[0]) for i in holidays]
+		return holidays
+
+	def calculate_lwp(self, holidays, m):
 		lwp = 0
 		for d in range(m['month_days']):
 			dt = add_days(cstr(m['month_start_date']), d)
@@ -133,7 +143,7 @@ class DocType(TransactionBase):
 					and %s between from_date and to_date
 				""", (self.doc.employee, dt))
 				if leave:
-					lwp = cint(leave[0][1]) and lwp + 0.5 or lwp + 1
+					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 		return lwp
 
 	def check_existing(self):
@@ -150,17 +160,29 @@ class DocType(TransactionBase):
 	def validate(self):
 		from webnotes.utils import money_in_words
 		self.check_existing()
+		
+		if not (len(self.doclist.get({"parentfield": "earning_details"})) or 
+			len(self.doclist.get({"parentfield": "deduction_details"}))):
+				self.get_emp_and_leave_details()
+		else:
+			self.get_leave_details(self.doc.leave_without_pay)
+
+		if not self.doc.net_pay:
+			self.calculate_net_pay()
+			
 		company_currency = get_company_currency(self.doc.company)
 		self.doc.total_in_words = money_in_words(self.doc.rounded_total, company_currency)
 
 	def calculate_earning_total(self):
 		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
-		for d in getlist(self.doclist, 'earning_details'):
+		for d in self.doclist.get({"parentfield": "earning_details"}):
 			if cint(d.e_depends_on_lwp) == 1:
 				d.e_modified_amount = round(flt(d.e_amount) * flt(self.doc.payment_days)
 					/ cint(self.doc.total_days_in_month), 2)
 			elif not self.doc.payment_days:
 				d.e_modified_amount = 0
+			else:
+				d.e_modified_amount = d.e_amount
 			self.doc.gross_pay += flt(d.e_modified_amount)
 	
 	def calculate_ded_total(self):
@@ -171,6 +193,8 @@ class DocType(TransactionBase):
 					/ cint(self.doc.total_days_in_month), 2)
 			elif not self.doc.payment_days:
 				d.d_modified_amount = 0
+			else:
+				d.d_modified_amount = d.d_amount
 			
 			self.doc.total_deduction += flt(d.d_modified_amount)
 				

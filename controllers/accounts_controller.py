@@ -141,8 +141,9 @@ class AccountsController(TransactionBase):
 					
 	def calculate_taxes_and_totals(self):
 		# validate conversion rate
-		if not self.doc.currency:
-			self.doc.currency = get_company_currency(self.doc.company)
+		company_currency = get_company_currency(self.doc.company)
+		if not self.doc.currency or self.doc.currency == company_currency:
+			self.doc.currency = company_currency
 			self.doc.conversion_rate = 1.0
 		else:
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,

@@ -195,6 +195,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var company_currency = this.get_company_currency();
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
+		this.frm.refresh_fields();
 	},
 	
 	recalculate: function() {

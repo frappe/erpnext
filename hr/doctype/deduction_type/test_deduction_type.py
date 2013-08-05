@@ -1,0 +1,10 @@
+test_records = [
+	[{
+			"doctype": "Deduction Type",
+			"deduction_name": "_Test Professional Tax"
+	}],
+	[{
+			"doctype": "Deduction Type",
+			"deduction_name": "_Test TDS"
+	}]
+]
