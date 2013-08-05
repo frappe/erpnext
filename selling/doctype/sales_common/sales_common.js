@@ -605,7 +605,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
-		var show = this.frm.doc.currency != company_currency;
+		var show = (this.frm.doc.currency != company_currency) || 
+			(wn.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
+				{parentfield: "other_charges", included_in_print_rate: 1}).length);
+		
 		$.each(["basic_rate", "base_ref_rate", "amount"], function(i, fname) {
 			if(wn.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show);
