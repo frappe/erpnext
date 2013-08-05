@@ -53,22 +53,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.set_dynamic_labels();
 	},
 	
-	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company) {
-			var me = this;
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "onload_post_render",
-				freeze: true,
-				callback: function(r) {
-					// remove this call when using client side mapper
-					me.set_default_values();
-					me.frm.refresh();
-				}
-			});
-		}
-	},
-	
 	validate: function() {
 		this.calculate_taxes_and_totals();
 	},
@@ -344,17 +328,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \
 		</table></div>';
-	},
-	
-	set_default_values: function() {
-		$.each(wn.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
-			var updated = wn.model.set_default_values(doc);
-			if(doc.parentfield) {
-				refresh_field(doc.parentfield);
-			} else {
-				refresh_field(updated);
-			}
-		});
 	},
 	
 	_validate_before_fetch: function(fieldname) {
