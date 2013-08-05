@@ -1,3 +1,6 @@
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
+
 wn.pages['Setup'].onload = function(wrapper) { 
 	if(msg_dialog && msg_dialog.display) msg_dialog.hide();
 	wn.ui.make_app_page({

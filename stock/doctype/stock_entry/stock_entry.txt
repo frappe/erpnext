@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:56:06", 
+  "modified": "2013-08-05 15:28:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -298,11 +298,11 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "eval:(doc.purpose!==\"Sales Return\" || doc.purpose!==\"Purchase Return\")", 
+  "depends_on": "eval:(doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
   "doctype": "DocField", 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
-  "label": "Reference", 
+  "label": "From Bill of Materials", 
   "read_only": 0
  }, 
  {
