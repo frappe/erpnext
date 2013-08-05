@@ -617,7 +617,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// set labels
 		var $wrapper = $(this.frm.wrapper);
 		$.each(field_label_map, function(fname, label) {
-			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
+			fname = fname.split("-");
+			var df = wn.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
+			if(df) df.label = label;
 		});
 	},
 	
