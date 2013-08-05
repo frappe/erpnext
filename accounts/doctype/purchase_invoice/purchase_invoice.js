@@ -172,16 +172,13 @@ return{
 	}	
 }
 
-cur_frm.fields_dict['entries'].grid.get_field("expense_head").get_query = function(doc) {
+cur_frm.set_query("expense_head", "entries", function(doc) {
 	return{
-		filters:{
-			'debit_or_credit':'Debit',
-			'account_type': 'Expense Account',
-			'group_or_ledger': 'Ledger',
-			'company': doc.company
-		}
-	}	
-}
+		query: "accounts.doctype.purchase_invoice.purchase_invoice.get_expense_account",
+		filters: {'company': doc.company}
+	}
+});
+
 cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.expense_head){

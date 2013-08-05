@@ -979,6 +979,7 @@ def get_bank_cash_account(mode_of_payment):
 		"cash_bank_account": val
 	}
 
+@webnotes.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
