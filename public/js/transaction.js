@@ -315,15 +315,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
 							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency);
 						
-						item_tax[item_code][tax.account_head] = [tax_rate, tax_amount];
+						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {
-						item_tax[item_code][tax.account_head] = [flt(tax_data, tax_rate_precision) + "%", ""];
+						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
 					}
 				});
-			tax_accounts.push(tax.account_head);
+			tax_accounts.push([tax.name, tax.account_head]);
 		});
 		
-		var headings = $.map([wn._("Item Name")].concat(tax_accounts), 
+		var headings = $.map([wn._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
 		
 		var rows = $.map(this.get_item_doclist(), function(item) {
@@ -332,8 +332,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
 				item_name: item.item_name,
 				taxes: $.map(tax_accounts, function(head) {
-					return item_tax_record[head] ?
-						"<td>(" + item_tax_record[head][0] + ") " + item_tax_record[head][1] + "</td>" :
+					return item_tax_record[head[0]] ?
+						"<td>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
 						"<td></td>";
 				}).join("\n")
 			});
