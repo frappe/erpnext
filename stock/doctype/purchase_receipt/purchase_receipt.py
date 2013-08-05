@@ -205,14 +205,17 @@ class DocType(BuyingController):
 				if pr_qty:
 					sl_entries.append(self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip()
+						"serial_no": cstr(d.serial_no).strip(),
+						"incoming_rate": d.valuation_rate
+						
 					}))
 					
 				if flt(d.rejected_qty) > 0:
 					sl_entries.append(self.get_sl_entries(d, {
 						"warehouse": self.doc.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-						"serial_no": cstr(d.rejected_serial_no).strip()
+						"serial_no": cstr(d.rejected_serial_no).strip(),
+						"incoming_rate": d.valuation_rate
 					}))
 
 		self.bk_flush_supp_wh(sl_entries)
@@ -312,16 +315,17 @@ class DocType(BuyingController):
 		return get_obj('Purchase Common').get_rate(arg,self)
 	
 	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
 		
-		from accounts.general_ledger import make_gl_entries
-		
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
-		total_valuation_amount = self.get_total_valuation_amount()
-		gl_entries = self.get_gl_entries_for_stock(against_stock_account, total_valuation_amount)
+		warehouse_list = [d.warehouse for d in 
+			self.doclist.get({"parentfield": "purchase_receipt_details"})]
+
+		gl_entries = self.get_gl_entries_for_stock(against_stock_account, warehouse_list=warehouse_list)
 		
 		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 		
 	def get_total_valuation_amount(self):

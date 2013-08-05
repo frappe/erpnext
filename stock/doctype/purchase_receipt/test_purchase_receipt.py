@@ -23,6 +23,8 @@ from webnotes.utils import cint
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		self._clear_stock_account_balance()
 		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		pr = webnotes.bean(copy=test_records[0]).insert()
@@ -42,8 +44,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		self._clear_stock_account_balance()
 		pr = webnotes.bean(copy=test_records[0])
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
@@ -54,11 +57,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(not gl_entries)
 		
 	def test_purchase_receipt_gl_entry(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
+		
+		self._clear_stock_account_balance()
 		
 		pr = webnotes.bean(copy=test_records[0])
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
@@ -67,20 +71,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 			order by account desc""", pr.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand_account = webnotes.conn.get_value("Company", pr.doc.company, 
-			"stock_in_hand_account")
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", pr.doclist[1].warehouse, 
+			"account")
 		
-		expected_values = [
-			[stock_in_hand_account, 750.0, 0.0],
-			["Stock Received But Not Billed - _TC", 0.0, 750.0]
-		]
+		fixed_asset_account = webnotes.conn.get_value("Warehouse", pr.doclist[2].warehouse, 
+			"account")
 		
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+		expected_values = {
+			stock_in_hand_account: [375.0, 0.0],
+			fixed_asset_account: [375.0, 0.0],
+			"Stock Received But Not Billed - _TC": [0.0, 750.0]
+		}
+		
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.debit)
+			self.assertEquals(expected_values[gle.account][1], gle.credit)
 			
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		
+	def _clear_stock_account_balance(self):
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
 		pr = webnotes.bean(copy=test_records[1])
@@ -115,12 +127,28 @@ test_records = [
 			"item_code": "_Test Item", 
 			"item_name": "_Test Item", 
 			"parentfield": "purchase_receipt_details", 
-			"received_qty": 10.0,
-			"qty": 10.0,
+			"received_qty": 5.0,
+			"qty": 5.0,
 			"rejected_qty": 0.0,
 			"import_rate": 50.0,
 			"amount": 500.0,
 			"warehouse": "_Test Warehouse - _TC", 
+			"stock_uom": "Nos", 
+			"uom": "_Test UOM",
+		},
+		{
+			"conversion_factor": 1.0, 
+			"description": "_Test Item", 
+			"doctype": "Purchase Receipt Item", 
+			"item_code": "_Test Item", 
+			"item_name": "_Test Item", 
+			"parentfield": "purchase_receipt_details", 
+			"received_qty": 5.0,
+			"qty": 5.0,
+			"rejected_qty": 0.0,
+			"import_rate": 50.0,
+			"amount": 500.0,
+			"warehouse": "_Test Warehouse 1 - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
 		},

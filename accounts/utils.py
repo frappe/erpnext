@@ -371,7 +371,6 @@ def get_stock_and_account_difference(warehouse_list=None):
 	account_warehouse_map = {}
 	warehouse_with_no_account = []
 	difference = {}
-	
 	warehouse_account = webnotes.conn.sql("""select name, account from tabWarehouse 
 		where name in (%s)""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list, as_dict=1)
 		
@@ -387,6 +386,7 @@ def get_stock_and_account_difference(warehouse_list=None):
 		account_balance = get_balance_on(account)
 		stock_value = get_latest_stock_balance(warehouse)
 		
-		difference.setdefault(account, (account_balance - stock_value))
+		if stock_value - account_balance:
+			difference.setdefault(account, (stock_value - account_balance))
 	
 	return difference

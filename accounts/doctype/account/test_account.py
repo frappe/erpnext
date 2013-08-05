@@ -12,6 +12,7 @@ def make_test_records(verbose):
 		["_Test Account Shipping Charges", "_Test Account Stock Expenses - _TC", "Ledger"],
 		["_Test Account Customs Duty", "_Test Account Stock Expenses - _TC", "Ledger"],
 		
+		
 		["_Test Account Tax Assets", "Current Assets - _TC", "Group"],
 		["_Test Account VAT", "_Test Account Tax Assets - _TC", "Ledger"],
 		["_Test Account Service Tax", "_Test Account Tax Assets - _TC", "Ledger"],
@@ -25,6 +26,7 @@ def make_test_records(verbose):
 		
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets - _TC", "Ledger"],
+		["_Test Account Fixed Assets", "Current Assets - _TC", "Ledger"],
 	]
 
 	test_objects = make_test_objects("Account", [[{

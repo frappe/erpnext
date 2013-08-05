@@ -329,15 +329,31 @@ class DocType(SellingController):
 			get_obj('Sales Common').check_credit(self, total)
 		
 	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
 		
-		gl_entries = []	
+		gl_entries = []
+		warehouse_item_map = {}
 		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
 			self.check_expense_account(item)
-			if item.buying_amount:
+			warehouse_item_map.setdefault(item.warehouse, [])
+			if item.item_code not in warehouse_item_map[item.warehouse]:
+				warehouse_item_map[item.warehouse].append(item.item_code)
+
+		
+				
+			
+			if [item.item_code, item.warehouse] not in item_warehouse:
+				item_warehouse.append([item.item_code, item.warehouse])
+			
+		for 
+			
+			
+			
+		for wh, cc_dict in expense_account_map.items:
+			for cost_center, warehouse_list in cc_dict.items():
 				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-					-1*item.buying_amount, cost_center=item.cost_center)
+					cost_center=item.cost_center, warehouse_list=warehouse_list)
 				
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries

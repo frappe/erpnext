@@ -6,7 +6,7 @@ import webnotes, unittest
 
 class TestSerialNo(unittest.TestCase):
 	def test_aii_gl_entries_for_serial_no_in_store(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		sr = webnotes.bean(copy=test_records[0])
 		sr.doc.serial_no = "_Test Serial No 1"
@@ -64,11 +64,11 @@ class TestSerialNo(unittest.TestCase):
 		
 		self.assertEquals(gl_count[0][0], 4)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		
 		
 	def test_aii_gl_entries_for_serial_no_delivered(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		sr = webnotes.bean(copy=test_records[0])
 		sr.doc.serial_no = "_Test Serial No 2"
@@ -80,7 +80,7 @@ class TestSerialNo(unittest.TestCase):
 			order by account desc""", sr.doc.name, as_dict=1)
 		self.assertFalse(gl_entries)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 
 test_dependencies = ["Item"]
 test_records = [

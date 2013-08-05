@@ -43,9 +43,9 @@ def get_stock_balance_on(warehouse_list, posting_date=None):
 		
 	return sum([sum(item_dict.values()) for item_dict in sle_map.values()])
 	
-def get_latest_stock_balance(warehouse_list):
+def get_latest_stock_balance(warehouse, item):
 	return webnotes.conn.sql("""
-		SELECT sum(stock_value) 
+		SELECT sum(stock_value)
 		FROM tabBin 
 		where warehouse in (%s)
 	""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list)[0][0]

@@ -21,18 +21,24 @@ import webnotes.defaults
 from controllers.accounts_controller import AccountsController
 
 class StockController(AccountsController):
-	def get_gl_entries_for_stock(self, against_stock_account, amount, 
-			stock_in_hand_account=None, cost_center=None):
-		if not stock_in_hand_account:
-			stock_in_hand_account = self.get_company_default("stock_in_hand_account")
+	def get_gl_entries_for_stock(self, against_stock_account, amount=None, 
+			stock_in_hand_account=None, cost_center=None, warehouse_list=None):
 		if not cost_center:
 			cost_center = self.get_company_default("stock_adjustment_cost_center")
-		
-		if amount:
-			gl_entries = [
+			
+		acc_diff = {}
+		if warehouse_list:
+			from accounts.utils import get_stock_and_account_difference
+			acc_diff = get_stock_and_account_difference(warehouse_list)
+		elif amount and stock_in_hand_account:
+			acc_diff = {stock_in_hand_account: amount}
+
+		gl_entries = []
+		for account, amount in acc_diff.items():
+			gl_entries += [
 				# stock in hand account
 				self.get_gl_dict({
-					"account": stock_in_hand_account,
+					"account": account,
 					"against": against_stock_account,
 					"debit": amount,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock",
@@ -41,14 +47,14 @@ class StockController(AccountsController):
 				# account against stock in hand
 				self.get_gl_dict({
 					"account": against_stock_account,
-					"against": stock_in_hand_account,
+					"against": account,
 					"credit": amount,
 					"cost_center": cost_center or None,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock",
 				}, self.doc.docstatus == 2),
 			]
 			
-			return gl_entries
+		return gl_entries
 			
 			
 	def get_sl_entries(self, d, args):		
