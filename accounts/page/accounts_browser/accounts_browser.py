@@ -16,15 +16,16 @@ def get_companies():
 		where parent='Account' and permlevel=0 and `read`=1""", as_dict=1)
 	
 	roles = webnotes.user.get_roles()
-	match = any((r["match"] for r in res 
-		if r["role"] in roles and r["match"]=="company"))
-	
-	# if match == company is specified and companies are specified in user defaults
-	if match:
-		return webnotes.defaults.get_user_default_as_list("company")
-	else:
-		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
-			where docstatus!=2""")]
+	match = any((True for r  in res
+                if r["role"] in roles and r["match"] == None))
+
+        # if match == None is specified then return all  companies else return companies specified in user defaults
+        if match:
+                return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
+                        where docstatus!=2""")]
+        else:
+                return webnotes.defaults.get_user_default_as_list("company")
+
 
 @webnotes.whitelist()
 def get_children():
