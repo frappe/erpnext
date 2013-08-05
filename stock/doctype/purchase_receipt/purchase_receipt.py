@@ -118,7 +118,7 @@ class DocType(BuyingController):
 			
 
 	def po_required(self):
-		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':
+		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'purchase_receipt_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)

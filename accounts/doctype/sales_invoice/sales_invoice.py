@@ -430,8 +430,8 @@ class DocType(SellingController):
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
-		for i in dic:	
-			if webnotes.conn.get_single_value('Selling Settings', dic[i]) == 'Yes':
+		for i in dic:
+			if webnotes.conn.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
 					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
@@ -979,6 +979,7 @@ def get_bank_cash_account(mode_of_payment):
 		"cash_bank_account": val
 	}
 
+@webnotes.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
