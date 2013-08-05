@@ -20,4 +20,7 @@ class DocType(DocTypeNestedSet):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				msgprint("Either target qty or target amount is mandatory.")
 				raise Exception
-				
+
+	def on_update(self):
+		super(DocType, self).on_update()
+		self.validate_one_root()

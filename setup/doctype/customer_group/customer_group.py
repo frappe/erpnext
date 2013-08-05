@@ -24,6 +24,7 @@ class DocType(DocTypeNestedSet):
 	def on_update(self):
 		self.validate_name_with_customer()
 		super(DocType, self).on_update()
+		self.validate_one_root()
 		
 	def validate_name_with_customer(self):
 		if webnotes.conn.exists("Customer", self.doc.name):
