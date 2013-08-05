@@ -252,14 +252,14 @@ class DocType(BuyingController):
 		self.doc.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
-		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':
+		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_order:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
 	def pr_required(self):
-		if webnotes.conn.get_single_value("Buying Settings", "pr_required") == 'Yes':
+		if webnotes.conn.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_receipt:
 					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
