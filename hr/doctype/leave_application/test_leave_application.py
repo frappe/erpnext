@@ -243,8 +243,8 @@ test_records = [
 	[{
 		"doctype": "Leave Application",
 		"leave_type": "_Test Leave Type LWP",
-		"from_date": "2013-01-02",
-		"to_date": "2013-01-02",
+		"from_date": "2013-01-15",
+		"to_date": "2013-01-15",
 		"posting_date": "2013-01-02",
 		"fiscal_year": "_Test Fiscal Year 2013",
 		"employee": "_T-Employee-0001",
