@@ -21,6 +21,10 @@ class DocType(DocTypeNestedSet):
 				webnotes.msgprint("Either target qty or target amount is mandatory.")
 				raise Exception
 	
+	def on_update(self):
+		super(DocType, self).on_update()
+		self.validate_one_root()
+	
 	def get_email_id(self):
 		profile = webnotes.conn.get_value("Employee", self.doc.employee, "user_id")
 		if not profile:

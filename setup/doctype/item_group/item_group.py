@@ -20,7 +20,6 @@ class DocType(DocTypeNestedSet):
 		
 		from website.helpers.product import invalidate_cache_for
 		
-		
 		if self.doc.show_in_website:
 			from webnotes.webutils import update_page_name
 			# webpage updates
@@ -37,6 +36,8 @@ class DocType(DocTypeNestedSet):
 			invalidate_cache_for(self.doc.name)
 			
 			webnotes.conn.set(self.doc, "page_name", None)
+		
+		self.validate_one_root()
 		
 	def validate_name_with_item(self):
 		if webnotes.conn.exists("Item", self.doc.name):
