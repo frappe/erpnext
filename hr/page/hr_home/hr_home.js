@@ -1,5 +1,5 @@
-// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
-// GNU General Public License. See "license.txt"
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt"
 
 wn.module_page["HR"] = [
 	{
@@ -159,6 +159,18 @@ wn.module_page["HR"] = [
 				"description": wn._("Employee grades"),
 				doctype: "Grade"
 			},
+		]
+	},
+	{
+		title: wn._("Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"label": wn._("HR Settings"),
+				"route": "Form/HR Settings",
+				"doctype":"HR Settings",
+				"description": "Settings for HR Module"
+			}
 		]
 	},
 	{

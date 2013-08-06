@@ -1,5 +1,5 @@
-# Copyright (c) 2012 Web Notes Technologies Pvt Ltd.
-# License: GNU General Public License (v3). For more information see license.txt
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 import os
 import webnotes

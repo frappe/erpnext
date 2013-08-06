@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-07-15 15:03:01", 
+  "modified": "2013-08-02 13:45:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -179,15 +179,6 @@
   "fieldname": "hr", 
   "fieldtype": "Section Break", 
   "label": "HR", 
-  "read_only": 0
- }, 
- {
-  "description": "Employee record is created using selected field. ", 
-  "doctype": "DocField", 
-  "fieldname": "emp_created_by", 
-  "fieldtype": "Select", 
-  "label": "Employee Records to be created by ", 
-  "options": "Naming Series\nEmployee Number", 
   "read_only": 0
  }, 
  {

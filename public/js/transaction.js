@@ -1,18 +1,5 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
 
 wn.provide("erpnext");
 wn.require("app/js/controllers/stock_controller.js");
@@ -51,22 +38,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
-	},
-	
-	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company) {
-			var me = this;
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "onload_post_render",
-				freeze: true,
-				callback: function(r) {
-					// remove this call when using client side mapper
-					me.set_default_values();
-					me.frm.refresh();
-				}
-			});
-		}
 	},
 	
 	validate: function() {
@@ -195,6 +166,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var company_currency = this.get_company_currency();
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
+		this.frm.refresh_fields();
 	},
 	
 	recalculate: function() {
@@ -314,15 +286,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
 							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency);
 						
-						item_tax[item_code][tax.account_head] = [tax_rate, tax_amount];
+						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {
-						item_tax[item_code][tax.account_head] = [flt(tax_data, tax_rate_precision) + "%", ""];
+						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
 					}
 				});
-			tax_accounts.push(tax.account_head);
+			tax_accounts.push([tax.name, tax.account_head]);
 		});
 		
-		var headings = $.map([wn._("Item Name")].concat(tax_accounts), 
+		var headings = $.map([wn._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
 		
 		var rows = $.map(this.get_item_doclist(), function(item) {
@@ -331,8 +303,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
 				item_name: item.item_name,
 				taxes: $.map(tax_accounts, function(head) {
-					return item_tax_record[head] ?
-						"<td>(" + item_tax_record[head][0] + ") " + item_tax_record[head][1] + "</td>" :
+					return item_tax_record[head[0]] ?
+						"<td>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
 						"<td></td>";
 				}).join("\n")
 			});
@@ -343,17 +315,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \
 		</table></div>';
-	},
-	
-	set_default_values: function() {
-		$.each(wn.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
-			var updated = wn.model.set_default_values(doc);
-			if(doc.parentfield) {
-				refresh_field(doc.parentfield);
-			} else {
-				refresh_field(updated);
-			}
-		});
 	},
 	
 	_validate_before_fetch: function(fieldname) {

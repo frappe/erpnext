@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 #!/usr/bin/env python
 from __future__ import unicode_literals
 import os, sys

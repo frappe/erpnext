@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.	If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -55,6 +42,7 @@ class DocType:
 		if self.doc.user_id:
 			self.update_user_default()
 			self.update_profile()
+		self.update_dob_event()
 				
 	def update_user_default(self):
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
@@ -177,6 +165,32 @@ class DocType:
 			if "Leave Approver" not in Profile(l.leave_approver).get_roles():
 				msgprint(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
 					raise_exception=InvalidLeaveApproverError)
+
+	def update_dob_event(self):
+		get_events = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
+			and ref_type='Employee' and ref_name=%s""", (self.doc.name), as_dict=1)
+
+		starts_on = self.doc.date_of_birth + " 00:00:00"
+		ends_on = self.doc.date_of_birth + " 00:15:00"
+
+		if get_events:
+			webnotes.conn.sql("""update `tabEvent` set starts_on=%s, ends_on=%s 
+				where name=%s""", (get_events[0].name, starts_on, ends_on)
+		else:
+			event_wrapper = webnotes.bean({
+				"doctype": "Event",
+				"subject": self.doc.employee_name + "'s Birthday",
+				"starts_on": starts_on,
+				"ends_on": ends_on,
+				"event_type": "Public",
+				"all_day": 1,
+				"send_reminder": 1,
+				"repeat_this_event": 1,
+				"repeat_on": "Every Year",
+				"ref_type": "Employee",
+				"ref_name": self.doc.name
+			}).insert()
+			
 
 @webnotes.whitelist()
 def get_retirement_date(date_of_birth=None):
