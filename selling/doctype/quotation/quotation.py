@@ -240,8 +240,7 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 				"doctype": "Sales Order Item", 
 				"field_map": {
 					"parent": "prevdoc_docname"
-				}, 
-				"add_if_empty": True
+				}
 			}, 
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
