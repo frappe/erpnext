@@ -14,6 +14,7 @@ def execute(filters=None):
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 	
+	
 	data = []
 	for ss in salary_slips:
 		row = [ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation, 
