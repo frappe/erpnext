@@ -29,3 +29,14 @@ cur_frm.cscript.merge = function(doc, cdt, cdn) {
 		return $c_obj(make_doclist(cdt, cdn), 'merge_warehouses', '', '');
 	}
 }
+
+cur_frm.set_query("account", function() {
+	return {
+		filters: {
+			"company": cur_frm.doc.company,
+			"debit_or_credit": "Debit",
+			"is_pl_account": "No",
+			'group_or_ledger': "Ledger"
+		}
+	}
+})
