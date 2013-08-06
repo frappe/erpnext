@@ -16,13 +16,17 @@ class DocType:
 		self.doclist = doclist
 		
 	def autoname(self):
-		ret = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'emp_created_by'")
-		if not ret:
-			msgprint("Please setup Employee Naming System in Setup > Global Defaults > HR", raise_exception=True)
+		naming_method = webnotes.conn.get_value("HR Settings", None, "emp_created_by")
+		if not naming_method:
+			webnotes.throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
-			if ret[0][0]=='Naming Series':
+			if naming_method=='Naming Series':
+				if not self.doc.naming_series:
+					webnotes.throw(_("Please select Naming Neries"))
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
-			elif ret[0][0]=='Employee Number':
+			elif naming_method=='Employee Number':
+				if not self.doc.employee_number:
+					webnotes.throw(_("Please enter Employee Number"))
 				self.doc.name = self.doc.employee_number
 
 		self.doc.employee = self.doc.name
@@ -34,7 +38,6 @@ class DocType:
 		self.doc.employee = self.doc.name
 		self.validate_date()
 		self.validate_email()
-		self.validate_name()
 		self.validate_status()
 		self.validate_employee_leave_approver()
 		
@@ -136,20 +139,6 @@ class DocType:
 		if self.doc.personal_email and not validate_email_add(self.doc.personal_email):
 			msgprint("Please enter valid Personal Email")
 			raise Exception
-
-	def validate_name(self):	
-		ret = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'emp_created_by'")
-
-		if not ret:
-			msgprint("To Save Employee, please go to Setup -->Global Defaults. Click on HR and select 'Employee Records to be created by'.")
-			raise Exception 
-		else:
-			if ret[0][0]=='Naming Series' and not self.doc.naming_series:
-				msgprint("Please select Naming Series.")
-				raise Exception 
-			elif ret[0][0]=='Employee Number' and not self.doc.employee_number:
-				msgprint("Please enter Employee Number.")
-				raise Exception 
 				
 	def validate_status(self):
 		if self.doc.status == 'Left' and not self.doc.relieving_date:
