@@ -367,7 +367,7 @@ def get_stock_and_account_difference(warehouse_list=None):
 	if not warehouse_list:
 		warehouse_list = webnotes.conn.sql_list("""select name from tabWarehouse 
 			where docstatus<2""")
-	
+			
 	account_warehouse_map = {}
 	warehouse_with_no_account = []
 	difference = {}
@@ -382,9 +382,11 @@ def get_stock_and_account_difference(warehouse_list=None):
 		msgprint(_("Please mention Perpetual Account in warehouse master for following warehouses")
 			 + ": " + '\n'.join(warehouse_with_no_account), raise_exception=1)
 
-	for account, warehouse in account_warehouse_map.items():
+	bin_map = get_latest_stock_balance()
+	for account, warehouse_list in account_warehouse_map.items():
 		account_balance = get_balance_on(account)
-		stock_value = get_latest_stock_balance(warehouse)
+		stock_value = sum([sum(bin_map.get(warehouse, {}).values()) 
+			for warehouse in warehouse_list])
 		
 		if stock_value - account_balance:
 			difference.setdefault(account, (stock_value - account_balance))
