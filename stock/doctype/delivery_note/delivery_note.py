@@ -107,6 +107,8 @@ class DocType(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_warehouse_with_company([d.warehouse 
+			for d in self.doclist.get({"parentfield": "delivery_note_details"})])
 		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
 		sales_com_obj.check_conversion_rate(self)
@@ -174,7 +176,7 @@ class DocType(SellingController):
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
 						% d['item_code'], raise_exception=1)
-
+				
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
@@ -332,32 +334,23 @@ class DocType(SellingController):
 		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
 		
-		gl_entries = []
-		warehouse_item_map = {}
+		gl_entries = []	
+		warehouse_list = []
 		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
 			self.check_expense_account(item)
-			warehouse_item_map.setdefault(item.warehouse, [])
-			if item.item_code not in warehouse_item_map[item.warehouse]:
-				warehouse_item_map[item.warehouse].append(item.item_code)
-
-		
-				
 			
-			if [item.item_code, item.warehouse] not in item_warehouse:
-				item_warehouse.append([item.item_code, item.warehouse])
-			
-		for 
-			
-			
-			
-		for wh, cc_dict in expense_account_map.items:
-			for cost_center, warehouse_list in cc_dict.items():
+			if item.buying_amount:
 				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-					cost_center=item.cost_center, warehouse_list=warehouse_list)
+					-1*item.buying_amount, item.warehouse, cost_center=item.cost_center)
+				if item.warehouse not in warehouse_list:
+					warehouse_list.append(item.warehouse)
 				
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
+			
+			self.sync_stock_account_balance(warehouse_list)
+
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

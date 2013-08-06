@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-08-01 16:50:05", 
+  "modified": "2013-08-05 16:51:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -163,7 +163,7 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
+  "depends_on": "eval:sys_defaults.perpetual_accounting", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 

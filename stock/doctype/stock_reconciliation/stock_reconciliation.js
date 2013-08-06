@@ -25,7 +25,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	set_default_expense_account: function() {
 		var me = this;
 		
-		if (sys_defaults.auto_inventory_accounting && !this.frm.doc.expense_account) {
+		if (sys_defaults.perpetual_accounting && !this.frm.doc.expense_account) {
 			return this.frm.call({
 				method: "accounts.utils.get_company_default",
 				args: {
@@ -41,7 +41,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	
 	setup: function() {
 		var me = this;
-		if (sys_defaults.auto_inventory_accounting) {
+		if (sys_defaults.perpetual_accounting) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 		
 			this.frm.fields_dict["expense_account"].get_query = function() {

@@ -140,7 +140,10 @@ class DocType(BuyingController):
 		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
-
+		self.validate_warehouse_with_company(reduce(lambda x,y: x+y, 
+			[[d.warehouse, d.rejected_warehouse] for d in 
+				self.doclist.get({"parentfield": "purchase_receipt_details"})]))
+				
 		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
 		self.validate_challan_no()
 
@@ -319,25 +322,21 @@ class DocType(BuyingController):
 			return
 		
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
-		warehouse_list = [d.warehouse for d in 
-			self.doclist.get({"parentfield": "purchase_receipt_details"})]
-
-		gl_entries = self.get_gl_entries_for_stock(against_stock_account, warehouse_list=warehouse_list)
+		gl_entries = []
+		warehouse_list = []
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if d.valuation_rate:
+				gl_entries += self.get_gl_entries_for_stock(against_stock_account, 
+					d.valuation_rate, d.warehouse)
+				
+				if d.warehouse not in warehouse_list:
+					warehouse_list.append(d.warehouse)
 		
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
-		
-	def get_total_valuation_amount(self):
-		total_valuation_amount = 0.0
-		stock_items = self.get_stock_items()
-		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			if item.item_code in stock_items:
-				total_valuation_amount += flt(item.valuation_rate) * \
-					flt(item.qty) * flt(item.conversion_factor)
-
-		return total_valuation_amount
-		
+			
+			self.sync_stock_account_balance(warehouse_list)
 	
 @webnotes.whitelist()
 def make_purchase_invoice(source_name, target_doclist=None):

@@ -25,9 +25,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function() {
 		var me = this;
 		
-		if (cint(wn.defaults.get_default("auto_inventory_accounting")) && !this.frm.doc.expense_adjustment_account) {
+		if (cint(wn.defaults.get_default("perpetual_accounting")) && !this.frm.doc.expense_adjustment_account) {
 			if (this.frm.doc.purpose == "Sales Return")
-				account_for = "stock_in_hand_account";
+				account_for = "default_expense_account";
 			else if (this.frm.doc.purpose == "Purchase Return") 
 				account_for = "stock_received_but_not_billed";
 			else account_for = "stock_adjustment_account";
@@ -78,7 +78,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		};
 		
-		if(cint(wn.defaults.get_default("auto_inventory_accounting"))) {
+		if(cint(wn.defaults.get_default("perpetual_accounting"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {

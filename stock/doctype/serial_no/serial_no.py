@@ -75,6 +75,8 @@ class DocType(StockController):
 			self.make_gl_entries()
 
 	def make_stock_ledger_entry(self, qty):
+		self.validate_warehouse_with_company([self.doc.warehouse])
+		
 		sl_entries = [{
 			'item_code'				: self.doc.item_code,
 			'warehouse'				: self.doc.warehouse,
@@ -102,7 +104,7 @@ class DocType(StockController):
 			webnotes.conn.set(self.doc, 'status', 'Not in Use')
 			self.make_stock_ledger_entry(-1)
 			
-			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+			if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
 				and webnotes.conn.sql("""select name from `tabGL Entry`
 				where voucher_type=%s and voucher_no=%s and ifnull(is_cancelled, 'No')='No'""",
 				(self.doc.doctype, self.doc.name)):
@@ -133,16 +135,24 @@ class DocType(StockController):
 					('\n'.join(serial_nos), item[0]))
 
 	def make_gl_entries(self, cancel=False):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
-				
-		from accounts.general_ledger import make_gl_entries
-		against_stock_account = self.get_company_default("stock_adjustment_account")
-		gl_entries = self.get_gl_entries_for_stock(against_stock_account, self.doc.purchase_rate)
-		
-		for entry in gl_entries:
-			entry["posting_date"] = self.doc.purchase_date or (self.doc.creation and 
-				self.doc.creation.split(' ')[0]) or nowdate()
 			
+		if not self.doc.cost_center:
+			msgprint(_("Please enter Cost Center"), raise_exception=1)
+		
+		against_stock_account = self.get_company_default("stock_adjustment_account")
+		gl_entries = self.get_gl_entries_for_stock(against_stock_account, 
+			self.doc.purchase_rate, self.doc.warehouse, cost_center=self.doc.cost_center)
+		
+		posting_date = self.doc.purchase_date or (self.doc.creation and 
+			self.doc.creation.split(' ')[0]) or nowdate()
+			
+		for entry in gl_entries:
+			entry["posting_date"] = posting_date
+		
 		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel)
+			self.sync_stock_account_balance([self.doc.warehouse], self.doc.cost_center, 
+				posting_date)

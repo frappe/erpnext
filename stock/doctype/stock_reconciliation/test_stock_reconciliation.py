@@ -9,7 +9,7 @@ from accounts.utils import get_fiscal_year
 
 class TestStockReconciliation(unittest.TestCase):
 	def test_reco_for_fifo(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -53,7 +53,7 @@ class TestStockReconciliation(unittest.TestCase):
 			
 		
 	def test_reco_for_moving_average(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -99,7 +99,7 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertFalse(gl_entries)
 			
 	def test_reco_fifo_gl_entries(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, stock_in_hand_debit]]
@@ -131,10 +131,10 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.check_gl_entries(stock_reco.doc.name, -d[4], True)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)		
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)		
 			
 	def test_reco_moving_average_gl_entries(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, stock_in_hand_debit]]
@@ -166,7 +166,7 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.check_gl_entries(stock_reco.doc.name, -d[4], True)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 
 
 	def cleanup_data(self):

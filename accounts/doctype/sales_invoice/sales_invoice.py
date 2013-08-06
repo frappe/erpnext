@@ -61,6 +61,8 @@ class DocType(SellingController):
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_warehouse_with_company([d.warehouse 
+			for d in self.doclist.get({"parentfield": "entries"})])
 
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -586,6 +588,10 @@ class DocType(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
 				
+			warehouse_list = list(set([d.warehouse for d in 
+				self.doclist.get({"parentfield": "entries"})]))
+			self.sync_stock_account_balance(warehouse_list)
+				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
 			gl_entries.append(
@@ -627,7 +633,7 @@ class DocType(SellingController):
 				)
 				
 		# expense account gl entries
-		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+		if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
 				and cint(self.doc.update_stock):
 			
 			for item in self.doclist.get({"parentfield": "entries"}):
@@ -635,7 +641,7 @@ class DocType(SellingController):
 			
 				if item.buying_amount:
 					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-						-1*item.buying_amount, cost_center=item.cost_center)
+						-1*item.buying_amount, item.warehouse, cost_center=item.cost_center)
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

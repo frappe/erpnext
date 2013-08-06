@@ -119,8 +119,8 @@ class DocType:
 		})
 		global_defaults.save()
 		
-		webnotes.conn.set_value("Accounts Settings", None, "auto_inventory_accounting", 1)
-		webnotes.conn.set_default("auto_inventory_accounting", 1)
+		webnotes.conn.set_value("Accounts Settings", None, "perpetual_accounting", 1)
+		webnotes.conn.set_default("perpetual_accounting", 1)
 
 		stock_settings = webnotes.bean("Stock Settings")
 		stock_settings.doc.item_naming_by = "Item Code"

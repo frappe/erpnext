@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:29:43", 
+  "modified": "2013-08-05 17:35:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -149,6 +149,14 @@
   "read_only": 1, 
   "reqd": 0, 
   "search_index": 0
+ }, 
+ {
+  "depends_on": "eval:sys_defaults.perpetual_accounting", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "options": "Cost Center"
  }, 
  {
   "doctype": "DocField", 
@@ -519,6 +527,13 @@
   "print_hide": 1, 
   "read_only": 1, 
   "report_hide": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
  }, 
  {
   "cancel": 1, 

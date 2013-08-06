@@ -33,7 +33,7 @@ class DocType:
 	def validate(self):
 		self.check_for_duplicate()
 		self.validate_expense_account()
-		
+	
 	def check_for_duplicate(self):
 		res = webnotes.conn.sql("""select name, user from `tabPOS Setting` 
 			where ifnull(user, '') = %s and name != %s and company = %s""", 
@@ -47,6 +47,6 @@ class DocType:
 					(res[0][0], self.doc.company), raise_exception=1)
 
 	def validate_expense_account(self):
-		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+		if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
 				and not self.doc.expense_account:
 			msgprint(_("Expense Account is mandatory"), raise_exception=1)

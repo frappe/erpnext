@@ -7,7 +7,7 @@ from webnotes.utils import flt
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		if hasattr(self, "old_default_company"):
 			webnotes.conn.set_default("company", self.old_default_company)
 
@@ -45,7 +45,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_receipt_gl_entry(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
@@ -80,7 +80,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_issue_gl_entry(self):
 		self._clear_stock()
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
@@ -120,7 +120,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	def test_material_transfer_gl_entry(self):
 		self._clear_stock()
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()

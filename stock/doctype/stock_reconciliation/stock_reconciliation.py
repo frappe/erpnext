@@ -69,8 +69,10 @@ class DocType(StockController):
 		if len(rows) > 100:
 			msgprint(_("""Sorry! We can only allow upto 100 rows for Stock Reconciliation."""),
 				raise_exception=True)
-		
+		warehouse_list = []
 		for row_num, row in enumerate(rows):
+			if row[1] not in warehouse_list:
+				warehouse_list.append(row[1])
 			# find duplicates
 			if [row[0], row[1]] in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, "Duplicate entry"))
@@ -101,6 +103,8 @@ class DocType(StockController):
 				msgprint(msg)
 			
 			raise webnotes.ValidationError
+			
+		self.validate_warehouse_with_company(warehouse_list)
 			
 	def validate_item(self, item_code, row_num):
 		from stock.utils import validate_end_of_life, validate_is_stock_item, \
@@ -301,26 +305,54 @@ class DocType(StockController):
 		warehouse_list = [d.warehouse for d in self.entries]
 		stock_ledger_entries = self.get_stock_ledger_entries(item_list, warehouse_list)
 		
-		self.doc.stock_value_difference = 0.0
+		stock_value_difference = {}
 		for d in self.entries:
-			self.doc.stock_value_difference -= get_buying_amount(d.item_code, d.warehouse, 
-				d.actual_qty, self.doc.doctype, self.doc.name, d.voucher_detail_no, 
-				stock_ledger_entries)
-		webnotes.conn.set(self.doc, "stock_value_difference", self.doc.stock_value_difference)
+			diff = get_buying_amount(d.item_code, d.warehouse, d.actual_qty, self.doc.doctype, 
+				self.doc.name, d.voucher_detail_no, stock_ledger_entries)
+			stock_value_difference.setdefault(d.warehouse, 0.0)
+			stock_value_difference[d.warehouse] += diff
+
+		webnotes.conn.set(self.doc, "stock_value_difference", json.dumps(stock_value_difference))
 		
 	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
 		
 		if not self.doc.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
+		else:
+			self.validate_expense_account()
 			
-		from accounts.general_ledger import make_gl_entries
-				
-		gl_entries = self.get_gl_entries_for_stock(self.doc.expense_account, 
-			self.doc.stock_value_difference)
+		if not self.doc.cost_center:
+			msgprint(_("Please enter Cost Center"), raise_exception=1)
+		
+		if self.doc.stock_value_difference:
+			stock_value_difference = json.loads(self.doc.stock_value_difference)
+		
+			gl_entries = []
+			warehouse_list = []
+			for warehouse, diff in stock_value_difference.items():
+				if diff:
+					gl_entries += self.get_gl_entries_for_stock(self.doc.expense_account, diff, 
+						warehouse, self.doc.cost_center)
+						
+					if warehouse not in warehouse_list:
+						warehouse_list.append(warehouse)
+		
 		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+			
+			self.sync_stock_account_balance(warehouse_list, self.doc.cost_center)
+			
+	def validate_expense_account(self):
+		if not webnotes.conn.sql("select * from `tabStock Ledger Entry`"):
+			if webnotes.conn.get_value("Account", self.doc.expense_account, 
+					"is_pl_account") == "Yes":
+				msgprint(_("""Expense Account can not be a PL Account, as this stock \
+					reconciliation is an opening entry. Please select 'Temporary Liability' or \
+					relevant account"""), raise_exception=1)
+			
 		
 @webnotes.whitelist()
 def upload():

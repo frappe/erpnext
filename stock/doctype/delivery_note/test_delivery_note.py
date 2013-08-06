@@ -50,8 +50,8 @@ class TestDeliveryNote(unittest.TestCase):
 	
 	def test_delivery_note_no_gl_entry(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 0)
 		
 		self._insert_purchase_receipt()
 		
@@ -69,8 +69,8 @@ class TestDeliveryNote(unittest.TestCase):
 		webnotes.conn.sql("""delete from `tabBin`""")
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
 		
 		self._insert_purchase_receipt()
 		
@@ -106,7 +106,7 @@ class TestDeliveryNote(unittest.TestCase):
 		bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
 		self.assertEquals(bal, prev_bal - 375.0)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 
 test_records = [
 	[

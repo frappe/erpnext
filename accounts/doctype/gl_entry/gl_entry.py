@@ -69,6 +69,7 @@ class DocType:
 	def validate_posting_date(self):
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
+		
 
 	def check_credit_limit(self):
 		master_type, master_name = webnotes.conn.get_value("Account", 

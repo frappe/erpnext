@@ -7,7 +7,6 @@ import webnotes, unittest
 class TestSerialNo(unittest.TestCase):
 	def test_aii_gl_entries_for_serial_no_in_store(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
-		
 		sr = webnotes.bean(copy=test_records[0])
 		sr.doc.serial_no = "_Test Serial No 1"
 		sr.insert()
@@ -96,7 +95,8 @@ test_records = [
 			"purchase_rate": 1000.0, 
 			"purchase_time": "11:37:39", 
 			"purchase_date": "2013-02-26",
-			'fiscal_year': "_Test Fiscal Year 2013"
+			'fiscal_year': "_Test Fiscal Year 2013",
+			"cost_center": "_Test Cost Center - _TC"
 		}
 	]
 ]

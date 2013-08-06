@@ -34,7 +34,7 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 			
 		self.validate_for_freezed_account()
-			
+		
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
@@ -410,7 +410,6 @@ class AccountsController(TransactionBase):
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)
-			
 		
 	def get_stock_items(self):
 		stock_items = []
