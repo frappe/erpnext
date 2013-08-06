@@ -168,7 +168,7 @@ class DocType:
 		else:
 			event_wrapper = webnotes.bean({
 				"doctype": "Event",
-				"subject": self.doc.employee_name + "'s Birthday",
+				"subject": _("Birthday") + ": " + self.doc.employee_name,
 				"starts_on": starts_on,
 				"ends_on": ends_on,
 				"event_type": "Public",
