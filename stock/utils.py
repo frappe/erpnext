@@ -43,12 +43,13 @@ def get_stock_balance_on(warehouse_list, posting_date=None):
 		
 	return sum([sum(item_dict.values()) for item_dict in sle_map.values()])
 	
-def get_latest_stock_balance(warehouse, item):
-	return webnotes.conn.sql("""
-		SELECT sum(stock_value)
-		FROM tabBin 
-		where warehouse in (%s)
-	""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list)[0][0]
+def get_latest_stock_balance():
+	bin_map = {}
+	for d in webnotes.conn.sql("""SELECT item_code, warehouse, sum(stock_value) as stock_value 
+		FROM tabBin""", as_dict=1):
+			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, d.stock_value)
+			
+	return bin_map
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
