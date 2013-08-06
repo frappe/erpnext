@@ -27,7 +27,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		// if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
-		// 	cur_frm.cscript.toggle_pos(true);
+		//   cur_frm.cscript.toggle_pos(true);
 		// }
 	},
 
