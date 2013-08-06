@@ -1,18 +1,5 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
 
 // Preset
 // ------
@@ -29,6 +16,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super();
 		this.toggle_rounded_total();
 		this.setup_queries();
+		this.toggle_editable_price_list_rate();
 	},
 	
 	setup_queries: function() {
@@ -317,6 +305,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
+	toggle_editable_price_list_rate: function() {
+		var df = wn.meta.get_docfield(this.tname, "ref_rate", this.frm.doc.name);
+		var editable_price_list_rate = cint(wn.defaults.get_default("editable_price_list_rate"));
+		
+		if(df && editable_price_list_rate) {
+			df.read_only = 0;
+		}
+	},
+	
 	calculate_taxes_and_totals: function() {
 		this._super();
 		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
@@ -595,7 +592,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
-		var show = this.frm.doc.currency != company_currency;
+		var show = (this.frm.doc.currency != company_currency) || 
+			(wn.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
+				{parentfield: "other_charges", included_in_print_rate: 1}).length);
+		
 		$.each(["basic_rate", "base_ref_rate", "amount"], function(i, fname) {
 			if(wn.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show);
@@ -604,7 +604,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// set labels
 		var $wrapper = $(this.frm.wrapper);
 		$.each(field_label_map, function(fname, label) {
-			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
+			fname = fname.split("-");
+			var df = wn.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
+			if(df) df.label = label;
 		});
 	},
 	

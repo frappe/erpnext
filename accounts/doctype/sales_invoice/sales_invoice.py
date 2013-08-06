@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -432,8 +419,8 @@ class DocType(SellingController):
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
-		for i in dic:	
-			if webnotes.conn.get_single_value('Selling Settings', dic[i]) == 'Yes':
+		for i in dic:
+			if webnotes.conn.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
 					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
@@ -960,6 +947,7 @@ def get_bank_cash_account(mode_of_payment):
 		"cash_bank_account": val
 	}
 
+@webnotes.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 

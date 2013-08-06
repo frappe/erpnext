@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-07-23 12:00:14", 
+  "modified": "2013-08-05 17:21:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -75,7 +75,7 @@
   "oldfieldname": "parent_item_group", 
   "oldfieldtype": "Link", 
   "options": "Item Group", 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 0
  }, 
  {

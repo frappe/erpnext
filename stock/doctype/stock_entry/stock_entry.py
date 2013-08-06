@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -472,6 +459,7 @@ class DocType(StockController):
 	def get_items(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
 		
+		pro_obj = None
 		if self.doc.production_order:
 			# common validations
 			pro_obj = get_obj('Production Order', self.doc.production_order)
@@ -490,7 +478,8 @@ class DocType(StockController):
 				else:
 					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
 					for item in item_dict.values():
-						item["from_warehouse"] = pro_obj.doc.wip_warehouse
+						if pro_obj:
+							item["from_warehouse"] = pro_obj.doc.wip_warehouse
 						item["to_warehouse"] = ""
 
 				# add raw materials to Stock Entry Detail table
@@ -515,8 +504,12 @@ class DocType(StockController):
 				item = webnotes.conn.sql("""select item, description, uom from `tabBOM`
 					where name=%s""", (self.doc.bom_no,), as_dict=1)
 				self.add_to_stock_entry_detail({
-					item[0]["item"] :
-						[self.doc.fg_completed_qty, item[0]["description"], item[0]["uom"]]
+					item[0]["item"] : {
+						"qty": self.doc.fg_completed_qty,
+						"description": item[0]["description"],
+						"stock_uom": item[0]["uom"],
+						"from_warehouse": ""
+					}
 				}, bom_no=self.doc.bom_no)
 		
 		self.get_stock_and_rate()
@@ -638,7 +631,7 @@ class DocType(StockController):
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 
 				self.doclist)
-			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.doc.from_warehouse) 
+			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.doc.from_warehouse)
 			se_child.t_warehouse = item_dict[d].get("to_warehouse", self.doc.to_warehouse)
 			se_child.item_code = cstr(d)
 			se_child.description = item_dict[d]["description"]

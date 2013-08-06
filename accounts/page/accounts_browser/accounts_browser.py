@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 from __future__ import unicode_literals
 import webnotes
 import webnotes.defaults
@@ -7,21 +10,8 @@ from accounts.utils import get_balance_on
 @webnotes.whitelist()
 def get_companies():
 	"""get a list of companies based on permission"""
-	
-	# check if match permission exists
-	res = webnotes.conn.sql("""select role, `match` from `tabDocPerm`
-		where parent='Account' and permlevel=0 and `read`=1""", as_dict=1)
-	
-	roles = webnotes.user.get_roles()
-	match = any((r["match"] for r in res 
-		if r["role"] in roles and r["match"]=="company"))
-	
-	# if match == company is specified and companies are specified in user defaults
-	if match:
-		return webnotes.defaults.get_user_default_as_list("company")
-	else:
-		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
-			where docstatus!=2""")]
+	return [d.name for d in webnotes.get_list("Company", fields=["name"], 
+		order_by="name")]
 
 @webnotes.whitelist()
 def get_children():

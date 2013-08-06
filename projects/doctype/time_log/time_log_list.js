@@ -1,3 +1,6 @@
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
+
 // render
 wn.listview_settings['Time Log'] = {
 	add_fields: ["`tabTime Log`.`status`", "`tabTime Log`.`billable`", "`tabTime Log`.`activity_type`"],

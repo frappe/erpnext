@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -91,19 +78,9 @@ class DocType(BuyingController):
 		return ret
 		
 	def set_supplier_defaults(self):
-		self.doc.fields.update(self.get_supplier())
 		self.doc.fields.update(self.get_credit_to())
 		super(DocType, self).set_supplier_defaults()
 		
-	def get_supplier(self):
-		ret = {}
-		if self.doc.credit_to:
-			acc = webnotes.conn.get_value('Account',self.doc.credit_to,['master_name', 'credit_days'])
-			ret['supplier'] = acc[0]
-			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
-			
-		return ret
-
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
@@ -263,14 +240,14 @@ class DocType(BuyingController):
 		self.doc.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
-		if webnotes.conn.get_single_value("Buying Settings", "po_required") == 'Yes':
+		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_order:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
 	def pr_required(self):
-		if webnotes.conn.get_single_value("Buying Settings", "pr_required") == 'Yes':
+		if webnotes.conn.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_receipt:
 					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
@@ -467,3 +444,17 @@ class DocType(BuyingController):
 					"conversion_factor")) or 1
 		
 				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)
+				
+@webnotes.whitelist()
+def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
+			where (tabAccount.debit_or_credit="Debit" 
+					or tabAccount.account_type = "Expense Account") 
+				and tabAccount.group_or_ledger="Ledger" 
+				and tabAccount.docstatus!=2 
+				and tabAccount.company = '%(company)s' 
+				and tabAccount.%(key)s LIKE '%(txt)s'
+				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})

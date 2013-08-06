@@ -1,18 +1,5 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.	If not, see <http://www.gnu.org/licenses/>.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
 
 wn.provide("erpnext.hr");
 erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
@@ -43,11 +30,12 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		return this.frm.call({
 			method:"hr.utils.get_leave_approver_list",
 			callback: function(r) {
-				me.frm.fields_dict.employee_leave_approvers.grid
-					.get_field("leave_approver").df.options =
-					$.map(r.message, function(profile) { 
-						return {value: profile, label: wn.user_info(profile).fullname}; 
-					});
+				var df = wn.meta.get_docfield("Employee Leave Approver", "leave_approver",
+					me.frm.doc.name);
+				df.options = $.map(r.message, function(profile) { 
+					return {value: profile, label: wn.user_info(profile).fullname}; 
+				});
+				me.frm.fields_dict.employee_leave_approvers.refresh();
 			}
 		});
 	},

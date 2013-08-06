@@ -306,11 +306,11 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "eval:(doc.purpose!==\"Sales Return\" || doc.purpose!==\"Purchase Return\")", 
+  "depends_on": "eval:(doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
   "doctype": "DocField", 
   "fieldname": "sb1", 
   "fieldtype": "Section Break", 
-  "label": "Reference", 
+  "label": "From Bill of Materials", 
   "read_only": 0
  }, 
  {

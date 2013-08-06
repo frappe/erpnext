@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:34:20", 
+  "modified": "2013-08-05 18:12:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -69,7 +69,7 @@
   "oldfieldname": "parent_customer_group", 
   "oldfieldtype": "Link", 
   "options": "Customer Group", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "description": "Only leaf nodes are allowed in transaction", 

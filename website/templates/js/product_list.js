@@ -1,3 +1,6 @@
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// License: GNU General Public License v3. See license.txt
+
 window.get_product_list = function() {
 	$(".more-btn .btn").click(function() {
 		window.get_product_list()

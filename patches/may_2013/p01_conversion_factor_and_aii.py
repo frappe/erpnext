@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 import webnotes
 from webnotes.utils import cint
 from accounts.utils import create_stock_in_hand_jv

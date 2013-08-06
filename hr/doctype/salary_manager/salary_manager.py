@@ -1,18 +1,5 @@
-# ERPNext - web based ERP (http://erpnext.com)
-# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -112,26 +99,16 @@ class DocType:
 			if not sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
 					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
-				ss = Document('Salary Slip')
-				ss.fiscal_year = self.doc.fiscal_year
-				ss.employee = emp[0]
-				ss.month = self.doc.month
-				ss.email_check = self.doc.send_email
-				ss.company = self.doc.company
-				ss.save(1)
-			
-				ss_obj = get_obj('Salary Slip', ss.name, with_children=1)
-				ss_obj.get_emp_and_leave_details()
-				ss_obj.calculate_net_pay()
-				ss_obj.validate()
-				ss_obj.doc.save()
-			
-				for d in getlist(ss_obj.doclist, 'earning_details'):
-					d.save()
-				for d in getlist(ss_obj.doclist, 'deduction_details'):
-					d.save()
-					
-				ss_list.append(ss.name)
+				ss = webnotes.bean({
+					"doctype": "Salary Slip",
+					"fiscal_year": self.doc.fiscal_year,
+					"employee": emp[0],
+					"month": self.doc.month,
+					"email_check": self.doc.send_email,
+					"company": self.doc.company,
+				})
+				ss.insert()
+				ss_list.append(ss.doc.name)
 		
 		return self.create_log(ss_list)
 	

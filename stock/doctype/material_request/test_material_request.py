@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
@@ -84,9 +87,9 @@ class TestMaterialRequest(unittest.TestCase):
 				"parentfield": "mtn_details", 
 				"incoming_rate": 100,
 				"qty": qty1, 
-				"stock_uom": "_Test UOM", 
+				"stock_uom": "_Test UOM 1", 
 				"transfer_qty": qty1, 
-				"uom": "_Test UOM",
+				"uom": "_Test UOM 1",
 				"t_warehouse": "_Test Warehouse 1 - _TC",
 			},
 			{
@@ -96,9 +99,9 @@ class TestMaterialRequest(unittest.TestCase):
 				"parentfield": "mtn_details", 
 				"incoming_rate": 100,
 				"qty": qty2, 
-				"stock_uom": "_Test UOM", 
+				"stock_uom": "_Test UOM 1", 
 				"transfer_qty": qty2, 
-				"uom": "_Test UOM",
+				"uom": "_Test UOM 1",
 				"t_warehouse": "_Test Warehouse 1 - _TC",
 			},
 		])
@@ -316,7 +319,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr = webnotes.bean(copy=test_records[0])
 		mr.doc.company = "_Test Company 1"
 		self.assertRaises(WrongWarehouseCompany, mr.insert)
-		
+
+test_dependencies = ["Currency Exchange"]
 test_records = [
 	[
 		{
@@ -335,7 +339,7 @@ test_records = [
 			"parentfield": "indent_details", 
 			"qty": 54.0, 
 			"schedule_date": "2013-02-18", 
-			"uom": "_Test UOM",
+			"uom": "_Test UOM 1",
 			"warehouse": "_Test Warehouse - _TC"
 		}, 
 		{
@@ -346,7 +350,7 @@ test_records = [
 			"parentfield": "indent_details", 
 			"qty": 3.0, 
 			"schedule_date": "2013-02-19", 
-			"uom": "_Test UOM",
+			"uom": "_Test UOM 1",
 			"warehouse": "_Test Warehouse - _TC"
 		}
 	],

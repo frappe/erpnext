@@ -164,15 +164,7 @@
   "width": "50%"
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "cost_center", 
-  "fieldtype": "Link", 
-  "label": "Cost Center", 
-  "no_copy": 1, 
-  "options": "Cost Center"
- }, 
- {
+  "description": "To enable more currencies go to Setup > Currency", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 
@@ -180,6 +172,15 @@
   "options": "Currency", 
   "read_only": 0, 
   "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 

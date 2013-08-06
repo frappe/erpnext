@@ -1,3 +1,6 @@
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# License: GNU General Public License v3. See license.txt
+
 import webnotes
 def execute():
 	"""finds references of deleted addresses and contacts and deletes these references"""
