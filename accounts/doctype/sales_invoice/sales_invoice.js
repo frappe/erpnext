@@ -25,10 +25,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.set_df_property("debit_to", "print_hide", 0);
 			}
 		}
-		
-		// if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
-		// 	cur_frm.cscript.toggle_pos(true);
-		// }
 	},
 	
 	refresh: function(doc, dt, dn) {
