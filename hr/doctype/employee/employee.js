@@ -30,11 +30,12 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		return this.frm.call({
 			method:"hr.utils.get_leave_approver_list",
 			callback: function(r) {
-				me.frm.fields_dict.employee_leave_approvers.grid
-					.get_field("leave_approver").df.options =
-					$.map(r.message, function(profile) { 
-						return {value: profile, label: wn.user_info(profile).fullname}; 
-					});
+				var df = wn.meta.get_docfield("Employee Leave Approver", "leave_approver",
+					me.frm.doc.name);
+				df.options = $.map(r.message, function(profile) { 
+					return {value: profile, label: wn.user_info(profile).fullname}; 
+				});
+				me.frm.fields_dict.employee_leave_approvers.refresh();
 			}
 		});
 	},

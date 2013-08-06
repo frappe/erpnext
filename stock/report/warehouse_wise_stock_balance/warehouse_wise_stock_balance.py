@@ -29,8 +29,8 @@ def get_columns(filters):
 	"""return columns based on filters"""
 	
 	columns = ["Item:Link/Item:100", "Item Name::150", "Description::150", \
-	"Warehouse:Link/Warehouse:100", "Opening Qty::90", \
-	"In Qty::80", "Out Qty::80", "Balance Qty::90", "Company:Link/Company:100"]
+	"Warehouse:Link/Warehouse:100", "Opening Qty:Float:90", \
+	"In Qty:Float:80", "Out Qty:Float:80", "Balance Qty:Float:90", "Company:Link/Company:100"]
 
 	return columns
 

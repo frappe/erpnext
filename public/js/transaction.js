@@ -32,6 +32,21 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 	},
 	
+	onload_post_render: function() {
+		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.customer) {
+			var me = this;
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "onload_post_render",
+				freeze: true,
+				callback: function(r) {
+					// remove this call when using client side mapper
+					me.set_default_values();
+				}
+			});
+		}
+	},
+	
 	refresh: function() {
 		this.frm.clear_custom_buttons();
 		erpnext.hide_naming_series();
@@ -42,6 +57,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	validate: function() {
 		this.calculate_taxes_and_totals();
+	},
+	
+	set_default_values: function() {
+		$.each(wn.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
+			var updated = wn.model.set_default_values(doc);
+			if(doc.parentfield) {
+				refresh_field(doc.parentfield);
+			} else {
+				refresh_field(updated);
+			}
+		});
 	},
 	
 	company: function() {
