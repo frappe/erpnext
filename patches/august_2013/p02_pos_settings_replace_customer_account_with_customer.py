@@ -4,9 +4,9 @@
 import webnotes
 
 def execute():
+	webnotes.reload_doc("accounts", "doctype", "pos_setting")
 	customer_account = webnotes.conn.sql("""select customer_account, name from `tabPOS Setting` 
 		where ifnull(customer_account, '')!=''""")
-	webnotes.reload_doc("accounts", "doctype", "pos_setting")
 
 	for cust_acc, pos_name in customer_account:
 		customer = webnotes.conn.sql("""select master_name, account_name from `tabAccount` 
