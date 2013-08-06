@@ -5,8 +5,7 @@ from accounts.utils import create_stock_in_hand_jv
 def execute():
 	webnotes.conn.auto_commit_on_many_writes = True
 	
-	aii_enabled = cint(webnotes.conn.get_value("Global Defaults", None, 
-		"auto_inventory_accounting"))
+	aii_enabled = cint(webnotes.defaults.get_global_default("perpetual_accounting"))
 	
 	if aii_enabled:
 		create_stock_in_hand_jv(reverse = True)
