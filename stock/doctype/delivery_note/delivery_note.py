@@ -289,6 +289,9 @@ class DocType(SellingController):
 				
 				if d['reserved_qty'] < 0 :
 					# Reduce reserved qty from reserved warehouse mentioned in so
+					if not d["reserved_warehouse"]:
+						webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
+						
 					args = {
 						"item_code": d['item_code'],
 						"voucher_type": self.doc.doctype,
