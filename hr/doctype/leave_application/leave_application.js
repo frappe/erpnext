@@ -10,7 +10,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		cur_frm.set_value("status", "Open");
 		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
-	cur_frm.set_df_property("leave_approver", "options", "");
 	return cur_frm.call({
 		method:"hr.utils.get_leave_approver_list",
 		callback: function(r) {

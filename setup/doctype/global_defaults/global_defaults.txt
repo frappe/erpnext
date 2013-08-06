@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-08-02 13:45:12", 
+  "modified": "2013-08-06 11:22:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,7 +71,8 @@
   "read_only": 0
  }, 
  {
-  "description": "Precision for Float fields (quantities, discounts, percentages etc) only for display. Floats will still be calculated up to 6 decimals.", 
+  "default": "3", 
+  "description": "Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3", 
   "doctype": "DocField", 
   "fieldname": "float_precision", 
   "fieldtype": "Select", 
