@@ -8,7 +8,7 @@ from webnotes.utils import cint, cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 get_value = webnotes.conn.get_value
@@ -115,6 +115,10 @@ class DocType(TransactionBase):
 			reserved_qty_for_main_item = 0
 			
 			if obj.doc.doctype == "Sales Order":
+				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
+					self.has_sales_bom(d.item_code)) and not d.reserved_warehouse:
+						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
+							d.item_code + _(" as it is stock Item or packing item"))
 				reserved_warehouse = d.reserved_warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
