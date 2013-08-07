@@ -148,6 +148,7 @@ class DocType:
 	
 
 	def validate_data(self):
+		self.validate_company()
 		for d in getlist(self.doclist, 'pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
@@ -169,7 +170,6 @@ class DocType:
 
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""
-		self.validate_company()
 		self.validate_data()
 
 		from utilities.transaction_base import validate_uom_is_integer
@@ -180,15 +180,15 @@ class DocType:
 		if pro:
 			pro = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in pro]
-			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
+			msgprint("Production Order(s) created:\n\n" + '\n'.join(pro))
 		else :
-			msgprint("No Production Order generated.")
+			msgprint("No Production Order created.")
 
 
 	def get_distinct_items_and_boms(self):
 		""" Club similar BOM and item for processing"""
 		item_dict, bom_dict = {}, {}
-		for d in self.doclist.get({"parentfield": "pp_details"}):
+		for d in self.doclist.get({"parentfield": "pp_details"}):			
 			bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
 			item_dict[(d.item_code, d.sales_order)] = {
 				"qty" 				: flt(item_dict.get((d.item_code, d.sales_order), \
@@ -223,6 +223,7 @@ class DocType:
 
 	def download_raw_materials(self):
 		""" Create csv data for required raw material to produce finished goods"""
+		self.validate_data()
 		bom_dict = self.get_distinct_items_and_boms()[0]
 		self.get_raw_materials(bom_dict)
 		return self.get_csv()
@@ -283,6 +284,7 @@ class DocType:
 			Raise Material Request if projected qty is less than qty required
 			Requested qty should be shortage qty considering minimum order qty
 		"""
+		self.validate_data()
 		if not self.doc.purchase_request_for_warehouse:
 			webnotes.msgprint("Please enter Warehouse for which Material Request will be raised",
 			 	raise_exception=1)
@@ -308,6 +310,7 @@ class DocType:
 			
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
+				
 		item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
 			from `tabBin` where item_code in (%s) group by item_code""" % 
 			(", ".join(["%s"]*len(items)),), tuple(items))
@@ -355,7 +358,7 @@ class DocType:
 			if purchase_request_list:
 				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
 					(p, p) for p in purchase_request_list]
-				webnotes.msgprint("Following Material Request created successfully: \n%s" % 
+				webnotes.msgprint("Material Request(s) created: \n%s" % 
 					"\n".join(pur_req))
 		else:
 			webnotes.msgprint("Nothing to request")

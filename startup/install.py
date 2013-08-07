@@ -107,6 +107,7 @@ def import_defaults():
 		{'doctype': 'Item Group', 'item_group_name': 'Products', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		{'doctype': 'Item Group', 'item_group_name': 'Raw Material', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		{'doctype': 'Item Group', 'item_group_name': 'Services', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Sub Assemblies', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		
 		# deduction type
 		{'doctype': 'Deduction Type', 'name': 'Income Tax', 'description': 'Income Tax', 'deduction_name': 'Income Tax'},

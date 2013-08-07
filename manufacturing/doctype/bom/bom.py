@@ -118,6 +118,11 @@ class DocType:
 				rate = self.get_valuation_rate(arg)
 			elif self.doc.rm_cost_as_per == 'Last Purchase Rate':
 				rate = arg['last_purchase_rate']
+			elif self.doc.rm_cost_as_per == "Price List":
+				if not self.doc.price_list:
+					webnotes.throw(_("Please select Price List"))
+				rate = webnotes.conn.get_value("Item Price", {"price_list_name": self.doc.price_list, 
+					"parent": arg["item_code"]}, "ref_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
 
@@ -180,7 +185,7 @@ class DocType:
 				webnotes.conn.set(self.doc, "is_default", 0)
 			
 			sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
-			 	(self.doc.item, self.doc.name))
+				 (self.doc.item, self.doc.name))
 
 	def clear_operations(self):
 		if not self.doc.with_operations:
