@@ -196,7 +196,6 @@ def make_purchase_receipt(source_name, target_doclist=None):
 		bean.run_method("set_missing_values")
 
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
 		target.import_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)
@@ -237,7 +236,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		bean.run_method("set_supplier_defaults")
 
 	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1
 		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
 		target.amount = target.import_amount * flt(source_parent.conversion_rate)
 		if flt(obj.purchase_rate):
