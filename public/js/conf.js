@@ -3,10 +3,10 @@
 
 wn.provide('erpnext');
 
-wn.modules_path = 'erpnext';
-
 // add toolbar icon
 $(document).bind('toolbar_setup', function() {
+	wn.app.name = "ERPNext";
+	
 	var brand = ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext');
 	$('.navbar-brand').html('<div style="display: inline-block;">\
 			<object type="image/svg+xml" data="app/images/splash.svg" class="toolbar-splash"></object>\
