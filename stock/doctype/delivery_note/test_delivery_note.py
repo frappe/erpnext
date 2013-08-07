@@ -7,6 +7,7 @@ import unittest
 import webnotes
 import webnotes.defaults
 from webnotes.utils import cint
+from accounts.utils import get_stock_and_account_difference
 
 class TestDeliveryNote(unittest.TestCase):
 	def _insert_purchase_receipt(self):
@@ -89,10 +90,12 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals(expected_values[i][0], gle.account)
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
-		
+					
 		# check stock in hand balance
 		bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
 		self.assertEquals(bal, prev_bal - 375.0)
+		
+		self.assertFalse(get_stock_and_account_difference([dn.doclist[1].warehouse]))
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 

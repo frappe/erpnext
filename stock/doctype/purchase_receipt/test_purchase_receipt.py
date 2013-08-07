@@ -7,6 +7,8 @@ import unittest
 import webnotes
 import webnotes.defaults
 from webnotes.utils import cint
+from accounts.utils import get_stock_and_account_difference
+
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
@@ -73,6 +75,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			
+		self.assertFalse(get_stock_and_account_difference([pr.doclist[1].warehouse, 
+			pr.doclist[2].warehouse]))
 			
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		

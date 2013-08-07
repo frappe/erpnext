@@ -6,6 +6,7 @@
 
 from __future__ import unicode_literals
 import webnotes, unittest
+from accounts.utils import get_stock_and_account_difference
 
 class TestSerialNo(unittest.TestCase):
 	def test_aii_gl_entries_for_serial_no_in_store(self):
@@ -14,8 +15,8 @@ class TestSerialNo(unittest.TestCase):
 		sr.doc.serial_no = "_Test Serial No 1"
 		sr.insert()
 		
-		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
-			"stock_in_hand_account")
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", sr.doc.warehouse, 
+			"account")
 		against_stock_account = webnotes.conn.get_value("Company", "_Test Company", 
 			"stock_adjustment_account")
 		
@@ -29,18 +30,19 @@ class TestSerialNo(unittest.TestCase):
 		# check gl entries
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Serial No' and voucher_no=%s
-			order by account desc""", sr.doc.name, as_dict=1)
+			order by account desc""", sr.doc.name, as_list=1)
 		self.assertTrue(gl_entries)
-		
+		gl_entries.sort(key=lambda x: x[0])
 		expected_values = [
 			[stock_in_hand_account, 1000.0, 0.0],
 			[against_stock_account, 0.0, 1000.0]
 		]
+		expected_values.sort(key=lambda x: x[0])
 		
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[i][0], gle[0])
+			self.assertEquals(expected_values[i][1], gle[1])
+			self.assertEquals(expected_values[i][2], gle[2])
 		
 		sr.load_from_db()
 		self.assertEquals(sr.doc.sle_exists, 1)
@@ -49,13 +51,16 @@ class TestSerialNo(unittest.TestCase):
 		sr.save()
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Serial No' and voucher_no=%s
-			order by account desc""", sr.doc.name, as_dict=1)
+			order by account desc""", sr.doc.name, as_list=1)
+		gl_entries.sort(key=lambda x: x[0])
 		
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
-			
+			self.assertEquals(expected_values[i][0], gle[0])
+			self.assertEquals(expected_values[i][1], gle[1])
+			self.assertEquals(expected_values[i][2], gle[2])
+		
+		self.assertFalse(get_stock_and_account_difference([sr.doc.warehouse]))
+		
 		# trash/cancel
 		sr.submit()
 		sr.cancel()

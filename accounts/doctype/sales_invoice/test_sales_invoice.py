@@ -5,6 +5,7 @@ import webnotes
 import unittest, json
 from webnotes.utils import flt, cint
 from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
+from accounts.utils import get_stock_and_account_difference
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -392,7 +393,9 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, name asc""", si.doc.name)
 		
 		self.assertEquals(gl_count[0][0], 16)
-			
+		
+		self.assertFalse(get_stock_and_account_difference([si.doclist[1].warehouse]))
+		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		webnotes.conn.set_default("company", old_default_company)
 		
