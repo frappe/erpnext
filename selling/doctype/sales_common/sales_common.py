@@ -115,6 +115,10 @@ class DocType(TransactionBase):
 			reserved_qty_for_main_item = 0
 			
 			if obj.doc.doctype == "Sales Order":
+				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
+					self.has_sales_bom(d.item_code)) and not d.reserved_warehouse:
+						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
+							d.item_code + _(" as it is stock Item or packing item"))
 				reserved_warehouse = d.reserved_warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
