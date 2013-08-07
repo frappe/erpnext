@@ -323,8 +323,7 @@ class DocType(StockController):
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
-			print webnotes.conn.sql("""select name, posting_date, stock_value from `tabStock Ledger Entry`""")
-			print webnotes.conn.sql("""select stock_value from tabBin""")
+
 			self.sync_stock_account_balance(warehouse_list, self.doc.cost_center)
 			
 	def validate_expense_account(self):

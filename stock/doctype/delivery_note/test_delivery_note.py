@@ -18,7 +18,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 	def test_over_billing_against_dn(self):
 		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
-		
+		self._insert_purchase_receipt()
 		dn = webnotes.bean(copy=test_records[0]).insert()
 		
 		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
@@ -55,6 +55,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry(self):
 		webnotes.conn.sql("""delete from `tabBin`""")
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("delete from `tabGL Entry`")
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
@@ -65,8 +66,8 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
-		stock_in_hand_account = webnotes.conn.get_value("Company", dn.doc.company, 
-			"stock_in_hand_account")
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", dn.doclist[1].warehouse, 
+			"account")
 		
 		from accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)

@@ -374,8 +374,7 @@ def get_stock_and_account_difference(warehouse_list=None):
 		account_balance = get_balance_on(account)
 		stock_value = sum([sum(bin_map.get(warehouse, {}).values()) 
 			for warehouse in warehouse_list])
-		
-		if flt(stock_value) - flt(account_balance):
+		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
-	
+
 	return difference

@@ -53,7 +53,7 @@ def save_entries(gl_map, cancel, adv_adj, update_outstanding):
 	total_debit = total_credit = 0.0
 	def _swap(gle):
 		gle.debit, gle.credit = abs(flt(gle.credit)), abs(flt(gle.debit))
-			
+	
 	for entry in gl_map:
 		gle = Document('GL Entry', fielddata=entry)
 		
@@ -83,9 +83,7 @@ def save_entries(gl_map, cancel, adv_adj, update_outstanding):
 		# update total debit / credit
 		total_debit += flt(gle.debit)
 		total_credit += flt(gle.credit)
-		
-		# print gle.account, gle.debit, gle.credit, total_debit, total_credit
-		
+				
 	if not cancel:
 		validate_total_debit_credit(total_debit, total_credit)
 	

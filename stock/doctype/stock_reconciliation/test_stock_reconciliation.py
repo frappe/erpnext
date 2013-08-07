@@ -12,7 +12,7 @@ from accounts.utils import get_fiscal_year, get_stock_and_account_difference, ge
 
 
 class TestStockReconciliation(unittest.TestCase):
-	def atest_reco_for_fifo(self):
+	def test_reco_for_fifo(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
@@ -56,7 +56,7 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertFalse(gl_entries)
 			
 		
-	def atest_reco_for_moving_average(self):
+	def test_reco_for_moving_average(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
@@ -107,18 +107,18 @@ class TestStockReconciliation(unittest.TestCase):
 		
 		# [[qty, valuation_rate, posting_date, posting_time, stock_in_hand_debit]]
 		input_data = [
-			[50, 1000, "2012-12-26", "12:00", 38000], 
-			[5, 1000, "2012-12-26", "12:00", -7000], 
-			[15, 1000, "2012-12-26", "12:00", 3000], 
-			[25, 900, "2012-12-26", "12:00", 10500], 
-			[20, 500, "2012-12-26", "12:00", -2000], 
-			["", 1000, "2012-12-26", "12:05", 3000],
-			[20, "", "2012-12-26", "12:05", 4000],
-			[10, 2000, "2012-12-26", "12:10", 8000],
-			[0, "", "2012-12-26", "12:10", -12000],
-			[50, 1000, "2013-01-01", "12:00", 50000], 
-			[5, 1000, "2013-01-01", "12:00", 5000],
-			[1, 1000, "2012-12-01", "00:00", 1000],
+			[50, 1000, "2012-12-26", "12:00"], 
+			[5, 1000, "2012-12-26", "12:00"], 
+			[15, 1000, "2012-12-26", "12:00"], 
+			[25, 900, "2012-12-26", "12:00"], 
+			[20, 500, "2012-12-26", "12:00"], 
+			["", 1000, "2012-12-26", "12:05"],
+			[20, "", "2012-12-26", "12:05"],
+			[10, 2000, "2012-12-26", "12:10"],
+			[0, "", "2012-12-26", "12:10"],
+			[50, 1000, "2013-01-01", "12:00"], 
+			[5, 1000, "2013-01-01", "12:00"],
+			[1, 1000, "2012-12-01", "00:00"],
 			
 		]
 			
@@ -128,17 +128,14 @@ class TestStockReconciliation(unittest.TestCase):
 			self.insert_existing_sle("FIFO")
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 			
-			# check gl_entries
 			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
-			print get_balance_on("_Test Account Stock In Hand - _TC")
-			self.assertEquals(get_balance_on("_Test Account Stock In Hand - _TC", d[2]), 38000)
 			# cancel
 			stock_reco.cancel()
-			# self.check_gl_entries(stock_reco.doc.name, -d[4], True)
+			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)		
 			
-	def atest_reco_moving_average_gl_entries(self):
+	def test_reco_moving_average_gl_entries(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
@@ -163,13 +160,11 @@ class TestStockReconciliation(unittest.TestCase):
 			self.cleanup_data()
 			self.insert_existing_sle("Moving Average")
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
-			
-			# check gl_entries
-			self.check_gl_entries(stock_reco.doc.name, d[4])
+			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
 			
 			# cancel
 			stock_reco.cancel()
-			self.check_gl_entries(stock_reco.doc.name, -d[4], True)
+			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 
@@ -196,37 +191,6 @@ class TestStockReconciliation(unittest.TestCase):
 		stock_reco.insert()
 		stock_reco.submit()
 		return stock_reco
-		
-	def check_gl_entries(self, voucher_no, stock_value_diff, cancel=None):
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", "_Test Warehouse - _TC", 
-			"account")
-		debit_amount = stock_value_diff > 0 and stock_value_diff or 0.0
-		credit_amount = stock_value_diff < 0 and abs(stock_value_diff) or 0.0
-		
-		expected_gl_entries = [
-			[stock_in_hand_account, debit_amount, credit_amount],
-			["Stock Adjustment - _TC", credit_amount, debit_amount]
-		]
-		if cancel:
-			expected_gl_entries = [
-				[stock_in_hand_account, debit_amount, credit_amount],
-				["Stock Adjustment - _TC", credit_amount, debit_amount],
-				[stock_in_hand_account, credit_amount, debit_amount],
-				["Stock Adjustment - _TC", debit_amount, credit_amount]
-			]
-		expected_gl_entries.sort(key=lambda x: x[0])
-		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Stock Reconciliation' and voucher_no=%s 
-			order by account asc, name asc""", voucher_no, as_list=1)
-		self.assertTrue(gl_entries)
-		gl_entries.sort(key=lambda x: x[0])
-		
-		print gl_entries
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[i][0], gle[0])
-			self.assertEquals(expected_gl_entries[i][1], gle[1])
-			self.assertEquals(expected_gl_entries[i][2], gle[2])
 		
 	def insert_existing_sle(self, valuation_method):
 		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", valuation_method)

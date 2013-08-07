@@ -298,7 +298,7 @@ class TestSalesInvoice(unittest.TestCase):
 			
 	def test_sales_invoice_gl_entry_without_aii(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
-		
+		self.clear_stock_account_balance()
 		si = webnotes.bean(copy=test_records[1])
 		si.insert()
 		si.submit()
@@ -306,6 +306,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
+		
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
@@ -330,7 +331,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertEquals(gle_count[0][0], 8)
 		
-	def atest_pos_gl_entry_with_aii(self):
+	def test_pos_gl_entry_with_aii(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
@@ -644,6 +645,11 @@ class TestSalesInvoice(unittest.TestCase):
 		count = no_of_months == 12 and 3 or 13
 		for i in xrange(count):
 			base_si = _test(i)
+			
+	def clear_stock_account_balance(self):
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("delete from tabBin")
+		webnotes.conn.sql("delete from `tabGL Entry`")
 		
 test_dependencies = ["Journal Voucher", "POS Setting", "Contact", "Address"]
 

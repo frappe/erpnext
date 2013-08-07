@@ -620,11 +620,11 @@ class DocType(SellingController):
 		# expense account gl entries
 		if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
 				and cint(self.doc.update_stock):
-			
 			for item in self.doclist.get({"parentfield": "entries"}):
 				self.check_expense_account(item)
 			
 				if item.buying_amount:
+					
 					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
 						-1*item.buying_amount, item.warehouse, cost_center=item.cost_center)
 				
