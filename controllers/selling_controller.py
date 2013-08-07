@@ -103,8 +103,8 @@ class SellingController(StockController):
 			for item in self.doclist.get({"parentfield": self.fname}):
 				if item.item_code in self.stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
-						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+					buying_amount = get_buying_amount(item.item_code, self.doc.doctype, self.doc.name, item.name, 
+						stock_ledger_entries.get((item.item_code, item.warehouse), []), 
 						item_sales_bom)
 					
 					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0

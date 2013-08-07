@@ -10,9 +10,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 	
 	stock_ledger_entries = get_stock_ledger_entries(filters)
-	
 	source = get_source_data(filters)
-	
 	item_sales_bom = get_item_sales_bom()
 	
 	columns = ["Delivery Note/Sales Invoice::120", "Link::30", "Posting Date:Date", "Posting Time", 
@@ -20,12 +18,12 @@ def execute(filters=None):
 		"Qty:Float", "Selling Rate:Currency", "Avg. Buying Rate:Currency", 
 		"Selling Amount:Currency", "Buying Amount:Currency",
 		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
-	
 	data = []
 	for row in source:
 		selling_amount = flt(row.amount)
-		buying_amount = get_buying_amount(row.item_code, row.warehouse, -1*row.qty, 
-			row.parenttype, row.name, row.item_row, stock_ledger_entries, 
+
+		buying_amount = get_buying_amount(row.item_code, row.parenttype, row.name, row.item_row,
+			stock_ledger_entries.get((row.item_code, row.warehouse), []), 
 			item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict()))
 		
 		buying_amount = buying_amount > 0 and buying_amount or 0
@@ -56,8 +54,17 @@ def get_stock_ledger_entries(filters):
 		query += """ and company=%(company)s"""
 	
 	query += " order by item_code desc, warehouse desc, posting_date desc, posting_time desc, name desc"
+	
+	res = webnotes.conn.sql(query, filters, as_dict=True)
+	
+	out = {}
+	for r in res:
+		if (r.item_code, r.warehouse) not in out:
+			out[(r.item_code, r.warehouse)] = []
+		
+		out[(r.item_code, r.warehouse)].append(r)
 
-	return webnotes.conn.sql(query, filters, as_dict=True)
+	return out
 	
 def get_item_sales_bom():
 	item_sales_bom = {}
