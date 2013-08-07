@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:58", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:36:10", 
+  "modified": "2013-08-07 14:44:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -88,7 +88,6 @@
   "label": "Quantity and Rate"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
@@ -117,7 +116,6 @@
   "width": "70px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
@@ -133,7 +131,6 @@
   "width": "70px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "adj_rate", 
   "fieldtype": "Float", 
@@ -147,7 +144,6 @@
   "width": "70px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "export_rate", 
   "fieldtype": "Currency", 
@@ -162,7 +158,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "export_amount", 
   "fieldtype": "Currency", 
@@ -192,7 +187,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "basic_rate", 
   "fieldtype": "Currency", 
@@ -208,7 +202,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
@@ -248,7 +241,6 @@
   "width": "150px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "projected_qty", 
   "fieldtype": "Float", 
@@ -264,7 +256,6 @@
   "width": "70px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "actual_qty", 
   "fieldtype": "Float", 
@@ -277,7 +268,6 @@
   "width": "70px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "delivered_qty", 
   "fieldtype": "Float", 

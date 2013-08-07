@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-08-01 12:23:40", 
+  "modified": "2013-08-07 14:45:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -89,7 +89,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
