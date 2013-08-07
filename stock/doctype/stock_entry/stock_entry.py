@@ -38,10 +38,6 @@ class DocType(StockController):
 		self.validate_item()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
-		self.validate_warehouse_with_company(reduce(lambda x,y: x+y, 
-			[[d.s_warehouse, d.t_warehouse] for d in 
-				self.doclist.get({"parentfield": "mtn_details"})]))
-
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order(pro_obj)
 		self.get_stock_and_rate()
@@ -189,11 +185,11 @@ class DocType(StockController):
 					warehouse = item.s_warehouse
 					valuation_amount = -1*valuation_amount
 				elif item.s_warehouse and item.t_warehouse:
-					s_account = webnotes.con.get_value("Warehouse", item.s_warehouse, "account")
+					s_account = webnotes.conn.get_value("Warehouse", item.s_warehouse, "account")
 					t_account = webnotes.conn.get_value("Warehouse", item.t_warehouse, "account")
 					if s_account != t_account:
-						warehouse = item.s_warehouse
-						against_expense_account = t_account
+						warehouse = item.t_warehouse
+						against_expense_account = s_account
 						
 				if item.s_warehouse and item.s_warehouse not in warehouse_list:
 					warehouse_list.append(item.s_warehouse)
@@ -201,7 +197,7 @@ class DocType(StockController):
 					warehouse_list.append(item.t_warehouse)
 						
 				gl_entries += self.get_gl_entries_for_stock(against_expense_account, 
-					valuation_amount, warehouse, self.doc.cost_center)
+					valuation_amount, warehouse, cost_center=self.doc.cost_center)
 			
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries

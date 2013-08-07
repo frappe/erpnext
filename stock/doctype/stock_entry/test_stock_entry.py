@@ -17,7 +17,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_auto_material_request(self):
 		webnotes.conn.sql("""delete from `tabMaterial Request Item`""")
 		webnotes.conn.sql("""delete from `tabMaterial Request`""")
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		
 		webnotes.conn.set_value("Stock Settings", None, "auto_indent", True)
 
@@ -47,15 +47,15 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
 
 	def test_material_receipt_gl_entry(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
 		mr.submit()
 		
-		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
-			"stock_in_hand_account")
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mr.doclist[1].t_warehouse, 
+			"account")
 		
 		self.check_stock_ledger_entries("Stock Entry", mr.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
@@ -72,17 +72,14 @@ class TestStockEntry(unittest.TestCase):
 			sorted([["_Test Item", "_Test Warehouse - _TC", 50.0], 
 				["_Test Item", "_Test Warehouse - _TC", -50.0]]))
 			
-		self.check_gl_entries("Stock Entry", mr.doc.name, 
-			sorted([
-				[stock_in_hand_account, 5000.0, 0.0], 
-				["Stock Adjustment - _TC", 0.0, 5000.0],
-				[stock_in_hand_account, 0.0, 5000.0], 
-				["Stock Adjustment - _TC", 5000.0, 0.0]
-			])
-		)
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s 
+			order by account asc, debit asc""", (mr.doc.name), as_dict=1)
+		self.assertEquals(len(gl_entries), 4)
+		
 
 	def test_material_issue_gl_entry(self):
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
@@ -93,12 +90,11 @@ class TestStockEntry(unittest.TestCase):
 		mi.insert()
 		mi.submit()
 		
-		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
-			"stock_in_hand_account")
-		
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
-			
+		
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mi.doclist[1].s_warehouse, 
+			"account")
 		self.check_gl_entries("Stock Entry", mi.doc.name, 
 			sorted([
 				[stock_in_hand_account, 0.0, 4000.0], 
@@ -111,23 +107,27 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
 			sorted([["_Test Item", "_Test Warehouse - _TC", -40.0], 
 				["_Test Item", "_Test Warehouse - _TC", 40.0]]))
+				
+		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
+			"item_code": mi.doclist[1].item_code}, "actual_qty"), 50)
+		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
+			"item_code": mi.doclist[1].item_code}, "stock_value"), 5000)
 			
-		self.check_gl_entries("Stock Entry", mi.doc.name, 
-			sorted([
-				[stock_in_hand_account, 0.0, 4000.0], 
-				["Stock Adjustment - _TC", 4000.0, 0.0],
-				[stock_in_hand_account, 4000.0, 0.0], 
-				["Stock Adjustment - _TC", 0.0, 4000.0],
-			])
-		)
+		gl_entries = webnotes.conn.sql("""select account, debit, credit, voucher_no
+			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s 
+			order by account asc, debit asc""", (mi.doc.name), as_dict=1)
+		self.assertEquals(len(gl_entries), 4)
+		
 		
 	def test_material_transfer_gl_entry(self):
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
 		mr.submit()
+		
+		
 
 		mtn = webnotes.bean(copy=test_records[2])
 		mtn.insert()
@@ -136,10 +136,18 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		# no gl entry
-		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
-			where voucher_type = 'Stock Entry' and voucher_no=%s""", mtn.doc.name)
-		self.assertFalse(gl_entries)
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mtn.doclist[1].s_warehouse, 
+			"account")
+		fixed_asset_account = webnotes.conn.get_value("Warehouse", mtn.doclist[1].t_warehouse, 
+			"account")
+			
+		self.check_gl_entries("Stock Entry", mtn.doc.name, 
+			sorted([
+				[stock_in_hand_account, 0.0, 4500.0], 
+				[fixed_asset_account, 4500.0, 0.0],
+			])
+		)
+
 		
 		mtn.cancel()
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
@@ -148,10 +156,7 @@ class TestStockEntry(unittest.TestCase):
 				["_Test Item", "_Test Warehouse - _TC", -45.0], 
 				["_Test Item", "_Test Warehouse 1 - _TC", 45.0]]))
 
-		# no gl entry
-		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
-			where voucher_type = 'Stock Entry' and voucher_no=%s""", mtn.doc.name)
-		self.assertFalse(gl_entries)
+		
 			
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		# check stock ledger entries
@@ -185,7 +190,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", "_Test Company")
 	
 	def _insert_material_receipt(self):
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		se1 = webnotes.bean(copy=test_records[0])
 		se1.insert()
 		se1.submit()
@@ -416,7 +421,7 @@ class TestStockEntry(unittest.TestCase):
 		return se
 		
 	def test_purchase_receipt_return(self):
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -432,7 +437,7 @@ class TestStockEntry(unittest.TestCase):
 		
 		actual_qty_1 = self._get_actual_qty()
 		
-		self.assertEquals(actual_qty_0 + 10, actual_qty_1)
+		self.assertEquals(actual_qty_0 + 5, actual_qty_1)
 		
 		pi_doclist = make_purchase_invoice(pr.doc.name)
 			
@@ -506,7 +511,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_purchase_return_jv(se)
 		
 	def _test_purchase_return_return_against_purchase_order(self):
-		self._clear_stock()
+		self._clear_stock_account_balance()
 		
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -570,6 +575,14 @@ class TestStockEntry(unittest.TestCase):
 		
 		return se, pr.doc.name
 		
+	def _clear_stock_account_balance(self):
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		
+		self.old_default_company = webnotes.conn.get_default("company")
+		webnotes.conn.set_default("company", "_Test Company")
+		
 test_records = [
 	[
 		{
@@ -579,7 +592,8 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Receipt",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC"
+			"expense_adjustment_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -602,7 +616,8 @@ test_records = [
 			"posting_time": "17:15", 
 			"purpose": "Material Issue",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC"
+			"expense_adjustment_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -625,7 +640,8 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Transfer",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC"
+			"expense_adjustment_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 

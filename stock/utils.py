@@ -32,9 +32,9 @@ def get_stock_balance_on(warehouse_list, posting_date=None):
 	
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in webnotes.conn.sql("""SELECT item_code, warehouse, sum(stock_value) as stock_value 
+	for d in webnotes.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value 
 		FROM tabBin""", as_dict=1):
-			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, d.stock_value)
+			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 			
 	return bin_map
 
@@ -208,7 +208,6 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 			sle.voucher_detail_no == item_row:
 				previous_stock_value = len(relevant_stock_ledger_entries) > i+1 and \
 					flt(relevant_stock_ledger_entries[i+1].stock_value) or 0.0
-				
 				buying_amount =  previous_stock_value - flt(sle.stock_value)						
 				
 				return buying_amount

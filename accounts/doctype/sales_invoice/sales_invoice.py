@@ -48,8 +48,6 @@ class DocType(SellingController):
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_warehouse_with_company([d.warehouse 
-			for d in self.doclist.get({"parentfield": "entries"})])
 
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)

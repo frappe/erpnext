@@ -61,9 +61,7 @@ class DocType(StockController):
 			
 			self.make_gl_entries()
 
-	def make_stock_ledger_entry(self, qty):
-		self.validate_warehouse_with_company([self.doc.warehouse])
-		
+	def make_stock_ledger_entry(self, qty):		
 		sl_entries = [{
 			'item_code'				: self.doc.item_code,
 			'warehouse'				: self.doc.warehouse,

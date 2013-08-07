@@ -38,7 +38,7 @@ class DocType:
 		for k in mandatory:
 			if not self.doc.fields.get(k):
 				msgprint(k + _(" is mandatory for GL Entry"), raise_exception=1)
-				
+
 		# Zero value transaction is not allowed
 		if not (flt(self.doc.debit) or flt(self.doc.credit)):
 			msgprint(_("GL Entry: Debit or Credit amount is mandatory for ") + self.doc.account, 

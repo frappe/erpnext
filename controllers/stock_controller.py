@@ -38,12 +38,12 @@ class StockController(AccountsController):
 			return gl_entries
 			
 	def sync_stock_account_balance(self, warehouse_list, cost_center=None, posting_date=None):
+		print "sync_stock_account_balance"
 		from accounts.utils import get_stock_and_account_difference
 		acc_diff = get_stock_and_account_difference(warehouse_list)
-		
 		if not cost_center:
 			cost_center = self.get_company_default("cost_center")
-		
+		print acc_diff
 		gl_entries = []
 		for account, diff in acc_diff.items():
 			if diff:
@@ -57,7 +57,7 @@ class StockController(AccountsController):
 			if posting_date:
 				for entries in gl_entries:
 					entries["posting_date"] = posting_date
-			
+			# print gl_entries
 			make_gl_entries(gl_entries)
 				
 	def get_sl_entries(self, d, args):		
@@ -87,17 +87,6 @@ class StockController(AccountsController):
 		if sl_entries:
 			from webnotes.model.code import get_obj
 			get_obj('Stock Ledger').update_stock(sl_entries, is_amended)
-			
-	def validate_warehouse_with_company(self, warehouse_list):
-		warehouse_list = list(set(filter(lambda x: x not in ["", None], warehouse_list)))
-		valid_warehouses = webnotes.conn.sql_list("""select name from `tabWarehouse` 
-			where company=%s""", self.doc.company)
-		
-		invalid_warehouses = filter(lambda x: x not in valid_warehouses, warehouse_list)
-		if invalid_warehouses:
-			print invalid_warehouses, valid_warehouses, warehouse_list
-			msgprint(_("Following warehouses not belong to the company") + ": " + 
-				self.doc.company + "\n" + "\n".join(invalid_warehouses), raise_exception=1)
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
 		if not (item_list and warehouse_list):

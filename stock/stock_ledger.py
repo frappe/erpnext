@@ -30,11 +30,11 @@ def update_entries_after(args, verbose=1):
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
 	valuation_rate = flt(previous_sle.get("valuation_rate"))
 	stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
-	stock_value = 0.0
+	stock_value = flt(previous_sle.get("stock_value"))
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
-	
+
 	valuation_method = get_valuation_method(args["item_code"])
 	
 	for sle in entries_to_fix:
