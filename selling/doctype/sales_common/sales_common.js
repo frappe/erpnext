@@ -359,11 +359,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 			
 			if(cumulated_tax_fraction) {
-				item.basic_rate = flt(
-					(item.export_rate * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
-					precision("basic_rate", item));
-				
-				item.amount = flt(item.basic_rate * item.qty, precision("amount", item));
+				item.amount = flt(
+					(item.export_amount * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
+					precision("amount", item));
+					
+				item.basic_rate = flt(item.amount / item.qty, precision("basic_rate", item));
 				
 				if(item.adj_rate == 100) {
 					item.base_ref_rate = item.basic_rate;

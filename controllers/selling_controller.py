@@ -150,10 +150,10 @@ class SellingController(StockController):
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
 			if cumulated_tax_fraction:
-				item.basic_rate = flt((item.export_rate * self.doc.conversion_rate) / 
-					(1 + cumulated_tax_fraction), self.precision("basic_rate", item))
-				
-				item.amount = flt(item.basic_rate * item.qty, self.precision("amount", item))
+				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
+					(1 + cumulated_tax_fraction), self.precision("amount", item))
+					
+				item.basic_rate = flt(item.amount / item.qty, self.precision("basic_rate", item))
 				
 				if item.adj_rate == 100:
 					item.base_ref_rate = item.basic_rate

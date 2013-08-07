@@ -43,7 +43,6 @@ erpnext.startup.start = function() {
 				</div>', { expiry_string: expiry_string, payment_link: payment_link }));
 			}
 		}
-		erpnext.set_about();
 	}
 }
 

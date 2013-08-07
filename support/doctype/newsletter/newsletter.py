@@ -11,6 +11,12 @@ from webnotes import _
 class DocType():
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def onload(self):
+		if self.doc.email_sent:
+			self.doc.fields["__status_count"] = dict(webnotes.conn.sql("""select status, count(*)
+				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
+				group by status""", (self.doc.doctype, self.doc.name))) or None
 
 	def test_send(self, doctype="Lead"):
 		self.recipients = self.doc.test_email_id.split(",")
@@ -74,7 +80,8 @@ class DocType():
 		
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
-			doctype = self.send_to_doctype, email_field = "email_id")
+			doctype = self.send_to_doctype, email_field = "email_id",
+			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
 		webnotes.conn.auto_commit_on_many_writes = False
 
@@ -91,8 +98,10 @@ class DocType():
 @webnotes.whitelist()
 def get_lead_options():
 	return {
-		"sources": ["All"] + webnotes.conn.sql_list("""select distinct source from tabLead"""),
-		"statuses": ["All"]+ webnotes.conn.sql_list("""select distinct status from tabLead""")
+		"sources": ["All"] + filter(None, 
+			webnotes.conn.sql_list("""select distinct source from tabLead""")),
+		"statuses": ["All"] + filter(None, 
+			webnotes.conn.sql_list("""select distinct status from tabLead"""))
 	}
 
 

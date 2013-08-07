@@ -2,11 +2,12 @@
  {
   "creation": "2013-03-07 18:50:29", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:54:02", 
+  "modified": "2013-08-06 17:15:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "doctype": "DocType", 
   "icon": "icon-file-text", 
   "module": "HR", 
@@ -158,19 +159,6 @@
   "read_only": 0
  }, 
  {
-  "description": "Cost to Company", 
-  "doctype": "DocField", 
-  "fieldname": "ctc", 
-  "fieldtype": "Currency", 
-  "in_filter": 1, 
-  "label": "Annual Cost To Company", 
-  "oldfieldname": "ctc", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Select", 
@@ -181,11 +169,11 @@
   "reqd": 1
  }, 
  {
-  "description": "You can create more earning and deduction type from Setup --> HR", 
+  "description": "Salary breakup based on Earning and Deduction.", 
   "doctype": "DocField", 
   "fieldname": "earning_deduction", 
   "fieldtype": "Section Break", 
-  "label": "Earning & Deduction", 
+  "label": "Monthly Earning & Deduction", 
   "oldfieldname": "earning_deduction", 
   "oldfieldtype": "Section Break", 
   "read_only": 0

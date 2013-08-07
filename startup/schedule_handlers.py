@@ -49,6 +49,9 @@ def execute_daily():
 	# check reorder level
 	from stock.utils import reorder_item
 	run_fn(reorder_item)
+		
+	# scheduler error
+	scheduler.report_errors()
 
 def execute_weekly():
 	from setup.doctype.backup_manager.backup_manager import take_backups_weekly

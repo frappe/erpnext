@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:48", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:19", 
+  "modified": "2013-08-06 17:11:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -16,7 +16,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Salary Structure Earning", 
   "parentfield": "fields", 
@@ -31,6 +30,7 @@
   "doctype": "DocField", 
   "fieldname": "e_type", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Type", 
   "oldfieldname": "e_type", 
   "oldfieldtype": "Data", 
@@ -43,6 +43,7 @@
   "doctype": "DocField", 
   "fieldname": "modified_value", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "modified_value", 
   "oldfieldtype": "Currency", 
@@ -52,7 +53,8 @@
   "doctype": "DocField", 
   "fieldname": "depend_on_lwp", 
   "fieldtype": "Check", 
-  "label": "Depend on LWP", 
+  "in_list_view": 0, 
+  "label": "Reduce Earning for Leave Without Pay (LWP)", 
   "oldfieldname": "depend_on_lwp", 
   "oldfieldtype": "Check"
  }
