@@ -82,9 +82,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
-		mr = webnotes.bean(copy=test_records[0])
-		mr.insert()
-		mr.submit()
+		self._insert_material_receipt()
 		
 		mi = webnotes.bean(copy=test_records[1])
 		mi.insert()
@@ -110,6 +108,7 @@ class TestStockEntry(unittest.TestCase):
 				
 		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
 			"item_code": mi.doclist[1].item_code}, "actual_qty"), 50)
+			
 		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
 			"item_code": mi.doclist[1].item_code}, "stock_value"), 5000)
 			
@@ -123,12 +122,8 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 
-		mr = webnotes.bean(copy=test_records[0])
-		mr.insert()
-		mr.submit()
+		self._insert_material_receipt()
 		
-		
-
 		mtn = webnotes.bean(copy=test_records[2])
 		mtn.insert()
 		mtn.submit()
@@ -155,32 +150,79 @@ class TestStockEntry(unittest.TestCase):
 				["_Test Item", "_Test Warehouse 1 - _TC", -45.0],
 				["_Test Item", "_Test Warehouse - _TC", -45.0], 
 				["_Test Item", "_Test Warehouse 1 - _TC", 45.0]]))
+				
+	def test_repack_no_change_in_valuation(self):
+		self._clear_stock_account_balance()
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 
+		self._insert_material_receipt()
+
+		repack = webnotes.bean(copy=test_records[3])
+		repack.insert()
+		repack.submit()
 		
+		self.check_stock_ledger_entries("Stock Entry", repack.doc.name, 
+			[["_Test Item", "_Test Warehouse - _TC", -50.0], 
+				["_Test Item Home Desktop 100", "_Test Warehouse - _TC", 1]])
+				
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
+			order by account desc""", repack.doc.name, as_dict=1)
+		self.assertFalse(gl_entries)
+		
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		
+	def test_repack_with_change_in_valuation(self):
+		self._clear_stock_account_balance()
+		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+
+		self._insert_material_receipt()
+		
+		repack = webnotes.bean(copy=test_records[3])
+		repack.doclist[2].incoming_rate = 6000
+		repack.insert()
+		repack.submit()
+		
+		stock_in_hand_account = webnotes.conn.get_value("Warehouse", 
+			repack.doclist[2].t_warehouse, "account")
+			
+		self.check_gl_entries("Stock Entry", repack.doc.name, 
+			sorted([
+				[stock_in_hand_account, 1000.0, 0.0], 
+				["Stock Adjustment - _TC", 0.0, 1000.0],
+			])
+		)
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 			
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
-		# check stock ledger entries
-		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` where voucher_type = %s 
-			and voucher_no = %s order by item_code, warehouse, actual_qty""", 
-			(voucher_type, voucher_no), as_dict=1)
-		self.assertTrue(sle)
+		expected_sle.sort(key=lambda x: x[0])
 		
+		# check stock ledger entries
+		sle = webnotes.conn.sql("""select item_code, warehouse, actual_qty 
+			from `tabStock Ledger Entry` where voucher_type = %s 
+			and voucher_no = %s order by item_code, warehouse, actual_qty""", 
+			(voucher_type, voucher_no), as_list=1)
+		self.assertTrue(sle)
+		sle.sort(key=lambda x: x[0])
+
 		for i, sle in enumerate(sle):
-			self.assertEquals(expected_sle[i][0], sle.item_code)
-			self.assertEquals(expected_sle[i][1], sle.warehouse)
-			self.assertEquals(expected_sle[i][2], sle.actual_qty)
+			self.assertEquals(expected_sle[i][0], sle[0])
+			self.assertEquals(expected_sle[i][1], sle[1])
+			self.assertEquals(expected_sle[i][2], sle[2])
 		
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
-		# check gl entries
+		expected_gl_entries.sort(key=lambda x: x[0])
 		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s 
-			order by account asc, debit asc""", (voucher_type, voucher_no), as_dict=1)
+			order by account asc, debit asc""", (voucher_type, voucher_no), as_list=1)
 		self.assertTrue(gl_entries)
+		gl_entries.sort(key=lambda x: x[0])
+		
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEquals(expected_gl_entries[i][0], gle[0])
+			self.assertEquals(expected_gl_entries[i][1], gle[1])
+			self.assertEquals(expected_gl_entries[i][2], gle[2])
 	
 	def _clear_stock(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
@@ -656,5 +698,41 @@ test_records = [
 			"s_warehouse": "_Test Warehouse - _TC",
 			"t_warehouse": "_Test Warehouse 1 - _TC",
 		}
-	]
+	],
+	[
+		{
+			"company": "_Test Company", 
+			"doctype": "Stock Entry", 
+			"posting_date": "2013-01-25", 
+			"posting_time": "17:14:24", 
+			"purpose": "Manufacture/Repack",
+			"fiscal_year": "_Test Fiscal Year 2013", 
+			"expense_adjustment_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		}, 
+		{
+			"conversion_factor": 1.0, 
+			"doctype": "Stock Entry Detail", 
+			"item_code": "_Test Item", 
+			"parentfield": "mtn_details", 
+			"incoming_rate": 100,
+			"qty": 50.0, 
+			"stock_uom": "_Test UOM", 
+			"transfer_qty": 50.0, 
+			"uom": "_Test UOM",
+			"s_warehouse": "_Test Warehouse - _TC",
+		}, 
+		{
+			"conversion_factor": 1.0, 
+			"doctype": "Stock Entry Detail", 
+			"item_code": "_Test Item Home Desktop 100", 
+			"parentfield": "mtn_details", 
+			"incoming_rate": 5000,
+			"qty": 1, 
+			"stock_uom": "_Test UOM", 
+			"transfer_qty": 1, 
+			"uom": "_Test UOM",
+			"t_warehouse": "_Test Warehouse - _TC",
+		},
+	],
 ]

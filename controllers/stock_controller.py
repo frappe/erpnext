@@ -38,7 +38,6 @@ class StockController(AccountsController):
 			return gl_entries
 			
 	def sync_stock_account_balance(self, warehouse_list, cost_center=None, posting_date=None):
-		# print "sync_stock_account_balance"
 		from accounts.utils import get_stock_and_account_difference
 		acc_diff = get_stock_and_account_difference(warehouse_list)
 		if not cost_center:
@@ -56,7 +55,7 @@ class StockController(AccountsController):
 			if posting_date:
 				for entries in gl_entries:
 					entries["posting_date"] = posting_date
-			# print gl_entries
+
 			make_gl_entries(gl_entries)
 				
 	def get_sl_entries(self, d, args):		

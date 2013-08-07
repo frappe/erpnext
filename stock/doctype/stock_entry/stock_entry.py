@@ -198,7 +198,7 @@ class DocType(StockController):
 						
 				gl_entries += self.get_gl_entries_for_stock(against_expense_account, 
 					valuation_amount, warehouse, cost_center=self.doc.cost_center)
-			
+
 		if gl_entries:
 			from accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
