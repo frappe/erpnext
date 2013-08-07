@@ -66,16 +66,8 @@ class DocType:
 				(cstr(ret), self.doc.employee), raise_exception=1)
 
 	def validate_amount(self):
-		if flt(self.doc.ctc) < 12*flt(self.doc.total_earning):
-			msgprint(_("Annual Cost To Company can not be less than 12 months of Total Earning"), 
-				raise_exception=1)
-				
 		if flt(self.doc.net_pay) < 0:
 			msgprint(_("Net pay can not be negative"), raise_exception=1)
-		elif flt(self.doc.net_pay)*12 > flt(self.doc.ctc):
-			msgprint(_("Net pay can not be greater than 1/12th of Annual Cost To Company"), 
-				raise_exception=1)
-		
 
 	def validate(self):	 
 		self.check_existing()

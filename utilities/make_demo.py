@@ -13,6 +13,7 @@ def make():
 	complete_setup()
 	make_items()
 	make_customers_suppliers_contacts()
+	make_users_and_employees()
 	# make_bom()
 	# make_opening_stock()
 	# make_opening_accounts()
@@ -32,7 +33,7 @@ def complete_setup():
 		"industry": "Manufacturing",
 		"company_name": "Wind Power LLC",
 		"company_abbr": "WP",
-		"currency": "INR",
+		"currency": "USD",
 		"timezone": "America/New York",
 		"country": "United States"
 	})
@@ -62,6 +63,20 @@ def make_customers_suppliers_contacts():
 	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Lead.csv")
 	upload()
 
+def make_users_and_employees():
+	print "Importing Profile..."
+	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Profile.csv")
+	upload()
+	webnotes.conn.set_value("HR Settings", None, "emp_created_by", "Naming Series")
+	webnotes.conn.commit()
+	
+	print "Importing Employee..."
+	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Employee.csv")
+	upload()
+
+	print "Importing Salary Structure..."
+	webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", "Salary Structure.csv")
+	upload()
 
 if __name__=="__main__":
 	make()

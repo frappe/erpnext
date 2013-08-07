@@ -19,16 +19,16 @@ Mandatory:,Yes,Yes,Yes,No,No
 Type:,Data (text),Link,Select,Currency,Link
 Info:,,Valid Price List,"One of: Buying, Selling",,Valid Currency
 Start entering data below this line,,,,,
-,Base Bearing Plate,Standard Buying,Buying,750,INR
-,Base Plate,Standard Buying,Buying,1092,INR
-,Bearing Block,Standard Buying,Buying,355,INR
-,Bearing Collar,Standard Buying,Buying,980,INR
-,Bearing Pipe,Standard Buying,Buying,599,INR
-,Blade Rib,Standard Buying,Buying,430,INR
-,Disc Collars,Standard Buying,Buying,3000,INR
-,External Disc,Standard Buying,Buying,1200,INR
-,Internal Disc,Standard Buying,Buying,1000,INR
-,Shaft,Standard Buying,Buying,600,INR
-,Stand,Standard Buying,Buying,200,INR
-,Upper Bearing Plate,Standard Buying,Buying,400,INR
-,Wing Sheet,Standard Buying,Buying,20300,INR
+,Base Bearing Plate,Standard Buying,Buying,15,USD
+,Base Plate,Standard Buying,Buying,20,USD
+,Bearing Block,Standard Buying,Buying,10,USD
+,Bearing Collar,Standard Buying,Buying,20,USD
+,Bearing Pipe,Standard Buying,Buying,15,USD
+,Blade Rib,Standard Buying,Buying,10,USD
+,Disc Collars,Standard Buying,Buying,74,USD
+,External Disc,Standard Buying,Buying,45,USD
+,Internal Disc,Standard Buying,Buying,33,USD
+,Shaft,Standard Buying,Buying,30,USD
+,Stand,Standard Buying,Buying,40,USD
+,Upper Bearing Plate,Standard Buying,Buying,50,USD
+,Wing Sheet,Standard Buying,Buying,22,USD
