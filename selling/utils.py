@@ -59,7 +59,7 @@ def get_item_details(args):
 		
 		if args.price_list_name and args.price_list_currency:
 			out.update(_get_price_list_rate(args, item_bean, meta))
-			
+		
 	out.update(_get_item_discount(out.item_group, args.customer))
 	
 	if out.get(warehouse_fieldname):
@@ -70,7 +70,7 @@ def get_item_details(args):
 	if cint(args.is_pos):
 		pos_settings = get_pos_settings(args.company)
 		out.update(apply_pos_settings(pos_settings, out))
-	
+
 	return out
 	
 def _get_item_code(barcode):
@@ -132,7 +132,7 @@ def _get_price_list_rate(args, item_bean, meta):
 		"price_list_name": args.price_list_name, 
 		"ref_currency": args.price_list_currency,
 		"buying_or_selling": "Selling"})
-	
+
 	if not base_ref_rate:
 		return {}
 	

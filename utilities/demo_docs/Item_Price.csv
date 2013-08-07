@@ -32,3 +32,19 @@ Start entering data below this line,,,,,
 ,Stand,Standard Buying,Buying,40,USD
 ,Upper Bearing Plate,Standard Buying,Buying,50,USD
 ,Wing Sheet,Standard Buying,Buying,22,USD
+,Wind Turbine,Standard Selling,Selling,300,USD
+,Wind Mill A Series,Standard Selling,Selling,340,USD
+,Wind MIll C Series,Standard Selling,Selling,400,USD
+,Base Bearing Plate,Standard Selling,Selling,21,USD
+,Base Plate,Standard Selling,Selling,28,USD
+,Bearing Block,Standard Selling,Selling,14,USD
+,Bearing Collar,Standard Selling,Selling,28,USD
+,Bearing Pipe,Standard Selling,Selling,21,USD
+,Blade Rib,Standard Selling,Selling,14,USD
+,Disc Collars,Standard Selling,Selling,103.6,USD
+,External Disc,Standard Selling,Selling,63,USD
+,Internal Disc,Standard Selling,Selling,46.2,USD
+,Shaft,Standard Selling,Selling,42,USD
+,Stand,Standard Selling,Selling,56,USD
+,Upper Bearing Plate,Standard Selling,Selling,70,USD
+,Wing Sheet,Standard Selling,Selling,30.8,USD
