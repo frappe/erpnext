@@ -290,9 +290,8 @@ class DocType(StockController):
 		
 		self.doc.stock_value_difference = 0.0
 		for d in self.entries:
-			self.doc.stock_value_difference -= get_buying_amount(d.item_code, d.warehouse, 
-				d.actual_qty, self.doc.doctype, self.doc.name, d.voucher_detail_no, 
-				stock_ledger_entries)
+			self.doc.stock_value_difference -= get_buying_amount(d.item_code, self.doc.doctype, self.doc.name,
+				d.voucher_detail_no, stock_ledger_entries.get((d.item_code, d.warehouse), []))
 		webnotes.conn.set(self.doc, "stock_value_difference", self.doc.stock_value_difference)
 		
 	def make_gl_entries(self):
