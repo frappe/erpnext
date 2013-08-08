@@ -98,8 +98,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			// }, 'icon-desktop');
 
 		}
-		
-		cur_frm.cscript.hide_fields(doc, dt, dn);
 	},
 
 	toggle_pos: function(show) {
@@ -178,6 +176,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	entries_add: function(doc, cdt, cdn) {
 		var row = wn.model.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
+	},
+	
+	set_dynamic_labels: function() {
+		this._super();
+		this.hide_fields(this.frm.doc);
 	}
 });
 

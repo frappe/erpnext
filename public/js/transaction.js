@@ -42,6 +42,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				callback: function(r) {
 					// remove this call when using client side mapper
 					me.set_default_values();
+					me.set_dynamic_labels();
 				}
 			});
 		}
