@@ -286,6 +286,9 @@ class DocType(StockController):
 		
 		item_list = [d.item_code for d in self.entries]
 		warehouse_list = [d.warehouse for d in self.entries]
+		if not (item_list and warehouse_list):
+			webnotes.throw(_("Invalid Item or Warehouse Data"))
+		
 		stock_ledger_entries = self.get_stock_ledger_entries(item_list, warehouse_list)
 		
 		self.doc.stock_value_difference = 0.0

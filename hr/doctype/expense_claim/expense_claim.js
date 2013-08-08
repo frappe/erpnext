@@ -25,9 +25,11 @@ erpnext.hr.ExpenseClaimController = wn.ui.form.Controller.extend({
 
 				// credit to bank
 				var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-				d1.account = r.message[0].account;
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
-				d1.balance = r.message[0].balance;
+				if(r.message) {
+					d1.account = r.message[0].account;
+					d1.balance = r.message[0].balance;
+				}
 
 				loaddoc('Journal Voucher', jv.name);
 			}
