@@ -30,6 +30,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		var me = this;
 		if (sys_defaults.perpetual_accounting) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+			this.frm.add_fetch("company", "cost_center", "cost_center");
 		
 			this.frm.fields_dict["expense_account"].get_query = function() {
 				return {

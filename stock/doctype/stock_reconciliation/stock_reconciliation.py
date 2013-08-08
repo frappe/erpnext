@@ -17,6 +17,7 @@ class DocType(StockController):
 		
 	def validate(self):
 		self.validate_data()
+		self.validate_expense_account()
 		
 	def on_submit(self):
 		self.insert_stock_ledger_entries()
@@ -299,12 +300,7 @@ class DocType(StockController):
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
-		
-		if not self.doc.expense_account:
-			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		else:
-			self.validate_expense_account()
-			
+					
 		if not self.doc.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 		
@@ -327,13 +323,19 @@ class DocType(StockController):
 			self.sync_stock_account_balance(warehouse_list, self.doc.cost_center)
 			
 	def validate_expense_account(self):
-		if not webnotes.conn.sql("select * from `tabStock Ledger Entry`"):
+		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
+			return
+			
+		if not self.doc.expense_account:
+			msgprint(_("Please enter Expense Account"), raise_exception=1)
+		elif not webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+				where ifnull(is_cancelled, 'No') = 'No'"""):
 			if webnotes.conn.get_value("Account", self.doc.expense_account, 
 					"is_pl_account") == "Yes":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \
-					reconciliation is an opening entry. Please select 'Temporary Liability' or \
-					relevant account"""), raise_exception=1)
-			
+					reconciliation is an opening entry. \
+					Please select 'Temporary Account (Liabilities)' or relevant account"""), 
+					raise_exception=1)
 		
 @webnotes.whitelist()
 def upload():

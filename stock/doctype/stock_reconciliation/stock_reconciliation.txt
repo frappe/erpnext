@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-08-07 11:14:17", 
+  "modified": "2013-08-07 18:16:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -108,6 +108,13 @@
   "fieldtype": "Link", 
   "label": "Expense Account", 
   "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "options": "Cost Center"
  }, 
  {
   "doctype": "DocField", 
