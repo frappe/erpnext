@@ -7,7 +7,7 @@ from webnotes.utils import cstr, flt, cint, nowdate, add_days
 from webnotes.model.doc import addchild, Document
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -70,12 +70,12 @@ class DocType:
 				and so.docstatus = 1 and so.status != "Stopped"
 				and so.company = %s
 				and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0) %s
-				and (exists (select * from `tabItem` item where item.name=so_item.item_code
+				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 						or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)
-					or exists (select * from `tabDelivery Note Packing Item` dnpi
+					or exists (select name from `tabDelivery Note Packing Item` dnpi
 						where dnpi.parent = so.name and dnpi.parent_item = so_item.item_code
-							and exists (select * from `tabItem` item where item.name=dnpi.item_code
+							and exists (select name from `tabItem` item where item.name=dnpi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
 			""" % ('%s', so_filter, item_filter, item_filter), self.doc.company, as_dict=1)
@@ -107,7 +107,7 @@ class DocType:
 		if not so_list:
 			msgprint("Please enter sales order in the above table", raise_exception=1)
 			
-		items = sql("""select distinct parent, item_code,
+		items = sql("""select distinct parent, item_code, reserved_warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
@@ -116,7 +116,7 @@ class DocType:
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 		
-		dnpi_items = sql("""select distinct dnpi.parent, dnpi.item_code,
+		dnpi_items = sql("""select distinct dnpi.parent, dnpi.item_code, dnpi.warehouse as reserved_warhouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * dnpi.qty) / so_item.qty) 
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabDelivery Note Packing Item` dnpi
@@ -139,6 +139,7 @@ class DocType:
 				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
+			pi.warehouse				= p['reserved_warehouse']
 			pi.item_code				= p['item_code']
 			pi.description				= item_details and item_details[0][0] or ''
 			pi.stock_uom				= item_details and item_details[0][1] or ''
@@ -190,34 +191,38 @@ class DocType:
 		item_dict, bom_dict = {}, {}
 		for d in self.doclist.get({"parentfield": "pp_details"}):			
 			bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
-			item_dict[(d.item_code, d.sales_order)] = {
-				"qty" 				: flt(item_dict.get((d.item_code, d.sales_order), \
-					{}).get("qty")) + flt(d.planned_qty),
+			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
+				"production_item"	: d.item_code,
+				"sales_order"		: d.sales_order,
+				"qty" 				: flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),
+										{}).get("qty")) + flt(d.planned_qty),
 				"bom_no"			: d.bom_no,
 				"description"		: d.description,
 				"stock_uom"			: d.stock_uom,
 				"company"			: self.doc.company,
 				"wip_warehouse"		: "",
-				"fg_warehouse"		: "",
+				"fg_warehouse"		: d.warehouse,
 				"status"			: "Draft",
 			}
 		return bom_dict, item_dict
 		
 	def create_production_order(self, items):
 		"""Create production order. Called from Production Planning Tool"""
+		from manufacturing.doctype.production_order.production_order import OverProductionError
 
 		pro_list = []
-		for item_so in items:
-			pro_doc = Document('Production Order')
-			pro_doc.production_item = item_so[0]
-			pro_doc.sales_order = item_so[1]
-			for key in items[item_so]:
-				pro_doc.fields[key] = items[item_so][key]
+		for key in items:
+			pro = webnotes.new_bean("Production Order")
+			pro.doc.fields.update(items[key])
 			
-			pro_doc.save(new = 1)
-			
-			get_obj("Production Order", pro_doc.name).validate_production_order_against_so()
-			pro_list.append(pro_doc.name)
+			webnotes.mute_messages = True
+			try:
+				pro.insert()
+				pro_list.append(pro.doc.name)
+			except OverProductionError, e:
+				pass
+				
+			webnotes.mute_messages = False
 			
 		return pro_list
 

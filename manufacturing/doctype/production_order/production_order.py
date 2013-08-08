@@ -10,6 +10,8 @@ from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
+class OverProductionError(webnotes.ValidationError): pass
+
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -71,8 +73,7 @@ class DocType:
 				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
 				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
 				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
-				_("Please reduce qty."), raise_exception=1)
-
+				_("Please reduce qty."), raise_exception=OverProductionError)
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
@@ -95,6 +96,8 @@ class DocType:
 
 
 	def on_submit(self):
+		if not self.doc.wip_warehouse:
+			webnotes.throw(_("WIP Warehouse required before Submit"))
 		webnotes.conn.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
 		
