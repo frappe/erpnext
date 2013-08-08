@@ -78,6 +78,11 @@ def run_manufacturing(current_date):
 		b = webnotes.bean("Production Order", pro[0])
 		b.doc.wip_warehouse = "Work in Progress - WP"
 		b.submit()
+		
+	# submit material requests
+	for pro in webnotes.conn.get_values("Material Request", {"docstatus": 0}):
+		b = webnotes.bean("Material Request", pro[0])
+		b.submit()
 	
 def make_quotation(current_date):
 	b = webnotes.bean([{

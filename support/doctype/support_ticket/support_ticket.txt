@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-01 10:36:25", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:57:19", 
+  "modified": "2013-08-08 14:22:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,7 +53,7 @@
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "hidden": 0, 
-  "label": "Naming Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "options": "SUP", 
   "print_hide": 1, 
