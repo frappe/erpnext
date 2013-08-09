@@ -309,6 +309,8 @@ def post_install(install_path):
 	
 	print
 	print "-"*80
+	print "To change url domain, run: lib/wnf.py --domain example.com"
+	print "-"*80
 	print "Installation complete"
 	print "Open your browser and go to http://localhost:8080"
 	print "Login using username = Administrator and password = admin"
