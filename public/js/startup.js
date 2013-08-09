@@ -26,24 +26,28 @@ erpnext.startup.start = function() {
 					"</p>", wn._("Welcome"));
 			}
 		} else if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
-			var today = dateutil.str_to_obj(wn.boot.server_date);
-			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
-			var diff = dateutil.get_diff(expires_on, today);
-			var payment_link = "<a href=\"https://erpnext.com/modes-of-payment.html\" target=\"_blank\">See Payment Options.</a>";		
-			if (0 <= diff && diff <= 15) {
-				var expiry_string = diff==0 ? "today" : repl("in %(diff)s day(s)", { diff: diff });
-				$('header').append(repl('<div class="expiry-info"> \
-					Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
-					Please renew your subscription to continue using ERPNext \
-					(and remove this annoying banner). %(payment_link)s\
-				</div>', { expiry_string: expiry_string, payment_link: payment_link }));
-			} else if (diff < 0) {
-				$('header').append(repl('<div class="expiry-info"> \
-					This ERPNext subscription <b>has expired</b>. %(payment_link)s\
-				</div>', { expiry_string: expiry_string, payment_link: payment_link }));
-			}
+			erpnext.startup.show_expiry_banner();
 		}
 	}
+}
+
+erpnext.startup.show_expiry_banner = function() {
+	var today = dateutil.str_to_obj(wn.boot.server_date);
+	var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
+	var diff = dateutil.get_diff(expires_on, today);
+	var payment_link = "<a href=\"https://erpnext.com/modes-of-payment.html\" target=\"_blank\">\
+		Click here to buy subscription.</a>";
+	
+	var msg = "";
+	if (0 <= diff && diff <= 10) {
+		var expiry_string = diff==0 ? "today" : repl("in %(diff)s day(s)", { diff: diff });
+		msg = repl('Your ERPNext subscription will <b>expire %(expiry_string)s</b>. %(payment_link)s',
+			{ expiry_string: expiry_string, payment_link: payment_link });
+	} else if (diff < 0) {
+		msg = repl('This ERPNext subscription <b>has expired</b>. %(payment_link)s', {payment_link: payment_link});
+	}
+	
+	if(msg) wn.ui.toolbar.show_banner(msg);
 }
 
 // start
