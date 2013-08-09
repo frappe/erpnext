@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:08", 
+  "modified": "2013-08-09 14:45:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -208,7 +208,7 @@
  {
   "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
-  "fieldname": "price_list_name", 
+  "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
   "options": "Price List", 

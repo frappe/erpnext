@@ -3,17 +3,22 @@
 
 import webnotes, os, datetime
 import webnotes.utils
+from webnotes.widgets import query_report
 import random
 
 webnotes.session = webnotes._dict({"user":"Administrator"})
 from core.page.data_import_tool.data_import_tool import upload
+
+# fix price list
+# fix fiscal year
 
 company = "Wind Power LLC"
 start_date = '2010-01-01'
 runs_for = 100
 prob = {
 	"Quotation": { "make": 0.5, "qty": (1,3) },
-	"Sales Order": { "make": 0.5, "qty": (1,2) }
+	"Sales Order": { "make": 0.5, "qty": (1,2) },
+	"Supplier Quotation": { "make": 0.5, "qty": (1, 3) }
 }
 
 def make():
@@ -48,21 +53,51 @@ def simulate():
 		run_sales(current_date)
 		run_purchase(current_date)
 		run_manufacturing(current_date)
+		run_stock(current_date)
 		
 	webnotes.conn.commit()
 
 def run_sales(current_date):
-	if random.random() < prob["Quotation"]["make"]:
-		for i in xrange(random.randrange(*prob["Quotation"]["qty"])):
+	if can_make("Quotation"):
+		for i in xrange(how_many("Quotation")):
 			make_quotation(current_date)
-			
-	if random.random() < prob["Sales Order"]["make"]:
-		for i in xrange(random.randrange(*prob["Sales Order"]["qty"])):
+					
+	if can_make("Sales Order"):
+		for i in xrange(how_many("Sales Order")):
 			make_sales_order(current_date)
 
-def run_purchase(current_date):
-	pass
+def run_stock(current_date):
+	# make purchase requests
 	
+	# make delivery notes (if possible)
+	
+	# make stock entry (from production order)
+
+def run_purchase(current_date):
+	# make supplier quotations
+	if can_make("Supplier Quotation"):
+		from stock.doctype.material_request.material_request import make_supplier_quotation
+		report = "Material Requests for which Supplier Quotations are not created"
+		for row in query_report.run(report)["result"][:how_many("Supplier Quotation")]:
+			sq = webnotes.bean(make_supplier_quotation(row[0]))
+			sq.doc.transaction_date = current_date
+			sq.doc.fiscal_year = "2010"
+			po.doc.price_list = "Standard Buying"
+			sq.insert()
+			sq.submit()
+		
+	# make purchase orders
+	if can_make("Purchase Order"):
+		from stock.doctype.material_request.material_request import make_purchase_order
+		report = "Requested Items To Be Ordered"
+		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
+			po = webnotes.bean(make_purchase_order(row[0]))
+			po.doc.transaction_date = current_date
+			po.doc.fiscal_year = "2010"
+			po.doc.price_list = "Standard Buying"
+			po.insert()
+			po.submit()
+			
 def run_manufacturing(current_date):
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
 	ppt.doc.company = company
@@ -145,6 +180,12 @@ def get_random(doctype, filters=None):
 		order by RAND() limit 0,1""" % (doctype, condition))[0][0]
 
 	return out
+
+def can_make(doctype):
+	return random.random() < prob.get(doctype, {"make": 0.5})["make"]
+
+def how_many(doctype):
+	return random.randrange(*prob.get(doctype, {"qty": (1, 3)})["qty"])
 
 def install():
 	print "Creating Fresh Database..."

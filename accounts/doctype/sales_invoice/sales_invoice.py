@@ -210,7 +210,7 @@ class DocType(SellingController):
 				}, "master_name")
 				
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
-				'price_list_name', 'company', 'select_print_heading', 'cash_bank_account'):
+				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
 					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
 						self.doc.fields[fieldname] = pos.get(fieldname)
 						

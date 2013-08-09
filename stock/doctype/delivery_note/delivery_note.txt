@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:21", 
+  "modified": "2013-08-09 14:46:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -285,7 +285,7 @@
  {
   "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
   "doctype": "DocField", 
-  "fieldname": "price_list_name", 
+  "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 

@@ -252,4 +252,5 @@ patch_list = [
 	"patches.july_2013.p11_update_price_list_currency",
 	"execute:webnotes.bean('Selling Settings').save() #2013-07-29",
 	"patches.august_2013.p01_hr_settings",
+	"patches.august_2013.p02_rename_price_list",
 ]

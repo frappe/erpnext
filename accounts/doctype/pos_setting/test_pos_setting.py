@@ -7,7 +7,7 @@ test_records = [
 		"name": "_Test POS Setting",
 		"currency": "INR",
 		"conversion_rate": 1.0,
-		"price_list_name": "_Test Price List",
+		"selling_price_list": "_Test Price List",
 		"company": "_Test Company",
 		"warehouse": "_Test Warehouse - _TC",
 		"territory": "_Test Territory", 

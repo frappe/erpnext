@@ -666,7 +666,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory"
 		}, 
 		{
@@ -729,7 +729,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-03-07", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory"
 		}, 
 		{
@@ -780,7 +780,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory",
 		},
 		# items
@@ -905,7 +905,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory",
 		},
 		# items

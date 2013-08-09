@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-20 16:00:18", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:23", 
+  "modified": "2013-08-09 14:47:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,7 +14,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "price_list", 
+  "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
   "in_list_view": 1, 
   "label": "Price List", 

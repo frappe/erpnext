@@ -30,6 +30,7 @@ class BuyingController(StockController):
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
 
+		self.set_supplier_from_item_default()
 		self.set_price_list_currency("Buying")
 		
 		# set contact and address details for supplier, if they are not mentioned
@@ -39,6 +40,14 @@ class BuyingController(StockController):
 					self.doc.fields[fieldname] = val
 
 		self.set_missing_item_details(get_item_details)
+
+	def set_supplier_from_item_default(self):
+		if self.meta.get_field("supplier") and not self.doc.supplier:
+			for d in self.doclist.get({"doctype": self.tname}):
+				supplier = webnotes.conn.get_value("Item", d.item_code, "default_supplier")
+				if supplier:
+					self.doc.supplier = supplier
+					break
 
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")

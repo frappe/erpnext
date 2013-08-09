@@ -111,9 +111,14 @@ wn.module_page["Buying"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Item-wise Purchase History"),
-				route: "query-report/Item-wise Purchase History",
-				doctype: "Item"
+				"label":wn._("Requested Items To Be Ordered"),
+				route: "query-report/Requested Items To Be Ordered",
+				doctype: "Material Request"
+			},
+			{
+				"label":wn._("Material Requests for which Supplier Quotations are not created"),
+				route: "query-report/Material Requests for which Supplier Quotations are not created",
+				doctype: "Material Request"
 			},
 			{
 				"label":wn._("Purchase In Transit"),
@@ -121,20 +126,20 @@ wn.module_page["Buying"] = [
 				doctype: "Purchase Order"
 			},
 			{
-				"label":wn._("Requested Items To Be Ordered"),
-				route: "query-report/Requested Items To Be Ordered",
-				doctype: "Material Request"
+				"label":wn._("Item-wise Purchase History"),
+				route: "query-report/Item-wise Purchase History",
+				doctype: "Item"
+			},
+			{
+				"label":wn._("Item-wise Last Purchase Rate"),
+				route: "query-report/Item-wise Last Purchase Rate",
+				doctype: "Item"
 			},
 			{
 				"label":wn._("Purchase Order Trends"),
 				route: "query-report/Purchase Order Trends",
 				doctype: "Purchase Order"
 			},
-			{
-				"label":wn._("Item-wise Last Purchase Rate"),
-				route: "query-report/Item-wise Last Purchase Rate",
-				doctype: "Item"
-			}
 		]
 	}
 ]

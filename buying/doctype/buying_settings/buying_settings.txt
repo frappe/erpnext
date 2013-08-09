@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 11:04:03", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:29:41", 
+  "modified": "2013-08-09 14:38:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,13 @@
   "fieldtype": "Link", 
   "label": "Default Supplier Type", 
   "options": "Supplier Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_price_list", 
+  "fieldtype": "Link", 
+  "label": "Default Buying Price List", 
+  "options": "Price List"
  }, 
  {
   "doctype": "DocField", 
