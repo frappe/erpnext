@@ -121,8 +121,7 @@ class DocType:
 
 	def get_current(self, arg=None):
 		"""get series current"""
-		self.doc.current_value = webnotes.conn.sql("""select current from tabSeries where name=%s""", 
-			self.doc.prefix)[0][0]
+		self.doc.current_value = webnotes.conn.get_value("Series", self.doc.prefix, "current")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
