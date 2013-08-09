@@ -61,7 +61,7 @@ test_records = [
 	}, {
 		"doctype": "Item Price",
 		"parentfield": "ref_rate_details",
-		"price_list_name": "_Test Price List",
+		"price_list": "_Test Price List",
 		"ref_rate": 100,
 		"ref_currency": "INR",
 		"buying_or_selling": "Selling"

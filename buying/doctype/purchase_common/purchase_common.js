@@ -18,8 +18,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	setup_queries: function() {
 		var me = this;
 		
-		if(this.frm.fields_dict.price_list_name) {
-			this.frm.set_query("price_list_name", function() {
+		if(this.frm.fields_dict.buying_price_list) {
+			this.frm.set_query("buying_price_list", function() {
 				return{
 					filters: { 'buying_or_selling': "Buying" }
 				}
@@ -29,7 +29,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				return{
 					query: "controllers.queries.get_price_list_currency",
 					filters: {
-						'price_list_name': me.frm.doc.price_list_name,
+						'price_list': me.frm.doc.buying_price_list,
 						'buying_or_selling': "Buying"
 					}					
 				}
@@ -77,7 +77,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				msgprint(wn._("Please specify Company"));
 			} else {
 				var me = this;
-				var price_list_name = this.frm.doc.price_list_name;
+				var buying_price_list = this.frm.doc.buying_price_list;
 
 				return this.frm.call({
 					doc: this.frm.doc,
@@ -85,7 +85,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							if(me.frm.doc.price_list_name !== price_list_name) me.price_list_name();
+							if(me.frm.doc.buying_price_list !== buying_price_list) me.buying_price_list();
 						}
 					}
 				});
@@ -132,7 +132,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							docname: me.frm.doc.name,
 							supplier: me.frm.doc.supplier,
 							conversion_rate: me.frm.doc.conversion_rate,
-							price_list_name: me.frm.doc.price_list_name,
+							buying_price_list: me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							is_subcontracted: me.frm.doc.is_subcontracted,
@@ -151,8 +151,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	price_list_name: function() {
-		this._super("buying");
+	buying_price_list: function() {
+		this.get_price_list_currency("buying");
 	},
 	
 	import_ref_rate: function(doc, cdt, cdn) {

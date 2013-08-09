@@ -19,7 +19,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	show_item_prices: function() {
-		var item_price = wn.model.get("Item Price", {price_list_name: cur_frm.doc.name});
+		var item_price = wn.model.get("Item Price", {price_list: cur_frm.doc.name});
 	
 		var show = item_price && item_price.length;
 	

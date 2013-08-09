@@ -31,6 +31,6 @@ def get_ancestors_of(doctype, name):
 	return result or []
 
 @webnotes.whitelist()
-def get_price_list_currency(price_list_name):
-	return {"price_list_currency": webnotes.conn.get_value("Price List", price_list_name, 
+def get_price_list_currency(price_list):
+	return {"price_list_currency": webnotes.conn.get_value("Price List", price_list, 
 		"currency")}

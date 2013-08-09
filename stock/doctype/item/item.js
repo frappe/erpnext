@@ -5,16 +5,16 @@ wn.provide("erpnext.stock");
 
 erpnext.stock.Item = wn.ui.form.Controller.extend({
 	onload: function() {
-		this.frm.add_fetch("price_list_name", "currency", "ref_currency");
-		this.frm.add_fetch("price_list_name", "buying_or_selling", "buying_or_selling");
+		this.frm.add_fetch("price_list", "currency", "ref_currency");
+		this.frm.add_fetch("price_list", "buying_or_selling", "buying_or_selling");
 	},
 	
 	ref_rate_details_add: function(doc, cdt, cdn) {
 		var row = wn.model.get_doc(cdt, cdn);
-		if(row.price_list_name && !row.ref_currency) {
+		if(row.price_list && !row.ref_currency) {
 			// execute fetch
-			var df = wn.meta.get_docfield(row.doctype, "price_list_name", row.parent);
-			this.frm.script_manager.validate_link_and_fetch(df, row.name, row.price_list_name);
+			var df = wn.meta.get_docfield(row.doctype, "price_list", row.parent);
+			this.frm.script_manager.validate_link_and_fetch(df, row.name, row.price_list);
 		}
 	}
 });

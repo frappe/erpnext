@@ -32,7 +32,7 @@ class DocType:
 		det = webnotes.conn.sql("""select description, stock_uom from `tabItem` 
 			where name = %s""", name)
 		rate = webnotes.conn.sql("""select ref_rate from `tabItem Price` 
-			where price_list_name = %s and parent = %s 
+			where price_list = %s and parent = %s 
 			and ref_currency = %s""", (self.doc.price_list, name, self.doc.currency))
 		return {
 			'description' : det and det[0][0] or '', 

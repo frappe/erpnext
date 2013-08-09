@@ -16,7 +16,7 @@ def get_product_info(item_code):
 	
 	cart_quotation = _get_cart_quotation()
 	
-	price_list = webnotes.cookies.get("price_list_name").value
+	price_list = webnotes.cookies.get("selling_price_list").value
 
 	warehouse = webnotes.conn.get_value("Item", item_code, "website_warehouse")
 	if warehouse:
@@ -28,7 +28,7 @@ def get_product_info(item_code):
 		in_stock = -1
 		
 	price = price_list and webnotes.conn.sql("""select ref_rate, ref_currency from
-		`tabItem Price` where parent=%s and price_list_name=%s""", 
+		`tabItem Price` where parent=%s and price_list=%s""", 
 		(item_code, price_list), as_dict=1) or []
 	
 	price = price and price[0] or None

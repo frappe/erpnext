@@ -111,7 +111,7 @@ test_records = [
 			"posting_date": "2013-02-21", 
 			"posting_time": "9:00:00", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"status": "Draft", 
 			"territory": "_Test Territory",
 			"net_total": 500.0,

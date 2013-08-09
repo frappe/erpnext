@@ -114,13 +114,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 	
-	price_list_name: function(buying_or_selling) {
+	get_price_list_currency: function(buying_or_selling) {
 		var me = this;
-		if(this.frm.doc.price_list_name) {
+		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
+		if(this.frm.doc[fieldname]) {
 			return this.frm.call({
 				method: "setup.utils.get_price_list_currency",
 				args: { 
-					price_list_name: this.frm.doc.price_list_name,
+					price_list: this.frm.doc[fieldname],
 				},
 				callback: function(r) {
 					if(!r.exc) {

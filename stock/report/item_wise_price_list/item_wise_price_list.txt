@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 18:01:55", 
   "docstatus": 0, 
-  "modified": "2013-05-07 11:50:46", 
+  "modified": "2013-05-07 11:52:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,7 +10,7 @@
   "doctype": "Report", 
   "is_standard": "Yes", 
   "name": "__common__", 
-  "query": "select\n  item.name as \"ID:Link/Item:120\", \n  item.item_name as \"Item Name::120\", \n  item_price.price_list_name as \"Price List::80\",\n  item_price.ref_currency as \"Currency::40\", \n  item_price.ref_rate as \"Rate:Float:80\",\n  item.description as \"Description::160\",\n  item.item_group as \"Item Group:Link/Item Group:100\",\n  item.brand as \"Brand::100\"\nfrom `tabItem` item, `tabItem Price` item_price\nwhere\n  item_price.parent = item.name", 
+  "query": "select\n  item.name as \"ID:Link/Item:120\", \n  item.item_name as \"Item Name::120\", \n  item_price.price_list as \"Price List::80\",\n  item_price.ref_currency as \"Currency::40\", \n  item_price.ref_rate as \"Rate:Float:80\",\n  item.description as \"Description::160\",\n  item.item_group as \"Item Group:Link/Item Group:100\",\n  item.brand as \"Brand::100\"\nfrom `tabItem` item, `tabItem Price` item_price\nwhere\n  item_price.parent = item.name", 
   "ref_doctype": "Item", 
   "report_name": "Item-Wise Price List", 
   "report_type": "Query Report"

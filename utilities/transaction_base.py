@@ -476,8 +476,8 @@ def validate_currency(args, item, meta=None):
 				webnotes._dict({"fields": args})))
 	
 	# validate price list conversion rate
-	if meta.get_field("price_list_currency") and args.price_list_name and \
-		args.price_list_currency:
+	if meta.get_field("price_list_currency") and (args.selling_price_list or args.buying_price_list) \
+		and args.price_list_currency:
 		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate, 
 			meta.get_label("plc_conversion_rate"), args.company)
 		

@@ -250,7 +250,7 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "price_list_name", 
+  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -260,7 +260,7 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "price_list_name", 
+  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 

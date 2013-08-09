@@ -14,7 +14,7 @@ You can only upload upto 5000 records in one go. (may be less in some cases),,,,
 "If you are updating, please select ""Overwrite"" else existing rows will not be deleted.",,,,,
 ,,,,,
 Column Labels,ID,Price List Name,Valid for Buying or Selling?,Ref Rate,Currency
-Column Name:,parent,price_list_name,buying_or_selling,ref_rate,ref_currency
+Column Name:,parent,price_list,buying_or_selling,ref_rate,ref_currency
 Mandatory:,Yes,Yes,Yes,No,No
 Type:,Data (text),Link,Select,Currency,Link
 Info:,,Valid Price List,"One of: Buying, Selling",,Valid Currency

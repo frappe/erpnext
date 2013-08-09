@@ -105,7 +105,8 @@ class DocType:
 	def get_items(self):
 		so_list = filter(None, [d.sales_order for d in getlist(self.doclist, 'pp_so_details')])
 		if not so_list:
-			msgprint("Please enter sales order in the above table", raise_exception=1)
+			msgprint("Please enter sales order in the above table")
+			return []
 			
 		items = sql("""select distinct parent, item_code, reserved_warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
@@ -294,8 +295,12 @@ class DocType:
 			webnotes.msgprint("Please enter Warehouse for which Material Request will be raised",
 			 	raise_exception=1)
 			
-		bom_dict = self.get_distinct_items_and_boms()[0]
+		bom_dict = self.get_distinct_items_and_boms()[0]		
 		self.get_raw_materials(bom_dict)
+		
+		if not self.item_dict:
+			return
+		
 		item_projected_qty = self.get_projected_qty()
 		
 		from accounts.utils import get_fiscal_year
@@ -315,7 +320,6 @@ class DocType:
 			
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
-				
 		item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
 			from `tabBin` where item_code in (%s) group by item_code""" % 
 			(", ".join(["%s"]*len(items)),), tuple(items))

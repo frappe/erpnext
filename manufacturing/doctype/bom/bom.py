@@ -119,9 +119,9 @@ class DocType:
 			elif self.doc.rm_cost_as_per == 'Last Purchase Rate':
 				rate = arg['last_purchase_rate']
 			elif self.doc.rm_cost_as_per == "Price List":
-				if not self.doc.price_list:
+				if not self.doc.buying_price_list:
 					webnotes.throw(_("Please select Price List"))
-				rate = webnotes.conn.get_value("Item Price", {"price_list_name": self.doc.price_list, 
+				rate = webnotes.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
 					"parent": arg["item_code"]}, "ref_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
@@ -255,7 +255,7 @@ class DocType:
 			(bom_no, item), as_dict =1)
 		if not bom:
 			msgprint("""Incorrect BOM No: %s against item: %s at row no: %s.
-				It may be inactive or cancelled or for some other item.""" % 
+				It may be inactive or not submitted or does not belong to this item.""" % 
 				(bom_no, item, idx), raise_exception = 1)
 
 	def check_if_item_repeated(self, item, op, check_list):

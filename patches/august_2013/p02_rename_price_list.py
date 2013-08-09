@@ -15,9 +15,19 @@ def execute():
 			("Item Price", "price_list_name", "price_list"),
 			("BOM", "price_list", "buying_price_list"),
 		]:
-		webnotes.conn.sql_ddl("alter table `tab%s` change `%s` `%s` varchar(180)" % t)
+		if t[2] in webnotes.conn.get_table_columns(t[0]):
+			# already reloaded, so copy into new column and drop old column
+			webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % (t[0], t[2], t[1]))
+			webnotes.conn.sql("""alter table `tab%s` drop column `%s`""" % (t[0], t[1]))
+		else:
+			webnotes.conn.sql_ddl("alter table `tab%s` change `%s` `%s` varchar(180)" % t)
+
+		webnotes.reload_doc(webnotes.conn.get_value("DocType", t[0], "module"), "DocType", t[0])
 		
 	webnotes.conn.sql("""update tabSingles set field='selling_price_list'
 		where field='price_list_name' and doctype='Selling Settings'""")
-
+	
+	webnotes.reload_doc("Selling", "DocType", "Selling Settings")
 	webnotes.bean("Selling Settings").save()
+	
+	

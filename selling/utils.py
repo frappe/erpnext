@@ -29,7 +29,7 @@ def get_item_details(args):
 			"warehouse": None,
 			"customer": "",
 			"conversion_rate": 1.0,
-			"price_list_name": None,
+			"selling_price_list": None,
 			"price_list_currency": None,
 			"plc_conversion_rate": 1.0
 		}
@@ -57,7 +57,7 @@ def get_item_details(args):
 	if meta.get_field("currency"):
 		out.base_ref_rate = out.basic_rate = out.ref_rate = out.export_rate = 0.0
 		
-		if args.price_list_name and args.price_list_currency:
+		if args.selling_price_list and args.price_list_currency:
 			out.update(_get_price_list_rate(args, item_bean, meta))
 		
 	out.update(_get_item_discount(out.item_group, args.customer))
@@ -129,7 +129,7 @@ def _get_basic_details(args, item_bean, warehouse_fieldname):
 def _get_price_list_rate(args, item_bean, meta):
 	base_ref_rate = item_bean.doclist.get({
 		"parentfield": "ref_rate_details",
-		"price_list_name": args.price_list_name, 
+		"price_list": args.selling_price_list, 
 		"ref_currency": args.price_list_currency,
 		"buying_or_selling": "Selling"})
 

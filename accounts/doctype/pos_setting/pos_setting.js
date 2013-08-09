@@ -6,7 +6,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 		if(r.message) set_field_options('naming_series', r.message);
 	});
 	
-	cur_frm.set_query("price_list_name", function() {
+	cur_frm.set_query("selling_price_list", function() {
 		return { filters: { buying_or_selling: "Selling" } };
 	});
 }

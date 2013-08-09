@@ -5,6 +5,7 @@ import webnotes, os, datetime
 import webnotes.utils
 from webnotes.widgets import query_report
 import random
+import json
 
 webnotes.session = webnotes._dict({"user":"Administrator"})
 from core.page.data_import_tool.data_import_tool import upload
@@ -14,10 +15,10 @@ from core.page.data_import_tool.data_import_tool import upload
 
 company = "Wind Power LLC"
 start_date = '2010-01-01'
-runs_for = 100
+runs_for = 20
 prob = {
-	"Quotation": { "make": 0.5, "qty": (1,3) },
-	"Sales Order": { "make": 0.5, "qty": (1,2) },
+	"Quotation": { "make": 0.5, "qty": (1,5) },
+	"Sales Order": { "make": 0.5, "qty": (1,4) },
 	"Supplier Quotation": { "make": 0.5, "qty": (1, 3) }
 }
 
@@ -25,15 +26,15 @@ def make():
 	webnotes.connect()
 	webnotes.print_messages = True
 	webnotes.mute_emails = True
-
-	# setup()
+	
+	#setup()
 	simulate()
 	
 def setup():
 	install()
 	complete_setup()
-	make_items()
 	make_customers_suppliers_contacts()
+	make_items()
 	make_users_and_employees()
 	# make_opening_stock()
 	# make_opening_accounts()
@@ -67,6 +68,7 @@ def run_sales(current_date):
 			make_sales_order(current_date)
 
 def run_stock(current_date):
+	pass
 	# make purchase requests
 	
 	# make delivery notes (if possible)
@@ -79,24 +81,24 @@ def run_purchase(current_date):
 		from stock.doctype.material_request.material_request import make_supplier_quotation
 		report = "Material Requests for which Supplier Quotations are not created"
 		for row in query_report.run(report)["result"][:how_many("Supplier Quotation")]:
-			sq = webnotes.bean(make_supplier_quotation(row[0]))
-			sq.doc.transaction_date = current_date
-			sq.doc.fiscal_year = "2010"
-			po.doc.price_list = "Standard Buying"
-			sq.insert()
-			sq.submit()
+			if row[0] != "Total":
+				sq = webnotes.bean(make_supplier_quotation(row[0]))
+				sq.doc.transaction_date = current_date
+				sq.doc.fiscal_year = "2010"
+				sq.insert()
+				sq.submit()
 		
 	# make purchase orders
 	if can_make("Purchase Order"):
 		from stock.doctype.material_request.material_request import make_purchase_order
 		report = "Requested Items To Be Ordered"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
-			po = webnotes.bean(make_purchase_order(row[0]))
-			po.doc.transaction_date = current_date
-			po.doc.fiscal_year = "2010"
-			po.doc.price_list = "Standard Buying"
-			po.insert()
-			po.submit()
+			if row[0] != "Total":
+				po = webnotes.bean(make_purchase_order(row[0]))
+				po.doc.transaction_date = current_date
+				po.doc.fiscal_year = "2010"
+				po.insert()
+				po.submit()
 			
 def run_manufacturing(current_date):
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
@@ -126,7 +128,6 @@ def make_quotation(current_date):
 		"quotation_to": "Customer",
 		"customer": get_random("Customer"),
 		"order_type": "Sales",
-		"price_list_name": "Standard Selling",
 		"transaction_date": current_date,
 		"fiscal_year": "2010"
 	}])
@@ -144,12 +145,13 @@ def make_quotation(current_date):
 	
 def make_sales_order(current_date):
 	q = get_random("Quotation", {"status": "Submitted"})
-	from selling.doctype.quotation.quotation import make_sales_order
-	so = webnotes.bean(make_sales_order(q))
-	so.doc.transaction_date = current_date
-	so.doc.delivery_date = webnotes.utils.add_days(current_date, 10)
-	so.insert()
-	so.submit()
+	if q:
+		from selling.doctype.quotation.quotation import make_sales_order
+		so = webnotes.bean(make_sales_order(q))
+		so.doc.transaction_date = current_date
+		so.doc.delivery_date = webnotes.utils.add_days(current_date, 10)
+		so.insert()
+		so.submit()
 	
 def add_random_children(bean, template, rows, randomize, unique=None):
 	for i in xrange(random.randrange(1, rows)):
@@ -177,9 +179,9 @@ def get_random(doctype, filters=None):
 		condition = ""
 		
 	out = webnotes.conn.sql("""select name from `tab%s` %s
-		order by RAND() limit 0,1""" % (doctype, condition))[0][0]
+		order by RAND() limit 0,1""" % (doctype, condition))
 
-	return out
+	return out and out[0][0] or None
 
 def can_make(doctype):
 	return random.random() < prob.get(doctype, {"make": 0.5})["make"]
@@ -210,7 +212,8 @@ def complete_setup():
 	import_data("Fiscal_Year")
 	
 def make_items():
-	import_data(["Item", "Item_Price", "BOM"])
+	import_data(["Item", "Item_Price"])
+	import_data("BOM", submit=True)
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])
@@ -221,12 +224,15 @@ def make_users_and_employees():
 	
 	import_data(["Profile", "Employee", "Salary_Structure"])
 	
-def import_data(dt):
+def import_data(dt, submit=False):
 	if not isinstance(dt, (tuple, list)):
 		dt = [dt]
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
+		webnotes.form_dict = {}
+		if submit:
+			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")
 		upload()
 

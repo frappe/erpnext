@@ -18,7 +18,7 @@ def get_item_details(args):
 			"supplier": None,
 			"transaction_date": None,
 			"conversion_rate": 1.0,
-			"price_list_name": None,
+			"buying_price_list": None,
 			"price_list_currency": None,
 			"plc_conversion_rate": 1.0,
 			"is_subcontracted": "Yes" / "No"
@@ -88,10 +88,10 @@ def _get_price_list_rate(args, item_bean, meta):
 	out = webnotes._dict()
 	
 	# try fetching from price list
-	if args.price_list_name and args.price_list_currency:
+	if args.buying_price_list and args.price_list_currency:
 		price_list_rate = item_bean.doclist.get({
 			"parentfield": "ref_rate_details", 
-			"price_list_name": args.price_list_name, 
+			"price_list": args.buying_price_list, 
 			"ref_currency": args.price_list_currency,
 			"buying_or_selling": "Buying"})
 		if price_list_rate:
