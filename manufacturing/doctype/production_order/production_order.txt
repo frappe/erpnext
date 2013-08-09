@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:38:37", 
+  "modified": "2013-08-08 14:22:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,7 +55,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "options": "\nPRO", 
   "reqd": 1
  }, 
@@ -152,7 +152,7 @@
   "label": "For Warehouse", 
   "options": "Warehouse", 
   "read_only": 0, 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -165,7 +165,7 @@
   "fieldtype": "Link", 
   "label": "Work-in-Progress Warehouse", 
   "options": "Warehouse", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

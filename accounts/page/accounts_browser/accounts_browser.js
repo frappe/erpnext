@@ -170,7 +170,12 @@ erpnext.AccountsChart = Class.extend({
 	show_ledger: function() {
 		var me = this;
 		var node = me.selected_node();
-		wn.set_route("general-ledger", "account=" + node.data('label'));
+		wn.route_options = {
+			"account": node.data('label'),
+			"from_date": sys_defaults.year_start_date,
+			"to_date": sys_defaults.year_end_date
+		};
+		wn.set_route("general-ledger");
 	},
 	rename: function() {
 		var node = this.selected_node();

@@ -70,10 +70,20 @@ def run_manufacturing(current_date):
 	ppt.doc.purchase_request_for_warehouse = "Stores - WP"
 	ppt.run_method("get_open_sales_orders")
 	ppt.run_method("get_items_from_so")
-	ppt.run_method("get_items_from_so")
 	ppt.run_method("raise_production_order")
 	ppt.run_method("raise_purchase_request")
-
+	
+	# submit production orders
+	for pro in webnotes.conn.get_values("Production Order", {"docstatus": 0}):
+		b = webnotes.bean("Production Order", pro[0])
+		b.doc.wip_warehouse = "Work in Progress - WP"
+		b.submit()
+		
+	# submit material requests
+	for pro in webnotes.conn.get_values("Material Request", {"docstatus": 0}):
+		b = webnotes.bean("Material Request", pro[0])
+		b.submit()
+	
 def make_quotation(current_date):
 	b = webnotes.bean([{
 		"creation": current_date,

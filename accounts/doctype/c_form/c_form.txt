@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:06", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:29:48", 
+  "modified": "2013-08-08 14:21:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,7 +50,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "options": "\nC-FORM/", 
   "read_only": 0, 
   "reqd": 1

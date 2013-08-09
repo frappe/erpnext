@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-10 13:13:27", 
+  "modified": "2013-08-08 14:22:33", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -55,7 +55,7 @@
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "in_filter": 0, 
-  "label": "Naming Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 

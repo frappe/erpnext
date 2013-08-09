@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:03", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:52:20", 
+  "modified": "2013-08-08 14:22:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,7 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Naming Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "options": "\nQAI/11-12/", 
   "reqd": 1
