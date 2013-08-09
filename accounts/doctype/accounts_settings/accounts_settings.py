@@ -20,8 +20,10 @@ class DocType:
 			previous_val = cint(webnotes.conn.get_value("Accounts Settings", 
 				None, "perpetual_accounting"))
 			if cint(self.doc.perpetual_accounting) != previous_val:
-				from accounts.utils import validate_stock_and_account_balance
+				from accounts.utils import validate_stock_and_account_balance, \
+					create_stock_in_hand_jv
 				validate_stock_and_account_balance()
+				create_stock_in_hand_jv(reverse=cint(self.doc.perpetual_accounting) < previous_val)
 	
 	def on_update(self):
 		for key in ["perpetual_accounting"]:
