@@ -312,7 +312,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					if(!item_tax[item_code]) item_tax[item_code] = {};
 					if($.isArray(tax_data)) {
 						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
-							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency);
+							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
+								tax_amount_precision);
 						
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {

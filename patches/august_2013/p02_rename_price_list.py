@@ -15,11 +15,12 @@ def execute():
 			("Item Price", "price_list_name", "price_list"),
 			("BOM", "price_list", "buying_price_list"),
 		]:
-		if t[2] in webnotes.conn.get_table_columns(t[0]):
+		table_columns = webnotes.conn.get_table_columns(t[0])
+		if t[2] in table_columns and t[1] in table_columns:
 			# already reloaded, so copy into new column and drop old column
 			webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % (t[0], t[2], t[1]))
 			webnotes.conn.sql("""alter table `tab%s` drop column `%s`""" % (t[0], t[1]))
-		else:
+		elif t[1] in table_columns:
 			webnotes.conn.sql_ddl("alter table `tab%s` change `%s` `%s` varchar(180)" % t)
 
 		webnotes.reload_doc(webnotes.conn.get_value("DocType", t[0], "module"), "DocType", t[0])

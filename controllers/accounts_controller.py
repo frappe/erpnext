@@ -265,7 +265,7 @@ class AccountsController(TransactionBase):
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
 							current_tax_amount, self.precision("total", tax))
-							
+				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
 				
