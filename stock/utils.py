@@ -184,8 +184,8 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries)
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	if not hasattr(webnotes, "auto_indent"):
-		webnotes.auto_indent = webnotes.conn.get_value('Stock Settings', None, 'auto_indent')
-
+		webnotes.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
+	
 	if webnotes.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
@@ -280,8 +280,8 @@ def create_material_request(material_requests):
 
 	if mr_list:
 		if not hasattr(webnotes, "reorder_email_notify"):
-			webnotes.reorder_email_notify = webnotes.conn.get_value('Stock Settings', None, 
-				'reorder_email_notify')
+			webnotes.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+				'reorder_email_notify'))
 			
 		if(webnotes.reorder_email_notify):
 			send_email_notification(mr_list)
@@ -307,7 +307,6 @@ def send_email_notification(mr_list):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
-
 	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
 	
 def notify_errors(exceptions_list):
