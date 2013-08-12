@@ -204,7 +204,10 @@ cur_frm.cscript.hide_fields = function(doc) {
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
-		unhide_field(par_flds);
+		for (i in par_flds) {
+			var docfield = wn.meta.docfield_map[doc.doctype][par_flds[i]];
+			if(!docfield.hidden) unhide_field(par_flds[i]);
+		}
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
 	
