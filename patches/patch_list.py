@@ -253,4 +253,5 @@ patch_list = [
 	"execute:webnotes.bean('Selling Settings').save() #2013-07-29",
 	"patches.august_2013.p01_hr_settings",
 	"patches.august_2013.p02_rename_price_list",
+	"patches.august_2013.p03_pos_setting_replace_customer_account",
 ]
