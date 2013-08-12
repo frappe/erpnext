@@ -156,29 +156,33 @@ class DocType:
 					raise_exception=InvalidLeaveApproverError)
 
 	def update_dob_event(self):
-		get_events = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
-			and ref_type='Employee' and ref_name=%s""", (self.doc.name), as_dict=1)
+		if self.doc.date_of_birth:
+			get_events = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
+				and ref_type='Employee' and ref_name=%s""", self.doc.name)
 
-		starts_on = self.doc.date_of_birth + " 00:00:00"
-		ends_on = self.doc.date_of_birth + " 00:15:00"
+			starts_on = self.doc.date_of_birth + " 00:00:00"
+			ends_on = self.doc.date_of_birth + " 00:15:00"
 
-		if get_events:
-			webnotes.conn.sql("""update `tabEvent` set starts_on=%s, ends_on=%s 
-				where name=%s""", (get_events[0].name, starts_on, ends_on)
+			if get_events:
+				webnotes.conn.sql("""update `tabEvent` set starts_on=%s, ends_on=%s 
+					where name=%s""", (starts_on, ends_on, get_events[0][0]))
+			else:
+				webnotes.bean({
+					"doctype": "Event",
+					"subject": _("Birthday") + ": " + self.doc.employee_name,
+					"starts_on": starts_on,
+					"ends_on": ends_on,
+					"event_type": "Public",
+					"all_day": 1,
+					"send_reminder": 1,
+					"repeat_this_event": 1,
+					"repeat_on": "Every Year",
+					"ref_type": "Employee",
+					"ref_name": self.doc.name
+				}).insert()
 		else:
-			event_wrapper = webnotes.bean({
-				"doctype": "Event",
-				"subject": _("Birthday") + ": " + self.doc.employee_name,
-				"starts_on": starts_on,
-				"ends_on": ends_on,
-				"event_type": "Public",
-				"all_day": 1,
-				"send_reminder": 1,
-				"repeat_this_event": 1,
-				"repeat_on": "Every Year",
-				"ref_type": "Employee",
-				"ref_name": self.doc.name
-			}).insert()
+			webnotes.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and
+				ref_type='Employee' and ref_name=%s""", self.doc.name)
 
 @webnotes.whitelist()
 def get_retirement_date(date_of_birth=None):

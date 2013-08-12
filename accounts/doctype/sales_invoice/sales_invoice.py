@@ -197,18 +197,10 @@ class DocType(SellingController):
 		if pos:
 			self.doc.conversion_rate = flt(pos.conversion_rate)
 			
-			if not self.doc.debit_to:
-				self.doc.debit_to = self.doc.customer and webnotes.conn.get_value("Account", {
-					"name": self.doc.customer + " - " + self.get_company_abbr(), 
-					"docstatus": ["!=", 2]
-				}) or pos.customer_account
-				
-			if self.doc.debit_to and not self.doc.customer:
-				self.doc.customer = webnotes.conn.get_value("Account", {
-					"name": self.doc.debit_to,
-					"master_type": "Customer"
-				}, "master_name")
-				
+			if not for_validate:
+				self.doc.customer = pos.customer
+				self.set_customer_defaults()
+
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
 					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
