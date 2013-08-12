@@ -8,6 +8,7 @@ from stock.utils import get_valuation_method
 import json
 
 # future reposting
+class NegativeStockError(webnotes.ValidationError): pass
 
 _exceptions = []
 def update_entries_after(args, verbose=1):
@@ -253,9 +254,9 @@ def _raise_exceptions(args, verbose=1):
 		_exceptions[0]["voucher_type"], _exceptions[0]["voucher_no"],
 		abs(deficiency))
 	if verbose:
-		msgprint(msg, raise_exception=1)
+		msgprint(msg, raise_exception=NegativeStockError)
 	else:
-		raise webnotes.ValidationError, msg
+		raise NegativeStockError, msg
 		
 def get_previous_sle(args, for_update=False):
 	"""
