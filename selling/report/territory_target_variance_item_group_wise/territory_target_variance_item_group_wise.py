@@ -46,37 +46,36 @@ def get_columns(filters):
 			label = (" ".join(fieldname.split("_"))).title()
 			msgprint(_("Please specify") + ": " + label, raise_exception=True)
 
-	columns = ["Territory:Link/Territory:80", "Item Group:Link/Item Group:80"]
+	columns = ["Territory:Link/Territory:120", "Item Group:Link/Item Group:120"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
 	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
 		for label in ["Target (%s)", "Achieved (%s)", "Variance (%s)"]:
 			if group_months:
-				columns.append(label % (from_date.strftime("%b") + " - " + to_date.strftime("%b")))				
+				label = label % (from_date.strftime("%b") + " - " + to_date.strftime("%b"))
 			else:
-				columns.append(label % from_date.strftime("%b"))
+				label = label % from_date.strftime("%b")
+			columns.append(label+":Float:120")
 
-	return columns + ["Total Target::80", "Total Achieved::80", "Total Variance::80"]
+	return columns + ["Total Target::120", "Total Achieved::120", "Total Variance::120"]
 
 #Get territory & item group details
 def get_territory_details(filters):
 	return webnotes.conn.sql("""select t.name, td.item_group, td.target_qty, 
 		td.target_amount, t.distribution_id 
 		from `tabTerritory` t, `tabTarget Detail` td 
-		where td.parent=t.name and td.fiscal_year=%s and 
-		ifnull(t.distribution_id, '')!='' order by t.name""", 
+		where td.parent=t.name and td.fiscal_year=%s order by t.name""", 
 		(filters["fiscal_year"]), as_dict=1)
 
 #Get target distribution details of item group
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
-		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
-		`tabTerritory` t where bdd.parent=bd.name and t.distribution_id=bd.name and \
-		bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
-			target_details.setdefault(d.month, d)
+	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
+		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
+		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
+			target_details.setdefault(d.name, {}).setdefault(d.month, d.percentage_allocation)
 
 	return target_details
 
@@ -99,25 +98,27 @@ def get_territory_item_month_map(filters):
 	tim_map = {}
 
 	for td in territory_details:
-		for month in tdd:
+		for month_id in range(1, 13):
+			month = datetime.date(2013, month_id, 1).strftime('%B')
+			
 			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
-			.setdefault(month, webnotes._dict({
-				"target": 0.0, "achieved": 0.0
-			}))
+				.setdefault(month, webnotes._dict({
+					"target": 0.0, "achieved": 0.0
+				}))
 
 			tav_dict = tim_map[td.name][td.item_group][month]
+			month_percentage = td.distribution_id and \
+				tdd.get(td.distribution_id, {}).get(month, 0) or 100.0/12
 
 			for ad in achieved_details:
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(td.target_qty) * \
-						(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(flt(td.target_qty) * month_percentage /100)
 					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = flt(td.target_amount) * \
-						(tdd[month]["percentage_allocation"]/100)
+					tav_dict.target = flt(flt(td.target_amount) * month_percentage / 100)
 					if ad.month_name == month and get_item_group(ad.item_code) == td.item_group \
 						and ad.territory == td.name:
 							tav_dict.achieved += ad.amount

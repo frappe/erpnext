@@ -47,18 +47,20 @@ def get_columns(filters):
 			msgprint(_("Please specify") + ": " + label,
 				raise_exception=True)
 
-	columns = ["Cost Center:Link/Cost Center:100", "Account:Link/Account:100"]
+	columns = ["Cost Center:Link/Cost Center:120", "Account:Link/Account:120"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
 	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
 		for label in ["Target (%s)", "Actual (%s)", "Variance (%s)"]:
 			if group_months:
-				columns.append(label % (from_date.strftime("%b") + " - " + to_date.strftime("%b")))				
+				label = label % (from_date.strftime("%b") + " - " + to_date.strftime("%b"))
 			else:
-				columns.append(label % from_date.strftime("%b"))
+				label = label % from_date.strftime("%b")
+				
+			columns.append(label+":Float:120")
 
-	return columns + ["Total Target::80", "Total Actual::80", "Total Variance::80"]
+	return columns + ["Total Target::120", "Total Actual::120", "Total Variance::120"]
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
@@ -66,19 +68,17 @@ def get_costcenter_target_details(filters):
 		cc.parent_cost_center, bd.account, bd.budget_allocated 
 		from `tabCost Center` cc, `tabBudget Detail` bd 
 		where bd.parent=cc.name and bd.fiscal_year=%s and 
-		cc.company=%s and ifnull(cc.distribution_id, '')!='' 
-		order by cc.name""" % ('%s', '%s'), 
+		cc.company=%s order by cc.name""" % ('%s', '%s'), 
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 
 #Get target distribution details of accounts of cost center
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation \
-		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd, \
-		`tabCost Center` cc where bdd.parent=bd.name and cc.distribution_id=bd.name and \
-		bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
-			target_details.setdefault(d.month, d)
+	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation \
+		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
+		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
+			target_details.setdefault(d.name, {}).setdefault(d.month, d.percentage_allocation)
 
 	return target_details
 
@@ -99,15 +99,19 @@ def get_costcenter_account_month_map(filters):
 	cam_map = {}
 
 	for ccd in costcenter_target_details:
-		for month in tdd:
+		for month_id in range(1, 13):
+			month = datetime.date(2013, month_id, 1).strftime('%B')
+			
 			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
-			.setdefault(month, webnotes._dict({
-				"target": 0.0, "actual": 0.0
-			}))
+				.setdefault(month, webnotes._dict({
+					"target": 0.0, "actual": 0.0
+				}))
 
 			tav_dict = cam_map[ccd.name][ccd.account][month]
-			tav_dict.target = flt(ccd.budget_allocated) * \
-				(tdd[month]["percentage_allocation"]/100)
+			month_percentage = ccd.distribution_id and \
+				tdd.get(ccd.distribution_id, {}).get(month, 0) or 100.0/12
+				
+			tav_dict.target = flt(flt(ccd.budget_allocated) * month_percentage /100)
 
 			for ad in actual_details:
 				if ad.month_name == month and ad.account == ccd.account \
