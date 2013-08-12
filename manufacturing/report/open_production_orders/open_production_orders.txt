@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-08-12 12:32:30", 
+  "docstatus": 0, 
+  "modified": "2013-08-12 12:42:29", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "SELECT\n  `tabProduction Order`.name as \"Production Order:Link/Production Order:200\",\n  `tabProduction Order`.creation as \"Date:Date:120\",\n  `tabProduction Order`.production_item as \"Item:Link/Item:150\",\n  `tabProduction Order`.qty as \"To Produce:Int:100\",\n  `tabProduction Order`.produced_qty as \"Produced:Int:100\"\nFROM\n  `tabProduction Order`\nWHERE\n  `tabProduction Order`.docstatus=1\n  AND ifnull(`tabProduction Order`.produced_qty,0) < `tabProduction Order`.qty\n  AND NOT EXISTS (SELECT name from `tabStock Entry` where production_order =`tabProduction Order`.name) ", 
+  "ref_doctype": "Production Order", 
+  "report_name": "Open Production Orders", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Open Production Orders"
+ }
+]

@@ -19,6 +19,7 @@ sql = webnotes.conn.sql
 
 class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass
+class IncorrectValuationRateError(webnotes.ValidationError): pass
 	
 from controllers.stock_controller import StockController
 
@@ -245,7 +246,7 @@ class DocType(StockController):
 	def validate_incoming_rate(self):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.t_warehouse:
-				self.validate_value("incoming_rate", ">", 0, d)
+				self.validate_value("incoming_rate", ">", 0, d, raise_exception=IncorrectValuationRateError)
 					
 	def validate_bom(self):
 		for d in getlist(self.doclist, 'mtn_details'):

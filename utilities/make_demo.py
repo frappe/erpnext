@@ -19,15 +19,18 @@ runs_for = 20
 prob = {
 	"Quotation": { "make": 0.5, "qty": (1,5) },
 	"Sales Order": { "make": 0.5, "qty": (1,4) },
+	"Purchase Order": { "make": 0.7, "qty": (1,4) },
+	"Purchase Receipt": { "make": 0.7, "qty": (1,4) },
 	"Supplier Quotation": { "make": 0.5, "qty": (1, 3) }
 }
 
-def make():
+def make(reset=False):
 	webnotes.connect()
 	webnotes.print_messages = True
 	webnotes.mute_emails = True
 	
-	#setup()
+	if reset:
+		setup()
 	simulate()
 	
 def setup():
@@ -68,13 +71,29 @@ def run_sales(current_date):
 			make_sales_order(current_date)
 
 def run_stock(current_date):
-	pass
 	# make purchase requests
+	if can_make("Purchase Receipt"):
+		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		report = "Purchase Order Items To Be Received"
+		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
+			pr = webnotes.bean(make_purchase_receipt(po))
+			pr.doc.posting_date = current_date
+			pr.doc.fiscal_year = "2010"
+			pr.insert()
+			pr.submit()
 	
 	# make delivery notes (if possible)
+	if can_make("Delivery Note"):
+		from selling.doctype.sales_order.sales_order import make_delivery_note
+		report = "Ordered Items To Be Delivered"
+		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
+			dn = webnotes.bean(make_delivery_note(so))
+			dn.doc.posting_date = current_date
+			dn.doc.fiscal_year = "2010"
+			dn.insert()
+			dn.submit()
 	
-	# make stock entry (from production order)
-
+	
 def run_purchase(current_date):
 	# make supplier quotations
 	if can_make("Supplier Quotation"):
@@ -121,6 +140,40 @@ def run_manufacturing(current_date):
 		b = webnotes.bean("Material Request", pro[0])
 		b.submit()
 	
+	# stores -> wip
+	if can_make("Stock Entry for WIP"):		
+		for pro in query_report.run("Open Production Orders")["result"][:how_many("Stock Entry for WIP")]:
+			make_stock_entry_from_pro(pro[0], "Material Transfer", current_date)
+		
+	# wip -> fg
+	if can_make("Stock Entry for FG"):		
+		for pro in query_report.run("Production Orders in Progress")["result"][:how_many("Stock Entry for FG")]:
+			make_stock_entry_from_pro(pro[0], "Manufacture/Repack", current_date)
+
+	# try posting older drafts (if exists)
+	for st in webnotes.conn.get_values("Stock Entry", {"docstatus":0}):
+		try:
+			webnotes.bean("Stock Entry", st[0]).submit()
+		except NegativeStockError: pass
+		except IncorrectValuationRateError: pass
+			
+
+def make_stock_entry_from_pro(pro_id, purpose, current_date):
+	from manufacturing.doctype.production_order.production_order import make_stock_entry
+	from stock.stock_ledger import NegativeStockError
+	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError
+
+	st = webnotes.bean(make_stock_entry(pro_id, purpose))
+	st.run_method("get_items")
+	st.doc.posting_date = current_date
+	st.doc.fiscal_year = "2010"
+	st.doc.expense_adjustment_account = "Stock in Hand - WP"
+	try:
+		st.insert()
+		st.submit()
+	except NegativeStockError: pass
+	except IncorrectValuationRateError: pass
+
 def make_quotation(current_date):
 	b = webnotes.bean([{
 		"creation": current_date,

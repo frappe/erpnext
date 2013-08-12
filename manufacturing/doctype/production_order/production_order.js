@@ -61,30 +61,25 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 }
 
 cur_frm.cscript['Transfer Raw Materials'] = function() {
-	var doc = cur_frm.doc;
-	cur_frm.cscript.make_se(doc, 'Material Transfer');
+	cur_frm.cscript.make_se('Material Transfer');
 }
 
 cur_frm.cscript['Update Finished Goods'] = function() {
-	var doc = cur_frm.doc;
-	cur_frm.cscript.make_se(doc, 'Manufacture/Repack');
+	cur_frm.cscript.make_se('Manufacture/Repack');
 }
 
-cur_frm.cscript.make_se = function(doc, purpose) {
-	var se = wn.model.get_new_doc("Stock Entry");
-	se.purpose = purpose;
-	se.production_order = doc.name;
-	if(purpose==="Material Transfer") {
-		se.to_warehouse = doc.wip_warehouse;
-	} else {
-		se.from_warehouse = doc.wip_warehouse;
-		se.to_warehouse = doc.fg_warehouse;
-	}
-	se.company = doc.company;
-	se.fg_completed_qty = doc.qty - doc.produced_qty;
-	se.bom_no = doc.bom_no;
-	se.use_multi_level_bom = doc.use_multi_level_bom;
-	loaddoc('Stock Entry', se.name);
+cur_frm.cscript.make_se = function(purpose) {
+	wn.call({
+		method:"manufacturing.doctype.production_order.production_order.make_stock_entry",
+		args: {
+			"production_order_id": cur_frm.doc.name,
+			"purpose": purpose
+		},
+		callback: function(r) {
+			var doclist = wn.model.sync(r.message);
+			wn.set_route("Form", doclist[0].doctype, doclist[0].name);
+		}
+	})
 }
 
 cur_frm.fields_dict['production_item'].get_query = function(doc) {

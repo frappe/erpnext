@@ -69,7 +69,7 @@ def get_incoming_rate(args):
 		if valuation_method == 'FIFO':
 			if not previous_sle:
 				return 0.0
-			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]'))
+			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
 			in_rate = previous_stock_queue and \
 				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
 		elif valuation_method == 'Moving Average':
