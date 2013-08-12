@@ -269,7 +269,7 @@ def create_stock_in_hand_jv(reverse=False):
 					"posting_date": today,
 					"fiscal_year": fiscal_year,
 					"voucher_type": "Journal Entry",
-					"user_remark": (_("Auto Inventory Accounting") + ": " +
+					"user_remark": (_("Perpetual Accounting") + ": " +
 						(_("Disabled") if reverse else _("Enabled")) + ". " +
 						_("Journal Entry for inventory that is received but not yet invoiced"))
 				},
@@ -297,14 +297,14 @@ def create_stock_in_hand_jv(reverse=False):
 		
 		msgprint(_("""These adjustment vouchers book the difference between \
 			the total value of received items and the total value of invoiced items, \
-			as a required step to use Auto Inventory Accounting.
+			as a required step to use Perpetual Accounting.
 			This is an approximation to get you started.
 			You will need to submit these vouchers after checking if the values are correct.
 			For more details, read: \
 			<a href="http://erpnext.com/auto-inventory-accounting" target="_blank">\
-			Auto Inventory Accounting</a>"""))
+			Perpetual Accounting</a>"""))
 			
-	webnotes.msgprint("""Please refresh the system to get effect of Auto Inventory Accounting""")
+	webnotes.msgprint("""Please refresh the system to get effect of Perpetual Accounting""")
 			
 		
 def get_stock_rbnb_value(company):

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 
-from webnotes.utils import cstr
+from webnotes.utils import cstr, cint
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 import webnotes.defaults
@@ -58,11 +58,15 @@ class DocType:
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
-			webnotes.bean({
+			wh = {
 				"doctype":"Warehouse",
 				"warehouse_name": whname,
 				"company": self.doc.name
-			}).insert()
+			}
+			if cint(webnotes.defaults.get_global_default("perpetual_accounting")):
+				wh.update({"account": "Stock In Hand - " + self.doc.abbr})
+				
+			webnotes.bean(wh).insert()
 			
 	def create_default_web_page(self):
 		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
@@ -242,8 +246,8 @@ class DocType:
 			"default_expense_account": "Cost of Goods Sold",
 			"receivables_group": "Accounts Receivable",
 			"payables_group": "Accounts Payable",
+			"default_cash_account": "Cash",
 			"stock_received_but_not_billed": "Stock Received But Not Billed",
-			"stock_in_hand_account": "Stock In Hand",
 			"stock_adjustment_account": "Stock Adjustment",
 			"expenses_included_in_valuation": "Expenses Included In Valuation"
 		}
@@ -252,9 +256,6 @@ class DocType:
 			account_name = accounts[a] + " - " + self.doc.abbr
 			if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
 				webnotes.conn.set(self.doc, a, account_name)
-
-		if not self.doc.stock_adjustment_cost_center:
-				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)
 
 	def create_default_cost_center(self):
 		cc_list = [
@@ -272,14 +273,15 @@ class DocType:
 			},
 		]
 		for cc in cc_list:
-			cc.update({"doctype": "Cost Center"})
-			cc_bean = webnotes.bean(cc)
-			cc_bean.ignore_permissions = True
+			if webnotes.conn.exists("Cost Center", cc.cost_center_name + ' - ' + self.doc.abbr):
+				cc.update({"doctype": "Cost Center"})
+				cc_bean = webnotes.bean(cc)
+				cc_bean.ignore_permissions = True
 			
-			if cc.get("cost_center_name") == self.doc.name:
-				cc_bean.ignore_mandatory = True
+				if cc.get("cost_center_name") == self.doc.name:
+					cc_bean.ignore_mandatory = True
 			
-			cc_bean.insert()
+				cc_bean.insert()
 			
 		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
 

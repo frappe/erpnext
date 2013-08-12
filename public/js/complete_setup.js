@@ -122,5 +122,5 @@ $.extend(erpnext.complete_setup, {
 	
 	fy_start_list: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'],
 
-	domains: ['', "Manufacturing", "Retail", "Distribution", "Services"],	
+	domains: ['', "Manufacturing", "Retail", "Distribution", "Services", "Other"],	
 });

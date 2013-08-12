@@ -2,8 +2,12 @@ import webnotes
 from webnotes.utils import cint
 
 def execute():
+	import patches.march_2013.p08_create_aii_accounts
+	patches.march_2013.p08_create_aii_accounts.execute()
+	
 	copy_perpetual_accounting_settings()
 	set_missing_cost_center()
+	
 
 def set_missing_cost_center():
 	reload_docs = [
@@ -17,8 +21,7 @@ def set_missing_cost_center():
 	if cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 		for dt in ["Serial No", "Stock Reconciliation", "Stock Entry"]:
 			webnotes.conn.sql("""update `tab%s` t1, tabCompany t2 
-				set t1.cost_center=t2.stock_adjustment_cost_center 
-				where t1.company = t2.name""" % dt)
+				set t1.cost_center=t2.cost_center where t1.company = t2.name""" % dt)
 		
 def copy_perpetual_accounting_settings():
 	webnotes.reload_doc("accounts", "doctype", "accounts_settings")
