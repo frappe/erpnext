@@ -133,8 +133,6 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				} else {
 					break;
 				}
-				
-				me.round_item_values(item);
 			}
 		}
 
