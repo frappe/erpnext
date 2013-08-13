@@ -77,9 +77,9 @@ class TransactionBase(StatusUpdater):
 		"""
 		customer_defaults = self.get_customer_defaults()
 					
-		customer_defaults["price_list_name"] = customer_defaults.get("price_list") or \
+		customer_defaults["selling_price_list"] = customer_defaults.get("price_list") or \
 			webnotes.conn.get_value("Customer Group", self.doc.customer_group, "default_price_list") or \
-			self.doc.price_list
+			self.doc.selling_price_list
 			
 		for fieldname, val in customer_defaults.items():
 			if self.meta.get_field(fieldname):
