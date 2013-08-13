@@ -11,7 +11,7 @@ In the form:
 
 - Select the Document on which you want to add the Custom Field.
 - Select the Type of field and the Options (see section on field types).
-- Select where you want to field to appear in the Form (“after field” section).
+- Select where you want the field to appear in the Form (“after field” section).
 
 and save the Custom Field. When you open a new / existing form of the type you selected in step 1, you will see it with the Custom Fields.
 

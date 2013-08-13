@@ -21,4 +21,4 @@ The web link to your page will be the value of the “Page Name” field + “.h
 
 #### Images
 
-You can attach images to your web page and show them using the <img> HTML tag or using markdown format. the link for your file will be files/filename
+You can attach images to your web page and show them using the <img> HTML tag or using markdown format. the link to your file will be files/filename
