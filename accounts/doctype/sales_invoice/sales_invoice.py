@@ -250,10 +250,15 @@ class DocType(SellingController):
 
 	def get_cust_and_due_date(self):
 		"""Set Due Date = Posting Date + Credit Days"""
+		if self.doc.debit_to:
+			self.doc.customer = webnotes.conn.get_value('Account', self.doc.debit_to, 'master_name')
+			
 		if self.doc.posting_date:
 			credit_days = 0
 			if self.doc.debit_to:
 				credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
+			if self.doc.customer and not credit_days:
+				credit_days = webnotes.conn.get_value("Customer", self.doc.customer, "credit_days")
 			if self.doc.company and not credit_days:
 				credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
 				
@@ -261,9 +266,6 @@ class DocType(SellingController):
 				self.doc.due_date = add_days(self.doc.posting_date, credit_days)
 			else:
 				self.doc.due_date = self.doc.posting_date
-		
-		if self.doc.debit_to:
-			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
 
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)

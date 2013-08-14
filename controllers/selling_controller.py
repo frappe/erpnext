@@ -191,7 +191,7 @@ class SellingController(StockController):
 			
 			if item.adj_rate == 100:
 				item.export_rate = 0
-			elif item.ref_rate:
+			elif not item.export_rate:
 				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
 					self.precision("export_rate", item))
 						

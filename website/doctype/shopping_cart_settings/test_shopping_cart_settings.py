@@ -26,7 +26,7 @@ class TestShoppingCartSettings(unittest.TestCase):
 			cart_settings.doclist.append({
 				"doctype": "Shopping Cart Price List",
 				"parentfield": "price_lists",
-				"price_list": price_list
+				"selling_price_list": price_list
 			})
 		
 		for price_list in ("_Test Price List Rest of the World", "_Test Price List India",
@@ -34,13 +34,13 @@ class TestShoppingCartSettings(unittest.TestCase):
 			_add_price_list(price_list)
 		
 		controller = cart_settings.make_controller()
-		controller.validate_overlapping_territories("price_lists", "price_list")
+		controller.validate_overlapping_territories("price_lists", "selling_price_list")
 		
 		_add_price_list("_Test Price List 2")
 		
 		controller = cart_settings.make_controller()
 		self.assertRaises(ShoppingCartSetupError, controller.validate_overlapping_territories,
-			"price_lists", "price_list")
+			"price_lists", "selling_price_list")
 			
 		return cart_settings
 		

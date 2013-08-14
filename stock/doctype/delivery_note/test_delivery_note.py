@@ -33,7 +33,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(len(si), len(dn.doclist))
 		
 		# modify export_amount
-		si[1].ref_rate = 200
+		si[1].export_rate = 200
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
 		
 	

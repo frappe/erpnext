@@ -98,7 +98,7 @@ class BuyingController(StockController):
 
 			if item.discount_rate == 100.0:
 				item.import_rate = 0.0
-			elif item.import_ref_rate:
+			elif not item.import_rate:
 				item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
 					self.precision("import_rate", item))
 						
