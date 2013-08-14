@@ -162,12 +162,22 @@ class DocType(SellingController):
 		
 	def set_missing_values(self, for_validate=False):
 		self.set_pos_fields(for_validate)
+		
+		if not self.doc.debit_to:
+			self.doc.debit_to = self.get_customer_account()
+		if not self.doc.due_date:
+			self.doc.due_date = self.get_due_date()
+		
 		super(DocType, self).set_missing_values(for_validate)
 		
 	def set_customer_defaults(self):
 		# TODO cleanup these methods
-		self.doc.fields.update(self.get_debit_to())
-		self.get_cust_and_due_date()
+		if self.doc.customer:
+			self.doc.debit_to = self.get_customer_account()
+		elif self.doc.debit_to:
+			self.doc.customer = webnotes.conn.get_value('Account', self.doc.debit_to, 'master_name')
+		
+		self.doc.due_date = self.get_due_date()
 		
 		super(DocType, self).set_customer_defaults()
 			
@@ -243,16 +253,9 @@ class DocType(SellingController):
 					You must first create it from the Customer Master" % 
 					(self.doc.customer, self.doc.company))
 
-	def get_debit_to(self):
-		acc_head = self.get_customer_account()
-		return acc_head and {'debit_to' : acc_head} or {}
-
-
-	def get_cust_and_due_date(self):
+	def get_due_date(self):
 		"""Set Due Date = Posting Date + Credit Days"""
-		if self.doc.debit_to:
-			self.doc.customer = webnotes.conn.get_value('Account', self.doc.debit_to, 'master_name')
-			
+		due_date = None
 		if self.doc.posting_date:
 			credit_days = 0
 			if self.doc.debit_to:
@@ -263,9 +266,11 @@ class DocType(SellingController):
 				credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
 				
 			if credit_days:
-				self.doc.due_date = add_days(self.doc.posting_date, credit_days)
+				due_date = add_days(self.doc.posting_date, credit_days)
 			else:
-				self.doc.due_date = self.doc.posting_date
+				due_date = self.doc.posting_date
+
+		return due_date
 
 	def get_barcode_details(self, barcode):
 		return get_obj('Sales Common').get_barcode_details(barcode)
