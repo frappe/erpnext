@@ -23,7 +23,7 @@ def execute():
 		if t[2] in table_columns and t[1] in table_columns:
 			# already reloaded, so copy into new column and drop old column
 			webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % (t[0], t[2], t[1]))
-			webnotes.conn.sql("""alter table `tab%s` drop column `%s`""" % (t[0], t[1]))
+			webnotes.conn.sql_ddl("""alter table `tab%s` drop column `%s`""" % (t[0], t[1]))
 		elif t[1] in table_columns:
 			webnotes.conn.sql_ddl("alter table `tab%s` change `%s` `%s` varchar(180)" % t)
 
