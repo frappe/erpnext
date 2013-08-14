@@ -253,6 +253,6 @@ patch_list = [
 	"patches.august_2013.p01_hr_settings",
 	"patches.august_2013.p02_rename_price_list",
 	"patches.august_2013.p03_pos_setting_replace_customer_account",
-	"patches.august_2013.p04_employee_birthdays",
 	"patches.august_2013.p05_update_serial_no_status",
+	"patches.august_2013.p05_employee_birthdays",
 ]

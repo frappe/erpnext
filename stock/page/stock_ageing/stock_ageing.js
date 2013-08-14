@@ -176,7 +176,8 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			xaxis: {  
 				ticks: $.map(me.data, function(item, idx) { return [[idx+1, item.name]] }),
 				max: 20
-			}
+			},
+			series: { downsample: { threshold: 1000 } }
 		}
 	}	
 });

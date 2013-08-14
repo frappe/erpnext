@@ -156,20 +156,23 @@ class DocType:
 					raise_exception=InvalidLeaveApproverError)
 
 	def update_dob_event(self):
-		if self.doc.date_of_birth:
-			get_events = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
+		if self.doc.status == "Active" and self.doc.date_of_birth:
+			birthday_event = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
 				and ref_type='Employee' and ref_name=%s""", self.doc.name)
 
 			starts_on = self.doc.date_of_birth + " 00:00:00"
 			ends_on = self.doc.date_of_birth + " 00:15:00"
 
-			if get_events:
-				webnotes.conn.sql("""update `tabEvent` set starts_on=%s, ends_on=%s 
-					where name=%s""", (starts_on, ends_on, get_events[0][0]))
+			if birthday_event:
+				event = webnotes.bean("Event", birthday_event[0][0])
+				event.doc.starts_on = starts_on
+				event.doc.ends_on = ends_on
+				event.save()
 			else:
 				webnotes.bean({
 					"doctype": "Event",
 					"subject": _("Birthday") + ": " + self.doc.employee_name,
+					"description": _("Happy Birthday!") + " " + self.doc.employee_name,
 					"starts_on": starts_on,
 					"ends_on": ends_on,
 					"event_type": "Public",
