@@ -235,6 +235,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 				min: dateutil.str_to_obj(this.from_date).getTime(),
 				max: dateutil.str_to_obj(this.to_date).getTime(),
 			},
+			series: { downsample: { threshold: 1000 } }
 		}
 	},
 	get_tooltip_text: function(label, x, y) {
