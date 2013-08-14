@@ -223,6 +223,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
+	
+	mtn_details_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no(grid_row)
+	}
 });
 
 cur_frm.script_manager.make(erpnext.stock.StockEntry);

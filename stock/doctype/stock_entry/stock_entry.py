@@ -32,7 +32,6 @@ class DocType(StockController):
 	def validate(self):
 		self.validate_posting_time()
 		self.validate_purpose()
-		self.validate_serial_nos()
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
 
@@ -52,14 +51,14 @@ class DocType(StockController):
 		self.set_total_amount()
 		
 	def on_submit(self):
-		self.update_serial_no(1)
 		self.update_stock_ledger(0)
+		self.update_serial_no(1)
 		self.update_production_order(1)
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.update_serial_no(0)
 		self.update_stock_ledger(1)
+		self.update_serial_no(0)
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()
 		
@@ -74,11 +73,6 @@ class DocType(StockController):
 		if self.doc.purpose not in valid_purposes:
 			msgprint(_("Purpose must be one of ") + comma_or(valid_purposes),
 				raise_exception=True)
-					
-	def validate_serial_nos(self):
-		sl_obj = get_obj("Stock Ledger")
-		sl_obj.scrub_serial_nos(self)
-		sl_obj.validate_serial_no(self, 'mtn_details')
 		
 	def validate_item(self):
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
@@ -206,7 +200,7 @@ class DocType(StockController):
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
-				"serial_no": cstr(d.serial_no).strip(),
+				"serial_no": d.serial_no,
 				"bom_no": d.bom_no,
 			})
 			# get actual stock at source warehouse
@@ -317,27 +311,21 @@ class DocType(StockController):
 		
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
-		from stock.utils import get_valid_serial_nos
-		
-		sl_obj = get_obj('Stock Ledger')
-		if is_submit:
-			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
+
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
+		update_serial_nos_after_submit(self, "Stock Entry", "mtn_details")
 		
 		for d in getlist(self.doclist, 'mtn_details'):
-			if cstr(d.serial_no).strip():
-				for x in get_valid_serial_nos(d.serial_no):
-					serial_no = x.strip()
-					if d.s_warehouse:
-						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
-					if d.t_warehouse:
-						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit,
-							self.doc.purpose)
-					
-					if self.doc.purpose == 'Purchase Return':
-						serial_doc = Document("Serial No", serial_no)
-						serial_doc.status = is_submit and 'Purchase Returned' or 'In Store'
-						serial_doc.docstatus = is_submit and 2 or 0
-						serial_doc.save()
+			for serial_no in get_serial_nos(d.serial_no):
+				if self.doc.purpose == 'Purchase Return':
+					sr = webnotes.bean("Serial No", serial_no)
+					sr.doc.status = "Purchase Returned" if is_submit else "Available"
+					sr.save()
+				
+				if self.doc.purpose == "Sales Return":
+					sr = webnotes.bean("Serial No", serial_no)
+					sr.doc.status = "Sales Returned" if is_submit else "Delivered"
+					sr.save()
 						
 	def update_stock_ledger(self, is_cancelled=0):
 		self.values = []			

@@ -28,6 +28,7 @@ def make(reset=False):
 	webnotes.connect()
 	webnotes.print_messages = True
 	webnotes.mute_emails = True
+	webnotes.rollback_on_exception = True
 	
 	if reset:
 		setup()
