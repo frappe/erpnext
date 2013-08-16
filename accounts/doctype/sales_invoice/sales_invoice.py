@@ -521,6 +521,8 @@ class DocType(SellingController):
 			self.make_packing_list()
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
+			
+		if not cint(self.doc.is_pos):
 			webnotes.conn.set(self.doc,'paid_amount',0)
 		
 	def check_prev_docstatus(self):

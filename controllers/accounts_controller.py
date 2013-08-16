@@ -75,7 +75,7 @@ class AccountsController(TransactionBase):
 						self.doc.conversion_rate = self.doc.plc_conversion_rate
 						
 		if self.meta.get_field("currency"):
-			if self.doc.currency != company_currency:
+			if self.doc.currency and self.doc.currency != company_currency:
 				if not self.doc.conversion_rate:
 					exchange = self.doc.currency + "-" + company_currency
 					self.doc.conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
