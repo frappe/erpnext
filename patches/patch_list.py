@@ -255,4 +255,5 @@ patch_list = [
 	"patches.august_2013.p02_rename_price_list",
 	"patches.august_2013.p03_pos_setting_replace_customer_account",
 	"patches.august_2013.p05_employee_birthdays",
+	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-08-16",
 ]
