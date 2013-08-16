@@ -9,8 +9,8 @@ A Material Request can be generated:
 
 - By a User.
 - Automatically from a Sales Order.
-- Automatically when the Projected Quantity (more on this later) of an Item in stores reaches a particular level.
-- Automatically from your Bill of Materials if you use Production Plan to plan your manufacturing. (more on this later too)
+- Automatically when the Projected Quantity of an Item in stores reaches a particular level.
+- Automatically from your Bill of Materials if you use Production Plan to plan your manufacturing activities.
 
 To generate a Material Request manually go to:
 
@@ -19,7 +19,7 @@ To generate a Material Request manually go to:
 In the Material Request form, 
 
 - Fill in the Items you want and their quantities.
-- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered to. This helps you to keep track of the Projected Quantity for this Item.
+- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the Projected Quantity for this Item.
 - You can also automatically get the Items from a Sales Order.
 - You can optionally add the Terms, using the Terms and Conditions master and also the reason.
 

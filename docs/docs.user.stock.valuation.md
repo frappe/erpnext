@@ -5,11 +5,13 @@
 ---
 ### How are Items Valued?
 
-One of the major features of any inventory system is that you can find out the value of any item based on its historic or average price. You can also find the value of all your items for your balance sheet. Why is valuation important?
+One of the major features of any inventory system is that you can find out the value of any item based on its historic or average price. You can also find the value of all your items for your balance sheet. 
 
-- The buying price fluctuates.
-- The value changes because of some process (value add).
-- The value changes because of decay, loss etc.
+Valuation is important because:
+
+- The buying price may fluctuate.
+- The value may change because of some process (value add).
+- The value may change because of decay, loss etc.
 
 You may encounter these terms, so lets clarify:
 
@@ -18,7 +20,7 @@ You may encounter these terms, so lets clarify:
 
 There are two major ways in which ERPNext values your items.
 
-- **FIFO (First In First Out):** In this system, ERPNext assumes that you will consume / sell those Items first that you bought first. For example, if you buy an Item at price X and then after a few days at price Y. Thus when you sell your Item, ERPNext will reduce the quantity of the Item priced at X first and then Y.
+- **FIFO (First In First Out):** In this system, ERPNext assumes that you will consume / sell those Items first which you bought first. For example, if you buy an Item at price X and then after a few days at price Y, whenever you sell your Item, ERPNext will reduce the quantity of the Item priced at X first and then Y.
 
 ![FIFO](img/fifo.png)
 

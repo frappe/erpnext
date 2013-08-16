@@ -10,7 +10,6 @@ You can either directly create your Customers via
 
 or upload it via the Data Import Tool.
 
-In your normal operations, you can also create Customers from Leads.
 
 > Note: Customers are separate from Contacts and Addresses. A Customer can have multiple Contacts and Addresses.
 
@@ -20,7 +19,7 @@ Contacts and Addresses in ERPNext are stored separately so that you can attach m
 
 To add a Contact or Address directly from the Customer record, click on “New Contact” or “New Address”.
 
-> Tip: When you select a Customer in any transaction, one Contact and Address gets pre-selected. This is the “Default Contact or Address”. So make sure you set your defaults correctly!
+> Tip: When you select a Customer in any transaction, one Contact and Address gets pre-selected. This is the “Default Contact or Address”. 
 
 To Import multiple Contacts and Addresses from a spreadsheet, use the Data Import Tool.
 

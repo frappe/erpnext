@@ -8,7 +8,7 @@ If you have multiple **Suppliers** who supply you with the same **Item**, you us
 - You can easily compare prices in the future 
 - Audit whether all Suppliers were given the opportunity to quote.
 
-Supplier Quotations are not necessary for most small businesses. Always evaluate the cost of collecting information to the value it provides! You could only do this for high value items.
+Supplier Quotations are not necessary for most small businesses. Always evaluate the cost of collecting information to the value it really provides! You could only do this for high value items.
 
 You can make a Supplier Quotation directly from:
 

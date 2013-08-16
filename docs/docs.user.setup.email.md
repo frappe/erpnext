@@ -27,7 +27,7 @@ Set your outgoing mail server settings here. These are the same settings you wou
 
 A very useful email integration is to sync the incoming emails from support inbox into Support Ticket, so that you can track, assign and monitor support issues.
 
-> **Case Study:** Here are ERPNext, we have regularly tracking incoming support issues via email at “support@erpnext.com”. At the time of writing we have answered more than 3000 tickets via this system.
+> **Case Study:** Here at ERPNext, we have regularly tracked incoming support issues via email at “support@erpnext.com”. At the time of writing we had answered more than 3000 tickets via this system.
 
 To setup your Support integration, go to:
 
@@ -35,7 +35,7 @@ To setup your Support integration, go to:
 
 To make ERPNext pull emails from your mail box, enter the POP3 settings. (POP3 is a way of extracting emails from your mailbox. It should be fairly easy to find out what your POP3 settings are. If you have problems, contact your email service provider).
 If you want to setup an auto reply, check on the “Send Autoreply” box and whenever someone sends an email, an autoreply will be sent.
-Add a custom signature you want to send with your replies. 
+Add a custom signature which you want to send with your replies. 
 
 ### Setting Auto-notification on Documents
 
@@ -49,7 +49,7 @@ Check on the transactions you want to send via email directly on Submission and 
 
 Email Digests allow you to get regular updates about your sales, expenses and other critical numbers directly in your Inbox. 
 
-Set your frequency, check all the items you want to receive in your weekly update and select the user ids who you want to send the Digest to.
+Set your frequency, check all the items you want to receive in your weekly update and select the user ids whom you want to send the Digest to.
 
 Email Digests are a great way for top managers to keep track of the big numbers like “Sales Booked” or “Amount Collected” or “Invoices Raised” etc.
 
