@@ -15,7 +15,7 @@ The Chart of Accounts helps you answer:
 - How much debt have you taken?
 - How much profit are you making (and hence paying tax)?
 - How much are you selling?
-- How are your expenses broken up?
+- What is your expense break- up
 
  You may note that as a business manager,it is very valuable  to see how well your business is doing. 
 
