@@ -14,12 +14,8 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		
 		self.set_taxes("other_charges", "charge")
 		
-		if self.meta.get_field("debit_to") and not self.doc.debit_to:
-			self.doc.debit_to = self.get_debit_to().get("debit_to")
-			
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
@@ -191,7 +187,7 @@ class SellingController(StockController):
 			
 			if item.adj_rate == 100:
 				item.export_rate = 0
-			elif item.ref_rate:
+			elif not item.export_rate:
 				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
 					self.precision("export_rate", item))
 						

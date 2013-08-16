@@ -69,7 +69,8 @@ def get_item_details(args):
 	
 	if cint(args.is_pos):
 		pos_settings = get_pos_settings(args.company)
-		out.update(apply_pos_settings(pos_settings, out))
+		if pos_settings:
+			out.update(apply_pos_settings(pos_settings, out))
 
 	return out
 	

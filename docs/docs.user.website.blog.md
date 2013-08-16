@@ -5,7 +5,7 @@
 ---
 Blogs are a great way to share your thoughts about your business and keep your customers and readers updated of what you are up to.
 
-In the age of internet, writing assumes a lot more importance is because when people come to your website, they want to be read about your product and you.
+In the age of internet, writing assumes a lot of significance because when people come to your website, they want to read about you and your product.
 
 To create a new blog, just create a new Blog from:
 

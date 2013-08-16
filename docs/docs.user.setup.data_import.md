@@ -63,7 +63,7 @@ If you have multiple child rows then you must start a new main item on a new row
 
 ### 5. Overwriting
 
-ERPNext also allows you to overwrite all / certain columns. If you want to update certain columns, you can download the template with data. Remember to check on the “Overwrite” box before uploading.
+ERPNext also allows you to overwrite all / certain columns. If you want to update certain columns, you can download the template with data.Remember to check on the “Overwrite” box before uploading.
 
 > Note: For child records, if you select Overwrite, it will delete all the child records of that parent.
 

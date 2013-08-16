@@ -32,7 +32,7 @@ A look at some of the common accounting entries that can be done via Journal Vou
 
 #### Expenses (non accruing)
 
-Many times it may not be necessary to accrue an expense, but it can be directly be booked against an expense Account on payment. For example a travel allowance or a telephone bill. You can directly debit Telephone Expense (instead of your telephone company) and credit your Bank on payment.
+Many times it may not be necessary to accrue an expense, but it can be directly booked against an expense Account on payment. For example a travel allowance or a telephone bill. You can directly debit Telephone Expense (instead of your telephone company) and credit your Bank on payment.
 
 - Debit: Expense Account (like Telephone expense)
 - Credit: Bank or Cash Account

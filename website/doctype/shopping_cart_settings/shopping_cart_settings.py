@@ -43,7 +43,7 @@ class DocType(DocListController):
 		
 	def validate_price_lists(self):
 		territory_name_map = self.validate_overlapping_territories("price_lists",
-			"price_list")
+			"selling_price_list")
 		
 		# validate that a Shopping Cart Price List exists for the root territory
 		# as a catch all!
@@ -92,9 +92,9 @@ class DocType(DocListController):
 				raise_exception=ShoppingCartSetupError)
 		
 		price_list_currency_map = webnotes.conn.get_values("Price List", 
-			[d.price_list for d in self.doclist.get({"parentfield": "price_lists"})],
+			[d.selling_price_list for d in self.doclist.get({"parentfield": "price_lists"})],
 			"currency")
-		
+			
 		expected_to_exist = [currency + "-" + company_currency 
 			for currency in price_list_currency_map.values()
 			if currency != company_currency]
@@ -126,7 +126,7 @@ class DocType(DocListController):
 		return name
 				
 	def get_price_list(self, billing_territory):
-		price_list = self.get_name_from_territory(billing_territory, "price_lists", "price_list")
+		price_list = self.get_name_from_territory(billing_territory, "price_lists", "selling_price_list")
 		return price_list and price_list[0] or None
 		
 	def get_tax_master(self, billing_territory):
