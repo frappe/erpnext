@@ -18,4 +18,4 @@ This will also set the default **Currency** and time zone for your account. Once
 
 Congrats! You are already on your way.
 
-The next step is to configure your Chart of Accounts or start adding users and setting their permissions.
+The next step is to follow implementation instructions.

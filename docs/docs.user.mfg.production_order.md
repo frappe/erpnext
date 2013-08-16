@@ -3,7 +3,7 @@
 	"_label": "Production Order"
 }
 ---
-Production Order (also called as Work Order) is a document that is given to the manufacturing shop floor by the Production Planner as a signal to product a certain quantity of a certain Item. Production Order also helps to generate the material requirements (Stock Entry) for the Item to be produced from its **Bill of Materials**. 
+Production Order (also called as Work Order) is a document that is given to the manufacturing shop floor by the Production Planner as a signal to produce a certain quantity of a certain Item. Production Order also helps to generate the material requirements (Stock Entry) for the Item to be produced from its **Bill of Materials**. 
 
 The **Production Order** is generated directly from the **Production Planning Tool** based on Sales Orders. You can also create a direct Production Order by:
 
@@ -13,7 +13,7 @@ The **Production Order** is generated directly from the **Production Planning To
 - Select the BOM
 - Select Quantities
 - Select Warehouses. WIP (Work-in-Progress) is where your Items will be transferred when you begin production and FG (Finished Goods) where you store finished Items before they are shipped.
-- Select if you want to consider sub-assemblies (sub-Items that have their own BOM) as stock items or you want to explode the entire BOM when you make Stock Entries for this Item. What is means is that if you also maintain stock of your sub assemblies then you should set this as “No” and in your Stock Entires, it will also list the sub-assembly Item (not is sub-components).
+- Select if you want to consider sub-assemblies (sub-Items that have their own BOM) as stock items or you want to explode the entire BOM when you make Stock Entries for this Item. What it means is that if you also maintain stock of your sub assemblies then you should set this as “No” and in your Stock Entires, it will also list the sub-assembly Item (not is sub-components).
 
 and “Submit” the Production Order.
 

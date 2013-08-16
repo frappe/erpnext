@@ -11,6 +11,7 @@ from webnotes import msgprint, _
 from controllers.stock_controller import StockController
 
 class SerialNoCannotCreateDirectError(webnotes.ValidationError): pass
+class SerialNoCannotCannotChangeError(webnotes.ValidationError): pass
 
 class DocType(StockController):
 	def __init__(self, doc, doclist=[]):
@@ -19,8 +20,9 @@ class DocType(StockController):
 		self.via_stock_ledger = False
 
 	def validate(self):
-		if self.doc.fields.get("__islocal") and not self.via_stock_ledger:
-			webnotes.throw(_("Serial No cannot be created directly"), SerialNoCannotCreateDirectError)
+		if self.doc.fields.get("__islocal") and self.doc.warehouse:
+			webnotes.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), 
+				SerialNoCannotCreateDirectError)
 			
 		self.validate_warranty_status()
 		self.validate_amc_status()
@@ -47,9 +49,9 @@ class DocType(StockController):
 			item_code, warehouse = webnotes.conn.get_value("Serial No", 
 				self.doc.name, ["item_code", "warehouse"])
 			if item_code != self.doc.item_code:
-				webnotes.throw(_("Item Code cannot be changed for Serial No."))
+				webnotes.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
 			if not self.via_stock_ledger and warehouse != self.doc.warehouse:
-				webnotes.throw(_("Warehouse cannot be changed for Serial No."))
+				webnotes.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
 			
 		if not self.doc.warehouse and self.doc.status=="Available":
 			self.doc.status = "Not Available"

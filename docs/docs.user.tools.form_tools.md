@@ -13,4 +13,4 @@ Comments are a great way to add information about a transaction that is not a pa
 
 ### Tags
 
-Like Assignments and Comments, you can also add your own tags to each type of transactions. These tags can help you search a document and also classify it. ERPNext will also show you all the important tags in in the document list.
+Like Assignments and Comments, you can also add your own tags to each type of transactions. These tags can help you search a document and also classify it. ERPNext will also show you all the important tags in the document list.

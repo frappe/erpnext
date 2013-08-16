@@ -3,7 +3,7 @@
 	"_label": "Expense Claim"
 }
 ---
-When Employee’s make expenses out their pocket on behalf of the company, like if they took a customer out for lunch, they can make a request for reimbursement via the Expense Claim form. 
+When Employee’s make expenses out of their pocket on behalf of the company, for example, if they take a customer out for lunch, they can make a request for reimbursement via the Expense Claim form. 
 
 To make a new Expense Claim, go to:
 
@@ -21,4 +21,4 @@ Comments can be added in the Comments section explaining why the claim was appro
 
 ### Booking the Expense and Reimbursement
 
-The approved Expense Claim must be then be converted into a Journal Voucher and a payment must be made. Note: This amount should not be clubbed with Salary because the amount will then be taxable to the Employee.
+The approved Expense Claim must then be converted into a Journal Voucher and a payment must be made. Note: This amount should not be clubbed with Salary because the amount will then be taxable to the Employee.

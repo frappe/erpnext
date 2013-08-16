@@ -42,7 +42,7 @@ $.extend(erpnext, {
 		
 		var $btn = $('<button class="btn btn-sm btn-default">Add Serial No</button>')
 			.appendTo($("<div>")
-				.css({"margin-bottom": "10px"})
+				.css({"margin-bottom": "10px", "margin-top": "-10px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
 				
 		$btn.on("click", function() {
