@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-16 10:59:15", 
   "docstatus": 0, 
-  "modified": "2013-08-14 18:26:23", 
+  "modified": "2013-08-16 10:16:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,9 +12,9 @@
   "autoname": "field:serial_no", 
   "description": "Distinct unit of an Item", 
   "doctype": "DocType", 
-  "document_type": "Other", 
+  "document_type": "Master", 
   "icon": "icon-barcode", 
-  "in_create": 1, 
+  "in_create": 0, 
   "module": "Stock", 
   "name": "__common__", 
   "search_fields": "item_code,status"
@@ -58,7 +58,7 @@
  }, 
  {
   "default": "In Store", 
-  "description": "Only Serial Nos with status \"In Store\" can be delivered.", 
+  "description": "Only Serial Nos with status \"Available\" can be delivered.", 
   "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
@@ -96,11 +96,12 @@
   "oldfieldname": "item_code", 
   "oldfieldtype": "Link", 
   "options": "Item", 
-  "read_only": 1, 
+  "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
  }, 
  {
+  "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt", 
   "doctype": "DocField", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
@@ -219,7 +220,7 @@
   "label": "Creation Time", 
   "no_copy": 1, 
   "read_only": 1, 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -232,7 +233,7 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "read_only": 1, 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 0
  }, 
  {
@@ -250,7 +251,7 @@
   "label": "Supplier", 
   "no_copy": 1, 
   "options": "Supplier", 
-  "read_only": 1
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -337,7 +338,7 @@
   "oldfieldtype": "Link", 
   "options": "Customer", 
   "print_hide": 1, 
-  "read_only": 1, 
+  "read_only": 0, 
   "search_index": 0
  }, 
  {

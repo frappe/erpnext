@@ -165,7 +165,6 @@ class DocType(DocListController):
 		sr.doc.serial_no = serial_no
 		sr.doc.status = "Available"
 		sr.doc.item_code = self.doc.item_code
-		sr.doc.warehouse = self.doc.warehouse
 		sr.doc.purchase_rate = self.doc.incoming_rate
 		sr.doc.purchase_document_type = self.doc.voucher_type
 		sr.doc.purchase_document_no = self.doc.voucher_no
@@ -173,6 +172,10 @@ class DocType(DocListController):
 		sr.doc.purchase_time = self.doc.posting_time
 		sr.make_controller().via_stock_ledger = True
 		sr.insert()
+		
+		# set warehouse
+		sr.doc.warehouse = self.doc.warehouse
+		sr.save()
 		webnotes.msgprint(_("Serial No created") + ": " + sr.doc.name)
 		return sr.doc.name
 		
