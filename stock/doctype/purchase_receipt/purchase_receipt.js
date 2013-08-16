@@ -127,7 +127,7 @@ cur_frm.cscript.new_contact = function(){
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
-			['project', 'status', 'not in', 'Completed, Cancelled']
+			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
 }
