@@ -509,20 +509,20 @@ class DocType(SellingController):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
-				if flt(self.doc.paid_amount) == 0:
-					if self.doc.cash_bank_account: 
-						webnotes.conn.set(self.doc, 'paid_amount', 
-							(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
-					else:
-						# show message that the amount is not paid
-						webnotes.conn.set(self.doc,'paid_amount',0)
-						webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
-
 			self.make_packing_list()
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			
-		if not cint(self.doc.is_pos):
+		if cint(self.doc.is_pos) == 1:
+			if flt(self.doc.paid_amount) == 0:
+				if self.doc.cash_bank_account: 
+					webnotes.conn.set(self.doc, 'paid_amount', 
+						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+				else:
+					# show message that the amount is not paid
+					webnotes.conn.set(self.doc,'paid_amount',0)
+					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+		else:
 			webnotes.conn.set(self.doc,'paid_amount',0)
 		
 	def check_prev_docstatus(self):
