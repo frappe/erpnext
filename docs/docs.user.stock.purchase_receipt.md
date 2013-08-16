@@ -21,7 +21,7 @@ If you reject, you are required to enter a “Rejected Warehouse” to indicate 
 
 ### Quality Inspections
 
-If for certain Items it is mandatory for you to record Quality Inspections (you have set it in your Item master), you will need to update the “Quality Inspection No” (QA No) column. The system will only allow you to “Submit” the Purchase Receipt if you update the “Quality Inspection No”.
+If for certain Items, it is mandatory to record Quality Inspections (if you have set it in your Item master), you will need to update the “Quality Inspection No” (QA No) column. The system will only allow you to “Submit” the Purchase Receipt if you update the “Quality Inspection No”.
 
 ### UOM Conversions
 
