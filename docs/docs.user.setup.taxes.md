@@ -11,7 +11,7 @@ For Tax Accounts that you want to use in the tax templates, you must mention the
 
 ## Sales Taxes and Charges Master
 
-You must usually collect taxes from your Customer and pay them to the government. At times there may be multiple taxes for multiple government bodies like local government, state or provincial and federal or central government.
+You must usually collect taxes from your Customer and pay them to the government. At times, you may have to pay multiple taxes to multiple government bodies like local government, state or provincial and federal or central government.
 
 The way ERPNext sets up taxes is via templates. Other types of charges that may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.
 
@@ -36,9 +36,9 @@ In each row, you have to mention:
 - Amount: Tax amount.
 - Total: Cumulative total to this point.
 - Enter Row: If based on "Previous Row Total" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-- Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to your customers.
+- Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the rate in your main item table. This is useful when you want to give a flat price (inclusive of all taxes) to your customers.
 
-Once your setup your template, you can now select this in your sales transactions.
+Once you setup your template, you can select this in your sales transactions.
 
 ## Purchase Taxes and Charges Master
 
