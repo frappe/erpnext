@@ -571,7 +571,6 @@ class DocType(StockController):
 		for item in item_dict:
 			pending_to_issue = (max_qty * item_dict[item]["qty"]) - issued_item_qty.get(item, 0)
 			desire_to_transfer = flt(self.doc.fg_completed_qty) * item_dict[item]["qty"]
-			
 			if desire_to_transfer <= pending_to_issue:
 				item_dict[item]["qty"] = desire_to_transfer
 			else:

@@ -122,16 +122,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	get_items: function() {
-		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
-			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
-				// if production order / bom is mentioned, get items
-				return this.frm.call({
-					doc: this.frm.doc,
-					method: "get_items",
-					callback: function(r) {
-						if(!r.exc) refresh_field("mtn_details");
-					}
-				});
+		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
+			// if production order / bom is mentioned, get items
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "get_items",
+				callback: function(r) {
+					if(!r.exc) refresh_field("mtn_details");
+				}
+			});
 		}
 	},
 	
