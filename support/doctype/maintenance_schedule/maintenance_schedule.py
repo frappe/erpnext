@@ -193,10 +193,6 @@ class DocType(TransactionBase):
 					if not chk1:
 						msgprint("Serial no "+x+" does not exist in system.")
 						raise Exception
-					else:
-						if status=='In Store' or status=='Note in Use' or status=='Scrapped':
-							msgprint("Serial no "+x+" is '"+status+"'")
-							raise Exception
 	
 	def validate(self):
 		self.validate_maintenance_detail()

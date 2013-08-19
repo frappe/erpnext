@@ -644,7 +644,61 @@ class TestSalesInvoice(unittest.TestCase):
 		count = no_of_months == 12 and 3 or 13
 		for i in xrange(count):
 			base_si = _test(i)
+
+	def test_serialized(self):
+		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
 		
+		se = make_serialized_item()
+		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		
+		si = webnotes.bean(copy=test_records[0])
+		si.doc.update_stock = 1
+		si.doclist[1].item_code = "_Test Serialized Item With Series"
+		si.doclist[1].qty = 1
+		si.doclist[1].serial_no = serial_nos[0]
+		si.insert()
+		si.submit()
+		
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], 
+			"delivery_document_no"), si.doc.name)
+			
+		return si
+			
+	def test_serialized_cancel(self):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		si = self.test_serialized()
+		si.cancel()
+
+		serial_nos = get_serial_nos(si.doclist[1].serial_no)
+
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], 
+			"delivery_document_no"))
+
+	def test_serialize_status(self):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoStatusError, get_serial_nos
+		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		
+		se = make_serialized_item()
+		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		
+		sr = webnotes.bean("Serial No", serial_nos[0])
+		sr.doc.status = "Not Available"
+		sr.save()
+		
+		si = webnotes.bean(copy=test_records[0])
+		si.doc.update_stock = 1
+		si.doclist[1].item_code = "_Test Serialized Item With Series"
+		si.doclist[1].qty = 1
+		si.doclist[1].serial_no = serial_nos[0]
+		si.insert()
+
+		self.assertRaises(SerialNoStatusError, si.submit)
+
 test_dependencies = ["Journal Voucher", "POS Setting", "Contact", "Address"]
 
 test_records = [

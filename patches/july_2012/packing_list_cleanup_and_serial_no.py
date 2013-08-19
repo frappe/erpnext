@@ -39,7 +39,7 @@ def execute():
 
 				status = 'Not in Use'
 				if sle and flt(sle[0]['actual_qty']) > 0:
-					status = 'In Store'
+					status = 'Available'
 				elif sle and flt(sle[0]['actual_qty']) < 0:
 					status = 'Delivered'
 				
