@@ -18,6 +18,8 @@ class TestDeliveryNote(unittest.TestCase):
 		pr.submit()
 		
 	def test_over_billing_against_dn(self):
+		self._insert_purchase_receipt()
+		
 		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		self._insert_purchase_receipt()
 		dn = webnotes.bean(copy=test_records[0]).insert()
@@ -33,7 +35,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		# modify export_amount
 		si[1].export_rate = 200
-		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).submit)
+		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
 		
 	
 	def test_delivery_note_no_gl_entry(self):
@@ -113,7 +115,7 @@ test_records = [
 			"posting_date": "2013-02-21", 
 			"posting_time": "9:00:00", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"status": "Draft", 
 			"territory": "_Test Territory",
 			"net_total": 500.0,

@@ -286,12 +286,15 @@ class DocType(StockController):
 		
 		item_list = [d.item_code for d in self.entries]
 		warehouse_list = [d.warehouse for d in self.entries]
+		if not (item_list and warehouse_list):
+			webnotes.throw(_("Invalid Item or Warehouse Data"))
+		
 		stock_ledger_entries = self.get_stock_ledger_entries(item_list, warehouse_list)
 		
 		stock_value_difference = {}
 		for d in self.entries:
-			diff = get_buying_amount(d.item_code, d.warehouse, d.actual_qty, self.doc.doctype, 
-				self.doc.name, d.voucher_detail_no, stock_ledger_entries)
+			diff = get_buying_amount(d.item_code, self.doc.doctype, self.doc.name, 
+				d.voucher_detail_no, stock_ledger_entries.get((d.item_code, d.warehouse), []))
 			stock_value_difference.setdefault(d.warehouse, 0.0)
 			stock_value_difference[d.warehouse] -= diff
 

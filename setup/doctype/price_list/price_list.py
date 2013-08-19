@@ -11,7 +11,7 @@ import webnotes.defaults
 class DocType(DocListController):
 	def onload(self):
 		self.doclist.extend(webnotes.conn.sql("""select * from `tabItem Price` 
-			where price_list_name=%s""", self.doc.name, as_dict=True, update={"doctype": "Item Price"}))
+			where price_list=%s""", self.doc.name, as_dict=True, update={"doctype": "Item Price"}))
 	
 	def validate(self):
 		if self.doc.buying_or_selling not in ["Buying", "Selling"]:
@@ -31,10 +31,20 @@ class DocType(DocListController):
 				self.validate_table_has_rows("valid_for_territories")
 		
 	def on_update(self):
+		self.set_default_if_missing()
 		cart_settings = webnotes.get_obj("Shopping Cart Settings")
 		if cint(cart_settings.doc.enabled):
 			cart_settings.validate_price_lists()
 				
 	def on_trash(self):
-		webnotes.conn.sql("""delete from `tabItem Price` where price_list_name = %s""", 
+		webnotes.conn.sql("""delete from `tabItem Price` where price_list = %s""", 
 			self.doc.name)
+			
+	def set_default_if_missing(self):
+		if self.doc.buying_or_selling=="Selling":
+			if not webnotes.conn.get_value("Selling Settings", None, "selling_price_list"):
+				webnotes.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
+
+		elif self.doc.buying_or_selling=="Buying":
+			if not webnotes.conn.get_value("Buying Settings", None, "buying_price_list"):
+				webnotes.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)

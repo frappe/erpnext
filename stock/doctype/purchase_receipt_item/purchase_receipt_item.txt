@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:30:24", 
+  "modified": "2013-08-07 14:45:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,7 +76,6 @@
   "label": "Received and Accepted"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "received_qty", 
   "fieldtype": "Float", 
@@ -91,7 +90,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
@@ -104,7 +102,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "rejected_qty", 
   "fieldtype": "Float", 
@@ -161,7 +158,6 @@
   "read_only": 0
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "import_rate", 
   "fieldtype": "Currency", 
@@ -197,7 +193,6 @@
   "read_only": 0
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "purchase_rate", 
   "fieldtype": "Currency", 
@@ -213,7 +208,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 

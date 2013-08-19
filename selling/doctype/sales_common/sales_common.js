@@ -45,8 +45,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		if(this.frm.fields_dict.price_list_name) {
-			this.frm.set_query("price_list_name", function() {
+		if(this.frm.fields_dict.selling_price_list) {
+			this.frm.set_query("selling_price_list", function() {
 				return { filters: { buying_or_selling: "Selling" } };
 			});
 		
@@ -54,7 +54,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return {
 					query: "controllers.queries.get_price_list_currency",
 					filters: {
-						price_list_name: me.frm.doc.price_list_name,
+						price_list: me.frm.doc.selling_price_list,
 						buying_or_selling: "Selling"
 					}					
 				};
@@ -126,15 +126,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				this.frm.set_value("customer", null);
 				msgprint(wn._("Please specify Company"));
 			} else {
-				var price_list_name = this.frm.doc.price_list_name;
+				var selling_price_list = this.frm.doc.selling_price_list;
 				return this.frm.call({
 					doc: this.frm.doc,
 					method: "set_customer_defaults",
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							(me.frm.doc.price_list_name !== price_list_name) ? 
-								me.price_list_name() :
+							(me.frm.doc.selling_price_list !== selling_price_list) ? 
+								me.selling_price_list() :
 								me.price_list_currency();
 						}
 					}
@@ -188,7 +188,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							customer: me.frm.doc.customer,
 							currency: me.frm.doc.currency,
 							conversion_rate: me.frm.doc.conversion_rate,
-							price_list_name: me.frm.doc.price_list_name,
+							selling_price_list: me.frm.doc.selling_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
@@ -206,8 +206,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	price_list_name: function() {
-		this._super("Selling");
+	selling_price_list: function() {
+		this.get_price_list_currency("Selling");
 	},
 	
 	ref_rate: function(doc, cdt, cdn) {

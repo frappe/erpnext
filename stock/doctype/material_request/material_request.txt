@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-15 17:50:38", 
+  "modified": "2013-08-08 14:22:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,7 +71,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 

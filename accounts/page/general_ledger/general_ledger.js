@@ -389,7 +389,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			grid: { hoverable: true, clickable: true },
 			xaxis: { mode: "time", 
 				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
+				max: dateutil.str_to_obj(this.to_date).getTime() },
+			series: { downsample: { threshold: 1000 } }
 		}
 	},
 });

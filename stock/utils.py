@@ -99,7 +99,7 @@ def get_incoming_rate(args):
 		if valuation_method == 'FIFO':
 			if not previous_sle:
 				return 0.0
-			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]'))
+			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
 			in_rate = previous_stock_queue and \
 				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
 		elif valuation_method == 'Moving Average':
@@ -182,32 +182,28 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 				wlist.append([w])
 	return wlist
 
-def get_buying_amount(item_code, warehouse, qty, voucher_type, voucher_no, voucher_detail_no, 
+def get_buying_amount(item_code, voucher_type, voucher_no, voucher_detail_no, 
 		stock_ledger_entries, item_sales_bom=None):
 	if item_sales_bom and item_sales_bom.get(item_code):
 		# sales bom item
 		buying_amount = 0.0
 		for bom_item in item_sales_bom[item_code]:
 			if bom_item.get("parent_detail_docname")==voucher_detail_no:
-				buying_amount += _get_buying_amount(voucher_type, voucher_no, voucher_detail_no,
-					bom_item.item_code, bom_item.warehouse or warehouse, 
-					bom_item.total_qty or (bom_item.qty * qty), stock_ledger_entries)
+				buying_amount += _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, stock_ledger_entries)
 		return buying_amount
 	else:
 		# doesn't have sales bom
-		return _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, 
-			item_code, warehouse, qty, stock_ledger_entries)
+		return _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, stock_ledger_entries)
 		
-def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse, qty, 
-		stock_ledger_entries):
-	relevant_stock_ledger_entries = [sle for sle in stock_ledger_entries 
-		if sle.item_code == item_code and sle.warehouse == warehouse]
-		
-	for i, sle in enumerate(relevant_stock_ledger_entries):
+def _get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
+	# IMP NOTE
+	# stock_ledger_entries should already be filtered by item_code and warehouse and 
+	# sorted by posting_date desc, posting_time desc
+	for i, sle in enumerate(stock_ledger_entries):
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
 			sle.voucher_detail_no == item_row:
-				previous_stock_value = len(relevant_stock_ledger_entries) > i+1 and \
-					flt(relevant_stock_ledger_entries[i+1].stock_value) or 0.0
+				previous_stock_value = len(stock_ledger_entries) > i+1 and \
+					flt(stock_ledger_entries[i+1].stock_value) or 0.0
 				buying_amount =  previous_stock_value - flt(sle.stock_value)						
 				
 				return buying_amount
@@ -217,8 +213,8 @@ def _get_buying_amount(voucher_type, voucher_no, item_row, item_code, warehouse,
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	if not hasattr(webnotes, "auto_indent"):
-		webnotes.auto_indent = webnotes.conn.get_value('Stock Settings', None, 'auto_indent')
-
+		webnotes.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
+	
 	if webnotes.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
@@ -313,8 +309,8 @@ def create_material_request(material_requests):
 
 	if mr_list:
 		if not hasattr(webnotes, "reorder_email_notify"):
-			webnotes.reorder_email_notify = webnotes.conn.get_value('Stock Settings', None, 
-				'reorder_email_notify')
+			webnotes.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+				'reorder_email_notify'))
 			
 		if(webnotes.reorder_email_notify):
 			send_email_notification(mr_list)
@@ -340,7 +336,6 @@ def send_email_notification(mr_list):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
-
 	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
 	
 def notify_errors(exceptions_list):

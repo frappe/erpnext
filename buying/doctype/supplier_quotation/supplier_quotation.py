@@ -10,7 +10,7 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc, self.doclist = doc, doclist or []
 		self.tname, self.fname = "Supplier Quotation Item", "quotation_items"
-		
+	
 	def validate(self):
 		super(DocType, self).validate()
 		

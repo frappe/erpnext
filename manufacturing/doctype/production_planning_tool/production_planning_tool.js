@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	doc.company = wn.defaults.get_default("company");
-	refresh_field("company");
+	cur_frm.set_value("company", wn.defaults.get_default("company"))
+	cur_frm.set_value("use_multi_level_bom", 1)
 }
 
 cur_frm.cscript.refresh = function(doc) {

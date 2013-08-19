@@ -14,7 +14,7 @@ Step 2: Add the User and other details￼
 This transaction will appear in:
 
 The To-do list of the user whom this is assigned to in “My List” section
-In the “Assigned by me” section of the user who as assigned this activity.
+In the “Assigned by me” section of the user who has assigned this activity.
 
 ### To Do
 

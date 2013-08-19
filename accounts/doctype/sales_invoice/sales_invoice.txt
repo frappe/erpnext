@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-07-26 11:16:58", 
+  "modified": "2013-08-09 14:45:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,7 +52,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -246,7 +246,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "price_list_name", 
+  "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 

@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-08-09 12:20:58", 
+  "docstatus": 0, 
+  "modified": "2013-08-09 12:25:29", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select \n    mr.name as \"Material Request:Link/Material Request:120\",\n    mr.transaction_date as \"Date:Date:100\",\n\tmr_item.item_code as \"Item Code:Link/Item:120\",\n\tmr_item.qty as \"Qty:Float:100\",\n\tmr_item.item_name as \"Item Name::150\",\n\tmr_item.description as \"Description::200\"\nfrom\n\t`tabMaterial Request` mr, `tabMaterial Request Item` mr_item\nwhere\n\tmr_item.parent = mr.name\n\tand mr.material_request_type = \"Purchase\"\n\tand mr.docstatus = 1\n\tand mr.status != \"Stopped\"\n\tand not exists(select name from `tabSupplier Quotation Item` where prevdoc_docname=mr.name)\norder by mr.transaction_date asc", 
+  "ref_doctype": "Material Request", 
+  "report_name": "Material Requests for which Supplier Quotations are not created", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Material Requests for which Supplier Quotations are not created"
+ }
+]

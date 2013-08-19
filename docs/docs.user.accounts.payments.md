@@ -42,7 +42,7 @@ To use this, go to:
 
 Select your “Bank” Account and enter the dates of your statement. Here you will get all the “Bank Voucher” type entries. In each of the entry on the right most column, update the “Clearance Date” and click on “Update”.
 
-This way you will be able sync your bank statements and entries in the system.
+This way you will be able to sync your bank statements and entries in the system.
 
 ---
 

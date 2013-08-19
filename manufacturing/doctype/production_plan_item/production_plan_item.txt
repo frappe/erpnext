@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:35:27", 
+  "modified": "2013-08-08 12:12:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,7 +52,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "planned_qty", 
   "fieldtype": "Float", 
@@ -76,7 +75,6 @@
   "read_only": 1
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "so_pending_qty", 
   "fieldtype": "Float", 
@@ -88,6 +86,15 @@
   "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
+ }, 
+ {
+  "description": "Reserved Warehouse in Sales Order / Finished Goods Warehouse", 
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "options": "Warehouse", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

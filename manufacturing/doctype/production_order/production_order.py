@@ -10,6 +10,8 @@ from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
+class OverProductionError(webnotes.ValidationError): pass
+
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -71,8 +73,7 @@ class DocType:
 				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
 				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
 				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
-				_("Please reduce qty."), raise_exception=1)
-
+				_("Please reduce qty."), raise_exception=OverProductionError)
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
@@ -95,6 +96,8 @@ class DocType:
 
 
 	def on_submit(self):
+		if not self.doc.wip_warehouse:
+			webnotes.throw(_("WIP Warehouse required before Submit"))
 		webnotes.conn.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
 		
@@ -135,3 +138,23 @@ def get_item_details(item):
 		res.bom_no = bom[0][0]
 		
 	return res
+
+@webnotes.whitelist()
+def make_stock_entry(production_order_id, purpose):
+	production_order = webnotes.bean("Production Order", production_order_id)
+	
+	stock_entry = webnotes.new_bean("Stock Entry")
+	stock_entry.doc.purpose = purpose
+	stock_entry.doc.production_order = production_order_id
+	stock_entry.doc.company = production_order.doc.company
+	stock_entry.doc.bom_no = production_order.doc.bom_no
+	stock_entry.doc.use_multi_level_bom = production_order.doc.use_multi_level_bom
+	stock_entry.doc.fg_completed_qty = flt(production_order.doc.qty) - flt(production_order.doc.produced_qty)
+	
+	if purpose=="Material Transfer":
+		stock_entry.doc.to_warehouse = production_order.doc.wip_warehouse
+	else:
+		stock_entry.doc.from_warehouse = production_order.doc.wip_warehouse
+		stock_entry.doc.to_warehouse = production_order.doc.fg_warehouse
+
+	return [d.fields for d in stock_entry.doclist]

@@ -87,11 +87,13 @@ class StockController(AccountsController):
 			get_obj('Stock Ledger').update_stock(sl_entries, is_amended)
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
+		out = {}
+		
 		if not (item_list and warehouse_list):
 			item_list, warehouse_list = self.get_distinct_item_warehouse()
 			
 		if item_list and warehouse_list:
-			return webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
+			res = webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
 				voucher_detail_no, posting_date, posting_time, stock_value,
 				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
 				where ifnull(`is_cancelled`, "No") = "No" and company = %s 
@@ -100,6 +102,14 @@ class StockController(AccountsController):
 				posting_time desc, name desc""" % 
 				('%s', ', '.join(['%s']*len(item_list)), ', '.join(['%s']*len(warehouse_list))), 
 				tuple([self.doc.company] + item_list + warehouse_list), as_dict=1)
+				
+			for r in res:
+				if (r.item_code, r.warehouse) not in out:
+					out[(r.item_code, r.warehouse)] = []
+		
+				out[(r.item_code, r.warehouse)].append(r)
+
+		return out
 
 	def get_distinct_item_warehouse(self):
 		item_list = []

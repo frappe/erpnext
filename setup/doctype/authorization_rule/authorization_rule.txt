@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:25:35", 
+  "modified": "2013-08-07 14:44:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -141,7 +141,6 @@
   "options": "Profile"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "value", 
   "fieldtype": "Float", 

@@ -675,7 +675,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory"
 		}, 
 		{
@@ -738,7 +738,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-03-07", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory"
 		}, 
 		{
@@ -789,7 +789,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory",
 		},
 		# items
@@ -914,7 +914,7 @@ test_records = [
 			"plc_conversion_rate": 1.0, 
 			"posting_date": "2013-01-23", 
 			"price_list_currency": "INR", 
-			"price_list_name": "_Test Price List", 
+			"selling_price_list": "_Test Price List", 
 			"territory": "_Test Territory",
 		},
 		# items
@@ -925,7 +925,6 @@ test_records = [
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
 			"ref_rate": 62.5,
-			"export_rate": 62.5,
 			"stock_uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
 			"income_account": "Sales - _TC",
@@ -939,7 +938,6 @@ test_records = [
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
 			"ref_rate": 190.66,
-			"export_rate": 190.66,
 			"stock_uom": "_Test UOM",
 			"income_account": "Sales - _TC",
 			"cost_center": "_Test Cost Center - _TC",

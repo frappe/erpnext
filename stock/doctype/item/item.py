@@ -130,16 +130,16 @@ class DocType(DocListController):
 	def validate_price_lists(self):
 		price_lists=[]
 		for d in getlist(self.doclist,'ref_rate_details'):
-			if d.price_list_name in price_lists:
-				msgprint(_("Cannot have two prices for same Price List") + ": " + d.price_list_name,
+			if d.price_list in price_lists:
+				msgprint(_("Cannot have two prices for same Price List") + ": " + d.price_list,
 					raise_exception= webnotes.DuplicateEntryError)
 			else:
-				price_list_currency = webnotes.conn.get_value("Price List", d.price_list_name, "currency")
+				price_list_currency = webnotes.conn.get_value("Price List", d.price_list, "currency")
 				if price_list_currency and d.ref_currency != price_list_currency:
 					msgprint(_("Currency does not match Price List Currency for Price List") \
-						+ ": " + d.price_list_name, raise_exception=PriceListCurrencyMismatch)
+						+ ": " + d.price_list, raise_exception=PriceListCurrencyMismatch)
 				
-				price_lists.append(d.price_list_name)
+				price_lists.append(d.price_list)
 			
 					
 	def fill_customer_code(self):

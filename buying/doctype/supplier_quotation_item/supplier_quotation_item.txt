@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:23", 
+  "modified": "2013-08-07 14:44:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -87,7 +87,6 @@
   "label": "Quantity and Rate"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
@@ -169,7 +168,6 @@
   "read_only": 0
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "purchase_rate", 
   "fieldtype": "Currency", 
@@ -185,7 +183,6 @@
   "width": "100px"
  }, 
  {
-  "default": "0.00", 
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 

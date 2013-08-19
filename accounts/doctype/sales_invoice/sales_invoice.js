@@ -98,8 +98,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			// }, 'icon-desktop');
 
 		}
-		
-		cur_frm.cscript.hide_fields(doc, dt, dn);
 	},
 
 	toggle_pos: function(show) {
@@ -178,6 +176,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	entries_add: function(doc, cdt, cdn) {
 		var row = wn.model.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
+	},
+	
+	set_dynamic_labels: function() {
+		this._super();
+		this.hide_fields(this.frm.doc);
 	}
 });
 
@@ -201,7 +204,10 @@ cur_frm.cscript.hide_fields = function(doc) {
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
-		unhide_field(par_flds);
+		for (i in par_flds) {
+			var docfield = wn.meta.docfield_map[doc.doctype][par_flds[i]];
+			if(!docfield.hidden) unhide_field(par_flds[i]);
+		}
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
 	

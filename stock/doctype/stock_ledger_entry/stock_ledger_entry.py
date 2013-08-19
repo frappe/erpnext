@@ -113,4 +113,3 @@ def on_doctype_update():
 		webnotes.conn.commit()
 		webnotes.conn.sql("""alter table `tabStock Ledger Entry` 
 			add index posting_sort_index(posting_date, posting_time, name)""")
-		webnotes.conn.begin()

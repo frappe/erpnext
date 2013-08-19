@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:28:38", 
+  "modified": "2013-08-09 14:47:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,11 +67,6 @@
   "search_index": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "cb0", 
-  "fieldtype": "Column Break"
- }, 
- {
   "allow_on_submit": 1, 
   "default": "1", 
   "doctype": "DocField", 
@@ -87,6 +82,7 @@
  }, 
  {
   "allow_on_submit": 1, 
+  "default": "1", 
   "doctype": "DocField", 
   "fieldname": "is_default", 
   "fieldtype": "Check", 
@@ -97,11 +93,32 @@
   "oldfieldtype": "Check"
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
   "description": "Manage cost of operations", 
   "doctype": "DocField", 
   "fieldname": "with_operations", 
   "fieldtype": "Check", 
   "label": "With Operations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rm_cost_as_per", 
+  "fieldtype": "Select", 
+  "label": "Rate Of Materials Based On", 
+  "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+ }, 
+ {
+  "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
+  "description": "Price List for Costing", 
+  "doctype": "DocField", 
+  "fieldname": "buying_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List"
  }, 
  {
   "depends_on": "with_operations", 
@@ -144,13 +161,6 @@
   "fieldtype": "Section Break", 
   "label": "Costing", 
   "oldfieldtype": "Section Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "rm_cost_as_per", 
-  "fieldtype": "Select", 
-  "label": "Rate Of Materials Based On", 
-  "options": "Valuation Rate\nLast Purchase Rate"
  }, 
  {
   "doctype": "DocField", 

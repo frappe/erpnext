@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-07-23 15:26:50", 
+  "modified": "2013-08-09 14:47:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -60,7 +60,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -237,14 +237,14 @@
  {
   "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
-  "fieldname": "price_list_name", 
+  "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
   "options": "Price List", 
   "print_hide": 1
  }, 
  {
-  "depends_on": "price_list_name", 
+  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -255,7 +255,7 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "price_list_name", 
+  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 

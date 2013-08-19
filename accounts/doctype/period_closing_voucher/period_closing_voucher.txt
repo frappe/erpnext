@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:31:33", 
+  "modified": "2013-08-12 17:13:23", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
@@ -35,7 +35,6 @@
   "permlevel": 0, 
   "read": 1, 
   "report": 1, 
-  "role": "Accounts Manager", 
   "submit": 1, 
   "write": 1
  }, 
@@ -104,6 +103,7 @@
   "oldfieldtype": "Column Break"
  }, 
  {
+  "description": "The account head under Liability, in which Profit/Loss will be booked", 
   "doctype": "DocField", 
   "fieldname": "closing_account_head", 
   "fieldtype": "Link", 
@@ -131,6 +131,11 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
  }
 ]

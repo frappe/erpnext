@@ -1,0 +1,23 @@
+Data Import Template,,,,
+Table:,Fiscal Year,,,
+,,,,
+,,,,
+Notes:,,,,
+Please do not change the template headings.,,,,
+First data column must be blank.,,,,
+"If you are uploading new records, leave the ""name"" (ID) column blank.",,,,
+"If you are uploading new records, ""Naming Series"" becomes mandatory, if present.",,,,
+Only mandatory fields are necessary for new records. You can delete non-mandatory columns if you wish.,,,,
+"For updating, you can update only selective columns.",,,,
+You can only upload upto 5000 records in one go. (may be less in some cases),,,,
+,,,,
+DocType:,Fiscal Year,,,
+Column Labels:,ID,Year Name,Year Start Date,Year Closed
+Column Name:,name,year,year_start_date,is_fiscal_year_closed
+Mandatory:,Yes,Yes,Yes,No
+Type:,Data (text),Data,Date,Select
+Info:,,,,"One of: No, Yes"
+Start entering data below this line,,,,
+,,2009,01-Jan-2009,No
+,,2010,01-Jan-2010,No
+,,2011,01-Jan-2011,No

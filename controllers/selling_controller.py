@@ -14,12 +14,8 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		
 		self.set_taxes("other_charges", "charge")
 		
-		if self.meta.get_field("debit_to") and not self.doc.debit_to:
-			self.doc.debit_to = self.get_debit_to().get("debit_to")
-			
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
@@ -104,8 +100,8 @@ class SellingController(StockController):
 			for item in self.doclist.get({"parentfield": self.fname}):
 				if item.item_code in stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					buying_amount = get_buying_amount(item.item_code, item.warehouse, -1*item.qty, 
-						self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+					buying_amount = get_buying_amount(item.item_code, self.doc.doctype, self.doc.name, item.name, 
+						stock_ledger_entries.get((item.item_code, item.warehouse), []), 
 						item_sales_bom)
 					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
 					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
@@ -191,7 +187,7 @@ class SellingController(StockController):
 			
 			if item.adj_rate == 100:
 				item.export_rate = 0
-			elif item.ref_rate:
+			elif not item.export_rate:
 				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
 					self.precision("export_rate", item))
 						

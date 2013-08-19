@@ -334,9 +334,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		bean.run_method("set_missing_values")
 		bean.run_method("set_supplier_defaults")
 
-	def update_item(obj, target, source_parent):
-		target.conversion_factor = 1
-
 	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice", 
@@ -353,7 +350,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "purchase_order", 
 				"purchase_rate": "rate"
 			},
-			"postprocess": update_item
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 

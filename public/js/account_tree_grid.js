@@ -138,7 +138,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 		$.each(gl, function(i, v) {
 			var posting_date = dateutil.str_to_obj(v.posting_date);
 			var account = me.item_by_name[v.account];
-			me.update_balances(account, posting_date, v)
+			me.update_balances(account, posting_date, v);
 		});
 
 		this.update_groups();

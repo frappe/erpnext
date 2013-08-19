@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-08-05 16:51:22", 
+  "modified": "2013-08-09 16:35:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,7 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Series", 
+  "label": "Document Numbering Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -92,7 +92,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "price_list_name", 
+  "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 
@@ -131,12 +131,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "customer_account", 
+  "fieldname": "customer", 
   "fieldtype": "Link", 
-  "label": "Customer Account", 
+  "label": "Customer", 
   "oldfieldname": "customer_account", 
   "oldfieldtype": "Link", 
-  "options": "Account", 
+  "options": "Customer", 
   "read_only": 0, 
   "reqd": 0
  }, 

@@ -118,7 +118,7 @@ class DocType:
 			elif purpose == 'Sales Return':
 				webnotes.conn.sql("update `tabSerial No` set status = 'Delivered', purchase_document_type = '', purchase_document_no = '' where name = '%s'" % serial_no)
 			else:
-				webnotes.conn.sql("update `tabSerial No` set docstatus = 2, status = 'Not in Use', purchase_document_type = '', purchase_document_no = '', purchase_date = null, purchase_rate = 0, supplier = null, supplier_name = '', supplier_address = '', warehouse = '' where name = '%s'" % serial_no)
+				webnotes.conn.sql("update `tabSerial No` set docstatus = 2, status = 'Not in Use', purchase_document_type = '', purchase_document_no = '', purchase_date = null, purchase_rate = 0, supplier = null, supplier_name = '', address_display = '', warehouse = '' where name = '%s'" % serial_no)
 
 
 	def check_serial_no_exists(self, serial_no, item_code):

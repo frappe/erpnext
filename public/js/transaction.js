@@ -42,6 +42,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				callback: function(r) {
 					// remove this call when using client side mapper
 					me.set_default_values();
+					me.set_dynamic_labels();
 				}
 			});
 		}
@@ -113,13 +114,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 	
-	price_list_name: function(buying_or_selling) {
+	get_price_list_currency: function(buying_or_selling) {
 		var me = this;
-		if(this.frm.doc.price_list_name) {
+		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
+		if(this.frm.doc[fieldname]) {
 			return this.frm.call({
 				method: "setup.utils.get_price_list_currency",
 				args: { 
-					price_list_name: this.frm.doc.price_list_name,
+					price_list: this.frm.doc[fieldname],
 				},
 				callback: function(r) {
 					if(!r.exc) {
@@ -310,7 +312,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					if(!item_tax[item_code]) item_tax[item_code] = {};
 					if($.isArray(tax_data)) {
 						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
-							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency);
+							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
+								tax_amount_precision);
 						
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {

@@ -10,7 +10,7 @@ The Manufacturing module in ERPNext helps you maintain multi-level Bill of Mater
 Broadly there are three types of Production Planning Systems
 
 - Make-to-Stock: In these systems, production is planned based on a forecast and then the Items are sold to distributors or customers. All fast moving consumer goods that are sold in retail shops like soaps, packaged water etc and electronics like phones etc are Made to Stock.
-- Make-to-Order: In these systems, manufacturing takes place after an firm order is placed by a Customer.
+- Make-to-Order: In these systems, manufacturing takes place after a firm order is placed by a Customer.
 - Engineer-to-Order:  In this case each sale is a separate Project and has to be designed and engineered to the requirements of the Customer. Common examples of this are any custom business like furniture, machine tools, speciality devices, metal fabrication etc.
 
 Most small and medium sized manufacturing businesses are based on a make-to-order or engineer-to-order system and so is ERPNext.
@@ -42,7 +42,7 @@ The state of art manufacturing philosophy (the rationale behind the planning pro
 
 The biggest cause of wastage in manufacturing is variation (in product and quantity).
 
-So they standardized their products and sub-assemblies and sold fixed quantities based on what they produced not produce based on what they sold. This way, they had an extremely predictable and stable product mix. If they sold less than planned, they would simple stop production. 
+So they standardized their products and sub-assemblies and sold fixed quantities based on what they produced or did not produce based on what they sold. This way, they had an extremely predictable and stable product mix. If they sold less than planned, they would simply stop production. 
 
 Their card signaling system kanban, would notify all their suppliers to stop production too. Hence they never used any of the complex material planning tools like MRP to play day-to-day material requirements, but a simple signaling system that said either STOP or GO.
 
