@@ -46,10 +46,10 @@ cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
 	if (doc.item_code) {
 		filter = {
 			'item_code': doc.item_code,
-			'status': "In Store"
+			'status': "Available"
 		}
 	} else
-		filter = { 'status': "In Store" }
+		filter = { 'status': "Available" }
 	
 	return { filters: filter }
 }

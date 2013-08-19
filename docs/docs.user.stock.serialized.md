@@ -11,10 +11,40 @@ You can also track from which **Supplier** you purchased the **Serial No** and t
 
 If your Item is *serialized* you will have to enter the Serial Nos in the related column with each Serial No in a new line.
 
+### Serial Nos and Inventory
+
+Inventory of an Item can only be affected if the Serial No is transacted via a Stock transaction (Stock Entry, Purchase Receipt, Delivery Note, Sales Invoice). When a new Serial No is created directly, its warehouse cannot be set.
+
+### Using Serial Nos
+
+To add a Serial No to a stock transaction, you can set the Serial No in the serial no field:
+
+![Serial No Entry](img/serial-no-entry.png)
+
+### Creation
+
+Serial Nos can automatically be created from a Stock Entry or Purchase Receipt. If you mention Serial No in the Serial Nos column, it will automatically create those serial Nos.
+
+### Automatic Series
+
+If in the Item Master, the Serial No Series is mentioned, you can leave the Serial No column blank in a Stock Entry / Purchase Receipt and Serial Nos will automatically be set from that series.
+
+#### Step 1: Mention the Series in the Item
+
+![Automatic Series](img/item-serial-no-series.png)
+
+#### Step 2: Keep Serial No field blank in your entry
+
+#### Step 3: Save / Submit your transaction (Serial Nos Automatically Updated)
+
+![Serial No Created Message](img/serial-no-auto-1.png)
+
+![Serial No Updated in Transaction](img/serial-no-auto-2.png)
+
+
 ### Importing and Updating Serial Nos
 
-Serial Nos cannot be imported from Stock Reconciliation. To import Serial Nos, you will have to use the Data Import Tool. When you import the Serial Nos, the stock level of its corresponding Item will be automatically updated.
-
+Serial Nos cannot be imported from Stock Reconciliation. To import Serial Nos, you will have to use the Data Import Tool.
 
 ### Using Serial Numbers for Multiple Purposes
 

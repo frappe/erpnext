@@ -22,7 +22,6 @@ patch_list = [
 	"patches.april_2012.update_role_in_address", 
 	"patches.april_2012.update_permlevel_in_address", 
 	"patches.april_2012.update_appraisal_permission", 
-	"patches.april_2012.serial_no_fixes", 
 	"patches.april_2012.repost_stock_for_posting_time", 
 	"patches.may_2012.cleanup_property_setter", 
 	"patches.may_2012.rename_prev_doctype", 
@@ -254,6 +253,7 @@ patch_list = [
 	"patches.august_2013.p01_hr_settings",
 	"patches.august_2013.p02_rename_price_list",
 	"patches.august_2013.p03_pos_setting_replace_customer_account",
+	"patches.august_2013.p05_update_serial_no_status",
 	"patches.august_2013.p05_employee_birthdays",
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-08-16",
 ]
