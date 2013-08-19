@@ -163,7 +163,6 @@ class DocType(DocListController):
 	def make_serial_no(self, serial_no):
 		sr = webnotes.new_bean("Serial No")
 		sr.doc.serial_no = serial_no
-		sr.doc.status = "Available"
 		sr.doc.item_code = self.doc.item_code
 		sr.doc.purchase_rate = self.doc.incoming_rate
 		sr.doc.purchase_document_type = self.doc.voucher_type
@@ -175,6 +174,7 @@ class DocType(DocListController):
 		
 		# set warehouse
 		sr.doc.warehouse = self.doc.warehouse
+		sr.doc.status = "Available"
 		sr.save()
 		webnotes.msgprint(_("Serial No created") + ": " + sr.doc.name)
 		return sr.doc.name
