@@ -9,8 +9,7 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 import webnotes.defaults
-
-sql = webnotes.conn.sql
+from stock.utils import update_bin
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -157,61 +156,73 @@ class DocType(BuyingController):
 				d.rejected_serial_no = cstr(d.rejected_serial_no).strip().replace(',', '\n')
 				d.save()
 
-	def update_stock(self):		
-		pc_obj = get_obj('Purchase Common')
+	def update_stock(self):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
 			if d.item_code in stock_items and d.warehouse:
-				ord_qty = 0
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-
-				if cstr(d.prevdoc_doctype) == 'Purchase Order':
-					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Purchase Order Item', 
-						'Purchase Order - Purchase Receipt', self.doc.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
-					 	flt(curr_ref_qty.split('~~~')[0]), 0
-
-					if flt(qty) + flt(pr_qty) > flt(max_qty):
-						curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
-					else:
-						curr_qty = flt(pr_qty)
-
-					ord_qty = -flt(curr_qty)
+				self.update_ordered_qty(pr_qty, d)
+				
+				if self.doc.docstatus == 1:
+					if pr_qty:
+						sl_entries.append(self.get_sl_entries(d, {
+							"actual_qty": flt(pr_qty),
+							"serial_no": cstr(d.serial_no).strip(),
+							"incoming_rate": d.valuation_rate
+						}))
 					
-					# update ordered qty in bin
-					args = {
-						"item_code": d.item_code,
-						"posting_date": self.doc.posting_date,
-						"ordered_qty": (self.doc.docstatus==1 and 1 or -1) * flt(ord_qty)
-					}
-					get_obj("Warehouse", d.warehouse).update_bin(args)
-
-				if pr_qty:
-					sl_entries.append(self.get_sl_entries(d, {
-						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip(),
-						"incoming_rate": d.valuation_rate
+					if flt(d.rejected_qty) > 0:
+						sl_entries.append(self.get_sl_entries(d, {
+							"warehouse": self.doc.rejected_warehouse,
+							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"serial_no": cstr(d.rejected_serial_no).strip(),
+							"incoming_rate": d.valuation_rate
+						}))
 						
-					}))
-					
-				if flt(d.rejected_qty) > 0:
-					sl_entries.append(self.get_sl_entries(d, {
-						"warehouse": self.doc.rejected_warehouse,
-						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-						"serial_no": cstr(d.rejected_serial_no).strip(),
-						"incoming_rate": d.valuation_rate
-					}))
-
-		self.bk_flush_supp_wh(sl_entries)
+		if self.doc.docstatus == 1:
+			self.bk_flush_supp_wh(sl_entries)
+			self.make_sl_entries(sl_entries)
+		else:
+			self.delete_and_repost_sle()
 		
-		self.make_sl_entries(sl_entries)
+	def update_ordered_qty(self, pr_qty, d):
+		pc_obj = get_obj('Purchase Common')
+		if cstr(d.prevdoc_doctype) == 'Purchase Order':
+			# get qty and pending_qty of prevdoc
+			curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname',
+			 	d.prevdoc_detail_docname, 'Purchase Order Item', 
+				'Purchase Order - Purchase Receipt', self.doc.name)
+			max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
+			 	flt(curr_ref_qty.split('~~~')[0]), 0
+
+			if flt(qty) + flt(pr_qty) > flt(max_qty):
+				curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
+			else:
+				curr_qty = flt(pr_qty)
+				
+			args = {
+				"item_code": d.item_code,
+				"warehouse": d.warehouse,
+				"posting_date": self.doc.posting_date,
+				"ordered_qty": self.doc.docstatus==1 and -1*flt(curr_qty) or flt(curr_qty)
+			}
+			update_bin(args)
+	
+	def bk_flush_supp_wh(self, sl_entries):
+		for d in getlist(self.doclist, 'pr_raw_material_details'):
+			# negative quantity is passed as raw material qty has to be decreased 
+			# when PR is submitted and it has to be increased when PR is cancelled
+			sl_entries.append(self.get_sl_entries(d, {
+				"item_code": d.rm_item_code,
+				"warehouse": self.doc.supplier_warehouse,
+				"actual_qty": -1*flt(consumed_qty),
+				"incoming_rate": 0
+			}))
 		
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
+			ins_reqd = webnotes.conn.sql("select inspection_required from `tabItem` where name = %s",
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
@@ -250,7 +261,7 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):
-		submit_rv = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -263,7 +274,7 @@ class DocType(BuyingController):
 		# 1.Check if Purchase Invoice has been submitted against current Purchase Order
 		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 
-		submitted = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
@@ -279,22 +290,11 @@ class DocType(BuyingController):
 		pc_obj.update_last_purchase_rate(self, 0)
 		
 		self.make_cancel_gl_entries()
-
-	def bk_flush_supp_wh(self, sl_entries):
-		for d in getlist(self.doclist, 'pr_raw_material_details'):
-			# negative quantity is passed as raw material qty has to be decreased 
-			# when PR is submitted and it has to be increased when PR is cancelled
-			sl_entries.append(self.get_sl_entries(d, {
-				"item_code": d.rm_item_code,
-				"warehouse": self.doc.supplier_warehouse,
-				"actual_qty": -1*flt(consumed_qty),
-				"incoming_rate": 0
-			}))
 			
 	def get_current_stock(self):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			if self.doc.supplier_warehouse:
-				bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
+				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 

@@ -273,15 +273,13 @@ class DocType:
 			},
 		]
 		for cc in cc_list:
-			if webnotes.conn.exists("Cost Center", cc.cost_center_name + ' - ' + self.doc.abbr):
-				cc.update({"doctype": "Cost Center"})
-				cc_bean = webnotes.bean(cc)
-				cc_bean.ignore_permissions = True
-			
-				if cc.get("cost_center_name") == self.doc.name:
-					cc_bean.ignore_mandatory = True
-			
-				cc_bean.insert()
+			cc.update({"doctype": "Cost Center"})
+			cc_bean = webnotes.bean(cc)
+			cc_bean.ignore_permissions = True
+		
+			if cc.get("cost_center_name") == self.doc.name:
+				cc_bean.ignore_mandatory = True
+			cc_bean.insert()
 			
 		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
 

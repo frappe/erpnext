@@ -10,11 +10,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
 from webnotes.model.mapper import get_mapped_doclist
-
-
-
-sql = webnotes.conn.sql
-
+from stock.utils import update_bin
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -55,7 +51,7 @@ class DocType(SellingController):
 	def set_actual_qty(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if d.item_code and d.warehouse:
-				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
+				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 
@@ -131,7 +127,7 @@ class DocType(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
-			res = sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
@@ -165,11 +161,11 @@ class DocType(SellingController):
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
-			bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 		for d in getlist(self.doclist, 'packing_details'):
-			bin = sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 			
@@ -253,12 +249,12 @@ class DocType(SellingController):
 
 
 	def check_next_docstatus(self):
-		submit_rv = sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = webnotes.conn.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
 
-		submit_in = sql("select t1.name from `tabInstallation Note` t1, `tabInstallation Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_in = webnotes.conn.sql("select t1.name from `tabInstallation Note` t1, `tabInstallation Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_in:
 			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
 			raise Exception , "Validation Error."
@@ -284,26 +280,34 @@ class DocType(SellingController):
 		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
-				if d['reserved_qty'] < 0 :
-					# Reduce reserved qty from reserved warehouse mentioned in so
-					if not d["reserved_warehouse"]:
-						webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
-						
-					args = {
-						"item_code": d['item_code'],
-						"voucher_type": self.doc.doctype,
-						"voucher_no": self.doc.name,
-						"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
-						"posting_date": self.doc.posting_date,
-						"is_amended": self.doc.amended_from and 'Yes' or 'No'
-					}
-					get_obj("Warehouse", d["reserved_warehouse"]).update_bin(args)
-						
-				# Reduce actual qty from warehouse
-				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d['qty']),
-				}))
-		self.make_sl_entries(sl_entries)
+				self.update_reserved_qty()
+										
+				if self.doc.docstatus == 1:
+					sl_entries.append(self.get_sl_entries(d, {
+						"actual_qty": -1*flt(d['qty']),
+					}))
+					
+		if self.doc.docstatus == 1:
+			self.make_sl_entries(sl_entries)
+		else:
+			self.delete_and_repost_sle()
+			
+	def update_reserved_qty(self, d):
+		if d['reserved_qty'] < 0 :
+			# Reduce reserved qty from reserved warehouse mentioned in so
+			if not d["reserved_warehouse"]:
+				webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
+				
+			args = {
+				"item_code": d['item_code'],
+				"warehouse": d["reserved_warehouse"],
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
+				"posting_date": self.doc.posting_date,
+				"is_amended": self.doc.amended_from and 'Yes' or 'No'
+			}
+			update_bin(args)
 
 	def get_item_list(self):
 	 return get_obj('Sales Common').get_item_list(self)

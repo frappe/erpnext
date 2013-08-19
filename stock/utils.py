@@ -37,6 +37,32 @@ def get_latest_stock_balance():
 			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 			
 	return bin_map
+	
+def get_bin(item_code, warehouse):
+	bin = webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	if not bin:
+		bin_wrapper = webnotes.bean([{
+			"doctype": "Bin",
+			"item_code": item_code,
+			"warehouse": warehouse,
+		}])
+		bin_wrapper.ignore_permissions = 1
+		bin_wrapper.insert()
+		bin_obj = bin_wrapper.make_controller()
+	else:
+		from webnotes.model.code import get_obj
+		bin_obj = get_obj('Bin', bin)
+	return bin_obj
+
+def update_bin(args):
+	is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
+	if is_stock_item == 'Yes':
+		bin = get_bin(args.get("item_code"), args.get("warehouse"))
+		bin.update_stock(args)
+		return bin
+	else:
+		msgprint("[Stock Update] Ignored %s since it is not a stock item" 
+			% args.get("item_code"))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -355,3 +381,12 @@ def notify_errors(exceptions_list):
 
 	from webnotes.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)
+
+
+def repost():
+	"""
+	Repost everything!
+	"""
+	from webnotes.model.code import get_obj
+	for wh in webnotes.conn.sql("select name from tabWarehouse"):
+		get_obj('Warehouse', wh[0]).repost_stock()

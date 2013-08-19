@@ -19,35 +19,6 @@ class DocType:
 		suffix = " - " + webnotes.conn.get_value("Company", self.doc.company, "abbr")
 		if not self.doc.warehouse_name.endswith(suffix):
 			self.doc.name = self.doc.warehouse_name + suffix
-	
-	def get_bin(self, item_code, warehouse=None):
-		warehouse = warehouse or self.doc.name
-		bin = sql("select name from tabBin where item_code = %s and \
-				warehouse = %s", (item_code, warehouse))
-		bin = bin and bin[0][0] or ''
-		if not bin:
-			bin_wrapper = webnotes.bean([{
-				"doctype": "Bin",
-				"item_code": item_code,
-				"warehouse": warehouse,
-			}])
-			bin_wrapper.ignore_permissions = 1
-			bin_wrapper.insert()
-			
-			bin_obj = bin_wrapper.make_controller()
-		else:
-			bin_obj = get_obj('Bin', bin)
-		return bin_obj
-	
-	def update_bin(self, args):
-		is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
-		if is_stock_item == 'Yes':
-			bin = self.get_bin(args.get("item_code"))
-			bin.update_stock(args)
-			return bin
-		else:
-			msgprint("[Stock Update] Ignored %s since it is not a stock item" 
-				% args.get("item_code"))
 
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
@@ -76,9 +47,10 @@ class DocType:
 		
 
 	def repost(self, item_code, warehouse=None):
+		from stock.utils import get_bin
 		self.repost_actual_qty(item_code, warehouse)
 		
-		bin = self.get_bin(item_code, warehouse)
+		bin = get_bin(item_code, warehouse)
 		self.repost_reserved_qty(bin)
 		self.repost_indented_qty(bin)
 		self.repost_ordered_qty(bin)

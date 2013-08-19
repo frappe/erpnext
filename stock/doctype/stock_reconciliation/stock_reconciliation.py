@@ -9,6 +9,7 @@ from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, cint
 from stock.stock_ledger import update_entries_after
 from controllers.stock_controller import StockController
+from stock.utils import update_bin
 
 class DocType(StockController):
 	def setup(self):
@@ -25,7 +26,7 @@ class DocType(StockController):
 		self.make_gl_entries()
 		
 	def on_cancel(self):
-		self.delete_stock_ledger_entries()
+		self.delete_and_repost_sle()
 		self.make_cancel_gl_entries()
 		
 	def validate_data(self):
@@ -248,37 +249,10 @@ class DocType(StockController):
 			"fiscal_year": self.doc.fiscal_year,
 		})
 		args.update(opts)
-		# create stock ledger entry
-		sle_wrapper = webnotes.bean([args])
-		sle_wrapper.ignore_permissions = 1
-		sle_wrapper.insert()
-		
-		# update bin
-		webnotes.get_obj('Warehouse', row.warehouse).update_bin(args)
-		
+		self.make_sl_entries([args])
+
 		# append to entries
 		self.entries.append(args)
-		
-	def delete_stock_ledger_entries(self):
-		"""	Delete Stock Ledger Entries related to this Stock Reconciliation
-			and repost future Stock Ledger Entries"""
-					
-		existing_entries = webnotes.conn.sql("""select item_code, warehouse 
-			from `tabStock Ledger Entry` where voucher_type='Stock Reconciliation' 
-			and voucher_no=%s""", self.doc.name, as_dict=1)
-				
-		# delete entries
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
-			where voucher_type='Stock Reconciliation' and voucher_no=%s""", self.doc.name)
-		
-		# repost future entries for selected item_code, warehouse
-		for entries in existing_entries:
-			update_entries_after({
-				"item_code": entries.item_code,
-				"warehouse": entries.warehouse,
-				"posting_date": self.doc.posting_date,
-				"posting_time": self.doc.posting_time
-			})
 			
 	def set_stock_value_difference(self):
 		"""stock_value_difference is the increment in the stock value"""

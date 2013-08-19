@@ -9,7 +9,7 @@ import webnotes, unittest
 from accounts.utils import get_stock_and_account_difference
 
 class TestSerialNo(unittest.TestCase):
-	def test_aii_gl_entries_for_serial_no_in_store(self):
+	def atest_aii_gl_entries_for_serial_no_in_store(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		sr = webnotes.bean(copy=test_records[0])
 		sr.doc.serial_no = "_Test Serial No 1"
@@ -74,7 +74,7 @@ class TestSerialNo(unittest.TestCase):
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		
 		
-	def test_aii_gl_entries_for_serial_no_delivered(self):
+	def atest_aii_gl_entries_for_serial_no_delivered(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		sr = webnotes.bean(copy=test_records[0])

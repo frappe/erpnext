@@ -75,16 +75,36 @@ class StockController(AccountsController):
 			"is_cancelled": self.doc.docstatus==2 and "Yes" or "No",
 			"batch_no": cstr(d.batch_no).strip(),
 			"serial_no": d.serial_no,
-			"project": d.project_name
+			"project": d.project_name,
 		}
 		
 		sl_dict.update(args)
 		return sl_dict
 		
 	def make_sl_entries(self, sl_entries, is_amended=None):
-		if sl_entries:
-			from webnotes.model.code import get_obj
-			get_obj('Stock Ledger').update_stock(sl_entries, is_amended)
+		from stock.stock_ledger import make_sl_entries
+		make_sl_entries(sl_entries, is_amended)
+		
+	def delete_and_repost_sle(self):
+		"""	Delete Stock Ledger Entries related to this voucher
+			and repost future Stock Ledger Entries"""
+					
+		existing_entries = webnotes.conn.sql("""select distinct item_code, warehouse 
+			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
+			(self.doc.doctype, self.doc.name), as_dict=1)
+				
+		# delete entries
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
+		
+		# repost future entries for selected item_code, warehouse
+		for entries in existing_entries:
+			update_entries_after({
+				"item_code": entries.item_code,
+				"warehouse": entries.warehouse,
+				"posting_date": self.doc.posting_date,
+				"posting_time": self.doc.posting_time
+			})
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):
 		out = {}

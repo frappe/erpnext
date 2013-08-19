@@ -117,10 +117,12 @@ class DocType:
 		"""update planned qty in bin"""
 		args = {
 			"item_code": self.doc.production_item,
+			"warehouse": self.doc.fg_warehouse,
 			"posting_date": nowdate(),
 			"planned_qty": flt(qty)
 		}
-		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(args)
+		from stock.utils import update_bin
+		update_bin(args)
 
 @webnotes.whitelist()	
 def get_item_details(item):

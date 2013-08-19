@@ -3,12 +3,33 @@
 
 import webnotes
 from webnotes import msgprint
-from webnotes.utils import cint, flt, cstr
+from webnotes.utils import cint, flt, cstr, now
 from stock.utils import get_valuation_method
 import json
 
 # future reposting
 class NegativeStockError(webnotes.ValidationError): pass
+
+def make_sl_entries(sl_entries, is_amended=None):
+	from stock.utils import update_bin
+	for sle in sl_entries:
+		if sle.get("actual_qty"):
+			sle_id = make_entry(sle)
+			
+		args = sle.copy()
+		args.update({
+			"sle_id": sle_id,
+			"is_amended": is_amended
+		})
+		update_bin(args)
+		
+def make_entry(args):
+	args.update({"doctype": "Stock Ledger Entry"})
+	sle = webnotes.bean([args])
+	sle.ignore_permissions = 1
+	sle.insert()
+	sle.submit()
+	return sle.doc.name
 
 _exceptions = []
 def update_entries_after(args, verbose=1):

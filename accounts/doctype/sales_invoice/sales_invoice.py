@@ -124,7 +124,7 @@ class DocType(SellingController):
 			sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
 			sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
 			
-			self.update_stock_ledger()
+			self.delete_and_repost_sle()
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -537,7 +537,7 @@ class DocType(SellingController):
 				submitted = webnotes.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
-					raise Exception , "Validation Error."		
+					raise Exception , "Validation Error."
 
 	def update_stock_ledger(self):
 		sl_entries = []
@@ -549,7 +549,7 @@ class DocType(SellingController):
 					"actual_qty": -1*flt(d.qty),
 					"stock_uom": webnotes.conn.get_value("Item", d.item_code, "stock_uom")
 				}))
-	
+		
 		self.make_sl_entries(sl_entries)
 		
 	def make_gl_entries(self):

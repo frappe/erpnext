@@ -58,7 +58,7 @@ class DocType(StockController):
 
 	def on_cancel(self):
 		self.update_serial_no(0)
-		self.update_stock_ledger()
+		self.delete_and_repost_sle()
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()
 		
@@ -383,14 +383,16 @@ class DocType(StockController):
 					
 			# update bin
 			if self.doc.purpose == "Manufacture/Repack":
+				from stock.utils import update_bin
 				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
 					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
 				args = {
 					"item_code": pro_obj.doc.production_item,
+					"warehouse": pro_obj.doc.fg_warehouse,
 					"posting_date": self.doc.posting_date,
 					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
 				}
-				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
+				update_bin(args)
 			
 			# update production order status
 			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
