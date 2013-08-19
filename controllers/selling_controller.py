@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or
+from webnotes.utils import cint, flt, comma_or, _round
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
@@ -218,8 +218,8 @@ class SellingController(StockController):
 		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
 			self.precision("other_charges_total_export"))
 		
-		self.doc.rounded_total = round(self.doc.grand_total)
-		self.doc.rounded_total_export = round(self.doc.grand_total_export)
+		self.doc.rounded_total = _round(self.doc.grand_total)
+		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
 		
 	def calculate_outstanding_amount(self):
 		# NOTE: 

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
-from webnotes.utils import flt
+from webnotes.utils import flt, _round
 
 from buying.utils import get_item_details
 from setup.utils import get_company_currency
@@ -129,10 +129,10 @@ class BuyingController(StockController):
 			self.precision("total_tax"))
 
 		if self.meta.get_field("rounded_total"):
-			self.doc.rounded_total = round(self.doc.grand_total)
+			self.doc.rounded_total = _round(self.doc.grand_total)
 		
 		if self.meta.get_field("rounded_total_import"):
-			self.doc.rounded_total_import = round(self.doc.grand_total_import)
+			self.doc.rounded_total_import = _round(self.doc.grand_total_import)
 			
 	def calculate_outstanding_amount(self):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus < 2:
