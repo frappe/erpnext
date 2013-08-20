@@ -162,5 +162,6 @@ def make_stock_entry(production_order_id, purpose):
 	else:
 		stock_entry.doc.from_warehouse = production_order.doc.wip_warehouse
 		stock_entry.doc.to_warehouse = production_order.doc.fg_warehouse
-
+		
+	stock_entry.run_method("get_items")
 	return [d.fields for d in stock_entry.doclist]

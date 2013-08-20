@@ -103,12 +103,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
-					
-					me.get_items_onload();
 				}
 			});
-		} else {
-			me.get_items_onload();
 		}
 	},
 	
@@ -119,13 +115,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			wn.model.remove_from_locals("Production Order", 
 				this.frm.doc.production_order);
 		}
-	},
-	
-	get_items_onload: function() {
-		if (this.frm.doc.__islocal && !getchildren('Stock Entry Detail', this.frm.doc.name,
-			'mtn_details').length) {
-				this.get_items()
-			}
 	},
 	
 	get_items: function() {
