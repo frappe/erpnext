@@ -51,7 +51,7 @@ def validate_install():
 	distribution = platform.linux_distribution()[0].lower().replace('"', '')
 	print "Distribution = ", distribution
 	is_redhat = distribution in ("redhat", "centos", "centos linux", "fedora")
-	is_debian = distribution in ("debian", "ubuntu", "elementary os")
+	is_debian = distribution in ("debian", "ubuntu", "elementary os", "linuxmint")
 	
 	if not (is_redhat or is_debian):
 		raise Exception, "Sorry! This installer works only with yum or apt-get package management"
