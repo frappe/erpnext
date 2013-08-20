@@ -153,27 +153,23 @@ class DocType(BuyingController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 				self.update_ordered_qty(pr_qty, d)
 				
-				if self.doc.docstatus == 1:
-					if pr_qty:
-						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": flt(pr_qty),
-							"serial_no": cstr(d.serial_no).strip(),
-							"incoming_rate": d.valuation_rate
-						}))
-					
-					if flt(d.rejected_qty) > 0:
-						sl_entries.append(self.get_sl_entries(d, {
-							"warehouse": self.doc.rejected_warehouse,
-							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-							"serial_no": cstr(d.rejected_serial_no).strip(),
-							"incoming_rate": d.valuation_rate
-						}))
+				if pr_qty:
+					sl_entries.append(self.get_sl_entries(d, {
+						"actual_qty": flt(pr_qty),
+						"serial_no": cstr(d.serial_no).strip(),
+						"incoming_rate": d.valuation_rate
+					}))
+				
+				if flt(d.rejected_qty) > 0:
+					sl_entries.append(self.get_sl_entries(d, {
+						"warehouse": self.doc.rejected_warehouse,
+						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+						"serial_no": cstr(d.rejected_serial_no).strip(),
+						"incoming_rate": d.valuation_rate
+					}))
 						
-		if self.doc.docstatus == 1:
-			self.bk_flush_supp_wh(sl_entries)
-			self.make_sl_entries(sl_entries)
-		else:
-			self.delete_and_repost_sle()
+		self.bk_flush_supp_wh(sl_entries)
+		self.make_sl_entries(sl_entries)
 		
 	def update_ordered_qty(self, pr_qty, d):
 		pc_obj = get_obj('Purchase Common')

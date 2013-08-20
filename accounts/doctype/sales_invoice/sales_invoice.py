@@ -111,7 +111,7 @@ class DocType(SellingController):
 
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
-			self.delete_and_repost_sle()
+			self.update_stock_ledger()
 			self.update_serial_nos(cancel = True)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')

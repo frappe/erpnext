@@ -252,6 +252,27 @@ class DocType(StockController):
 
 		# append to entries
 		self.entries.append(args)
+		
+	def delete_and_repost_sle(self):
+		"""	Delete Stock Ledger Entries related to this voucher
+			and repost future Stock Ledger Entries"""
+				
+		existing_entries = webnotes.conn.sql("""select distinct item_code, warehouse 
+			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
+			(self.doc.doctype, self.doc.name), as_dict=1)
+				
+		# delete entries
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
+		
+		# repost future entries for selected item_code, warehouse
+		for entries in existing_entries:
+			update_entries_after({
+				"item_code": entries.item_code,
+				"warehouse": entries.warehouse,
+				"posting_date": self.doc.posting_date,
+				"posting_time": self.doc.posting_time
+			})
 			
 	def set_stock_value_difference(self):
 		"""stock_value_difference is the increment in the stock value"""

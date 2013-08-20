@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-08-20 11:56:25", 
+  "modified": "2013-08-20 15:02:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -271,6 +271,15 @@
   "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_cancelled", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Is Cancelled", 
+  "options": "\nNo\nYes", 
+  "report_hide": 1
  }, 
  {
   "amend": 0, 

@@ -56,7 +56,7 @@ class DocType(StockController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.delete_and_repost_sle()
+		self.update_stock_ledger()
 		self.update_serial_no(0)
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()

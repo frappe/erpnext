@@ -12,7 +12,16 @@ class NegativeStockError(webnotes.ValidationError): pass
 
 def make_sl_entries(sl_entries, is_amended=None):
 	from stock.utils import update_bin
+	
+	cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
+	if cancel:
+		set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+	
 	for sle in sl_entries:
+		sle_id = None
+		if sle.get('is_cancelled') == 'Yes':
+			sle['actual_qty'] = -flt(sle['actual_qty'])
+		
 		if sle.get("actual_qty"):
 			sle_id = make_entry(sle)
 			
@@ -23,6 +32,15 @@ def make_sl_entries(sl_entries, is_amended=None):
 		})
 		update_bin(args)
 		
+	if cancel:
+		delete_cancelled_entry(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+			
+def set_as_cancel(voucher_type, voucher_no):
+	webnotes.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+		modified=%s, modified_by=%s
+		where voucher_no=%s and voucher_type=%s""", 
+		(now(), webnotes.session.user, voucher_type, voucher_no))
+		
 def make_entry(args):
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = webnotes.bean([args])
@@ -30,6 +48,10 @@ def make_entry(args):
 	sle.insert()
 	# sle.submit()
 	return sle.doc.name
+	
+def delete_cancelled_entry(voucher_type, voucher_no):
+	webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 _exceptions = []
 def update_entries_after(args, verbose=1):

@@ -292,15 +292,11 @@ class DocType(SellingController):
 					and d.warehouse:
 				self.update_reserved_qty(d)
 										
-				if self.doc.docstatus == 1:
-					sl_entries.append(self.get_sl_entries(d, {
-						"actual_qty": -1*flt(d['qty']),
-					}))
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+				}))
 					
-		if self.doc.docstatus == 1:
-			self.make_sl_entries(sl_entries)
-		else:
-			self.delete_and_repost_sle()
+		self.make_sl_entries(sl_entries)
 			
 	def update_reserved_qty(self, d):
 		if d['reserved_qty'] < 0 :
