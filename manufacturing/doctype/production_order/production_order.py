@@ -143,6 +143,12 @@ def get_item_details(item):
 def make_stock_entry(production_order_id, purpose):
 	production_order = webnotes.bean("Production Order", production_order_id)
 	
+	# validate already existing
+	ste = webnotes.conn.get_value("Stock Entry",  {
+		"production_order":production_order_id,
+		"purpose": purpose
+	}, "name")
+		
 	stock_entry = webnotes.new_bean("Stock Entry")
 	stock_entry.doc.purpose = purpose
 	stock_entry.doc.production_order = production_order_id

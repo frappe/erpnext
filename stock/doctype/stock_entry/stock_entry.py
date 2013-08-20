@@ -20,6 +20,7 @@ sql = webnotes.conn.sql
 class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass
 class IncorrectValuationRateError(webnotes.ValidationError): pass
+class DuplicateEntryForProductionOrderError(webnotes.ValidationError): pass
 	
 from controllers.stock_controller import StockController
 
@@ -146,21 +147,32 @@ class DocType(StockController):
 				return
 		
 		if self.doc.purpose == "Manufacture/Repack":
-			if not flt(self.doc.fg_completed_qty):
-				msgprint(_("Manufacturing Quantity") + _(" is mandatory"), raise_exception=1)
-			
-			if flt(pro_obj.doc.qty) < (flt(pro_obj.doc.produced_qty)
-					+ flt(self.doc.fg_completed_qty)):
-				# do not allow manufacture of qty > production order qty
-				msgprint(_("For Item ") + pro_obj.doc.production_item 
-					+ _("Quantity already manufactured")
-					+ " = %s." % flt(pro_obj.doc.produced_qty)
-					+ _("Hence, maximum allowed Manufacturing Quantity")
-					+ " = %s." % (flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty)),
-					raise_exception=1)
+			# check for double entry
+			self.check_duplicate_entry_for_production_order()
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
+	
+	def check_duplicate_entry_for_production_order(self):
+		other_ste = [t[0] for t in webnotes.conn.get_values("Stock Entry",  {
+			"production_order": self.doc.production_order,
+			"purpose": self.doc.purpose,
+			"docstatus": ["!=", 2]
+		}, "name")]
+		
+		if other_ste:
+			production_item, qty = webnotes.conn.get_value("Production Order", 
+				self.doc.production_order, ["production_item", "qty"])
+			args = other_ste + [production_item]
+			fg_qty_already_entered = webnotes.conn.sql("""select sum(actual_qty)
+				from `tabStock Entry Detail` 
+				where parent in (%s) 
+					and item_code = %s 
+					and ifnull(s_warehouse,'')='' """ % (", ".join(["%s" * len(other_ste)]), "%s"), args)[0][0]
 			
+			if fg_qty_already_entered >= qty:
+				webnotes.throw(_("Stock Entries already created for Production Order ") 
+					+ self.doc.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
+
 	def set_total_amount(self):
 		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
 			

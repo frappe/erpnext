@@ -14,14 +14,15 @@ from core.page.data_import_tool.data_import_tool import upload
 # fix fiscal year
 
 company = "Wind Power LLC"
+country = "United States"
+currency = "USD"
+time_zone = "America/New York"
 start_date = '2010-01-01'
 runs_for = 20
 prob = {
-	"Quotation": { "make": 0.5, "qty": (1,5) },
-	"Sales Order": { "make": 0.5, "qty": (1,4) },
-	"Purchase Order": { "make": 0.7, "qty": (1,4) },
-	"Purchase Receipt": { "make": 0.7, "qty": (1,4) },
-	"Supplier Quotation": { "make": 0.5, "qty": (1, 3) }
+	"default": { "make": 0.6, "qty": (1,5) },
+	"Purchase Order": { "make": 0.7, "qty": (1,15) },
+	"Purchase Receipt": { "make": 0.7, "qty": (1,15) },
 }
 
 def make(reset=False):
@@ -46,12 +47,18 @@ def setup():
 def simulate():
 	current_date = None
 	for i in xrange(runs_for):
-		print i
 		if not current_date:
-			current_date = webnotes.utils.getdate(start_date)
+			# get last stock ledger posting date or use default
+			last_posting = webnotes.conn.sql("""select max(posting_date) from `tabStock Ledger Entry`""")
+			if last_posting[0][0]:
+				current_date = webnotes.utils.add_days(last_posting[0][0], 1)
+			else:
+				current_date = webnotes.utils.getdate(start_date)
 		else:
 			current_date = webnotes.utils.add_days(current_date, 1)
-			
+		
+		print current_date.strftime("%Y-%m-%d")
+		
 		if current_date.weekday() in (5, 6):
 			continue
 
@@ -85,17 +92,48 @@ def run_stock(current_date):
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
 		from selling.doctype.sales_order.sales_order import make_delivery_note
+		from stock.stock_ledger import NegativeStockError
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoRequiredError, SerialNoQtyError
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
 			dn.doc.posting_date = current_date
 			dn.doc.fiscal_year = "2010"
 			dn.insert()
-			dn.submit()
-			webnotes.conn.commit()
+			try:
+				dn.submit()
+				webnotes.conn.commit()
+			except NegativeStockError: pass
+			except SerialNoRequiredError: pass
+			except SerialNoQtyError: pass
+	
+	# try submitting existing
+	for dn in webnotes.conn.get_values("Delivery Note", {"docstatus": 0}, "name"):
+		b = webnotes.bean("Delivery Note", dn[0])
+		b.submit()
+		webnotes.conn.commit()
+	
 	
 	
 def run_purchase(current_date):
+	# make material requests for purchase items that have negative projected qtys
+	if can_make("Material Request"):
+		report = "Items To Be Requested"
+		for row in query_report.run(report)["result"][:how_many("Material Request")]:
+			mr = webnotes.new_bean("Material Request")
+			mr.doc.material_request_type = "Purchase"
+			mr.doc.transaction_date = current_date
+			mr.doc.fiscal_year = "2010"
+			mr.doclist.append({
+				"doctype": "Material Request Item",
+				"parentfield": "indent_details",
+				"schedule_date": webnotes.utils.add_days(current_date, 7),
+				"item_code": row[0],
+				"qty": -row[-1]
+			})
+			mr.insert()
+			mr.submit()
+	
 	# make supplier quotations
 	if can_make("Supplier Quotation"):
 		from stock.doctype.material_request.material_request import make_supplier_quotation
@@ -124,7 +162,7 @@ def run_purchase(current_date):
 			
 def run_manufacturing(current_date):
 	from stock.stock_ledger import NegativeStockError
-	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError
+	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
 	ppt.doc.company = company
@@ -137,14 +175,14 @@ def run_manufacturing(current_date):
 	webnotes.conn.commit()
 	
 	# submit production orders
-	for pro in webnotes.conn.get_values("Production Order", {"docstatus": 0}):
+	for pro in webnotes.conn.get_values("Production Order", {"docstatus": 0}, "name"):
 		b = webnotes.bean("Production Order", pro[0])
 		b.doc.wip_warehouse = "Work in Progress - WP"
 		b.submit()
 		webnotes.conn.commit()
 		
 	# submit material requests
-	for pro in webnotes.conn.get_values("Material Request", {"docstatus": 0}):
+	for pro in webnotes.conn.get_values("Material Request", {"docstatus": 0}, "name"):
 		b = webnotes.bean("Material Request", pro[0])
 		b.submit()
 		webnotes.conn.commit()
@@ -160,31 +198,32 @@ def run_manufacturing(current_date):
 			make_stock_entry_from_pro(pro[0], "Manufacture/Repack", current_date)
 
 	# try posting older drafts (if exists)
-	for st in webnotes.conn.get_values("Stock Entry", {"docstatus":0}):
+	for st in webnotes.conn.get_values("Stock Entry", {"docstatus":0}, "name"):
 		try:
 			webnotes.bean("Stock Entry", st[0]).submit()
 			webnotes.conn.commit()
 		except NegativeStockError: pass
 		except IncorrectValuationRateError: pass
-			
+		except DuplicateEntryForProductionOrderError: pass
 
 def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	from manufacturing.doctype.production_order.production_order import make_stock_entry
 	from stock.stock_ledger import NegativeStockError
-	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError
+	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
 	st = webnotes.bean(make_stock_entry(pro_id, purpose))
-	st.run_method("get_items")
 	st.doc.posting_date = current_date
 	st.doc.fiscal_year = "2010"
 	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
+		st.run_method("get_items")
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()
 		webnotes.conn.commit()
 	except NegativeStockError: pass
 	except IncorrectValuationRateError: pass
+	except DuplicateEntryForProductionOrderError: pass
 
 def make_quotation(current_date):
 	b = webnotes.bean([{
@@ -253,10 +292,10 @@ def get_random(doctype, filters=None):
 	return out and out[0][0] or None
 
 def can_make(doctype):
-	return random.random() < prob.get(doctype, {"make": 0.5})["make"]
+	return random.random() < prob.get(doctype, prob["default"])["make"]
 
 def how_many(doctype):
-	return random.randrange(*prob.get(doctype, {"qty": (1, 3)})["qty"])
+	return random.randrange(*prob.get(doctype, prob["default"])["qty"])
 
 def install():
 	print "Creating Fresh Database..."
@@ -273,15 +312,15 @@ def complete_setup():
 		"industry": "Manufacturing",
 		"company_name": company,
 		"company_abbr": "WP",
-		"currency": "USD",
-		"timezone": "America/New York",
-		"country": "United States"
+		"currency": currency,
+		"timezone": time_zone,
+		"country": country
 	})
 
 	import_data("Fiscal_Year")
 	
 def make_items():
-	import_data(["Item", "Item_Price"])
+	import_data("Item")
 	import_data("BOM", submit=True)
 	
 def make_customers_suppliers_contacts():
