@@ -28,7 +28,7 @@ def make_entry(args):
 	sle = webnotes.bean([args])
 	sle.ignore_permissions = 1
 	sle.insert()
-	sle.submit()
+	# sle.submit()
 	return sle.doc.name
 
 _exceptions = []

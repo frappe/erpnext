@@ -87,7 +87,9 @@ class StockController(AccountsController):
 	def delete_and_repost_sle(self):
 		"""	Delete Stock Ledger Entries related to this voucher
 			and repost future Stock Ledger Entries"""
-					
+		
+		from stock.stock_ledger import update_entries_after
+		
 		existing_entries = webnotes.conn.sql("""select distinct item_code, warehouse 
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
 			(self.doc.doctype, self.doc.name), as_dict=1)

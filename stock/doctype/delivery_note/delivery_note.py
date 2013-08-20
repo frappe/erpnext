@@ -290,7 +290,7 @@ class DocType(SellingController):
 		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
-				self.update_reserved_qty()
+				self.update_reserved_qty(d)
 										
 				if self.doc.docstatus == 1:
 					sl_entries.append(self.get_sl_entries(d, {
