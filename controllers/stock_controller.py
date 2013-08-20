@@ -72,7 +72,6 @@ class StockController(AccountsController):
 			"incoming_rate": 0,
 			"company": self.doc.company,
 			"fiscal_year": self.doc.fiscal_year,
-			"is_cancelled": self.doc.docstatus==2 and "Yes" or "No",
 			"batch_no": cstr(d.batch_no).strip(),
 			"serial_no": d.serial_no,
 			"project": d.project_name,
@@ -116,8 +115,7 @@ class StockController(AccountsController):
 			res = webnotes.conn.sql("""select item_code, voucher_type, voucher_no,
 				voucher_detail_no, posting_date, posting_time, stock_value,
 				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
-				where ifnull(`is_cancelled`, "No") = "No" and company = %s 
-				and item_code in (%s) and warehouse in (%s)
+				where company = %s and item_code in (%s) and warehouse in (%s)
 				order by item_code desc, warehouse desc, posting_date desc, 
 				posting_time desc, name desc""" % 
 				('%s', ', '.join(['%s']*len(item_list)), ', '.join(['%s']*len(warehouse_list))), 
@@ -143,6 +141,5 @@ class StockController(AccountsController):
 		
 	def make_cancel_gl_entries(self):
 		if webnotes.conn.sql("""select name from `tabGL Entry` where voucher_type=%s 
-			and voucher_no=%s and ifnull(is_cancelled, 'No')='No'""",
-			(self.doc.doctype, self.doc.name)):
+			and voucher_no=%s""", (self.doc.doctype, self.doc.name)):
 				self.make_gl_entries()

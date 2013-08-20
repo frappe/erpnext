@@ -244,7 +244,6 @@ class DocType(StockController):
 			"voucher_type": self.doc.doctype,
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
-			"is_cancelled": "No",
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
 		})
@@ -305,8 +304,7 @@ class DocType(StockController):
 			
 		if not self.doc.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		elif not webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-				where ifnull(is_cancelled, 'No') = 'No'"""):
+		elif not webnotes.conn.sql("""select * from `tabStock Ledger Entry`"""):
 			if webnotes.conn.get_value("Account", self.doc.expense_account, 
 					"is_pl_account") == "Yes":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \

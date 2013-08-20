@@ -146,8 +146,7 @@ class DocType:
 				sql("delete from `tabBin` where name = %s", d['name'])
 				
 		# delete cancelled sle
-		if sql("""select name from `tabStock Ledger Entry` 
-				where warehouse = %s and ifnull('is_cancelled', '') = 'No'""", self.doc.name):
+		if sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):
 			msgprint("""Warehosue can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 		else:

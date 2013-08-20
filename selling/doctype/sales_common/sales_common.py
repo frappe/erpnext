@@ -336,7 +336,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
 				where item_code = '%(item_code)s' 
 					and warehouse = '%(warehouse)s' 
-					and ifnull(is_cancelled, 'No') = 'No' 
 					and batch_no like '%(txt)s' 
 					and exists(select * from `tabBatch` 
 							where name = sle.batch_no 

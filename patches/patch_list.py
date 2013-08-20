@@ -258,4 +258,5 @@ patch_list = [
 	"patches.august_2013.p05_employee_birthdays",
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-08-16",
 	"execute:webnotes.delete_doc('DocType', 'Stock Ledger')",
+	"patches.august_2013.p06_deprecate_cancelled_sl_entry",
 ]

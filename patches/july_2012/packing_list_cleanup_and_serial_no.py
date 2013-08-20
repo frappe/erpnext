@@ -37,7 +37,7 @@ def execute():
 					limit 1
 				"""% (s, s, s, s, d['parent']), as_dict=1)
 
-				status = 'Not in Use'
+				status = 'Not Available'
 				if sle and flt(sle[0]['actual_qty']) > 0:
 					status = 'Available'
 				elif sle and flt(sle[0]['actual_qty']) < 0:

@@ -228,7 +228,7 @@ class DocType(StockController):
 			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 
 				actual_qty, stock_value, warehouse from `tabStock Ledger Entry` 
 				where voucher_type = %s and voucher_no = %s and 
-				item_code = %s and ifnull(is_cancelled, 'No') = 'No' limit 1""", 
+				item_code = %s limit 1""", 
 				((self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"),
 				self.doc.delivery_note_no or self.doc.sales_invoice_no, args.item_code), as_dict=1)
 			if sle:
@@ -770,7 +770,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			from `tabStock Ledger Entry` sle 
 			where item_code = '%(item_code)s' 
 				and warehouse = '%(s_warehouse)s'
-				and ifnull(is_cancelled, 'No') = 'No' 
 				and batch_no like '%(txt)s' 
 				and exists(select * from `tabBatch` 
 					where name = sle.batch_no 

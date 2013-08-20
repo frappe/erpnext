@@ -145,7 +145,6 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, fo
 	return webnotes.conn.sql("""select * from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
 		and warehouse = %%(warehouse)s
-		and ifnull(is_cancelled, 'No') = 'No'
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
 		%(limit)s %(for_update)s""" % {

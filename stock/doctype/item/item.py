@@ -194,7 +194,7 @@ class DocType(DocListController):
 	
 	def check_if_sle_exists(self):
 		sle = webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
-			where item_code = %s and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name)
+			where item_code = %s""", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
@@ -255,8 +255,6 @@ class DocType(DocListController):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
-			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
