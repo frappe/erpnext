@@ -181,7 +181,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	set_dynamic_labels: function() {
 		this._super();
 		this.hide_fields(this.frm.doc);
+	},
+
+	entries_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no(grid_row)
 	}
+
 });
 
 // for backward compatibility: combine new and previous states

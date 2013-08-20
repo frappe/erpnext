@@ -103,7 +103,7 @@ cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 		net_weight_pkg += flt(item.net_weight) * flt(item.qty);
 	}
 
-	doc.net_weight_pkg = roundNumber(net_weight_pkg, 2);
+	doc.net_weight_pkg = _round(net_weight_pkg, 2);
 	if(!flt(doc.gross_weight_pkg)) {
 		doc.gross_weight_pkg = doc.net_weight_pkg
 	}

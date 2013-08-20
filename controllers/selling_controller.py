@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or
+from webnotes.utils import cint, flt, comma_or, _round
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
@@ -218,8 +218,8 @@ class SellingController(StockController):
 		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
 			self.precision("other_charges_total_export"))
 		
-		self.doc.rounded_total = round(self.doc.grand_total)
-		self.doc.rounded_total_export = round(self.doc.grand_total_export)
+		self.doc.rounded_total = _round(self.doc.grand_total)
+		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
 		
 	def calculate_outstanding_amount(self):
 		# NOTE: 
@@ -267,3 +267,32 @@ class SellingController(StockController):
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types),
 				raise_exception=True)
+				
+	def update_serial_nos(self, cancel=False):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
+		update_serial_nos_after_submit(self, self.doc.doctype, self.fname)
+		update_serial_nos_after_submit(self, self.doc.doctype, "packing_details")
+
+		for table_fieldname in (self.fname, "packing_details"):
+			for d in self.doclist.get({"parentfield": table_fieldname}):
+				for serial_no in get_serial_nos(d.serial_no):
+					sr = webnotes.bean("Serial No", serial_no)
+					if cancel:
+						sr.doc.status = "Available"
+						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
+							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
+							"customer_name"):
+							sr.doc.fields[fieldname] = None
+					else:
+						sr.doc.delivery_document_type = self.doc.doctype
+						sr.doc.delivery_document_no = self.doc.name
+						sr.doc.delivery_date = self.doc.posting_date
+						sr.doc.delivery_time = self.doc.posting_time
+						sr.doc.customer = self.doc.customer
+						sr.doc.customer_name	= self.doc.customer_name
+						if sr.doc.warranty_period:
+							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.delivery_date), 
+								cint(sr.doc.warranty_period))
+						sr.doc.status =	'Delivered'
+
+					sr.save()

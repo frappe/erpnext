@@ -105,7 +105,6 @@ class DocType(TransactionBase):
 			msgprint("Please fetch items from Delivery Note selected", raise_exception=1)
 	
 	def on_update(self):
-		get_obj("Stock Ledger").scrub_serial_nos(self, 'installed_item_details')
 		webnotes.conn.set(self.doc, 'status', 'Draft')
 	
 	def on_submit(self):

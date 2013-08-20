@@ -65,9 +65,6 @@ class DocType(SellingController):
 			self.validate_write_off_account()
 
 		if cint(self.doc.update_stock):
-			sl = get_obj('Stock Ledger')
-			sl.validate_serial_no(self, 'entries')
-			sl.validate_serial_no(self, 'packing_details')
 			self.validate_item_code()
 			self.update_current_stock()
 			self.validate_delivery_note()
@@ -84,15 +81,9 @@ class DocType(SellingController):
 			"delivery_note_details")
 
 	def on_submit(self):
-		if cint(self.doc.update_stock) == 1:
-			sl_obj = get_obj("Stock Ledger")
-			sl_obj.validate_serial_no_warehouse(self, 'entries')
-			sl_obj.validate_serial_no_warehouse(self, 'packing_details')
-			
-			sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
-			sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
-			
+		if cint(self.doc.update_stock) == 1:			
 			self.update_stock_ledger()
+			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -120,11 +111,8 @@ class DocType(SellingController):
 
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
-			sl = get_obj('Stock Ledger')
-			sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
-			sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
-			
 			self.delete_and_repost_sle()
+			self.update_serial_nos(cancel = True)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -494,10 +482,6 @@ class DocType(SellingController):
 	
 	def make_packing_list(self):
 		get_obj('Sales Common').make_packing_list(self,'entries')
-		sl = get_obj('Stock Ledger')
-		sl.scrub_serial_nos(self)
-		sl.scrub_serial_nos(self, 'packing_details')
-
 
 	def on_update(self):
 		if cint(self.doc.update_stock) == 1:

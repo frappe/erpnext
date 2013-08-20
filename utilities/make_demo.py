@@ -28,6 +28,7 @@ def make(reset=False):
 	webnotes.connect()
 	webnotes.print_messages = True
 	webnotes.mute_emails = True
+	webnotes.rollback_on_exception = True
 	
 	if reset:
 		setup()
@@ -59,8 +60,6 @@ def simulate():
 		run_manufacturing(current_date)
 		run_stock(current_date)
 		
-	webnotes.conn.commit()
-
 def run_sales(current_date):
 	if can_make("Quotation"):
 		for i in xrange(how_many("Quotation")):
@@ -81,6 +80,7 @@ def run_stock(current_date):
 			pr.doc.fiscal_year = "2010"
 			pr.insert()
 			pr.submit()
+			webnotes.conn.commit()
 	
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
@@ -92,6 +92,7 @@ def run_stock(current_date):
 			dn.doc.fiscal_year = "2010"
 			dn.insert()
 			dn.submit()
+			webnotes.conn.commit()
 	
 	
 def run_purchase(current_date):
@@ -106,6 +107,7 @@ def run_purchase(current_date):
 				sq.doc.fiscal_year = "2010"
 				sq.insert()
 				sq.submit()
+				webnotes.conn.commit()
 		
 	# make purchase orders
 	if can_make("Purchase Order"):
@@ -118,8 +120,12 @@ def run_purchase(current_date):
 				po.doc.fiscal_year = "2010"
 				po.insert()
 				po.submit()
+				webnotes.conn.commit()
 			
 def run_manufacturing(current_date):
+	from stock.stock_ledger import NegativeStockError
+	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError
+
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
 	ppt.doc.company = company
 	ppt.doc.use_multi_level_bom = 1
@@ -128,17 +134,20 @@ def run_manufacturing(current_date):
 	ppt.run_method("get_items_from_so")
 	ppt.run_method("raise_production_order")
 	ppt.run_method("raise_purchase_request")
+	webnotes.conn.commit()
 	
 	# submit production orders
 	for pro in webnotes.conn.get_values("Production Order", {"docstatus": 0}):
 		b = webnotes.bean("Production Order", pro[0])
 		b.doc.wip_warehouse = "Work in Progress - WP"
 		b.submit()
+		webnotes.conn.commit()
 		
 	# submit material requests
 	for pro in webnotes.conn.get_values("Material Request", {"docstatus": 0}):
 		b = webnotes.bean("Material Request", pro[0])
 		b.submit()
+		webnotes.conn.commit()
 	
 	# stores -> wip
 	if can_make("Stock Entry for WIP"):		
@@ -154,6 +163,7 @@ def run_manufacturing(current_date):
 	for st in webnotes.conn.get_values("Stock Entry", {"docstatus":0}):
 		try:
 			webnotes.bean("Stock Entry", st[0]).submit()
+			webnotes.conn.commit()
 		except NegativeStockError: pass
 		except IncorrectValuationRateError: pass
 			
@@ -170,7 +180,9 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
 		st.insert()
+		webnotes.conn.commit()
 		st.submit()
+		webnotes.conn.commit()
 	except NegativeStockError: pass
 	except IncorrectValuationRateError: pass
 
@@ -194,7 +206,9 @@ def make_quotation(current_date):
 	}, unique="item_code")
 	
 	b.insert()
+	webnotes.conn.commit()
 	b.submit()
+	webnotes.conn.commit()
 	
 def make_sales_order(current_date):
 	q = get_random("Quotation", {"status": "Submitted"})
@@ -204,7 +218,9 @@ def make_sales_order(current_date):
 		so.doc.transaction_date = current_date
 		so.doc.delivery_date = webnotes.utils.add_days(current_date, 10)
 		so.insert()
+		webnotes.conn.commit()
 		so.submit()
+		webnotes.conn.commit()
 	
 def add_random_children(bean, template, rows, randomize, unique=None):
 	for i in xrange(random.randrange(1, rows)):

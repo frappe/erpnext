@@ -126,8 +126,6 @@ class DocType(BuyingController):
 		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
-				
-		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
 		self.validate_challan_no()
 
 		pc_obj = get_obj(dt='Purchase Common')
@@ -146,19 +144,10 @@ class DocType(BuyingController):
 			for d in getlist(self.doclist,'purchase_receipt_details'):
 				d.rejected_warehouse = self.doc.rejected_warehouse
 
-		get_obj('Stock Ledger').scrub_serial_nos(self)
-		self.scrub_rejected_serial_nos()
-
-
-	def scrub_rejected_serial_nos(self):
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if d.rejected_serial_no:
-				d.rejected_serial_no = cstr(d.rejected_serial_no).strip().replace(',', '\n')
-				d.save()
-
 	def update_stock(self):
 		sl_entries = []
 		stock_items = self.get_stock_items()
+		
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
 			if d.item_code in stock_items and d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
@@ -219,7 +208,7 @@ class DocType(BuyingController):
 				"actual_qty": -1*flt(consumed_qty),
 				"incoming_rate": 0
 			}))
-		
+
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
 			ins_reqd = webnotes.conn.sql("select inspection_required from `tabItem` where name = %s",
@@ -245,20 +234,34 @@ class DocType(BuyingController):
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 
 		# Set status as Submitted
-		webnotes.conn.set(self.doc,'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
-
-		# Update Serial Record
-		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 1, is_incoming = 1)
-
+		
 		# Update Stock
 		self.update_stock()
+
+		self.update_serial_nos()
 
 		# Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, 1)
 		
 		self.make_gl_entries()
+		
+	def update_serial_nos(self, cancel=False):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
+		update_serial_nos_after_submit(self, "Purchase Receipt", "purchase_receipt_details")
+
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			for serial_no in get_serial_nos(d.serial_no):
+				sr = webnotes.bean("Serial No", serial_no)
+				if cancel:
+					sr.doc.supplier = None
+					sr.doc.supplier_name = None
+				else:
+					sr.doc.supplier = self.doc.supplier
+					sr.doc.supplier_name = self.doc.supplier_name
+				sr.save()
 
 	def check_next_docstatus(self):
 		submit_rv = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
@@ -283,9 +286,9 @@ class DocType(BuyingController):
 		webnotes.conn.set(self.doc,'status','Cancelled')
 
 		# 3. Cancel Serial No
-		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 0, is_incoming = 1)
-
 		self.update_stock()
+		self.update_serial_nos(cancel=True)
+
 		self.update_prevdoc_status()
 		pc_obj.update_last_purchase_rate(self, 0)
 		

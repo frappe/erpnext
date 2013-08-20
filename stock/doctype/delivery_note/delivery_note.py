@@ -171,9 +171,6 @@ class DocType(SellingController):
 			
 	def on_update(self):
 		self.doclist = get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
-		sl = get_obj('Stock Ledger')
-		sl.scrub_serial_nos(self)
-		sl.scrub_serial_nos(self, 'packing_details')
 
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -181,22 +178,12 @@ class DocType(SellingController):
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 		
-		# validate serial no for item table (non-sales-bom item) and packing list (sales-bom item)
-		sl_obj = get_obj("Stock Ledger")
-		sl_obj.validate_serial_no(self, 'delivery_note_details')
-		sl_obj.validate_serial_no_warehouse(self, 'delivery_note_details')
-		sl_obj.validate_serial_no(self, 'packing_details')
-		sl_obj.validate_serial_no_warehouse(self, 'packing_details')
-		
-		# update delivery details in serial no
-		sl_obj.update_serial_record(self, 'delivery_note_details', is_submit = 1, is_incoming = 0)
-		sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
-		
 		# update delivered qty in sales order	
 		self.update_prevdoc_status()
 		
 		# create stock ledger entry
 		self.update_stock_ledger()
+		self.update_serial_nos()
 
 		self.credit_limit()
 		
@@ -206,6 +193,50 @@ class DocType(SellingController):
 		# set DN status
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 
+
+	def on_cancel(self):
+		sales_com_obj = get_obj(dt = 'Sales Common')
+		sales_com_obj.check_stop_sales_order(self)
+		self.check_next_docstatus()
+				
+		self.update_prevdoc_status()
+		
+		self.update_stock_ledger()
+		self.update_serial_nos(cancel=True)
+
+		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+		self.cancel_packing_slips()
+		
+		self.make_cancel_gl_entries()
+
+	def update_serial_nos(self, cancel=False):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
+		update_serial_nos_after_submit(self, "Delivery Note", "delivery_note_details")
+		update_serial_nos_after_submit(self, "Delivery Note", "packing_details")
+
+		for table_fieldname in ("delivery_note_details", "packing_details"):
+			for d in self.doclist.get({"parentfield": table_fieldname}):
+				for serial_no in get_serial_nos(d.serial_no):
+					sr = webnotes.bean("Serial No", serial_no)
+					if cancel:
+						sr.doc.status = "Available"
+						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
+							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
+							"customer_name"):
+							sr.doc.fields[fieldname] = None
+					else:
+						sr.doc.delivery_document_type = "Delivery Note"
+						sr.doc.delivery_document_no = self.doc.name
+						sr.doc.delivery_date = self.doc.posting_date
+						sr.doc.delivery_time = self.doc.posting_time
+						sr.doc.customer = self.doc.customer
+						sr.doc.customer_name	= self.doc.customer_name
+						if sr.doc.warranty_period:
+							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.delivery_date), 
+								cint(sr.doc.warranty_period))
+						sr.doc.status =	'Delivered'
+
+					sr.save()
 
 	def validate_packed_qty(self):
 		"""
@@ -228,26 +259,6 @@ class DocType(SellingController):
 				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
 			webnotes.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
 
-
-	def on_cancel(self):
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
-		
-		# remove delivery details from serial no
-		sl = get_obj('Stock Ledger')		
-		sl.update_serial_record(self, 'delivery_note_details', is_submit = 0, is_incoming = 0)
-		sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
-		
-		self.update_prevdoc_status()
-		
-		self.update_stock_ledger()
-		webnotes.conn.set(self.doc, 'status', 'Cancelled')
-		self.cancel_packing_slips()
-		
-		self.make_cancel_gl_entries()
-
-
 	def check_next_docstatus(self):
 		submit_rv = webnotes.conn.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
@@ -258,7 +269,6 @@ class DocType(SellingController):
 		if submit_in:
 			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
 			raise Exception , "Validation Error."
-
 
 	def cancel_packing_slips(self):
 		"""
