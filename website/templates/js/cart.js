@@ -133,16 +133,16 @@ $.extend(wn.cart, {
 		if(doc.description === doc.item_name) doc.description = "";
 		
 		$(repl('<div class="row">\
-			<div class="col col-lg-9 col-sm-9">\
+			<div class="col-md-9 col-sm-9">\
 				<div class="row">\
-					<div class="col col-lg-3">%(image_html)s</div>\
-					<div class="col col-lg-9">\
+					<div class="col-md-3">%(image_html)s</div>\
+					<div class="col-md-9">\
 						<h4><a href="%(page_name)s">%(item_name)s</a></h4>\
 						<p>%(description)s</p>\
 					</div>\
 				</div>\
 			</div>\
-			<div class="col col-lg-3 col-sm-3 text-right">\
+			<div class="col-md-3 col-sm-3 text-right">\
 				<div class="input-group item-update-cart">\
 					<input type="text" placeholder="Qty" value="%(qty)s" \
 						data-item-code="%(item_code)s" class="text-right">\
@@ -166,14 +166,14 @@ $.extend(wn.cart, {
 		}
 		
 		var $tax_row = $(repl('<div class="row">\
-			<div class="col col-lg-9 col-sm-9">\
+			<div class="col-md-9 col-sm-9">\
 				<div class="row">\
-					<div class="col col-lg-9 col-offset-3">' +
+					<div class="col-md-9 col-md-offset-3">' +
 					(shipping_selector || '<p>%(description)s</p>') +
 					'</div>\
 				</div>\
 			</div>\
-			<div class="col col-lg-3 col-sm-3 text-right">\
+			<div class="col-md-3 col-sm-3 text-right">\
 				<p' + (shipping_selector ? ' style="margin-top: 5px;"' : "") + '>%(formatted_tax_amount)s</p>\
 			</div>\
 		</div>', doc)).appendTo($cart_taxes);
@@ -209,9 +209,9 @@ $.extend(wn.cart, {
 			$(repl('<div class="accordion-group"> \
 				<div class="accordion-heading"> \
 					<div class="row"> \
-						<div class="col col-lg-10 address-title" \
+						<div class="col-md-10 address-title" \
 							data-address-name="%(name)s"><strong>%(name)s</strong></div> \
-						<div class="col col-lg-2"><input type="checkbox" \
+						<div class="col-md-2"><input type="checkbox" \
 							data-address-name="%(name)s"></div> \
 					</div> \
 				</div> \

@@ -3,14 +3,14 @@
 {% set title="About Us" %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
 	{{ obj.doc.company_introduction or "<h2>About Us</h2><p>Some Introduction about your company that you would like your website visitor to know. More people than you think will read your About page. People always like to know who the are doing business with. Be authentic and avoid using jargon like 'value added services' etc. Be sure to update your company history and list of key team members in Website > About Us Settings</p>" }}
 	{% if obj.doclist.get({"doctype":"Company History"}) %}
 	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
 	{% for d in obj.doclist.get({"doctype":"Company History"}) %}
 	<div class="row">
-		<span class="col col-lg-2"><h4 style="margin:0px;">{{ d.year }}</h4></span>
-		<span class="col col-lg-10"><p>{{ d.highlight }}</p></span>
+		<span class="col-md-2"><h4 style="margin:0px;">{{ d.year }}</h4></span>
+		<span class="col-md-10"><p>{{ d.highlight }}</p></span>
 	</div>
 	{% endfor %}
 	{% endif %}
@@ -18,12 +18,12 @@
 	<h3>{{ obj.doc.team_members_heading or "Team Members" }}</h3>
 	{% for d in obj.doclist.get({"doctype":"About Us Team Member"}) %}
 	<div class="row" itemscope itemtype="http://schema.org/Person">
-		<span class="col col-lg-2">
+		<span class="col-md-2">
 			<div class="avatar avatar-large">
 				<img class="avatar" src="{{ d.image_link }}" style="" itemprop="image">
 			</div>
 		</span>
-		<span class="col col-lg-10"><h4 itemprop="name">{{ d.full_name }}</h4>
+		<span class="col-md-10"><h4 itemprop="name">{{ d.full_name }}</h4>
 			<p itemprop="description">{{ d.bio }}</p>
 		</span>
 	</div>

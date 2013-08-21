@@ -8,7 +8,7 @@ global_number_format = "{{ global_number_format }}";
 currency = "{{ currency }}";
 wn.currency_symbols = {{ currency_symbols }};
 </script>
-<div class="col col-lg-12">
+<div class="col-md-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a> <span class="divider">/</span></li>
     	<li><a href="account">My Account</a> <span class="divider">/</span></li>
@@ -44,8 +44,8 @@ $(document).ready(function() {
 				
 				// parent
 				var $order = $(repl('<div class="row">\
-					<div class="col col-lg-3"><a href="order?name=%(name)s">%(name)s</a></div>\
-					<div class="col col-lg-9"></div>\
+					<div class="col-md-3"><a href="order?name=%(name)s">%(name)s</a></div>\
+					<div class="col-md-9"></div>\
 				</div>', order)).appendTo($list);
 				
 				// items
@@ -53,12 +53,12 @@ $(document).ready(function() {
 					item.export_rate = format_currency(item.export_rate, order.currency);
 					item.export_amount = format_currency(item.export_amount, order.currency);
 					var $item = $(repl('<div class="row">\
-							<div class="col col-lg-3">%(item_name)s</div>\
-							<div class="col col-lg-2" style="text-align: right;">%(export_rate)s</div>\
-							<div class="col col-lg-2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
-							<div class="col col-lg-2" style="text-align: right;">%(export_amount)s</div>\
+							<div class="col-md-3">%(item_name)s</div>\
+							<div class="col-md-2" style="text-align: right;">%(export_rate)s</div>\
+							<div class="col-md-2" style="text-align: right;">%(qty)s %(stock_uom)s</div>\
+							<div class="col-md-2" style="text-align: right;">%(export_amount)s</div>\
 						</div>\
-					</div>', item)).appendTo($order.find(".col col-lg-9"));
+					</div>', item)).appendTo($order.find(".col-md-9"));
 				});
 				
 				$("<hr>").appendTo($list);

@@ -167,6 +167,7 @@ fieldset {
 .btn-default:focus,
 .btn-default:active,
 .btn-default.active {
+  color: #ffffff;
   background-color: #9a9c9d;
   border-color: #8d9091;
 }

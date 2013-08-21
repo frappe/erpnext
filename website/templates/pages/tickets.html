@@ -3,7 +3,7 @@
 {% set title="My Tickets" %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a></li>
     	<li><a href="account">My Account</a></li>
@@ -39,9 +39,9 @@ $(document).ready(function() {
 				
 				// parent
 				var $ticket = $(repl('<div class="row">\
-					<div class="col col-lg-2"><span class="label">%(status)s</span></div>\
-					<div class="col col-lg-3"><a href="ticket?name=%(name)s">%(name)s</a></div>\
-					<div class="col col-lg-7">%(subject)s</div>\
+					<div class="col-md-2"><span class="label">%(status)s</span></div>\
+					<div class="col-md-3"><a href="ticket?name=%(name)s">%(name)s</a></div>\
+					<div class="col-md-7">%(subject)s</div>\
 				</div>', ticket)).appendTo($list);
 				
 				$("<hr>").appendTo($list);

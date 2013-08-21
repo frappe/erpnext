@@ -11,7 +11,7 @@ $(document).ready(function() {
 	}
 	if(n_comments > 50) {
 		$(".add-comment").toggle(false)
-			.parent().append("<div class='alert'>Comments are closed.</div>")
+			.parent().append("<div class='alert alert-warning'>Comments are closed.</div>")
 	}
 	$(".add-comment").click(function() {
 		$("#comment-form").toggle();
@@ -54,7 +54,7 @@ $(document).ready(function() {
 					$(".no_comment").toggle(false);
 					$(".add-comment").toggle(false);
 					$("#comment-form")
-						.replaceWith("<div class='alert'>Thank you for your comment!</div>")
+						.replaceWith("<div class='alert alert-success'>Thank you for your comment!</div>")
 				}
 			}
 		})

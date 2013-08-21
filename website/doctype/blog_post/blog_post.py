@@ -30,6 +30,7 @@ class DocType:
 
 	def prepare_template_args(self):
 		import webnotes.utils
+		import markdown2
 		
 		# this is for double precaution. usually it wont reach this code if not published
 		if not webnotes.utils.cint(self.doc.published):
@@ -65,3 +66,4 @@ class DocType:
 		self.doc.comment_list = comment_list or []
 		for comment in self.doc.comment_list:
 			comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
+			comment['comment'] = markdown2.markdown(comment['comment'])

@@ -3,7 +3,7 @@
 {% set title="My Profile" %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a> <span class="divider">/</span></li>
     	<li><a href="account">My Account</a> <span class="divider">/</span></li>
@@ -15,23 +15,23 @@
 	<form>
 		<fieldset>
 			<label>Full Name</label>
-			<input type="text" id="fullname" placeholder="Your Name">
+			<input class="form-control" type="text" id="fullname" placeholder="Your Name">
 		</fieldset>
 		<fieldset>
 			<label>Password</label>
-			<input type="password" id="password" placeholder="Password">
+			<input class="form-control" type="password" id="password" placeholder="Password">
 		</fieldset>
 		<fieldset>
 			<label>Company Name</label>
-			<input type="text" id="company_name" placeholder="Company Name" value="{{ company_name }}">
+			<input class="form-control" type="text" id="company_name" placeholder="Company Name" value="{{ company_name }}">
 		</fieldset>
 		<fieldset>
 			<label>Mobile No</label>
-			<input type="text" id="mobile_no" placeholder="Mobile No" value="{{ mobile_no }}">
+			<input class="form-control" type="text" id="mobile_no" placeholder="Mobile No" value="{{ mobile_no }}">
 		</fieldset>
 		<fieldset>
 			<label>Phone</label>
-			<input type="text" id="phone" placeholder="Phone" value="{{ phone }}">
+			<input class="form-control" type="text" id="phone" placeholder="Phone" value="{{ phone }}">
 		</fieldset>
 		<button id="update_profile" type="submit" class="btn btn-default">Update</button>
 	</form>
