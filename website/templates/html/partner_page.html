@@ -1,9 +1,9 @@
 {% extends "app/website/templates/html/page.html" %}
 
 {% block content %}
-	<div class="col col-lg-12" itemscope itemtype="http://schema.org/Organization">
+	<div class="col-md-12" itemscope itemtype="http://schema.org/Organization">
 		<div class="row">
-			<div class="col col-lg-4">
+			<div class="col-md-4">
 				{% if logo -%}
 				<img itemprop="brand" src="{{ logo }}" class="partner-logo" 
 					alt="{{ partner_name }}" title="{{ partner_name }}" />
@@ -17,7 +17,7 @@
 					{% if email -%}<p itemprop="email"><span class="icon-envelope"></span> {{ email }}</p>{%- endif %}
 				</address>
 			</div>
-			<div class="col col-lg-8">
+			<div class="col-md-8">
 				<h3 itemprop="name" style="margin-top: 0px;">{{ partner_name }}</h3>
 				<p>{{ description }}</p>
 			</div>

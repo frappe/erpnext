@@ -7,32 +7,32 @@
 {% set title="Contact Us" %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
 	<h3>{{ obj.doc.heading or "Contact Us"}}</h3>
 	<div class="row">
-		<div class="web-form col col-lg-8">
-			<p id="contact-alert" class="alert" 
+		<div class="web-form col-md-8">
+			<p id="contact-alert" class="alert alert-warning" 
 				style="display: none;">&nbsp;</p>
 			<p>
-				<select name="subject">
+				<select name="subject" class="form-control">
 				{% for option in obj.query_options %}
 					<option value="{{ option }}">{{ option }}</option>
 				{% endfor %}
 				</select>
 			</p>
 			<p>
-				<input name="email" type="text" 
+				<input class="form-control" name="email" type="text" 
 				placeholder="Your Email Address" />
 			</p>
 			<p>
-				<textarea rows="10" name="message"></textarea>
+				<textarea rows="10" name="message" class="form-control"></textarea>
 			</p>
 			<p>
 				<button class="btn btn-primary btn-send">Send</button>
 			</p>
 		</div>
 		{% if obj.doc.address %}
-		<div class="col col-lg-3 col-offset-1 alert" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
+		<div class="col-md-3 col-md-offset-1 alert" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
 			<h4><i class="icon-map-marker"></i> {{ obj.address.address_title }}</h4>
 			{% if obj.address.address_line1 %}
 				<span itemprop="streetAddress">{{ obj.address.address_line1 }}</span><br>

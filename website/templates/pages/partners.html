@@ -3,12 +3,12 @@
 {% set title="Partners" %}
 
 {% block content %}
-	<div class="col col-lg-12">
+	<div class="col-md-12">
 		<h2 id="blog-title">{{ title }}</h2>
 		<hr>
 		{% for partner_info in partners %}
 		<div class="row">
-			<div class="col col-lg-3">
+			<div class="col-md-3">
 				{% if partner_info.logo -%}
 				<a href="{{ partner_info.page_name }}">
 					<img itemprop="brand" src="{{ partner_info.logo }}" class="partner-logo" 
@@ -16,7 +16,7 @@
 				</a>
 				{%- endif %}
 			</div>
-			<div class="col col-lg-9">
+			<div class="col-md-9">
 				<a href="{{ partner_info.page_name }}">
 					<h4>{{ partner_info.partner_name }}</h4>
 				</a>

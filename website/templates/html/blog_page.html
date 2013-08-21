@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="col col-lg-12" itemscope itemtype="http://schema.org/BlogPost">
+<div class="col-md-12" itemscope itemtype="http://schema.org/BlogPost">
 	<h2 itemprop="name headline">{{ title }}</h2>
 
 	<!-- begin blog content -->
@@ -38,14 +38,16 @@
 		{% include 'app/website/templates/html/comment.html' %}
 	</div>
 	<div><button class="btn btn-default add-comment">{{ texts.add_comment }}</button></div>
-	<div style="display: none; margin-top: 10px;" 
+	<div style="display: none; margin-top: 10px; max-width: 400px;" 
 		id="comment-form">
 		<div class="alert" style="display:none;"></div>
 		<form>
 			<fieldset>
-				<input name="comment_by_fullname" placeholder="Your Name" type="text"/><br>
-				<input name="comment_by" placeholder="Your Email Id" type="text"/><br>
-				<textarea name="comment" placeholder="Comment" style="width: 300px; height: 120px;"/>
+				<input class="form-control" name="comment_by_fullname" placeholder="Your Name" type="text"/><br>
+				<input class="form-control" name="comment_by" 
+					placeholder="Your Email Id" type="text"/><br>
+				<textarea class="form-control" name="comment" rows=10
+					placeholder="Comment"/>
 				</textarea><br>
 				<button class="btn btn-info" id="submit-comment">{{ texts.submit }}</button>
 			</fieldset>

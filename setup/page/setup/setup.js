@@ -41,15 +41,15 @@ wn.pages.Setup.make = function(wrapper) {
 			})
 			.appendTo(body);
 
-		$('<div class="col col-lg-1"></div>').appendTo(row);
+		$('<div class="col-md-1"></div>').appendTo(row);
 		
 		if(item.type==="Link") {
-			var col = $('<div class="col col-lg-5"><b><a href="#'
+			var col = $('<div class="col-md-5"><b><a href="#'
 				+item.route+'"><i class="'+item.icon+'"></i> '
 				+item.title+'</a></b></div>').appendTo(row);
 		
 		} else {
-			var col = $(repl('<div class="col col-lg-5">\
+			var col = $(repl('<div class="col-md-5">\
 					<span class="badge view-link">%(count)s</span>\
 					 <b><i class="%(icon)s"></i>\
 						<a class="data-link">%(title)s</a></b>\
@@ -73,9 +73,9 @@ wn.pages.Setup.make = function(wrapper) {
 		}
 
 		if(dependency) 
-			col.addClass("col-offset-1");
+			col.addClass("col-md-offset-1");
 		else
-			$('<div class="col col-lg-1"></div>').appendTo(row);
+			$('<div class="col-md-1"></div>').appendTo(row);
 		
 		if(item.doctype) {
 			var badge = col.find(".badge, .data-link")
@@ -94,7 +94,7 @@ wn.pages.Setup.make = function(wrapper) {
 		}
 	
 		// tree
-		$links = $('<div class="col col-lg-5">').appendTo(row);
+		$links = $('<div class="col-md-5">').appendTo(row);
 	
 		if(item.tree) {
 			$('<a class="view-link"><i class="icon-sitemap"></i> Browse</a>\
