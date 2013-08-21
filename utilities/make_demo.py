@@ -216,7 +216,6 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	st.doc.fiscal_year = "2010"
 	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
-		st.run_method("get_items")
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()
