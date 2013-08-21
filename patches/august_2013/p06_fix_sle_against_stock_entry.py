@@ -4,10 +4,9 @@ cancelled = []
 uncancelled = []
 
 def execute():
-	from stock.stock_ledger import update_entries_after
-
+	global cancelled, uncancelled
 	stock_entries = webnotes.conn.sql("""select * from `tabStock Entry` 
-		where docstatus >= 1 and date(modified) >= "2013-08-16" and date(modified) <= "2013-08-21" 
+		where docstatus >= 1 and date(modified) >= "2013-08-16" 
 		and ifnull(production_order, '') != '' and ifnull(bom_no, '') != '' 
 		order by modified desc, name desc""", as_dict=True)
 
@@ -18,7 +17,6 @@ def execute():
 					where voucher_type='Stock Entry' and voucher_no=%s
 					and is_cancelled='No'""", entry.name, as_dict=True)
 				if res:
-					print entry
 					make_stock_entry_detail(entry, res)
 				
 	if cancelled or uncancelled:
@@ -98,11 +96,11 @@ def send_email():
 		if cancelled else ""
 
 	subject = "[ERPNext] [Important] Cancellation undone for some Stock Entries"
-	content = """Dear user, 
+	content = """Dear System Manager, 
 
-An error got introduced into the code that cleared the item table in Stock Entry associated to a Production Order.
+An error got introduced into the code that cleared the item table in a Stock Entry associated to a Production Order.
 
-Hence, 
+To undo its effect, 
 %s
 
 %s
@@ -114,6 +112,6 @@ Sorry for the inconvenience this has caused.
 Regards,
 Team ERPNext.""" % (uncancelled, cancelled)
 
-	print subject, content
+	# print subject, content
 
-	# sendmail_to_system_managers(subject, content)
+	sendmail_to_system_managers(subject, content)
