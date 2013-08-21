@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, cint
+from webnotes.utils import cstr, flt, cint, add_days
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -232,7 +232,7 @@ class DocType(SellingController):
 						sr.doc.customer = self.doc.customer
 						sr.doc.customer_name	= self.doc.customer_name
 						if sr.doc.warranty_period:
-							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.delivery_date), 
+							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.posting_date), 
 								cint(sr.doc.warranty_period))
 						sr.doc.status =	'Delivered'
 

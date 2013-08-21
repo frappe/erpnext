@@ -181,6 +181,11 @@ wn.module_page["Stock"] = [
 				doctype: "Purchase Receipt"
 			},
 			{
+				"label":wn._("Item Shortage Report"),
+				route: "Report/Bin/Item Shortage Report",
+				doctype: "Purchase Receipt"
+			},
+			{
 				"label":wn._("Serial No Service Contract Expiry"),
 				route: "Report/Serial No/Serial No Service Contract Expiry",
 				doctype: "Serial No"

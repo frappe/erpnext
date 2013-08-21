@@ -103,12 +103,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
-					
-					me.get_items();
 				}
 			});
-		} else {
-			me.get_items();
 		}
 	},
 	

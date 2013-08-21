@@ -111,6 +111,11 @@ wn.module_page["Buying"] = [
 		icon: "icon-list",
 		items: [
 			{
+				"label":wn._("Items To Be Requested"),
+				route: "query-report/Items To Be Requested",
+				doctype: "Item"
+			},
+			{
 				"label":wn._("Requested Items To Be Ordered"),
 				route: "query-report/Requested Items To Be Ordered",
 				doctype: "Material Request"
