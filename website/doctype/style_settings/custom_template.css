@@ -187,7 +187,7 @@ div.web-footer, div.web-footer a {
 }
 
 .breadcrumb {
-	background-color: #{{ get_hex_shade(doc.page_background, 10) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 5) }};
 }
 
 .breadcrumb > li {
