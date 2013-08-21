@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or, _round
+from webnotes.utils import cint, flt, comma_or, _round, add_days, cstr
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
@@ -291,7 +291,7 @@ class SellingController(StockController):
 						sr.doc.customer = self.doc.customer
 						sr.doc.customer_name	= self.doc.customer_name
 						if sr.doc.warranty_period:
-							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.delivery_date), 
+							sr.doc.warranty_expiry_date = add_days(cstr(self.doc.posting_date), 
 								cint(sr.doc.warranty_period))
 						sr.doc.status =	'Delivered'
 
