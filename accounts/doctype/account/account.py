@@ -98,9 +98,7 @@ class DocType:
 
 	# Check if any previous balance exists
 	def check_gle_exists(self):
-		exists = sql("""select name from `tabGL Entry` where account = %s
-			and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name)
-		return exists and exists[0][0] or ''
+		return webnotes.conn.get_value("GL Entry", {"account": self.doc.name})
 
 	def check_if_child_exists(self):
 		return sql("""select name from `tabAccount` where parent_account = %s 
@@ -172,10 +170,6 @@ class DocType:
 	def on_trash(self): 
 		self.validate_trash()
 		self.update_nsm_model()
-
-		# delete all cancelled gl entry of this account
-		sql("""delete from `tabGL Entry` where account = %s and 
-			ifnull(is_cancelled, 'No') = 'Yes'""", self.doc.name)
 
 	def on_rename(self, new, old, merge=False):
 		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		

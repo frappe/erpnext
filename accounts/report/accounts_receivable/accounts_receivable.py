@@ -65,7 +65,7 @@ def get_columns():
 def get_gl_entries(filters, upto_report_date=True):
 	conditions, customer_accounts = get_conditions(filters, upto_report_date)
 	return webnotes.conn.sql("""select * from `tabGL Entry` 
-		where ifnull(is_cancelled, 'No') = 'No' %s order by posting_date, account""" % 
+		where docstatus < 2 %s order by posting_date, account""" % 
 		(conditions), tuple(customer_accounts), as_dict=1)
 	
 def get_conditions(filters, upto_report_date=True):
@@ -116,7 +116,7 @@ def get_outstanding_amount(gle, report_date):
 		select sum(ifnull(credit, 0)) - sum(ifnull(debit, 0)) 
 		from `tabGL Entry` 
 		where account = %s and posting_date <= %s and against_voucher_type = %s 
-		and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
+		and against_voucher = %s and name != %s""", 
 		(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
 		
 	return flt(gle.debit) - flt(gle.credit) - flt(payment_amount)
@@ -130,7 +130,7 @@ def get_payment_amount(gle, report_date, entries_after_report_date):
 		payment_amount = webnotes.conn.sql("""
 			select sum(ifnull(credit, 0)) - sum(ifnull(debit, 0)) from `tabGL Entry` 
 			where account = %s and posting_date <= %s and against_voucher_type = %s 
-			and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
+			and against_voucher = %s and name != %s""", 
 			(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
 	
 	return flt(payment_amount)

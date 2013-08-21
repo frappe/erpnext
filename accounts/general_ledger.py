@@ -8,14 +8,14 @@ from webnotes.model.doc import Document
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
-	if merge_entries:
-		gl_map = merge_similar_entries(gl_map)
-	
-	if cancel:
-		set_as_cancel(gl_map[0]["voucher_type"], gl_map[0]["voucher_no"])
+	if not cancel:
+		if merge_entries:
+			gl_map = merge_similar_entries(gl_map)
 
-	check_budget(gl_map, cancel)
-	save_entries(gl_map, cancel, adv_adj, update_outstanding)
+		check_budget(gl_map, cancel)
+		save_entries(gl_map, adv_adj, update_outstanding)
+	else:
+		delete_gl_entries(gl_map, adv_adj, update_outstanding)
 		
 def merge_similar_entries(gl_map):
 	merged_gl_map = []
@@ -52,7 +52,7 @@ def check_budget(gl_map, cancel):
 			if acc_details[0]=="Yes" and acc_details[1]=="Debit":
 				webnotes.get_obj('Budget Control').check_budget(gle, cancel)
 
-def save_entries(gl_map, cancel, adv_adj, update_outstanding):
+def save_entries(gl_map, adv_adj, update_outstanding):
 	total_debit = total_credit = 0.0
 	def _swap(gle):
 		gle.debit, gle.credit = abs(flt(gle.credit)), abs(flt(gle.debit))
@@ -68,36 +68,38 @@ def save_entries(gl_map, cancel, adv_adj, update_outstanding):
 		if flt(gle.debit) < 0 or flt(gle.credit) < 0:
 			_swap(gle)
 
-		# toggled debit/credit in two separate condition because 
-		# both should be executed at the 
-		# time of cancellation when there is negative amount (tax discount)
-		if cancel:
-			_swap(gle)
-
 		gle_obj = webnotes.get_obj(doc=gle)
-		# validate except on_cancel
-		if not cancel:
-			gle_obj.validate()
-
-		# save
+		gle_obj.validate()
 		gle.save(1)
-		gle_obj.on_update(adv_adj, cancel, update_outstanding)
+		gle_obj.on_update(adv_adj, update_outstanding)
 
 		# update total debit / credit
 		total_debit += flt(gle.debit)
 		total_credit += flt(gle.credit)
 				
-	if not cancel:
-		validate_total_debit_credit(total_debit, total_credit)
+	validate_total_debit_credit(total_debit, total_credit)
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		webnotes.msgprint("""Debit and Credit not equal for 
-			this voucher: Diff (Debit) is %s""" %
-		 	(total_debit - total_credit), raise_exception=1)
-
-def set_as_cancel(voucher_type, voucher_no):
-	webnotes.conn.sql("""update `tabGL Entry` set is_cancelled='Yes',
-		modified=%s, modified_by=%s
-		where voucher_type=%s and voucher_no=%s""", 
-		(now(), webnotes.session.user, voucher_type, voucher_no))
+		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
+		 	cstr(total_debit - total_credit))
+		
+def delete_gl_entries(gl_entries, adv_adj, update_outstanding):
+	from accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
+		check_freezing_date, update_outstanding_amt, validate_freezed_account
+	
+	check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+	
+	webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
+		(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"]))
+	
+	for entry in gl_entries:
+		validate_freezed_account(entry["account"], adv_adj)
+		check_negative_balance(entry["account"], adv_adj)
+		if entry.get("against_voucher") and entry.get("against_voucher_type") != "POS" \
+			and update_outstanding == 'Yes':
+				update_outstanding_amt(entry["account"], entry.get("against_voucher_type"), 
+					entry.get("against_voucher"))
+					
+	# To-do 
+	# Check and update budget for expense account

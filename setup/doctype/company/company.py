@@ -287,7 +287,7 @@ class DocType:
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'No' and company = %s", self.doc.name)
+		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
 		if not rec:
 			# delete gl entry
 			webnotes.conn.sql("delete from `tabGL Entry` where company = %s", self.doc.name)

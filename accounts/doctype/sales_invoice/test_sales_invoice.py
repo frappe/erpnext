@@ -325,12 +325,10 @@ class TestSalesInvoice(unittest.TestCase):
 		# cancel
 		si.cancel()
 		
-		gle_count = webnotes.conn.sql("""select count(name) from `tabGL Entry` 
-			where voucher_type='Sales Invoice' and voucher_no=%s 
-			and ifnull(is_cancelled, 'No') = 'Yes'
-			order by account asc""", si.doc.name)
+		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
-		self.assertEquals(gle_count[0][0], 8)
+		self.assertFalse(gle)
 		
 	def atest_pos_gl_entry_with_aii(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
@@ -387,12 +385,10 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# cancel
 		si.cancel()
-		gl_count = webnotes.conn.sql("""select count(name)
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			and ifnull(is_cancelled, 'No') = 'Yes' 
-			order by account asc, name asc""", si.doc.name)
+		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
-		self.assertEquals(gl_count[0][0], 16)
+		self.assertFalse(gle)
 		
 		self.assertFalse(get_stock_and_account_difference([si.doclist[1].warehouse]))
 		

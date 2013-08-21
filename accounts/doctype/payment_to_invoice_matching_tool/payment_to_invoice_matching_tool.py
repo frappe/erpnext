@@ -20,8 +20,7 @@ class DocType:
 		
 	def get_voucher_details(self):
 		total_amount = webnotes.conn.sql("""select %s from `tabGL Entry` 
-			where voucher_type = %s and voucher_no = %s 
-			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
+			where voucher_type = %s and voucher_no = %s and account = %s""" % 
 			(self.doc.account_type, '%s', '%s', '%s'), 
 			(self.doc.voucher_type, self.doc.voucher_no, self.doc.account))
 			
@@ -29,7 +28,7 @@ class DocType:
 		reconciled_payment = webnotes.conn.sql("""
 			select sum(ifnull(%s, 0)) - sum(ifnull(%s, 0)) from `tabGL Entry` where 
 			against_voucher = %s and voucher_no != %s
-			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
+			and account = %s""" % 
 			((self.doc.account_type == 'debit' and 'credit' or 'debit'), self.doc.account_type, 
 			 	'%s', '%s', '%s'), (self.doc.voucher_no, self.doc.voucher_no, self.doc.account))
 			
@@ -135,7 +134,6 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 	    where gle.account = '%(acc)s' 
 	    	and gle.voucher_type = '%(dt)s'
 			and gle.voucher_no like '%(txt)s'  
-			and ifnull(gle.is_cancelled, 'No') = 'No'
 	    	and (ifnull(gle.against_voucher, '') = '' 
 	    		or ifnull(gle.against_voucher, '') = gle.voucher_no ) 
 			and ifnull(gle.%(account_type)s, 0) > 0 
@@ -143,8 +141,7 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 				from `tabGL Entry` 
 	        	where against_voucher_type = '%(dt)s' 
 	        	and against_voucher = gle.voucher_no 
-	        	and voucher_no != gle.voucher_no 
-	        	and ifnull(is_cancelled, 'No') = 'No') 
+	        	and voucher_no != gle.voucher_no) 
 					!= abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)
 			) 
 			%(mcond)s

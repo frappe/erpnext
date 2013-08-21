@@ -91,15 +91,10 @@ def get_balance_on(account=None, date=None):
 	else:
 		cond.append("""gle.account = "%s" """ % (account, ))
 	
-	# join conditional conditions
-	cond = " and ".join(cond)
-	if cond:
-		cond += " and "
-	
 	bal = webnotes.conn.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		FROM `tabGL Entry` gle
-		WHERE %s ifnull(is_cancelled, 'No') = 'No' """ % (cond, ))[0][0]
+		WHERE %s""" % " and ".join(cond))[0][0]
 
 	# if credit account, it should calculate credit - debit
 	if bal and acc.debit_or_credit == 'Credit':
@@ -236,8 +231,7 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != ifnull(against_voucher, "")
-		and ifnull(is_cancelled, "No")="No" """,
+		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), webnotes.session.user, ref_type, ref_no))
 
 @webnotes.whitelist()

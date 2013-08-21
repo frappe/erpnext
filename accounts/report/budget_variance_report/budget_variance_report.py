@@ -87,7 +87,7 @@ def get_actual_details(filters):
 	return webnotes.conn.sql("""select gl.account, gl.debit, gl.credit, 
 		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
 		from `tabGL Entry` gl, `tabBudget Detail` bd 
-		where gl.fiscal_year=%s and company=%s and	is_cancelled='No' 
+		where gl.fiscal_year=%s and company=%s
 		and bd.account=gl.account""" % ('%s', '%s'), 
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 

@@ -311,7 +311,8 @@ class DocType(TransactionBase):
 		acc_head = webnotes.conn.sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
 		if acc_head:
 			tot_outstanding = 0
-			dbcr = webnotes.conn.sql("select sum(debit), sum(credit) from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No')='No'" % acc_head[0][0])
+			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
+				where account = %s""", acc_head[0][0])
 			if dbcr:
 				tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1])
 

@@ -19,6 +19,8 @@ def make_test_records(verbose):
 		["_Test Account Tax Assets", "Current Assets - _TC", "Group"],
 		["_Test Account VAT", "_Test Account Tax Assets - _TC", "Ledger"],
 		["_Test Account Service Tax", "_Test Account Tax Assets - _TC", "Ledger"],
+		
+		["_Test Account Reserves and Surplus", "Current Liabilities - _TC", "Ledger"],
 
 		["_Test Account Cost for Goods Sold", "Expenses - _TC", "Ledger"],
 		["_Test Account Excise Duty", "_Test Account Tax Assets - _TC", "Ledger"],

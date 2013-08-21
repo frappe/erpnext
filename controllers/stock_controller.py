@@ -23,7 +23,7 @@ class StockController(AccountsController):
 					"against": against_stock_account,
 					"debit": amount,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
+				}),
 				
 				# account against stock in hand
 				self.get_gl_dict({
@@ -32,7 +32,7 @@ class StockController(AccountsController):
 					"credit": amount,
 					"cost_center": cost_center or None,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock",
-				}, self.doc.docstatus == 2),
+				}),
 			]
 			
 			return gl_entries
