@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or, _round, add_days
+from webnotes.utils import cint, flt, comma_or, _round, add_days, cstr
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
