@@ -156,7 +156,8 @@ class DocType(StockController):
 		other_ste = [t[0] for t in webnotes.conn.get_values("Stock Entry",  {
 			"production_order": self.doc.production_order,
 			"purpose": self.doc.purpose,
-			"docstatus": ["!=", 2]
+			"docstatus": ["!=", 2],
+			"name": ["!=", self.doc.name]
 		}, "name")]
 		
 		if other_ste:
