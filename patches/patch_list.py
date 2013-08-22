@@ -228,7 +228,6 @@ patch_list = [
 	"execute:webnotes.delete_doc('Report', 'Received Items To Be Billed')",
 	"patches.july_2013.p02_copy_shipping_address",
 	"patches.july_2013.p03_cost_center_company",
-	"execute:webnotes.bean('Style Settings').save() #2013-07-16",
 	"patches.july_2013.p04_merge_duplicate_leads",
 	"patches.july_2013.p05_custom_doctypes_in_list_view",
 	"patches.july_2013.p06_same_sales_rate",
@@ -260,4 +259,5 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Stock Ledger')",
 	"patches.august_2013.p06_deprecate_cancelled_sl_entry",
 	"patches.august_2013.p06_fix_sle_against_stock_entry",
+	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
 ]

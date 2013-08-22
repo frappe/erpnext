@@ -231,11 +231,12 @@ class DocType(AccountsController):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.against_invoice and webnotes.conn.get_value("Sales Invoice", 
 					d.against_invoice, "debit_to") != d.account:
-				msgprint("Debit account is not matching with Sales Invoice", raise_exception=1)
+				webnotes.throw(_("Credited account (Customer) is not matching with Sales Invoice"))
 			
 			if d.against_voucher and webnotes.conn.get_value("Purchase Invoice", 
 						d.against_voucher, "credit_to") != d.account:
-				msgprint("Credit account is not matching with Purchase Invoice", raise_exception=1)
+				webnotes.throw(_("Debited account (Supplier) is not matching with \
+					Purchase Invoice"))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from accounts.general_ledger import make_gl_entries

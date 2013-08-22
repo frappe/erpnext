@@ -22,7 +22,7 @@
 	{% elif df.fieldtype == "Select" -%}
 	<fieldset>
 		<label>{{ df.label }}</label>
-		<select data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}">
+		<select class="form-control" data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}">
 			{% for value in df.options.split("\n") -%}
 			{% if doc and doc.fields.get(df.fieldname) == value -%}
 			<option selected="selected">{{ value }}</option>
