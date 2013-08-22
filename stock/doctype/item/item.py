@@ -272,4 +272,4 @@ class DocType(DocListController):
 			from stock.stock_ledger import update_entries_after
 			for wh in webnotes.conn.sql("""select warehouse from `tabBin` 
 				where item_code=%s""", newdn):
-					update_entries_after({"item_code": newdn, "warehouse": wh})
+					update_entries_after({"item_code": newdn, "warehouse": wh[0]})
