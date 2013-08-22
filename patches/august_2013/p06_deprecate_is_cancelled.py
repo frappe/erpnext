@@ -6,3 +6,6 @@ def execute():
 	
 	webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
 		where ifnull(is_cancelled, 'No') = 'Yes'""")
+		
+	webnotes.reload_doc("stock", "doctype", "gl_entry")
+	webnotes.conn.sql("""delete from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'Yes'""")

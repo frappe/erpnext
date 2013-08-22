@@ -31,6 +31,21 @@ class TestJournalVoucher(unittest.TestCase):
 		
 		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s""", jv_invoice.doc.name))
+			
+	def test_budget(self):
+		from accounts.utils import BudgetError
+		webnotes.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
+		
+		jv1 = webnotes.bean(copy=test_records[0])
+		jv1.doc.posting_date = "2013-02-12"
+		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
+		jv1.doclist[2].cost_center = "_Test Cost Center - _TC"
+		jv1.doclist[2].debit = 20000.0
+		jv1.doclist[1].credit = 20000.0
+		jv1.insert()
+		
+		self.assertRaises(BudgetError, jv1.submit)
+
 
 test_records = [
 	[{

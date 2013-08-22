@@ -1,1 +1,0 @@
-Backend scripts for Budget Management.

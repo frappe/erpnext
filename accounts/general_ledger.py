@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, cstr, now
 from webnotes.model.doc import Document
+from accounts.utils import validate_expense_against_budget
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
@@ -12,7 +13,6 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True,
 		if merge_entries:
 			gl_map = merge_similar_entries(gl_map)
 
-		check_budget(gl_map, cancel)
 		save_entries(gl_map, adv_adj, update_outstanding)
 	else:
 		delete_gl_entries(gl_map, adv_adj, update_outstanding)
@@ -54,20 +54,21 @@ def check_budget(gl_map, cancel):
 
 def save_entries(gl_map, adv_adj, update_outstanding):
 	total_debit = total_credit = 0.0
-	def _swap(gle):
-		gle.debit, gle.credit = abs(flt(gle.credit)), abs(flt(gle.debit))
+	def _swap(entry):
+		entry["debit"], entry["credit"] = abs(flt(entry["credit"])), abs(flt(entry["debit"]))
 	
 	for entry in gl_map:
-		gle = Document('GL Entry', fielddata=entry)
-		
 		# round off upto 2 decimal
-		gle.debit = flt(gle.debit, 2)
-		gle.credit = flt(gle.credit, 2)
+		entry["debit"] = flt(entry["debit"], 2)
+		entry["credit"] = flt(entry["credit"], 2)
 		
 		# toggle debit, credit if negative entry
-		if flt(gle.debit) < 0 or flt(gle.credit) < 0:
-			_swap(gle)
+		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
+			_swap(entry)
 
+		validate_expense_against_budget(entry)
+		
+		gle = Document('GL Entry', fielddata=entry)
 		gle_obj = webnotes.get_obj(doc=gle)
 		gle_obj.validate()
 		gle.save(1)
@@ -96,10 +97,9 @@ def delete_gl_entries(gl_entries, adv_adj, update_outstanding):
 	for entry in gl_entries:
 		validate_freezed_account(entry["account"], adv_adj)
 		check_negative_balance(entry["account"], adv_adj)
+		validate_expense_against_budget(entry)
+		
 		if entry.get("against_voucher") and entry.get("against_voucher_type") != "POS" \
 			and update_outstanding == 'Yes':
 				update_outstanding_amt(entry["account"], entry.get("against_voucher_type"), 
 					entry.get("against_voucher"))
-					
-	# To-do 
-	# Check and update budget for expense account

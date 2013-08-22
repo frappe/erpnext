@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import nowdate, nowtime, cstr, flt, now
+from webnotes.utils import nowdate, nowtime, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
@@ -12,6 +12,8 @@ from utilities import build_filter_conditions
 
 
 class FiscalYearError(webnotes.ValidationError): pass
+class BudgetError(webnotes.ValidationError): pass
+
 
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
 	return get_fiscal_years(date, fiscal_year, label, verbose=1)[0]
@@ -373,7 +375,6 @@ def get_stock_and_account_difference(warehouse_list=None):
 
 	return difference
 
-
 def validate_expense_against_budget(args):
 	args = webnotes._dict(args)
 	if webnotes.conn.get_value("Account", {"name": args.account, "is_pl_account": "Yes", 
@@ -385,18 +386,60 @@ def validate_expense_against_budget(args):
 			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
 			
 			if budget and budget[0].budget_allocated:
-				action = webnotes.conn.get_value("Company", args.company, 
+				yearly_action, monthly_action = webnotes.conn.get_value("Company", args.company, 
 					["yearly_bgt_flag", "monthly_bgt_flag"])
+				action_for = action = ""
+
+				if monthly_action in ["Stop", "Warn"]:
+					budget_amount = get_allocated_budget(budget[0].distribution_id, 
+						args.posting_date, args.fiscal_year, budget[0].budget_allocated)
 					
-				args["month_end_date"] = webnotes.conn.sql("select LAST_DAY(%s)", args.posting_date)
-				
-				expense_upto_date = get_actual_expense(args)
+					month_end_date = webnotes.conn.sql("select LAST_DAY(%s)", args.posting_date)
+					args["condition"] = " and posting_date<='%s'" % month_end_date
+					action_for, action = "Monthly", monthly_action
+					
+				elif yearly_action in ["Stop", "Warn"]:
+					budget_amount = budget[0].budget_allocated
+					action_for, action = "Monthly", yearly_action
+				print budget_amount
+				if action_for:
+					actual_expense = get_actual_expense(args)
+					print actual_expense
+					if actual_expense > budget_amount:
+						webnotes.msgprint(action_for + _(" budget ") + cstr(budget_amount) + 
+							_(" for account ") + args.account + _(" against cost center ") + 
+							args.cost_center + _(" will exceed by ") + 
+							cstr(actual_expense - budget_amount) + _(" after this transaction.")
+							, raise_exception=BudgetError if action=="Stop" else False)
+					
+def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
+	if distribution_id:
+		distribution = {}
+		for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation 
+			from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
+			where bdd.parent=bd.name and bd.fiscal_year=%s""", fiscal_year, as_dict=1):
+				distribution.setdefault(d.month, d.percentage_allocation)
+	print distribution
+	dt = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
+	budget_percentage = 0.0
+	
+	while(dt <= getdate(posting_date)):
+		print dt, posting_date
+		if distribution_id:
+			print getdate(dt).month
+			print distribution.get(getdate(dt).month)
+			budget_percentage += distribution.get(getdate(dt).month, 0)
+		else:
+			budget_percentage += 100.0/12
+			
+		dt = add_months(dt, 1)
+		
+	return yearly_budget * budget_percentage / 100
 				
 def get_actual_expense(args):
 	return webnotes.conn.sql("""
 		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
 		where account=%(account)s and cost_center=%(cost_center)s 
-		and posting_date<=%(month_end_date)s 
-		and fiscal_year=%(fiscal_year)s and company=%(company)s
+		and fiscal_year=%(fiscal_year)s and company=%(company)s %(condition)s
 	""", (args))[0][0]
