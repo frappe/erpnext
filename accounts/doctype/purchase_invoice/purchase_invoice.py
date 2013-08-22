@@ -127,9 +127,9 @@ class DocType(BuyingController):
 			if not self.doc.remarks and self.doc.bill_date:
 				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" 
 					% (self.doc.bill_no, formatdate(self.doc.bill_date)))
-		else:
-			if not self.doc.remarks:
-				self.doc.remarks = "No Remarks"
+
+		if not self.doc.remarks:
+			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
 		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 

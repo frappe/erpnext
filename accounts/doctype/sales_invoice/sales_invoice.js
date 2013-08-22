@@ -255,13 +255,13 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 
 cur_frm.cscript.make_bank_voucher = function() {
 	return wn.call({
-		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+		method: "accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
 		args: {
-			"company": cur_frm.doc.company,
-			"voucher_type": "Bank Voucher"
+			"sales_invoice": cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
+			var doclist = wn.model.sync(r.message);
+			wn.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
 }
@@ -394,34 +394,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	}
 	refresh_field(cur_frm.cscript.fname);
 }
-
-// Make Journal Voucher
-// --------------------
-cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
-	var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
-	jv = locals['Journal Voucher'][jv];
-	jv.voucher_type = 'Bank Voucher';
-
-	jv.company = doc.company;
-	jv.remark = repl('Payment received against invoice %(vn)s for %(rem)s', {vn:doc.name, rem:doc.remarks});
-	jv.fiscal_year = doc.fiscal_year;
-
-	// debit to creditor
-	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = doc.debit_to;
-	d1.credit = doc.outstanding_amount;
-	d1.against_invoice = doc.name;
-
-
-	// credit to bank
-	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = bank_account.account;
-	d1.debit = doc.outstanding_amount;
-	d1.balance = bank_account.balance;
-
-	loaddoc('Journal Voucher', jv.name);
-}
-
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_invoice)) {

@@ -339,11 +339,72 @@ def get_default_bank_cash_account(company, voucher_type):
 	account = webnotes.conn.get_value("Company", company,
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 	if account:
-		return [{
+		return {
 			"account": account,
 			"balance": get_balance_on(account)
-		}]
+		}
+		
+@webnotes.whitelist()
+def get_payment_entry_from_sales_invoice(sales_invoice):
+	from accounts.utils import get_balance_on
+	si = webnotes.bean("Sales Invoice", sales_invoice)
+	jv = get_payment_entry(si.doc)
+	jv.doc.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.doc.fields
 
+	# credit customer
+	jv.doclist[1].account = si.doc.debit_to
+	jv.doclist[1].balance = get_balance_on(si.doc.debit_to)
+	jv.doclist[1].credit = si.doc.outstanding_amount
+	jv.doclist[1].against_invoice = si.doc.name
+
+	# debit bank
+	jv.doclist[2].debit = si.doc.outstanding_amount
+	
+	return [d.fields for d in jv.doclist]
+
+@webnotes.whitelist()
+def get_payment_entry_from_purchase_invoice(purchase_invoice):
+	from accounts.utils import get_balance_on
+	pi = webnotes.bean("Purchase Invoice", purchase_invoice)
+	jv = get_payment_entry(pi.doc)
+	jv.doc.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.doc.fields
+	
+	# credit supplier
+	jv.doclist[1].account = pi.doc.credit_to
+	jv.doclist[1].balance = get_balance_on(pi.doc.credit_to)
+	jv.doclist[1].debit = pi.doc.outstanding_amount
+	jv.doclist[1].against_voucher = pi.doc.name
+
+	# credit bank
+	jv.doclist[2].credit = pi.doc.outstanding_amount
+	
+	return [d.fields for d in jv.doclist]
+
+def get_payment_entry(doc):
+	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
+	
+	jv = webnotes.new_bean('Journal Voucher')
+	jv.doc.voucher_type = 'Bank Voucher'
+
+	jv.doc.company = doc.company
+	jv.doc.fiscal_year = doc.fiscal_year
+
+	jv.doclist.append({
+		"doctype": "Journal Voucher Detail",
+		"parentfield": "entries"
+	})
+
+	jv.doclist.append({
+		"doctype": "Journal Voucher Detail",
+		"parentfield": "entries"
+	})
+	
+	if bank_account:
+		jv.doclist[2].account = bank_account["account"]
+		jv.doclist[2].balance = bank_account["balance"]
+	
+	return jv
+	
 @webnotes.whitelist()
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
