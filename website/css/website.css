@@ -148,8 +148,15 @@ div.web-footer {
 	}
 }
 
-.accordion-heading, .accordion-inner {
-	padding-left: 10px;
+.panel-heading, 
+.panel-body {
+	padding-left: 15px;
+}
+
+
+.breadcrumb {
+	margin: 0px -20px;
+	margin-bottom: 20px;
 }
 
 fieldset {
