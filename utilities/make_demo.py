@@ -3,6 +3,7 @@
 
 import webnotes, os, datetime
 import webnotes.utils
+from webnotes.utils import random_string
 from webnotes.widgets import query_report
 import random
 import json
@@ -14,10 +15,12 @@ from core.page.data_import_tool.data_import_tool import upload
 # fix fiscal year
 
 company = "Wind Power LLC"
+company_abbr = "WP"
 country = "United States"
 currency = "USD"
 time_zone = "America/New York"
 start_date = '2010-01-01'
+bank_name = "Citibank"
 runs_for = 20
 prob = {
 	"default": { "make": 0.6, "qty": (1,5) },
@@ -41,6 +44,7 @@ def setup():
 	make_customers_suppliers_contacts()
 	make_items()
 	make_users_and_employees()
+	make_bank_account()
 	# make_opening_stock()
 	# make_opening_accounts()
 
@@ -66,6 +70,7 @@ def simulate():
 		run_purchase(current_date)
 		run_manufacturing(current_date)
 		run_stock(current_date)
+		run_accounts(current_date)
 		
 def run_sales(current_date):
 	if can_make("Quotation"):
@@ -75,6 +80,52 @@ def run_sales(current_date):
 	if can_make("Sales Order"):
 		for i in xrange(how_many("Sales Order")):
 			make_sales_order(current_date)
+
+def run_accounts(current_date):
+	if can_make("Sales Invoice"):
+		from selling.doctype.sales_order.sales_order import make_sales_invoice
+		report = "Ordered Items to be Billed"
+		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Sales Invoice")]:
+			si = webnotes.bean(make_sales_invoice(so))
+			si.doc.posting_date = current_date
+			si.insert()
+			si.submit()
+			webnotes.conn.commit()
+
+	if can_make("Purchase Invoice"):
+		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		report = "Received Items to be Billed"
+		for pr in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Invoice")]:
+			pi = webnotes.bean(make_purchase_invoice(pr))
+			pi.doc.posting_date = current_date
+			pi.doc.bill_no = random_string(6)
+			pi.insert()
+			pi.submit()
+			webnotes.conn.commit()
+			
+	if can_make("Payment Received"):
+		from accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_sales_invoice
+		report = "Accounts Receivable"
+		for si in list(set([r[4] for r in query_report.run(report, {"report_date": current_date })["result"] if r[3]=="Sales Invoice"]))[:how_many("Payment Received")]:
+			jv = webnotes.bean(get_payment_entry_from_sales_invoice(si))
+			jv.doc.posting_date = current_date
+			jv.doc.cheque_no = random_string(6)
+			jv.doc.cheque_date = current_date
+			jv.insert()
+			jv.submit()
+			webnotes.conn.commit()
+			
+	if can_make("Payment Made"):
+		from accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_purchase_invoice
+		report = "Accounts Payable"
+		for pi in list(set([r[4] for r in query_report.run(report, {"report_date": current_date })["result"] if r[3]=="Purchase Invoice"]))[:how_many("Payment Made")]:
+			jv = webnotes.bean(get_payment_entry_from_purchase_invoice(pi))
+			jv.doc.posting_date = current_date
+			jv.doc.cheque_no = random_string(6)
+			jv.doc.cheque_date = current_date
+			jv.insert()
+			jv.submit()
+			webnotes.conn.commit()
 
 def run_stock(current_date):
 	# make purchase requests
@@ -112,8 +163,6 @@ def run_stock(current_date):
 		b = webnotes.bean("Delivery Note", dn[0])
 		b.submit()
 		webnotes.conn.commit()
-	
-	
 	
 def run_purchase(current_date):
 	# make material requests for purchase items that have negative projected qtys
@@ -310,7 +359,7 @@ def complete_setup():
 		"fy_start": "1st Jan",
 		"industry": "Manufacturing",
 		"company_name": company,
-		"company_abbr": "WP",
+		"company_abbr": company_abbr,
 		"currency": currency,
 		"timezone": time_zone,
 		"country": country
@@ -330,7 +379,19 @@ def make_users_and_employees():
 	webnotes.conn.commit()
 	
 	import_data(["Profile", "Employee", "Salary_Structure"])
+
+def make_bank_account():
+	ba = webnotes.bean({
+		"doctype": "Account",
+		"account_name": bank_name,
+		"account_type": "Bank or Cash",
+		"group_or_ledger": "Ledger",
+		"parent_account": "Bank Accounts - " + company_abbr,
+		"company": company
+	}).insert()
 	
+	webnotes.set_value("Company", company, "default_bank_account", ba.doc.name)
+
 def import_data(dt, submit=False):
 	if not isinstance(dt, (tuple, list)):
 		dt = [dt]
