@@ -372,3 +372,31 @@ def get_stock_and_account_difference(warehouse_list=None):
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 
 	return difference
+
+
+def validate_expense_against_budget(args):
+	args = webnotes._dict(args)
+	if webnotes.conn.get_value("Account", {"name": args.account, "is_pl_account": "Yes", 
+		"debit_or_credit": "Debit"}):
+			budget = webnotes.conn.sql("""
+				select bd.budget_allocated, cc.distribution_id 
+				from `tabCost Center` cc, `tabBudget Detail` bd
+				where cc.name=bd.parent and cc.name=%s and account=%s and bd.fiscal_year=%s
+			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
+			
+			if budget and budget[0].budget_allocated:
+				action = webnotes.conn.get_value("Company", args.company, 
+					["yearly_bgt_flag", "monthly_bgt_flag"])
+					
+				args["month_end_date"] = webnotes.conn.sql("select LAST_DAY(%s)", args.posting_date)
+				
+				expense_upto_date = get_actual_expense(args)
+				
+def get_actual_expense(args):
+	return webnotes.conn.sql("""
+		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+		from `tabGL Entry`
+		where account=%(account)s and cost_center=%(cost_center)s 
+		and posting_date<=%(month_end_date)s 
+		and fiscal_year=%(fiscal_year)s and company=%(company)s
+	""", (args))[0][0]
