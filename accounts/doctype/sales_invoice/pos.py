@@ -9,14 +9,18 @@ def get_items(price_list, item=None, item_group=None):
 	condition = ""
 	
 	if item_group and item_group != "All Item Groups":
-		condition = "where i.item_group='%s'" % item_group
+		condition = "and i.item_group='%s'" % item_group
 
 	if item:
-		condition = "where i.name='%s'" % item
+		condition = "and i.name='%s'" % item
 
-	return webnotes.conn.sql("""select i.name, i.item_name, i.image, ip.ref_rate, 
-		ip.ref_currency from `tabItem` i LEFT JOIN `tabItem Price` ip ON ip.parent=i.name 
-		and ip.price_list=%s %s""" % ('%s', condition), (price_list), as_dict=1)
+	return webnotes.conn.sql("""select 
+		i.name, i.item_name, i.image, ip.ref_rate, ip.ref_currency 
+		from `tabItem` i LEFT JOIN `tabItem Price` ip 
+			ON ip.parent=i.name 
+			and ip.price_list=%s 
+		where
+			i.is_sales_item='Yes'%s""" % ('%s', condition), (price_list), as_dict=1)
 
 @webnotes.whitelist()
 def get_item_from_barcode(barcode):

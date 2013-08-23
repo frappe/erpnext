@@ -26,8 +26,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 		
-		pos_view = cint(sys_defaults.fs_pos_view);
-		if(this.frm.doc.is_pos && this.frm.doc.docstatus===0 && pos_view===1) {
+		if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
 			cur_frm.cscript.toggle_pos(true);
 		}
 	},
@@ -60,7 +59,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
-		if (this.frm.doc.docstatus===0) {
+		if (doc.docstatus===0) {
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
@@ -97,11 +96,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			
 			if (cint(sys_defaults.fs_pos_view)===1)
 				cur_frm.cscript.pos_btn();
+				
+			setTimeout(function() { cur_frm.$pos_btn.click(); }, 1000);
+				
+		} else {
+			// hide shown pos for submitted records
+			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
 	},
 
 	pos_btn: function() {
-		if(cur_frm.$pos_btn) cur_frm.$pos_btn.remove();
+		if(cur_frm.$pos_btn) 
+			cur_frm.$pos_btn.remove();
 
 		if(!cur_frm.pos_active) {
 			var btn_label = wn._("POS View"),
@@ -111,11 +117,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				icon = "icon-file-text";
 		}
 
-		cur_frm.add_custom_button(btn_label, function() {
-			cur_frm.$pos_btn = $(this);
+		cur_frm.$pos_btn = cur_frm.add_custom_button(btn_label, function() {
 			cur_frm.cscript.toggle_pos();
 			cur_frm.cscript.pos_btn();
 		}, icon);
+		
 	},
 
 	toggle_pos: function(show) {

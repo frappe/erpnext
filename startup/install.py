@@ -72,7 +72,7 @@ def feature_setup():
 		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
 		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
-		'fs_page_break', 'fs_more_info'
+		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
 	doc.fields.update(dict(zip(flds, [1]*len(flds))))
 	doc.save()

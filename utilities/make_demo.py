@@ -24,13 +24,14 @@ bank_name = "Citibank"
 runs_for = 20
 prob = {
 	"default": { "make": 0.6, "qty": (1,5) },
+	"Sales Order": { "make": 0.4, "qty": (1,3) },
 	"Purchase Order": { "make": 0.7, "qty": (1,15) },
 	"Purchase Receipt": { "make": 0.7, "qty": (1,15) },
 }
 
 def make(reset=False):
 	webnotes.connect()
-	webnotes.print_messages = True
+	#webnotes.print_messages = True
 	webnotes.mute_emails = True
 	webnotes.rollback_on_exception = True
 	
