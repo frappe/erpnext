@@ -97,8 +97,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if (cint(sys_defaults.fs_pos_view)===1)
 				cur_frm.cscript.pos_btn();
 				
-			setTimeout(function() { cur_frm.$pos_btn.click(); }, 1000);
-				
 		} else {
 			// hide shown pos for submitted records
 			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);

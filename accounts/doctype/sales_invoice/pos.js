@@ -160,9 +160,12 @@ erpnext.POS = Class.extend({
 			parent: this.wrapper.find(".barcode-area")
 		});
 		this.barcode.make_input();
-		this.barcode.$input.on("change", function() {
-			me.add_item_thru_barcode();
+		this.barcode.$input.on("keypress", function() {
+			setTimeout(function() { me.barcode_timeout(); }, 1000);
 		});
+	},
+	barcode_timeout: function() {
+		me.add_item_thru_barcode();
 	},
 	make_item_list: function() {
 		var me = this;
@@ -178,7 +181,7 @@ erpnext.POS = Class.extend({
 				me.wrapper.find(".item-list").empty();
 				$.each(r.message, function(index, obj) {
 					if (obj.image)
-						image = "<img src='" + obj.image + "' class='img-responsive'>";
+						image = '<img src="' + obj.image + '" class="img-responsive" style="border: 1px solid #eee;">';
 					else
 						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
@@ -230,7 +233,6 @@ erpnext.POS = Class.extend({
 			var child = wn.model.add_child(me.frm.doc, "Sales Invoice Item", "entries");
 			child.item_code = item_code;
 			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
-			//me.refresh();
 		}
 	},
 	update_qty: function(item_code, qty) {
@@ -262,7 +264,7 @@ erpnext.POS = Class.extend({
 					<td>%(item_code)s%(item_name)s</td>\
 					<td><input type="text" value="%(qty)s" \
 						class="form-control qty" style="text-align: right;"></td>\
-					<td style="text-align: right;">%(rate)s<br><b>%(amount)s</b></td>\
+					<td style="text-align: right;"><b>%(amount)s</b><br>%(rate)s</td>\
 				</tr>',
 				{
 					item_code: d.item_code,
@@ -297,14 +299,18 @@ erpnext.POS = Class.extend({
 		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
 			cur_frm.doc.price_list_currency));
 
+		$("input.qty").on("focus", function() {
+			$(this).select();
+		});
+
 		// append quantity to the respective item after change from input box
 		$("input.qty").on("change", function() {
 			var item_code = $(this).closest("tr")[0].id;
 			me.update_qty(item_code, $(this).val());
 		});
 
-		// on td click highlight the respective row
-		$("td").on("click", function() {
+		// on td click toggle the highlighting of row
+		$("#cart tbody tr td").on("click", function() {
 			var row = $(this).closest("tr");
 			if (row.attr("data-selected") == "false") {
 				row.attr("class", "warning");
@@ -319,22 +325,25 @@ erpnext.POS = Class.extend({
 		});
 		
 		me.refresh_delete_btn();
+		cur_frm.pos.barcode.$input.focus();
 	},
 	refresh_delete_btn: function() {
 		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
+		clearTimeout();
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_barcode',
 			args: {barcode: this.barcode.$input.val()},
 			callback: function(r) {
 				if (r.message) {
 					me.add_to_cart(r.message[0].name);
-					me.refresh();
 				}
 				else
 					msgprint(wn._("Invalid Barcode"));
+
+				me.refresh();
 			}
 		});
 	},
@@ -348,9 +357,6 @@ erpnext.POS = Class.extend({
 				selected_items.push(row.attr("id"));
 			}
 		}
-
-		if (!selected_items[0])
-			msgprint(wn._("Please select any item to remove it"));
 		
 		var child = wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
 		"Sales Invoice");
@@ -362,6 +368,7 @@ erpnext.POS = Class.extend({
 			}
 		});
 		cur_frm.fields_dict["entries"].grid.refresh();
+		cur_frm.script_manager.trigger("calculate_taxes_and_totals");
 		me.refresh();
 	},
 	make_payment: function() {
