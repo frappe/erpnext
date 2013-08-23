@@ -18,10 +18,10 @@ class DocType:
 		self.validate_posting_date()
 		self.check_credit_limit()
 		self.check_pl_account()
-
-	def on_update(self, adv_adj, update_outstanding = 'Yes'):
-		self.validate_account_details(adv_adj)
 		self.validate_cost_center()
+
+	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
+		self.validate_account_details(adv_adj)
 		validate_freezed_account(self.doc.account, adv_adj)
 		check_freezing_date(self.doc.posting_date, adv_adj)
 		check_negative_balance(self.doc.account, adv_adj)

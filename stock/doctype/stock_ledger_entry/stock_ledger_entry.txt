@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-08-20 15:02:48", 
+  "modified": "2013-08-23 12:23:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -221,6 +221,14 @@
   "label": "Stock Value", 
   "oldfieldname": "stock_value", 
   "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_value_difference", 
+  "fieldtype": "Currency", 
+  "label": "Stock Value Difference", 
   "options": "Company:company:default_currency", 
   "read_only": 1
  }, 

@@ -49,7 +49,7 @@ class DocType(AccountsController):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
 		
-		self.make_gl_entries()
+		self.make_gl_entries(1)
 		
 	def on_trash(self):
 		pass
@@ -258,7 +258,7 @@ class DocType(AccountsController):
 					})
 				)
 		if gl_map:
-			make_gl_entries(gl_map, cancel=self.doc.docstatus==2, adv_adj=adv_adj)
+			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 
 	def get_outstanding(self, args):
 		args = eval(args)

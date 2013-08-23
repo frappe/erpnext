@@ -49,6 +49,13 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.insert()
 		dn.submit()
 		
+		stock_value, stock_value_difference = webnotes.conn.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.doc.name, 
+				"item_code": "_Test Item"}, ["stock_value", "stock_value_difference"])
+		self.assertEqual(stock_value, 0)
+		self.assertEqual(stock_value_difference, -375)
+			
+		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Delivery Note' and voucher_no=%s
 			order by account desc""", dn.doc.name, as_dict=1)

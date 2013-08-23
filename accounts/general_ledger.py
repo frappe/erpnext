@@ -66,19 +66,23 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
 			_swap(entry)
 		
-		gle = Document('GL Entry', fielddata=entry)
-		gle_obj = webnotes.get_obj(doc=gle)
-		gle_obj.validate()
-		gle.save(1)
-		gle_obj.on_update(adv_adj, update_outstanding)
+		make_entry(entry, adv_adj, update_outstanding)
 		
 		validate_expense_against_budget(entry)
 
 		# update total debit / credit
-		total_debit += flt(gle.debit)
-		total_credit += flt(gle.credit)
-				
+		total_debit += flt(entry["debit"])
+		total_credit += flt(entry["credit"])
+		
 	validate_total_debit_credit(total_debit, total_credit)
+	
+def make_entry(args, adv_adj, update_outstanding):
+	args.update({"doctype": "GL Entry"})
+	gle = webnotes.bean([args])
+	gle.ignore_permissions = 1
+	gle.insert()
+	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
+	gle.submit()
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
@@ -102,4 +106,4 @@ def delete_gl_entries(gl_entries, adv_adj, update_outstanding):
 		if entry.get("against_voucher") and entry.get("against_voucher_type") != "POS" \
 			and update_outstanding == 'Yes':
 				update_outstanding_amt(entry["account"], entry.get("against_voucher_type"), 
-					entry.get("against_voucher"))
+					entry.get("against_voucher"), on_cancel=True)

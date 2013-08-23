@@ -46,7 +46,7 @@ def make_entry(args):
 	sle = webnotes.bean([args])
 	sle.ignore_permissions = 1
 	sle.insert()
-	# sle.submit()
+	sle.submit()
 	return sle.doc.name
 	
 def delete_cancelled_entry(voucher_type, voucher_no):
@@ -74,12 +74,13 @@ def update_entries_after(args, verbose=1):
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
 	valuation_rate = flt(previous_sle.get("valuation_rate"))
 	stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
-	stock_value = flt(previous_sle.get("stock_value"))
+	prev_stock_value = stock_value = flt(previous_sle.get("stock_value"))
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
 
 	valuation_method = get_valuation_method(args["item_code"])
+	stock_value_difference = 0.0
 	
 	for sle in entries_to_fix:
 		if sle.serial_no or not cint(webnotes.conn.get_default("allow_negative_stock")):
@@ -107,12 +108,15 @@ def update_entries_after(args, verbose=1):
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
 			
+		stock_value_difference = stock_value - prev_stock_value
+		prev_stock_value = stock_value
+			
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
-			stock_value=%s where name=%s""", 
+			stock_value=%s, stock_value_difference=%s where name=%s""", 
 			(qty_after_transaction, valuation_rate,
-			json.dumps(stock_queue), stock_value, sle.name))
+			json.dumps(stock_queue), stock_value, stock_value_difference, sle.name))
 	
 	if _exceptions:
 		_raise_exceptions(args, verbose)

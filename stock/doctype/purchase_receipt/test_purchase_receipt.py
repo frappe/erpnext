@@ -39,6 +39,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
+		stock_value, stock_value_difference = webnotes.conn.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.doc.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
+			["stock_value", "stock_value_difference"])
+		self.assertEqual(stock_value, 375)
+		self.assertEqual(stock_value_difference, 375)
+		
+		bin_stock_value = webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+		self.assertEqual(bin_stock_value, 375)
+		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
 			order by account desc""", pr.doc.name, as_dict=1)
