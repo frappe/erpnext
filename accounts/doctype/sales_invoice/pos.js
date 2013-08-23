@@ -288,7 +288,7 @@ erpnext.POS = Class.extend({
 			<tr>', {
 				description: d.description,
 				tax_amount: format_currency(d.tax_amount, me.frm.doc.price_list_currency)
-			})).appendTo(".tax-table tbody")
+			})).appendTo(".tax-table tbody");
 		});
 
 		// set totals
