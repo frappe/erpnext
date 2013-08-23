@@ -9,6 +9,21 @@ test_records = [
 	}, {
 		"doctype": "Budget Distribution Detail",
 		"parentfield": "budget_distribution_details",
+		"month": "January",
+		"percentage_allocation": "8"
+	}, {
+		"doctype": "Budget Distribution Detail",
+		"parentfield": "budget_distribution_details",
+		"month": "February",
+		"percentage_allocation": "8"
+	}, {
+		"doctype": "Budget Distribution Detail",
+		"parentfield": "budget_distribution_details",
+		"month": "March",
+		"percentage_allocation": "8"
+	}, {
+		"doctype": "Budget Distribution Detail",
+		"parentfield": "budget_distribution_details",
 		"month": "April",
 		"percentage_allocation": "8"
 	}, {
@@ -45,26 +60,11 @@ test_records = [
 		"doctype": "Budget Distribution Detail",
 		"parentfield": "budget_distribution_details",
 		"month": "November",
-		"percentage_allocation": "8"
-	}, {
-		"doctype": "Budget Distribution Detail",
-		"parentfield": "budget_distribution_details",
-		"month": "December",
-		"percentage_allocation": "8"
-	}, {
-		"doctype": "Budget Distribution Detail",
-		"parentfield": "budget_distribution_details",
-		"month": "January",
-		"percentage_allocation": "8"
-	}, {
-		"doctype": "Budget Distribution Detail",
-		"parentfield": "budget_distribution_details",
-		"month": "February",
 		"percentage_allocation": "10"
 	}, {
 		"doctype": "Budget Distribution Detail",
 		"parentfield": "budget_distribution_details",
-		"month": "March",
+		"month": "December",
 		"percentage_allocation": "10"
 	}]
 ]

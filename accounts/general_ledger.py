@@ -65,14 +65,14 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		# toggle debit, credit if negative entry
 		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
 			_swap(entry)
-
-		validate_expense_against_budget(entry)
 		
 		gle = Document('GL Entry', fielddata=entry)
 		gle_obj = webnotes.get_obj(doc=gle)
 		gle_obj.validate()
 		gle.save(1)
 		gle_obj.on_update(adv_adj, update_outstanding)
+		
+		validate_expense_against_budget(entry)
 
 		# update total debit / credit
 		total_debit += flt(gle.debit)

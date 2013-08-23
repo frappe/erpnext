@@ -394,17 +394,16 @@ def validate_expense_against_budget(args):
 					budget_amount = get_allocated_budget(budget[0].distribution_id, 
 						args.posting_date, args.fiscal_year, budget[0].budget_allocated)
 					
-					month_end_date = webnotes.conn.sql("select LAST_DAY(%s)", args.posting_date)
-					args["condition"] = " and posting_date<='%s'" % month_end_date
+					args["month_end_date"] = webnotes.conn.sql("select LAST_DAY(%s)", 
+						args.posting_date)[0][0]
 					action_for, action = "Monthly", monthly_action
 					
 				elif yearly_action in ["Stop", "Warn"]:
 					budget_amount = budget[0].budget_allocated
 					action_for, action = "Monthly", yearly_action
-				print budget_amount
+
 				if action_for:
 					actual_expense = get_actual_expense(args)
-					print actual_expense
 					if actual_expense > budget_amount:
 						webnotes.msgprint(action_for + _(" budget ") + cstr(budget_amount) + 
 							_(" for account ") + args.account + _(" against cost center ") + 
@@ -419,16 +418,13 @@ def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budg
 			from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 			where bdd.parent=bd.name and bd.fiscal_year=%s""", fiscal_year, as_dict=1):
 				distribution.setdefault(d.month, d.percentage_allocation)
-	print distribution
+
 	dt = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
 	budget_percentage = 0.0
 	
 	while(dt <= getdate(posting_date)):
-		print dt, posting_date
 		if distribution_id:
-			print getdate(dt).month
-			print distribution.get(getdate(dt).month)
-			budget_percentage += distribution.get(getdate(dt).month, 0)
+			budget_percentage += distribution.get(getdate(dt).strftime("%B"), 0)
 		else:
 			budget_percentage += 100.0/12
 			
@@ -437,9 +433,12 @@ def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budg
 	return yearly_budget * budget_percentage / 100
 				
 def get_actual_expense(args):
+	args["condition"] = " and posting_date<='%s'" % args.month_end_date \
+		if args.get("month_end_date") else ""
+		
 	return webnotes.conn.sql("""
 		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
-		where account=%(account)s and cost_center=%(cost_center)s 
-		and fiscal_year=%(fiscal_year)s and company=%(company)s %(condition)s
-	""", (args))[0][0]
+		where account='%(account)s' and cost_center='%(cost_center)s' 
+		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
+	""" % (args))[0][0]
