@@ -32,7 +32,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		
 		if(this.other_fname) {
-			this[this.fname + "_remove"] = this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
+			this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
+		}
+		
+		if(this.fname) {
+			this[this.fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
 	},
 	
