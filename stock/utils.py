@@ -193,8 +193,7 @@ def reorder_item():
 			and exists (select name from `tabItem` 
 				where `tabItem`.name = `tabBin`.item_code and 
 				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
-				(ifnull(end_of_life, '')='') or end_of_life > now())""",
-			as_dict=True)
+				(ifnull(end_of_life, '')='' or end_of_life > now()))""", as_dict=True)
 		for bin in bin_list:
 			#check if re-order is required
 			item_reorder = webnotes.conn.get("Item Reorder", 
