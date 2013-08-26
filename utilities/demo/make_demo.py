@@ -266,11 +266,11 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	from stock.stock_ledger import NegativeStockError
 	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
-	st = webnotes.bean(make_stock_entry(pro_id, purpose))
-	st.doc.posting_date = current_date
-	st.doc.fiscal_year = "2013"
-	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
+		st = webnotes.bean(make_stock_entry(pro_id, purpose))
+		st.doc.posting_date = current_date
+		st.doc.fiscal_year = "2013"
+		st.doc.expense_adjustment_account = "Stock in Hand - WP"
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()
@@ -278,7 +278,7 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	except NegativeStockError: pass
 	except IncorrectValuationRateError: pass
 	except DuplicateEntryForProductionOrderError: pass
-
+	
 def make_quotation(current_date):
 	b = webnotes.bean([{
 		"creation": current_date,

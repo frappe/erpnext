@@ -73,7 +73,7 @@ def make_demo_on_login_script():
 		s.doc.script = dfile.read()
 
 if __name__=="__main__":
-	webnotes.connect()
+	# webnotes.connect()
 	webnotes.mute_emails = 1
 	make_demo_app()
 	make_demo_user()
