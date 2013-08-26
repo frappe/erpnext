@@ -76,6 +76,9 @@ def make_demo_on_login_script():
 	s.doc.script_type = "Server"
 	with open(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), "r") as dfile:
 		s.doc.script = dfile.read()
+	s.insert()
+
+	webnotes.conn.commit()
 
 if __name__=="__main__":
 	# webnotes.connect()
