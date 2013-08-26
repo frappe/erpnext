@@ -36,6 +36,11 @@ def make_demo_user():
 		})
 
 	p.save()
+	
+	# only read for newsletter
+	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
+		where parent='Newsletter'""")
+	
 	webnotes.conn.commit()
 
 def make_demo_login_page():
