@@ -3,9 +3,9 @@
 	"_label": "Sales Invoice"
 }
 ---
-A Sales Invoice is a bill you send to your Customers against which they will process your payment. 
+A Sales Invoice is a bill that you send to your Customers, against which they will process your payment. 
 
-If you have managed to create Sales Orders or Delivery Notes, creating a Sales Invoice should be more of the same. 
+If you have managed to create Sales Orders or Delivery Notes, creating a Sales Invoice follows the same process. 
 
 You can create a Sales Invoice directly from
 
@@ -21,7 +21,7 @@ All Sales must be booked against an “Income Account”. This refers to an Acco
 
 The other account that is affected is the Account of the Customer. That is automatically set from “Debit To” in the heading section.
 
-You must also mention the Cost Centers in which your Income must be booked. Remember that your Cost Centers tell you the profitability of the different lines of business or product. Again, you can set a default Cost Center in your Item master.
+You must also mention the Cost Centers in which your Income must be booked. Remember that your Cost Centers tell you the profitability of the different lines of business or product. You can also set a default Cost Center in the Item master.
 
 #### Accounting entries (GL Entry) for a typical double entry “Sale”:
 
