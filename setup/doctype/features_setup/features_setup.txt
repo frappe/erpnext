@@ -2,7 +2,7 @@
  {
   "creation": "2012-12-20 12:50:49", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:37:59", 
+  "modified": "2013-08-22 15:36:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -183,6 +183,13 @@
   "fieldname": "fs_pos", 
   "fieldtype": "Check", 
   "label": "Point of Sale"
+ }, 
+ {
+  "description": "To enable <b>Point of Sale</b> view", 
+  "doctype": "DocField", 
+  "fieldname": "fs_pos_view", 
+  "fieldtype": "Check", 
+  "label": "POS View"
  }, 
  {
   "doctype": "DocField", 

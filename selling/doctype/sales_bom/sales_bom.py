@@ -76,8 +76,8 @@ class DocType:
 
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
-
-	return webnotes.conn.sql("""select name, description from tabItem 
+	
+	return webnotes.conn.sql("""select name, item_name, description from tabItem 
 		where is_stock_item="No" and is_sales_item="Yes"
 		and name not in (select name from `tabSales BOM`) and %s like %s
 		%s limit %s, %s""" % (searchfield, "%s", 

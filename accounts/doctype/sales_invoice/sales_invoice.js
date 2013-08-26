@@ -12,7 +12,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
-// wn.require('app/accounts/doctype/sales_invoice/pos.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -25,9 +25,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.set_df_property("debit_to", "print_hide", 0);
 			}
 		}
-		// if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
-		//   cur_frm.cscript.toggle_pos(true);
-		// }
+		
+		cur_frm.cscript.toggle_pos(true);
 	},
 	
 	refresh: function(doc, dt, dn) {
@@ -58,7 +57,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
-		if (this.frm.doc.docstatus===0) {
+		if (doc.docstatus===0) {
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
@@ -92,32 +91,62 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						}
 					});
 				});
+			
+			if(cint(sys_defaults.fs_pos_view)===1)
+				cur_frm.cscript.pos_btn();
 				
-			// cur_frm.add_custom_button(wn._("POS View"), function() {
-			// 	cur_frm.cscript.toggle_pos();
-			// }, 'icon-desktop');
-
+			// setTimeout(function() { cur_frm.$pos_btn.click(); }, 1000);
+				
+		} else {
+			// hide shown pos for submitted records
+			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
+	},
+
+	pos_btn: function() {
+		if(cur_frm.$pos_btn) 
+			cur_frm.$pos_btn.remove();
+
+		if(!cur_frm.pos_active) {
+			var btn_label = wn._("POS View"),
+				icon = "icon-desktop";
+		} else {
+			var btn_label = wn._("Invoice View"),
+				icon = "icon-file-text";
+		}
+
+		cur_frm.$pos_btn = cur_frm.add_custom_button(btn_label, function() {
+			cur_frm.cscript.toggle_pos();
+			cur_frm.cscript.pos_btn();
+		}, icon);
+		
 	},
 
 	toggle_pos: function(show) {
-		if((show===true && cur_frm.pos_active) || (show===false && !cur_frm.pos_active)) return;
+		if(cint(sys_defaults.fs_pos_view)===0) return;
+		if(!(this.frm.doc.is_pos && this.frm.doc.docstatus===0)) return;
 		
-		// make pos
-		if(!cur_frm.pos) {
-			cur_frm.layout.add_view("pos");
-			cur_frm.pos = new erpnext.POS(cur_frm.layout.views.pos, cur_frm);
+		if (!this.frm.doc.selling_price_list)
+			msgprint(wn._("Please select Price List"))
+		else {
+			if((show===true && cur_frm.pos_active) || (show===false && !cur_frm.pos_active)) return;
+
+			// make pos
+			if(!cur_frm.pos) {
+				cur_frm.layout.add_view("pos");
+				cur_frm.pos = new erpnext.POS(cur_frm.layout.views.pos, cur_frm);
+			}
+
+			// toggle view
+			cur_frm.layout.set_view(cur_frm.pos_active ? "" : "pos");
+			cur_frm.pos_active = !cur_frm.pos_active;
+
+			// refresh
+			if(cur_frm.pos_active)
+				cur_frm.pos.refresh();
 		}
-		
-		// toggle view
-		cur_frm.layout.set_view(cur_frm.pos_active ? "" : "pos");
-		cur_frm.pos_active = !cur_frm.pos_active;
-		
-		// refresh
-		if(cur_frm.pos_active)
-			cur_frm.pos.refresh();
-		
 	},
+	
 	tc_name: function() {
 		this.get_terms();
 	},
