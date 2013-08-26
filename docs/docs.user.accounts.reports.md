@@ -28,4 +28,4 @@ You can also get your payables and receivables from direct reports on Sales Invo
 
 ### Sales and Purchase Register
 
-This is useful for making your tax statements invoice and Item wise. In this report, each tax Account is transposed in columns and for each Invoice and invoice Item, you will get the amount of individual tax that has been paid based on the Taxes and Charges table.
+In this report, each tax Account is transposed in columns.For each Invoice and invoice Item, you will get the amount of individual tax that has been paid, based on the Taxes and Charges table.
