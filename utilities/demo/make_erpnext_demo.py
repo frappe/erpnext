@@ -1,3 +1,7 @@
+if __name__=="__main__":
+	import sys
+	sys.path.extend([".", "lib", "app"])
+
 import webnotes, os
 
 def make_demo_app():
