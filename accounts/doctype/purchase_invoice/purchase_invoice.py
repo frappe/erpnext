@@ -396,7 +396,7 @@ class DocType(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.get_company_default("expenses_included_in_valuation"),
-					"cost_center": self.get_company_default("stock_adjustment_cost_center"),
+					"cost_center": self.get_company_default("cost_center"),
 					"against": self.doc.credit_to,
 					"credit": valuation_tax,
 					"remarks": self.doc.remarks or "Accounting Entry for Stock"

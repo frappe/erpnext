@@ -41,13 +41,14 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
+		self._clear_stock_account_balance()
 		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
 
-	def atest_material_receipt_gl_entry(self):
+	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
@@ -69,17 +70,15 @@ class TestStockEntry(unittest.TestCase):
 		)
 		
 		mr.cancel()
-		self.check_stock_ledger_entries("Stock Entry", mr.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse - _TC", 50.0], 
-				["_Test Item", "_Test Warehouse - _TC", -50.0]]))
-			
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s 
-			order by account asc, debit asc""", (mr.doc.name), as_dict=1)
-		self.assertEquals(len(gl_entries), 4)
+		
+		self.assertFalse(webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))			
+		
+		self.assertFalse(webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))
 		
 
-	def atest_material_issue_gl_entry(self):
+	def test_material_issue_gl_entry(self):
 		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
@@ -102,24 +101,19 @@ class TestStockEntry(unittest.TestCase):
 		)
 		
 		mi.cancel()
+		self.assertFalse(webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))			
 		
-		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse - _TC", -40.0], 
-				["_Test Item", "_Test Warehouse - _TC", 40.0]]))
-				
+		self.assertFalse(webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))
+			
 		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
 			"item_code": mi.doclist[1].item_code}, "actual_qty"), 50)
 			
 		self.assertEquals(webnotes.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse, 
 			"item_code": mi.doclist[1].item_code}, "stock_value"), 5000)
-			
-		gl_entries = webnotes.conn.sql("""select account, debit, credit, voucher_no
-			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s 
-			order by account asc, debit asc""", (mi.doc.name), as_dict=1)
-		self.assertEquals(len(gl_entries), 4)
 		
-		
-	def atest_material_transfer_gl_entry(self):
+	def test_material_transfer_gl_entry(self):
 		self._clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 
@@ -146,11 +140,12 @@ class TestStockEntry(unittest.TestCase):
 
 		
 		mtn.cancel()
-		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
-			sorted([["_Test Item", "_Test Warehouse - _TC", 45.0], 
-				["_Test Item", "_Test Warehouse 1 - _TC", -45.0],
-				["_Test Item", "_Test Warehouse - _TC", -45.0], 
-				["_Test Item", "_Test Warehouse 1 - _TC", 45.0]]))
+		self.assertFalse(webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))			
+		
+		self.assertFalse(webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))
+		
 				
 	def test_repack_no_change_in_valuation(self):
 		self._clear_stock_account_balance()
@@ -224,15 +219,7 @@ class TestStockEntry(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][0], gle[0])
 			self.assertEquals(expected_gl_entries[i][1], gle[1])
 			self.assertEquals(expected_gl_entries[i][2], gle[2])
-	
-	def _clear_stock(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("""delete from `tabSerial No`""")
 		
-		self.old_default_company = webnotes.conn.get_default("company")
-		webnotes.conn.set_default("company", "_Test Company")
-	
 	def _insert_material_receipt(self):
 		self._clear_stock_account_balance()
 		se1 = webnotes.bean(copy=test_records[0])
@@ -321,9 +308,11 @@ class TestStockEntry(unittest.TestCase):
 		return se
 	
 	def test_sales_invoice_return_of_non_packing_item(self):
+		self._clear_stock_account_balance()
 		self._test_sales_invoice_return("_Test Item", 5, 2)
 			
 	def test_sales_invoice_return_of_packing_item(self):
+		self._clear_stock_account_balance()
 		self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
 		
 	def _test_delivery_note_return(self, item_code, delivered_qty, returned_qty):
@@ -373,9 +362,11 @@ class TestStockEntry(unittest.TestCase):
 		return se
 		
 	def test_delivery_note_return_of_non_packing_item(self):
+		self._clear_stock_account_balance()
 		self._test_delivery_note_return("_Test Item", 5, 2)
 		
 	def test_delivery_note_return_of_packing_item(self):
+		self._clear_stock_account_balance()
 		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
 		
 	def _test_sales_return_jv(self, se):
@@ -390,14 +381,17 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(jv_list[1].get("against_invoice"))
 		
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
+		self._clear_stock_account_balance()
 		se = self._test_sales_invoice_return("_Test Item", 5, 2)
 		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_sales_invoice_packing_item(self):
+		self._clear_stock_account_balance()
 		se = self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
 		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_delivery_note_non_packing_item(self):
+		self._clear_stock_account_balance()
 		se = self._test_delivery_note_return("_Test Item", 5, 2)
 		self._test_sales_return_jv(se)
 		
@@ -405,6 +399,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_sales_return_jv(se)
 		
 	def test_make_return_jv_for_delivery_note_packing_item(self):
+		self._clear_stock_account_balance()
 		se = self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
 		self._test_sales_return_jv(se)
 		
@@ -521,6 +516,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	def test_over_stock_return(self):
 		from stock.doctype.stock_entry.stock_entry import StockOverReturnError
+		self._clear_stock_account_balance()
 		
 		# out of 10, 5 gets returned
 		prev_se, pr_docname = self.test_purchase_receipt_return()
@@ -548,6 +544,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(jv_list[1].get("against_voucher"))
 		
 	def test_make_return_jv_for_purchase_receipt(self):
+		self._clear_stock_account_balance()
 		se, pr_name = self.test_purchase_receipt_return()
 		self._test_purchase_return_jv(se)
 
@@ -660,6 +657,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoQtyError, se.submit)
 		
 	def test_serial_no_transfer_in(self):
+		self._clear_stock_account_balance()
 		se = webnotes.bean(copy=test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
@@ -672,6 +670,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(webnotes.conn.exists("Serial No", "EFGH"))
 		
 	def test_serial_no_not_exists(self):
+		self._clear_stock_account_balance()
 		se = webnotes.bean(copy=test_records[0])
 		se.doc.purpose = "Material Issue"
 		se.doclist[1].item_code = "_Test Serialized Item"
@@ -684,6 +683,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoNotExistsError, se.submit)
 		
 	def test_serial_by_series(self):
+		self._clear_stock_account_balance()
 		se = make_serialized_item()
 
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
@@ -694,6 +694,7 @@ class TestStockEntry(unittest.TestCase):
 		return se
 
 	def test_serial_item_error(self):
+		self._clear_stock_account_balance()
 		self.test_serial_by_series()
 		
 		se = webnotes.bean(copy=test_records[0])
@@ -708,6 +709,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoItemError, se.submit)
 
 	def test_serial_move(self):
+		self._clear_stock_account_balance()
 		se = make_serialized_item()
 		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
 		
@@ -724,6 +726,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
 
 	def test_serial_warehouse_error(self):
+		self._clear_stock_account_balance()
 		make_serialized_item()
 		
 		se = webnotes.bean(copy=test_records[0])
@@ -738,6 +741,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoWarehouseError, se.submit)
 		
 	def test_serial_cancel(self):
+		self._clear_stock_account_balance()
 		se = self.test_serial_by_series()
 		se.cancel()
 		
@@ -763,8 +767,6 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Receipt",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -777,6 +779,8 @@ test_records = [
 			"transfer_qty": 50.0, 
 			"uom": "_Test UOM",
 			"t_warehouse": "_Test Warehouse - _TC",
+			"expense_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 	],
 	[
@@ -787,8 +791,6 @@ test_records = [
 			"posting_time": "17:15", 
 			"purpose": "Material Issue",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -801,6 +803,8 @@ test_records = [
 			"transfer_qty": 40.0, 
 			"uom": "_Test UOM",
 			"s_warehouse": "_Test Warehouse - _TC",
+			"expense_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 	],
 	[
@@ -811,8 +815,6 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Material Transfer",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -826,6 +828,8 @@ test_records = [
 			"uom": "_Test UOM",
 			"s_warehouse": "_Test Warehouse - _TC",
 			"t_warehouse": "_Test Warehouse 1 - _TC",
+			"expense_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}
 	],
 	[
@@ -836,8 +840,6 @@ test_records = [
 			"posting_time": "17:14:24", 
 			"purpose": "Manufacture/Repack",
 			"fiscal_year": "_Test Fiscal Year 2013", 
-			"expense_adjustment_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -850,6 +852,8 @@ test_records = [
 			"transfer_qty": 50.0, 
 			"uom": "_Test UOM",
 			"s_warehouse": "_Test Warehouse - _TC",
+			"expense_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -862,6 +866,8 @@ test_records = [
 			"transfer_qty": 1, 
 			"uom": "_Test UOM",
 			"t_warehouse": "_Test Warehouse - _TC",
+			"expense_account": "Stock Adjustment - _TC",
+			"cost_center": "_Test Cost Center - _TC"
 		},
 	],
 ]

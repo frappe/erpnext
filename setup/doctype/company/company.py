@@ -61,10 +61,9 @@ class DocType:
 			wh = {
 				"doctype":"Warehouse",
 				"warehouse_name": whname,
-				"company": self.doc.name
+				"company": self.doc.name,
 			}
-			if cint(webnotes.defaults.get_global_default("perpetual_accounting")):
-				wh.update({"account": "Stock In Hand - " + self.doc.abbr})
+			wh.update({"account": "Stock In Hand - " + self.doc.abbr})
 				
 			webnotes.bean(wh).insert()
 			

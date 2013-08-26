@@ -10,12 +10,24 @@ from accounts.utils import validate_expense_against_budget
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
 	if not cancel:
-		if merge_entries:
-			gl_map = merge_similar_entries(gl_map)
-
+		gl_map = process_gl_map(gl_map, merge_entries)
 		save_entries(gl_map, adv_adj, update_outstanding)
 	else:
 		delete_gl_entries(gl_map, adv_adj, update_outstanding)
+		
+def process_gl_map(gl_map, merge_entries=True):
+	if merge_entries:
+		gl_map = merge_similar_entries(gl_map)
+	
+	for entry in gl_map:
+		# round off upto 2 decimal
+		entry["debit"] = flt(entry["debit"], 2)
+		entry["credit"] = flt(entry["credit"], 2)
+	
+		# toggle debit, credit if negative entry
+		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
+			entry["debit"], entry["credit"] = abs(flt(entry["credit"])), abs(flt(entry["debit"]))
+	return gl_map
 		
 def merge_similar_entries(gl_map):
 	merged_gl_map = []
@@ -31,7 +43,6 @@ def merge_similar_entries(gl_map):
 			
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x["debit"])!=0 or flt(x["credit"])!=0, merged_gl_map)
-
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_mqp):
@@ -43,31 +54,11 @@ def check_if_in_list(gle, gl_mqp):
 				and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
 			return e
 
-def check_budget(gl_map, cancel):
-	for gle in gl_map:
-		if gle.get('cost_center'):
-			#check budget only if account is expense account
-			acc_details = webnotes.conn.get_value("Account", gle['account'], 
-				['is_pl_account', 'debit_or_credit'])
-			if acc_details[0]=="Yes" and acc_details[1]=="Debit":
-				webnotes.get_obj('Budget Control').check_budget(gle, cancel)
-
 def save_entries(gl_map, adv_adj, update_outstanding):
 	total_debit = total_credit = 0.0
-	def _swap(entry):
-		entry["debit"], entry["credit"] = abs(flt(entry["credit"])), abs(flt(entry["debit"]))
-	
 	for entry in gl_map:
-		# round off upto 2 decimal
-		entry["debit"] = flt(entry["debit"], 2)
-		entry["credit"] = flt(entry["credit"], 2)
-		
-		# toggle debit, credit if negative entry
-		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
-			_swap(entry)
-		
 		make_entry(entry, adv_adj, update_outstanding)
-		
+		# check against budget
 		validate_expense_against_budget(entry)
 
 		# update total debit / credit
@@ -86,14 +77,14 @@ def make_entry(args, adv_adj, update_outstanding):
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
+		webnotes.throw(webnotes._("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
 		 	cstr(total_debit - total_credit))
 		
-def delete_gl_entries(gl_entries, adv_adj, update_outstanding):
+def delete_gl_entries(gl_entries=None, adv_adj=False, update_outstanding="Yes"):
 	from accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
 		check_freezing_date, update_outstanding_amt, validate_freezed_account
-	
-	check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+	if gl_entries:
+		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 	
 	webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
 		(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"]))

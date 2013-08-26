@@ -41,7 +41,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
-	def atest_gl_entries_with_perpetual_accounting(self):
+	def test_gl_entries_with_perpetual_accounting(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
 		
@@ -70,7 +70,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 
-	def atest_gl_entries_with_aia_for_non_stock_items(self):
+	def test_gl_entries_with_aia_for_non_stock_items(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
 		

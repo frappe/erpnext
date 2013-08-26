@@ -557,10 +557,8 @@ class DocType(SellingController):
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
-				
-			warehouse_list = list(set([d.warehouse for d in 
-				self.doclist.get({"parentfield": "entries"})]))
-			self.sync_stock_account_balance(warehouse_list)
+
+			self.update_gl_entries_after()
 				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
@@ -605,13 +603,7 @@ class DocType(SellingController):
 		# expense account gl entries
 		if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
 				and cint(self.doc.update_stock):
-			for item in self.doclist.get({"parentfield": "entries"}):
-				self.check_expense_account(item)
-			
-				if item.buying_amount:
-					
-					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-						-1*item.buying_amount, item.warehouse, cost_center=item.cost_center)
+			gl_entries += self.get_gl_entries_for_stock()
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

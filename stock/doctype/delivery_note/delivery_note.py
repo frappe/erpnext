@@ -327,28 +327,6 @@ class DocType(SellingController):
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			get_obj('Sales Common').check_credit(self, total)
-		
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
-			return
-		
-		gl_entries = []	
-		warehouse_list = []
-		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-			self.check_expense_account(item)
-			
-			if item.buying_amount:
-				gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-					-1*item.buying_amount, item.warehouse, cost_center=item.cost_center)
-				if item.warehouse not in warehouse_list:
-					warehouse_list.append(item.warehouse)
-				
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
-			
-			self.sync_stock_account_balance(warehouse_list)
-
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

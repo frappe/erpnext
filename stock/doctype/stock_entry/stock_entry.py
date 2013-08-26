@@ -177,42 +177,6 @@ class DocType(StockController):
 	def set_total_amount(self):
 		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
 			
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
-			return
-		
-		gl_entries = []
-		warehouse_list = []
-		against_expense_account = self.doc.expense_adjustment_account
-		for item in self.doclist.get({"parentfield": "mtn_details"}):
-			valuation_amount = flt(item.incoming_rate) * flt(item.transfer_qty)
-			if valuation_amount:
-				if item.t_warehouse and not item.s_warehouse:
-					warehouse = item.t_warehouse
-				elif item.s_warehouse and not item.t_warehouse:
-					warehouse = item.s_warehouse
-					valuation_amount = -1*valuation_amount
-				elif item.s_warehouse and item.t_warehouse:
-					s_account = webnotes.conn.get_value("Warehouse", item.s_warehouse, "account")
-					t_account = webnotes.conn.get_value("Warehouse", item.t_warehouse, "account")
-					if s_account != t_account:
-						warehouse = item.t_warehouse
-						against_expense_account = s_account
-						
-				if item.s_warehouse and item.s_warehouse not in warehouse_list:
-					warehouse_list.append(item.s_warehouse)
-				if item.t_warehouse and item.t_warehouse not in warehouse_list:
-					warehouse_list.append(item.t_warehouse)
-						
-				gl_entries += self.get_gl_entries_for_stock(against_expense_account, 
-					valuation_amount, warehouse, cost_center=self.doc.cost_center)
-
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
-			
-			self.sync_stock_account_balance(warehouse_list, self.doc.cost_center)
-				
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):

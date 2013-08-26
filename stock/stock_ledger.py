@@ -33,7 +33,7 @@ def make_sl_entries(sl_entries, is_amended=None):
 		update_bin(args)
 		
 	if cancel:
-		delete_cancelled_entry(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+		delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 			
 def set_as_cancel(voucher_type, voucher_no):
 	webnotes.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
@@ -74,8 +74,9 @@ def update_entries_after(args, verbose=1):
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
 	valuation_rate = flt(previous_sle.get("valuation_rate"))
 	stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
-	prev_stock_value = stock_value = flt(previous_sle.get("stock_value"))
-
+	stock_value = flt(previous_sle.get("stock_value"))
+	prev_stock_value = flt(previous_sle.get("stock_value"))
+	
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
 

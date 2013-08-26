@@ -343,33 +343,24 @@ def validate_stock_and_account_balance():
 				to enable perpetual accounting." + 
 				_(" Following accounts are not synced with stock balance") + ": \n" + 
 				"\n".join(difference.keys())), raise_exception=1)
-				
-def get_stock_and_account_difference(warehouse_list=None):
-	from stock.utils import get_latest_stock_balance
 	
-	if not warehouse_list:
-		warehouse_list = webnotes.conn.sql_list("""select name from tabWarehouse 
-			where docstatus<2""")
-			
+def get_stock_and_account_difference(account_list=None, posting_date=None):
+	from stock.utils import get_stock_balance_on
+	
+	if not posting_date: posting_date = nowdate()
+	
 	account_warehouse_map = {}
-	warehouse_with_no_account = []
 	difference = {}
 	warehouse_account = webnotes.conn.sql("""select name, account from tabWarehouse 
-		where name in (%s)""" % ', '.join(['%s']*len(warehouse_list)), warehouse_list, as_dict=1)
+		where account in (%s)""" % ', '.join(['%s']*len(account_list)), account_list, as_dict=1)
 		
 	for wh in warehouse_account:
-			if not wh.account: warehouse_with_no_account.append(wh.name)
 			account_warehouse_map.setdefault(wh.account, []).append(wh.name)
 			
-	if warehouse_with_no_account:
-		msgprint(_("Please mention Perpetual Account in warehouse master for following warehouses")
-			 + ": " + '\n'.join(warehouse_with_no_account), raise_exception=1)
-
-	bin_map = get_latest_stock_balance()
 	for account, warehouse_list in account_warehouse_map.items():
-		account_balance = get_balance_on(account)
-		stock_value = sum([sum(bin_map.get(warehouse, {}).values()) 
-			for warehouse in warehouse_list])
+		account_balance = get_balance_on(account, posting_date)
+		stock_value = get_stock_balance_on(warehouse_list, posting_date)
+
 		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 

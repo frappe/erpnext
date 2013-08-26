@@ -293,31 +293,14 @@ class DocType(StockController):
 			stock_value_difference[d.warehouse] -= diff
 
 		webnotes.conn.set(self.doc, "stock_value_difference", json.dumps(stock_value_difference))
-		
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
-			return
-					
+			
+	def get_gl_entries_for_stock(self):
 		if not self.doc.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
+			
+		super(DocType, self).get_gl_entries_for_stock(expense_account=self.doc.expense_account, 
+			cost_center=self.doc.cost_center)
 		
-		if self.doc.stock_value_difference:
-			stock_value_difference = json.loads(self.doc.stock_value_difference)
-			gl_entries = []
-			warehouse_list = []
-			for warehouse, diff in stock_value_difference.items():
-				if diff:
-					gl_entries += self.get_gl_entries_for_stock(self.doc.expense_account, diff, 
-						warehouse, cost_center=self.doc.cost_center)
-						
-					if warehouse not in warehouse_list:
-						warehouse_list.append(warehouse)
-		
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
-
-			self.sync_stock_account_balance(warehouse_list, self.doc.cost_center)
 			
 	def validate_expense_account(self):
 		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):

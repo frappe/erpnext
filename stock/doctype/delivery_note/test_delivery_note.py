@@ -18,6 +18,7 @@ class TestDeliveryNote(unittest.TestCase):
 		pr.submit()
 		
 	def test_over_billing_against_dn(self):
+		self.clear_stock_account_balance()
 		self._insert_purchase_receipt()
 		
 		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -39,7 +40,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 	
 	def test_delivery_note_no_gl_entry(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
+		self.clear_stock_account_balance()
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 0)
 		
@@ -62,10 +63,8 @@ class TestDeliveryNote(unittest.TestCase):
 			
 		self.assertTrue(not gl_entries)
 		
-	def atest_delivery_note_gl_entry(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("delete from `tabGL Entry`")
+	def test_delivery_note_gl_entry(self):
+		self.clear_stock_account_balance()
 		
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
@@ -158,6 +157,11 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.insert()
 
 		self.assertRaises(SerialNoStatusError, dn.submit)
+		
+	def clear_stock_account_balance(self):
+		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("delete from `tabGL Entry`")
 
 test_records = [
 	[

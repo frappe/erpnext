@@ -299,30 +299,16 @@ class DocType(BuyingController):
 
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
-	
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
-			return
-		
+			
+	def get_gl_entries_for_stock(self):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
-		stock_items = self.get_stock_items()
+		item_acc_map = {}
+		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			item_acc_map.setdefault(item.name, [against_stock_account, None])
+			
+		gl_entries = super(DocType, self).get_gl_entries_for_stock(item_acc_map)
+		return gl_entries
 		
-		gl_entries = []
-		warehouse_list = []
-		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			if d.item_code in stock_items and d.valuation_rate:
-				valuation_amount = flt(d.valuation_rate) * \
-					flt(d.qty) * flt(d.conversion_factor)
-				gl_entries += self.get_gl_entries_for_stock(against_stock_account, 
-					valuation_amount, d.warehouse)
-				
-				if d.warehouse not in warehouse_list:
-					warehouse_list.append(d.warehouse)
-		
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
-			self.sync_stock_account_balance(warehouse_list)
 	
 @webnotes.whitelist()
 def make_purchase_invoice(source_name, target_doclist=None):
