@@ -77,6 +77,10 @@ def make_demo_on_login_script():
 	with open(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), "r") as dfile:
 		s.doc.script = dfile.read()
 	s.insert()
+	
+	cp = webnotes.bean("Control Panel")
+	cp.doc.custom_startup_code = """wn.ui.toolbar.show_banner('You are using ERPNext Demo. To start your own ERPNext Trial, <a href="https://erpnext.com/pricing-and-signup" target="_blank">click here</a>')"""
+	cp.save()
 
 	webnotes.conn.commit()
 
