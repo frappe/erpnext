@@ -9,6 +9,23 @@ def make_demo_app():
 	utilities.demo.make_demo.make(reset=True)
 
 def make_demo_user():
+	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
+		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
+		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
+		"Material Master Manager", "Material User", "Partner", "Manufacturing Manager", 
+		"Manufacturing User", "Projects User", "Purchase Manager", "Purchase Master Manager", 
+		"Purchase User", "Quality Manager", "Report Manager", "Sales Master Manager", 
+		"Sales User", "Supplier", "Support Team"]
+		
+	def add_roles(bean):
+		for role in roles:
+			p.doclist.append({
+				"doctype": "UserRole",
+				"parentfield": "user_roles",
+				"role": role
+			})
+	
+	# make demo user
 	if webnotes.conn.exists("Profile", "demo@erpnext.com"):
 		webnotes.delete_doc("Profile", "demo@erpnext.com")
 
@@ -21,20 +38,24 @@ def make_demo_user():
 	p.doc.send_invite_email = 0
 	p.doc.new_password = "demo"
 	p.insert()
+	add_roles(p)
+	p.save()
 	
-	for role in ("Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
-		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
-		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
-		"Material Master Manager", "Material User", "Partner", "Manufacturing Manager", 
-		"Manufacturing User", "Projects User", "Purchase Manager", "Purchase Master Manager", 
-		"Purchase User", "Quality Manager", "Report Manager", "Sales Master Manager", "Sales User", 
-		"Supplier", "Support Team"):
-		p.doclist.append({
-			"doctype": "UserRole",
-			"parentfield": "user_roles",
-			"role": role
-		})
-
+	# make system manager user
+	if webnotes.conn.exists("Profile", "admin@erpnext.com"):
+		webnotes.delete_doc("Profile", "admin@erpnext.com")
+	
+	p = webnotes.new_bean("Profile")
+	p.doc.email = "admin@erpnext.com"
+	p.doc.first_name = "Admin"
+	p.doc.last_name = "User"
+	p.doc.enabled = 1
+	p.doc.user_type = "System User"
+	p.doc.send_invite_email = 0
+	p.doc.new_password = "admin010123"
+	p.insert()
+	roles.append("System Manager")
+	add_roles(p)
 	p.save()
 	
 	# only read for newsletter
