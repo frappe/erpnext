@@ -95,7 +95,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						return{
 							query : "selling.doctype.sales_common.sales_common.get_batch_no",
 							filters: {
-								'item': item.item_code,
+								'item_code': item.item_code,
 								'posting_date': me.frm.doc.posting_date
 							}
 						}
