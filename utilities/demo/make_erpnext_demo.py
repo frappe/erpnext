@@ -61,6 +61,8 @@ def make_demo_user():
 	# only read for newsletter
 	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
 		where parent='Newsletter'""")
+	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
+		where parent='Profile' and role='All'""")
 	
 	webnotes.conn.commit()
 
@@ -87,6 +89,7 @@ def make_demo_login_page():
 	p.insert()
 	
 	webnotes.conn.set_value("Website Settings", None, "home_page", "demo-login")
+	webnotes.conn.set_value("Website Settings", None, "disable_signup", 1)
 	
 	webnotes.conn.commit()
 
