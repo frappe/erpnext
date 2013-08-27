@@ -406,7 +406,7 @@ def import_data(dt, submit=False):
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
-		webnotes.form_dict = {}
+		webnotes.form_dict = _dict()
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")
