@@ -126,8 +126,9 @@ class DocType(SellingController):
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()
-		self.validate_uom_is_integer("stock_uom", "qty")		
+		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
+		self.validate_warehouse_user()
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
@@ -146,6 +147,15 @@ class DocType(SellingController):
 
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
+		
+		
+	def validate_warehouse_user(self):
+		from stock.utils import validate_warehouse_user
+		
+		warehouses = list(set([d.reserved_warehouse for d in self.doclist.get({"doctype": self.tname})]))
+				
+		for w in warehouses:
+			validate_warehouse_user(w)
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
