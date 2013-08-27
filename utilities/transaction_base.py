@@ -55,6 +55,8 @@ class TransactionBase(StatusUpdater):
 		return self._party_type_and_name
 			
 	def get_customer_defaults(self):
+		if not self.doc.customer: return {}
+		
 		out = self.get_default_address_and_contact("customer")
 
 		customer = webnotes.doc("Customer", self.doc.customer)
