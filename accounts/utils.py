@@ -360,7 +360,6 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	for account, warehouse_list in account_warehouse_map.items():
 		account_balance = get_balance_on(account, posting_date)
 		stock_value = get_stock_balance_on(warehouse_list, posting_date)
-
 		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 

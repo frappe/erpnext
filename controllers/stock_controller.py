@@ -8,130 +8,130 @@ from webnotes import msgprint, _
 import webnotes.defaults
 
 from controllers.accounts_controller import AccountsController
+from accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
 			return
 		
-		from accounts.general_ledger import make_gl_entries, delete_gl_entries
-		gl_entries = self.get_gl_entries_for_stock()
-		
-		if gl_entries and self.doc.docstatus==1:
+		if self.doc.docstatus==1:
+			gl_entries = self.get_gl_entries_for_stock()
 			make_gl_entries(gl_entries)
-		elif self.doc.docstatus==2:
-			webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s 
-				and voucher_no=%s""", (self.doc.doctype, self.doc.name))
-			
+		else:
+			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
+		
 		self.update_gl_entries_after()
-			
-			
-	def get_gl_entries_for_stock(self, item_acc_map=None, expense_account=None, cost_center=None):
+	
+	def get_gl_entries_for_stock(self, default_expense_account=None, default_cost_center=None):
 		from accounts.general_ledger import process_gl_map
+		warehouse_account = self.get_warehouse_account()
+		stock_ledger = self.get_stock_ledger_details()
+		voucher_details = self.get_voucher_details(stock_ledger, default_expense_account, 
+			default_cost_center)
+		
+		gl_list = []
+		for detail in voucher_details:
+			sle_list = stock_ledger.get(detail.name)
+			if sle_list:
+				for sle in sle_list:
+					if warehouse_account.get(sle.warehouse):
+						
+						# from warehouse account
+						gl_list.append(self.get_gl_dict({
+							"account": warehouse_account[sle.warehouse],
+							"against": detail.expense_account,
+							"cost_center": detail.cost_center,
+							"remarks": self.doc.remarks or "Accounting Entry for Stock",
+							"debit": sle.stock_value_difference
+						}))
 
-		if not (expense_account or cost_center or item_acc_map):
-			item_acc_map = {}
-			for item in self.doclist.get({"parentfield": self.fname}):
-				self.check_expense_account(item)
-				item_acc_map.setdefault(item.name, [item.expense_account, item.cost_center])
-		
-		gl_entries = []
-		stock_value_diff = self.get_stock_value_diff_from_sle(item_acc_map, expense_account, 
-			cost_center)
-		for stock_in_hand_account, against_stock_account_dict in stock_value_diff.items():
-			for against_stock_account, cost_center_dict in against_stock_account_dict.items():
-				for cost_center, value_diff in cost_center_dict.items():
-					gl_entries += [
-						# stock in hand account
-						self.get_gl_dict({
-							"account": stock_in_hand_account,
-							"against": against_stock_account,
-							"debit": value_diff,
+						# to target warehouse / expense account
+						gl_list.append(self.get_gl_dict({
+							"account": detail.expense_account,
+							"against": warehouse_account[sle.warehouse],
+							"cost_center": detail.cost_center,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock",
-						}),
-			
-						# account against stock in hand
-						self.get_gl_dict({
-							"account": against_stock_account,
-							"against": stock_in_hand_account,
-							"credit": value_diff,
-							"cost_center": cost_center != "No Cost Center" and cost_center or None,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock",
-						}),
-					]
-		gl_entries = process_gl_map(gl_entries)
-		return gl_entries
+							"credit": sle.stock_value_difference
+						}))
 		
+		return process_gl_map(gl_list)
 			
-	def get_stock_value_diff_from_sle(self, item_acc_map, expense_account, cost_center):
-		wh_acc_map = self.get_warehouse_account_map()
-		stock_value_diff = {}
+	def get_voucher_details(self, stock_ledger, default_expense_account, default_cost_center):
+		if not default_expense_account:
+			details = self.doclist.get({"parentfield": self.fname})
+			for d in details:
+				self.check_expense_account(d)
+		else:
+			details = [webnotes._dict({
+				"name":d, 
+				"expense_account": default_expense_account, 
+				"cost_center": default_cost_center
+			}) for d in stock_ledger.keys()]
+			
+		return details
+		
+	def get_stock_ledger_details(self):
+		stock_ledger = {}
 		for sle in webnotes.conn.sql("""select warehouse, stock_value_difference, voucher_detail_no
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doc.doctype, self.doc.name), as_dict=True):
-				account = wh_acc_map[sle.warehouse]
-				against_account = expense_account or item_acc_map[sle.voucher_detail_no][0]
-				cost_center = cost_center or item_acc_map[sle.voucher_detail_no][1] or \
-					"No Cost Center"
-				
-				stock_value_diff.setdefault(account, {}).setdefault(against_account, {})\
-					.setdefault(cost_center, 0)
-				stock_value_diff[account][against_account][cost_center] += \
-					flt(sle.stock_value_difference)
-				 
-		return stock_value_diff
+				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
+		return stock_ledger
 		
-	def get_warehouse_account_map(self):
-		wh_acc_map = {}
-		warehouse_with_no_account = []
-		for d in webnotes.conn.sql("""select name, account from `tabWarehouse`""", as_dict=True):
-			if not d.account: warehouse_with_no_account.append(d.name)
-			wh_acc_map.setdefault(d.name, d.account)
-			
-		if warehouse_with_no_account:
-			webnotes.throw(_("Please mention Perpetual Account in warehouse master for \
-				following warehouses") + ": " + '\n'.join(warehouse_with_no_account))
+	def get_warehouse_account(self):
+		warehouse_account = dict(webnotes.conn.sql("""select name, account from `tabWarehouse`
+			where ifnull(account, '') != ''"""))
 				
-		return wh_acc_map
+		return warehouse_account
 		
 	def update_gl_entries_after(self):
+		from accounts.utils import get_stock_and_account_difference
 		future_stock_vouchers = self.get_future_stock_vouchers()
 		gle = self.get_voucherwise_gl_entries(future_stock_vouchers)
 		for voucher_type, voucher_no in future_stock_vouchers:
-			existing_gle = gle.get((voucher_type, voucher_no), {})
-			voucher_bean = webnotes.bean(voucher_type, voucher_no)
-			expected_gle = voucher_bean.run_method("get_gl_entries_for_stock")
+			existing_gle = gle.get((voucher_type, voucher_no), [])
+			voucher_obj = webnotes.get_obj(voucher_type, voucher_no)
+			expected_gle = voucher_obj.get_gl_entries_for_stock()
+			
 			if expected_gle:
+				matched = True
 				if existing_gle:
-					matched = True
 					for entry in expected_gle:
-						entry_amount = existing_gle.get(entry.account, {}).get(entry.cost_center \
-							or "No Cost Center", [0, 0])
-					
-						if [entry.debit, entry.credit] != entry_amount:
-							matched = False
-							break
-					
-					if not matched:
-						# make updated entry
-						webnotes.conn.sql("""delete from `tabGL Entry` 
-							where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
-					
-						voucher_bean.run_method("make_gl_entries")
+						for e in existing_gle:
+							if entry.account==e.account \
+								and entry.against_account==e.against_account\
+								and entry.cost_center==e.cost_center:
+									if entry.debit != e.debit or entry.credit != e.credit:
+										matched = False
+										break
 				else:
-					# make adjustment entry on that date
-					self.make_adjustment_entry(expected_gle, voucher_bean)
+					matched = False
+									
+				if not matched:
+					self.delete_gl_entries(voucher_type, voucher_no)
+					make_gl_entries(expected_gle)
+			else:
+				self.delete_gl_entries(voucher_type, voucher_no)
+			
+			# else:
+			# 	# make adjustment entry on that date
+			# 	self.make_adjustment_entry(expected_gle, voucher_obj)
 				
 		
 	def get_future_stock_vouchers(self):
 		future_stock_vouchers = []
-		for d in webnotes.conn.sql("""select distinct voucher_type, voucher_no 
-			from `tabStock Ledger Entry` 
-			where timestamp(posting_date, posting_time) >= timestamp(%s, %s)
-			order by timestamp(posting_date, posting_time) asc, name asc""", 
+		item_codes = webnotes.conn.sql_list("""select distinct item_code 
+			from `tabStock Ledger Entry`
+			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
+		
+		for d in webnotes.conn.sql("""select distinct sle.voucher_type, sle.voucher_no 
+			from `tabStock Ledger Entry` sle
+			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
+			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""",
 			(self.doc.posting_date, self.doc.posting_time), as_dict=True):
 				future_stock_vouchers.append([d.voucher_type, d.voucher_no])
-				
+		
 		return future_stock_vouchers
 				
 	def get_voucherwise_gl_entries(self, future_stock_vouchers):
@@ -141,13 +141,15 @@ class StockController(AccountsController):
 				where posting_date >= %s and voucher_no in (%s)""" % 
 				('%s', ', '.join(['%s']*len(future_stock_vouchers))), 
 				tuple([self.doc.posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
-					gl_entries.setdefault((d.voucher_type, d.voucher_no), {})\
-						.setdefault(d.account, {})\
-						.setdefault(d.cost_center, [d.debit, d.credit])
+					gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 		
 		return gl_entries
+		
+	def delete_gl_entries(self, voucher_type, voucher_no):
+		webnotes.conn.sql("""delete from `tabGL Entry` 
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 					
-	def make_adjustment_entry(self, expected_gle, voucher_bean):
+	def make_adjustment_entry(self, expected_gle, voucher_obj):
 		from accounts.utils import get_stock_and_account_difference
 		account_list = [d.account for d in expected_gle]
 		acc_diff = get_stock_and_account_difference(account_list, expected_gle[0].posting_date)
@@ -160,7 +162,7 @@ class StockController(AccountsController):
 			if diff:
 				gl_entries.append([
 					# stock in hand account
-					voucher_bean.get_gl_dict({
+					voucher_obj.get_gl_dict({
 						"account": account,
 						"against": stock_adjustment_account,
 						"debit": diff,
@@ -168,7 +170,7 @@ class StockController(AccountsController):
 					}),
 				
 					# account against stock in hand
-					voucher_bean.get_gl_dict({
+					voucher_obj.get_gl_dict({
 						"account": stock_adjustment_account,
 						"against": account,
 						"credit": diff,

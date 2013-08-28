@@ -123,7 +123,6 @@ class DocType(SellingController):
 					}
 				})
 			
-		
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:

@@ -332,7 +332,7 @@ class AccountsController(TransactionBase):
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""
-		gl_dict = {
+		gl_dict = webnotes._dict({
 			'company': self.doc.company, 
 			'posting_date': self.doc.posting_date,
 			'voucher_type': self.doc.doctype,
@@ -343,7 +343,7 @@ class AccountsController(TransactionBase):
 			'debit': 0,
 			'credit': 0,
 			'is_opening': self.doc.fields.get("is_opening") or "No",
-		}
+		})
 		gl_dict.update(args)
 		return gl_dict
 				

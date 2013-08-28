@@ -320,7 +320,7 @@ class DocType(StockController):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
 					"actual_qty": -flt(d.transfer_qty),
-					"incoming_rate": flt(d.incoming_rate)
+					"incoming_rate": 0
 				}))
 				
 			if cstr(d.t_warehouse):

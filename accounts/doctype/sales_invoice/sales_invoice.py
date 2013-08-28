@@ -557,8 +557,10 @@ class DocType(SellingController):
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
-
-			self.update_gl_entries_after()
+				
+			if cint(webnotes.defaults.get_global_default("perpetual_accounting")) \
+					and cint(self.doc.update_stock):
+				self.update_gl_entries_after()
 				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:

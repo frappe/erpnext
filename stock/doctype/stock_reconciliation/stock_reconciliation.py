@@ -298,8 +298,8 @@ class DocType(StockController):
 		if not self.doc.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 			
-		super(DocType, self).get_gl_entries_for_stock(expense_account=self.doc.expense_account, 
-			cost_center=self.doc.cost_center)
+		return super(DocType, self).get_gl_entries_for_stock(self.doc.expense_account, 
+			self.doc.cost_center)
 		
 			
 	def validate_expense_account(self):

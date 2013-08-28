@@ -9,11 +9,12 @@ from accounts.utils import validate_expense_against_budget
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
-	if not cancel:
-		gl_map = process_gl_map(gl_map, merge_entries)
-		save_entries(gl_map, adv_adj, update_outstanding)
-	else:
-		delete_gl_entries(gl_map, adv_adj, update_outstanding)
+	if gl_map:
+		if not cancel:
+			gl_map = process_gl_map(gl_map, merge_entries)
+			save_entries(gl_map, adv_adj, update_outstanding)
+		else:
+			delete_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
 		
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
@@ -21,12 +22,13 @@ def process_gl_map(gl_map, merge_entries=True):
 	
 	for entry in gl_map:
 		# round off upto 2 decimal
-		entry["debit"] = flt(entry["debit"], 2)
-		entry["credit"] = flt(entry["credit"], 2)
+		entry.debit = flt(entry.debit, 2)
+		entry.credit = flt(entry.credit, 2)
 	
 		# toggle debit, credit if negative entry
-		if flt(entry["debit"]) < 0 or flt(entry["credit"]) < 0:
-			entry["debit"], entry["credit"] = abs(flt(entry["credit"])), abs(flt(entry["debit"]))
+		if flt(entry.debit) < 0 or flt(entry.credit) < 0:
+			entry.debit, entry.credit = abs(flt(entry.credit)), abs(flt(entry.debit))
+
 	return gl_map
 		
 def merge_similar_entries(gl_map):
@@ -36,18 +38,18 @@ def merge_similar_entries(gl_map):
 		# to that entry
 		same_head = check_if_in_list(entry, merged_gl_map)
 		if same_head:
-			same_head['debit']	= flt(same_head['debit']) + flt(entry['debit'])
-			same_head['credit'] = flt(same_head['credit']) + flt(entry['credit'])
+			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
+			same_head.credit = flt(same_head.credit) + flt(entry.credit)
 		else:
 			merged_gl_map.append(entry)
 			
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x["debit"])!=0 or flt(x["credit"])!=0, merged_gl_map)
+	merged_gl_map = filter(lambda x: flt(x.debit)!=0 or flt(x.credit)!=0, merged_gl_map)
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_mqp):
 	for e in gl_mqp:
-		if e['account'] == gle['account'] and \
+		if e.account == gle.account and \
 				cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 				and cstr(e.get('against_voucher_type')) == \
 					cstr(gle.get('against_voucher_type')) \
@@ -62,8 +64,8 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		validate_expense_against_budget(entry)
 
 		# update total debit / credit
-		total_debit += flt(entry["debit"])
-		total_credit += flt(entry["credit"])
+		total_debit += flt(entry.debit)
+		total_credit += flt(entry.credit)
 		
 	validate_total_debit_credit(total_debit, total_credit)
 	
@@ -80,14 +82,20 @@ def validate_total_debit_credit(total_debit, total_credit):
 		webnotes.throw(webnotes._("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
 		 	cstr(total_debit - total_credit))
 		
-def delete_gl_entries(gl_entries=None, adv_adj=False, update_outstanding="Yes"):
+def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, 
+		adv_adj=False, update_outstanding="Yes"):
+	
 	from accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
 		check_freezing_date, update_outstanding_amt, validate_freezed_account
+		
+	if not gl_entries:
+		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 	
 	webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
-		(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"]))
+		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
 	
 	for entry in gl_entries:
 		validate_freezed_account(entry["account"], adv_adj)

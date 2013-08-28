@@ -50,11 +50,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
 		self.assertEqual(bin_stock_value, 375)
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
-			order by account desc""", pr.doc.name, as_dict=1)
-			
-		self.assertTrue(not gl_entries)
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
 		
 	def test_purchase_receipt_gl_entry(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
@@ -66,14 +62,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
-			order by account desc""", pr.doc.name, as_dict=1)
+		gl_entries = get_gl_entries("Purchase Receipt", pr.doc.name)
+		
 		self.assertTrue(gl_entries)
 		
 		stock_in_hand_account = webnotes.conn.get_value("Warehouse", pr.doclist[1].warehouse, 
-			"account")
-		
+			"account")		
 		fixed_asset_account = webnotes.conn.get_value("Warehouse", pr.doclist[2].warehouse, 
 			"account")
 		
@@ -87,9 +81,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
 			
-		self.assertFalse(get_stock_and_account_difference([pr.doclist[1].warehouse, 
-			pr.doclist[2].warehouse]))
-			
+		pr.cancel()
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
+		
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		
 	def _clear_stock_account_balance(self):
@@ -126,6 +120,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertEqual(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"status"), "Not Available")
+			
+def get_gl_entries(voucher_type, voucher_no):
+	return webnotes.conn.sql("""select account, debit, credit
+		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
+		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 		
 	
 		

@@ -12,7 +12,7 @@ from accounts.utils import get_fiscal_year, get_stock_and_account_difference, ge
 
 
 class TestStockReconciliation(unittest.TestCase):
-	def atest_reco_for_fifo(self):
+	def test_reco_for_fifo(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
@@ -90,7 +90,6 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertEqual(res and flt(res[0][0], 4) or 0, d[4])
 			
 			# bin qty and stock value
-			print "bin"
 			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
@@ -103,7 +102,7 @@ class TestStockReconciliation(unittest.TestCase):
 				stock_reco.doc.name)
 			self.assertFalse(gl_entries)
 			
-	def atest_reco_fifo_gl_entries(self):
+	def test_reco_fifo_gl_entries(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		# [[qty, valuation_rate, posting_date, posting_time, stock_in_hand_debit]]
@@ -120,23 +119,23 @@ class TestStockReconciliation(unittest.TestCase):
 			[50, 1000, "2013-01-01", "12:00"], 
 			[5, 1000, "2013-01-01", "12:00"],
 			[1, 1000, "2012-12-01", "00:00"],
-			
 		]
 			
 		for d in input_data:
-			# print d[0], d[1], d[2], d[3]
 			self.cleanup_data()
 			self.insert_existing_sle("FIFO")
+			self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 			
-			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
-			# cancel
-			stock_reco.cancel()
-			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
-		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)		
 			
-	def atest_reco_moving_average_gl_entries(self):
+			self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
+
+			stock_reco.cancel()
+			self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
+		
+		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+			
+	def test_reco_moving_average_gl_entries(self):
 		webnotes.defaults.set_global_default("perpetual_accounting", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
@@ -258,6 +257,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr3.doclist[1].incoming_rate = 0
 		pr3.insert()
 		pr3.submit()
+		
 		
 		pr4 = webnotes.bean(copy=stock_entry)
 		pr4.doc.posting_date = "2013-01-05"

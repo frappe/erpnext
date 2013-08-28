@@ -302,11 +302,8 @@ class DocType(BuyingController):
 			
 	def get_gl_entries_for_stock(self):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
-		item_acc_map = {}
-		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			item_acc_map.setdefault(item.name, [against_stock_account, None])
-			
-		gl_entries = super(DocType, self).get_gl_entries_for_stock(item_acc_map)
+		
+		gl_entries = super(DocType, self).get_gl_entries_for_stock(against_stock_account, None)
 		return gl_entries
 		
 	
