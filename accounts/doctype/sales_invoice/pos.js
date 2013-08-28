@@ -160,8 +160,10 @@ erpnext.POS = Class.extend({
 			parent: this.wrapper.find(".barcode-area")
 		});
 		this.barcode.make_input();
-		this.barcode.$input.on("change", function() {
-			setTimeout(me.add_item_thru_barcode(), 1000);
+		this.barcode.$input.on("keypress", function() {
+			if(me.barcode_timeout)
+				clearTimeout(me.barcode_timeout);
+			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
 		});
 	},
 	make_item_list: function() {
@@ -233,19 +235,23 @@ erpnext.POS = Class.extend({
 			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
 		}
 	},
-	update_qty: function(item_code, qty) {
+	update_qty: function(item_code, qty, textbox_qty) {
 		var me = this;
 		$.each(wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
 		"Sales Invoice"), function(i, d) {
 			if (d.item_code == item_code) {
-				if (qty == 1)
-					d.qty += 1;
-				else
+				if (textbox_qty) {
+					if (qty == 0 && d.item_code == item_code)
+						wn.model.clear_doc(d.doctype, d.name);
 					d.qty = qty;
+				}
+				else
+					d.qty += 1;
 
 				me.frm.cscript.qty(me.frm.doc, d.doctype, d.name);
 			}
 		});
+		me.frm.dirty();
 		me.refresh();
 	},
 	refresh: function() {
@@ -288,7 +294,7 @@ erpnext.POS = Class.extend({
 			<tr>', {
 				description: d.description,
 				tax_amount: format_currency(d.tax_amount, me.frm.doc.price_list_currency)
-			})).appendTo(".tax-table tbody")
+			})).appendTo(".tax-table tbody");
 		});
 
 		// set totals
@@ -304,7 +310,7 @@ erpnext.POS = Class.extend({
 		// append quantity to the respective item after change from input box
 		$("input.qty").on("change", function() {
 			var item_code = $(this).closest("tr")[0].id;
-			me.update_qty(item_code, $(this).val());
+			me.update_qty(item_code, $(this).val(), true);
 		});
 
 		// on td click toggle the highlighting of row
@@ -330,6 +336,7 @@ erpnext.POS = Class.extend({
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
+		me.barcode_timeout = null;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_barcode',
 			args: {barcode: this.barcode.$input.val()},
@@ -367,6 +374,7 @@ erpnext.POS = Class.extend({
 		});
 		cur_frm.fields_dict["entries"].grid.refresh();
 		cur_frm.script_manager.trigger("calculate_taxes_and_totals");
+		me.frm.dirty();
 		me.refresh();
 	},
 	make_payment: function() {
