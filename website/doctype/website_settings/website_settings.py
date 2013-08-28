@@ -13,6 +13,26 @@ class DocType:
 		self.set_home_page()
 		self.validate_top_bar_items()
 		self.validate_footer_items()
+		
+	def make_website(self):
+		# set item pages
+		for name in webnotes.conn.sql_list("""select name from tabItem where 
+			ifnull(show_in_website, 0)=0 and is_sales_item ='Yes' """):
+			webnotes.msgprint("Setting 'Show in Website' for:" + name)
+			item = webnotes.bean("Item", name)
+			item.doc.show_in_website = 1
+			item.doc.website_warehouse = item.doc.default_warehouse
+			item.doc.website_image = item.doc.image
+			item.save()
+		
+		# set item group pages
+		for name in webnotes.conn.sql_list("""select name from `tabItem Group` where 
+			ifnull(show_in_website, 0)=0 and exists (select name from tabItem where 
+				ifnull(show_in_website, 0)=1)"""):
+			webnotes.msgprint("Setting 'Show in Website' for:" + name)
+			item_group = webnotes.bean("Item Group", name)
+			item_group.doc.show_in_website = 1
+			item_group.save()
 			
 	def validate_top_bar_items(self):
 		"""validate url in top bar items"""

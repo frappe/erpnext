@@ -8,6 +8,8 @@ from webnotes.utils import flt, cstr, nowdate, add_days, cint
 from webnotes.defaults import get_global_default
 from webnotes.utils.email_lib import sendmail
 
+class UserNotAllowedForWarehouse(webnotes.ValidationError): pass
+
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
@@ -151,6 +153,16 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 			elif webnotes.session.user in warehouse_users:
 				wlist.append([w])
 	return wlist
+
+def validate_warehouse_user(warehouse):
+	if webnotes.session.user=="Administrator":
+		return
+	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
+		where parent=%s""", warehouse)]
+				
+	if warehouse_users and not (webnotes.session.user in warehouse_users):
+		webnotes.throw(_("Not allowed entry in Warehouse") \
+			+ ": " + warehouse, UserNotAllowedForWarehouse)
 
 def get_buying_amount(item_code, voucher_type, voucher_no, voucher_detail_no, 
 		stock_ledger_entries, item_sales_bom=None):

@@ -261,13 +261,11 @@ class DocType(BuyingController):
 			if d.purchase_order:
 				submitted = sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
 				if not submitted:
-					msgprint("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
-					raise Exception , "Validation Error."
+					webnotes.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
 			if d.purchase_receipt:
 				submitted = sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
 				if not submitted:
-					msgprint("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
-					raise Exception , "Validation Error."
+					webnotes.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					
 					
 	def update_against_document_in_jv(self):

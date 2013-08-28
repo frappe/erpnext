@@ -93,14 +93,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						}
 					});
 				});
-			
-			if (cint(sys_defaults.fs_pos_view)===1)
-				cur_frm.cscript.pos_btn();
-				
 		} else {
 			// hide shown pos for submitted records
 			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
+
+		if(cint(sys_defaults.fs_pos_view)===1)
+			cur_frm.cscript.pos_btn();
 	},
 
 	pos_btn: function() {
@@ -123,6 +122,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	toggle_pos: function(show) {
+		// if(cint(sys_defaults.fs_pos_view)===0) return;
+		// if(!(this.frm.doc.is_pos && this.frm.doc.docstatus===0)) return;
+		
 		if (!this.frm.doc.selling_price_list)
 			msgprint(wn._("Please select Price List"))
 		else {

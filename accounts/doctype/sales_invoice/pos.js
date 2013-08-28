@@ -16,7 +16,7 @@ erpnext.POS = Class.extend({
 				<div class="col-sm-6">\
 					<div class="pos-bill">\
 						<div class="item-cart">\
-							<table class="table table-condensed table-hover" id="cart"  style="table-layout: fixed;">\
+							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
 										<th style="width: 50%">Item</th>\
@@ -160,12 +160,9 @@ erpnext.POS = Class.extend({
 			parent: this.wrapper.find(".barcode-area")
 		});
 		this.barcode.make_input();
-		this.barcode.$input.on("keypress", function() {
-			setTimeout(function() { me.barcode_timeout(); }, 1000);
+		this.barcode.$input.on("change", function() {
+			setTimeout(me.add_item_thru_barcode(), 1000);
 		});
-	},
-	barcode_timeout: function() {
-		me.add_item_thru_barcode();
 	},
 	make_item_list: function() {
 		var me = this;
@@ -181,12 +178,13 @@ erpnext.POS = Class.extend({
 				me.wrapper.find(".item-list").empty();
 				$.each(r.message, function(index, obj) {
 					if (obj.image)
-						image = '<img src="' + obj.image + '" class="img-responsive" style="border: 1px solid #eee;">';
+						image = '<img src="' + obj.image + '" class="img-responsive" \
+								style="border:1px solid #eee;height:140px;width:122px;">';
 					else
 						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
 					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								%(item_image)s\
+								<div>%(item_image)s</div>\
 								<div class="small">%(item_code)s</div>\
 								<div class="small">%(item_name)s</div>\
 								<div class="small">%(item_price)s</div>\
@@ -332,7 +330,6 @@ erpnext.POS = Class.extend({
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
-		clearTimeout();
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_barcode',
 			args: {barcode: this.barcode.$input.val()},
@@ -363,6 +360,7 @@ erpnext.POS = Class.extend({
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
 				if (d.item_code == selected_items[i]) {
+					// cur_frm.fields_dict["entries"].grid.grid_rows[d.idx].remove();
 					wn.model.clear_doc(d.doctype, d.name);
 				}
 			}
@@ -401,6 +399,7 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
+					cur_frm.pos.barcode.$input.focus();
 					
 					dialog.get_input("total_amount").attr("disabled", "disabled");
 					

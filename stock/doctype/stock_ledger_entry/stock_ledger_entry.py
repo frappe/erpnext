@@ -25,12 +25,14 @@ class DocType(DocListController):
 		self.doclist = doclist
 
 	def validate(self):
+		from stock.utils import validate_warehouse_user
 		if not hasattr(webnotes, "new_stock_ledger_entries"):
 			webnotes.new_stock_ledger_entries = []
+			
 		webnotes.new_stock_ledger_entries.append(self.doc)
 		self.validate_mandatory()
 		self.validate_item()
-		self.validate_warehouse_user()
+		validate_warehouse_user(self.doc.warehouse)
 		self.validate_warehouse_company()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
@@ -52,16 +54,6 @@ class DocType(DocListController):
 
 			self.doc.fields.pop('batch_bal')
 			 
-	def validate_warehouse_user(self):
-		if webnotes.session.user=="Administrator":
-			return
-		warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
-			where parent=%s""", self.doc.warehouse)]
-			
-		if warehouse_users and not webnotes.session.user in warehouse_users:
-			webnotes.msgprint(_("User not allowed entry in the Warehouse") \
-				+ ": " + webnotes.session.user + " / " + self.doc.warehouse, raise_exception = 1)
-
 	def validate_warehouse_company(self):
 		warehouse_company = webnotes.conn.get_value("Warehouse", self.doc.warehouse, "company")
 		if warehouse_company and warehouse_company != self.doc.company:

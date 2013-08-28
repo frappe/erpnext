@@ -19,9 +19,9 @@ company_abbr = "WP"
 country = "United States"
 currency = "USD"
 time_zone = "America/New York"
-start_date = '2010-01-01'
+start_date = '2013-01-01'
 bank_name = "Citibank"
-runs_for = 20
+runs_for = None
 prob = {
 	"default": { "make": 0.6, "qty": (1,5) },
 	"Sales Order": { "make": 0.4, "qty": (1,3) },
@@ -50,21 +50,24 @@ def setup():
 	# make_opening_accounts()
 
 def simulate():
-	current_date = None
-	for i in xrange(runs_for):
-		if not current_date:
-			# get last stock ledger posting date or use default
-			last_posting = webnotes.conn.sql("""select max(posting_date) from `tabStock Ledger Entry`""")
-			if last_posting[0][0]:
-				current_date = webnotes.utils.add_days(last_posting[0][0], 1)
-			else:
-				current_date = webnotes.utils.getdate(start_date)
-		else:
-			current_date = webnotes.utils.add_days(current_date, 1)
-		
+	global runs_for
+	current_date = webnotes.utils.getdate(start_date)
+	
+	# continue?
+	last_posting = webnotes.conn.sql("""select max(posting_date) from `tabStock Ledger Entry`""")
+	if last_posting[0][0]:
+		current_date = webnotes.utils.add_days(last_posting[0][0], 1)
+
+	# run till today
+	if not runs_for:
+		runs_for = webnotes.utils.date_diff(webnotes.utils.nowdate(), current_date)
+	
+	for i in xrange(runs_for):		
 		print current_date.strftime("%Y-%m-%d")
+		webnotes.utils.current_date = current_date
 		
 		if current_date.weekday() in (5, 6):
+			current_date = webnotes.utils.add_days(current_date, 1)
 			continue
 
 		run_sales(current_date)
@@ -72,6 +75,8 @@ def simulate():
 		run_manufacturing(current_date)
 		run_stock(current_date)
 		run_accounts(current_date)
+
+		current_date = webnotes.utils.add_days(current_date, 1)
 		
 def run_sales(current_date):
 	if can_make("Quotation"):
@@ -136,7 +141,7 @@ def run_stock(current_date):
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
 			pr.doc.posting_date = current_date
-			pr.doc.fiscal_year = "2010"
+			pr.doc.fiscal_year = "2013"
 			pr.insert()
 			pr.submit()
 			webnotes.conn.commit()
@@ -150,7 +155,7 @@ def run_stock(current_date):
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
 			dn.doc.posting_date = current_date
-			dn.doc.fiscal_year = "2010"
+			dn.doc.fiscal_year = "2013"
 			dn.insert()
 			try:
 				dn.submit()
@@ -173,7 +178,7 @@ def run_purchase(current_date):
 			mr = webnotes.new_bean("Material Request")
 			mr.doc.material_request_type = "Purchase"
 			mr.doc.transaction_date = current_date
-			mr.doc.fiscal_year = "2010"
+			mr.doc.fiscal_year = "2013"
 			mr.doclist.append({
 				"doctype": "Material Request Item",
 				"parentfield": "indent_details",
@@ -192,7 +197,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				sq = webnotes.bean(make_supplier_quotation(row[0]))
 				sq.doc.transaction_date = current_date
-				sq.doc.fiscal_year = "2010"
+				sq.doc.fiscal_year = "2013"
 				sq.insert()
 				sq.submit()
 				webnotes.conn.commit()
@@ -205,7 +210,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				po = webnotes.bean(make_purchase_order(row[0]))
 				po.doc.transaction_date = current_date
-				po.doc.fiscal_year = "2010"
+				po.doc.fiscal_year = "2013"
 				po.insert()
 				po.submit()
 				webnotes.conn.commit()
@@ -261,11 +266,11 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	from stock.stock_ledger import NegativeStockError
 	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
-	st = webnotes.bean(make_stock_entry(pro_id, purpose))
-	st.doc.posting_date = current_date
-	st.doc.fiscal_year = "2010"
-	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
+		st = webnotes.bean(make_stock_entry(pro_id, purpose))
+		st.doc.posting_date = current_date
+		st.doc.fiscal_year = "2013"
+		st.doc.expense_adjustment_account = "Stock in Hand - WP"
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()
@@ -273,7 +278,7 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	except NegativeStockError: pass
 	except IncorrectValuationRateError: pass
 	except DuplicateEntryForProductionOrderError: pass
-
+	
 def make_quotation(current_date):
 	b = webnotes.bean([{
 		"creation": current_date,
@@ -282,7 +287,7 @@ def make_quotation(current_date):
 		"customer": get_random("Customer"),
 		"order_type": "Sales",
 		"transaction_date": current_date,
-		"fiscal_year": "2010"
+		"fiscal_year": "2013"
 	}])
 	
 	add_random_children(b, {
@@ -349,8 +354,9 @@ def how_many(doctype):
 def install():
 	print "Creating Fresh Database..."
 	from webnotes.install_lib.install import Installer
+	import conf
 	inst = Installer('root')
-	inst.import_from_db("demo", verbose = 1)
+	inst.import_from_db(conf.demo_db_name, verbose = 1)
 
 def complete_setup():
 	print "Complete Setup..."
@@ -392,6 +398,7 @@ def make_bank_account():
 	}).insert()
 	
 	webnotes.set_value("Company", company, "default_bank_account", ba.doc.name)
+	webnotes.conn.commit()
 
 def import_data(dt, submit=False):
 	if not isinstance(dt, (tuple, list)):
@@ -399,7 +406,7 @@ def import_data(dt, submit=False):
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
-		webnotes.form_dict = {}
+		webnotes.form_dict = webnotes._dict()
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")

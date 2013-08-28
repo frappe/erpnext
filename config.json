@@ -1,4 +1,5 @@
 {
+	"app_name": "ERPNext",
 	"modules": {
 		"Selling": {
 			"link": "selling-home",
