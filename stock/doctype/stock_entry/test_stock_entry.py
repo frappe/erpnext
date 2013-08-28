@@ -11,7 +11,7 @@ from stock.doctype.stock_ledger_entry.stock_ledger_entry import *
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		if hasattr(self, "old_default_company"):
 			webnotes.conn.set_default("company", self.old_default_company)
 
@@ -50,7 +50,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
@@ -80,7 +80,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_issue_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		self._insert_material_receipt()
 		
@@ -115,7 +115,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	def test_material_transfer_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 
 		self._insert_material_receipt()
 		
@@ -149,7 +149,7 @@ class TestStockEntry(unittest.TestCase):
 				
 	def test_repack_no_change_in_valuation(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 
 		self._insert_material_receipt()
 
@@ -166,11 +166,11 @@ class TestStockEntry(unittest.TestCase):
 			order by account desc""", repack.doc.name, as_dict=1)
 		self.assertFalse(gl_entries)
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		
 	def test_repack_with_change_in_valuation(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 
 		self._insert_material_receipt()
 		
@@ -188,7 +188,7 @@ class TestStockEntry(unittest.TestCase):
 				["Stock Adjustment - _TC", 0.0, 1000.0],
 			])
 		)
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 			
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[0])

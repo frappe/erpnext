@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 15:49:57", 
   "docstatus": 0, 
-  "modified": "2013-08-01 17:35:16", 
+  "modified": "2013-08-28 18:55:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,9 +42,9 @@
   "default": "1", 
   "description": "If enabled, the system will post accounting entries for inventory automatically.", 
   "doctype": "DocField", 
-  "fieldname": "perpetual_accounting", 
+  "fieldname": "auto_accounting_for_stock", 
   "fieldtype": "Check", 
-  "label": "Enable Perpetual Accounting for Inventory"
+  "label": "Make Accounting Entry For Every Stock Entry"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 

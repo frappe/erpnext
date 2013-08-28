@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-08-05 17:23:52", 
+  "modified": "2013-08-28 19:15:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,20 +25,13 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Company", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "submit": 0, 
-  "write": 1
+  "read": 1
  }, 
  {
   "doctype": "DocType", 
@@ -228,9 +221,9 @@
  {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "fieldname": "perpetual_accounting_settings", 
+  "fieldname": "auto_accounting_for_stock_settings", 
   "fieldtype": "Section Break", 
-  "label": "Perpetual Accounting Settings", 
+  "label": "Auto Accounting For Stock Settings", 
   "read_only": 0
  }, 
  {
@@ -355,6 +348,17 @@
   "read_only": 1
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
  }
 ]

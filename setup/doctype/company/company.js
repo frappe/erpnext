@@ -59,7 +59,7 @@ cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 	}  
 }
 
-if (sys_defaults.perpetual_accounting) {
+if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
 		return {
 			"filters": {

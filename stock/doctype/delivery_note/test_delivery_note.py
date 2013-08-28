@@ -41,8 +41,8 @@ class TestDeliveryNote(unittest.TestCase):
 	
 	def test_delivery_note_no_gl_entry(self):
 		self.clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 0)
 		
 		self._insert_purchase_receipt()
 		
@@ -66,8 +66,8 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry(self):
 		self.clear_stock_account_balance()
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 		
 		self._insert_purchase_receipt()
@@ -119,11 +119,11 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 			
 	def test_delivery_note_gl_entry_packing_item(self):
 		self.clear_stock_account_balance()
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		self._insert_purchase_receipt()
 		self._insert_purchase_receipt("_Test Item Home Desktop 100")
@@ -158,7 +158,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		
 	def test_serialized(self):
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item

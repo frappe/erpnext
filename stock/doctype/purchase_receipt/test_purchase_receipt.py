@@ -12,7 +12,7 @@ from accounts.utils import get_stock_and_account_difference
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		self._clear_stock_account_balance()
 		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
@@ -33,7 +33,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		self._clear_stock_account_balance()
 		pr = webnotes.bean(copy=test_records[0])
 		pr.insert()
@@ -53,8 +53,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
 		
 	def test_purchase_receipt_gl_entry(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("perpetual_accounting")), 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		self._clear_stock_account_balance()
 		
@@ -84,7 +84,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		
 	def _clear_stock_account_balance(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")

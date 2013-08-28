@@ -12,7 +12,7 @@ from accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
 	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
+		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			return
 		
 		if self.doc.docstatus==1:

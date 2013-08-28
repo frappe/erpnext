@@ -358,7 +358,7 @@ cur_frm.set_query("income_account", "entries", function(doc) {
 });
 
 // expense account
-if (sys_defaults.perpetual_accounting) {
+if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {

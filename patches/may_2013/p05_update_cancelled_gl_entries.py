@@ -6,7 +6,7 @@ import webnotes
 from webnotes.utils import cint
 
 def execute():
-	aii_enabled = cint(webnotes.defaults.get_global_default("perpetual_accounting"))
+	aii_enabled = cint(webnotes.defaults.get_global_default("auto_accounting_for_stock"))
 	
 	if aii_enabled:
 		webnotes.conn.sql("""update `tabGL Entry` gle set is_cancelled = 'Yes' 

@@ -303,7 +303,7 @@ class DocType(StockController):
 		
 			
 	def validate_expense_account(self):
-		if not cint(webnotes.defaults.get_global_default("perpetual_accounting")):
+		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			return
 			
 		if not self.doc.expense_account:

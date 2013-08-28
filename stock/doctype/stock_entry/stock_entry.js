@@ -38,7 +38,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		};
 		
-		if(cint(wn.defaults.get_default("perpetual_accounting"))) {
+		if(cint(wn.defaults.get_default("auto_accounting_for_stock"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
 
 			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {

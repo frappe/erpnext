@@ -13,7 +13,7 @@ from accounts.utils import get_fiscal_year, get_stock_and_account_difference, ge
 
 class TestStockReconciliation(unittest.TestCase):
 	def test_reco_for_fifo(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -57,7 +57,7 @@ class TestStockReconciliation(unittest.TestCase):
 			
 		
 	def test_reco_for_moving_average(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -103,7 +103,7 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertFalse(gl_entries)
 			
 	def test_reco_fifo_gl_entries(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		# [[qty, valuation_rate, posting_date, posting_time, stock_in_hand_debit]]
 		input_data = [
@@ -133,10 +133,10 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 			
 	def test_reco_moving_average_gl_entries(self):
-		webnotes.defaults.set_global_default("perpetual_accounting", 1)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, stock_in_hand_debit]]
@@ -166,7 +166,7 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
 		
-		webnotes.defaults.set_global_default("perpetual_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 
 	def cleanup_data(self):

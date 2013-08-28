@@ -212,15 +212,15 @@ class DocType(BuyingController):
 			raise Exception
 			
 	def set_against_expense_account(self):
-		perpetual_accounting = cint(webnotes.defaults.get_global_default("perpetual_accounting"))
+		auto_accounting_for_stock = cint(webnotes.defaults.get_global_default("auto_accounting_for_stock"))
 
-		if perpetual_accounting:
+		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 		
 		against_accounts = []
 		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if perpetual_accounting and item.item_code in stock_items:
+			if auto_accounting_for_stock and item.item_code in stock_items:
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
 				item.expense_head = stock_not_billed_account
@@ -234,7 +234,7 @@ class DocType(BuyingController):
 					(item.item_code or item.item_name), raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
-				# if no perpetual_accounting or not a stock item
+				# if no auto_accounting_for_stock or not a stock item
 				against_accounts.append(item.expense_head)
 				
 		self.doc.against_expense_account = ",".join(against_accounts)
@@ -317,8 +317,8 @@ class DocType(BuyingController):
 		self.update_prevdoc_status()
 
 	def make_gl_entries(self):
-		perpetual_accounting = \
-			cint(webnotes.defaults.get_global_default("perpetual_accounting"))
+		auto_accounting_for_stock = \
+			cint(webnotes.defaults.get_global_default("auto_accounting_for_stock"))
 		
 		gl_entries = []
 		
@@ -355,15 +355,15 @@ class DocType(BuyingController):
 				valuation_tax += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
-		stock_item_and_perpetual_accounting = False
+		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if perpetual_accounting and item.item_code in stock_items:
+			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
 					# if auto inventory accounting enabled and stock item, 
 					# then do stock related gl entries
 					# expense will be booked in sales invoice
-					stock_item_and_perpetual_accounting = True
+					stock_item_and_auto_accounting_for_stock = True
 					
 					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
 						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
@@ -390,7 +390,7 @@ class DocType(BuyingController):
 					})
 				)
 				
-		if stock_item_and_perpetual_accounting and valuation_tax:
+		if stock_item_and_auto_accounting_for_stock and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
 			gl_entries.append(

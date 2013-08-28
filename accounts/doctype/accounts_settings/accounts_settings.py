@@ -13,18 +13,18 @@ class DocType:
 		self.doc, self.doclist = d, dl
 
 	def validate(self):
-		self.validate_perpetual_accounting()
+		self.validate_auto_accounting_for_stock()
 		
-	def validate_perpetual_accounting(self):
-		if cint(self.doc.perpetual_accounting) == 1:
+	def validate_auto_accounting_for_stock(self):
+		if cint(self.doc.auto_accounting_for_stock) == 1:
 			previous_val = cint(webnotes.conn.get_value("Accounts Settings", 
-				None, "perpetual_accounting"))
-			if cint(self.doc.perpetual_accounting) != previous_val:
+				None, "auto_accounting_for_stock"))
+			if cint(self.doc.auto_accounting_for_stock) != previous_val:
 				from accounts.utils import validate_stock_and_account_balance, \
 					create_stock_in_hand_jv
 				validate_stock_and_account_balance()
-				create_stock_in_hand_jv(reverse=cint(self.doc.perpetual_accounting) < previous_val)
+				create_stock_in_hand_jv(reverse=cint(self.doc.auto_accounting_for_stock) < previous_val)
 	
 	def on_update(self):
-		for key in ["perpetual_accounting"]:
+		for key in ["auto_accounting_for_stock"]:
 			webnotes.conn.set_default(key, self.doc.fields.get(key, ''))
