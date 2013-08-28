@@ -152,7 +152,8 @@ class DocType(SellingController):
 	def validate_warehouse_user(self):
 		from stock.utils import validate_warehouse_user
 		
-		warehouses = list(set([d.reserved_warehouse for d in self.doclist.get({"doctype": self.tname})]))
+		warehouses = list(set([d.reserved_warehouse for d in 
+			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_user(w)
