@@ -9,17 +9,8 @@ from core.doctype.communication.communication import make
 
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
 	status="Open", date=None):
-	def set_status(doctype, name):
-		w = webnotes.bean(doctype, name)
-		w.ignore_permissions = True
-		w.doc.status = is_system_user and "Replied" or status
-		w.doc.save()
-		if mail:
-			mail.save_attachments_in_doc(w.doc)
-
 	lead_name = webnotes.conn.get_value("Lead", {"email_id": sender})
 	contact_name = webnotes.conn.get_value("Contact", {"email_id": sender})
-	is_system_user = webnotes.conn.get_value("Profile", sender)
 
 	if not (lead_name or contact_name):
 		# none, create a new Lead
@@ -34,14 +25,13 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		lead.insert()
 		lead_name = lead.doc.name
 
-	make(content=content, sender=sender, subject=subject,
+	message = make(content=content, sender=sender, subject=subject,
 		lead=lead_name, contact=contact_name, date=date)
 	
-	if contact_name:
-		set_status("Contact", contact_name)
-	elif lead_name:
-		set_status("Lead", lead_name)
-	
+	if mail:
+		# save attachments to parent if from mail
+		bean = webnotes.bean("Contact" if contact_name else "Lead", contact_name or lead_name)
+		mail.save_attachments_in_doc(bean.doc)
 
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):
