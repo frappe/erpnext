@@ -186,7 +186,6 @@ class DocType(SellingController):
 
 		self.credit_limit()
 		
-		self.set_buying_amount()
 		self.make_gl_entries()
 
 		# set DN status

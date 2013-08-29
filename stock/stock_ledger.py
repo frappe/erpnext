@@ -82,7 +82,7 @@ def update_entries_after(args, verbose=1):
 
 	valuation_method = get_valuation_method(args["item_code"])
 	stock_value_difference = 0.0
-	
+
 	for sle in entries_to_fix:
 		if sle.serial_no or not cint(webnotes.conn.get_default("allow_negative_stock")):
 			# validate negative stock for serialized items, fifo valuation 
@@ -90,7 +90,7 @@ def update_entries_after(args, verbose=1):
 			if not validate_negative_stock(qty_after_transaction, sle):
 				qty_after_transaction += flt(sle.actual_qty)
 				continue
-				
+
 		if sle.serial_no:
 			valuation_rate = get_serialized_values(qty_after_transaction, sle, valuation_rate)
 		elif valuation_method == "Moving Average":
@@ -172,6 +172,7 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, fo
 	return webnotes.conn.sql("""select * from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
 		and warehouse = %%(warehouse)s
+		and ifnull(is_cancelled, 'No')='No'
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
 		%(limit)s %(for_update)s""" % {

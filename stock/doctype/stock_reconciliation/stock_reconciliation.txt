@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-08-07 18:16:18", 
+  "modified": "2013-08-29 16:46:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -102,11 +102,11 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
+  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
-  "label": "Expense Account", 
+  "label": "Difference Account", 
   "options": "Account"
  }, 
  {

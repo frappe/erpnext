@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2013-08-28 19:15:55", 
+  "modified": "2013-08-28 19:25:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -149,7 +149,7 @@
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
-  "label": "Expense/Adjustment Account", 
+  "label": "Difference Account", 
   "options": "Account", 
   "print_hide": 1
  }, 

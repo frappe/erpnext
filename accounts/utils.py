@@ -246,79 +246,6 @@ def get_company_default(company, fieldname):
 			_("' in Company: ") + company), raise_exception=True)
 			
 	return value
-		
-def create_stock_in_hand_jv(reverse=False):
-	from webnotes.utils import nowdate
-	today = nowdate()
-	fiscal_year = get_fiscal_year(today)[0]
-	jv_list = []
-	
-	for company in webnotes.conn.sql_list("select name from `tabCompany`"):
-		stock_rbnb_value = get_stock_rbnb_value(company)
-		stock_rbnb_value = reverse and -1*stock_rbnb_value or stock_rbnb_value
-		if stock_rbnb_value:
-			jv = webnotes.bean([
-				{
-					"doctype": "Journal Voucher",
-					"naming_series": "JV-AUTO-",
-					"company": company,
-					"posting_date": today,
-					"fiscal_year": fiscal_year,
-					"voucher_type": "Journal Entry",
-					"user_remark": (_("Perpetual Accounting") + ": " +
-						(_("Disabled") if reverse else _("Enabled")) + ". " +
-						_("Journal Entry for inventory that is received but not yet invoiced"))
-				},
-				{
-					"doctype": "Journal Voucher Detail",
-					"parentfield": "entries",
-					"account": get_company_default(company, "stock_received_but_not_billed"),
-						(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
-				},
-				{
-					"doctype": "Journal Voucher Detail",
-					"parentfield": "entries",
-					"account": get_company_default(company, "stock_adjustment_account"),
-						(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
-					"cost_center": get_company_default(company, "stock_adjustment_cost_center")
-				},
-			])
-			jv.insert()
-			
-			jv_list.append(jv.doc.name)
-	
-	if jv_list:
-		msgprint(_("Following Journal Vouchers have been created automatically") + \
-			":\n%s" % ("\n".join([("<a href=\"#Form/Journal Voucher/%s\">%s</a>" % (jv, jv)) for jv in jv_list]),))
-		
-		msgprint(_("""These adjustment vouchers book the difference between \
-			the total value of received items and the total value of invoiced items, \
-			as a required step to use Perpetual Accounting.
-			This is an approximation to get you started.
-			You will need to submit these vouchers after checking if the values are correct.
-			For more details, read: \
-			<a href="http://erpnext.com/auto-inventory-accounting" target="_blank">\
-			Perpetual Accounting</a>"""))
-			
-	webnotes.msgprint("""Please refresh the system to get effect of Perpetual Accounting""")
-			
-		
-def get_stock_rbnb_value(company):
-	total_received_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
-		from `tabPurchase Receipt Item` pr_item where docstatus=1 
-		and exists(select name from `tabItem` where name = pr_item.item_code 
-			and is_stock_item='Yes')
-		and exists(select name from `tabPurchase Receipt` 
-			where name = pr_item.parent and company = %s)""", company)
-		
-	total_billed_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
-		from `tabPurchase Invoice Item` pi_item where docstatus=1 
-		and exists(select name from `tabItem` where name = pi_item.item_code 
-			and is_stock_item='Yes')
-		and exists(select name from `tabPurchase Invoice` 
-			where name = pi_item.parent and company = %s)""", company)
-	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])
-
 
 def fix_total_debit_credit():
 	vouchers = webnotes.conn.sql("""select voucher_type, voucher_no, 
@@ -335,14 +262,6 @@ def fix_total_debit_credit():
 				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
 				(d.diff, d.voucher_type, d.voucher_no))
-
-def validate_stock_and_account_balance():
-	difference = get_stock_and_account_difference()
-	if difference:
-		msgprint(_("Account balance must be synced with stock balance, \
-				to enable perpetual accounting." + 
-				_(" Following accounts are not synced with stock balance") + ": \n" + 
-				"\n".join(difference.keys())), raise_exception=1)
 	
 def get_stock_and_account_difference(account_list=None, posting_date=None):
 	from stock.utils import get_stock_balance_on

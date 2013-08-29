@@ -90,7 +90,6 @@ class DocType(SellingController):
 				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
 				 	self.doc.company, self.doc.grand_total, self)
 				
-		self.set_buying_amount()
 		self.check_prev_docstatus()
 		
 		self.update_status_updater_args()

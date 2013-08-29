@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-04 11:02:19", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:32:10", 
+  "modified": "2013-08-29 16:58:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -413,17 +413,6 @@
   "label": "Item Tax Rate", 
   "oldfieldname": "item_tax_rate", 
   "oldfieldtype": "Small Text", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "buying_amount", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "label": "Buying Amount", 
-  "no_copy": 1, 
-  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 

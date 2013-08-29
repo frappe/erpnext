@@ -22,7 +22,6 @@ cur_frm.set_query("account", function() {
 		filters: {
 			"company": cur_frm.doc.company,
 			"debit_or_credit": "Debit",
-			"is_pl_account": "No",
 			'group_or_ledger': "Ledger"
 		}
 	}

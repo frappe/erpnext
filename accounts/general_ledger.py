@@ -5,7 +5,11 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, cstr, now
 from webnotes.model.doc import Document
+from webnotes import msgprint, _
 from accounts.utils import validate_expense_against_budget
+
+
+class StockAccountInvalidTransaction(webnotes.ValidationError): pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
@@ -47,8 +51,8 @@ def merge_similar_entries(gl_map):
 	merged_gl_map = filter(lambda x: flt(x.debit)!=0 or flt(x.credit)!=0, merged_gl_map)
 	return merged_gl_map
 
-def check_if_in_list(gle, gl_mqp):
-	for e in gl_mqp:
+def check_if_in_list(gle, gl_map):
+	for e in gl_map:
 		if e.account == gle.account and \
 				cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 				and cstr(e.get('against_voucher_type')) == \
@@ -57,11 +61,14 @@ def check_if_in_list(gle, gl_mqp):
 			return e
 
 def save_entries(gl_map, adv_adj, update_outstanding):
+	validate_account_for_auto_accounting_for_stock(gl_map)
+	
 	total_debit = total_credit = 0.0
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding)
 		# check against budget
 		validate_expense_against_budget(entry)
+		
 
 		# update total debit / credit
 		total_debit += flt(entry.debit)
@@ -79,8 +86,20 @@ def make_entry(args, adv_adj, update_outstanding):
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		webnotes.throw(webnotes._("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
+		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
 		 	cstr(total_debit - total_credit))
+			
+def validate_account_for_auto_accounting_for_stock(gl_map):
+	if gl_map[0].voucher_type=="Journal Voucher":
+		aii_accounts = [d[0] for d in webnotes.conn.sql("""select account from tabWarehouse 
+			where ifnull(account, '')!=''""")]
+		
+		for entry in gl_map:
+			if entry.account in aii_accounts:
+				webnotes.throw(_("Account") + ": " + entry.account + 
+					_(" can only be debited/credited through Stock transactions"), 
+					StockAccountInvalidTransaction)
+	
 		
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, 
 		adv_adj=False, update_outstanding="Yes"):

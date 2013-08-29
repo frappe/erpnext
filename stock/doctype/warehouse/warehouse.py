@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import flt, validate_email_add
+from webnotes.utils import cint, flt, validate_email_add
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
@@ -23,6 +23,21 @@ class DocType:
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
+				
+		self.account_mandatory()
+		
+	def account_mandatory(self):
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+			sle_exists = webnotes.conn.get_value("Stock Ledger Entry", {"warehouse": self.doc.name})
+			if not self.doc.account and (self.doc.__islocal or not sle_exists):
+				webnotes.throw(_("Asset/Expense Account mandatory"))
+				
+			if not self.doc.__islocal and sle_exists:
+				old_account = webnotes.conn.get_value("Warehouse", self.doc.name, "account")
+				if old_account != self.doc.account:
+					webnotes.throw(_("Account can not be changed/assigned/removed as \
+						stock transactions exist for this warehouse"))
+						
 
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1

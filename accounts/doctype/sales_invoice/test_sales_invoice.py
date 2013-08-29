@@ -330,12 +330,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertFalse(gle)
 		
-	def atest_pos_gl_entry_with_aii(self):
+	def test_pos_gl_entry_with_aii(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("delete from `tabGL Entry`")
+		webnotes.conn.sql("delete from `tabBin`")
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
-		
-		old_default_company = webnotes.conn.get_default("company")
-		webnotes.conn.set_default("company", "_Test Company")
 		
 		self._insert_purchase_receipt()
 		self._insert_pos_settings()
@@ -360,20 +359,18 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
 		
 		# check gl entries
-		stock_in_hand_account = webnotes.conn.get_value("Company", "_Test Company", 
-			"stock_in_hand_account")
 		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
-		
+				
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
 			[pos[1]["income_account"], 0.0, 500.0],
 			[pos[2]["account_head"], 0.0, 80.0],
 			[pos[3]["account_head"], 0.0, 50.0],
-			[stock_in_hand_account, 0.0, 75.0],
+			["_Test Account Stock In Hand - _TC", 0.0, 75.0],
 			[pos[1]["expense_account"], 75.0, 0.0],
 			[si.doc.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
@@ -383,6 +380,8 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][1], gle.debit)
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 		
+		
+		
 		# cancel
 		si.cancel()
 		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
@@ -390,12 +389,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertFalse(gle)
 		
-		self.assertFalse(get_stock_and_account_difference([si.doclist[1].warehouse]))
+		self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
 		
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
-		webnotes.conn.set_default("company", old_default_company)
 		
-	def atest_sales_invoice_gl_entry_with_aii_no_item_code(self):		
+	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):		
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 				
 		si_copy = webnotes.copy_doclist(test_records[1])
@@ -422,7 +420,7 @@ class TestSalesInvoice(unittest.TestCase):
 				
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 	
-	def atest_sales_invoice_gl_entry_with_aii_non_stock_item(self):		
+	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):		
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		si_copy = webnotes.copy_doclist(test_records[1])
@@ -641,7 +639,7 @@ class TestSalesInvoice(unittest.TestCase):
 			return new_si
 		
 		# if yearly, test 3 repetitions, else test 13 repetitions
-		count = no_of_months == 12 and 3 or 13
+		count = 3 if no_of_months == 12 else 13
 		for i in xrange(count):
 			base_si = _test(i)
 			
