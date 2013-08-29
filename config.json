@@ -106,8 +106,13 @@
 			},
 			"orders": {
 				"no_cache": true,
-				"template": "app/website/templates/pages/orders",
-				"args_method": "selling.doctype.sales_order.sales_order.get_currency_and_number_format"
+				"template": "app/website/templates/pages/transaction_list",
+				"args_method": "website.helpers.transaction.order_list_args"
+			},
+			"invoices": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/transaction_list",
+				"args_method": "website.helpers.transaction.invoice_list_args"
 			},
 			"product_search": {
 				"template": "app/website/templates/pages/product_search"
