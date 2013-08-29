@@ -1,5 +1,0 @@
----
-{
-	"_label": "Price Lists"
-}
----
