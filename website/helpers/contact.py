@@ -20,7 +20,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 
 	# make lead / communication
 	from selling.doctype.lead.get_leads import add_sales_communication
-	add_sales_communication(subject or "Website Query", message, sender, sender, 
+	message = add_sales_communication(subject or "Website Query", message, sender, sender, 
 		mail=None, status=status)
 	
 	# guest method, cap max writes per hour
@@ -29,4 +29,4 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		webnotes.response["message"] = "Sorry: we believe we have received an unreasonably high number of requests of this kind. Please try later"
 		return
 	
-	webnotes.response["message"] = 'Thank You'
+	webnotes.response.status = "okay"
