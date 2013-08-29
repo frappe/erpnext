@@ -181,7 +181,7 @@ erpnext.POS = Class.extend({
 				$.each(r.message, function(index, obj) {
 					if (obj.image)
 						image = '<img src="' + obj.image + '" class="img-responsive" \
-								style="border:1px solid #eee;height:140px;width:122px;">';
+								style="border:1px solid #eee;height:140px;width:100%;">';
 					else
 						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 

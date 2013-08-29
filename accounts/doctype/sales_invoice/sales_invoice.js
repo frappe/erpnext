@@ -26,7 +26,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 		
-		if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
+		if(this.frm.doc.is_pos) {
 			cur_frm.cscript.toggle_pos(true);
 		}
 	},
@@ -93,9 +93,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						}
 					});
 				});
-		} else {
-			// hide shown pos for submitted records
-			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
 
 		if(cint(sys_defaults.fs_pos_view)===1)
