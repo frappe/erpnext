@@ -17,7 +17,6 @@ class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()
-		self.set_taxes("purchase_tax_details", "purchase_other_charges")
 	
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -40,6 +39,8 @@ class BuyingController(StockController):
 					self.doc.fields[fieldname] = val
 
 		self.set_missing_item_details(get_item_details)
+		if self.doc.fields.get("__islocal"):
+			self.set_taxes("purchase_tax_details", "purchase_other_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
