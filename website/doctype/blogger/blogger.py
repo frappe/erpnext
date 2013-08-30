@@ -5,6 +5,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
