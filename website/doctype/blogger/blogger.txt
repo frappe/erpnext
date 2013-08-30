@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 16:00:51", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:27:34", 
+  "modified": "2013-08-30 16:35:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -38,6 +38,12 @@
  {
   "doctype": "DocType", 
   "name": "Blogger"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "disabled", 
+  "fieldtype": "Check", 
+  "label": "Disabled"
  }, 
  {
   "description": "Will be used in url (usually first name).", 
