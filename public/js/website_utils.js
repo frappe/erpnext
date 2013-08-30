@@ -18,7 +18,7 @@ erpnext.send_message = function(opts) {
 
 wn.call = function(opts) {
 	if(opts.btn) {
-		$(opts.btn).attr("disabled", "disabled");
+		$(opts.btn).prop("disabled", true);
 	}
 	
 	if(opts.msg) {
@@ -51,7 +51,7 @@ wn.call = function(opts) {
 		dataType: "json",
 		success: function(data) {
 			if(opts.btn) {
-				$(opts.btn).attr("disabled", false);
+				$(opts.btn).prop("disabled", false);
 			}
 			if(data.exc) {
 				if(opts.btn) {
