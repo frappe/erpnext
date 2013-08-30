@@ -1,7 +1,7 @@
 import webnotes
 
 def execute():
-	# create_fiscal_years()
+	create_fiscal_years()
 	
 	doctypes = webnotes.conn.sql_list("""select parent from tabDocField
 		where (fieldtype="Link" and options='Fiscal Year')
