@@ -85,6 +85,7 @@ Contents
 	1. [Material Issue](docs.user.stock.material_issue.html)
 	1. [Sales Return](docs.user.stock.sales_return.html)
 	1. [Purchase Return](docs.user.stock.sales_return.html)
+	1. [Accounting for Stock](docs.user.stock.accounting_for_stock.html)
 1. [Accounting](docs.user.accounting.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)

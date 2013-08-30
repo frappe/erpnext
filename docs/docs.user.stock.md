@@ -31,4 +31,3 @@ Tracking stock is not just about adding and subtracting quantities. Some complic
 - Stock reports are required at any point in time in the past: You have to lookup what was the quantity / value your stock of Item X on date Y. 
 
 To manage this, ERPNext collects all inventory transactions in a table called the Stock Ledger Entry. All Purchase Receipts, Stock Entries and Delivery Notes update this table.
-
