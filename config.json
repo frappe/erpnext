@@ -106,13 +106,23 @@
 			},
 			"orders": {
 				"no_cache": true,
-				"template": "app/website/templates/pages/transaction_list",
+				"template": "app/website/templates/pages/sales_transactions",
 				"args_method": "website.helpers.transaction.order_list_args"
 			},
 			"invoices": {
 				"no_cache": true,
-				"template": "app/website/templates/pages/transaction_list",
+				"template": "app/website/templates/pages/sales_transactions",
 				"args_method": "website.helpers.transaction.invoice_list_args"
+			},
+			"shipments": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/sales_transactions",
+				"args_method": "website.helpers.transaction.shipment_list_args"
+			},
+			"messages": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/messages",
+				"args_method": "website.helpers.transaction.message_list_args"
 			},
 			"product_search": {
 				"template": "app/website/templates/pages/product_search"
@@ -123,7 +133,8 @@
 				"args_method": "support.doctype.support_ticket.support_ticket.get_website_args"
 			},
 			"tickets": {
-				"template": "app/website/templates/pages/tickets"
+				"template": "app/website/templates/pages/tickets",
+				"args_method": "website.helpers.transaction.ticket_list_args"
 			},
 			"address": {
 				"no_cache": true,

@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 
-var erpnext = {};
-var wn = {};
+if(!window.erpnext) erpnext = {};
+if(!window.wn) wn = {};
 
 // Add / update a new Lead / Communication
 // subject, sender, description
@@ -230,3 +230,16 @@ $.extend(wn.cart, {
 			$(".cart-count").html("( "+ cart_count +" )")
 	}
 });
+
+function remove_script_and_style(txt) {
+	return (!txt || (txt.indexOf("<script>")===-1 && txt.indexOf("<style>")===-1)) ? txt :
+		$("<div></div>").html(txt).find("script,noscript,style,title,meta").remove().end().html();
+}
+
+function is_html(txt) {
+	if(txt.indexOf("<br>")==-1 && txt.indexOf("<p")==-1 
+		&& txt.indexOf("<img")==-1 && txt.indexOf("<div")==-1) {
+		return false;
+	}
+	return true;
+}

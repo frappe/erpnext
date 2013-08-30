@@ -15,7 +15,7 @@ def get_transaction_list(doctype, start):
 		transactions = webnotes.conn.sql("""select name, creation, currency, grand_total_export 
 			from `tab%s` where customer=%s and docstatus=1
 			order by creation desc
-			limit %s, 20""" % (doctype, "%s", "%s"), (customer, cint(start)), as_dict=1)
+			limit %s, 20""" % (doctype, "%s", "%s"), (customer, cint(start)), as_dict=True)
 		for doc in transactions:
 			doc.items = ", ".join(webnotes.conn.sql_list("""select item_name
 				from `tab%s Item` where parent=%s limit 5""" % (doctype, "%s"), doc.name))
@@ -61,3 +61,59 @@ def invoice_list_args():
 		"page": "invoice"
 	})
 	return args
+
+@webnotes.whitelist()
+def get_shipments(start=0):
+	return get_transaction_list("Delivery Note", start)
+
+def shipment_list_args():
+	args = get_common_args()
+	args.update({
+		"title": "Shipments",
+		"method": "website.helpers.transaction.get_shipments",
+		"icon": "icon-truck",
+		"empty_list_message": "No Shipments Found",
+		"page": "shipment"
+	})
+	return args
+	
+@webnotes.whitelist()
+def get_tickets(start=0):
+	tickets = webnotes.conn.sql("""select name, subject, status, creation 
+		from `tabSupport Ticket` where raised_by=%s 
+		order by modified desc
+		limit %s, 20""", (webnotes.session.user, cint(start)), as_dict=True)
+	for t in tickets:
+		t.creation = formatdate(t.creation)
+	
+	return tickets
+	
+def ticket_list_args():
+	return {
+		"title": "My Tickets",
+		"method": "website.helpers.transaction.get_tickets",
+		"icon": "icon-ticket",
+		"empty_list_message": "No Tickets Raised",
+		"page": "ticket"
+	}
+
+@webnotes.whitelist()
+def get_messages(start=0):
+	search_term = "%%%s%%" % webnotes.session.user
+	messages = webnotes.conn.sql("""select name, subject, creation,
+		sender, recipients, content
+		from `tabCommunication` where sender like %s or recipients like %s
+		order by creation desc
+		limit %s, 20""", (search_term, search_term, cint(start)), as_dict=True)
+	for m in messages:
+		m.creation = formatdate(m.creation)
+		
+	return messages
+
+def message_list_args():
+	return {
+		"title": "Messages",
+		"method": "website.helpers.transaction.get_messages",
+		"icon": "icon-comments",
+		"empty_list_message": "No Messages Found",
+	}
