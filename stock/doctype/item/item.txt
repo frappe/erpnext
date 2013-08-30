@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-08-14 11:46:49", 
+  "modified": "2013-08-30 16:21:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,7 +35,9 @@
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -558,20 +560,6 @@
   "reqd": 1
  }, 
  {
-  "default": "No", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "description": "Select \"Yes\" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.", 
-  "doctype": "DocField", 
-  "fieldname": "is_sample_item", 
-  "fieldtype": "Select", 
-  "label": "Allow Samples", 
-  "oldfieldname": "is_sample_item", 
-  "oldfieldtype": "Select", 
-  "options": "Yes\nNo", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "max_discount", 
@@ -878,9 +866,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material Master Manager", 
-  "submit": 0, 
   "write": 1
  }, 
  {
@@ -888,9 +874,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material Manager", 
-  "submit": 0, 
   "write": 0
  }, 
  {
@@ -898,21 +882,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material User", 
-  "submit": 0, 
   "write": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Sales User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Purchase User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts User"
  }
 ]
