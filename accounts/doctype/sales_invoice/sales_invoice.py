@@ -549,9 +549,7 @@ class DocType(SellingController):
 		self.values = []
 		items = get_obj('Sales Common').get_item_list(self)
 		for d in items:
-			stock_item = webnotes.conn.sql("SELECT is_stock_item, is_sample_item \
-				FROM tabItem where name = '%s'"%(d['item_code']), as_dict = 1)
-			if stock_item[0]['is_stock_item'] == "Yes":
+			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['warehouse']:
 					msgprint("Message: Please enter Warehouse for item %s as it is stock item." \
 						% d['item_code'], raise_exception=1)
