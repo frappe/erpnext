@@ -13,6 +13,14 @@ You can make a Purchase Receipt directly from:
 
 or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”.
 
+
+
+![Purchase Receipt](img/purchase-receipt.png)
+
+
+
+
+
 ### Rejections
 
 In the Purchase Receipt, you are required to enter whether all the materials you receive are of accepted quality (in case you check). If you have any rejections, update the “Rejected Quantity” column in the Items table.

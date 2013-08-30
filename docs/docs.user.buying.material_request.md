@@ -40,7 +40,7 @@ In the Material Request form,
 
 - Fill in the Items you want and their quantities.
 
-- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the Projected Quantity for this Item. Projected Quantity is the level of stock that is predicted for a particular Item, based on the current stock levels and other requirements.It is the quantity of gross inventory, including supply and demand in the past that is done as part of the planning process. The projected inventory is used by the planning system to monitor the reorder point and to determine the reorder quantity. The projected Quantity is used by the planning engine to monitor the safety stock levels. These levels are maintained to serve unexpected demands. Having a tight control of the projected inventory is crucial to detect when the reorder point is being crossed and to calculate the right order quantity.
+- If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the [Projected Quantity](docs.user.stock.projected_quantity.html)for this Item.
 
 
 - You can optionally add the Terms, using the Terms and Conditions master and also the reason.

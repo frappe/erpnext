@@ -7,64 +7,59 @@
 	]
 }
 ---
-An Item is simply a product or service which you sell or buy from your Customers or Suppliers. ERPNext is optimized for itemized management of your sales and purchase. However, you can skip creating Items. If you are in services, you can create an Item for each services that your offer.
+An Item is your company's product or a service.The term Item is applicable to your core products as well as your raw materials. It can be a product or service that you buy/sell from your customers/ suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items. 
 
-There are two main categories of Items in ERPNext
+ERPNext is optimized for itemized management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.
 
-- Stock Items
-- Non Stock Items
+## Item Properties
 
-As you may have guessed, inventory balances are tracked for stock items and not for
-non-stock items. Non-stock items could be services or consumables that are not tracked.
+- **Item Name:** Item name is the actual name of your product or service.
+- **Item Code:** Item Code is a short-form to denote your Item. If you have very few Items, it is advisable to keep the Item Name and the Item Code same. This helps new users to recognise and update Item details in all transactions. In case you have lot of Items with long names and the list runs in hundreds, it is advisable to code. To understand naming Item codes see [Item Codification](docs.user.setup.codification.html)
+- **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under Item Group.
+- **Default Unit of Measure:** This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data > UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list. 
+- **Brand:** If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.
 
-### Item Groups
+![Item Properties](img/item-properties.png)
 
-ERPNext allows you to classify items into groups. This will help you in getting reports about various classes of items and also help in cataloging your items for the website.
+### Upload an Image
 
-### Warehouses
+To  upload an image for your icon that will appear in all transactions, save the partially filled form. Only after your file is saved a “+” button will appear besides the Image icon. Click on this sign and upload the image.
 
-In ERPNext you can create Warehouses to identify where your Items reside. 
+![Item Properties](img/item-add-image.png)
 
-There are two main Warehouse Types that are significant in ERPNext.
+### Item Pricing
 
-Stores: These are where your incoming Items are kept before they are consumed or sold. You can have as many “Stores” type Warehouses as you wish. Stores type warehouses are significant because if you set an Item for automatic re-order, ERPNext will check its quantities in all “Stores” type Warehouses when deciding whether to re-order or not.
+Item Price and Price Lists: ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a place where different rate plans can be stored. It’s a name you can give to a set of Item prices. In case you have different zones (based on the shipping costs), for different currencies etc, you can maintain different Price Lists. A Price List is formed when you create different Item Prices. To import Item Price visit “Import Item Price”.
 
-Asset: Items marked as type “Fixed Asset” are maintained in Asset Type Warehouses. This helps you to separate them for the Items that are consumed as a part of your regular operations or “Cost of Goods Sold”.
+## Inventory : Warehouse and Stock Setting
 
-### Item Taxes
+In ERPNext, you can select  different type of Warehouses to stock your different Items. This can be selected based on Item types. It could be Fixed Asset Item, Stock Item or even Manufacturing Item. 
 
-These settings are only required if this particular Item has a different tax rate than what is the rate defined in the standard tax Account.
+- **Stock Item:** If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.
+- **Default Warehouse:** This is the Warehouse that is automatically selected in your transactions. 
+- **Allowance Percentage:** This is the  percent by which you will be allowed to over-bill or  over-deliver this Item. If not set, it will select from  the Global Defaults. 
+- **Valuation Method:** There are two options to maintain valuation of stock. FIFO (first in -  first out) and Moving Average. To understand this topic in detail please visit “ Item Valuation, FIFO and Moving Average”.
 
-For example, you have a tax Account, “VAT 10%” and this particular item is exempted from this tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column.
+### Serialized and Batched Inventory
+
+These numbers help to track individual units or batches of Items which you sell. It also tracks warranty and returns. In case any individual Item is recalled by the supplier the number system helps to track individual Item. The numbering system  also manages expiry dates. Please note that if you sell your items in thousands, and if the items are very small like pens or erasers, you need not serialize them. In ERPNext, you will have to mention the serial number in some accounting entries. To create serial numbers you will have to manually create all the numbers in your entries. If your product is not a big consumer durable Item, if it has no warranty and has no chances of being  recalled, avoid giving serial numbers. 
+
+> Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.
+
+- [Disucssion on Serialized Inventory](docs.user.stock.serialized.html)
+
+### Re Ordering
+
+- **Re-order level** suggests the amount of stock balance in the Warehouse. 
+- **Re-order Qty** suggests the amount of stock to be ordered  to maintain minimum stock levels.
+- **Minimum Order Qty** is the minimum quantity for which a Material Request / Purchase Order must be made.
+
+### Item Tax
+
+These settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account. For example,  If you have a tax Account, “VAT 10%” and this particular Item is exempted from tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column.
 
 ### Inspection
 
-Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase Receipt is submitted.
+Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase 	Receipt is submitted.
 
-Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection.  Examples of Criteria are: Weight, Length, Finish etc.
-
-### Item Pricing and Price Lists
-
-ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a name you can give to a set of Item prices.
-￼
-Why would you want Price Lists? You have different prices for different zones (based on the shipping costs), for different currencies, regions etc.
-
-#### Negative Stock
-
-FIFO is the more accurate system of the two but has a disadvantage. You cannot have negative stock in FIFO. This means that you cannot make forward transactions that would make your stock negative. Why is this? Because sequences are so important to FIFO, you cannot track the value of the stock if it does not exist!
-
-In Moving Average, since each item has an “average” value, the value of the negative stock is also based on this “average”.
-
-### Serial Numbers and Batches
-
-In scenarios where you may have to track individual units or batches of Items you sell, ERPNext allows you to manage Serial Numbers and Batches.
-￼
-Why is this useful?
-
-- To track warranty and returns.
-- To trace individual Items incase they are recalled by the Supplier.
-- To manage expiry.
-
-In ERPNext, Serial Number and Batch are separate entities and all stock transactions for Items that serialized or batches must be tagged with either the Batch or Serial Number.
-
-> Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.
+Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection. Examples of Criteria are: Weight, Length, Finish etc.
