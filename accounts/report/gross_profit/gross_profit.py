@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
-from stock.utils import get_buying_amount
+from stock.utils import get_buying_amount, get_sales_bom_buying_amount
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -21,10 +21,15 @@ def execute(filters=None):
 	data = []
 	for row in source:
 		selling_amount = flt(row.amount)
-
-		buying_amount = get_buying_amount(row.item_code, row.parenttype, row.name, row.item_row,
-			stock_ledger_entries.get((row.item_code, row.warehouse), []), 
-			item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict()))
+		
+		item_sales_bom_map = item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict())
+		
+		if item_sales_bom_map.get(row.item_code):
+			buying_amount = get_sales_bom_buying_amount(row.item_code, row.warehouse, 
+				row.parenttype, row.name, row.item_row, stock_ledger_entries, item_sales_bom_map)
+		else:
+			buying_amount = get_buying_amount(row.parenttype, row.name, row.item_row,
+				stock_ledger_entries.get((row.item_code, row.warehouse), []))
 		
 		buying_amount = buying_amount > 0 and buying_amount or 0
 

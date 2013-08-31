@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:45:42", 
+  "modified": "2013-08-31 10:19:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -179,7 +179,6 @@
   "search_index": 1
  }, 
  {
-  "default": "Today", 
   "description": "Enter the date by which payments from customer is expected against this invoice.", 
   "doctype": "DocField", 
   "fieldname": "due_date", 
