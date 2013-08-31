@@ -27,7 +27,7 @@ $(document).ready(function() {
 			message: message,
 			callback: function(r) {
 				if(r.status==="okay") {
-					msgprint(r.message or "Sent")
+					msgprint(r.message || "Thank you for your message.")
 				} else {
 					msgprint("There were errors");
 					console.log(r.exc);
