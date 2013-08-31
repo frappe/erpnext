@@ -55,7 +55,7 @@ This process is called Perpetual Accounting.
 
 Go to Setup > Accounts Settings > check "Make Accounting Entry For Every Stock Entry"
 
-![Activation](img/activate-accounting-for-stock.png)
+![Activation](img/accounting-for-stock-1.png)
 
 -
 
@@ -121,33 +121,46 @@ Auto / Perpetual Accounting totally depends upon the item valuation rate. Hence,
 
 #### **Purchase Receipt**
 
-Suppose you have purchased *10 quantity* of item "RAM" at *$200* and *5 quantity* of item "Table" at **$100** from supplier "East Wind Inc". Following are the details of Purchase Receipt:
+Suppose you have purchased *10 quantity* of item "RM0001" at *$200* and *5 quantity* of item "Desktop" at **$100** from supplier "East Wind Inc". Following are the details of Purchase Receipt:
 
 
->**Supplier:** East Wind Inc.
+>	<b>Supplier:</b> East Wind Inc.
 
->**Items:**
+>	<b>Items:</b>
 
->- Item = RAM ; Warehouse = Stores ; Qty = 10 ; Rate = 200 ; Amount = 2000 ; Valuation Amount = 2200
->- Item = Chair ; Warehouse = Fixed Asset Warehouse ; Qty = 5 ; Rate = 100 ; Amount = 500 ; Valuation Amount = 550
-
+>	<table class="table table-bordered">
+>		<thead>
+>			<tr>
+>				<th>Item</th><th>Warehouse</th><th>Qty</th>
+>				<th>Rate</th><th>Amount</th><th>Valuation Amount</th>
+>			</tr>
+>		</thead>
+>		<tbody>
+>			<tr>
+>				<td>RM0001</td><td>Stores</td><td>10</td><td>200</td><td>2000</td><td>2200</td>
+>			</tr>
+>			<tr>
+>				<td>Desktop</td><td>Fixed Asset Warehouse</td>
+>				<td>5</td><td>100</td><td>500</td><td>550</td>
+>			</tr>
+>		</tbody>
+>	</table>
+	
 >**Taxes:**
 >
 >- Shipping Charges = 100 ; Total and Valuation
 >- VAT = 120 ; Total
 >- Customs Duty = 150 ; Valuation
 
+**Stock Ledger**
 
-**GL Entry**
+![Activation](img/accounting-for-stock-2.png)
 
-<table class="table table-bordered">
-  <thead><tr><th>Account</th><th>Debit</th><th>Credit</th></tr></thead>
-  <tbody>
-  <tr><td>Raw Materials</td><td>2000 + 80 + 120 = 2200</td><td>0</td></tr>
-  <tr><td>Office Equipments</td><td>500 + 20 + 30 = 550</td><td>0</td></tr>
-  <tr><td>Stock Received But Not Billed</td><td>0</td><td>2750</td></tr>
-  </tbody>
-</table>
+**General Ledger**
+
+![Activation](img/accounting-for-stock-3.png)
+
+
 
 --
 
@@ -158,8 +171,8 @@ Suppose you have purchased *10 quantity* of item "RAM" at *$200* and *5 quantity
 
 >**Items:**
 
->- Item = RAM ; Warehouse = Stores ; Qty = 10 ; Rate = 200 ; Amount = 2000
->- Item = Chair ; Warehouse = Fixed Asset Warehouse ; Qty = 5 ; Rate = 100 ; Amount = 500
+>- Item = RM0001 ; Warehouse = Stores ; Qty = 10 ; Rate = 200 ; Amount = 2000
+>- Item = Desktop ; Warehouse = Fixed Asset Warehouse ; Qty = 5 ; Rate = 100 ; Amount = 500
 
 >**Taxes:**
 
@@ -190,7 +203,7 @@ Suppose you have purchased *10 quantity* of item "RAM" at *$200* and *5 quantity
 
 >**Items:**
 
->- Item = RAM ; Warehouse = Stores ; Qty = 5 ; Rate = 200 ; Amount = 1000 ; Buying Amount = (2200/10)*5 = 1100
+>- Item = RM0001 ; Warehouse = Stores ; Qty = 5 ; Rate = 200 ; Amount = 1000 ; Buying Amount = (2200/10)*5 = 1100
 
 >**Taxes:**
 
@@ -215,7 +228,7 @@ Suppose you have purchased *10 quantity* of item "RAM" at *$200* and *5 quantity
 
 >**Items:**
 
->- Item = RAM ; Qty = 5 ; Rate = 100 ; Amount = 500
+>- Item = RM0001 ; Qty = 5 ; Rate = 100 ; Amount = 500
 
 >**Taxes:**
 
