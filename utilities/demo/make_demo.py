@@ -29,7 +29,7 @@ prob = {
 	"Purchase Receipt": { "make": 0.7, "qty": (1,15) },
 }
 
-def make(reset=False):
+def make(reset=False, simulate=True):
 	webnotes.connect()
 	#webnotes.print_messages = True
 	webnotes.mute_emails = True
@@ -37,7 +37,8 @@ def make(reset=False):
 	
 	if reset:
 		setup()
-	simulate()
+	if simulate:
+		simulate()
 	
 def setup():
 	install()

@@ -3,10 +3,10 @@ if __name__=="__main__":
 	sys.path.extend([".", "lib", "app"])
 
 import webnotes, os
+import utilities.demo.make_demo
 
 def make_demo_app():
-	import utilities.demo.make_demo
-	utilities.demo.make_demo.make(reset=True)
+	
 
 def make_demo_user():
 	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
@@ -88,8 +88,10 @@ def make_demo_login_page():
 		
 	p.insert()
 	
-	webnotes.conn.set_value("Website Settings", None, "home_page", "demo-login")
-	webnotes.conn.set_value("Website Settings", None, "disable_signup", 1)
+	website_settings = webnotes.bean("Website Settings", "Website Settings")
+	website_settings.doc.home_page = "demo-login"
+	website_settings.doc.disable_signup = 1
+	website_settings.save()
 	
 	webnotes.conn.commit()
 
@@ -111,7 +113,9 @@ def make_demo_on_login_script():
 if __name__=="__main__":
 	# webnotes.connect()
 	webnotes.mute_emails = 1
-	make_demo_app()
+	utilities.demo.make_demo.make(reset=True, simulate=False)
+	# setup demo user etc so that the site it up faster, while the data loads
 	make_demo_user()
 	make_demo_login_page()
 	make_demo_on_login_script()
+	utilities.demo.make_demo.make(reset=False, simulate=True)
