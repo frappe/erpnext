@@ -12,9 +12,6 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	lead_name = webnotes.conn.get_value("Lead", {"email_id": sender})
 	contact_name = webnotes.conn.get_value("Contact", {"email_id": sender})
 
-	parent_doctype = "Contact" if contact_name else "Lead"
-	parent_name = contact_name or lead_name
-
 	if not (lead_name or contact_name):
 		# none, create a new Lead
 		lead = webnotes.bean({
@@ -27,6 +24,9 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		lead.ignore_permissions = True
 		lead.insert()
 		lead_name = lead.doc.name
+
+	parent_doctype = "Contact" if contact_name else "Lead"
+	parent_name = contact_name or lead_name
 
 	message = make(content=content, sender=sender, subject=subject,
 		doctype = parent_doctype, name = parent_name, date=date)
