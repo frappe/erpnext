@@ -18,7 +18,6 @@ class DocType:
 		return series and series[0] or ''
 
 	def validate(self):
-		self.prev_user = webnotes.conn.get_value("POS Setting", self.doc.name, "user")
 		self.check_for_duplicate()
 		self.validate_expense_account()
 		
