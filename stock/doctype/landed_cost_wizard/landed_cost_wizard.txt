@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:39", 
   "docstatus": 0, 
-  "modified": "2013-09-02 13:45:54", 
+  "modified": "2013-09-02 19:13:09", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -37,6 +37,14 @@
  {
   "doctype": "DocType", 
   "name": "Landed Cost Wizard"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

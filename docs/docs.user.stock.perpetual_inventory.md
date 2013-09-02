@@ -26,13 +26,13 @@ Migration from Periodic Inventory is not a one click settings, it involves some 
 
 Steps to be followed:
 
+- Nullify current stock-in-hand / fixed-asset account balance through Journal Voucher.
+- Create new warehouse for each existing warehouse.
+- Assign Asset / Expense account while creating new warehouse.
 - Follow Activation Step 1 & 2
-- To enable Perpetual Inventory, existing stock balances must be synced with relevant account balances. To do that, calculate available stock value and book stock-in-hand/fixed-asset (asset) against cost-of-goods-sold (expense) through Journal Voucher.
-- Create new warehouse for every existing warehouse.
-- Assign Asset / Expense account while creating warehouse.
 - Create Stock Entry (Material Transfer) to transfer available stock from existing warehouse to new warehouse
 
->Note: System will not  post any accounting entries for existing stock transactions submitted prior to the activation of Perpetual Inventory.
+>Note: System will not  post any accounting entries for existing stock transactions submitted prior to the activation of Perpetual Inventory as those old warehouses will not be linked to account.
 
 -
 
@@ -216,11 +216,11 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 
 **Stock Ledger**
 
-![si_stock_ledger](img/accounting-for-stock-9.png)
+![mr_stock_ledger](img/accounting-for-stock-9.png)
 
 **General Ledger**
 
-![si_stock_ledger](img/accounting-for-stock-10.png)
+![mr_stock_ledger](img/accounting-for-stock-10.png)
  
 --
 
@@ -238,11 +238,11 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 
 **Stock Ledger**
 
-![si_stock_ledger](img/accounting-for-stock-11.png)
+![mi_stock_ledger](img/accounting-for-stock-11.png)
 
 **General Ledger**
 
-![si_stock_ledger](img/accounting-for-stock-12.png)
+![mi_stock_ledger](img/accounting-for-stock-12.png)
 
 --
 
@@ -262,8 +262,53 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 
 **Stock Ledger**
 
-![si_stock_ledger](img/accounting-for-stock-13.png)
+![mtn_stock_ledger](img/accounting-for-stock-13.png)
 
 **General Ledger**
 
 No General Ledger Entry
+
+--
+
+### **Stock Entry (Sales Return - Sales Invoice booked)**
+
+>**Items:**
+><table class="table table-bordered">
+>	<thead>
+>		<tr><th>Item</th><th>Target Warehouse</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+>	</thead>
+>	<tbody>
+>		<tr><td>RM0001</td><td>Stores</td><td>2</td><td>200</td><td>400</td></tr>
+>	</tbody>
+></table>
+
+**Stock Ledger**
+
+![sret_stock_ledger](img/accounting-for-stock-14.png)
+
+**General Ledger**
+
+![sret_general_ledger](img/accounting-for-stock-15.png)
+
+
+--
+
+### **Stock Entry (Purchase Return)**
+
+>**Items:**
+><table class="table table-bordered">
+>	<thead>
+>		<tr><th>Item</th><th>Source Warehouse</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+>	</thead>
+>	<tbody>
+>		<tr><td>RM0001</td><td>Stores</td><td>4</td><td>220</td><td>880</td></tr>
+>	</tbody>
+></table>
+
+**Stock Ledger**
+
+![pret_stock_ledger](img/accounting-for-stock-16.png)
+
+**General Ledger**
+
+![pret_general_ledger](img/accounting-for-stock-17.png)
