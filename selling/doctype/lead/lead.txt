@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-09-02 16:16:14", 
+  "modified": "2013-09-02 17:25:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -412,10 +412,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "communcations", 
+  "fieldname": "communications", 
   "fieldtype": "Table", 
   "hidden": 1, 
-  "label": "Communcations", 
+  "label": "Communications", 
   "options": "Communication"
  }, 
  {
