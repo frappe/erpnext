@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:37", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:43:11", 
+  "modified": "2013-09-02 16:26:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -88,6 +88,14 @@
   "fieldname": "thread_html", 
   "fieldtype": "HTML", 
   "label": "Thread HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication"
  }, 
  {
   "doctype": "DocPerm"
