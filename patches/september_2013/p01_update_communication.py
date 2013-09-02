@@ -7,4 +7,9 @@ def execute():
 			set parenttype=%s, parentfield='communications', 
 			parent=`%s` 
 			where ifnull(`%s`, '')!=''""" % ("%s", fieldname, fieldname), doctype)
+			
+		webnotes.reload_doc("core", "doctype", "communication")
+			
+		webnotes.conn.sql("""update tabCommunication set communication_date = creation where 
+			ifnull(communication_date, '')='' """)
 	
