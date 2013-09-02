@@ -25,6 +25,9 @@ def recreate_gl_entries(doctype, name, parentfield):
 	bean = webnotes.bean(doctype, name)
 	bean.run_method("set_buying_amount")
 	
+	company_values = webnotes.conn.get_value("Company", bean.doc.company, ["default_expense_account",
+		"stock_adjustment_account", "cost_center", "stock_adjustment_cost_center"])
+	
 	# update missing expense account and cost center
 	for item in bean.doclist.get({"parentfield": parentfield}):
 		if item.buying_amount and not validate_item_values(item, bean.doc.company):
@@ -38,9 +41,12 @@ def recreate_gl_entries(doctype, name, parentfield):
 			if res:
 				item.expense_account = res[0][0]
 				item.cost_center = res[0][1]
+			elif company_values:
+				item.expense_account = company_values[0] or company_values[1]
+				item.cost_center = company_values[2] or company_values[3]
 		
-				webnotes.conn.set_value(item.doctype, item.name, "expense_account", item.expense_account)
-				webnotes.conn.set_value(item.doctype, item.name, "cost_center", item.cost_center)
+			webnotes.conn.set_value(item.doctype, item.name, "expense_account", item.expense_account)
+			webnotes.conn.set_value(item.doctype, item.name, "cost_center", item.cost_center)
 	
 	# remove gl entries
 	webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s
