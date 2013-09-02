@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
-from webnotes.utils import flt
+from webnotes.utils import flt, _round
 
 from buying.utils import get_item_details
 from setup.utils import get_company_currency
@@ -17,7 +17,6 @@ class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()
-		self.set_taxes("purchase_tax_details", "purchase_other_charges")
 	
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -40,6 +39,8 @@ class BuyingController(StockController):
 					self.doc.fields[fieldname] = val
 
 		self.set_missing_item_details(get_item_details)
+		if self.doc.fields.get("__islocal"):
+			self.set_taxes("purchase_tax_details", "purchase_other_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
@@ -98,7 +99,7 @@ class BuyingController(StockController):
 
 			if item.discount_rate == 100.0:
 				item.import_rate = 0.0
-			elif item.import_ref_rate:
+			elif not item.import_rate:
 				item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
 					self.precision("import_rate", item))
 						
@@ -129,10 +130,10 @@ class BuyingController(StockController):
 			self.precision("total_tax"))
 
 		if self.meta.get_field("rounded_total"):
-			self.doc.rounded_total = round(self.doc.grand_total)
+			self.doc.rounded_total = _round(self.doc.grand_total)
 		
 		if self.meta.get_field("rounded_total_import"):
-			self.doc.rounded_total_import = round(self.doc.grand_total_import)
+			self.doc.rounded_total_import = _round(self.doc.grand_total_import)
 			
 	def calculate_outstanding_amount(self):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus < 2:

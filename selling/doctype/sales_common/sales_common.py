@@ -340,7 +340,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 					and batch_no like '%(txt)s' 
 					and exists(select * from `tabBatch` 
 							where name = sle.batch_no 
-								and expiry_date >= '%(posting_date)s' 
+								and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s') 
 								and docstatus != 2) 
 					%(mcond)s
 				group by batch_no having sum(actual_qty) > 0 
@@ -353,7 +353,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		return webnotes.conn.sql("""select name from tabBatch 
 				where docstatus != 2 
 					and item = '%(item_code)s' 
-					and expiry_date >= '%(posting_date)s' 
+					and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s')
 					and name like '%(txt)s' 
 					%(mcond)s 
 				order by name desc 

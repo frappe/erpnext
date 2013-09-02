@@ -1,0 +1,15 @@
+.pos-item {
+	height: 200px;
+	overflow: hidden;
+	cursor: pointer;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+}
+
+.pos-bill {
+	padding: 20px 5px;
+	font-family: Monospace;
+	border: 1px solid #eee;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}

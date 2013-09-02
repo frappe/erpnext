@@ -20,8 +20,7 @@ class DocType(BuyingController):
 
 	def is_item_table_empty(self, obj):
 		if not len(obj.doclist.get({"parentfield": obj.fname})):
-			msgprint(_("Hey there! You need to put at least one item in \
-				the item table."), raise_exception=True)
+			msgprint(_("You need to put at least one item in the item table."), raise_exception=True)
 
 	def get_supplier_details(self, name = ''):
 		details = sql("select supplier_name,address from `tabSupplier` where name = '%s' and docstatus != 2" %(name), as_dict = 1)

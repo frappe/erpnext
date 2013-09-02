@@ -7,7 +7,7 @@
 {% set title="Shopping Cart" %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
 	<h2><i class="icon-shopping-cart"></i> {{ title }}</h2>
 	<div class="progress progress-striped active">
 		<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
@@ -18,12 +18,12 @@
 		<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
 		<hr>
 		<div class="row">
-			<div class="col col-lg-9 col-sm-9">
+			<div class="col-md-9 col-sm-9">
 				<div class="row">
-					<div class="col col-lg-9 col-offset-3"><h4>Item Details</h4></div>
+					<div class="col-md-9 col-md-offset-3"><h4>Item Details</h4></div>
 				</div>
 			</div>
-			<div class="col col-lg-3 col-sm-3 text-right"><h4>Qty, Amount</h4></div>
+			<div class="col-md-3 col-sm-3 text-right"><h4>Qty, Amount</h4></div>
 		</div><hr>
 		<div id="cart-items">
 		</div>
@@ -34,16 +34,16 @@
 		<hr>
 		<div id="cart-addresses">
 			<div class="row">
-				<div class="col col-lg-6">
+				<div class="col-md-6">
 					<h4>Shipping Address</h4>
-					<div id="cart-shipping-address" class="accordion" 
+					<div id="cart-shipping-address" class="panel-group" 
 						data-fieldname="shipping_address_name"></div>
 					<button class="btn btn-default" type="button" id="cart-add-shipping-address">
 						<span class="icon icon-plus"></span> New Shipping Address</button>
 				</div>
-				<div class="col col-lg-6">
+				<div class="col-md-6">
 					<h4>Billing Address</h4>
-					<div id="cart-billing-address" class="accordion"
+					<div id="cart-billing-address" class="panel-group"
 						data-fieldname="customer_address"></div>
 					<button class="btn btn-default" type="button" id="cart-add-billing-address">
 						<span class="icon icon-plus"></span> New Billing Address</button>

@@ -33,7 +33,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(len(si), len(dn.doclist))
 		
 		# modify export_amount
-		si[1].ref_rate = 200
+		si[1].export_rate = 200
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
 		
 	
@@ -96,6 +96,59 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(bal, prev_bal - 375.0)
 		
 		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		
+	def test_serialized(self):
+		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		
+		se = make_serialized_item()
+		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		
+		dn = webnotes.bean(copy=test_records[0])
+		dn.doclist[1].item_code = "_Test Serialized Item With Series"
+		dn.doclist[1].qty = 1
+		dn.doclist[1].serial_no = serial_nos[0]
+		dn.insert()
+		dn.submit()
+		
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], 
+			"delivery_document_no"), dn.doc.name)
+			
+		return dn
+			
+	def test_serialized_cancel(self):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		dn = self.test_serialized()
+		dn.cancel()
+
+		serial_nos = get_serial_nos(dn.doclist[1].serial_no)
+
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], 
+			"delivery_document_no"))
+
+	def test_serialize_status(self):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoStatusError, get_serial_nos
+		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		
+		se = make_serialized_item()
+		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		
+		sr = webnotes.bean("Serial No", serial_nos[0])
+		sr.doc.status = "Not Available"
+		sr.save()
+		
+		dn = webnotes.bean(copy=test_records[0])
+		dn.doclist[1].item_code = "_Test Serialized Item With Series"
+		dn.doclist[1].qty = 1
+		dn.doclist[1].serial_no = serial_nos[0]
+		dn.insert()
+
+		self.assertRaises(SerialNoStatusError, dn.submit)
+
 
 test_records = [
 	[

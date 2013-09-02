@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, getdate, nowdate
+from webnotes.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -164,7 +164,7 @@ class DocType(TransactionBase):
 		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
 		for d in self.doclist.get({"parentfield": "earning_details"}):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = round(flt(d.e_amount) * flt(self.doc.payment_days)
+				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.doc.payment_days)
 					/ cint(self.doc.total_days_in_month), 2)
 			elif not self.doc.payment_days:
 				d.e_modified_amount = 0
@@ -176,7 +176,7 @@ class DocType(TransactionBase):
 		self.doc.total_deduction = 0
 		for d in getlist(self.doclist, 'deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = round(flt(d.d_amount) * flt(self.doc.payment_days) 
+				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.doc.payment_days) 
 					/ cint(self.doc.total_days_in_month), 2)
 			elif not self.doc.payment_days:
 				d.d_modified_amount = 0
@@ -189,7 +189,7 @@ class DocType(TransactionBase):
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
-		self.doc.rounded_total = round(self.doc.net_pay)		
+		self.doc.rounded_total = _round(self.doc.net_pay)		
 
 	def on_submit(self):
 		if(self.doc.email_check == 1):			

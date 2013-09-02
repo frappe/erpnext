@@ -7,6 +7,7 @@
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
+from stock.doctype.stock_ledger_entry.stock_ledger_entry import *
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
@@ -40,11 +41,42 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
+		webnotes.session.user = "test2@example.com"
+		webnotes.bean("Profile", "test2@example.com").get_controller()\
+			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+
 		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
+		
+		webnotes.session.user = "Administrator"
+
+	def test_warehouse_user(self):
+		from stock.utils import UserNotAllowedForWarehouse
+
+		webnotes.session.user = "test@example.com"
+		webnotes.bean("Profile", "test@example.com").get_controller()\
+			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+
+		webnotes.bean("Profile", "test2@example.com").get_controller()\
+			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+
+		st1 = webnotes.bean(copy=test_records[0])
+		st1.doc.company = "_Test Company 1"
+		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.insert()
+		self.assertRaises(UserNotAllowedForWarehouse, st1.submit)
+
+		webnotes.session.user = "test2@example.com"
+		st1 = webnotes.bean(copy=test_records[0])
+		st1.doc.company = "_Test Company 1"
+		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.insert()
+		st1.submit()
+		
+		webnotes.session.user = "Administrator"
 
 	def test_material_receipt_gl_entry(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
@@ -180,6 +212,7 @@ class TestStockEntry(unittest.TestCase):
 	def _clear_stock(self):
 		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
 		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabSerial No`""")
 		
 		self.old_default_company = webnotes.conn.get_default("company")
 		webnotes.conn.set_default("company", "_Test Company")
@@ -571,12 +604,139 @@ class TestStockEntry(unittest.TestCase):
 		
 		return se, pr.doc.name
 		
+	def test_serial_no_not_reqd(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].serial_no = "ABCD"
+		se.insert()
+		self.assertRaises(SerialNoNotRequiredError, se.submit)
+
+	def test_serial_no_reqd(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 2
+		se.doclist[1].transfer_qty = 2
+		se.insert()
+		self.assertRaises(SerialNoRequiredError, se.submit)
+
+	def test_serial_no_qty_more(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 2
+		se.doclist[1].serial_no = "ABCD\nEFGH\nXYZ"
+		se.doclist[1].transfer_qty = 2
+		se.insert()
+		self.assertRaises(SerialNoQtyError, se.submit)
+
+	def test_serial_no_qty_less(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 2
+		se.doclist[1].serial_no = "ABCD"
+		se.doclist[1].transfer_qty = 2
+		se.insert()
+		self.assertRaises(SerialNoQtyError, se.submit)
+		
+	def test_serial_no_transfer_in(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 2
+		se.doclist[1].serial_no = "ABCD\nEFGH"
+		se.doclist[1].transfer_qty = 2
+		se.insert()
+		se.submit()
+		
+		self.assertTrue(webnotes.conn.exists("Serial No", "ABCD"))
+		self.assertTrue(webnotes.conn.exists("Serial No", "EFGH"))
+		
+	def test_serial_no_not_exists(self):
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Material Issue"
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 2
+		se.doclist[1].s_warehouse = "_Test Warehouse 1 - _TC"
+		se.doclist[1].t_warehouse = None
+		se.doclist[1].serial_no = "ABCD\nEFGH"
+		se.doclist[1].transfer_qty = 2
+		se.insert()
+		self.assertRaises(SerialNoNotExistsError, se.submit)
+		
+	def test_serial_by_series(self):
+		se = make_serialized_item()
+
+		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		
+		self.assertTrue(webnotes.conn.exists("Serial No", serial_nos[0]))
+		self.assertTrue(webnotes.conn.exists("Serial No", serial_nos[1]))
+		
+		return se
+
+	def test_serial_item_error(self):
+		self.test_serial_by_series()
+		
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Material Transfer"
+		se.doclist[1].item_code = "_Test Serialized Item"
+		se.doclist[1].qty = 1
+		se.doclist[1].transfer_qty = 1
+		se.doclist[1].serial_no = "ABCD00001"
+		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
+		se.doclist[1].t_warehouse = "_Test Warehouse 1 - _TC"
+		se.insert()
+		self.assertRaises(SerialNoItemError, se.submit)
+
+	def test_serial_move(self):
+		se = make_serialized_item()
+		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
+		
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Material Transfer"
+		se.doclist[1].item_code = "_Test Serialized Item With Series"
+		se.doclist[1].qty = 1
+		se.doclist[1].transfer_qty = 1
+		se.doclist[1].serial_no = serial_no
+		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
+		se.doclist[1].t_warehouse = "_Test Warehouse 1 - _TC"
+		se.insert()
+		se.submit()
+		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
+
+	def test_serial_warehouse_error(self):
+		make_serialized_item()
+		
+		se = webnotes.bean(copy=test_records[0])
+		se.doc.purpose = "Material Transfer"
+		se.doclist[1].item_code = "_Test Serialized Item With Series"
+		se.doclist[1].qty = 1
+		se.doclist[1].transfer_qty = 1
+		se.doclist[1].serial_no = "ABCD00001"
+		se.doclist[1].s_warehouse = "_Test Warehouse 1 - _TC"
+		se.doclist[1].t_warehouse = "_Test Warehouse - _TC"
+		se.insert()
+		self.assertRaises(SerialNoWarehouseError, se.submit)
+		
+	def test_serial_cancel(self):
+		se = self.test_serial_by_series()
+		se.cancel()
+		
+		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
+		self.assertFalse(webnotes.conn.get_value("Serial No", serial_no, "warehouse"))
+		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "status"), "Not Available")
+
+def make_serialized_item():
+	se = webnotes.bean(copy=test_records[0])
+	se.doclist[1].item_code = "_Test Serialized Item With Series"
+	se.doclist[1].qty = 2
+	se.doclist[1].transfer_qty = 2
+	se.insert()
+	se.submit()
+	return se
+
 test_records = [
 	[
 		{
 			"company": "_Test Company", 
 			"doctype": "Stock Entry", 
-			"posting_date": "2013-01-25", 
+			"posting_date": "2013-01-01", 
 			"posting_time": "17:14:24", 
 			"purpose": "Material Receipt",
 			"fiscal_year": "_Test Fiscal Year 2013", 

@@ -8,7 +8,7 @@
 	{% if df.fieldtype in ["Data", "Link"] -%}
 	<fieldset>
 		<label>{{ df.label }}</label>
-		<input type="text" placeholder="Type {{ df.label }}" 
+		<input class="form-control" type="text" placeholder="Type {{ df.label }}" 
 			data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}"
 			{% if doc and doc.fields.get(df.fieldname) -%} value="{{ doc.fields[df.fieldname] }}" {%- endif %}>
 	</fieldset>
@@ -22,7 +22,7 @@
 	{% elif df.fieldtype == "Select" -%}
 	<fieldset>
 		<label>{{ df.label }}</label>
-		<select data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}">
+		<select class="form-control" data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}">
 			{% for value in df.options.split("\n") -%}
 			{% if doc and doc.fields.get(df.fieldname) == value -%}
 			<option selected="selected">{{ value }}</option>
@@ -37,7 +37,7 @@
 {%- endmacro %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a></li>
     	<li><a href="account">My Account</a></li>
@@ -52,10 +52,10 @@
 	<div id="address-error" class="alert alert-danger" style="display: none;"></div>
 	<form autocomplete="on">
 		<div class="row">
-			<section class="col col-lg-6">
+			<section class="col-md-6">
 				{{ render_fields(meta.left_fields) }}
 			</section>
-			<section class="col col-lg-6">
+			<section class="col-md-6">
 				{{ render_fields(meta.right_fields) }}
 			</section>
 		</section>

@@ -103,12 +103,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
-					
-					me.get_items();
 				}
 			});
-		} else {
-			me.get_items();
 		}
 	},
 	
@@ -122,16 +118,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	get_items: function() {
-		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
-			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
-				// if production order / bom is mentioned, get items
-				return this.frm.call({
-					doc: this.frm.doc,
-					method: "get_items",
-					callback: function(r) {
-						if(!r.exc) refresh_field("mtn_details");
-					}
-				});
+		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
+			// if production order / bom is mentioned, get items
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "get_items",
+				callback: function(r) {
+					if(!r.exc) refresh_field("mtn_details");
+				}
+			});
 		}
 	},
 	
@@ -223,6 +218,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
+	
+	mtn_details_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no(grid_row)
+	}
 });
 
 cur_frm.script_manager.make(erpnext.stock.StockEntry);

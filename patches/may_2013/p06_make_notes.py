@@ -13,17 +13,27 @@ def execute():
 				name = question.question[:180]
 				if webnotes.conn.exists("Note", name):
 					webnotes.delete_doc("Note", name)
-				note = webnotes.bean({
+
+				similar_questions = webnotes.conn.sql_list("""select name from `tabQuestion`
+					where question like %s""", "%s%%" % name)
+				answers = [markdown2.markdown(c) for c in webnotes.conn.sql_list("""
+						select answer from tabAnswer where question in (%s)""" % \
+						", ".join(["%s"]*len(similar_questions)), similar_questions)]
+
+				webnotes.bean({
 					"doctype":"Note",
 					"title": name,
-					"content": "<hr>".join([markdown2.markdown(c) for c in webnotes.conn.sql_list("""
-						select answer from tabAnswer where question=%s""", question.name)]),
+					"content": "<hr>".join(answers),
 					"owner": question.owner,
 					"creation": question.creation,
 					"public": 1
 				}).insert()
+			
 			except NameError:
 				pass
+			except Exception, e:
+				if e.args[0] != 1062:
+					raise e
 
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")

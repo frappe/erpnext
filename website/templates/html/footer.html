@@ -1,6 +1,6 @@
 <footer class="container">
 	<div class="web-footer row">
-	<div class="col col-lg-12">
+	<div class="col-md-12">
 		{% if facebook_share or google_plus_one or twitter_share or linked_in_share %}
 		<div class="social-icons" style="">
 			<span style="font-size: 11px;">{{ share_text or "Share this page on: "}}</span>
@@ -40,8 +40,8 @@
 		{{ address }}
 		{% endif %}
 		<br>
-		<div class="input-group col col-lg-6 col-offset-3">
-			<input type="text" id="footer-subscribe-email" placeholder="Your email address...">
+		<div class="input-group col-md-6 col-md-offset-3">
+			<input class="form-control" type="text" id="footer-subscribe-email" placeholder="Your email address...">
 			<span class="input-group-btn">
 				<button class="btn btn-default" type="button" id="footer-subscribe-button">Stay Updated</button>
 			</span>

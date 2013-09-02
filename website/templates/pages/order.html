@@ -3,7 +3,7 @@
 {% set title=doc.name %}
 
 {% block content %}
-<div class="col col-lg-12">
+<div class="col-md-12">
     <ul class="breadcrumb">
     	<li><a href="index">Home</a></li>
     	<li><a href="account">My Account</a></li>
@@ -15,16 +15,16 @@
 	{%- if doc.status -%}
 	<div style="font-size: 13px;">
 	<div class="row">
-		<div class="col col-lg-2">
+		<div class="col-md-2">
 			<div class="label">{{ doc.status }}</div>
 		</div>
-		<div class="col col-lg-4">
+		<div class="col-md-4">
 			{{ utils.formatdate(doc.transaction_date) }}
 		</div>
 	</div>
 	<br>
 	<div class="row">
-		<div class="col col-lg-12">
+		<div class="col-md-12">
 		<table class="table table-bordered">
 			<tbody>
 				<tr>
@@ -52,8 +52,8 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col col-lg-6"></div>
-		<div class="col col-lg-6">
+		<div class="col-md-6"></div>
+		<div class="col-md-6">
 		<table cellspacing=0 width=100%>
 		<tbody>
 			<tr>

@@ -66,6 +66,10 @@ div.web-footer, div.web-footer a {
 }
 
 /* Bootstrap Navbar */
+.navbar-default {
+	border: 0px;
+}
+
 .navbar {
 	box-shadow: none;
 	border-radius: 0px;
@@ -166,8 +170,8 @@ div.web-footer, div.web-footer a {
   }
 
   .navbar .nav li.dropdown > .dropdown-toggle:hover .caret {
-    border-top-color: #{{ doc.top_bar_background }};
-    border-bottom-color: #{{ doc.top_bar_background }};
+    border-top-color: #{{ doc.top_bar_foreground }};
+    border-bottom-color: #{{ doc.top_bar_foreground }};
   }
 
   .navbar .nav li.dropdown.open > .dropdown-toggle .caret,
@@ -178,8 +182,12 @@ div.web-footer, div.web-footer a {
 
 }
 
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: #{{ doc.top_bar_foreground }};
+}
+
 .breadcrumb {
-	background-color: #{{ get_hex_shade(doc.page_background, 10) }};
+	background-color: #{{ get_hex_shade(doc.page_background, 5) }};
 }
 
 .breadcrumb > li {

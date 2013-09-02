@@ -1,13 +1,15 @@
-<div class="navbar">
-	<a class="navbar-brand" href="index">{{ brand_html or "<i class='icon-home'></i>"}}</a>
+<div class="navbar navbar-default">
 	<div class="container">
-		<button type="button" class="navbar-toggle" data-toggle="collapse" 
-			data-target=".navbar-responsive-collapse">
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-		</button>
-		<div class="nav-collapse collapse navbar-responsive-collapse">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" 
+				data-target=".navbar-responsive-collapse">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="index">{{ brand_html or "<i class='icon-home'></i>"}}</a>
+		</div>
+		<div class="collapse navbar-collapse navbar-responsive-collapse">
 			<ul class="nav navbar-nav">
 				{%- for page in top_bar_items -%}
 				{% if not page.parent_label -%}

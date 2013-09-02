@@ -4,6 +4,14 @@
 // update parent select
 
 $.extend(cur_frm.cscript, {
+	refresh: function(doc) {
+		cur_frm.add_custom_button("Auto Build Website", function() {
+			cur_frm.call({
+				doc: cur_frm.doc,
+				method: "make_website"
+			})
+		}, 'icon-magic')
+	},
 	onload_post_render: function(doc) {
 		this.set_parent_label_options();
 	},

@@ -55,6 +55,8 @@ class TransactionBase(StatusUpdater):
 		return self._party_type_and_name
 			
 	def get_customer_defaults(self):
+		if not self.doc.customer: return {}
+		
 		out = self.get_default_address_and_contact("customer")
 
 		customer = webnotes.doc("Customer", self.doc.customer)
@@ -77,9 +79,9 @@ class TransactionBase(StatusUpdater):
 		"""
 		customer_defaults = self.get_customer_defaults()
 					
-		customer_defaults["price_list_name"] = customer_defaults.get("price_list") or \
+		customer_defaults["selling_price_list"] = customer_defaults.get("price_list") or \
 			webnotes.conn.get_value("Customer Group", self.doc.customer_group, "default_price_list") or \
-			self.doc.price_list
+			self.doc.selling_price_list
 			
 		for fieldname, val in customer_defaults.items():
 			if self.meta.get_field(fieldname):

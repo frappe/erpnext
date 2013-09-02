@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-01 10:36:25", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:34", 
+  "modified": "2013-08-28 18:29:06", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -225,17 +225,6 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "resolution_details", 
-  "fieldtype": "Small Text", 
-  "label": "Resolution Details", 
-  "no_copy": 1, 
-  "oldfieldname": "resolution_details", 
-  "oldfieldtype": "Text", 
-  "read_only": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "first_responded_on", 
   "fieldtype": "Datetime", 
@@ -253,6 +242,17 @@
   "oldfieldtype": "Date", 
   "read_only": 1, 
   "search_index": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "resolution_details", 
+  "fieldtype": "Small Text", 
+  "label": "Resolution Details", 
+  "no_copy": 1, 
+  "oldfieldname": "resolution_details", 
+  "oldfieldtype": "Text", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 

@@ -76,8 +76,31 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		self.assertEquals(pr.doclist[1].rm_supp_cost, 70000.0)
 		self.assertEquals(len(pr.doclist.get({"parentfield": "pr_raw_material_details"})), 2)
+		
+	def test_serial_no_supplier(self):
+		pr = webnotes.bean(copy=test_records[0])
+		pr.doclist[1].item_code = "_Test Serialized Item With Series"
+		pr.doclist[1].qty = 1
+		pr.doclist[1].received_qty = 1
+		pr.insert()
+		pr.submit()
+		self.assertEquals(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+			"supplier"), pr.doc.supplier)
+			
+		return pr
+	
+	def test_serial_no_cancel(self):
+		pr = self.test_serial_no_supplier()
+		pr.cancel()
 
+		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+			"warehouse"))
 
+		self.assertEqual(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+			"status"), "Not Available")
+		
+	
+		
 test_dependencies = ["BOM"]
 
 test_records = [

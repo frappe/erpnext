@@ -95,7 +95,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						return{
 							query : "selling.doctype.sales_common.sales_common.get_batch_no",
 							filters: {
-								'item': item.item_code,
+								'item_code': item.item_code,
 								'posting_date': me.frm.doc.posting_date
 							}
 						}
@@ -640,7 +640,7 @@ var set_sales_bom_help = function(doc) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			help_msg = "<div class='alert'> \
+			help_msg = "<div class='alert alert-warning'> \
 				For 'Sales BOM' items, warehouse, serial no and batch no \
 				will be considered from the 'Packing List' table. \
 				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \

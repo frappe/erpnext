@@ -141,13 +141,13 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	toggle_group_by_checks: function() {
 		this.make_account_by_name();
 		
-		this.filter_inputs.group_by_ledger
-			.parent().toggle(!!(this.account_by_name[this.account] 
-				&& this.account_by_name[this.account].group_or_ledger==="Group"));
-				
-		this.filter_inputs.group_by_voucher
-			.parent().toggle(!!(this.account_by_name[this.account] 
-				&& this.account_by_name[this.account].group_or_ledger==="Ledger"));
+		// this.filter_inputs.group_by_ledger
+		// 	.parent().toggle(!!(this.account_by_name[this.account] 
+		// 		&& this.account_by_name[this.account].group_or_ledger==="Group"));
+		// 		
+		// this.filter_inputs.group_by_voucher
+		// 	.parent().toggle(!!(this.account_by_name[this.account] 
+		// 		&& this.account_by_name[this.account].group_or_ledger==="Ledger"));
 	},
 	prepare_data: function() {
 		var me = this;
@@ -389,7 +389,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			grid: { hoverable: true, clickable: true },
 			xaxis: { mode: "time", 
 				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
+				max: dateutil.str_to_obj(this.to_date).getTime() },
+			series: { downsample: { threshold: 1000 } }
 		}
 	},
 });

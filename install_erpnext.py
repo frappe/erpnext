@@ -51,7 +51,7 @@ def validate_install():
 	distribution = platform.linux_distribution()[0].lower().replace('"', '')
 	print "Distribution = ", distribution
 	is_redhat = distribution in ("redhat", "centos", "centos linux", "fedora")
-	is_debian = distribution in ("debian", "ubuntu", "elementary os")
+	is_debian = distribution in ("debian", "ubuntu", "elementary os", "linuxmint")
 	
 	if not (is_redhat or is_debian):
 		raise Exception, "Sorry! This installer works only with yum or apt-get package management"
@@ -59,7 +59,7 @@ def validate_install():
 	return is_redhat, is_debian
 		
 def install_using_yum():
-	packages = "python python-setuptools MySQL-python httpd git memcached ntp vim-enhanced screen"
+	packages = "python python-setuptools gcc python-devel MySQL-python httpd git memcached ntp vim-enhanced screen"
 	
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
@@ -108,7 +108,7 @@ def update_config_for_redhat():
 	
 def install_using_apt():
 	exec_in_shell("apt-get update")
-	packages = "python python-setuptools python-mysqldb apache2 git memcached ntp vim screen htop"
+	packages = "python python-setuptools python-dev build-essential python-pip python-mysqldb apache2 git memcached ntp vim screen htop"
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
 	print packages
@@ -145,7 +145,11 @@ def install_python_modules():
 	print python_modules
 	print "-"*80
 	
-	exec_in_shell("easy_install pip")
+	if not exec_in_shell("which pip"):
+		exec_in_shell("easy_install pip")
+	
+	exec_in_shell("pip install --upgrade pip")
+	exec_in_shell("pip install --upgrade virtualenv")
 	exec_in_shell("pip install -q %s" % python_modules)
 	
 def install_erpnext(install_path):

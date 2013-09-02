@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-08-20 15:08:10", 
+  "docstatus": 0, 
+  "modified": "2013-08-20 15:10:45", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "SELECT\n    tabBin.item_code as \"Item:Link/Item:120\",\n    tabBin.warehouse as \"Warehouse:Link/Warehouse:120\",\n    tabBin.actual_qty as \"Actual:Float:90\",\n    tabBin.indented_qty as \"Requested:Float:90\",\n    tabBin.reserved_qty as \"Reserved:Float:90\",\n    tabBin.ordered_qty as \"Ordered:Float:90\",\n    tabBin.projected_qty as \"Projected:Float:90\"\nFROM\n    tabBin, tabItem\nWHERE\n    tabBin.item_code = tabItem.name\n    AND tabItem.is_purchase_item = \"Yes\"\n    AND tabBin.projected_qty < 0\nORDER BY\n    tabBin.projected_qty ASC", 
+  "ref_doctype": "Item", 
+  "report_name": "Items To Be Requested", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Items To Be Requested"
+ }
+]

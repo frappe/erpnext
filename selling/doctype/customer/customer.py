@@ -77,9 +77,9 @@ class DocType(TransactionBase):
 			msgprint("Please Select Company under which you want to create account head")
 
 	def update_credit_days_limit(self):
-		sql("""update tabAccount set credit_days = %s, credit_limit = %s 
-			where name = %s""", (self.doc.credit_days or 0, self.doc.credit_limit or 0, 
-				self.doc.name + " - " + self.get_company_abbr()))
+		webnotes.conn.sql("""update tabAccount set credit_days = %s, credit_limit = %s 
+			where master_type='Customer' and master_name = %s""", 
+			(self.doc.credit_days or 0, self.doc.credit_limit or 0, self.doc.name))
 
 	def create_lead_address_contact(self):
 		if self.doc.lead_name:

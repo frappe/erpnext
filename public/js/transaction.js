@@ -6,9 +6,9 @@ wn.require("app/js/controllers/stock_controller.js");
 
 erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
+		var me = this;
 		if(this.frm.doc.__islocal) {
-			var me = this,
-				today = get_today(),
+			var today = get_today(),
 				currency = wn.defaults.get_default("currency");
 			
 			$.each({
@@ -29,6 +29,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			});
 			
 			me.frm.script_manager.trigger("company");
+		}
+		
+		if(this.other_fname) {
+			this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
+		}
+		
+		if(this.fname) {
+			this[this.fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
 	},
 	
@@ -311,9 +319,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				function(item_code, tax_data) {
 					if(!item_tax[item_code]) item_tax[item_code] = {};
 					if($.isArray(tax_data)) {
-						var tax_rate = tax_data[0] == null ? "" : (flt(tax_data[0], tax_rate_precision) + "%"),
-							tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
-								tax_amount_precision);
+						var tax_rate = "";
+						if(tax_data[0] != null) {
+							tax_rate = (tax.charge_type === "Actual") ?
+								format_currency(flt(tax_data[0], tax_amount_precision), company_currency, tax_amount_precision) :
+								(flt(tax_data[0], tax_rate_precision) + "%");
+						}
+						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
+							tax_amount_precision);
 						
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {

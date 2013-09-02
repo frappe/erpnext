@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or
+from webnotes.utils import cint, flt, comma_or, _round, add_days, cstr
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
@@ -15,18 +15,14 @@ class SellingController(StockController):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
 		
-		self.set_taxes("other_charges", "charge")
-		
-		if self.meta.get_field("debit_to") and not self.doc.debit_to:
-			self.doc.debit_to = self.get_debit_to().get("debit_to")
-			
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		
 		self.set_price_list_and_item_details()
+		if self.doc.fields.get("__islocal"):
+			self.set_taxes("other_charges", "charge")
 		
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
@@ -89,7 +85,7 @@ class SellingController(StockController):
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
 
 	def set_buying_amount(self, stock_ledger_entries = None):
-		from stock.utils import get_buying_amount
+		from stock.utils import get_buying_amount, get_sales_bom_buying_amount
 		if not stock_ledger_entries:
 			stock_ledger_entries = self.get_stock_ledger_entries()
 
@@ -103,13 +99,18 @@ class SellingController(StockController):
 			for item in self.doclist.get({"parentfield": self.fname}):
 				if item.item_code in self.stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					buying_amount = get_buying_amount(item.item_code, self.doc.doctype, self.doc.name, item.name, 
-						stock_ledger_entries.get((item.item_code, item.warehouse), []), 
-						item_sales_bom)
+					if item.item_code in self.stock_items:
+						buying_amount = get_buying_amount(self.doc.doctype, self.doc.name, 
+							item.name, stock_ledger_entries.get((item.item_code, 
+								item.warehouse), []))
+					elif item_sales_bom and item_sales_bom.get(item.item_code):
+						buying_amount = get_sales_bom_buying_amount(item.item_code, item.warehouse, 
+							self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+							item_sales_bom)
 					
-					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
-					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
-						item.buying_amount)
+						item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
+						webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
+							item.buying_amount)
 						
 	def check_expense_account(self, item):
 		if item.buying_amount and not item.expense_account:
@@ -191,7 +192,7 @@ class SellingController(StockController):
 			
 			if item.adj_rate == 100:
 				item.export_rate = 0
-			elif item.ref_rate:
+			elif not item.export_rate:
 				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
 					self.precision("export_rate", item))
 						
@@ -222,8 +223,8 @@ class SellingController(StockController):
 		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
 			self.precision("other_charges_total_export"))
 		
-		self.doc.rounded_total = round(self.doc.grand_total)
-		self.doc.rounded_total_export = round(self.doc.grand_total_export)
+		self.doc.rounded_total = _round(self.doc.grand_total)
+		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
 		
 	def calculate_outstanding_amount(self):
 		# NOTE: 
@@ -271,3 +272,32 @@ class SellingController(StockController):
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types),
 				raise_exception=True)
+				
+	def update_serial_nos(self, cancel=False):
+		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
+		update_serial_nos_after_submit(self, self.doc.doctype, self.fname)
+		update_serial_nos_after_submit(self, self.doc.doctype, "packing_details")
+
+		for table_fieldname in (self.fname, "packing_details"):
+			for d in self.doclist.get({"parentfield": table_fieldname}):
+				for serial_no in get_serial_nos(d.serial_no):
+					sr = webnotes.bean("Serial No", serial_no)
+					if cancel:
+						sr.doc.status = "Available"
+						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
+							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
+							"customer_name"):
+							sr.doc.fields[fieldname] = None
+					else:
+						sr.doc.delivery_document_type = self.doc.doctype
+						sr.doc.delivery_document_no = self.doc.name
+						sr.doc.delivery_date = self.doc.posting_date
+						sr.doc.delivery_time = self.doc.posting_time
+						sr.doc.customer = self.doc.customer
+						sr.doc.customer_name	= self.doc.customer_name
+						if sr.doc.warranty_period:
+							sr.doc.warranty_expiry_date = add_days(cstr(self.doc.posting_date), 
+								cint(sr.doc.warranty_period))
+						sr.doc.status =	'Delivered'
+
+					sr.save()

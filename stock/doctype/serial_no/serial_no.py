@@ -7,13 +7,27 @@ import webnotes
 from webnotes.utils import cint, getdate, nowdate
 import datetime
 from webnotes import msgprint, _
-	
+
 from controllers.stock_controller import StockController
+
+class SerialNoCannotCreateDirectError(webnotes.ValidationError): pass
+class SerialNoCannotCannotChangeError(webnotes.ValidationError): pass
 
 class DocType(StockController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
+		self.via_stock_ledger = False
+
+	def validate(self):
+		if self.doc.fields.get("__islocal") and self.doc.warehouse:
+			webnotes.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), 
+				SerialNoCannotCreateDirectError)
+			
+		self.validate_warranty_status()
+		self.validate_amc_status()
+		self.validate_warehouse()
+		self.validate_item()
 
 	def validate_amc_status(self):
 		"""
@@ -31,78 +45,40 @@ class DocType(StockController):
 
 
 	def validate_warehouse(self):
-		if self.doc.status=='In Store' and not self.doc.warehouse:
-			msgprint("Warehouse is mandatory if this Serial No is <b>In Store</b>", raise_exception=1)
+		if not self.doc.fields.get("__islocal"):
+			item_code, warehouse = webnotes.conn.get_value("Serial No", 
+				self.doc.name, ["item_code", "warehouse"])
+			if item_code != self.doc.item_code:
+				webnotes.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
+			if not self.via_stock_ledger and warehouse != self.doc.warehouse:
+				webnotes.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
+			
+		if not self.doc.warehouse and self.doc.status=="Available":
+			self.doc.status = "Not Available"
 
 	def validate_item(self):
 		"""
 			Validate whether serial no is required for this item
 		"""
-		item = webnotes.conn.sql("select name, has_serial_no from tabItem where name = '%s'" % self.doc.item_code)
-		if not item:
-			msgprint("Item is not exists in the system", raise_exception=1)
-		elif item[0][1] == 'No':
-			msgprint("To proceed please select 'Yes' in 'Has Serial No' in Item master: '%s'" % self.doc.item_code, raise_exception=1)
+		item = webnotes.doc("Item", self.doc.item_code)
+		if item.has_serial_no!="Yes":
+			webnotes.throw(_("Item must have 'Has Serial No' as 'Yes'") + ": " + self.doc.item_code)
 			
-
-	def validate(self):
-		self.validate_warranty_status()
-		self.validate_amc_status()
-		self.validate_warehouse()
-		self.validate_item()
-
-	def on_update(self):
-		if self.doc.warehouse and self.doc.status == 'In Store' \
-				and cint(self.doc.sle_exists) == 0 and \
-				not webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
-				where serial_no = %s and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name):
-			self.make_stock_ledger_entry(1)
-			webnotes.conn.set(self.doc, 'sle_exists', 1)
+		self.doc.item_group = item.item_group
+		self.doc.description = item.description
+		self.doc.item_name = item.item_name
+		self.doc.brand = item.brand
+		self.doc.warranty_period = item.warranty_period
 			
-			self.make_gl_entries()
-
-	def make_stock_ledger_entry(self, qty):
-		from webnotes.model.code import get_obj
-		values = [{
-			'item_code'				: self.doc.item_code,
-			'warehouse'				: self.doc.warehouse,
-			'posting_date'			: self.doc.purchase_date or (self.doc.creation and self.doc.creation.split(' ')[0]) or nowdate(),
-			'posting_time'			: self.doc.purchase_time or '00:00',
-			'voucher_type'			: 'Serial No',
-			'voucher_no'			: self.doc.name,
-			'voucher_detail_no'	 	: '', 
-			'actual_qty'			: qty, 
-			'stock_uom'				: webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom'),
-			'incoming_rate'			: self.doc.purchase_rate,
-			'company'				: self.doc.company,
-			'fiscal_year'			: self.doc.fiscal_year,
-			'is_cancelled'			: 'No', # is_cancelled is always 'No' because while deleted it can not find creation entry if it not created directly, voucher no != serial no
-			'batch_no'				: '',
-			'serial_no'				: self.doc.name
-		}]
-		get_obj('Stock Ledger').update_stock(values)
-
-
 	def on_trash(self):
 		if self.doc.status == 'Delivered':
 			msgprint("Cannot trash Serial No : %s as it is already Delivered" % (self.doc.name), raise_exception = 1)
-		elif self.doc.status == 'In Store': 
-			webnotes.conn.set(self.doc, 'status', 'Not in Use')
-			self.make_stock_ledger_entry(-1)
-			
-			if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
-				and webnotes.conn.sql("""select name from `tabGL Entry`
-				where voucher_type=%s and voucher_no=%s and ifnull(is_cancelled, 'No')='No'""",
-				(self.doc.doctype, self.doc.name)):
-					self.make_gl_entries(cancel=True)
-
+		if self.doc.warehouse:
+			webnotes.throw(_("Cannot delete Serial No in warehouse. First remove from warehouse, then delete.") + \
+				": " + self.doc.name)
 
 	def on_cancel(self):
 		self.on_trash()
-
-	def on_restore(self):
-		self.make_stock_ledger_entry(1)
-		self.make_gl_entries()
 	
 	def on_rename(self, new, old, merge=False):
 		"""rename serial_no text fields"""
@@ -119,18 +95,3 @@ class DocType(StockController):
 				webnotes.conn.sql("""update `tab%s` set serial_no = %s 
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
-
-	def make_gl_entries(self, cancel=False):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
-			return
-				
-		from accounts.general_ledger import make_gl_entries
-		against_stock_account = self.get_company_default("stock_adjustment_account")
-		gl_entries = self.get_gl_entries_for_stock(against_stock_account, self.doc.purchase_rate)
-		
-		for entry in gl_entries:
-			entry["posting_date"] = self.doc.purchase_date or (self.doc.creation and 
-				self.doc.creation.split(' ')[0]) or nowdate()
-			
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel)

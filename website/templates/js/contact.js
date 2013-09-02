@@ -26,7 +26,12 @@ $(document).ready(function() {
 			sender: email,
 			message: message,
 			callback: function(r) {
-				msgprint(r.message);
+				if(r.status==="okay") {
+					msgprint(r.message || "Thank you for your message.")
+				} else {
+					msgprint("There were errors");
+					console.log(r.exc);
+				}
 				$(':input').val('');
 			}
 		});

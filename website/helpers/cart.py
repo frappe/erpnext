@@ -228,6 +228,7 @@ def _get_cart_quotation(party=None):
 			"company": webnotes.defaults.get_user_default("company"),
 			"order_type": "Shopping Cart",
 			"status": "Draft",
+			"docstatus": 0,
 			"__islocal": 1,
 			(party.doctype.lower()): party.name
 		})

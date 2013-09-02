@@ -23,23 +23,22 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			
 			this.show_stock_ledger();
 			this.show_general_ledger();
+		} else {
+			cur_frm.add_custom_button(wn._('From Purchase Order'), 
+				function() {
+					wn.model.map_current_doc({
+						method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+						source_doctype: "Purchase Order",
+						get_query_filters: {
+							supplier: cur_frm.doc.supplier || undefined,
+							docstatus: 1,
+							status: ["!=", "Stopped"],
+							per_received: ["<", 99.99],
+							company: cur_frm.doc.company
+						}
+					})
+				});
 		}
-
-		cur_frm.add_custom_button(wn._('From Purchase Order'), 
-			function() {
-				wn.model.map_current_doc({
-					method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-					source_doctype: "Purchase Order",
-					get_query_filters: {
-						supplier: cur_frm.doc.supplier || undefined,
-						docstatus: 1,
-						status: ["!=", "Stopped"],
-						per_received: ["<", 99.99],
-						company: cur_frm.doc.company
-					}
-				})
-			});
-
 
 		if(wn.boot.control_panel.country == 'India') {
 			unhide_field(['challan_no', 'challan_date']);
@@ -127,7 +126,7 @@ cur_frm.cscript.new_contact = function(){
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
-			['project', 'status', 'not in', 'Completed, Cancelled']
+			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
 }

@@ -207,4 +207,4 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 				"fcond": get_filters_cond(doctype, filters, []),
 				"mcond": get_match_cond(doctype),
 				"start": "%(start)s", "page_len": "%(page_len)s", "txt": "%(txt)s"
-			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) }, debug=True)
+			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })

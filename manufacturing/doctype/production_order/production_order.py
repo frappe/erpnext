@@ -143,11 +143,18 @@ def get_item_details(item):
 def make_stock_entry(production_order_id, purpose):
 	production_order = webnotes.bean("Production Order", production_order_id)
 	
+	# validate already existing
+	ste = webnotes.conn.get_value("Stock Entry",  {
+		"production_order":production_order_id,
+		"purpose": purpose
+	}, "name")
+		
 	stock_entry = webnotes.new_bean("Stock Entry")
 	stock_entry.doc.purpose = purpose
 	stock_entry.doc.production_order = production_order_id
 	stock_entry.doc.company = production_order.doc.company
 	stock_entry.doc.bom_no = production_order.doc.bom_no
+	stock_entry.doc.use_multi_level_bom = production_order.doc.use_multi_level_bom
 	stock_entry.doc.fg_completed_qty = flt(production_order.doc.qty) - flt(production_order.doc.produced_qty)
 	
 	if purpose=="Material Transfer":
@@ -156,4 +163,5 @@ def make_stock_entry(production_order_id, purpose):
 		stock_entry.doc.from_warehouse = production_order.doc.wip_warehouse
 		stock_entry.doc.to_warehouse = production_order.doc.fg_warehouse
 		
+	stock_entry.run_method("get_items")
 	return [d.fields for d in stock_entry.doclist]

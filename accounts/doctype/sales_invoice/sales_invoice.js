@@ -12,7 +12,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
-// wn.require('app/accounts/doctype/sales_invoice/pos.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -25,9 +25,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.set_df_property("debit_to", "print_hide", 0);
 			}
 		}
-		// if(this.frm.doc.is_pos && this.frm.doc.docstatus===0) {
-		//   cur_frm.cscript.toggle_pos(true);
-		// }
+		
+		cur_frm.cscript.toggle_pos(true);
 	},
 	
 	refresh: function(doc, dt, dn) {
@@ -58,7 +57,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
-		if (this.frm.doc.docstatus===0) {
+		if (doc.docstatus===0) {
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
@@ -92,32 +91,62 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						}
 					});
 				});
+			
+			if(cint(sys_defaults.fs_pos_view)===1)
+				cur_frm.cscript.pos_btn();
 				
-			// cur_frm.add_custom_button(wn._("POS View"), function() {
-			// 	cur_frm.cscript.toggle_pos();
-			// }, 'icon-desktop');
-
+			// setTimeout(function() { cur_frm.$pos_btn.click(); }, 1000);
+				
+		} else {
+			// hide shown pos for submitted records
+			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
+	},
+
+	pos_btn: function() {
+		if(cur_frm.$pos_btn) 
+			cur_frm.$pos_btn.remove();
+
+		if(!cur_frm.pos_active) {
+			var btn_label = wn._("POS View"),
+				icon = "icon-desktop";
+		} else {
+			var btn_label = wn._("Invoice View"),
+				icon = "icon-file-text";
+		}
+
+		cur_frm.$pos_btn = cur_frm.add_custom_button(btn_label, function() {
+			cur_frm.cscript.toggle_pos();
+			cur_frm.cscript.pos_btn();
+		}, icon);
+		
 	},
 
 	toggle_pos: function(show) {
-		if((show===true && cur_frm.pos_active) || (show===false && !cur_frm.pos_active)) return;
+		if(cint(sys_defaults.fs_pos_view)===0) return;
+		if(!(this.frm.doc.is_pos && this.frm.doc.docstatus===0)) return;
 		
-		// make pos
-		if(!cur_frm.pos) {
-			cur_frm.layout.add_view("pos");
-			cur_frm.pos = new erpnext.POS(cur_frm.layout.views.pos, cur_frm);
+		if (!this.frm.doc.selling_price_list)
+			msgprint(wn._("Please select Price List"))
+		else {
+			if((show===true && cur_frm.pos_active) || (show===false && !cur_frm.pos_active)) return;
+
+			// make pos
+			if(!cur_frm.pos) {
+				cur_frm.layout.add_view("pos");
+				cur_frm.pos = new erpnext.POS(cur_frm.layout.views.pos, cur_frm);
+			}
+
+			// toggle view
+			cur_frm.layout.set_view(cur_frm.pos_active ? "" : "pos");
+			cur_frm.pos_active = !cur_frm.pos_active;
+
+			// refresh
+			if(cur_frm.pos_active)
+				cur_frm.pos.refresh();
 		}
-		
-		// toggle view
-		cur_frm.layout.set_view(cur_frm.pos_active ? "" : "pos");
-		cur_frm.pos_active = !cur_frm.pos_active;
-		
-		// refresh
-		if(cur_frm.pos_active)
-			cur_frm.pos.refresh();
-		
 	},
+	
 	tc_name: function() {
 		this.get_terms();
 	},
@@ -181,7 +210,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	set_dynamic_labels: function() {
 		this._super();
 		this.hide_fields(this.frm.doc);
+	},
+
+	entries_on_form_rendered: function(doc, grid_row) {
+		erpnext.setup_serial_no(grid_row)
 	}
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -250,13 +284,13 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 
 cur_frm.cscript.make_bank_voucher = function() {
 	return wn.call({
-		method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+		method: "accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
 		args: {
-			"company": cur_frm.doc.company,
-			"voucher_type": "Bank Voucher"
+			"sales_invoice": cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
+			var doclist = wn.model.sync(r.message);
+			wn.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
 }
@@ -389,34 +423,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	}
 	refresh_field(cur_frm.cscript.fname);
 }
-
-// Make Journal Voucher
-// --------------------
-cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
-	var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
-	jv = locals['Journal Voucher'][jv];
-	jv.voucher_type = 'Bank Voucher';
-
-	jv.company = doc.company;
-	jv.remark = repl('Payment received against invoice %(vn)s for %(rem)s', {vn:doc.name, rem:doc.remarks});
-	jv.fiscal_year = doc.fiscal_year;
-
-	// debit to creditor
-	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = doc.debit_to;
-	d1.credit = doc.outstanding_amount;
-	d1.against_invoice = doc.name;
-
-
-	// credit to bank
-	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d1.account = bank_account.account;
-	d1.debit = doc.outstanding_amount;
-	d1.balance = bank_account.balance;
-
-	loaddoc('Journal Voucher', jv.name);
-}
-
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_invoice)) {

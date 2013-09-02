@@ -272,6 +272,29 @@ class TestSalesOrder(unittest.TestCase):
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
 			so.doclist[1].reserved_warehouse, 20.0)
 
+	def test_warehouse_user(self):
+		webnotes.session.user = "test@example.com"
+
+		webnotes.bean("Profile", "test@example.com").get_controller()\
+			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			
+		webnotes.bean("Profile", "test2@example.com").get_controller()\
+			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+
+
+		from stock.utils import UserNotAllowedForWarehouse
+		so = webnotes.bean(copy = test_records[0])
+		so.doc.company = "_Test Company 1"
+		so.doc.conversion_rate = 0.02
+		so.doc.plc_conversion_rate = 0.02
+		so.doclist[1].reserved_warehouse = "_Test Warehouse 2 - _TC1"
+		self.assertRaises(UserNotAllowedForWarehouse, so.insert)
+
+		webnotes.session.user = "test2@example.com"
+		so.insert()
+
+		webnotes.session.user = "Administrator"
+
 test_dependencies = ["Sales BOM"]
 	
 test_records = [

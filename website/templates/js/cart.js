@@ -133,19 +133,19 @@ $.extend(wn.cart, {
 		if(doc.description === doc.item_name) doc.description = "";
 		
 		$(repl('<div class="row">\
-			<div class="col col-lg-9 col-sm-9">\
+			<div class="col-md-9 col-sm-9">\
 				<div class="row">\
-					<div class="col col-lg-3">%(image_html)s</div>\
-					<div class="col col-lg-9">\
+					<div class="col-md-3">%(image_html)s</div>\
+					<div class="col-md-9">\
 						<h4><a href="%(page_name)s">%(item_name)s</a></h4>\
 						<p>%(description)s</p>\
 					</div>\
 				</div>\
 			</div>\
-			<div class="col col-lg-3 col-sm-3 text-right">\
+			<div class="col-md-3 col-sm-3 text-right">\
 				<div class="input-group item-update-cart">\
 					<input type="text" placeholder="Qty" value="%(qty)s" \
-						data-item-code="%(item_code)s" class="text-right">\
+						data-item-code="%(item_code)s" class="text-right form-control">\
 					<div class="input-group-btn">\
 						<button class="btn btn-primary" data-item-code="%(item_code)s">\
 							<i class="icon-ok"></i></button>\
@@ -160,20 +160,20 @@ $.extend(wn.cart, {
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
 		var shipping_selector;
 		if(shipping_rules) {
-			shipping_selector = '<select>' + $.map(shipping_rules, function(rule) { 
+			shipping_selector = '<select class="form-control">' + $.map(shipping_rules, function(rule) { 
 					return '<option value="' + rule[0] + '">' + rule[1] + '</option>' }).join("\n") + 
 				'</select>';
 		}
 		
 		var $tax_row = $(repl('<div class="row">\
-			<div class="col col-lg-9 col-sm-9">\
+			<div class="col-md-9 col-sm-9">\
 				<div class="row">\
-					<div class="col col-lg-9 col-offset-3">' +
+					<div class="col-md-9 col-md-offset-3">' +
 					(shipping_selector || '<p>%(description)s</p>') +
 					'</div>\
 				</div>\
 			</div>\
-			<div class="col col-lg-3 col-sm-3 text-right">\
+			<div class="col-md-3 col-sm-3 text-right">\
 				<p' + (shipping_selector ? ' style="margin-top: 5px;"' : "") + '>%(formatted_tax_amount)s</p>\
 			</div>\
 		</div>', doc)).appendTo($cart_taxes);
@@ -206,32 +206,28 @@ $.extend(wn.cart, {
 	
 	render_address: function($address_wrapper, addresses, address_name) {
 		$.each(addresses, function(i, address) {
-			$(repl('<div class="accordion-group"> \
-				<div class="accordion-heading"> \
+			$(repl('<div class="panel panel-default"> \
+				<div class="panel-heading"> \
 					<div class="row"> \
-						<div class="col col-lg-10 address-title" \
+						<div class="col-md-10 address-title" \
 							data-address-name="%(name)s"><strong>%(name)s</strong></div> \
-						<div class="col col-lg-2"><input type="checkbox" \
+						<div class="col-md-2"><input type="checkbox" \
 							data-address-name="%(name)s"></div> \
 					</div> \
 				</div> \
-				<div class="accordion-body collapse" data-address-name="%(name)s"> \
-					<div class="accordion-inner">%(display)s</div> \
+				<div class="panel-collapse collapse" data-address-name="%(name)s"> \
+					<div class="panel-body">%(display)s</div> \
 				</div> \
 			</div>', address))
 				.css({"margin": "10px auto"})
 				.appendTo($address_wrapper);
 		});
 		
-		$address_wrapper.find(".accordion-heading")
-			.css({
-				"background-color": "#eee",
-				"padding": "10px",
-			})
+		$address_wrapper.find(".panel-heading")
 			.find(".address-title")
 				.css({"cursor": "pointer"})
 				.on("click", function() {
-					$address_wrapper.find('.accordion-body[data-address-name="'
+					$address_wrapper.find('.panel-collapse[data-address-name="'
 						+$(this).attr("data-address-name")+'"]').collapse("toggle");
 				});
 			
@@ -265,12 +261,12 @@ $.extend(wn.cart, {
 		$address_wrapper.find('input[type="checkbox"][data-address-name="'+ address_name +'"]')
 			.prop("checked", true);
 			
-		$address_wrapper.find(".accordion-body").collapse({
+		$address_wrapper.find(".panel-collapse").collapse({
 			parent: $address_wrapper,
 			toggle: false
 		});
 		
-		$address_wrapper.find('.accordion-body[data-address-name="'+ address_name +'"]')
+		$address_wrapper.find('.panel-collapse[data-address-name="'+ address_name +'"]')
 			.collapse("show");
 	},
 	

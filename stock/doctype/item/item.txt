@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:25", 
+  "modified": "2013-08-30 16:21:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,7 +35,9 @@
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "read": 1
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
   "doctype": "DocType", 
@@ -301,6 +303,14 @@
   "reqd": 1
  }, 
  {
+  "depends_on": "eval: doc.has_serial_no===\"Yes\"", 
+  "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.", 
+  "doctype": "DocField", 
+  "fieldname": "serial_no_series", 
+  "fieldtype": "Data", 
+  "label": "Serial Number Series"
+ }, 
+ {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
   "fieldname": "warranty_period", 
@@ -544,20 +554,6 @@
   "in_filter": 1, 
   "label": "Is Service Item", 
   "oldfieldname": "is_service_item", 
-  "oldfieldtype": "Select", 
-  "options": "Yes\nNo", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
-  "default": "No", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "description": "Select \"Yes\" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.", 
-  "doctype": "DocField", 
-  "fieldname": "is_sample_item", 
-  "fieldtype": "Select", 
-  "label": "Allow Samples", 
-  "oldfieldname": "is_sample_item", 
   "oldfieldtype": "Select", 
   "options": "Yes\nNo", 
   "read_only": 0, 
@@ -870,9 +866,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material Master Manager", 
-  "submit": 0, 
   "write": 1
  }, 
  {
@@ -880,9 +874,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material Manager", 
-  "submit": 0, 
   "write": 0
  }, 
  {
@@ -890,21 +882,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "role": "Material User", 
-  "submit": 0, 
   "write": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Sales User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Purchase User"
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "Accounts User"
  }
 ]
