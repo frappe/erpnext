@@ -32,7 +32,7 @@ def recreate_gl_entries(doctype, name, parentfield):
 				from `tab%s` child where docstatus=1 and item_code=%s and
 					ifnull(expense_account, '')!='' and ifnull(cost_center, '')!='' and
 					(select company from `tabAccount` ac where ac.name=child.expense_account)=%s and
-					(select company from `tabCost Center` cc where cc.name=child.cost_center)=%s and
+					(select company from `tabCost Center` cc where cc.name=child.cost_center)=%s
 					order by creation desc limit 1""" % (item.doctype, "%s", "%s", "%s"), 
 					(item.item_code, bean.doc.company, bean.doc.company))
 			if res:
