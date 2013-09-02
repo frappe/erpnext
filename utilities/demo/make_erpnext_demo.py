@@ -6,7 +6,14 @@ import webnotes, os
 import utilities.demo.make_demo
 
 def make_demo_app():
-	
+	webnotes.mute_emails = 1
+	webnotes.connect()
+	utilities.demo.make_demo.make(reset=True, simulate=False)
+	# setup demo user etc so that the site it up faster, while the data loads
+	make_demo_user()
+	make_demo_login_page()
+	make_demo_on_login_script()
+	utilities.demo.make_demo.make(reset=False, simulate=True)
 
 def make_demo_user():
 	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
@@ -111,11 +118,4 @@ def make_demo_on_login_script():
 	webnotes.conn.commit()
 
 if __name__=="__main__":
-	# webnotes.connect()
-	webnotes.mute_emails = 1
-	utilities.demo.make_demo.make(reset=True, simulate=False)
-	# setup demo user etc so that the site it up faster, while the data loads
-	make_demo_user()
-	make_demo_login_page()
-	make_demo_on_login_script()
-	utilities.demo.make_demo.make(reset=False, simulate=True)
+	make_demo_app()
