@@ -35,11 +35,26 @@ def recreate_gl_entries(doctype, name, parentfield):
 			item_values = webnotes.conn.get_value("Item", item.item_code, 
 				["purchase_account", "default_sales_cost_center"])
 			company_values = webnotes.conn.get_value("Company", bean.doc.company, 
-				["default_expense_account", "cost_center"])
+				["default_expense_account", "cost_center", "stock_adjustment_cost_center"])
 			if not item.expense_account:
 				item.expense_account = (item_values and item_values[0]) or (company_values and company_values[0])
+					
 			if not item.cost_center:
-				item.cost_center = (item_values and item_values[1]) or (company_values and company_values[1])
+				item.cost_center = (item_values and item_values[1]) or \
+					(company_values and (company_values[1] or company_values[2]))
+					
+			if not (item.expense_account and item.cost_center):
+				res = webnotes.conn.sql("""select expense_account, cost_center
+					from `tab%s` child where docstatus=1 and item_code=%s
+						ifnull(expense_account, '')!='' and ifnull(cost_center, '')!=''
+						and (select company from `tab%s` parent where parent.name=child.parent)=%s
+						order by creation desc limit 1""" % (item.doctype, "%s", doctype, "%s"), 
+						(item.item_code, bean.doc.company))
+				if res:
+					if not item.expense_account:
+						item.expense_account = res[0][0]
+					if not item.cost_center:
+						item.cost_center = res[0][1]
 			
 			webnotes.conn.set_value(item.doctype, item.name, "expense_account", item.expense_account)
 			webnotes.conn.set_value(item.doctype, item.name, "cost_center", item.cost_center)
