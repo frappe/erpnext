@@ -15,7 +15,6 @@ class DocType:
 		self.doclist = doclist
 		self.prwise_cost = {}
 		
-		
 	def check_mandatory(self):
 		if not self.doc.from_pr_date or not self.doc.to_pr_date:
 			webnotes.throw(_("Please enter From and To PR Date"))
