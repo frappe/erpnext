@@ -2,7 +2,7 @@
 	<hr />
 	{% if categories %}
 	<h5>Explore posts by categories</h5>
-	<ul class="breadcrumb" style="background-color: transparent; padding-left: 0px;">
+	<ul class="breadcrumb" style="background-color: transparent; padding-left: 20px;">
 	{% for category in categories %}
 		<li><a href="blog?category={{ category }}">{{ category }}</a> 
 	{% endfor %}

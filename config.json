@@ -130,7 +130,7 @@
 			},
 			"writers": {
 				"template": "app/website/templates/pages/writers",
-				"args_method": "website.helpers.blog.get_writers_args"
+				"args_method": "website.doctype.blogger.blogger.get_writers_args"
 			},
 			"profile": {
 				"no_cache": true,

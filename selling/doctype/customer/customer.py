@@ -17,10 +17,7 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-	
-	def onload(self):
-		self.add_communication_list()
-			
+				
 	def autoname(self):
 		cust_master_name = webnotes.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':

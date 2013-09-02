@@ -180,7 +180,6 @@
   "search_index": 1
  }, 
  {
-  "default": "Today", 
   "description": "Enter the date by which payments from customer is expected against this invoice.", 
   "doctype": "DocField", 
   "fieldname": "due_date", 

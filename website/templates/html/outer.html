@@ -1,6 +1,7 @@
 {% extends "lib/templates/base.html" %}
 
 {% block body %}
+	{% include "app/website/templates/html/navbar.html" %}
 	<div class="container">
 		<div class="pull-right" style="margin:4px;" id="user-tools">
 			{% if shopping_cart_enabled -%}
@@ -23,7 +24,6 @@
 			<div class="col-md-12">{{ banner_html }}</div>
 		</div>{% endif %}
 		<div class="outer">
-			{% include "app/website/templates/html/navbar.html" %}
 			<div class="content row" id="page-{{ name }}" style="display: block;">
 			{%- block content -%}
 			{%- endblock -%}
