@@ -14,15 +14,15 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		self.set_taxes("other_charges", "charge")
 		
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		
 		self.set_price_list_and_item_details()
+		if self.doc.fields.get("__islocal"):
+			self.set_taxes("other_charges", "charge")
 		
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:

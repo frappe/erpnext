@@ -17,7 +17,11 @@ test_records = [
 	[{
 		"doctype": "Warehouse",
 		"warehouse_name": "_Test Warehouse 2",
-		"company": "_Test Company 1",
-		"account": "_Test Account Stock In Hand - _TC1"
+		"account": "_Test Account Stock In Hand - _TC1",
+		"company": "_Test Company 1"
+	}, {
+		"doctype": "Warehouse User",
+		"parentfield": "warehouse_users",
+		"user": "test2@example.com"
 	}]	
 ]

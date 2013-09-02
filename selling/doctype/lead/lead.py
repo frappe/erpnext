@@ -39,17 +39,14 @@ class DocType(SellingController):
 	
 	def validate(self):
 		if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
-			msgprint("Please Enter Lost Reason under More Info section")
-			raise Exception	
+			webnotes.throw("Please Enter Lost Reason under More Info section")
 		
 		if self.doc.source == 'Campaign' and not self.doc.campaign_name and session['user'] != 'Guest':
-			msgprint("Please specify campaign name")
-			raise Exception
+			webnotes.throw("Please specify campaign name")
 		
 		if self.doc.email_id:
 			if not validate_email_add(self.doc.email_id):
-				msgprint('Please enter valid email id.')
-				raise Exception
+				webnotes.throw('Please enter valid email id.')
 				
 	def on_update(self):
 		self.check_email_id_is_unique()

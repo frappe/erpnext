@@ -119,18 +119,3 @@ def get_blog_template_args():
 	}
 	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
 	return args
-	
-def get_writers_args():
-	bloggers = webnotes.conn.sql("""select * from `tabBlogger` 
-	 	order by posts desc""", as_dict=1)
-		
-	args = {
-		"bloggers": bloggers,
-		"texts": {
-			"all_posts_by": _("All posts by")
-		},
-		"categories": webnotes.conn.sql_list("select name from `tabBlog Category` order by name")
-	}
-	
-	args.update(webnotes.doc("Blog Settings", "Blog Settings").fields)
-	return args

@@ -3,12 +3,29 @@ if __name__=="__main__":
 	sys.path.extend([".", "lib", "app"])
 
 import webnotes, os
+import utilities.demo.make_demo
 
 def make_demo_app():
-	import utilities.demo.make_demo
-	utilities.demo.make_demo.make(reset=True)
+	
 
 def make_demo_user():
+	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
+		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
+		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
+		"Material Master Manager", "Material User", "Partner", "Manufacturing Manager", 
+		"Manufacturing User", "Projects User", "Purchase Manager", "Purchase Master Manager", 
+		"Purchase User", "Quality Manager", "Report Manager", "Sales Master Manager", 
+		"Sales User", "Supplier", "Support Team"]
+		
+	def add_roles(bean):
+		for role in roles:
+			p.doclist.append({
+				"doctype": "UserRole",
+				"parentfield": "user_roles",
+				"role": role
+			})
+	
+	# make demo user
 	if webnotes.conn.exists("Profile", "demo@erpnext.com"):
 		webnotes.delete_doc("Profile", "demo@erpnext.com")
 
@@ -21,21 +38,32 @@ def make_demo_user():
 	p.doc.send_invite_email = 0
 	p.doc.new_password = "demo"
 	p.insert()
-	
-	for role in ("Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
-		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
-		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
-		"Material Master Manager", "Material User", "Partner", "Manufacturing Manager", 
-		"Manufacturing User", "Projects User", "Purchase Manager", "Purchase Master Manager", 
-		"Purchase User", "Quality Manager", "Report Manager", "Sales Master Manager", "Sales User", 
-		"Supplier", "Support Team"):
-		p.doclist.append({
-			"doctype": "UserRole",
-			"parentfield": "user_roles",
-			"role": role
-		})
-
+	add_roles(p)
 	p.save()
+	
+	# make system manager user
+	if webnotes.conn.exists("Profile", "admin@erpnext.com"):
+		webnotes.delete_doc("Profile", "admin@erpnext.com")
+	
+	p = webnotes.new_bean("Profile")
+	p.doc.email = "admin@erpnext.com"
+	p.doc.first_name = "Admin"
+	p.doc.last_name = "User"
+	p.doc.enabled = 1
+	p.doc.user_type = "System User"
+	p.doc.send_invite_email = 0
+	p.doc.new_password = "admin010123"
+	p.insert()
+	roles.append("System Manager")
+	add_roles(p)
+	p.save()
+	
+	# only read for newsletter
+	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
+		where parent='Newsletter'""")
+	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
+		where parent='Profile' and role='All'""")
+	
 	webnotes.conn.commit()
 
 def make_demo_login_page():
@@ -60,7 +88,10 @@ def make_demo_login_page():
 		
 	p.insert()
 	
-	webnotes.conn.set_value("Website Settings", None, "home_page", "demo-login")
+	website_settings = webnotes.bean("Website Settings", "Website Settings")
+	website_settings.doc.home_page = "demo-login"
+	website_settings.doc.disable_signup = 1
+	website_settings.save()
 	
 	webnotes.conn.commit()
 
@@ -71,11 +102,20 @@ def make_demo_on_login_script():
 	s.doc.script_type = "Server"
 	with open(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), "r") as dfile:
 		s.doc.script = dfile.read()
+	s.insert()
+	
+	cp = webnotes.bean("Control Panel")
+	cp.doc.custom_startup_code = """wn.ui.toolbar.show_banner('You are using ERPNext Demo. To start your own ERPNext Trial, <a href="https://erpnext.com/pricing-and-signup" target="_blank">click here</a>')"""
+	cp.save()
+
+	webnotes.conn.commit()
 
 if __name__=="__main__":
-	webnotes.connect()
+	# webnotes.connect()
 	webnotes.mute_emails = 1
-	make_demo_app()
+	utilities.demo.make_demo.make(reset=True, simulate=False)
+	# setup demo user etc so that the site it up faster, while the data loads
 	make_demo_user()
 	make_demo_login_page()
 	make_demo_on_login_script()
+	utilities.demo.make_demo.make(reset=False, simulate=True)

@@ -287,8 +287,8 @@ class DocType(StockController):
 		
 		stock_value_difference = {}
 		for d in self.entries:
-			diff = get_buying_amount(d.item_code, self.doc.doctype, self.doc.name, 
-				d.voucher_detail_no, stock_ledger_entries.get((d.item_code, d.warehouse), []))
+			diff = get_buying_amount(self.doc.doctype, self.doc.name, d.voucher_detail_no, 
+				stock_ledger_entries.get((d.item_code, d.warehouse), []))
 			stock_value_difference.setdefault(d.warehouse, 0.0)
 			stock_value_difference[d.warehouse] -= diff
 

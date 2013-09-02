@@ -29,7 +29,7 @@ prob = {
 	"Purchase Receipt": { "make": 0.7, "qty": (1,15) },
 }
 
-def make(reset=False):
+def make(reset=False, simulate=True):
 	webnotes.connect()
 	#webnotes.print_messages = True
 	webnotes.mute_emails = True
@@ -37,7 +37,8 @@ def make(reset=False):
 	
 	if reset:
 		setup()
-	simulate()
+	if simulate:
+		simulate()
 	
 def setup():
 	install()
@@ -266,11 +267,11 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	from stock.stock_ledger import NegativeStockError
 	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
-	st = webnotes.bean(make_stock_entry(pro_id, purpose))
-	st.doc.posting_date = current_date
-	st.doc.fiscal_year = "2013"
-	st.doc.expense_adjustment_account = "Stock in Hand - WP"
 	try:
+		st = webnotes.bean(make_stock_entry(pro_id, purpose))
+		st.doc.posting_date = current_date
+		st.doc.fiscal_year = "2013"
+		st.doc.expense_adjustment_account = "Stock in Hand - WP"
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()
@@ -278,7 +279,7 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	except NegativeStockError: pass
 	except IncorrectValuationRateError: pass
 	except DuplicateEntryForProductionOrderError: pass
-
+	
 def make_quotation(current_date):
 	b = webnotes.bean([{
 		"creation": current_date,
@@ -406,7 +407,7 @@ def import_data(dt, submit=False):
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
-		webnotes.form_dict = {}
+		webnotes.form_dict = webnotes._dict()
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")
