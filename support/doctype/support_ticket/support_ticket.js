@@ -51,7 +51,7 @@ $.extend(cur_frm.cscript, {
 		if(!comm_list.length) {
 			comm_list.push({
 				"sender": doc.raised_by,
-				"communication_date": doc.creation,
+				"creation": doc.creation,
 				"content": doc.description});
 		}
 					
