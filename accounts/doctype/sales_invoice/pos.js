@@ -199,13 +199,16 @@ erpnext.POS = Class.extend({
 						})).appendTo($wrap);
 				});
 
-				$("div.pos-item").on("click", function() {
-					if(!cur_frm.doc.customer) {
-						msgprint("Please select customer first.");
-						return;
-					}
-					me.add_to_cart($(this).attr("data-item_code"));
-				});
+				// if form is local then allow this function
+				if (cur_frm.doc.docstatus===0) {
+					$("div.pos-item").on("click", function() {
+						if(!cur_frm.doc.customer) {
+							msgprint("Please select customer first.");
+							return;
+						}
+						me.add_to_cart($(this).attr("data-item_code"));
+					});
+				}
 			}
 		});
 	},
@@ -303,33 +306,45 @@ erpnext.POS = Class.extend({
 		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
 			cur_frm.doc.price_list_currency));
 
-		$("input.qty").on("focus", function() {
-			$(this).select();
-		});
+		// if form is local then only run all these functions
+		if (cur_frm.doc.docstatus===0) {
+			$("input.qty").on("focus", function() {
+				$(this).select();
+			});
 
-		// append quantity to the respective item after change from input box
-		$("input.qty").on("change", function() {
-			var item_code = $(this).closest("tr")[0].id;
-			me.update_qty(item_code, $(this).val(), true);
-		});
+			// append quantity to the respective item after change from input box
+			$("input.qty").on("change", function() {
+				var item_code = $(this).closest("tr")[0].id;
+				me.update_qty(item_code, $(this).val(), true);
+			});
 
-		// on td click toggle the highlighting of row
-		$("#cart tbody tr td").on("click", function() {
-			var row = $(this).closest("tr");
-			if (row.attr("data-selected") == "false") {
-				row.attr("class", "warning");
-				row.attr("data-selected", "true");
-			}
-			else {
-				row.prop("class", null);
-				row.attr("data-selected", "false");
-			}
+			// on td click toggle the highlighting of row
+			$("#cart tbody tr td").on("click", function() {
+				var row = $(this).closest("tr");
+				if (row.attr("data-selected") == "false") {
+					row.attr("class", "warning");
+					row.attr("data-selected", "true");
+				}
+				else {
+					row.prop("class", null);
+					row.attr("data-selected", "false");
+				}
+				me.refresh_delete_btn();
+				
+			});
+
 			me.refresh_delete_btn();
-			
-		});
-		
-		me.refresh_delete_btn();
-		cur_frm.pos.barcode.$input.focus();
+			cur_frm.pos.barcode.$input.focus();
+		}
+
+		// if form is submitted & cancelled then disable all input box & buttons
+		if (cur_frm.doc.docstatus>=1) {
+			me.wrapper.find('input, button').each(function () {
+				$(this).prop('disabled', true);
+			});
+			$(".delete-items").hide();
+			$(".make-payment").hide();
+		}
 	},
 	refresh_delete_btn: function() {
 		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		

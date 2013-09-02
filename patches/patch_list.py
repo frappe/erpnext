@@ -257,4 +257,6 @@ patch_list = [
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-08-16",
 	"patches.august_2013.p06_fix_sle_against_stock_entry",
 	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
+	"patches.september_2013.p01_add_user_defaults_from_pos_setting",
+	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-09-02",
 ]
