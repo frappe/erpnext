@@ -18,14 +18,6 @@ img {
 	padding-bottom: 30px;
 }
 
-.outer {
-	padding: 0px 20px;
-}
-
-.navbar {
-	margin: 0px -20px;
-}
-
 .banner {
 	margin-top: 20px;
 	padding: 0px 20px;
@@ -56,6 +48,7 @@ img {
 
 div.web-footer {
 	padding-top: 10px;
+	padding-bottom: 20px;
 }
 
 .web-footer-menu ul {

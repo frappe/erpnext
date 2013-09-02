@@ -164,20 +164,18 @@ def validate_warehouse_user(warehouse):
 		webnotes.throw(_("Not allowed entry in Warehouse") \
 			+ ": " + warehouse, UserNotAllowedForWarehouse)
 
-def get_buying_amount(item_code, voucher_type, voucher_no, voucher_detail_no, 
-		stock_ledger_entries, item_sales_bom=None):
-	if item_sales_bom and item_sales_bom.get(item_code):
-		# sales bom item
-		buying_amount = 0.0
-		for bom_item in item_sales_bom[item_code]:
-			if bom_item.get("parent_detail_docname")==voucher_detail_no:
-				buying_amount += _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, stock_ledger_entries)
-		return buying_amount
-	else:
-		# doesn't have sales bom
-		return _get_buying_amount(voucher_type, voucher_no, voucher_detail_no, stock_ledger_entries)
+def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no, 
+		stock_ledger_entries, item_sales_bom):
+	# sales bom item
+	buying_amount = 0.0
+	for bom_item in item_sales_bom[item_code]:
+		if bom_item.get("parent_detail_docname")==voucher_detail_no:
+			buying_amount += get_buying_amount(voucher_type, voucher_no, voucher_detail_no, 
+				stock_ledger_entries.get((bom_item.item_code, warehouse), []))
+
+	return buying_amount
 		
-def _get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
+def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 	# IMP NOTE
 	# stock_ledger_entries should already be filtered by item_code and warehouse and 
 	# sorted by posting_date desc, posting_time desc

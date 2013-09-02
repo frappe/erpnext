@@ -14,15 +14,15 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		self.set_taxes("other_charges", "charge")
 		
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		
 		self.set_price_list_and_item_details()
+		if self.doc.fields.get("__islocal"):
+			self.set_taxes("other_charges", "charge")
 		
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
@@ -85,7 +85,7 @@ class SellingController(StockController):
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
 
 	def set_buying_amount(self, stock_ledger_entries = None):
-		from stock.utils import get_buying_amount
+		from stock.utils import get_buying_amount, get_sales_bom_buying_amount
 		if not stock_ledger_entries:
 			stock_ledger_entries = self.get_stock_ledger_entries()
 
@@ -99,13 +99,18 @@ class SellingController(StockController):
 			for item in self.doclist.get({"parentfield": self.fname}):
 				if item.item_code in self.stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					buying_amount = get_buying_amount(item.item_code, self.doc.doctype, self.doc.name, item.name, 
-						stock_ledger_entries.get((item.item_code, item.warehouse), []), 
-						item_sales_bom)
+					if item.item_code in self.stock_items:
+						buying_amount = get_buying_amount(self.doc.doctype, self.doc.name, 
+							item.name, stock_ledger_entries.get((item.item_code, 
+								item.warehouse), []))
+					elif item_sales_bom and item_sales_bom.get(item.item_code):
+						buying_amount = get_sales_bom_buying_amount(item.item_code, item.warehouse, 
+							self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
+							item_sales_bom)
 					
-					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
-					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
-						item.buying_amount)
+						item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
+						webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
+							item.buying_amount)
 						
 	def check_expense_account(self, item):
 		if item.buying_amount and not item.expense_account:

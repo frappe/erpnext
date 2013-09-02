@@ -32,7 +32,7 @@
 			</p>
 		</div>
 		{% if obj.doc.address %}
-		<div class="col-md-3 col-md-offset-1 alert" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
+		<div class="col-md-3 col-md-offset-1 alert alert-warning" style="margin-top: 20px;" itemscope itemtype="http://schema.org/PostalAddress">
 			<h4><i class="icon-map-marker"></i> {{ obj.address.address_title }}</h4>
 			{% if obj.address.address_line1 %}
 				<span itemprop="streetAddress">{{ obj.address.address_line1 }}</span><br>
