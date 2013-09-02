@@ -210,7 +210,7 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 >		<tr><th>Item</th><th>Target Warehouse</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
 >	</thead>
 >	<tbody>
->		<tr><td>RM0001</td><td>Stores</td><td>50</td><td>200</td><td>10000</td></tr>
+>		<tr><td>RM0001</td><td>Stores</td><td>50</td><td>220</td><td>11000</td></tr>
 >	</tbody>
 ></table>
 
@@ -221,7 +221,7 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 **General Ledger**
 
 ![si_stock_ledger](img/accounting-for-stock-10.png)
-
+ 
 --
 
 ### **Stock Entry (Material Issue)**
@@ -232,7 +232,7 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 >		<tr><th>Item</th><th>Source Warehouse</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
 >	</thead>
 >	<tbody>
->		<tr><td>RM0001</td><td>Stores</td><td>10</td><td>200</td><td>2000</td></tr>
+>		<tr><td>RM0001</td><td>Stores</td><td>10</td><td>220</td><td>2200</td></tr>
 >	</tbody>
 ></table>
 
@@ -256,7 +256,7 @@ Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of
 >	</thead>
 >	<tbody>
 >		<tr><td>RM0001</td><td>Stores</td><td>Work In Progress</td>
->		<td>10</td><td>200</td><td>2000</td></tr>
+>		<td>10</td><td>220</td><td>2200</td></tr>
 >	</tbody>
 ></table>
 

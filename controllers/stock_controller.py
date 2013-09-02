@@ -113,10 +113,6 @@ class StockController(AccountsController):
 					make_gl_entries(expected_gle)
 			else:
 				self.delete_gl_entries(voucher_type, voucher_no)
-			
-			# else:
-			# 	# make adjustment entry on that date
-			# 	self.make_adjustment_entry(expected_gle, voucher_obj)
 				
 		
 	def get_future_stock_vouchers(self):
@@ -185,7 +181,7 @@ class StockController(AccountsController):
 			
 	def check_expense_account(self, item):
 		if item.fields.has_key("expense_account") and not item.expense_account:
-			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
+			msgprint(_("""Expense/Difference account is mandatory for item: """) + item.item_code, 
 				raise_exception=1)
 				
 		if item.fields.has_key("expense_account") and not item.cost_center:
