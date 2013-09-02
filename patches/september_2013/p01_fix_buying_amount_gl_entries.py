@@ -45,9 +45,9 @@ def recreate_gl_entries(doctype, name, parentfield):
 					
 			if not (item.expense_account and item.cost_center):
 				res = webnotes.conn.sql("""select expense_account, cost_center
-					from `tab%s` child where docstatus=1 and item_code=%s
-						ifnull(expense_account, '')!='' and ifnull(cost_center, '')!=''
-						and (select company from `tab%s` parent where parent.name=child.parent)=%s
+					from `tab%s` child where docstatus=1 and item_code=%s and
+						ifnull(expense_account, '')!='' and ifnull(cost_center, '')!='' and
+						(select company from `tab%s` parent where parent.name=child.parent)=%s
 						order by creation desc limit 1""" % (item.doctype, "%s", doctype, "%s"), 
 						(item.item_code, bean.doc.company))
 				if res:
