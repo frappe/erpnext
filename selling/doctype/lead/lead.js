@@ -51,7 +51,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 		}
 		
 		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"lead": this.frm.doc.name}),
+			list: wn.model.get("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
 			parent: this.frm.fields_dict.communication_html.wrapper,
 			doc: this.frm.doc,
 			recipients: this.frm.doc.email_id
