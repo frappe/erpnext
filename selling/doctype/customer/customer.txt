@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:13", 
+  "modified": "2013-09-02 16:25:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -346,6 +346,15 @@
   "fieldtype": "Table", 
   "label": "Customer Discounts", 
   "options": "Customer Discount", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication", 
   "permlevel": 0
  }, 
  {

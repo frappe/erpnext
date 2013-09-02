@@ -38,17 +38,22 @@ class DocType:
 		total_amt = self.get_total_pr_amt(purchase_receipts)
 		
 		for pr in purchase_receipts:
-			pr_obj = get_obj('Purchase Receipt', pr, with_children = 1)
-			idx = max([d.idx for d in pr_obj.doclist.get({"parentfield": "purchase_tax_details"})])
+			pr_bean = webnotes.bean('Purchase Receipt', pr)
+			idx = max([d.idx for d in pr_bean.doclist.get({"parentfield": "purchase_tax_details"})])
 			
 			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
-				amt = flt(lc.amount) * flt(pr_obj.doc.net_total)/ flt(total_amt)
+				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
 				
-				pr_oc_row = webnotes.conn.sql("""select name from `tabPurchase Taxes and Charges` 
-						where parent = %s and category = 'Valuation' and add_deduct_tax = 'Add' 
-						and charge_type = 'Actual' and account_head = %s""",(pr, lc.account_head))
-				if not pr_oc_row:	# add if not exists
-					ch = addchild(pr_obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges')
+				matched_row = pr_bean.doclist.get({
+					"parentfield": "purchase_tax_details", 
+					"category": "Valuation",
+					"add_deduct_tax": "Add",
+					"charge_type": "Actual",
+					"account_head": lc.account_head
+				})
+				
+				if not matched_row:	# add if not exists
+					ch = addchild(pr_bean.doc, 'purchase_tax_details', 'Purchase Taxes and Charges')
 					ch.category = 'Valuation'
 					ch.add_deduct_tax = 'Add'
 					ch.charge_type = 'Actual'
@@ -62,12 +67,12 @@ class DocType:
 					ch.save(1)
 					idx += 1
 				else:	# overwrite if exists
-					webnotes.conn.sql("""update `tabPurchase Taxes and Charges` 
-						set rate = %s, tax_amount = %s where name = %s and parent = %s""", 
-						(amt, amt, pr_oc_row[0][0], pr))
-			
-			pr_obj.calculate_taxes_and_totals()
-			for d in pr_obj.doclist:
+					matched_row[0].rate = amt
+					matched_row[0].tax_amount = amt
+					matched_row[0].cost_center = lc.cost_center
+					
+			pr_bean.run_method("validate")
+			for d in pr_bean.doclist:
 				d.save()
 	
 	def get_total_pr_amt(self, purchase_receipts):

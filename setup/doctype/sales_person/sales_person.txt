@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-08-05 18:11:22", 
+  "modified": "2013-09-02 16:26:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -159,6 +159,14 @@
   "oldfieldtype": "Link", 
   "options": "Budget Distribution", 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication"
  }, 
  {
   "cancel": 0, 

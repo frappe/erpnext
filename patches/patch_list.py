@@ -259,6 +259,8 @@ patch_list = [
 	"patches.august_2013.p06_deprecate_cancelled_sl_entry",
 	"patches.august_2013.p06_fix_sle_against_stock_entry",
 	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
+	"patches.september_2013.p01_fix_buying_amount_gl_entries",
+	"patches.september_2013.p01_update_communication",
 	"patches.august_2013.p06_deprecate_is_cancelled",
 	"execute:webnotes.delete_doc('DocType', 'Budget Control')",
 ]

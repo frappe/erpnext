@@ -11,9 +11,6 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-
-	def onload(self):
-		self.add_communication_list()
 	
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Email Settings',None,'support_email')
@@ -53,7 +50,7 @@ class DocType(TransactionBase):
 			if not self.doc.company:		
 				self.doc.company = webnotes.conn.get_value("Lead", self.doc.lead, "company") or \
 					webnotes.conn.get_default("company")
-			
+
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 
 			where support_ticket=%s""", (self.doc.name,))

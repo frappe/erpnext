@@ -11,9 +11,6 @@ class DocType(TransactionBase):
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
-	def onload(self):
-		self.add_communication_list()
-
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Jobs Email Settings',None,'email_id')
 		
