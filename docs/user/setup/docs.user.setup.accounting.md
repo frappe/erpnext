@@ -19,7 +19,7 @@ The Chart of Accounts helps you to answer:
 
  You may note that as a business manager,it is very valuable to see how well your business is doing. 
 
-> Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) its a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
+> Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) it's a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
 
 To edit your Chart of Accounts in ERPNext go to:
 
@@ -65,7 +65,7 @@ Accounting Transactions can only be made against Ledger Accounts (not Groups)
 
 ### Other Account Types
 
-In ERPNext, you can also specify more information when you create a new Account, this is there to help you select that particular account in a scenario like Bank Account or a Tax Account and has no affect on the Chart itself.
+In ERPNext, you can also specify more information when you create a new Account, this is there to help you select that particular account in a scenario like Bank Account or a Tax Account and has no effect on the Chart itself.
 
 You can also tag if an account represents a Customer, Supplier or Employee in "Master Type".
 
