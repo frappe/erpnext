@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.widgets.reportview import get_match_cond
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
@@ -21,34 +22,6 @@ def get_filters_cond(doctype, filters, conditions):
 	else:
 		cond = ''
 	return cond
-
-def get_match_cond(doctype, searchfield = 'name'):
-	from webnotes.widgets.reportview import build_match_conditions
-	cond = build_match_conditions(doctype)
-
-	if cond:
-		cond = ' and ' + cond
-	else:
-		cond = ''
-	return cond
-
- # searches for enabled profiles
-def profile_query(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, concat_ws(' ', first_name, middle_name, last_name) 
-		from `tabProfile` 
-		where ifnull(enabled, 0)=1 
-			and docstatus < 2 
-			and name not in ('Administrator', 'Guest') 
-			and (%(key)s like "%(txt)s" 
-				or concat_ws(' ', first_name, middle_name, last_name) like "%(txt)s") 
-			%(mcond)s
-		order by 
-			case when name like "%(txt)s" then 0 else 1 end, 
-			case when concat_ws(' ', first_name, middle_name, last_name) like "%(txt)s" 
-				then 0 else 1 end, 
-			name asc 
-		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,  
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
 
  # searches for active employees
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
