@@ -161,7 +161,7 @@ def _get_item_discount(item_group, customer):
 		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
 		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
 		GROUP BY parent.name 
-		ORDER BY parent.lft desc""", item_group)]
+		ORDER BY parent.lft desc""", (item_group,))]
 		
 	discount = 0
 	for d in parent_item_groups:
