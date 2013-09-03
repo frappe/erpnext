@@ -16,17 +16,7 @@ You can make a Sales Invoice of type POS by checking on “Is POS”. When you c
 - Update Payment Details like your Bank / Cash Account, paid amount etc. 
 - If you are writing off certain amount. For example when you receive extra cash as a result of not having exact denomination of change, check on ‘Write off Outstanding Amount’ and set the Account.
 
-#### POS Settings
-
-POS includes advanced features to cater to different functionality, such as inventory management, CRM, financials, warehousing, etc., all built into the POS software. Prior to the modern POS, all of these functions were done independently and required the manual re-keying of information, which could lead to entry errors.
-
-If you are in retail operations, you want your Point of Sale to be as quick and efficient as possible. To do this, you can create a POS Setting for a user from:
-
-> Accounts > Point-of-Sale Setting
-
-Set default values as defined.
-
-![POS Settings](img/settings-pos-view.png)
+Setup [POS Setting](docs.user.setup.pos_setting.html)
 
 #### Enable POS View
 
@@ -34,7 +24,7 @@ Sales Invoice has 2 different interfaces, Invoice View and POS View. The current
 
  > Setup  > Show/Hide Features
 
-![POS View](img/enable-pos-view.png)
+![POS View](img/pos-features-setup.png)
 
 ### Adding an Item
 
@@ -42,11 +32,9 @@ At the billing counter, the retailer needs to select Items which the consumer bu
 
 **Select Item** - To select a  product click on the Item image and add it into the cart. A cart is an area that prepares a customer for checkout by allowing to edit product information, adjust taxes and add discounts.
 
-![POS](img/add-item-image-click.png)
-
 **Barcode** - A Barcode is an optical machine-readable representation of data relating to the object to which it is attached. Enter Barcode in the barcode box and pause for a second. The  Item will be automatically added to the cart.
 
-![POS](img/add-item-barcode.png)
+![POS](img/pos-add-item.png)
 
 > Tip: To change the quantity of an Item, enter your desired quantity in the quantity box. These are mostly used if the same Item is purchased in bulk.
 
@@ -66,7 +54,7 @@ To remove multiple Items together, select multiple rows & click on “Del” but
 
 > Delete button appears only when Items are selected.
 
-![POS](img/delete-item.png)
+![POS](img/pos-remove-item.png)
 
 ### Make Payment
 
@@ -76,7 +64,7 @@ After all the Items and their quantities are added into the cart, you are ready 
 1. Select your “Mode of Payment”.
 1. Click on “Pay” button to Save the Sales Invoice.
 
-![POS Payment](img/make-payment.png)
+![POS Payment](img/pos-make-payment.png)
 
 Submit the document to finalise the record. After the Invoice is submitted, you can either print an invoice or email it directly to the customer.
 
