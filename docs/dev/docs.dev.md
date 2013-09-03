@@ -5,8 +5,9 @@
 		"docs.dev.install",
 		"docs.dev.quickstart",
 		"docs.dev.framework",
-		"docs.dev.api",
 		"docs.dev.modules",
+		"docs.dev.client_script",
+		"docs.dev.api",
 		"docs.dev.translate",
 		"docs.dev.docs"
 	]

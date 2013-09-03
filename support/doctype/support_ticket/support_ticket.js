@@ -46,16 +46,12 @@ $.extend(cur_frm.cscript, {
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		
-		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
-
-		var sortfn = function (a, b) { return (b.creation > a.creation) ? 1 : -1; }
-		comm_list = comm_list.sort(sortfn);
+		var comm_list = wn.model.get("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
 		
-		if(!comm_list.length || (comm_list[comm_list.length - 1].sender != doc.raised_by)) {
+		if(!comm_list.length) {
 			comm_list.push({
 				"sender": doc.raised_by,
 				"creation": doc.creation,
-				"modified": doc.creation,
 				"content": doc.description});
 		}
 					
