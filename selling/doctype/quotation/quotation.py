@@ -276,8 +276,9 @@ def _make_customer(source_name, ignore_permissions=False):
 					customer.doc.name += "-" + lead_name
 					customer.insert()
 					return customer
-				elif webnotes.MandatoryError:
-					msgprint(_("You will need to make Customer from Lead") + (" - %s" % lead_name))
-					return
 				else:
 					raise e
+			except webnotes.MandatoryError:
+				from webnotes.utils import get_url_to_form
+				webnotes.throw(_("Before proceeding, please create Customer from Lead") + \
+					(" - %s" % get_url_to_form("Lead", lead_name)))
