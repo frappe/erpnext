@@ -69,10 +69,10 @@ cur_frm.cscript.transaction = function(doc,cdt,cdn){
 
 
 cur_frm.fields_dict.system_user.get_query = function(doc,cdt,cdn) {
-  return{ query:"controllers.queries.profile_query" } }
+  return{ query:"core.doctype.profile.profile.profile_query" } }
 
 cur_frm.fields_dict.approving_user.get_query = function(doc,cdt,cdn) {
-  return{ query:"controllers.queries.profile_query" } }
+  return{ query:"core.doctype.profile.profile.profile_query" } }
 
 cur_frm.fields_dict['approving_role'].get_query = cur_frm.fields_dict['system_role'].get_query;
 

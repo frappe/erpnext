@@ -25,12 +25,15 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		lead.insert()
 		lead_name = lead.doc.name
 
+	parent_doctype = "Contact" if contact_name else "Lead"
+	parent_name = contact_name or lead_name
+
 	message = make(content=content, sender=sender, subject=subject,
-		lead=lead_name, contact=contact_name, date=date)
+		doctype = parent_doctype, name = parent_name, date=date)
 	
 	if mail:
 		# save attachments to parent if from mail
-		bean = webnotes.bean("Contact" if contact_name else "Lead", contact_name or lead_name)
+		bean = webnotes.bean(parent_doctype, parent_name)
 		mail.save_attachments_in_doc(bean.doc)
 
 class SalesMailbox(POP3Mailbox):	

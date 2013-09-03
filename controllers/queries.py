@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.widgets.reportview import get_match_cond
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
@@ -21,34 +22,6 @@ def get_filters_cond(doctype, filters, conditions):
 	else:
 		cond = ''
 	return cond
-
-def get_match_cond(doctype, searchfield = 'name'):
-	from webnotes.widgets.reportview import build_match_conditions
-	cond = build_match_conditions(doctype)
-
-	if cond:
-		cond = ' and ' + cond
-	else:
-		cond = ''
-	return cond
-
- # searches for enabled profiles
-def profile_query(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, concat_ws(' ', first_name, middle_name, last_name) 
-		from `tabProfile` 
-		where ifnull(enabled, 0)=1 
-			and docstatus < 2 
-			and name not in ('Administrator', 'Guest') 
-			and (%(key)s like "%(txt)s" 
-				or concat_ws(' ', first_name, middle_name, last_name) like "%(txt)s") 
-			%(mcond)s
-		order by 
-			case when name like "%(txt)s" then 0 else 1 end, 
-			case when concat_ws(' ', first_name, middle_name, last_name) like "%(txt)s" 
-				then 0 else 1 end, 
-			name asc 
-		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,  
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
 
  # searches for active employees
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
@@ -196,10 +169,12 @@ def get_price_list_currency(doctype, txt, searchfield, start, page_len, filters)
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
 		from `tabDelivery Note` 
-		where `tabDelivery Note`.`%(key)s` like %(txt)s %(fcond)s and
+		where `tabDelivery Note`.`%(key)s` like %(txt)s and 
+			`tabDelivery Note`.docstatus = 1 %(fcond)s and
 			(ifnull((select sum(qty) from `tabDelivery Note Item` where 
 					`tabDelivery Note Item`.parent=`tabDelivery Note`.name), 0) >
 				ifnull((select sum(qty) from `tabSales Invoice Item` where 
+					`tabSales Invoice Item`.docstatus = 1 and
 					`tabSales Invoice Item`.delivery_note=`tabDelivery Note`.name), 0))
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
 			limit %(start)s, %(page_len)s""" % {

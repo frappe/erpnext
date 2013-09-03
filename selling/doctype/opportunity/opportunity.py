@@ -25,9 +25,6 @@ class DocType(TransactionBase):
 			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 		})
-
-	def onload(self):
-		self.add_communication_list()
 		
 	def get_item_details(self, item_code):
 		item = sql("""select item_name, stock_uom, description_html, description, item_group, brand

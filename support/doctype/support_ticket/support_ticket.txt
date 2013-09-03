@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-01 10:36:25", 
   "docstatus": 0, 
-  "modified": "2013-08-28 18:29:06", 
+  "modified": "2013-09-02 16:24:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -260,6 +260,14 @@
   "fieldtype": "Data", 
   "hidden": 1, 
   "label": "Content Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication"
  }, 
  {
   "cancel": 0, 

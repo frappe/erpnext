@@ -30,7 +30,6 @@ prob = {
 }
 
 def make(reset=False, simulate=True):
-	webnotes.connect()
 	#webnotes.print_messages = True
 	webnotes.mute_emails = True
 	webnotes.rollback_on_exception = True
@@ -38,7 +37,7 @@ def make(reset=False, simulate=True):
 	if reset:
 		setup()
 	if simulate:
-		simulate()
+		_simulate()
 	
 def setup():
 	install()
@@ -50,7 +49,7 @@ def setup():
 	# make_opening_stock()
 	# make_opening_accounts()
 
-def simulate():
+def _simulate():
 	global runs_for
 	current_date = webnotes.utils.getdate(start_date)
 	
@@ -412,6 +411,3 @@ def import_data(dt, submit=False):
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")
 		upload()
-
-if __name__=="__main__":
-	make()

@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cstr, getdate
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import _, msgprint
 
 sql = webnotes.conn.sql
 	
@@ -20,9 +20,6 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
-
-	def onload(self):
-		self.add_communication_list()
 		 
 	# Get contact person details based on customer selected
 	# ------------------------------------------------------
@@ -281,3 +278,7 @@ def _make_customer(source_name, ignore_permissions=False):
 					return customer
 				else:
 					raise e
+			except webnotes.MandatoryError:
+				from webnotes.utils import get_url_to_form
+				webnotes.throw(_("Before proceeding, please create Customer from Lead") + \
+					(" - %s" % get_url_to_form("Lead", lead_name)))
