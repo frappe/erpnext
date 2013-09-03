@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:14", 
+  "modified": "2013-09-02 17:25:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -409,6 +409,14 @@
   "fieldname": "blog_subscriber", 
   "fieldtype": "Check", 
   "label": "Blog Subscriber"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication"
  }, 
  {
   "cancel": 1, 

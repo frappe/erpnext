@@ -20,9 +20,6 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
-
-	def onload(self):
-		self.add_communication_list()
 		 
 	# Get contact person details based on customer selected
 	# ------------------------------------------------------

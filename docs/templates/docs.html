@@ -1,0 +1,51 @@
+{% extends "lib/core/doctype/documentation_tool/docs.html" %}
+
+{% block navbar %}
+<div class="navbar navbar-default" style="border-bottom: 2px solid #c0392b">
+	<div class="container">
+		<button type="button" class="navbar-toggle" 
+			data-toggle="collapse" data-target=".navbar-responsive-collapse">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		</button>
+		<a class="navbar-brand" href="index.html">
+			<object data="img/splash.svg" class="erpnext-logo" 
+				type="image/svg+xml"></object> erpnext.org</a>
+		<div class="collapse navbar-collapse navbar-responsive-collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="docs.user.html">User</a></li>
+				<li><a href="docs.dev.html">Developer</a></li>
+				<li><a href="docs.user.help.html">Help</a></li>
+				<li><a href="docs.download.html">Download</a></li>
+				<li><a href="https://erpnext.com" target="_blank">Cloud</a></li>
+			</ul>
+			<ul class="nav navbar-nav pull-right">
+				<li><a href="docs.about.html">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<hr />
+<div class="footer text-muted" style="font-size: 80%;">
+	<div class="content row">
+		<div class="col-md-12">
+		&copy; <a href="https://erpnext.com">Web Notes</a> | 
+		<a href="docs.user.help.html">Help</a> | 
+		<a href="https://github.com/webnotes/erpnext" target="_blank">Code</a> |  
+		<a href="docs.attributions.html">Attributions</a> | 
+		<a href="https://erpnext.com">ERPNext Cloud</a> | 
+		<a href="https://erpnext.com/partners">Find a Partner</a> | 
+		<a href="https://erpnext.com/donate">Donate</a>
+		<br>
+		<p>
+		Code License: <a href="https://www.gnu.org/licenses/gpl.html">GNU/GPL 3</a>.
+		Documentation License: <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA-3.0</a>.
+		</p>
+		</div>
+	</div>
+</div>
+{% endblock %}

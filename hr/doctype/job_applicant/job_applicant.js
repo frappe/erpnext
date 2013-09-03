@@ -16,7 +16,7 @@ cur_frm.cscript = {
 	},
 	make_listing: function(doc) {
 		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"job_applicant": doc.name}),
+			list: wn.model.get("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
 			parent: cur_frm.fields_dict['thread_html'].wrapper,
 			doc: doc,
 			recipients: doc.email_id

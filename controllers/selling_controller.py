@@ -99,6 +99,8 @@ class SellingController(StockController):
 			for item in self.doclist.get({"parentfield": self.fname}):
 				if item.item_code in self.stock_items or \
 						(item_sales_bom and item_sales_bom.get(item.item_code)):
+					
+					buying_amount = 0
 					if item.item_code in self.stock_items:
 						buying_amount = get_buying_amount(self.doc.doctype, self.doc.name, 
 							item.name, stock_ledger_entries.get((item.item_code, 
@@ -108,9 +110,10 @@ class SellingController(StockController):
 							self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
 							item_sales_bom)
 					
-						item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
-						webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
-							item.buying_amount)
+					# buying_amount >= 0.01 so that gl entry doesn't get created for such small amounts
+					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
+					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
+						item.buying_amount)
 						
 	def check_expense_account(self, item):
 		if item.buying_amount and not item.expense_account:

@@ -18,9 +18,6 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def onload(self):
-		self.add_communication_list()
-
 	def autoname(self):
 		supp_master_name = webnotes.defaults.get_global_default('supp_master_name')
 		

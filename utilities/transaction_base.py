@@ -87,7 +87,7 @@ class TransactionBase(StatusUpdater):
 			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 			
-		if self.meta.get_field("sales_team"):
+		if self.meta.get_field("sales_team") and self.doc.customer:
 			self.set_sales_team_for_customer()
 			
 	def set_sales_team_for_customer(self):
@@ -229,20 +229,7 @@ class TransactionBase(StatusUpdater):
 		if int(webnotes.conn.get_value("Notification Control", None, dt) or 0):
 			self.doc.fields["__notification_message"] = \
 				webnotes.conn.get_value("Notification Control", None, dt + "_message")
-				
-	def add_communication_list(self):
-		# remove communications if present
-		self.doclist = webnotes.doclist(self.doclist).get({
-			"doctype": ["!=", "Communcation"]})
-		
-		comm_list = webnotes.conn.sql("""select * from tabCommunication 
-			where %s=%s order by modified desc limit 20""" \
-			% (self.doc.doctype.replace(" ", "_").lower(), "%s"),
-			self.doc.name, as_dict=1, update={"doctype":"Communication"})
-		
-		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
-			for d in comm_list]))
-			
+							
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
 			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')

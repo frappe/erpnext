@@ -20,20 +20,6 @@ erpnext.toolbar.setup = function() {
 			<i class="icon-fixed-width icon-comments"></i> '+wn._('Live Chat')+'</a></li>');
 	}
 	
-	erpnext.toolbar.set_new_comments();
-
 	$("#toolbar-tools").append('<li><a href="#latest-updates">\
 		<i class="icon-fixed-width icon-rss"></i> Latest Updates</li>');
-}
-
-erpnext.toolbar.set_new_comments = function(new_comments) {
-	return;
-	var navbar_nc = $('.navbar-new-comments');
-	if(cint(new_comments)) {
-		navbar_nc.addClass('navbar-new-comments-true')
-		navbar_nc.text(new_comments);
-	} else {
-		navbar_nc.removeClass('navbar-new-comments-true');
-		navbar_nc.text(0);
-	}
 }

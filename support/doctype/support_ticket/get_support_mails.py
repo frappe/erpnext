@@ -46,7 +46,7 @@ class SupportMailbox(POP3Mailbox):
 				
 		make(content=mail.content, sender=mail.from_email, subject = ticket.doc.subject,
 			doctype="Support Ticket", name=ticket.doc.name,
-			lead = ticket.doc.lead, contact=ticket.doc.contact, date=mail.date)
+			date=mail.date)
 			
 		if new_ticket and cint(self.email_settings.send_autoreply) and \
 			"mailer-daemon" not in mail.from_email.lower():
