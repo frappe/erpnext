@@ -169,10 +169,12 @@ def get_price_list_currency(doctype, txt, searchfield, start, page_len, filters)
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
 		from `tabDelivery Note` 
-		where `tabDelivery Note`.`%(key)s` like %(txt)s %(fcond)s and
+		where `tabDelivery Note`.`%(key)s` like %(txt)s and 
+			`tabDelivery Note`.docstatus = 1 %(fcond)s and
 			(ifnull((select sum(qty) from `tabDelivery Note Item` where 
 					`tabDelivery Note Item`.parent=`tabDelivery Note`.name), 0) >
 				ifnull((select sum(qty) from `tabSales Invoice Item` where 
+					`tabSales Invoice Item`.docstatus = 1 and
 					`tabSales Invoice Item`.delivery_note=`tabDelivery Note`.name), 0))
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
 			limit %(start)s, %(page_len)s""" % {
