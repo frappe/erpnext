@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cstr, getdate
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import _, msgprint
 
 sql = webnotes.conn.sql
 	
@@ -276,5 +276,8 @@ def _make_customer(source_name, ignore_permissions=False):
 					customer.doc.name += "-" + lead_name
 					customer.insert()
 					return customer
+				elif webnotes.MandatoryError:
+					msgprint(_("You will need to make Customer from Lead") + (" - %s" % lead_name))
+					return
 				else:
 					raise e
