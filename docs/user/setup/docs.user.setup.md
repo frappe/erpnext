@@ -19,7 +19,8 @@
 		"docs.user.setup.sms",
 		"docs.user.setup.taxes",
 		"docs.user.setup.price_lists",
-		"docs.user.setup.opening"
+		"docs.user.setup.opening",
+		"docs.user.setup.pos_setting"
 	]
 }
 ---

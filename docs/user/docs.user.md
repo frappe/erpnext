@@ -50,6 +50,7 @@ Contents
 	1. [Setting up Taxes](docs.user.setup.taxes.html)
 	1. [Price Lists](docs.user.setup.price_lists.html)
 	1. [Adding Opening Entries](docs.user.setup.opening.html)
+	1. [POS Setting](docs.user.setup.pos_setting.html)
 1. [Selling](docs.user.selling.html)
 	1. Selling Setup
 		1. [Customer Group](docs.user.selling.customer_groups.html)
