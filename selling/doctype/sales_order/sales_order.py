@@ -286,22 +286,6 @@ class DocType(SellingController):
 	def on_update(self):
 		pass
 		
-def get_website_args():	
-	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
-		"customer")
-	bean = webnotes.bean("Sales Order", webnotes.form_dict.name)
-	if bean.doc.customer != customer:
-		return {
-			"doc": {"name": "Not Allowed"}
-		}
-	else:
-		return {
-			"doc": bean.doc,
-			"doclist": bean.doclist,
-			"webnotes": webnotes,
-			"utils": webnotes.utils,
-		}
-		
 def set_missing_values(source, target):
 	bean = webnotes.bean(target)
 	bean.run_method("onload_post_render")

@@ -117,3 +117,29 @@ def message_list_args():
 		"icon": "icon-comments",
 		"empty_list_message": "No Messages Found",
 	}
+	
+def get_transaction_args(doctype, name):
+	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
+		"customer")
+		
+	bean = webnotes.bean(doctype, name)
+	if bean.doc.customer != customer:
+		return {
+			"doc": {"name": "Not Allowed"}
+		}
+	else:
+		return {
+			"doc": bean.doc,
+			"doclist": bean.doclist,
+			"webnotes": webnotes,
+			"utils": webnotes.utils
+		}
+
+def get_order_args():	
+	return get_transaction_args("Sales Order", webnotes.form_dict.name)
+	
+def get_invoice_args():
+	return get_transaction_args("Sales Invoice", webnotes.form_dict.name)
+
+def get_shipment_args():
+	return get_transaction_args("Delivery Note", webnotes.form_dict.name)

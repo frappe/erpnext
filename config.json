@@ -101,18 +101,31 @@
 			},
 			"order": {
 				"no_cache": true,
-				"template": "app/website/templates/pages/order",
-				"args_method": "selling.doctype.sales_order.sales_order.get_website_args"
+				"template": "app/website/templates/pages/sale",
+				"args_method": "website.helpers.transaction.get_order_args",
+				"for_doctype": "Sales Order"
 			},
 			"orders": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sales_transactions",
 				"args_method": "website.helpers.transaction.order_list_args"
 			},
+			"invoice": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/sale",
+				"args_method": "website.helpers.transaction.get_invoice_args",
+				"for_doctype": "Sales Invoice"
+			},
 			"invoices": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sales_transactions",
 				"args_method": "website.helpers.transaction.invoice_list_args"
+			},
+			"shipment": {
+				"no_cache": true,
+				"template": "app/website/templates/pages/sale",
+				"args_method": "website.helpers.transaction.get_shipment_args",
+				"for_doctype": "Delivery Note"
 			},
 			"shipments": {
 				"no_cache": true,
@@ -130,7 +143,8 @@
 			"ticket": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/ticket",
-				"args_method": "support.doctype.support_ticket.support_ticket.get_website_args"
+				"args_method": "support.doctype.support_ticket.support_ticket.get_website_args",
+				"for_doctype": "Support Ticket"
 			},
 			"tickets": {
 				"template": "app/website/templates/pages/tickets",
