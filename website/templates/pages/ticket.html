@@ -2,6 +2,12 @@
 
 {% set title=doc.name %}
 
+{% set status_label = {
+	"Open": "label-success",
+	"To Reply": "label-danger",
+	"Closed": "label-default"
+} %}
+
 {% block content %}
 <div class="col-md-12">
     <ul class="breadcrumb">
@@ -13,28 +19,35 @@
 	<h3><i class="icon-ticket icon-fixed-width"></i> {{ doc.name }}</h3>
 	<hr>
 	{%- if doc.status -%}
+	{% if doc.status == "Waiting for Customer" -%}
+		{% set status = "To Reply" %}
+	{% else %}
+		{% set status = doc.status %}
+	{%- endif -%}
 	<div class="row">
-		<div class="col-md-2">
-			<div class="label">{{ doc.status }}</div>
+		<div class="col-md-2" style="margin-bottom: 7px;">
+			<span class="label {{ status_label.get(status) or 'label-default' }}">{{ status }}</span>
 		</div>
-		<div class="col-md-7">
-			{{ doc.subject }}
+		<div class="col-md-8">
+			<div class="row col-md-12">{{ doc.subject }}</div>
 		</div>
-		<div class="col-md-3">
-			{{ utils.formatdate(doc.transaction_date) }}
+		<div class="col-md-2 pull-right">
+			<span class="text-muted">{{ utils.formatdate(doc.creation) }}</span>
 		</div>
 	</div>
 	<br>
 	<h4>Messages</h4>
 	{%- if doclist.get({"doctype":"Communication"}) -%}
-	<div style="font-size: 13px;">
+	<div>
 		<table class="table table-bordered table-striped">
 			<tbody>
 				{%- for comm in doclist.get({"doctype":"Communication"}) %}
 				<tr>
 					<td>
-					<h5>{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
-					<p>{{ comm.content }}</p>
+					<h5 style="text-transform: none">
+						{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
+					<p>{{ webnotes.utils.is_html(comm.content) and comm.content or
+						comm.content.replace("\n", "<br>")}}</p>
 					</td>
 				</tr>
 				{% endfor -%}

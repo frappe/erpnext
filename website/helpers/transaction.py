@@ -96,27 +96,6 @@ def ticket_list_args():
 		"empty_list_message": "No Tickets Raised",
 		"page": "ticket"
 	}
-
-@webnotes.whitelist()
-def get_messages(start=0):
-	search_term = "%%%s%%" % webnotes.session.user
-	messages = webnotes.conn.sql("""select name, subject, creation,
-		sender, recipients, content
-		from `tabCommunication` where sender like %s or recipients like %s
-		order by creation desc
-		limit %s, 20""", (search_term, search_term, cint(start)), as_dict=True)
-	for m in messages:
-		m.creation = formatdate(m.creation)
-		
-	return messages
-
-def message_list_args():
-	return {
-		"title": "Messages",
-		"method": "website.helpers.transaction.get_messages",
-		"icon": "icon-comments",
-		"empty_list_message": "No Messages Found",
-	}
 	
 def get_transaction_args(doctype, name):
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
@@ -136,10 +115,25 @@ def get_transaction_args(doctype, name):
 		}
 
 def get_order_args():	
-	return get_transaction_args("Sales Order", webnotes.form_dict.name)
+	args = get_transaction_args("Sales Order", webnotes.form_dict.name)
+	args.update({
+		"parent_link": "orders",
+		"parent_title": "My Orders"
+	})
+	return args
 	
 def get_invoice_args():
-	return get_transaction_args("Sales Invoice", webnotes.form_dict.name)
+	args = get_transaction_args("Sales Invoice", webnotes.form_dict.name)
+	args.update({
+		"parent_link": "invoices",
+		"parent_title": "Invoices"
+	})
+	return args
 
 def get_shipment_args():
-	return get_transaction_args("Delivery Note", webnotes.form_dict.name)
+	args = get_transaction_args("Delivery Note", webnotes.form_dict.name)
+	args.update({
+		"parent_link": "shipments",
+		"parent_title": "Shipments"
+	})
+	return args

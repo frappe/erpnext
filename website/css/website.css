@@ -198,3 +198,7 @@ fieldset[disabled] .btn-default.active {
   background-color: #a7a9aa;
   border-color: #a7a9aa;
 }
+
+.label {
+	padding-top: 0.3em;
+}

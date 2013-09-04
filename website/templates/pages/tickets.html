@@ -16,18 +16,14 @@ var render = function(doc) {
 	
 	$(repl('<a href="{{ page }}?name=%(name)s" class="list-group-item">\
 			<div class="row">\
+				<div class="col-md-2" style="margin-bottom: 7px;"><span class="label %(label_class)s">\
+					%(status)s</span></div>\
 				<div class="col-md-8">\
 					<div class="row col-md-12">%(name)s</div>\
 					<div class="row col-md-12 text-muted">%(subject)s</div>\
 				</div>\
-				<div class="col-md-4">\
-					<div class="pull-left">\
-						<span class="label %(label_class)s" \
-							style="padding-top: 0.3em; margin-right: 5px;">%(status)s</span>\
-					</div>\
-					<div class="pull-right">\
-						<span class="text-muted">%(creation)s</span>\
-					</div>\
+				<div class="col-md-2 pull-right">\
+					<span class="text-muted">%(creation)s</span>\
 				</div>\
 			</div>\
 		</a>', doc)).appendTo($list);
