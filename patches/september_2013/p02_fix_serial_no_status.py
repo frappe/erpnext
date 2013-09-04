@@ -15,14 +15,16 @@ def execute():
 		
 	for d in stock_entries:
 		serial_nos = d.serial_no.split("\n")
-		for serial_no in serial_nos:
-			serial_bean = webnotes.bean("Serial No", serial_no)
-			if serial_bean.doc.status == "Not Available":
-				latest_sle = webnotes.conn.sql("""select voucher_no from `tabStock Ledger Entry`
-					where item_code=%s and warehouse=%s and serial_no like %s 
-					order by name desc limit 1""", 
-					(serial_bean.doc.item_code, serial_bean.doc.warehouse, "%%%s%%" % serial_no))
+		for sr in serial_nos:
+			serial_no = sr.strip()
+			if serial_no:
+				serial_bean = webnotes.bean("Serial No", serial_no)
+				if serial_bean.doc.status == "Not Available":
+					latest_sle = webnotes.conn.sql("""select voucher_no from `tabStock Ledger Entry`
+						where item_code=%s and warehouse=%s and serial_no like %s 
+						order by name desc limit 1""", (serial_bean.doc.item_code, 
+							serial_bean.doc.warehouse, "%%%s%%" % serial_no))
 					
-				if latest_sle and latest_sle[0][0] == d.name:
-					serial_bean.doc.status = "Available"
-					serial_bean.save()
+					if latest_sle and latest_sle[0][0] == d.name:
+						serial_bean.doc.status = "Available"
+						serial_bean.save()
