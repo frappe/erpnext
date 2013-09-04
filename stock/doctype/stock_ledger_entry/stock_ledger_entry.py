@@ -119,13 +119,14 @@ class DocType(DocListController):
 
 						if self.doc.actual_qty < 0:
 							if sr.doc.warehouse!=self.doc.warehouse:
-								webnotes.throw(_("Warehouse does not belong to Item") + \
-									(": %s (%s)" % (self.doc.item_code, serial_no)), SerialNoWarehouseError)
+								webnotes.throw(_("Serial No") + ": " + serial_no + 
+									_(" does not belong to Warehouse") + ": " + self.doc.warehouse, 
+									SerialNoWarehouseError)
 								
 							if self.doc.voucher_type in ("Delivery Note", "Sales Invoice") \
 								and sr.doc.status != "Available":
-								webnotes.throw(_("Serial No status must be 'Available' to Deliver") + \
-									": " + serial_no, SerialNoStatusError)
+								webnotes.throw(_("Serial No status must be 'Available' to Deliver") 
+									+ ": " + serial_no, SerialNoStatusError)
 								
 									
 							sr.doc.warehouse = None
