@@ -10,7 +10,7 @@ Before you start managing your Operations in EPRNext, you must first become fami
 ### Test Phase
 
 - Read the Manual
-- Create your first Customer, Supplier and Item. Add a few more so you get familiar.
+- Create your first Customer, Supplier and Item. Add a few more so you get familiar with them.
 - Create Customer Groups, Item Groups, Warehouses, Supplier Groups, so that you can classify your Items.
 - Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Voucher)
 - Complete a standard purchase cycle - Purchase Request > Purchase Order > Purchase Receipt > Payment (Journal Voucher).
@@ -20,11 +20,10 @@ Before you start managing your Operations in EPRNext, you must first become fami
 
 ### Live Phase
 
-Once you have made yourself familiar with ERPNext, start entering your live data!
+Once you are familiar with ERPNext, start entering your live data!
 
 - Clean up the account of test data or better, start a fresh install.
 - Setup all the modules with Customer Groups, Item Groups, Warehouses, BOMs etc.
 - Import Customers, Suppliers, Items, Contacts and Addresses using Data Import Tool.
 - Import opening stock using Stock Reconciliation Tool.
 - Create opening accounting entries via Journal Voucher and create outstanding Sales Invoices and Purchase Invoices.
-

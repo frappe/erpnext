@@ -7,7 +7,7 @@
 	]
 }
 ---
-We have seem dozens of ERP implementations over the past few years and we realize that successful implementations are a lot about intangibles and attitude.
+We have seen dozens of ERP implementations over the past few years and we realize that successful implementation is a lot about intangibles and attitude.
 
 **ERPs are not required.**
 
@@ -23,12 +23,12 @@ So when you start implementing an ERP, keep your sight on the long term benefits
 
 ## The Champion
 
-ERP means organization wide change and it does not happen without effort. Every change requires a champion and it is the duty of the champion to organize and energize the entire team towards implementation. The champion is all the fall guy (or fall gal) incase something goes wrong and hence needs to be resilient. Who becomes a champion without putting effort anyways?
+ERP means organization wide change and it does not happen without effort. Every change requires a champion and it is the duty of the champion to organize and energize the entire team towards implementation. The champion needs to be resilient incase something goes wrong .
 
-In many organizations we have seen, the champion is most often the owner or a senior manager. Occasionally, the champion is an outsider who is hired for the purpose.
+In many organizations we have seen, the champion is most often the owner or a senior manager. Occasionally, the champion is an outsider who is hired for a particular purpose.
 
 In either case, you must identify your champion first.
 
-Most likely its **you!** 
+Most likely it's **you!** 
 
 Lets Begin!

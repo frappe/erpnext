@@ -3,7 +3,7 @@
 	"_label": "Manufacturing"
 }
 ---
-The Manufacturing module in ERPNext helps you maintain multi-level Bill of Materials (BOMs) for your Items, help you in Product Costing, plan your production via Production Plan, create Production Orders for your manufacturing shop floor and plan your inventory by getting your material requirement via your BOMs (also called Material Requirements Planning MRP).
+The Manufacturing module in ERPNext helps you to maintain multi-level Bill of Materials (BOMs) for your Items. It helps you in Product Costing, planing your production via Production Plan, creating Production Orders for your manufacturing shop floor,s and planing your inventory by getting your material requirement via BOMs (also called Material Requirements Planning MRP).
 
 ### Types of Production Planning
 
@@ -19,7 +19,7 @@ For engineer-to-order systems, the Manufacturing module should be used along wit
 
 #### Manufacturing and Inventory
 ￼
-You can track you work-in-progress by creating work-in-progress Warehouses. 
+You can track work-in-progress by creating work-in-progress Warehouses. 
 
 ERPNext will help you track material movement by automatically creating Stock Entries from your Production Orders by building form Bill of Materials.
 

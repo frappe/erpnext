@@ -11,6 +11,12 @@ In ERPNext, you can make a Purchase Order by going to:
 ￼
 A Purchase Order can also be automatically created from a Purchase Request or  Supplier Quotation.
 
+
+![Purchase Order](img/purchase-order.png)
+
+
+
+
 Entering a Purchase Order is very similar to a Purchase Request, additionally you will have to set:
 
 - Supplier. 

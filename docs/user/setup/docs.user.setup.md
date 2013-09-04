@@ -19,13 +19,14 @@
 		"docs.user.setup.sms",
 		"docs.user.setup.taxes",
 		"docs.user.setup.price_lists",
-		"docs.user.setup.opening"
+		"docs.user.setup.opening",
+		"docs.user.setup.pos_setting",
+		"docs.user.setup.third_party_backups"
 	]
 }
 ---
-Setting up an ERP system is like starting your business all over again, but in the virtual
-world. Thankfully it is not as hard as the real thing and you get to do a trial too.
+Setting up an ERP system is like starting your business all over again, although in the virtual world. Thankfully it is not as hard as the real business and you get to do a trial too!
 
-Implementation requires the implementer to take a step back and set aside some time to do this right. This is usually not a couple-of-hours after-work kind of a project.
+Implementation requires the implementer to take a step back and set aside some time to do this right. This is usually not a couple-of-hours, after-work kind of a project.
 
-Let us start with the screen which you see the first time you login.
+Let us start with the screen that you see, the first time you login.

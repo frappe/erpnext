@@ -9,17 +9,17 @@
 ---
 The Chart of Accounts forms the blueprint of your organization. The overall structure of your Chart of Accounts is based on a system of double entry accounting that has become a standard all over the world to quantify how a company is doing financially. 
 
-The Chart of Accounts helps you answer:
+The Chart of Accounts helps you to answer:
 
-- What is your organization worth?
+- What is your organisation worth?
 - How much debt have you taken?
 - How much profit are you making (and hence paying tax)?
 - How much are you selling?
-- What is your expense break- up
+- What is your expense break-up
 
- You may note that as a business manager,it is very valuable  to see how well your business is doing. 
+ You may note that as a business manager,it is very valuable to see how well your business is doing. 
 
-> Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) its a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
+> Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) it's a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
 
 To edit your Chart of Accounts in ERPNext go to:
 
@@ -39,7 +39,7 @@ The Balance Sheet has Application of Funds (Assets) and Sources of Funds (Liabil
 
 > Accounting: If you are new to accounting, you might be wondering, how can Assets be equal to Liabilities? That would mean the company has nothing of its own. Thats right. All the “investment” made in the company to buy assets (like land, furniture, machines) is made by the owners and is a liability to the company. If the company would want to shut down, it would need to sell all the assets and pay back all the liabilities (including profits) to the owners, leaving itself with nothing.
 
-All the accounts under this represent an asset owned by company like "Bank Account", "Land and Property", "Furniture" or a liability (funds that the company owes to others) like "Owners funds", "Debt" etc.
+All the accounts under this represent an asset owned by the company like "Bank Account", "Land and Property", "Furniture" or a liability (funds that the company owes to others) like "Owners funds", "Debt" etc.
 
 Two special accounts to note here are Accounts Receivable (money you have to collect from your customers) and Accounts Payable (money you have to pay to your suppliers) under Assets and Liabilities respectively.
 
@@ -65,7 +65,7 @@ Accounting Transactions can only be made against Ledger Accounts (not Groups)
 
 ### Other Account Types
 
-In ERPNext, you can also specify more information when you create a new Account, this is there to help you select that particular account in a scenario like Bank Account or a Tax Account and has no affect on the Chart itself.
+In ERPNext, you can also specify more information when you create a new Account, this is there to help you select that particular account in a scenario like Bank Account or a Tax Account and has no effect on the Chart itself.
 
 You can also tag if an account represents a Customer, Supplier or Employee in "Master Type".
 
