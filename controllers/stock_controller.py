@@ -14,11 +14,11 @@ class StockController(AccountsController):
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-		
+
 		if self.doc.docstatus==1:
-			gl_entries = self.get_gl_entries_for_stock()
+			gl_entries = self.get_gl_entries_for_stock()			
 			make_gl_entries(gl_entries)
-		else:
+		else:	
 			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
 		
 		self.update_gl_entries_after()
@@ -117,15 +117,19 @@ class StockController(AccountsController):
 		
 	def get_future_stock_vouchers(self):
 		future_stock_vouchers = []
-		item_codes = webnotes.conn.sql_list("""select distinct item_code 
-			from `tabStock Ledger Entry`
-			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
+		
+		if hasattr(self, "fname"):
+			item_list = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
+			condition = ''.join(['and item_code in (\'', '\', \''.join(item_list) ,'\')'])
+		else:
+			condition = ""
 		
 		for d in webnotes.conn.sql("""select distinct sle.voucher_type, sle.voucher_no 
 			from `tabStock Ledger Entry` sle
-			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
-			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""",
-			(self.doc.posting_date, self.doc.posting_time), as_dict=True):
+			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
+			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" % 
+			('%s', '%s', condition), (self.doc.posting_date, self.doc.posting_time), 
+			as_dict=True):
 				future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 		
 		return future_stock_vouchers

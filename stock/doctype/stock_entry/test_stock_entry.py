@@ -700,6 +700,9 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(webnotes.conn.exists("Serial No", "ABCD"))
 		self.assertTrue(webnotes.conn.exists("Serial No", "EFGH"))
 		
+		se.cancel()
+		self.assertFalse(webnotes.conn.get_value("Serial No", "ABCD", "warehouse"))
+		
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
 		se = webnotes.bean(copy=test_records[0])
@@ -755,6 +758,9 @@ class TestStockEntry(unittest.TestCase):
 		se.insert()
 		se.submit()
 		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
+		
+		se.cancel()
+		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
 
 	def test_serial_warehouse_error(self):
 		self._clear_stock_account_balance()
@@ -778,7 +784,6 @@ class TestStockEntry(unittest.TestCase):
 		
 		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
 		self.assertFalse(webnotes.conn.get_value("Serial No", serial_no, "warehouse"))
-		self.assertTrue(webnotes.conn.get_value("Serial No", serial_no, "status"), "Not Available")
 
 def make_serialized_item():
 	se = webnotes.bean(copy=test_records[0])

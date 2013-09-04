@@ -80,7 +80,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						source_doctype: "Delivery Note",
 						get_query: function() {
 							var filters = {
-								docstatus: 1,
 								company: cur_frm.doc.company
 							};
 							if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;

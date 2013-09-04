@@ -117,9 +117,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
-
-		self.assertEqual(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
-			"status"), "Not Available")
 			
 def get_gl_entries(voucher_type, voucher_no):
 	return webnotes.conn.sql("""select account, debit, credit

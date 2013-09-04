@@ -316,7 +316,7 @@ class DocType(StockController):
 	def update_stock_ledger(self):
 		sl_entries = []			
 		for d in getlist(self.doclist, 'mtn_details'):
-			if cstr(d.s_warehouse):
+			if cstr(d.s_warehouse) and self.doc.docstatus == 1:
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
 					"actual_qty": -flt(d.transfer_qty),
@@ -328,6 +328,16 @@ class DocType(StockController):
 					"warehouse": cstr(d.t_warehouse),
 					"actual_qty": flt(d.transfer_qty),
 					"incoming_rate": flt(d.incoming_rate)
+				}))
+			
+			# On cancellation, make stock ledger entry for 
+			# target warehouse first, to update serial no values properly
+			
+			if cstr(d.s_warehouse) and self.doc.docstatus == 2:
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.s_warehouse),
+					"actual_qty": -flt(d.transfer_qty),
+					"incoming_rate": 0
 				}))
 				
 		self.make_sl_entries(sl_entries, self.doc.amended_from and 'Yes' or 'No')

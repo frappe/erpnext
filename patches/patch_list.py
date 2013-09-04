@@ -261,6 +261,7 @@ patch_list = [
 	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
 	"patches.september_2013.p01_fix_buying_amount_gl_entries",
 	"patches.september_2013.p01_update_communication",
+	"patches.september_2013.p02_fix_serial_no_status",
 	"patches.august_2013.p06_deprecate_is_cancelled",
 	"execute:webnotes.delete_doc('DocType', 'Budget Control')",
 ]
