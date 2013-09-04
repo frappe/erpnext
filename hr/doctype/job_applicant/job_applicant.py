@@ -14,7 +14,7 @@ class DocType(TransactionBase):
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Jobs Email Settings',None,'email_id')
 		
-	def on_communication_sent(self, comm):
+	def on_communication(self, comm):
 		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
 			status = "Replied"
 		else:

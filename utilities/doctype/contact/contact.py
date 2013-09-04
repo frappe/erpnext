@@ -12,7 +12,7 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def on_communication_sent(self, comm):
+	def on_communication(self, comm):
 		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
 			status = "Replied"
 		else:

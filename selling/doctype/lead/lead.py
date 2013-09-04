@@ -28,9 +28,10 @@ class DocType(SellingController):
 		if customer:
 			self.doc.fields["__is_customer"] = customer
 
-	def on_communication_sent(self, comm):
-		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
-			status = "Replied"
+	def on_communication(self, comm):
+		if comm.sender == self.get_sender(comm) or \
+			webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+				status = "Replied"
 		else:
 			status = "Open"
 			
