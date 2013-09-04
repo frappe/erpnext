@@ -34,7 +34,10 @@ class DocType(TransactionBase):
 			clear(self.doc.doctype, self.doc.name)
 		
 	def on_communication_sent(self, comm):
-		self.doc.status = "Waiting for Customer"
+		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+			self.doc.status = "Waiting for Customer"
+		else:
+			self.doc.status = "Open"
 		self.update_status()
 		self.doc.save()
 		

@@ -15,7 +15,12 @@ class DocType(TransactionBase):
 		return webnotes.conn.get_value('Jobs Email Settings',None,'email_id')
 		
 	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
+		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+			status = "Replied"
+		else:
+			status = "Open"
+			
+		webnotes.conn.set(self.doc, 'status', status)
 
 	def on_trash(self):
 		webnotes.conn.sql("""delete from `tabCommunication` 

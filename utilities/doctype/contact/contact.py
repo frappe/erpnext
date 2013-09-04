@@ -13,7 +13,12 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 
 	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
+		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+			status = "Replied"
+		else:
+			status = "Open"
+			
+		webnotes.conn.set(self.doc, 'status', status)
 
 	def autoname(self):
 		# concat first and last name

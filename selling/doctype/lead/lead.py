@@ -29,7 +29,12 @@ class DocType(SellingController):
 			self.doc.fields["__is_customer"] = customer
 
 	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
+		if webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+			status = "Replied"
+		else:
+			status = "Open"
+			
+		webnotes.conn.set(self.doc, 'status', status)
 
 	def check_status(self):
 		chk = sql("select status from `tabLead` where name=%s", self.doc.name)
