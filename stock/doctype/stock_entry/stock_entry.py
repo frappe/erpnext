@@ -343,10 +343,14 @@ class DocType(StockController):
 	def update_stock_ledger(self, is_cancelled=0):
 		self.values = []			
 		for d in getlist(self.doclist, 'mtn_details'):
-			if cstr(d.s_warehouse):
+			if cstr(d.s_warehouse) and not is_cancelled:
 				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
+				
 			if cstr(d.t_warehouse):
 				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
+				
+			if cstr(d.s_warehouse) and is_cancelled:
+				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
 		
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, 
 			self.doc.amended_from and 'Yes' or 'No')

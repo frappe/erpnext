@@ -52,9 +52,7 @@ class DocType(StockController):
 				webnotes.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
 			if not self.via_stock_ledger and warehouse != self.doc.warehouse:
 				webnotes.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
-			
-		if not self.doc.warehouse and self.doc.status=="Available":
-			self.doc.status = "Not Available"
+	
 
 	def validate_item(self):
 		"""
