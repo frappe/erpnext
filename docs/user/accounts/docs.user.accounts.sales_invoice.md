@@ -15,13 +15,12 @@ or from the “Make Sales Invoice” button in the Sales Order or Delivery Note.
 
 
 
-
-
-
+<br>
 
 
 ![Sales Invoice](img/sales-invoice.png)
 
+<br>
 
 
 
