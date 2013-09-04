@@ -292,10 +292,11 @@ erpnext.POS = Class.extend({
 		
 		$.each(taxes, function(i, d) {
 			$(repl('<tr>\
-				<td>%(description)s</td>\
+				<td>%(description)s (%(rate)s%)</td>\
 				<td style="text-align: right;">%(tax_amount)s</td>\
 			<tr>', {
 				description: d.description,
+				rate: d.rate,
 				tax_amount: format_currency(d.tax_amount, me.frm.doc.price_list_currency)
 			})).appendTo(".tax-table tbody");
 		});
@@ -429,6 +430,7 @@ erpnext.POS = Class.extend({
 					dialog.fields_dict.pay.input.onclick = function() {
 						cur_frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);
 						cur_frm.set_value("paid_amount", dialog.get_values().total_amount);
+						cur_frm.cscript.mode_of_payment(cur_frm.doc);
 						cur_frm.save();
 						dialog.hide();
 						me.refresh();
