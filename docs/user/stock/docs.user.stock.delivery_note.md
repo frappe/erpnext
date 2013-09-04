@@ -13,6 +13,16 @@ The entry of the Delivery Note is very similar to a Purchase Receipt. You can cr
 
 or from a “Submitted” Sales Order (that is not already shipped) by clicking on “Make Delivery Note”.
 
+
+
+
+![Delivery Note](img/delivery-note.png)
+
+
+
+
+
+
 You can also “fetch” the details from an unshipped Sales Order. 
 
 You will notice that all the information about unshipped Items and other details are carried over from your Sales Order.

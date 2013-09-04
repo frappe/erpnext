@@ -7,7 +7,7 @@ There are many ways to get started with ERPNext.
 
 ### 1. See the Demo
 
-If you just want to check out the user interface and **feel** the application, just see the demo at:
+If you want to check out the user interface and **feel** the application, just see the demo at:
 
 - [https://demo.erpnext.com](https://demo.erpnext.com)
 

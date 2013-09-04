@@ -3,7 +3,7 @@
 	"_label": "Concepts and Terms"
 }
 ---
-Before you start implementation, lets get familiar with the terminology used and some basic concepts in ERPNext.
+Before you start implementation, lets get familiar with the terminology that is used and some basic concepts in ERPNext.
 
 ---
 
@@ -77,7 +77,7 @@ Represents a Financial Year or Accounting Year. You can operate multiple Fiscal 
 
 #### Cost Center
 
-A Cost Center is like an Account, but the only difference is that it's structure represents your business more closely than Accounts. For example in your Chart of Accounts, you separate your expenses by type (say travel, marketing etc). In your Chart of Cost Centers, you can separate them by product line or business group (for example online sales, retail sales)
+A Cost Center is like an Account, but the only difference is that its structure represents your business more closely than Accounts. For example in your Chart of Accounts, you separate your expenses by type (say travel, marketing etc). In your Chart of Cost Centers, you can separate them by product line or business group (for example online sales, retail sales)
 
 > Accounts > Chart of Cost Centers
 
@@ -101,7 +101,7 @@ A bill sent by a Supplier for delivery of Items (goods or services).
 
 #### Currency
 
-ERPNext allows you to book transactions in multiple currencies. There is only one currency for your books of accounts though. While posting your Invoices, payments in different currencies, the amounts are converted to the default currency by the specified conversion rate.
+ERPNext allows you to book transactions in multiple currencies. There is only one currency for your book of accounts though. While posting your Invoices, payments in different currencies, the amount is converted to the default currency by the specified conversion rate.
 
 > Setup > Company > Currencies
 
@@ -209,7 +209,7 @@ A number given to a group of units of a particular Item that may be purchased or
 
 #### Stock Ledger Entry
 
-A unified table for all material movement from one warehouse to another. This is the table that is updated when a Stock Entry, Delivery Note, Purchase Receipt, Sales Invoice (POS) is made.
+A unified table for all material movement from one warehouse to another. This is the table that is updated when a Stock Entry, Delivery Note, Purchase Receipt, and Sales Invoice (POS) is made.
 
 #### Stock Reconciliation
 
@@ -265,7 +265,7 @@ A record of the monthly salary given to an Employee.
 
 #### Salary Structure
 
-A template identifying all the components of an Employee’s salary (earnings) and tax and other social security deductions.
+A template identifying all the components of an Employees' salary (earnings) and tax and other social security deductions.
 
 > Human Resource > Salary and Payroll > Salary Structure
 
