@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _
-from webnotes.utils import cstr, validate_email_add, cint
+from webnotes.utils import cstr, validate_email_add, cint, extract_email_id
 from webnotes import session, msgprint
 
 sql = webnotes.conn.sql
@@ -30,7 +30,7 @@ class DocType(SellingController):
 
 	def on_communication(self, comm):
 		if comm.sender == self.get_sender(comm) or \
-			webnotes.conn.get_value("Profile", comm.sender, "user_type")=="System User":
+			webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
 				status = "Replied"
 		else:
 			status = "Open"
