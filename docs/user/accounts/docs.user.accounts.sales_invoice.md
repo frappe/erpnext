@@ -13,6 +13,19 @@ You can create a Sales Invoice directly from
 
 or from the “Make Sales Invoice” button in the Sales Order or Delivery Note.
 
+
+
+
+
+
+
+
+![Sales Invoice](img/sales-invoice.png)
+
+
+
+
+
 #### Accounting Impact
 
 All Sales must be booked against an “Income Account”. This refers to an Account in the “Income” section of your Chart of Accounts. It is a good practice to classify your income by type (like product income, service income etc). The Income Account must be set for each row of the Items table.

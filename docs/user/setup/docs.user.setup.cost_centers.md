@@ -19,9 +19,9 @@ For example, if you have two types of sales:
 - Walk-in Sales
 - Online Sales
 
-You may not have shipping expenses for your walk-in customers, and no shop-rent for your online customers. If you want to get the profitability of each of these separately, you create the two as Cost Centers and you can mark all sales as either "Walk-in" or "Online" and also all your purchases in the same way.
+You may not have shipping expenses for your walk-in customers, and no shop-rent for your online customers. If you want to get the profitability of each of these separately, you should create the two as Cost Centers and mark all sales as either "Walk-in" or "Online". Mark your all your purchases in the same way.
 
-So when you do your analysis you get a better understanding as to which side of your business is doing better. Since ERPNext has an option to add multiple Companies, you can create Cost Centers for each Company and manage it separately.
+Thus when you do your analysis you get a better understanding as to which side of your business is doing better. Since ERPNext has an option to add multiple Companies, you can create Cost Centers for each Company and manage it separately.
 
 ### Chart of Cost Centers
 

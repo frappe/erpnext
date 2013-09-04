@@ -10,6 +10,17 @@ Payments made against Sales Invoices or Purchase Invoices can be made by clickin
 1. Enter the cheque number, cheque date.
 1. Save and Submit.
 
+
+
+
+
+![Payment Entry](img/payment-entry.png)
+
+
+
+
+
+
 Payments can also be made independent of invoices by creating a new Journal Voucher and selecting the type of payment.
 
 #### Incoming Payment

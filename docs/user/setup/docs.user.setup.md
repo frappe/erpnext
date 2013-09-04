@@ -20,7 +20,8 @@
 		"docs.user.setup.taxes",
 		"docs.user.setup.price_lists",
 		"docs.user.setup.opening",
-		"docs.user.setup.pos_setting"
+		"docs.user.setup.pos_setting",
+		"docs.user.setup.third_party_backups"
 	]
 }
 ---
