@@ -2,39 +2,56 @@
 
 {% set title=doc.name %}
 
+{% set status_label = {
+	"Open": "label-success",
+	"To Reply": "label-danger",
+	"Closed": "label-default"
+} %}
+
 {% block content %}
 <div class="col-md-12">
     <ul class="breadcrumb">
-    	<li><a href="index">Home</a> <span class="divider">/</span></li>
-    	<li><a href="account">My Account</a> <span class="divider">/</span></li>
-    	<li><a href="tickets">My Tickets</a> <span class="divider">/</span></li>
-    	<li class="active">{{ doc.name }}</li>
+    	<li><a href="index">Home</a></li>
+    	<li><a href="account">My Account</a></li>
+    	<li><a href="tickets">My Tickets</a></li>
+    	<li class="active"><i class="icon-ticket icon-fixed-width"></i> {{ doc.name }}</li>
     </ul>
-	<h3><i class="icon-file"></i> {{ doc.name }}</h3>
+	<h3><i class="icon-ticket icon-fixed-width"></i> {{ doc.name }}</h3>
+	{% if doc.name == "Not Allowed" -%}
+		<script>ask_to_login();</script>
+	{% else %}
 	<hr>
 	{%- if doc.status -%}
+	{% if doc.status == "Waiting for Customer" -%}
+		{% set status = "To Reply" %}
+	{% else %}
+		{% set status = doc.status %}
+	{%- endif -%}
 	<div class="row">
-		<div class="col-md-2">
-			<div class="label">{{ doc.status }}</div>
+		<div class="col-md-2" style="margin-bottom: 7px;">
+			<span class="label {{ status_label.get(status) or 'label-default' }}">{{ status }}</span>
 		</div>
-		<div class="col-md-7">
-			{{ doc.subject }}
+		<div class="col-md-8">
+			<div class="row col-md-12">{{ doc.subject }}</div>
 		</div>
-		<div class="col-md-3">
-			{{ utils.formatdate(doc.transaction_date) }}
+		<div class="col-md-2 pull-right">
+			<span class="text-muted">{{ utils.formatdate(doc.creation) }}</span>
 		</div>
 	</div>
 	<br>
 	<h4>Messages</h4>
 	{%- if doclist.get({"doctype":"Communication"}) -%}
-	<div style="font-size: 13px;">
+	<div>
 		<table class="table table-bordered table-striped">
 			<tbody>
 				{%- for comm in doclist.get({"doctype":"Communication"}) %}
 				<tr>
 					<td>
-					<h5>{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
-					<p>{{ comm.content }}</p>
+					<h5 style="text-transform: none">
+						{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
+					<hr>
+					<p>{{ webnotes.utils.is_html(comm.content) and comm.content or
+						comm.content.replace("\n", "<br>")}}</p>
 					</td>
 				</tr>
 				{% endfor -%}
@@ -45,5 +62,6 @@
 	<div class="alert">No messages</div>
 	{%- endif -%}
 	{%- endif -%}
+	{% endif -%}
 </div>
 {% endblock %}

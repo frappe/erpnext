@@ -7,19 +7,21 @@
     <ul class="breadcrumb">
     	<li><a href="index">Home</a></li>
     	<li><a href="account">My Account</a></li>
-    	<li><a href="orders">My Orders</a></li>
-    	<li class="active">{{ doc.name }}</li>
+    	<li><a href="{{ parent_link }}">{{ parent_title }}</a></li>
+    	<li class="active"><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</li>
     </ul>
-	<h3><i class="icon-file"></i> {{ doc.name }}</h3>
+	<h3><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</h3>
+	{% if doc.name == "Not Allowed" -%}
+		<script>ask_to_login();</script>
+	{% else %}
 	<hr>
-	{%- if doc.status -%}
-	<div style="font-size: 13px;">
+	<div>
 	<div class="row">
-		<div class="col-md-2">
-			<div class="label">{{ doc.status }}</div>
+		<div class="col-xs-6">
+			{% if doc.status -%}<div class="label label-default">{{ doc.status }}</div>{%- endif %}
 		</div>
-		<div class="col-md-4">
-			{{ utils.formatdate(doc.transaction_date) }}
+		<div class="col-xs-6">
+			<span class="pull-right">{{ utils.formatdate(doc.posting_date or doc.transaction_date) }}</span>
 		</div>
 	</div>
 	<br>
@@ -36,7 +38,7 @@
 					<th>Basic Rate</th>
 					<th>Amount</th>
 				</tr>
-				{%- for row in doclist.get({"doctype":"Sales Order Item"}) %}
+				{%- for row in doclist.get({"doctype": doc.doctype + " Item"}) %}
 				<tr>
 					<td style="width: 3%;">{{ row.idx }}</td>
 					<td style="width: 20%;">{{ row.item_name }}</td>
@@ -83,6 +85,6 @@
 		</div>
 	</div>
 	</div>
-	{%- endif -%}
+	{%- endif %}
 </div>
 {% endblock %}

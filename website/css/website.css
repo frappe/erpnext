@@ -157,21 +157,32 @@ fieldset {
 }
 
 /* buttons */
+
 .btn-default {
   color: #ffffff;
   background-color: #a7a9aa;
   border-color: #a7a9aa;
 }
 
+.dropup .btn-default .caret,
+.btn-default .caret {
+	border-bottom-color: #ffffff;
+	border-top-color: #ffffff;
+}
+
 .btn-default:hover,
 .btn-default:focus,
 .btn-default:active,
-.btn-default.active {
-  color: #ffffff;
+.btn-default.active,
+.open .dropdown-toggle.btn-default {
   background-color: #9a9c9d;
   border-color: #8d9091;
+  color: #ffffff;
 }
 
+.btn-default.disabled,
+.btn-default[disabled],
+fieldset[disabled] .btn-default,
 .btn-default.disabled:hover,
 .btn-default[disabled]:hover,
 fieldset[disabled] .btn-default:hover,
@@ -186,4 +197,8 @@ fieldset[disabled] .btn-default:active,
 fieldset[disabled] .btn-default.active {
   background-color: #a7a9aa;
   border-color: #a7a9aa;
+}
+
+.label {
+	padding-top: 0.3em;
 }

@@ -395,7 +395,7 @@ erpnext.POS = Class.extend({
 					});
 					dialog.show();
 					
-					dialog.get_input("total_amount").attr("disabled", "disabled");
+					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
 						cur_frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);

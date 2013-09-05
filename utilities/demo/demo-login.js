@@ -3,7 +3,7 @@ $(document).ready(function() {
     
     $("#login_btn").click(function() {
         var me = this;
-        $(this).html("Logging In...").attr("disabled", "disabled");
+        $(this).html("Logging In...").prop("disabled", true);
         wn.call({
             "method": "login",
             args: {
@@ -12,7 +12,7 @@ $(document).ready(function() {
                 lead_email: $("#lead-email").val(),
             },
             callback: function(r) {
-                $(me).attr("disabled", false);
+                $(me).prop("disabled", false);
                 if(r.exc) {
                     alert("Error, please contact support@erpnext.com");
                 } else {
@@ -23,5 +23,5 @@ $(document).ready(function() {
         })
         return false;
     })
-    .attr("disabled", false);
+    .prop("disabled", false);
 })
