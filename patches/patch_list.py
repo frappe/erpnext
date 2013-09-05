@@ -259,6 +259,8 @@ patch_list = [
 	"patches.august_2013.p06_deprecate_is_cancelled",
 	"patches.august_2013.p06_fix_sle_against_stock_entry",
 	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
+	"patches.september_2013.p01_add_user_defaults_from_pos_setting",
+	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-09-02",
 	"patches.september_2013.p01_fix_buying_amount_gl_entries",
 	"patches.september_2013.p01_update_communication",
 	"patches.september_2013.p02_fix_serial_no_status",

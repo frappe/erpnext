@@ -62,11 +62,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if (!doc.__islocal) {
 			cur_frm.communication_view = new wn.views.CommunicationList({
-				list: wn.model.get("Communication", {"quotation": doc.name}),
+				list: wn.model.get("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
 				parent: cur_frm.fields_dict.communication_html.wrapper,
 				doc: doc,
 				recipients: doc.contact_email
-			});		
+			});
 		}
 		
 		this.quotation_to();

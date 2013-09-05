@@ -16,7 +16,7 @@ erpnext.POS = Class.extend({
 				<div class="col-sm-6">\
 					<div class="pos-bill">\
 						<div class="item-cart">\
-							<table class="table table-condensed table-hover" id="cart"  style="table-layout: fixed;">\
+							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
 										<th style="width: 50%">Item</th>\
@@ -160,8 +160,10 @@ erpnext.POS = Class.extend({
 			parent: this.wrapper.find(".barcode-area")
 		});
 		this.barcode.make_input();
-		this.barcode.$input.on("change", function() {
-			me.add_item_thru_barcode();
+		this.barcode.$input.on("keypress", function() {
+			if(me.barcode_timeout)
+				clearTimeout(me.barcode_timeout);
+			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
 		});
 	},
 	make_item_list: function() {
@@ -178,12 +180,13 @@ erpnext.POS = Class.extend({
 				me.wrapper.find(".item-list").empty();
 				$.each(r.message, function(index, obj) {
 					if (obj.image)
-						image = "<img src='" + obj.image + "' class='img-responsive'>";
+						image = '<img src="' + obj.image + '" class="img-responsive" \
+								style="border:1px solid #eee;height:140px;width:100%;">';
 					else
 						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
 					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								%(item_image)s\
+								<div>%(item_image)s</div>\
 								<div class="small">%(item_code)s</div>\
 								<div class="small">%(item_name)s</div>\
 								<div class="small">%(item_price)s</div>\
@@ -196,13 +199,16 @@ erpnext.POS = Class.extend({
 						})).appendTo($wrap);
 				});
 
-				$("div.pos-item").on("click", function() {
-					if(!cur_frm.doc.customer) {
-						msgprint("Please select customer first.");
-						return;
-					}
-					me.add_to_cart($(this).attr("data-item_code"));
-				});
+				// if form is local then allow this function
+				if (cur_frm.doc.docstatus===0) {
+					$("div.pos-item").on("click", function() {
+						if(!cur_frm.doc.customer) {
+							msgprint("Please select customer first.");
+							return;
+						}
+						me.add_to_cart($(this).attr("data-item_code"));
+					});
+				}
 			}
 		});
 	},
@@ -230,22 +236,25 @@ erpnext.POS = Class.extend({
 			var child = wn.model.add_child(me.frm.doc, "Sales Invoice Item", "entries");
 			child.item_code = item_code;
 			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
-			//me.refresh();
 		}
 	},
-	update_qty: function(item_code, qty) {
+	update_qty: function(item_code, qty, textbox_qty) {
 		var me = this;
 		$.each(wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
 		"Sales Invoice"), function(i, d) {
 			if (d.item_code == item_code) {
-				if (qty == 1)
-					d.qty += 1;
-				else
+				if (textbox_qty) {
+					if (qty == 0 && d.item_code == item_code)
+						wn.model.clear_doc(d.doctype, d.name);
 					d.qty = qty;
+				}
+				else
+					d.qty += 1;
 
 				me.frm.cscript.qty(me.frm.doc, d.doctype, d.name);
 			}
 		});
+		me.frm.dirty();
 		me.refresh();
 	},
 	refresh: function() {
@@ -262,7 +271,7 @@ erpnext.POS = Class.extend({
 					<td>%(item_code)s%(item_name)s</td>\
 					<td><input type="text" value="%(qty)s" \
 						class="form-control qty" style="text-align: right;"></td>\
-					<td style="text-align: right;">%(rate)s<br><b>%(amount)s</b></td>\
+					<td style="text-align: right;"><b>%(amount)s</b><br>%(rate)s</td>\
 				</tr>',
 				{
 					item_code: d.item_code,
@@ -283,10 +292,11 @@ erpnext.POS = Class.extend({
 		
 		$.each(taxes, function(i, d) {
 			$(repl('<tr>\
-				<td>%(description)s</td>\
+				<td>%(description)s (%(rate)s%)</td>\
 				<td style="text-align: right;">%(tax_amount)s</td>\
 			<tr>', {
 				description: d.description,
+				rate: d.rate,
 				tax_amount: format_currency(d.tax_amount, me.frm.doc.price_list_currency)
 			})).appendTo(".tax-table tbody");
 		});
@@ -297,44 +307,63 @@ erpnext.POS = Class.extend({
 		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
 			cur_frm.doc.price_list_currency));
 
-		// append quantity to the respective item after change from input box
-		$("input.qty").on("change", function() {
-			var item_code = $(this).closest("tr")[0].id;
-			me.update_qty(item_code, $(this).val());
-		});
+		// if form is local then only run all these functions
+		if (cur_frm.doc.docstatus===0) {
+			$("input.qty").on("focus", function() {
+				$(this).select();
+			});
 
-		// on td click highlight the respective row
-		$("td").on("click", function() {
-			var row = $(this).closest("tr");
-			if (row.attr("data-selected") == "false") {
-				row.attr("class", "warning");
-				row.attr("data-selected", "true");
-			}
-			else {
-				row.prop("class", null);
-				row.attr("data-selected", "false");
-			}
+			// append quantity to the respective item after change from input box
+			$("input.qty").on("change", function() {
+				var item_code = $(this).closest("tr")[0].id;
+				me.update_qty(item_code, $(this).val(), true);
+			});
+
+			// on td click toggle the highlighting of row
+			$("#cart tbody tr td").on("click", function() {
+				var row = $(this).closest("tr");
+				if (row.attr("data-selected") == "false") {
+					row.attr("class", "warning");
+					row.attr("data-selected", "true");
+				}
+				else {
+					row.prop("class", null);
+					row.attr("data-selected", "false");
+				}
+				me.refresh_delete_btn();
+				
+			});
+
 			me.refresh_delete_btn();
-			
-		});
-		
-		me.refresh_delete_btn();
+			cur_frm.pos.barcode.$input.focus();
+		}
+
+		// if form is submitted & cancelled then disable all input box & buttons
+		if (cur_frm.doc.docstatus>=1) {
+			me.wrapper.find('input, button').each(function () {
+				$(this).prop('disabled', true);
+			});
+			$(".delete-items").hide();
+			$(".make-payment").hide();
+		}
 	},
 	refresh_delete_btn: function() {
 		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
+		me.barcode_timeout = null;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_barcode',
 			args: {barcode: this.barcode.$input.val()},
 			callback: function(r) {
 				if (r.message) {
 					me.add_to_cart(r.message[0].name);
-					me.refresh();
 				}
 				else
 					msgprint(wn._("Invalid Barcode"));
+
+				me.refresh();
 			}
 		});
 	},
@@ -348,20 +377,20 @@ erpnext.POS = Class.extend({
 				selected_items.push(row.attr("id"));
 			}
 		}
-
-		if (!selected_items[0])
-			msgprint(wn._("Please select any item to remove it"));
 		
 		var child = wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
 		"Sales Invoice");
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
 				if (d.item_code == selected_items[i]) {
+					// cur_frm.fields_dict["entries"].grid.grid_rows[d.idx].remove();
 					wn.model.clear_doc(d.doctype, d.name);
 				}
 			}
 		});
 		cur_frm.fields_dict["entries"].grid.refresh();
+		cur_frm.script_manager.trigger("calculate_taxes_and_totals");
+		me.frm.dirty();
 		me.refresh();
 	},
 	make_payment: function() {
@@ -394,12 +423,14 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
+					cur_frm.pos.barcode.$input.focus();
 					
 					dialog.get_input("total_amount").attr("disabled", "disabled");
 					
 					dialog.fields_dict.pay.input.onclick = function() {
 						cur_frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);
 						cur_frm.set_value("paid_amount", dialog.get_values().total_amount);
+						cur_frm.cscript.mode_of_payment(cur_frm.doc);
 						cur_frm.save();
 						dialog.hide();
 						me.refresh();

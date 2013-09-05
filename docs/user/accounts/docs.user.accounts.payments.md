@@ -7,8 +7,19 @@ Payments made against Sales Invoices or Purchase Invoices can be made by clickin
 
 1. Update the “Bank Account” (you can also set the default account in the Company master).
 1. Update posting date.
-1. Enter the check number, check date.
+1. Enter the cheque number, cheque date.
 1. Save and Submit.
+
+
+
+
+
+![Payment Entry](img/payment-entry.png)
+
+
+
+
+
 
 Payments can also be made independent of invoices by creating a new Journal Voucher and selecting the type of payment.
 
@@ -32,7 +43,7 @@ For payments to Suppliers,
 
 ---
 
-### Reconciling Cheque (Check) Payments
+### Reconciling Cheque Payments
 
 If you are receiving payments or making payments via cheques, the bank statements will not accurately match the dates of your entry, this is because the bank usually takes time to “clear” these payments. Also you may have mailed a cheque to your Supplier and it may be a few days before it is received and deposited by the Supplier. In ERPNext you can synchronize your bank statements and your Journal Vouchers using the “Bank Reconciliation” tool.
 
@@ -42,13 +53,13 @@ To use this, go to:
 
 Select your “Bank” Account and enter the dates of your statement. Here you will get all the “Bank Voucher” type entries. In each of the entry on the right most column, update the “Clearance Date” and click on “Update”.
 
-This way you will be able to sync your bank statements and entries in the system.
+By doing this you will be able to sync your bank statements and entries into the system.
 
 ---
 
 ## Managing Outstanding Payments
 
-In most cases, apart from retail sales, billing and payment are separate activities. There are several combinations in which these payments are done. These cases apply to both sales and purchases.
+In most cases, apart from retail sales, billing and payments are separate activities. There are several combinations in which these payments are done. These cases apply to both sales and purchases.
 
 - They can be upfront (100% in advance).
 - Post shipment. Either on delivery or within a few days of delivery.
@@ -62,7 +73,7 @@ The total outstanding amount against an invoice is the sum of all the accounting
 
 ### Matching Payments to Invoices
 ￼
-In complex scenarios, especially in the capital goods industry, sometimes there is no direct link between payments and invoices. You send invoices to your Customers and your Customer send you block payments or payments based on some schedule that is not linked to your invoices. 
+In complex scenarios, especially in the capital goods industry, sometimes there is no direct link between payments and invoices. You send invoices to your Customers and your Customer sends you block payments or payments based on some schedule that is not linked to your invoices. 
 
 In such cases, you can use the Payment to Invoice Matching Tool.
 

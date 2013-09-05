@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from utilities.transaction_base import TransactionBase
-from webnotes.utils import now
+from webnotes.utils import now, extract_email_id
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -33,8 +33,12 @@ class DocType(TransactionBase):
 			from webnotes.widgets.form.assign_to import clear
 			clear(self.doc.doctype, self.doc.name)
 		
-	def on_communication_sent(self, comm):
-		self.doc.status = "Waiting for Customer"
+	def on_communication(self, comm):
+		if comm.sender == self.get_sender(comm) or \
+			webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
+				self.doc.status = "Waiting for Customer"
+		else:
+			self.doc.status = "Open"
 		self.update_status()
 		self.doc.save()
 		

@@ -5,7 +5,7 @@ wn.require('app/controllers/js/contact_address_common.js');
 
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.communication_view = new wn.views.CommunicationList({
-		list: wn.model.get("Communication", {"contact": doc.name}),
+		list: wn.model.get("Communication", {"parent": doc.name, "parenttype": "Contact"}),
 		parent: cur_frm.fields_dict.communication_html.wrapper,
 		doc: doc,
 		recipients: doc.email_id

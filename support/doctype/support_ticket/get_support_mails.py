@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, cint
+from webnotes.utils import cstr, cint, decode_dict
 from webnotes.utils.email_lib import sendmail		
 from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
@@ -31,14 +31,15 @@ class SupportMailbox(POP3Mailbox):
 			ticket.doc.save()
 				
 		else:
-			ticket = webnotes.bean([{
+			ticket = webnotes.bean([decode_dict({
 				"doctype":"Support Ticket",
 				"description": mail.content,
 				"subject": mail.subject,
 				"raised_by": mail.from_email,
 				"content_type": mail.content_type,
 				"status": "Open",
-			}])
+			})])
+						
 			ticket.insert()
 			new_ticket = True
 

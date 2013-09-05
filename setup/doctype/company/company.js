@@ -36,8 +36,6 @@ cur_frm.cscript.abbr = function(doc){
   }
 }
 
-cur_frm.fields_dict.default_cash_account.get_query = cur_frm.fields_dict.default_bank_account.get_query;
-
 cur_frm.fields_dict.default_bank_account.get_query = function(doc) {    
 	return{
 		filters:{
@@ -48,13 +46,46 @@ cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 	}  
 }
 
-cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
+cur_frm.fields_dict.default_cash_account.get_query = cur_frm.fields_dict.default_bank_account.get_query;
 
 cur_frm.fields_dict.receivables_group.get_query = function(doc) {  
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Group"
+		}
+	}  
+}
+
+cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
+
+cur_frm.fields_dict.default_expense_account.get_query = function(doc) {    
+	return{
+		filters:{
+			'company': doc.name,
+			'group_or_ledger': "Ledger",
+			'is_pl_account': "Yes",
+			'debit_or_credit': "Debit"
+		}
+	}  
+}
+
+cur_frm.fields_dict.default_income_account.get_query = function(doc) {    
+	return{
+		filters:{
+			'company': doc.name,
+			'group_or_ledger': "Ledger",
+			'is_pl_account': "Yes",
+			'debit_or_credit': "Credit"
+		}
+	}  
+}
+
+cur_frm.fields_dict.cost_center.get_query = function(doc) {    
+	return{
+		filters:{
+			'company': doc.name,
+			'group_or_ledger': "Ledger",
 		}
 	}  
 }

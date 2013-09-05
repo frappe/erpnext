@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr
+from webnotes.utils import cstr, extract_email_id
 
 from utilities.transaction_base import TransactionBase
 
@@ -12,8 +12,13 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
+	def on_communication(self, comm):
+		if webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
+			status = "Replied"
+		else:
+			status = "Open"
+			
+		webnotes.conn.set(self.doc, 'status', status)
 
 	def autoname(self):
 		# concat first and last name
