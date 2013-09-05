@@ -95,9 +95,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
-
-		self.assertEqual(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
-			"status"), "Not Available")
 		
 	
 		
