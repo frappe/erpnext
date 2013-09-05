@@ -338,8 +338,19 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		
 		var headings = $.map([wn._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
+			
+		var distinct_item_names = [];
+		var distinct_items = [];
+		$.each(this.get_item_doclist(), function(i, item) {
+			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
+				distinct_item_names.push(item.item_code || item.item_name);
+				distinct_items.push(item);
+			}
+		});
 		
-		var rows = $.map(this.get_item_doclist(), function(item) {
+		console.log(distinct_items);
+		
+		var rows = $.map(distinct_items, function(item) {
 			var item_tax_record = item_tax[item.item_code || item.item_name];
 			if(!item_tax_record) { return null; }
 			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
