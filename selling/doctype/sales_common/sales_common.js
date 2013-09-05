@@ -432,14 +432,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_outstanding_amount: function() {
 		// NOTE: 
-		// write_off_amount is only for POS Invoice
+		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0) {
 			wn.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"]);
-			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount;
-			this.frm.doc.outstanding_amount = flt(total_amount_to_pay - this.frm.doc.total_advance - 
-				this.frm.doc.paid_amount, precision("outstanding_amount"));
+			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount - this.frm.doc.total_advance;
+			this.frm.doc.paid_amount = this.frm.doc.is_pos? flt(total_amount_to_pay): 0.0;
+
+			this.frm.doc.outstanding_amount = flt(total_amount_to_pay - this.frm.doc.paid_amount, 
+				precision("outstanding_amount"));
 		}
 	},
 	
