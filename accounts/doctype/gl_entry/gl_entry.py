@@ -152,7 +152,7 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		
 	# Validation : Outstanding can not be negative
 	if bal < 0 and not on_cancel:
-		webnotes.throw(_("Outstanding for Voucher ") + gainst_voucher + _(" will become ") + 
+		webnotes.throw(_("Outstanding for Voucher ") + against_voucher + _(" will become ") + 
 			fmt_money(bal) + _(". Outstanding cannot be less than zero. \
 			 	Please match exact outstanding."))
 		
