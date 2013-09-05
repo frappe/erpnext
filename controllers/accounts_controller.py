@@ -56,23 +56,23 @@ class AccountsController(TransactionBase):
 	def set_price_list_currency(self, buying_or_selling):
 		company_currency = get_company_currency(self.doc.company)
 		fieldname = buying_or_selling.lower() + "_price_list"
+		
 		# TODO - change this, since price list now has only one currency allowed
-		if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname) and \
-			not self.doc.price_list_currency:
+		if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
+			if not self.doc.price_list_currency:
 				self.doc.fields.update(get_price_list_currency(self.doc.fields.get(fieldname)))
 				
-				if self.doc.price_list_currency:
-					if not self.doc.plc_conversion_rate:
-						if self.doc.price_list_currency == company_currency:
-							self.doc.plc_conversion_rate = 1.0
-						else:
-							exchange = self.doc.price_list_currency + "-" + company_currency
-							self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-								exchange, "exchange_rate"))
-						
-					if not self.doc.currency:
-						self.doc.currency = self.doc.price_list_currency
-						self.doc.conversion_rate = self.doc.plc_conversion_rate
+			if self.doc.price_list_currency:
+				if self.doc.price_list_currency == company_currency:
+					self.doc.plc_conversion_rate = 1.0
+				elif not self.doc.plc_conversion_rate:
+					exchange = self.doc.price_list_currency + "-" + company_currency
+					self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
+						exchange, "exchange_rate"))
+					
+				if not self.doc.currency:
+					self.doc.currency = self.doc.price_list_currency
+					self.doc.conversion_rate = self.doc.plc_conversion_rate
 						
 		if self.meta.get_field("currency"):
 			if self.doc.currency and self.doc.currency != company_currency:
@@ -82,7 +82,7 @@ class AccountsController(TransactionBase):
 						exchange, "exchange_rate"))
 			else:
 				self.doc.conversion_rate = 1
-						
+				
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""
 		for item in self.doclist.get({"parentfield": self.fname}):
