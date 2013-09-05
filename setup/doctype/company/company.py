@@ -48,7 +48,8 @@ class DocType:
 			self.create_default_warehouses()
 			self.create_default_web_page()
 		
-		if not self.doc.cost_center:
+		if not webnotes.conn.get_value("Cost Center", {"group_or_ledger": "Ledger", 
+				"company": self.doc.name}):
 			self.create_default_cost_center()
 			
 		self.set_default_accounts()
