@@ -19,7 +19,7 @@ class DocType:
 			webnotes.conn.get_value("Account", self.doc.account, "debit_or_credit").lower() or ""
 		
 	def get_voucher_details(self):
-		total_amount = webnotes.conn.sql("""select %s from `tabGL Entry` 
+		total_amount = webnotes.conn.sql("""select sum(%s) from `tabGL Entry` 
 			where voucher_type = %s and voucher_no = %s 
 			and account = %s and ifnull(is_cancelled, 'No') = 'No'""" % 
 			(self.doc.account_type, '%s', '%s', '%s'), 
