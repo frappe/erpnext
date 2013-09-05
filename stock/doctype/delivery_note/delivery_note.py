@@ -387,6 +387,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 	
 	def update_accounts(source, target):
 		si = webnotes.bean(target)
+		si.doc.is_pos = 0
 		si.run_method("onload_post_render")
 		
 		si.set_doclist(si.doclist.get({"parentfield": ["!=", "entries"]}) +

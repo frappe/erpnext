@@ -357,7 +357,12 @@ def make_delivery_note(source_name, target_doclist=None):
 	return [d.fields for d in doclist]
 
 @webnotes.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):	
+def make_sales_invoice(source_name, target_doclist=None):
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.doc.is_pos = 0
+		bean.run_method("onload_post_render")
+		
 	def update_item(obj, target, source_parent):
 		target.export_amount = flt(obj.export_amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount * flt(source_parent.conversion_rate)
