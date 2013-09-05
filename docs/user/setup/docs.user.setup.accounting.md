@@ -62,7 +62,7 @@ In ERPNext it is easy to create a Profit and Loss analysis chart. An example of 
 
 
 
-![Financial Analytics Profit and Loss](img/financial-analytics-pl.png)
+![Financial Analytics Profit and Loss](img/financial-analytic-pl.png)
 
 
 

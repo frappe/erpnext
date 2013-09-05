@@ -7,9 +7,28 @@ The Sales Order confirms your sales and triggers purchase (**Purchase Request**)
 
 A Sales Order is usually a binding Contract with your Customer.
 
-Once your customer confirms the Quotation you can convert your Quotation into a Sales Order. Alternatively, you can create a Sales Order directly from:
+Once your customer confirms the Quotation you can convert your Quotation into a Sales Order.
+
+
+
+![Sales Order](img/sales-order-f.jpg)
+
+
+
+
+
+Alternatively, you can create a Sales Order directly from:
+
 
 > Selling > Sales Order > New Sales Order
+
+
+
+![Sales Order](img/sales-order.png)
+
+
+
+
 
 Most of the information in your Sales Order is the same as the Quotation. There are a few amongst other things that a Sales Order will ask you to update.
 
