@@ -103,7 +103,12 @@
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
 				"args_method": "website.helpers.transaction.get_order_args",
-				"for_doctype": "Sales Order"
+				"portal": {
+					"doctype": "Sales Order",
+					"conditions": {
+						"docstatus": 1
+					}
+				}
 			},
 			"orders": {
 				"no_cache": true,
@@ -114,7 +119,12 @@
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
 				"args_method": "website.helpers.transaction.get_invoice_args",
-				"for_doctype": "Sales Invoice"
+				"portal": {
+					"doctype": "Sales Invoice",
+					"conditions": {
+						"docstatus": 1
+					}
+				}
 			},
 			"invoices": {
 				"no_cache": true,
@@ -125,7 +135,12 @@
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
 				"args_method": "website.helpers.transaction.get_shipment_args",
-				"for_doctype": "Delivery Note"
+				"portal": {
+					"doctype": "Delivery Note",
+					"conditions": {
+						"docstatus": 1
+					}
+				}
 			},
 			"shipments": {
 				"no_cache": true,
@@ -139,7 +154,9 @@
 				"no_cache": true,
 				"template": "app/website/templates/pages/ticket",
 				"args_method": "support.doctype.support_ticket.support_ticket.get_website_args",
-				"for_doctype": "Support Ticket"
+				"portal": {
+					"doctype": "Support Ticket"
+				}
 			},
 			"tickets": {
 				"template": "app/website/templates/pages/tickets",

@@ -1,7 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
-
 if(!window.erpnext) erpnext = {};
 if(!window.wn) wn = {};
 
@@ -200,7 +199,7 @@ $.extend(wn.cart, {
 	update_cart: function(opts) {
 		if(!full_name) {
 			if(localStorage) {
-				localStorage.setItem("last_visited", window.location.pathname.slice(1));
+				localStorage.setItem("last_visited", window.location.href.split("/").slice(-1)[0]);
 				localStorage.setItem("pending_add_to_cart", opts.item_code);
 			}
 			window.location.href = "login";
@@ -242,4 +241,13 @@ function is_html(txt) {
 		return false;
 	}
 	return true;
+}
+
+function ask_to_login() {
+	if(!full_name) {
+		if(localStorage) {
+			localStorage.setItem("last_visited", window.location.href.split("/").slice(-1)[0]);
+		}
+		window.location.href = "login";
+	}
 }

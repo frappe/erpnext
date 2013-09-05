@@ -11,6 +11,9 @@
     	<li class="active"><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</li>
     </ul>
 	<h3><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</h3>
+	{% if doc.name == "Not Allowed" -%}
+		<script>ask_to_login();</script>
+	{% else %}
 	<hr>
 	<div>
 	<div class="row">
@@ -82,5 +85,6 @@
 		</div>
 	</div>
 	</div>
+	{%- endif %}
 </div>
 {% endblock %}

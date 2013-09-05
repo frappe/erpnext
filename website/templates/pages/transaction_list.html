@@ -1,0 +1,77 @@
+{% extends "app/website/templates/html/page.html" %}
+
+{% block content %}
+<div class="col-md-12">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a></li>
+    	<li><a href="account">My Account</a></li>
+    	<li class="active"><i class="{{ icon }} icon-fixed-width"></i> {{ title }}</li>
+    </ul>
+	<div class="list-group transaction-list">
+		<div class="progress progress-striped active">
+			<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
+		</div>
+	</div>
+	<div class="text-center">
+		<button class="btn btn-default btn-show-more" style="display: none;">More</button></div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+global_number_format = "{{ global_number_format }}";
+currency = "{{ currency }}";
+wn.currency_symbols = {{ currency_symbols }};
+
+$(document).ready(function() {
+	var start = 0;
+	var $list = $(".transaction-list");
+	
+	var $show_more = $(".btn-show-more").on("click", function() {
+		get_transactions(this);
+	});
+	
+	var get_transactions = function(btn) {
+		wn.call({
+			method: "{{ method }}",
+			args: { start: start },
+			btn: btn,
+			callback: function(r) {
+				$list.find(".progress").remove();
+				$show_more.toggle(!(r.message && r.message.length===20));
+				
+				if(!(r.message && r.message.length)) {
+					console.log("empty");
+					if(!$list.html().trim()) {
+						$list.html("<div class='alert alert-warning'>\
+							{{ empty_list_message }}</div>");
+					}
+					return;
+				}
+			
+				start += r.message.length;
+			
+				$.each(r.message, function(i, doc) {
+					render(doc);
+				});
+			}
+		})
+	};
+	
+	var render = function(doc) {
+		doc.grand_total_export = format_currency(doc.grand_total_export, doc.currency);
+		
+		var $row = $(repl('<a href="{{ page }}?name=%(name)s" class="list-group-item">\
+				<div class="row">\
+					<div class="col-md-6">\
+						<div class="row col-md-12">%(name)s</div>\
+						<div class="row col-md-12 text-muted">%(items)s...</div>\
+					</div>\
+					<div class="col-md-3 text-right">%(grand_total_export)s</div>\
+					<div class="col-md-3 text-right text-muted">%(creation)s</div>\
+				</div>\
+			</a>', doc)).appendTo($list);
+	};
+	
+	get_transactions();
+});
+{% endblock %}
