@@ -26,7 +26,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 		
-		cur_frm.cscript.toggle_pos(true);
+		// toggle to pos view if is_pos is 1 in user_defaults
+		if (cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) {
+			this.frm.set_value("is_pos", 1);
+			this.is_pos();
+			cur_frm.cscript.toggle_pos(true);
+		}
+		
+		// if document is POS then change default print format to "POS Invoice"
+		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1) {
+			locals.DocType[cur_frm.doctype].default_print_format = "POS Invoice";
+			cur_frm.setup_print();
+		}
 	},
 	
 	refresh: function(doc, dt, dn) {
@@ -90,16 +101,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						}
 					});
 				});
-			
-			if(cint(sys_defaults.fs_pos_view)===1)
-				cur_frm.cscript.pos_btn();
-				
-			// setTimeout(function() { cur_frm.$pos_btn.click(); }, 1000);
-				
-		} else {
-			// hide shown pos for submitted records
-			if(cur_frm.pos_active) cur_frm.cscript.toggle_pos(false);
 		}
+		
+		// Show POS button only if it enabled from features setup
+		if(cint(sys_defaults.fs_pos_view)===1)
+			cur_frm.cscript.pos_btn();
 	},
 
 	pos_btn: function() {
@@ -118,13 +124,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			cur_frm.cscript.toggle_pos();
 			cur_frm.cscript.pos_btn();
 		}, icon);
-		
 	},
 
-	toggle_pos: function(show) {
-		if(cint(sys_defaults.fs_pos_view)===0) return;
-		if(!(this.frm.doc.is_pos && this.frm.doc.docstatus===0)) return;
-		
+	toggle_pos: function(show) {		
 		if (!this.frm.doc.selling_price_list)
 			msgprint(wn._("Please select Price List"))
 		else {

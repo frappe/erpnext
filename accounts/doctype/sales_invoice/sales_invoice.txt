@@ -2,13 +2,14 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-08-31 10:19:01", 
+  "modified": "2013-09-01 05:26:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
   "autoname": "naming_series:", 
+  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
   "icon": "icon-file-text", 

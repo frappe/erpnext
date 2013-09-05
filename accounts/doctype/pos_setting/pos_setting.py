@@ -7,7 +7,7 @@ from webnotes import msgprint, _
 from webnotes.utils import cint
 
 class DocType:
-	def __init__(self,doc,doclist=[]):
+	def __init__(self,doc,doclist):
 		self.doc, self.doclist = doc,doclist
 
 	def get_series(self):
@@ -20,6 +20,7 @@ class DocType:
 	def validate(self):
 		self.check_for_duplicate()
 		self.validate_expense_account()
+		self.validate_all_link_fields()
 		
 	def check_for_duplicate(self):
 		res = webnotes.conn.sql("""select name, user from `tabPOS Setting` 
@@ -37,3 +38,25 @@ class DocType:
 		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
 				and not self.doc.expense_account:
 			msgprint(_("Expense Account is mandatory"), raise_exception=1)
+
+	def validate_all_link_fields(self):
+		accounts = {"Account": [self.doc.cash_bank_account, self.doc.income_account, self.doc.expense_account], \
+			"Cost Center": [self.doc.cost_center], "Warehouse": [self.doc.warehouse]}
+		
+		for link_dt, dn_list in accounts.items():
+			for link_dn in dn_list:
+				if not webnotes.conn.exists({"doctype": link_dt, "company": self.doc.company, "name": link_dn}):
+					msgprint(link_dn +_(" does not belong to ") + self.doc.company)
+
+	def on_update(self):
+		webnotes.defaults.clear_default("is_pos")
+
+		pos_view_users = webnotes.conn.sql_list("""select user from `tabPOS Setting`""")
+		for user in pos_view_users:
+			if user:
+				webnotes.defaults.set_user_default("is_pos", 1, user)
+			else:
+				webnotes.defaults.set_global_default("is_pos", 1)
+
+	def on_trash(self):
+		self.on_update()

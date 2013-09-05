@@ -49,15 +49,9 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc,cdt,cdn) {
 	}	
 }
 
-// ------------------ Get Print Heading ------------------------------------
-cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:[
-			['Print Heading', 'docstatus', '!=', 2]
-		]	
-	}	
-}
 
+// Expense Account 
+// -----------------------------
 cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 	return {
 		filters: {
@@ -68,6 +62,16 @@ cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 		}
 	}
 }
+
+// ------------------ Get Print Heading ------------------------------------
+cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
+	return{
+		filters:[
+			['Print Heading', 'docstatus', '!=', 2]
+		]	
+	}	
+}
+
 
 cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
 	return{	query:"core.doctype.profile.profile.profile_query"}
