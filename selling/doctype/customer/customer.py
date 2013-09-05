@@ -40,8 +40,7 @@ class DocType(TransactionBase):
 	
 	def validate_values(self):
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
-			msgprint("Series is Mandatory.")
-			raise Exception
+			webnotes.throw("Series is Mandatory.", webnotes.MandatoryError)
 
 	def validate(self):
 		self.validate_values()

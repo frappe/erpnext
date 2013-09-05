@@ -74,5 +74,5 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 
 
 cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
-	return{	query:"controllers.queries.profile_query"}
+	return{	query:"core.doctype.profile.profile.profile_query"}
 }

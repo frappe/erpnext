@@ -1,53 +1,31 @@
-{% extends "app/website/templates/html/page.html" %}
+{% extends "app/website/templates/html/transactions.html" %}
 
-{% set title="My Tickets" %}
+{% block javascript -%}
+{{ super() }}
 
-{% block content %}
-<div class="col-md-12">
-    <ul class="breadcrumb">
-    	<li><a href="index">Home</a></li>
-    	<li><a href="account">My Account</a></li>
-    	<li class="active">My Tickets</li>
-    </ul>
-	<h3><i class="icon-tags icon-fixed-width"></i> My Tickets</h3>
-	<hr>
-	<div id="ticket-list" style="font-size: 13px;">
-		<div class="progress progress-striped active">
-			<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
-		</div>
-	</div>
-</div>
-<script>
-$(document).ready(function() {
-	var order_start = 0;
-		
-	wn.call({
-		method: "support.doctype.support_ticket.support_ticket.get_tickets",
-		args: {
-			start: order_start
-		},
-		callback: function(r) {
-			$("#ticket-list .progress").remove();
-			var $list = $("#ticket-list");
-			
-			if(!(r.message && r.message.length)) {
-				$list.html("<div class='alert'>No Tickets Yet</div>");
-				return;
-			}
-			
-			$.each(r.message, function(i, ticket) {
-				
-				// parent
-				var $ticket = $(repl('<div class="row">\
-					<div class="col-md-2"><span class="label">%(status)s</span></div>\
-					<div class="col-md-3"><a href="ticket?name=%(name)s">%(name)s</a></div>\
-					<div class="col-md-7">%(subject)s</div>\
-				</div>', ticket)).appendTo($list);
-				
-				$("<hr>").appendTo($list);
-			});
-		}
-	})
-})
-</script>
-{% endblock %}
+var status_label = {
+	"Open": "label-success",
+	"Waiting for Customer": "label-danger",
+	"Closed": "label-default"
+}
+
+var render = function(doc) {
+	doc.status = doc.status.trim();
+	doc.label_class = status_label[doc.status] || "label-default";
+	if(doc.status==="Waiting for Customer") doc.status = "To Reply";
+	
+	$(repl('<a href="{{ page }}?name=%(name)s" class="list-group-item">\
+			<div class="row">\
+				<div class="col-md-2" style="margin-bottom: 7px;"><span class="label %(label_class)s">\
+					%(status)s</span></div>\
+				<div class="col-md-8">\
+					<div class="row col-md-12">%(name)s</div>\
+					<div class="row col-md-12 text-muted">%(subject)s</div>\
+				</div>\
+				<div class="col-md-2 pull-right">\
+					<span class="text-muted">%(creation)s</span>\
+				</div>\
+			</div>\
+		</a>', doc)).appendTo($list);
+};
+{%- endblock %}

@@ -32,6 +32,7 @@ erpnext.ActivityFeed = Class.extend({
 	init: function(row, data) {
 		this.scrub_data(data);
 		this.add_date_separator(row, data);
+		if(!data.add_class) data.add_class = "label-default";
 		$(row).append(repl('<div style="margin: 0px">\
 			<span class="avatar avatar-small"><img src="%(imgsrc)s" /></span> \
 			<span %(onclick)s class="label %(add_class)s">%(feed_type)s</span>\
@@ -50,7 +51,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// color for comment
 		if(data.feed_type=='Comment') {
-			data.add_class = "label-important";
+			data.add_class = "label-danger";
 		}
 		
 		if(data.feed_type=='Assignment') {

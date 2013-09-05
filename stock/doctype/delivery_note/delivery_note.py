@@ -39,7 +39,7 @@ class DocType(SellingController):
 		
 	def onload(self):
 		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
-			where delivery_note=%s""", self.doc.name)
+			where docstatus=1 and delivery_note=%s""", self.doc.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty

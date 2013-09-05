@@ -87,7 +87,7 @@ class TransactionBase(StatusUpdater):
 			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
 			
-		if self.meta.get_field("sales_team"):
+		if self.meta.get_field("sales_team") and self.doc.customer:
 			self.set_sales_team_for_customer()
 			
 	def set_sales_team_for_customer(self):

@@ -6,6 +6,7 @@
 from __future__ import unicode_literals
 import webnotes
 from utilities.transaction_base import TransactionBase
+from webnotes.utils import extract_email_id
 
 class DocType(TransactionBase):
 	def __init__(self, d, dl):
@@ -14,8 +15,13 @@ class DocType(TransactionBase):
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Jobs Email Settings',None,'email_id')
 		
-	def on_communication_sent(self, comm):
-		webnotes.conn.set(self.doc, 'status', 'Replied')
+	def on_communication(self, comm):
+		if webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
+			status = "Replied"
+		else:
+			status = "Open"
+			
+		webnotes.conn.set(self.doc, 'status', status)
 
 	def on_trash(self):
 		webnotes.conn.sql("""delete from `tabCommunication` 

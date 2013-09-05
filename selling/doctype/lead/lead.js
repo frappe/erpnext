@@ -14,12 +14,12 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	onload: function() {
 		if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
 			cur_frm.fields_dict.lead_owner.get_query = function(doc,cdt,cdn) {
-				return { query:"controllers.queries.profile_query" } }
+				return { query:"core.doctype.profile.profile.profile_query" } }
 		}
 
 		if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 			cur_frm.fields_dict.contact_by.get_query = function(doc,cdt,cdn) {
-				return { query:"controllers.queries.profile_query" } }
+				return { query:"core.doctype.profile.profile.profile_query" } }
 		}
 
 		if(in_list(user_roles,'System Manager')) {
@@ -51,7 +51,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 		}
 		
 		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"lead": this.frm.doc.name}),
+			list: wn.model.get("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
 			parent: this.frm.fields_dict.communication_html.wrapper,
 			doc: this.frm.doc,
 			recipients: this.frm.doc.email_id

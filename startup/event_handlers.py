@@ -64,6 +64,12 @@ def check_if_expired():
 	webnotes.response['message'] = 'Account Expired'
 	raise webnotes.AuthenticationError
 
+def on_build():
+	from website.helpers.make_web_include_files import make
+	make()
+	
+	from home.page.latest_updates import latest_updates
+	latest_updates.make()
 
 def comment_added(doc):
 	"""add comment to feed"""

@@ -6,7 +6,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.setup_leave_approver_select();
 		this.frm.fields_dict.user_id.get_query = function(doc,cdt,cdn) {
-				return { query:"controllers.queries.profile_query"} }
+				return { query:"core.doctype.profile.profile.profile_query"} }
 		this.frm.fields_dict.reports_to.get_query = function(doc,cdt,cdn) {	
 			return{	query:"controllers.queries.employee_query"}	}
 	},

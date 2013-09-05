@@ -1,9 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
-
-var erpnext = {};
-var wn = {};
+if(!window.erpnext) erpnext = {};
+if(!window.wn) wn = {};
 
 // Add / update a new Lead / Communication
 // subject, sender, description
@@ -18,7 +17,7 @@ erpnext.send_message = function(opts) {
 
 wn.call = function(opts) {
 	if(opts.btn) {
-		$(opts.btn).attr("disabled", "disabled");
+		$(opts.btn).prop("disabled", true);
 	}
 	
 	if(opts.msg) {
@@ -51,7 +50,7 @@ wn.call = function(opts) {
 		dataType: "json",
 		success: function(data) {
 			if(opts.btn) {
-				$(opts.btn).attr("disabled", false);
+				$(opts.btn).prop("disabled", false);
 			}
 			if(data.exc) {
 				if(opts.btn) {
@@ -200,7 +199,7 @@ $.extend(wn.cart, {
 	update_cart: function(opts) {
 		if(!full_name) {
 			if(localStorage) {
-				localStorage.setItem("last_visited", window.location.pathname.slice(1));
+				localStorage.setItem("last_visited", window.location.href.split("/").slice(-1)[0]);
 				localStorage.setItem("pending_add_to_cart", opts.item_code);
 			}
 			window.location.href = "login";
@@ -230,3 +229,25 @@ $.extend(wn.cart, {
 			$(".cart-count").html("( "+ cart_count +" )")
 	}
 });
+
+function remove_script_and_style(txt) {
+	return (!txt || (txt.indexOf("<script>")===-1 && txt.indexOf("<style>")===-1)) ? txt :
+		$("<div></div>").html(txt).find("script,noscript,style,title,meta").remove().end().html();
+}
+
+function is_html(txt) {
+	if(txt.indexOf("<br>")==-1 && txt.indexOf("<p")==-1 
+		&& txt.indexOf("<img")==-1 && txt.indexOf("<div")==-1) {
+		return false;
+	}
+	return true;
+}
+
+function ask_to_login() {
+	if(!full_name) {
+		if(localStorage) {
+			localStorage.setItem("last_visited", window.location.href.split("/").slice(-1)[0]);
+		}
+		window.location.href = "login";
+	}
+}
