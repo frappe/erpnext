@@ -339,7 +339,7 @@ erpnext.POS = Class.extend({
 		}
 
 		// if form is submitted & cancelled then disable all input box & buttons
-		if (cur_frm.doc.docstatus>=1) {
+		if (cur_frm.doc.docstatus>=1 && cint(cur_frm.doc.is_pos)) {
 			me.wrapper.find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
