@@ -355,10 +355,8 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
-		warehouse_account = self.get_warehouse_account()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_accounting_for_stock and item.item_code in stock_items \
-					and warehouse_account.get(item.warehouse):
+			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
 					# if auto inventory accounting enabled and stock item, 
 					# then do stock related gl entries
