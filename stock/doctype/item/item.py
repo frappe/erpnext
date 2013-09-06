@@ -67,9 +67,27 @@ class DocType(DocListController):
 
 	def check_stock_uom_with_bin(self):
 		if not self.doc.fields.get("__islocal"):
-			bin_uom = webnotes.conn.get_value("Bin", {"item_code": self.doc.name}, "stock_uom")
-			if self.doc.stock_uom and bin_uom and cstr(bin_uom) != cstr(self.doc.stock_uom):
-				webnotes.errprint([self.doc.stock_uom, bin_uom])
+			matched=True
+			ref_uom = webnotes.conn.get_value("Stock Ledger Entry", 
+				{"item_code": self.doc.name, "is_cancelled": "No"}, "stock_uom")
+			
+			if ref_uom:
+				if cstr(ref_uom) != cstr(self.doc.stock_uom):
+					matched = False
+			else:
+				bin_list = webnotes.conn.sql("select * from tabBin where item_code=%s", 
+					self.doc.item_code, as_dict=1)
+				for bin in bin_list:
+					if bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
+						or bin.planned_qty > 0 and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
+							matched = False
+							break
+						
+				if matched and bin_list:
+					webnotes.conn.sql("""update tabBin set stock_uom=%s where item_code=%s""",
+						(self.doc.stock_uom, self.doc.name))
+				
+			if not matched:
 				webnotes.throw(_("Default Unit of Measure can not be changed directly \
 					because you have already made some transaction(s) with another UOM.\n \
 					To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
