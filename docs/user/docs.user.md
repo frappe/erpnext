@@ -53,7 +53,7 @@ Contents
 	1. [POS Setting](docs.user.setup.pos_setting.html)
 	1. [Third Party Backups](docs.user.setup.third_party_backups.html)	
 1. [Selling](docs.user.selling.html)
-	1. Selling Setup
+	1. [Selling Setup](docs.user.selling.selling_setup.html)
 		1. [Customer Group](docs.user.selling.customer_groups.html)
 		1. [Territory](docs.user.selling.territory.html)
 		1. [Sales Partner](docs.user.selling.sales_partner.html)

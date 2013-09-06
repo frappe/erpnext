@@ -55,6 +55,7 @@ Select your “Bank” Account and enter the dates of your statement. Here you w
 
 By doing this you will be able to sync your bank statements and entries into the system.
 
+
 ---
 
 ## Managing Outstanding Payments

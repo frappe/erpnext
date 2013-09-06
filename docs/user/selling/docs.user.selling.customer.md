@@ -11,6 +11,12 @@ You can either directly create your Customers via
 or upload it via the Data Import Tool.
 
 
+
+![Customer Master](img/customer.png)
+
+
+
+
 > Note: Customers are separate from Contacts and Addresses. A Customer can have multiple Contacts and Addresses.
 
 ### Contacts and Addresses
@@ -49,6 +55,14 @@ You can group your Customers so that you can get trend analysis for each group. 
 
 > Tip: If you think all this is too much effort, you can leave it at “Default Customer Group”. But all this effort, will pay off when you start getting reports.
 ￼
+An example of a sample report is given below:
+
+
+![Sales Analytics](img/sales-analytics-customer.png)
+
+
+
+
 ### Territory
 
 If your business operates in multiple Territories (could be countries, states or cities) it is usually a great idea to build your structure in the system. Once you group your Customers by Territories, you can set annual targets for each Item Group and get reports that will show your actual performance in the territory v/s what you had planned.
