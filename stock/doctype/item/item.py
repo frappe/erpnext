@@ -62,13 +62,12 @@ class DocType(DocListController):
 
 	def check_stock_uom_with_bin(self):
 		if not self.doc.fields.get("__islocal"):
-			bin = webnotes.conn.sql("select stock_uom from `tabBin` where item_code = %s", 
-				self.doc.name)
-			if self.doc.stock_uom and bin and cstr(bin[0][0]) \
-					and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
-				msgprint(_("Please Update Stock UOM with the help of Stock UOM Replace Utility."), 
-					raise_exception=1)
-	
+			bin_uom = webnotes.conn.get_value("Bin", {"item_code": self.doc.name}, "stock_uom")
+			if self.doc.stock_uom and bin_uom and cstr(bin_uom) != cstr(self.doc.stock_uom):
+				webnotes.throw(_("Default Unit of Measure can not be changed directly \
+					because you have already made some transaction(s) with another UOM. \
+					To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
+				
 	def validate_conversion_factor(self):
 		check_list = []
 		for d in getlist(self.doclist,'uom_conversion_details'):
