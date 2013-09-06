@@ -30,8 +30,8 @@ class DocType(DocListController):
 		
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
-		self.validate_conversion_factor()
 		self.add_default_uom_in_conversion_factor_table()
+		self.validate_conversion_factor()
 		self.valiadte_item_type()
 		self.check_for_active_boms()
 		self.validate_price_lists()
@@ -59,15 +59,21 @@ class DocType(DocListController):
 			ch = addchild(self.doc, 'uom_conversion_details', 'UOM Conversion Detail', self.doclist)
 			ch.uom = self.doc.stock_uom
 			ch.conversion_factor = 1
+			
+		for d in self.doclist.get({"parentfield": "uom_conversion_details"}):
+			if d.conversion_factor == 1 and d.uom != self.doc.stock_uom:
+				self.doclist.remove(d)
+				
 
 	def check_stock_uom_with_bin(self):
 		if not self.doc.fields.get("__islocal"):
 			bin_uom = webnotes.conn.get_value("Bin", {"item_code": self.doc.name}, "stock_uom")
 			if self.doc.stock_uom and bin_uom and cstr(bin_uom) != cstr(self.doc.stock_uom):
+				webnotes.errprint([self.doc.stock_uom, bin_uom])
 				webnotes.throw(_("Default Unit of Measure can not be changed directly \
-					because you have already made some transaction(s) with another UOM. \
+					because you have already made some transaction(s) with another UOM.\n \
 					To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
-				
+	
 	def validate_conversion_factor(self):
 		check_list = []
 		for d in getlist(self.doclist,'uom_conversion_details'):
