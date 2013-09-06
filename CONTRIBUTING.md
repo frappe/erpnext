@@ -20,7 +20,7 @@ We only accept issues that are bug reports or feature requests. Bugs must be iso
 	1. Screenshots (annotated with what should change)
 	1. Screenshots from other products if you want us to implement features present in other products.
 1. Basically, the more you help us, the faster your request is likely to be completed.
-1. A one line future request like **Implement Capacity Planning** will be closed.
+1. A one line feature request like **Implement Capacity Planning** will be closed.
 
 ## Pull Requests
 
