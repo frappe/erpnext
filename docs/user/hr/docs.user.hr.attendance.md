@@ -1,0 +1,6 @@
+---
+{
+	"_label": "Attendance"
+}
+---
+

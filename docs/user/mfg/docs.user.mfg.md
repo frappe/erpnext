@@ -1,6 +1,11 @@
 ---
 {
-	"_label": "Manufacturing"
+	"_label": "Manufacturing",
+	"_toc": [
+		"docs.user.mfg.bom",
+		"docs.user.mfg.planning",
+		"docs.user.mfg.production_order"
+	]
 }
 ---
 The Manufacturing module in ERPNext helps you to maintain multi-level Bill of Materials (BOMs) for your Items. It helps you in Product Costing, planing your production via Production Plan, creating Production Orders for your manufacturing shop floor,s and planing your inventory by getting your material requirement via BOMs (also called Material Requirements Planning MRP).

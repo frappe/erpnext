@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Leave and Attendance"
+	"_label": "Leave"
 }
 ---
 

@@ -8,7 +8,7 @@
 		"docs.user.selling",
 		"docs.user.buying",
 		"docs.user.stock",
-		"docs.user.accounting",
+		"docs.user.accounts",
 		"docs.user.hr",
 		"docs.user.mfg",
 		"docs.user.support",
@@ -61,6 +61,7 @@ Contents
 		1. [Campaign](docs.user.selling.campaign.html)
 		1. [Terms and Conditions](docs.user.selling.terms.html)
 		1. [Price Lists](docs.user.setup.price_lists.html)
+		1. [Discount](docs.user.selling.discount.html)
 	1. [Customers](docs.user.selling.customer.html)
 	1. [Lead](docs.user.selling.lead.html)
 	1. [Opportunity](docs.user.selling.opportunity.html)
@@ -87,7 +88,7 @@ Contents
 	1. [Sales Return](docs.user.stock.sales_return.html)
 	1. [Purchase Return](docs.user.stock.purchase_return.html)
 	1. [Projected Quantity](docs.user.stock.projected_quantity.html)
-1. [Accounting](docs.user.accounting.html)
+1. [Accounts](docs.user.accounts.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)
 	1. [Sales Invoice](docs.user.accounts.sales_invoice.html)
@@ -98,7 +99,7 @@ Contents
 	1. [Period Closing](docs.user.accounts.closing.html)
 	1. [Accounting Reports](docs.user.accounts.reports.html)
 	1. [Upload Journal Entries in Bulk](docs.user.accounts.voucher_import.html)
-	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)
+	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)	
 1. [Human Resources (HR)](docs.user.hr.html)
 	1. [HR Setup](docs.user.hr.setup.html)
 	1. [Employee](docs.user.hr.employee.html)
@@ -135,6 +136,6 @@ Contents
 1. [Customize](docs.user.customize.html)
 	1. [Custom Fields](docs.user.customize.custom_field.html)
 	1. [Customize Form](docs.user.customize.custom_form.html)
-	1. [Hide / Unhide modules](docs.user.customize.module.html)
+	1. [Hide / Unhide modules](docs.user.customize.hide_unhide.html)
 	1. [Print Formats](docs.user.customize.print_formats.html)
 	1. [Custom Scripts](docs.user.customize.custom_scripts.html)
