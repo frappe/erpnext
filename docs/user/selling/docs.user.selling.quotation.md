@@ -3,11 +3,19 @@
 	"_label": "Quotation"
 }
 ---
-During a sale, the customer may want you to give him a written note about the products or services you are planning to offer, along with the prices and other terms of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma Invoice”or a Quotation.
+During a sale, the customer may request for a written note about the products or services you are planning to offer, along with the prices and other terms of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma Invoice”or a Quotation.
 
 To create a new Quotation go to:
 
 > Selling > Quotation > New Quotation
+
+
+
+
+![Quotation](img/quotation.png)
+
+
+
 
 A Quotation contains details about:
 
@@ -28,7 +36,7 @@ A Quotation contains details about:
 The rates you quote may depend on two things.
 
 - The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List.
-- The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in reports in your standard Currency.
+- The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in standard Currency.
 
 ### Taxes
 
@@ -38,7 +46,8 @@ You can add taxes in the same manner as the Sales Taxes and Charges Master.
 
 ### Terms and Conditions
 
-Each Quotation must ideally contain a set of terms of your contract. It is usually a good idea to make templates of your Terms and Conditions, so that you have a standard set of terms. You can do this by going to:
+Each Quotation must ideally contain a set of terms, of your contract. It is usually a good idea to make templates of your Terms and Conditions, so that you have a standard set of terms. 
+You can do this by going to:
 
 > Selling > Terms and Conditions  (right sidebar)
 

@@ -6,15 +6,22 @@
 A Supplier Quotation is a formal statement of promise by potential supplier to supply the goods or services required by a buyer, at specified prices, and within a specified period. A quotation may also contain terms of sale and payment, and warranties. Acceptance of quotation by the buyer constitutes an agreement binding on both parties.
 
 
-You can make a Supplier Quotation directly from:
+You can make a supplier quotation from a Material Request
+
+
+
+![Supplier Quotation](img/supplier-quotation-f.jpg)
+
+
+
+You can also make a Supplier Quotation directly from:
 
 > Buying > Supplier Quotation > New Supplier Quotation
-
-or directly from the Purchase Request.
 
 
 
 ![Supplier Quotation](img/supplier-quotation.png)
+
 
 
 

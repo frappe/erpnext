@@ -5,11 +5,17 @@
 ---
 A Purchase Order is analogous to a Sales Order. It is usually a binding contract with your Supplier that you promise to buy a set of Items under the given conditions.
 
-In ERPNext, you can make a Purchase Order by going to:
+
+A Purchase Order can  be automatically created from a Material Request or Supplier Quotation.
+
+
+![Purchase Order](img/purchase-order-f.jpg)
+
+
+In ERPNext, you can also make a Purchase Order directly by going to:
 
 > Buying > Purchase Order > New Purchase Order
 ￼
-A Purchase Order can also be automatically created from a Purchase Request or  Supplier Quotation.
 
 
 ![Purchase Order](img/purchase-order.png)
