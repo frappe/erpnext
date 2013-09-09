@@ -14,7 +14,7 @@ class DocType:
 	def on_update(self):
 		"if profile is set, then update all older blogs"
 		
-		from website.helpers.blog import clear_blog_cache
+		from website.doctype.blog_post.blog_post import clear_blog_cache
 		clear_blog_cache()
 		
 		if self.doc.profile:

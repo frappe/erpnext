@@ -65,7 +65,7 @@ def check_if_expired():
 	raise webnotes.AuthenticationError
 
 def on_build():
-	from website.helpers.make_web_include_files import make
+	from website.doctype.website_settings.make_web_include_files import make
 	make()
 	
 	from home.page.latest_updates import latest_updates

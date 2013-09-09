@@ -22,7 +22,7 @@ $(document).ready(function() {
 			comment_by_fullname: $("[name='comment_by_fullname']").val(),
 			comment_by: $("[name='comment_by']").val(),
 			comment: $("[name='comment']").val(),
-			cmd: "website.helpers.blog.add_comment",
+			cmd: "website.doctype.blog_post.blog_post.add_comment",
 			comment_doctype: "Blog Post",
 			comment_docname: "{{ name }}",
 			page_name: "{{ page_name }}",

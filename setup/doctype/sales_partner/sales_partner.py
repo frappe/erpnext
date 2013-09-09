@@ -43,3 +43,9 @@ class DocType:
 				"partner_address": filter_strip_join(address_rows, "\n<br>"),
 				"phone": filter_strip_join(cstr(address.phone).split(","), "\n<br>")
 			})
+
+def get_partner_args():
+	return {
+		"partners": webnotes.conn.sql("""select * from `tabSales Partner`
+			where show_in_website=1 order by name asc""", as_dict=True),
+	}

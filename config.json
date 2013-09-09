@@ -90,7 +90,7 @@
 			},
 			"blog": {
 				"template": "app/website/templates/pages/blog",
-				"args_method": "website.helpers.blog.get_blog_template_args"
+				"args_method": "website.doctype.blog_post.blog_post.get_blog_template_args"
 			},
 			"contact": {
 				"template": "app/website/templates/pages/contact",
@@ -185,7 +185,7 @@
 			},
 			"partners": {
 				"template": "app/website/templates/pages/partners",
-				"args_method": "website.helpers.partner.get_partner_args"
+				"args_method": "setup.doctype.sales_partner.sales_partner.get_partner_args"
 			}
 		},
 		"generators": {

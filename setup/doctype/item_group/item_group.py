@@ -60,6 +60,6 @@ class DocType(DocTypeNestedSet):
 		self.doc.title = self.doc.name
 
 		if self.doc.slideshow:
-			from website.helpers.slideshow import get_slideshow
+			from website.doctype.website_slideshow.website_slideshow import get_slideshow
 			get_slideshow(self)
 		

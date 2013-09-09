@@ -94,5 +94,5 @@ class DocType:
 	
 	def on_update(self):
 		"""rebuild pages"""
-		from website.helpers.make_web_include_files import make
+		from website.doctype.website_settings.make_web_include_files import make
 		make()

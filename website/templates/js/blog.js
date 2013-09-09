@@ -28,7 +28,7 @@ var blog = {
 			method: "GET",
 			url: "server.py",
 			data: {
-				cmd: "website.helpers.blog.get_blog_list",
+				cmd: "website.doctype.blog_post.blog_post.get_blog_list",
 				start: blog.start,
 				by: get_url_arg("by"),
 				category: get_url_arg("category")

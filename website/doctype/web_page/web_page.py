@@ -29,7 +29,7 @@ class DocType():
 			
 	def prepare_template_args(self):
 		if self.doc.slideshow:
-			from website.helpers.slideshow import get_slideshow
+			from website.doctype.website_slideshow.website_slideshow import get_slideshow
 			get_slideshow(self)
 			
 		self.doc.meta_description = self.doc.description
