@@ -44,7 +44,7 @@ class DocType(DocTypeNestedSet):
 			webnotes.msgprint("An item exists with same name (%s), please change the \
 				item group name or rename the item" % self.doc.name, raise_exception=1)
 	
-	def prepare_template_args(self):
+	def get_context(self):
 		from selling.utils.product import get_product_list_for_group, \
 			get_parent_item_groups, get_group_item_count
 

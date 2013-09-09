@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import get_base_path
-import os
+import os, shutil
 
 def execute():
 	# remove pyc files
@@ -13,5 +13,5 @@ def execute():
 		print exists
 		os.remove(utils_pyc)
 	
-	# TODO remove website folder
+	shutil.rmtree(os.path.join(get_base_path(), "app", "website"))
 	

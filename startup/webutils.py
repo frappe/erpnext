@@ -7,15 +7,6 @@ from webnotes.utils import cint, cstr, encode
 def get_templates_path():
 	return os.path.join(os.path.dirname(conf.__file__), "app", "website", "templates")
 
-def get_home_page():
-	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
-	if doc_name:
-		page_name = webnotes.conn.get_value('Web Page', doc_name, 'page_name')
-	else:
-		page_name = 'login'
-
-	return page_name
-
 def update_template_args(page_name, args):
 	
 	from webnotes.utils import get_request_site_address

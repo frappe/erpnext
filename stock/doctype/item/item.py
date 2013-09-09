@@ -258,7 +258,7 @@ class DocType(DocListController):
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
 
-	def prepare_template_args(self):
+	def get_context(self):
 		from selling.utils.product import get_parent_item_groups
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.title = self.doc.item_name
