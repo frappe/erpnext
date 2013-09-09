@@ -89,7 +89,7 @@
 			wn.call({
 				btn: $(this),
 				type: "POST",
-				method: "website.helpers.cart.save_address",
+				method: "selling.utils.cart.save_address",
 				args: { fields: fields, address_fieldname: get_url_arg("address_fieldname") },
 				callback: function(r) {
 					if(r.exc) {

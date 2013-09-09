@@ -26,7 +26,7 @@
 	
 	var fetch_addresses = function() {
 		wn.call({
-			method: "website.helpers.cart.get_addresses",
+			method: "selling.utils.cart.get_addresses",
 			callback: function(r) {
 				$("#address-list .progress").remove();
 				var $list = $("#address-list");

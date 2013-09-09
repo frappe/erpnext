@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	wn.call({
 		type: "POST",
-		method: "website.helpers.product.get_product_info",
+		method: "selling.utils.product.get_product_info",
 		args: {
 			item_code: "{{ name }}"
 		},

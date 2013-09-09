@@ -7,7 +7,7 @@ $(document).ready(function() {
 	wn.cart.bind_events();
 	return wn.call({
 		type: "POST",
-		method: "website.helpers.cart.get_cart_quotation",
+		method: "selling.utils.cart.get_cart_quotation",
 		callback: function(r) {
 			console.log(r);
 			$("#cart-container").removeClass("hide");
@@ -194,7 +194,7 @@ $.extend(wn.cart, {
 		return wn.call({
 			btn: btn,
 			type: "POST",
-			method: "website.helpers.cart.apply_shipping_rule",
+			method: "selling.utils.cart.apply_shipping_rule",
 			args: { shipping_rule: rule },
 			callback: function(r) {
 				if(!r.exc) {
@@ -242,7 +242,7 @@ $.extend(wn.cart, {
 				
 				return wn.call({
 					type: "POST",
-					method: "website.helpers.cart.update_cart_address",
+					method: "selling.utils.cart.update_cart_address",
 					args: {
 						address_fieldname: $address_wrapper.attr("data-fieldname"),
 						address_name: $(this).attr("data-address-name")
@@ -273,7 +273,7 @@ $.extend(wn.cart, {
 	place_order: function() {
 		return wn.call({
 			type: "POST",
-			method: "website.helpers.cart.place_order",
+			method: "selling.utils.cart.place_order",
 			callback: function(r) {
 				if(r.exc) {
 					var msg = "";

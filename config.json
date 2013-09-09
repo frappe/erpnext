@@ -102,7 +102,7 @@
 			"order": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
-				"args_method": "website.helpers.transaction.get_order_args",
+				"args_method": "utilities.website_transactions.get_order_args",
 				"portal": {
 					"doctype": "Sales Order",
 					"conditions": {
@@ -113,12 +113,12 @@
 			"orders": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sales_transactions",
-				"args_method": "website.helpers.transaction.order_list_args"
+				"args_method": "utilities.website_transactions.order_list_args"
 			},
 			"invoice": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
-				"args_method": "website.helpers.transaction.get_invoice_args",
+				"args_method": "utilities.website_transactions.get_invoice_args",
 				"portal": {
 					"doctype": "Sales Invoice",
 					"conditions": {
@@ -129,12 +129,12 @@
 			"invoices": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sales_transactions",
-				"args_method": "website.helpers.transaction.invoice_list_args"
+				"args_method": "utilities.website_transactions.invoice_list_args"
 			},
 			"shipment": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sale",
-				"args_method": "website.helpers.transaction.get_shipment_args",
+				"args_method": "utilities.website_transactions.get_shipment_args",
 				"portal": {
 					"doctype": "Delivery Note",
 					"conditions": {
@@ -145,7 +145,7 @@
 			"shipments": {
 				"no_cache": true,
 				"template": "app/website/templates/pages/sales_transactions",
-				"args_method": "website.helpers.transaction.shipment_list_args"
+				"args_method": "utilities.website_transactions.shipment_list_args"
 			},
 			"product_search": {
 				"template": "app/website/templates/pages/product_search"
@@ -160,7 +160,7 @@
 			},
 			"tickets": {
 				"template": "app/website/templates/pages/tickets",
-				"args_method": "website.helpers.transaction.ticket_list_args"
+				"args_method": "utilities.website_transactions.ticket_list_args"
 			},
 			"address": {
 				"no_cache": true,

@@ -40,7 +40,7 @@ def order_list_args():
 	args = get_common_args()
 	args.update({
 		"title": "My Orders",
-		"method": "website.helpers.transaction.get_orders",
+		"method": "utilities.website_transactions.get_orders",
 		"icon": "icon-list",
 		"empty_list_message": "No Orders Yet",
 		"page": "order",
@@ -55,7 +55,7 @@ def invoice_list_args():
 	args = get_common_args()
 	args.update({
 		"title": "Invoices",
-		"method": "website.helpers.transaction.get_invoices",
+		"method": "utilities.website_transactions.get_invoices",
 		"icon": "icon-file-text",
 		"empty_list_message": "No Invoices Found",
 		"page": "invoice"
@@ -70,7 +70,7 @@ def shipment_list_args():
 	args = get_common_args()
 	args.update({
 		"title": "Shipments",
-		"method": "website.helpers.transaction.get_shipments",
+		"method": "utilities.website_transactions.get_shipments",
 		"icon": "icon-truck",
 		"empty_list_message": "No Shipments Found",
 		"page": "shipment"
@@ -91,7 +91,7 @@ def get_tickets(start=0):
 def ticket_list_args():
 	return {
 		"title": "My Tickets",
-		"method": "website.helpers.transaction.get_tickets",
+		"method": "utilities.website_transactions.get_tickets",
 		"icon": "icon-ticket",
 		"empty_list_message": "No Tickets Raised",
 		"page": "ticket"

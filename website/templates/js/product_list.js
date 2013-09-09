@@ -15,7 +15,7 @@ window.get_product_list = function() {
 		url: "server.py",
 		dataType: "json",
 		data: {
-			cmd: "website.helpers.product.get_product_list",
+			cmd: "selling.utils.product.get_product_list",
 			start: window.start,
 			search: window.search,
 			product_group: window.product_group

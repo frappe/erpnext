@@ -31,7 +31,7 @@ def on_login_post_session(login_manager):
 		webnotes.conn.commit()
 		
 	if webnotes.conn.get_value("Profile", webnotes.session.user, "user_type") == "Website User":
-		from website.helpers.cart import set_cart_count
+		from selling.utils.cart import set_cart_count
 		set_cart_count()
 		
 def on_logout(login_manager):

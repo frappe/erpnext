@@ -14,6 +14,7 @@ $(document).ready(function() {
 			.parent().append("<div class='alert alert-warning'>Comments are closed.</div>")
 	}
 	$(".add-comment").click(function() {
+		$(this).toggle(false);
 		$("#comment-form").toggle();
 		$("#comment-form input, #comment-form, textarea").val("");
 	})

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, cint, fmt_money
 from webnotes.webutils import build_html, delete_page_cache
-from website.helpers.cart import _get_cart_quotation
+from selling.utils.cart import _get_cart_quotation
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
