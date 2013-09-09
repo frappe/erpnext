@@ -1,1 +1,0 @@
-Profile of blog writer in "Blog" section.
