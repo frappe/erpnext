@@ -1,5 +1,6 @@
 {
 	"app_name": "ERPNext",
+	"base_template": "app/portal/templates/base.html",
 	"modules": {
 		"Selling": {
 			"link": "selling-home",
