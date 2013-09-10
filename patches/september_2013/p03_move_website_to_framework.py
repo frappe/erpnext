@@ -10,7 +10,6 @@ def execute():
 	# remove pyc files
 	utils_pyc = os.path.join(get_base_path(), "app", "selling", "utils.pyc")
 	if os.path.exists(utils_pyc):
-		print exists
 		os.remove(utils_pyc)
 	
 	shutil.rmtree(os.path.join(get_base_path(), "app", "website"))

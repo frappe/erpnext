@@ -1,4 +1,4 @@
-{% extends "app/website/templates/html/page.html" %}
+{% extends base_template %}
 
 {% block content -%}
 <div class="col-md-12">
@@ -19,6 +19,7 @@
 {%- endblock %}
 
 {% block javascript -%}
+<script>
 $(document).ready(function() {
 	window.start = 0;
 	window.$list = $(".transaction-list");
@@ -53,7 +54,7 @@ var get_transactions = function(btn) {
 		}
 	})
 };
+</script>
 
-// var render = function(doc) { };
-
+<!-- // var render = function(doc) { }; -->
 {% endblock %}

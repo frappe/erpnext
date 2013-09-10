@@ -73,17 +73,3 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
-
-def get_website_args():
-	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
-	if bean.doc.raised_by != webnotes.session.user:
-		return {
-			"doc": {"name": "Not Allowed"}
-		}
-	else:
-		return {
-			"doc": bean.doc,
-			"doclist": bean.doclist,
-			"webnotes": webnotes,
-			"utils": webnotes.utils
-		}
