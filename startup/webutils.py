@@ -3,6 +3,11 @@
 
 import webnotes, conf, os
 from webnotes.utils import cint, cstr, encode
+
+def get_website_settings():
+	return {
+		"shopping_cart_enabled": cint(webnotes.conn.get_default("shopping_cart_enabled"))
+	}	
 	
 @webnotes.whitelist()
 def update_profile(fullname, password=None, company_name=None, mobile_no=None, phone=None):
