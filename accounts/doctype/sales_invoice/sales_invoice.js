@@ -62,8 +62,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
-			if(cint(doc.update_stock)!=1)
-				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+			if(cint(doc.update_stock)!=1) {
+				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
+				var from_delivery_note = false;
+				from_delivery_note = cur_frm.get_doclist({parentfield: "entries"})
+					.some(function(item) { 
+						return item.delivery_note ? true : false; 
+					});
+				
+				if(!from_delivery_note)
+					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+			}
+				
 
 			if(doc.outstanding_amount!=0)
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);

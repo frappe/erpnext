@@ -2,11 +2,12 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:21:56", 
+  "modified": "2013-09-10 14:59:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "icon": "icon-file-text", 
