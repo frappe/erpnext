@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-09-02 16:26:54", 
+  "modified": "2013-09-10 10:53:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -166,7 +166,8 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication"
+  "options": "Communication", 
+  "print_hide": 1
  }, 
  {
   "cancel": 0, 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-09-02 16:27:33", 
+  "modified": "2013-09-10 10:52:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -168,6 +168,7 @@
   "label": "Communication History", 
   "oldfieldtype": "Section Break", 
   "options": "icon-comments", 
+  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -178,6 +179,7 @@
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
   "oldfieldtype": "Table", 
+  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -448,7 +450,8 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication"
+  "options": "Communication", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm", 
