@@ -7,15 +7,6 @@ from webnotes.utils import cint, cstr, encode
 def get_templates_path():
 	return os.path.join(os.path.dirname(conf.__file__), "app", "website", "templates")
 
-def get_home_page():
-	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
-	if doc_name:
-		page_name = webnotes.conn.get_value('Web Page', doc_name, 'page_name')
-	else:
-		page_name = 'login'
-
-	return page_name
-
 def update_template_args(page_name, args):
 	
 	from webnotes.utils import get_request_site_address
@@ -71,14 +62,14 @@ def update_template_args(page_name, args):
 	
 @webnotes.whitelist()
 def update_profile(fullname, password=None, company_name=None, mobile_no=None, phone=None):
-	from website.helpers.cart import update_party
+	from selling.utils.cart import update_party
 	update_party(fullname, company_name, mobile_no, phone)
 	
 	from core.doctype.profile import profile
 	return profile.update_profile(fullname, password)
 	
 def get_profile_args():
-	from website.helpers.cart import get_lead_or_customer
+	from selling.utils.cart import get_lead_or_customer
 	party = get_lead_or_customer()
 	if party.doctype == "Lead":
 		mobile_no = party.mobile_no

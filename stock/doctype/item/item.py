@@ -228,7 +228,7 @@ class DocType(DocListController):
 
 	def update_website(self):
 		def _invalidate_cache():
-			from website.helpers.product import invalidate_cache_for
+			from selling.utils.product import invalidate_cache_for
 			
 			invalidate_cache_for(self.doc.item_group)
 
@@ -258,13 +258,13 @@ class DocType(DocListController):
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
 
-	def prepare_template_args(self):
-		from website.helpers.product import get_parent_item_groups
+	def get_context(self):
+		from selling.utils.product import get_parent_item_groups
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.title = self.doc.item_name
 
 		if self.doc.slideshow:
-			from website.helpers.slideshow import get_slideshow
+			from website.doctype.website_slideshow.website_slideshow import get_slideshow
 			get_slideshow(self)								
 
 	def get_file_details(self, arg = ''):

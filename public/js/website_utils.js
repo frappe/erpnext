@@ -9,7 +9,7 @@ if(!window.wn) wn = {};
 erpnext.send_message = function(opts) {
 	return wn.call({
 		type: "POST",
-		method: "website.helpers.contact.send_message",
+		method: "selling.utils.contact.send_message",
 		args: opts,
 		callback: opts.callback
 	});
@@ -206,7 +206,7 @@ $.extend(wn.cart, {
 		} else {
 			return wn.call({
 				type: "POST",
-				method: "website.helpers.cart.update_cart",
+				method: "selling.utils.cart.update_cart",
 				args: {
 					item_code: opts.item_code,
 					qty: opts.qty,

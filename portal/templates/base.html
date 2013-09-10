@@ -1,0 +1,21 @@
+{% extends "lib/website/templates/base.html" %}
+
+{% block toolbar %}
+<div class="pull-right" style="margin:4px;" id="user-tools">
+	{% if shopping_cart_enabled -%}
+	<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> 
+		<span class="cart-count"></span></a> |
+	{%- endif %}
+	<a id="login-link" href="login">Login</a>
+</div>
+<div class="pull-right hide" style="margin:4px;" id="user-tools-post-login">
+	<a href="account" title="My Account" id="user-full-name"></a> |
+	{% if shopping_cart_enabled -%}
+	<a href="cart" title="Shopping Cart"><i class="icon-shopping-cart"></i> 
+		<span class="cart-count"></span></a> |
+	{%- endif %}
+	<a href="server.py?cmd=web_logout" title="Sign Out"><i class="icon-signout"></i></a>
+</div>
+{% endblock %}
+
+{% block footer %}{% include "app/portal/templates/includes/footer.html" %}{% endblock %}

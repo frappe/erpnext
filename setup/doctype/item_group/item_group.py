@@ -18,7 +18,7 @@ class DocType(DocTypeNestedSet):
 		
 		self.validate_name_with_item()
 		
-		from website.helpers.product import invalidate_cache_for
+		from selling.utils.product import invalidate_cache_for
 		
 		if self.doc.show_in_website:
 			from webnotes.webutils import update_page_name
@@ -44,8 +44,8 @@ class DocType(DocTypeNestedSet):
 			webnotes.msgprint("An item exists with same name (%s), please change the \
 				item group name or rename the item" % self.doc.name, raise_exception=1)
 	
-	def prepare_template_args(self):
-		from website.helpers.product import get_product_list_for_group, \
+	def get_context(self):
+		from selling.utils.product import get_product_list_for_group, \
 			get_parent_item_groups, get_group_item_count
 
 		self.doc.sub_groups = webnotes.conn.sql("""select name, page_name
@@ -60,6 +60,6 @@ class DocType(DocTypeNestedSet):
 		self.doc.title = self.doc.name
 
 		if self.doc.slideshow:
-			from website.helpers.slideshow import get_slideshow
+			from website.doctype.website_slideshow.website_slideshow import get_slideshow
 			get_slideshow(self)
 		
