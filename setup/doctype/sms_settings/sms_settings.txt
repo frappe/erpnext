@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:55:50", 
+  "modified": "2013-09-10 17:20:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -35,7 +35,7 @@
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "System Manager", 
   "submit": 0, 
   "write": 1
@@ -78,7 +78,6 @@
   "doctype": "DocField", 
   "fieldname": "static_parameters", 
   "fieldtype": "Column Break", 
-  "label": "Static Parameters", 
   "width": "50%"
  }, 
  {
@@ -86,7 +85,7 @@
   "doctype": "DocField", 
   "fieldname": "static_parameter_details", 
   "fieldtype": "Table", 
-  "label": "SMS Parameters", 
+  "label": "Static Parameters", 
   "options": "SMS Parameter"
  }, 
  {
