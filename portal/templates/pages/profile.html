@@ -9,7 +9,7 @@
     	<li><a href="account">My Account</a></li>
     	<li class="active"><i class="icon-user icon-fixed-width"></i> My Profile</li>
     </ul>
-	<div class="alert" id="message" style="display: none;"></div>
+	<div class="alert alert-warning" id="message" style="display: none;"></div>
 	<form>
 		<fieldset>
 			<label>Full Name</label>
@@ -39,7 +39,7 @@ $(document).ready(function() {
 	$("#fullname").val(getCookie("full_name") || "");
 	$("#update_profile").click(function() {
 		wn.call({
-			method: "startup.webutils.update_profile",
+			method: "portal.templates.pages.profile.update_profile",
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),

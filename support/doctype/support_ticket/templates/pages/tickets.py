@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, formatdate
 
+no_cache = True
+
 def get_context():
 	return {
 		"title": "My Tickets",

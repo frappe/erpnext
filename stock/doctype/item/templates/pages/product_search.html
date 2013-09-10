@@ -3,7 +3,7 @@
 {% set title="Product Search" %}
 
 {% block javascript %}
-{% include "app/website/templates/js/product_list.js" %}
+<script>{% include "app/stock/doctype/item/templates/includes/product_list.js" %}</script>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@ $(document).ready(function() {
 });
 </script>
 
-{% include 'app/website/templates/html/product_search_box.html' %}
+{% include "app/stock/doctype/item/templates/includes/product_search_box.html" %}
 <div class="col-md-12">
 	<h3 class="search-results">Search Results</h3>
 	<div id="search-list" class="row">

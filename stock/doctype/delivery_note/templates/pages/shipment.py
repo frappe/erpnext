@@ -4,11 +4,13 @@
 from __future__ import unicode_literals
 import webnotes
 
+no_cache = True
+
 def get_context():
 	from portal.website_transactions import get_transaction_context
-	context = get_transaction_context("Sales Order", webnotes.form_dict.name)
+	context = get_transaction_context("Delivery Note", webnotes.form_dict.name)
 	context.update({
-		"parent_link": "orders",
-		"parent_title": "My Orders"
+		"parent_link": "shipments",
+		"parent_title": "Shipments"
 	})
 	return context

@@ -24,6 +24,9 @@ class DocType(TransactionBase):
 		if signature:
 			content += '<p>' + signature + '</p>'
 		return content
+		
+	def get_portal_page(self):
+		return "ticket"
 	
 	def validate(self):
 		self.update_status()

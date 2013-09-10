@@ -4,6 +4,8 @@
 from __future__ import unicode_literals
 import webnotes
 
+no_cache = True
+
 def get_context():
 	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
 	if bean.doc.raised_by != webnotes.session.user:

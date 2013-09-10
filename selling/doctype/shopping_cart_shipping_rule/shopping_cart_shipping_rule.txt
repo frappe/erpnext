@@ -1,0 +1,36 @@
+[
+ {
+  "creation": "2013-07-03 13:15:34", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_rule", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Shipping Rule", 
+  "name": "__common__", 
+  "options": "Shipping Rule", 
+  "parent": "Shopping Cart Shipping Rule", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shopping Cart Shipping Rule"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

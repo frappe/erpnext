@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint
 
+no_cache = True
+
 def get_context():
 	def _get_fields(fieldnames):
 		return [webnotes._dict(zip(["label", "fieldname", "fieldtype", "options"], 

@@ -148,6 +148,9 @@ class DocType(SellingController):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
 		
+	def get_portal_page(self):
+		return "invoice" if self.doc.docstatus==1 else None
+		
 	def set_missing_values(self, for_validate=False):
 		self.set_pos_fields(for_validate)
 		
