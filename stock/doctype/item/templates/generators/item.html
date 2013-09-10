@@ -1,28 +1,32 @@
-{% extends "app/website/templates/html/page.html" %}
+{% extends base_template %}
 
 {% block javascript %}
-	{% include "app/website/templates/js/product_page.js" %}
+<script>
+	{% include "app/stock/doctype/item/templates/includes/product_page.js" %}
+</script>
 {% endblock %}
 
 {% block css %}
-	{% include "app/website/templates/css/product_page.css" %}
+<style>
+	{% include "app/stock/doctype/item/templates/includes/product_page.css" %}
+</style>
 {% endblock %}
 
 {% block content %}
-	{% include 'app/website/templates/html/product_search_box.html' %}
-	{% include 'app/website/templates/html/product_breadcrumbs.html' %}
+	{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
+	{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
 	<div class="col-md-12 product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="col-md-6">
 				{% if slideshow %}
-					{% include "app/website/templates/html/slideshow.html" %}
+					{% include "lib/website/templates/includes/html/slideshow.html" %}
 				{% else %}
 					{% if website_image %}
 					<image itemprop="image" class="item-main-image"
 						src="{{ website_image }}" />
 					{% else %}
 					<div class="img-area">
-						{% include 'app/website/templates/html/product_missing_image.html' %}
+		{% include 'app/stock/doctype/item/templates/includes/product_missing_image.html' %}
 					</div>
 					{% endif %}
 				{% endif %}

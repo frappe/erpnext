@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import cstr, cint, fmt_money
-from webnotes.webutils import build_html, delete_page_cache
+from webnotes.utils import cstr, cint, fmt_money, get_base_path
+from webnotes.webutils import delete_page_cache
 from selling.utils.cart import _get_cart_quotation
 
 @webnotes.whitelist(allow_guest=True)
@@ -106,10 +106,12 @@ def get_group_item_count(item_group):
 			or name in (select parent from `tabWebsite Item Group` 
 				where item_group in (%s))) """ % (child_groups, child_groups))[0][0]
 
-def get_item_for_list_in_html(r):
-	scrub_item_for_list(r)
-	r.template = "app/website/templates/html/product_in_grid.html"
-	return build_html(r)
+def get_item_for_list_in_html(context):
+	from jinja2 import Environment, FileSystemLoader
+	scrub_item_for_list(context)
+	jenv = Environment(loader = FileSystemLoader(get_base_path()))
+	template = jenv.get_template("app/stock/doctype/item/templates/includes/product_in_grid.html")
+	return template.render(context)
 
 def scrub_item_for_list(r):
 	if not r.website_description:

@@ -1,4 +1,4 @@
-{% if obj.parent_groups and len(obj.parent_groups) > 1 %}
+{% if obj.parent_groups and (obj.parent_groups|length) > 1 %}
 <div class="col-md-12">
 	<div class="clearfix">
 		<ul class="breadcrumb">
