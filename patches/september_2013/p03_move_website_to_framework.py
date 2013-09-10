@@ -12,5 +12,7 @@ def execute():
 	if os.path.exists(utils_pyc):
 		os.remove(utils_pyc)
 	
-	shutil.rmtree(os.path.join(get_base_path(), "app", "website"))
+	old_path = os.path.join(get_base_path(), "app", "website")
+	if os.path.exists(old_path):
+		shutil.rmtree(old_path)
 	
