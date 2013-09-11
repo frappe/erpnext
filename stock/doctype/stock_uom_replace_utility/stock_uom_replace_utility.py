@@ -8,7 +8,7 @@ from webnotes.utils import cstr, flt, now, cint
 from webnotes.model import db_exists
 from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -41,11 +41,11 @@ class DocType:
 			raise Exception
 			
 	def update_item_master(self):
-		# update stock uom in item master
-		sql("update `tabItem` set stock_uom = '%s' where name = '%s' " % (self.doc.new_stock_uom, self.doc.item_code))
+		item_bean = webnotes.bean("Item", self.doc.item_code)
+		item_bean.doc.stock_uom = self.doc.new_stock_uom
+		item_bean.save()
 		
-		# acknowledge user
-		msgprint("New Stock UOM : " + cstr(self.doc.new_stock_uom) + " updated in Item : " + cstr(self.doc.item_code))
+		msgprint(_("Default UOM updated in item ") + self.doc.item_code)
 		
 	def update_bin(self):
 		# update bin
@@ -80,20 +80,14 @@ class DocType:
 
 	# Update Stock UOM							
 	def update_stock_uom(self):
-		# validate mandatory
 		self.validate_mandatory()
 		self.validate_uom_integer_type()
 			
-		# update item master
 		self.update_item_master()
 		
-		# update stock ledger entry
 		self.update_stock_ledger_entry()
 		
-		# update bin
 		self.update_bin()
-
-		get_obj("Item", self.doc.item_code).on_update()
 		
 	def validate_uom_integer_type(self):
 		current_is_integer = webnotes.conn.get_value("UOM", self.doc.current_stock_uom, "must_be_whole_number")

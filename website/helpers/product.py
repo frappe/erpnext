@@ -11,7 +11,7 @@ from website.helpers.cart import _get_cart_quotation
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
 	"""get product price / stock info"""
-	if not webnotes.conn.get_default("shopping_cart_enabled"):
+	if not cint(webnotes.conn.get_default("shopping_cart_enabled")):
 		return {}
 	
 	cart_quotation = _get_cart_quotation()
