@@ -13,6 +13,8 @@ class TestItem(unittest.TestCase):
 		price_list.doclist.append(webnotes.doc(item_price.fields.copy()))
 		self.assertRaises(PriceListDuplicateItem, price_list.insert)
 
+# test_ignore = ["Item"]
+
 test_records = [
 	[
 		{
