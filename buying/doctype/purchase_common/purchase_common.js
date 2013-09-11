@@ -24,16 +24,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					filters: { 'buying_or_selling': "Buying" }
 				}
 			});
-			
-			this.frm.set_query("price_list_currency", function() {
-				return{
-					query: "controllers.queries.get_price_list_currency",
-					filters: {
-						'price_list': me.frm.doc.buying_price_list,
-						'buying_or_selling': "Buying"
-					}					
-				}
-			});
 		}
 		
 		$.each([["supplier", "supplier"], 
@@ -152,7 +142,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	buying_price_list: function() {
-		this.get_price_list_currency("buying");
+		this.get_price_list_currency("Buying");
 	},
 	
 	import_ref_rate: function(doc, cdt, cdn) {

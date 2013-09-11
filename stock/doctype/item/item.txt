@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-08-30 16:21:38", 
+  "modified": "2013-09-11 11:50:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -623,25 +623,6 @@
   "oldfieldname": "item_tax", 
   "oldfieldtype": "Table", 
   "options": "Item Tax", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "price_list_section", 
-  "fieldtype": "Section Break", 
-  "label": "Price Lists and Rates", 
-  "options": "icon-money", 
-  "read_only": 0
- }, 
- {
-  "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
-  "doctype": "DocField", 
-  "fieldname": "ref_rate_details", 
-  "fieldtype": "Table", 
-  "label": "Item Prices", 
-  "oldfieldname": "ref_rate_details", 
-  "oldfieldtype": "Table", 
-  "options": "Item Price", 
   "read_only": 0
  }, 
  {

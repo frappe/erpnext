@@ -49,16 +49,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("selling_price_list", function() {
 				return { filters: { buying_or_selling: "Selling" } };
 			});
-		
-			this.frm.set_query("price_list_currency", function() {
-				return {
-					query: "controllers.queries.get_price_list_currency",
-					filters: {
-						price_list: me.frm.doc.selling_price_list,
-						buying_or_selling: "Selling"
-					}					
-				};
-			});
 		}
 			
 		if(!this.fname) {

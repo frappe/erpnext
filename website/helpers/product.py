@@ -27,8 +27,9 @@ def get_product_info(item_code):
 	else:
 		in_stock = -1
 		
-	price = price_list and webnotes.conn.sql("""select ref_rate, ref_currency from
-		`tabItem Price` where parent=%s and price_list=%s""", 
+	price = price_list and webnotes.conn.sql("""select ip.ref_rate, pl.ref_currency from
+		`tabItem Price` ip, `tabPrice List` pl where ip.parent = pl.name and 
+		ip.item_code=%s and ip.parent=%s""", 
 		(item_code, price_list), as_dict=1) or []
 	
 	price = price and price[0] or None
