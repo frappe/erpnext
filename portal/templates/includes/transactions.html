@@ -6,6 +6,8 @@
     	<li><a href="index">Home</a></li>
     	<li class="active"><i class="{{ icon }} icon-fixed-width"></i> {{ title }}</li>
     </ul>
+	<p id="msgprint-alert" class="alert alert-danger" 
+		style="display: none;">&nbsp;</p>
 	<div class="list-group transaction-list">
 		<div class="progress progress-striped active">
 			<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
@@ -35,7 +37,6 @@ var get_transactions = function(btn) {
 		callback: function(r) {
 			$list.find(".progress").remove();
 			$show_more.toggleClass("hide", !(r.message && r.message.length===20));
-		
 			if(!(r.message && r.message.length)) {
 				console.log("empty");
 				if(!$list.html().trim()) {

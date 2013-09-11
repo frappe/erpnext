@@ -7,7 +7,7 @@ import webnotes
 no_cache = True
 
 def get_context():
-	from portal.website_transactions import get_transaction_context
+	from portal.utils import get_transaction_context
 	context = get_transaction_context("Sales Order", webnotes.form_dict.name)
 	context.update({
 		"parent_link": "orders",

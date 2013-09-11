@@ -7,7 +7,7 @@ import webnotes
 no_cache = True
 
 def get_context():
-	from portal.website_transactions import get_currency_context
+	from portal.utils import get_currency_context
 	context = get_currency_context()
 	context.update({
 		"title": "Invoices",
@@ -20,5 +20,5 @@ def get_context():
 	
 @webnotes.whitelist()
 def get_invoices(start=0):
-	from portal.website_transactions import get_transaction_list
+	from portal.utils import get_transaction_list
 	return get_transaction_list("Sales Invoice", start)

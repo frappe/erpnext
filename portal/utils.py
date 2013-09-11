@@ -48,3 +48,16 @@ def get_transaction_context(doctype, name):
 			"webnotes": webnotes,
 			"utils": webnotes.utils
 		}
+
+@webnotes.whitelist(allow_guest=True)
+def send_message(subject="Website Query", message="", sender="", status="Open"):
+	from website.doctype.contact_us_settings.templates.pages.contact \
+		import send_message as website_send_message
+	
+	if not website_send_message(subject, message, sender):
+		return
+	
+	# make lead / communication
+	from selling.doctype.lead.get_leads import add_sales_communication
+	add_sales_communication(subject or "Website Query", message, sender, sender, 
+		mail=None, status=status)

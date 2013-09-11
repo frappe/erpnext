@@ -38,17 +38,27 @@
 			<span class="text-muted">{{ utils.formatdate(doc.creation) }}</span>
 		</div>
 	</div>
-	<br>
-	<h4>Messages</h4>
+	<div class="row">
+		<h4 class="col-xs-6">Messages</h4>
+		<div class="col-xs-6">
+			 <button class="btn btn-sm btn-primary pull-right" id="ticket-reply">
+				  <i class="icon-envelope icon-fixed-width"></i> Reply</button>
+			 <button class="btn btn-sm btn-success pull-right hide" id="ticket-reply-send">
+				  <i class="icon-arrow-right icon-fixed-width"></i> Send</button>
+		</div>
+	</div>
+	<p id="ticket-alert" class="alert alert-danger" 
+		style="display: none;">&nbsp;</p>
 	{%- if doclist.get({"doctype":"Communication"}) -%}
 	<div>
-		<table class="table table-bordered table-striped">
+		<table class="table table-bordered table-striped" id="ticket-thread">
 			<tbody>
-				{%- for comm in doclist.get({"doctype":"Communication"}) %}
+				{%- for comm in 
+					(doclist.get({"doctype":"Communication"})|sort(reverse=True, attribute="creation")) %}
 				<tr>
 					<td>
 					<h5 style="text-transform: none">
-						{{ comm.sender }} on {{ utils.formatdate(doc.modified) }}</h5>
+						{{ comm.sender }} on {{ utils.formatdate(comm.creation) }}</h5>
 					<hr>
 					<p>{{ webnotes.utils.is_html(comm.content) and comm.content or
 						comm.content.replace("\n", "<br>")}}</p>
@@ -64,4 +74,49 @@
 	{%- endif -%}
 	{% endif -%}
 </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+	$("#ticket-reply").on("click", function() {
+		if(!$("#ticket-reply-editor").length) {
+			$('<tr id="ticket-reply-editor"><td>\
+				<h5 style="text-transform: none">Reply</h5>\
+				<hr>\
+				<textarea rows=10 class="form-control" style="resize: vertical;"></textarea>\
+			</td></tr>').prependTo($("#ticket-thread").find("tbody"));
+			$("#ticket-reply").addClass("hide");
+			$("#ticket-reply-send").removeClass("hide");
+		}
+	});
+	
+	$("#ticket-reply-send").on("click", function() {
+		var reply = $("#ticket-reply-editor").find("textarea").val().trim();
+		if(!reply) {
+			msgprint("Please write something in reply!");
+		} else {
+			wn.call({
+				type: "POST",
+				method: "support.doctype.support_ticket.templates.pages.ticket.add_reply",
+				btn: this,
+				args: { ticket: "{{ doc.name }}", message: reply },
+				callback: function(r) {
+					if(r.exc) {
+						msgprint(r._server_messages 
+							? JSON.parse(r._server_messages).join("<br>")
+							: "Something went wrong!");
+					} else {
+						window.location.reload();
+					}
+				}
+			})
+		}
+	});
+});
+
+var msgprint = function(txt) {
+	if(txt) $("#ticket-alert").html(txt).toggle(true);
+}
+</script>
 {% endblock %}

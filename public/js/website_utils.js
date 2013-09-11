@@ -5,14 +5,18 @@ if(!window.erpnext) erpnext = {};
 
 // Add / update a new Lead / Communication
 // subject, sender, description
-erpnext.send_message = function(opts) {
+wn.send_message = function(opts, btn) {
 	return wn.call({
 		type: "POST",
-		method: "selling.utils.contact.send_message",
+		method: "portal.utils.send_message",
+		btn: btn,
 		args: opts,
 		callback: opts.callback
 	});
-}
+};
+
+// for backward compatibility
+erpnext.send_message = wn.send_message;
 
 // Setup the user tools
 //
