@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint
 import MySQLdb
@@ -24,3 +25,5 @@ def execute():
 	except MySQLdb.OperationalError, e:
 		if e.args[0] == 1054:
 			webnotes.conn.sql("""update `tabItem Price` set buying_or_selling="Selling" """)
+		else:
+			raise e
