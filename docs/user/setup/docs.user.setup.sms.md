@@ -11,18 +11,18 @@ Example URL: <br>
 <pre>http://instant.smses.com/web2sms.php?username=&lt;USERNAME>&password=&lt;PASSWORD>&to=&lt;MOBILENUMBER>&sender=&lt;SENDERID>&message=&lt;MESSAGE>
 </pre>
 
-![SMS Settings](img/sms-settings2.jpg)
+![SMS Settings](img/sms-setting2.jpg)
 
 
 
 
-> Note: the characters up to the "?" are the SMS Gateway URL
+> Note: the string up to the "?" is the SMS Gateway URL
 
 Example:
 <pre>http://instant.smses.com/web2sms.php?username=abcd&password=abcd&to=9900XXXXXX&sender
 =DEMO&message=THIS+IS+A+TEST+SMS</pre>
 
-The above URL will send SMS from account abcd to mobile number 9900XXXXXX with sender ID as DEMO with text message as THIS IS A TEST SMS
+The above URL will send SMS from account abcd to mobile number 9900XXXXXX with sender ID as DEMO with text message as "THIS IS A TEST SMS"
 
 Note that some parameters in the URL are static.You will get static values from your SMS Provider like username, password etc. These static values should be entered in the Static Parameters table.
 
