@@ -17,7 +17,7 @@
 	<div>
 	<div class="row">
 		<div class="col-xs-6">
-			{% if doc.status -%}<div class="label label-default">{{ doc.status }}</div>{%- endif %}
+			{% block status -%}{%- endblock %}
 		</div>
 		<div class="col-xs-6">
 			<span class="pull-right">{{ utils.formatdate(doc.posting_date or doc.transaction_date) }}</span>

@@ -11,7 +11,7 @@ def get_context():
 	context = get_currency_context()
 	context.update({
 		"title": "My Orders",
-		"method": "portal.templates.pages.orders.get_orders",
+		"method": "selling.doctype.sales_order.templates.pages.orders.get_orders",
 		"icon": "icon-list",
 		"empty_list_message": "No Orders Yet",
 		"page": "order",
@@ -21,5 +21,10 @@ def get_context():
 @webnotes.whitelist()
 def get_orders(start=0):
 	from portal.utils import get_transaction_list
-	return get_transaction_list("Sales Order", start)
+	from selling.doctype.sales_order.templates.pages.order import modify_status
+	orders = get_transaction_list("Sales Order", start, ["per_billed", "per_delivered"])
+	for d in orders:
+		modify_status(d)
+		
+	return orders
 	

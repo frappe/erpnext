@@ -6,19 +6,27 @@ import webnotes
 from webnotes.utils import cint, formatdate
 import json
 
-def get_transaction_list(doctype, start):
+def get_transaction_list(doctype, start, additional_fields=None):
 	# find customer id
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
 		"customer")
-		
+	
 	if customer:
-		transactions = webnotes.conn.sql("""select name, creation, currency, grand_total_export 
+		if additional_fields:
+			additional_fields = ", " + ", ".join(("`%s`" % f for f in additional_fields))
+		else:
+			additional_fields = ""
+			
+		transactions = webnotes.conn.sql("""select name, creation, currency, grand_total_export
+			%s
 			from `tab%s` where customer=%s and docstatus=1
 			order by creation desc
-			limit %s, 20""" % (doctype, "%s", "%s"), (customer, cint(start)), as_dict=True)
+			limit %s, 20""" % (additional_fields, doctype, "%s", "%s"), 
+			(customer, cint(start)), as_dict=True)
 		for doc in transactions:
-			doc.items = ", ".join(webnotes.conn.sql_list("""select item_name
-				from `tab%s Item` where parent=%s limit 5""" % (doctype, "%s"), doc.name))
+			items = webnotes.conn.sql_list("""select item_name
+				from `tab%s Item` where parent=%s limit 6""" % (doctype, "%s"), doc.name)
+			doc.items = ", ".join(items[:5]) + ("..." if (len(items) > 5) else "")
 			doc.creation = formatdate(doc.creation)
 		return transactions
 	else:
