@@ -22,8 +22,3 @@ class DocType(TransactionBase):
 			status = "Open"
 			
 		webnotes.conn.set(self.doc, 'status', status)
-
-	def on_trash(self):
-		webnotes.conn.sql("""delete from `tabCommunication` 
-			where job_applicant=%s""", self.doc.name)
-		

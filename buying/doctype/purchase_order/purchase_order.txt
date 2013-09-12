@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:45:51", 
+  "modified": "2013-09-12 18:34:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -132,6 +132,7 @@
   "fieldtype": "Date", 
   "in_filter": 1, 
   "label": "Purchase Order Date", 
+  "no_copy": 1, 
   "oldfieldname": "transaction_date", 
   "oldfieldtype": "Date", 
   "reqd": 1, 

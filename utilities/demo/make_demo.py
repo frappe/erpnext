@@ -44,6 +44,7 @@ def setup():
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
+	make_price_lists()
 	make_users_and_employees()
 	make_bank_account()
 	# make_opening_stock()
@@ -377,6 +378,9 @@ def complete_setup():
 def make_items():
 	import_data("Item")
 	import_data("BOM", submit=True)
+
+def make_price_lists():
+	import_data("Price_List")
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])

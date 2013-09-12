@@ -204,11 +204,6 @@ class DocType(SellingController):
 			print_lst.append(lst1)
 		return print_lst
 	
-	def update_followup_details(self):
-		sql("delete from `tabCommunication Log` where parent = '%s'"%self.doc.name)
-		for d in getlist(self.doclist, 'follow_up'):
-			d.save()
-
 @webnotes.whitelist()
 def make_sales_order(source_name, target_doclist=None):
 	return _make_sales_order(source_name, target_doclist)

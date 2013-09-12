@@ -126,9 +126,10 @@ class DocType(TransactionBase):
 				webnotes.conn.sql("""delete from `tabAddress` where name=%s""", name)
 	
 	def delete_customer_contact(self):
-		for rec in sql("select * from `tabContact` where customer=%s", (self.doc.name,), as_dict=1):
-			sql("delete from `tabContact` where name=%s",(rec['name']))
-			
+		for contact in webnotes.conn.sql_list("""select name from `tabContact` 
+			where customer=%s""", self.doc.name):
+				webnotes.delete_doc("Contact", contact)
+	
 	def delete_customer_account(self):
 		"""delete customer's ledger if exist and check balance before deletion"""
 		acc = sql("select name from `tabAccount` where master_type = 'Customer' \
