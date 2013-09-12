@@ -72,7 +72,7 @@ class DocType(DocListController):
 
 	def validate_item(self):
 		item_det = webnotes.conn.sql("""select name, has_batch_no, docstatus, 
-			is_stock_item, has_serial_no, serial_no_series 
+			is_stock_item, has_serial_no, serial_no_series, stock_uom 
 			from tabItem where name=%s""", 
 			self.doc.item_code, as_dict=True)[0]
 
@@ -88,7 +88,10 @@ class DocType(DocListController):
 			if not webnotes.conn.sql("""select name from `tabBatch` 
 				where item='%s' and name ='%s' and docstatus != 2""" % (self.doc.item_code, self.doc.batch_no)):
 				webnotes.throw("'%s' is not a valid Batch Number for Item '%s'" % (self.doc.batch_no, self.doc.item_code))
-	
+				
+		if not self.doc.stock_uom:
+			self.doc.stock_uom = item_det.stock_uom
+			
 		self.validate_serial_no(item_det)
 	
 	def validate_serial_no(self, item_det):
