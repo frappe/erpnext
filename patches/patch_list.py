@@ -263,4 +263,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('setup', 'doctype', 'features_setup') # 2013-09-05",
 	"patches.september_2013.p02_fix_serial_no_status",
 	"patches.september_2013.p03_modify_item_price_include_in_price_list",
+	"patches.september_2013.p03_update_stock_uom_in_sle",
 ]
