@@ -32,19 +32,20 @@ To make this Workflow and transition rules go to :
 ![Workflow](img/workflow-leave2.png)
 
 
-Example of a Leave Application Process.
+Example of a Leave Application Process:
+
 Go to the Human Resources Module and click on Leave Application. Apply for a Leave.
 
 When a Leave Application is submitted, the status on the right hand corner of the page shows as "Applied"
 
 ![Workflow Employee LA](img/workflow-employee-la.png)
 
-When the HR User logs in,  he can either approve or reject. If approved the status on the right hand corner of the page shows as Approved. However, a blue band of information is displayed saying approval is pending by leave approver.
+When the HR User logs in,  he can either Approve or Reject. If approved the status on the right hand corner of the page shows as Approved. However, a blue band of information is displayed saying approval is pending by leave approver.
 
 ![Leave Approver](img/workflow-hr-user-la.png)
 
 
-When the leave approver opens the Leave Application page, he should update the status to Accepted or  rejected.
+When the leave approver opens the Leave Application page, he should select the status and convert to Approved or Rejected.
 
 ![Workflow Leave Approver](img/workflow-leave-approver-la.png)
 
