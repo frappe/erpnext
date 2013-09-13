@@ -2,10 +2,10 @@
 {
 	"_label": "Support",
 	"_toc": [
-		"docs.user.ops.support.support_ticket",
-		"docs.user.ops.support.customer_issue",
-		"docs.user.ops.support.maintenance_visit",
-		"docs.user.ops.support.maintenance_schedule"
+		"docs.user.support.support_ticket",
+		"docs.user.support.customer_issue",
+		"docs.user.support.maintenance_visit",
+		"docs.user.support.maintenance_schedule"
 	]
 }
 ---

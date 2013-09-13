@@ -17,7 +17,12 @@ All emails sent from the system are added to the Communication table.
 
 To setup your outgoing mails, go to
 
-> Setup > Email and Notifications > Email Settings
+> Setup > Outgoing Email Settings > Email Settings
+
+
+![Email Settings](img/email-settings1.png)
+
+
 
 Set your outgoing mail server settings here. These are the same settings you would use in your Outlook, Thunderbird, Apple Mail or other such email applications. If you are not sure, get in touch with your email service provider.
 
@@ -31,7 +36,13 @@ A very useful email integration is to sync the incoming emails from support inbo
 
 To setup your Support integration, go to:
 
-> Setup > Email and Notifications > Email Settings > Incoming Mail Settings
+> Setup > Support Email Settings > EMail Settings
+
+
+![Email Settings](img/email-settings2.png)
+
+
+
 
 To make ERPNext pull emails from your mail box, enter the POP3 settings. (POP3 is a way of extracting emails from your mailbox. It should be fairly easy to find out what your POP3 settings are. If you have problems, contact your email service provider).
 If you want to setup an auto reply, check on the “Send Autoreply” box and whenever someone sends an email, an autoreply will be sent.
@@ -41,7 +52,12 @@ Add a custom signature which you want to send with your replies.
 
 ERPNext allows you to automatically email documents on “Submission” to the contact mentioned in the document. To set this up, go to:
 
-> Setup > Email and Notifications > Auto-notifications
+> Setup > Tools > Enable / Disable Notifications.
+
+
+![Auto Notification](img/auto-notification.png)
+
+
 
 Check on the transactions you want to send via email directly on Submission and add a custom message if you want on these documents.
 ￼
@@ -55,4 +71,7 @@ Email Digests are a great way for top managers to keep track of the big numbers 
 
 To setup Email Digests, go to: 
 
-> Setup > Email and Notifications > Email Digests > New Email Digest
+> Setup > Email Digest > New Email Digest 
+
+
+![Email Digest](img/email-digest.png)
