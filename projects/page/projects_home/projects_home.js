@@ -40,7 +40,7 @@ wn.module_page["Projects"] = [
 		icon: "icon-wrench",
 		items: [
 			{
-				page: "Projects",
+				route: "Gantt/Task",
 				label: wn._("Gantt Chart"),
 				"description":wn._("Gantt chart of all tasks.")
 			},
