@@ -1,8 +1,23 @@
 ---
 {
-	"_label": "Stock / Inventory"
+	"_label": "Stock / Inventory",
+	"_toc": [
+		"docs.user.stock.warehouse",
+		"docs.user.stock.item_group",
+		"docs.user.stock.item",
+		"docs.user.stock.serialized",
+		"docs.user.stock.purchase_receipt",
+		"docs.user.stock.delivery_note",
+		"docs.user.stock.stock_entry",
+		"docs.user.stock.material_issue",
+		"docs.user.stock.sales_return",
+		"docs.user.stock.purchase_return",
+		"docs.user.stock.projected_quantity"
+	]
 }
 ---
+
+
 
 ![Stock-Inventory](img/stock-inventory.png)
 

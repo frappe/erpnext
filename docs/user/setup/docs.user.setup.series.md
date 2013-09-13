@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Creating Numbering Series"
+	"_label": "Document Naming Series"
 }
 ---
 Data records are broadly classified as “Master” or “Transaction”. A master record is a record that has a “name”, for example a Customer, Item, Supplier, Employee etc. A Transaction is a record that has a “number”. Examples of transactions include Sales Invoices, Quotations etc. You make transactions against a number of master records.
@@ -17,7 +17,13 @@ etc. You could also have a separate series for each type of Customer or for each
 
 To setup a series, go to:
 
-> Setup > Customize ERPNext > Numbering Series
+> Setup > Tools > Update Numbering Series
+
+
+
+![Document Naming Series](img/naming-series.png)
+
+
 
 In this form,
 
