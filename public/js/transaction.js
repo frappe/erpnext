@@ -418,10 +418,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
 			false;
 		
-		if(!valid_conversion_rate) {
-			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
-		}
+		// if(!valid_conversion_rate) {
+		// 	wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
+		// 		" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+		// }
 	},
 	
 	calculate_taxes_and_totals: function() {
