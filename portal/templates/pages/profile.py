@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 from webnotes.utils import cstr
 
 no_cache = True
@@ -28,5 +29,11 @@ def update_profile(fullname, password=None, company_name=None, mobile_no=None, p
 	from selling.utils.cart import update_party
 	update_party(fullname, company_name, mobile_no, phone)
 	
-	from core.doctype.profile import profile
-	return profile.update_profile(fullname, password)
+	if not fullname:
+		return _("Name is required")
+		
+	webnotes.conn.set_value("Profile", webnotes.session.user, "first_name", fullname)
+	webnotes.add_cookies["full_name"] = fullname
+	
+	return _("Updated")
+	

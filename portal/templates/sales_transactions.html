@@ -2,9 +2,11 @@
 
 {% block javascript -%}
 <script>
+$(document).ready(function() {
 	global_number_format = "{{ global_number_format }}";
 	currency = "{{ currency }}";
 	wn.currency_symbols = {{ currency_symbols }};
+});
 </script>
 
 {{ super() }}

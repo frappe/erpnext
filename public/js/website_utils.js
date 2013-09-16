@@ -24,8 +24,12 @@ $(document).ready(function() {
 	// update login
 	erpnext.cart.set_cart_count();
 	
-	$("#user-tools a").tooltip({"placement":"bottom"});
-	$("#user-tools-post-login a").tooltip({"placement":"bottom"});
+	// update profile
+	if(full_name) {
+		$('.navbar li[data-label="Profile"] a')
+			.html('<i class="icon-fixed-width icon-user"></i> ' + full_name);
+	}
+	
 });
 
 // shopping cart

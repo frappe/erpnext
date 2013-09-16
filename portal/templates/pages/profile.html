@@ -15,10 +15,6 @@
 			<input class="form-control" type="text" id="fullname" placeholder="Your Name">
 		</fieldset>
 		<fieldset>
-			<label>Password</label>
-			<input class="form-control" type="password" id="password" placeholder="Password">
-		</fieldset>
-		<fieldset>
 			<label>Company Name</label>
 			<input class="form-control" type="text" id="company_name" placeholder="Company Name" value="{{ company_name }}">
 		</fieldset>
@@ -42,7 +38,6 @@ $(document).ready(function() {
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),
-				password: $("#password").val(),
 				company_name: $("#company_name").val(),
 				mobile_no: $("#mobile_no").val(),
 				phone: $("#phone").val()
