@@ -22,6 +22,7 @@ def execute():
 			webnotes.conn.set_value("Price List", price_list, "buying_or_selling", buying_or_selling)
 	except MySQLdb.OperationalError, e:
 		if e.args[0] == 1054:
-			webnotes.conn.sql("""update `tabItem Price` set buying_or_selling='Selling' """)
+			webnotes.conn.sql("""update `tabPrice List` set buying_or_selling='Selling' 
+				where ifnull(buying_or_selling, '')='' """)
 		else:
 			raise e
