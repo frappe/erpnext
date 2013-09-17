@@ -15,8 +15,9 @@ erpnext.toolbar.setup = function() {
 	$user.append('<li><a href="http://groups.google.com/group/erpnext-user-forum" target="_blank">\
 		<i class="icon-fixed-width icon-quote-left"></i> '+wn._('Forum')+'</a></li>');
 	
-	if(wn.boot.expires_on) {
-		$user.append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
+	if(wn.boot.expires_on || wn.boot.commercial_support) {
+		$user.append('<li>\
+			<a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
 			<i class="icon-fixed-width icon-comments"></i> '+wn._('Live Chat')+'</a></li>');
 	}
 	

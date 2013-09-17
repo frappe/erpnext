@@ -32,6 +32,14 @@ In ERPNext Opening Accounts are setup by submitting a special Journal Entries (J
 
 Note: Make sure to set “Is Opening” as “Yes” in the More Info section.
 
+
+> Setup > Opening Accounts and Stock > Opening Accounting Entries.
+
+
+![Opening Entry](img/opening-entry.png)
+
+
+
 You can make two Opening Journal Vouchers:
 
 - For all assets (excluding Accounts Receivables): This entry will contain all your assets except the amounts you are expecting from your Customers against outstanding Sales Invoices. You will have to update your receivables by making an individual entry for each Invoice (this is because, the system will help you track the invoices which are yet to be paid). Since all the entries in this voucher will be of type “Debit”, you can credit the sum of all these debits against the “Temp Opening Liabilities” account.
@@ -64,3 +72,6 @@ To make a Stock Reconciliation, go to:
 > Stock > Stock Reconciliation > New Stock Reconciliation
 
 and follow the steps mentioned on the page.
+
+
+![Stock Reconciliation](img/stock-reconciliation1.png)

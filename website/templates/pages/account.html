@@ -8,12 +8,20 @@
     	<li><a href="index">Home</a></li>
     	<li class="active">My Account</li>
     </ul>
-	<h3>My Account</h3>
-	<p><a href="profile"><i class="icon-user icon-fixed-width"></i> Change my name, password</a></p>
-	<p><a href="addresses"><i class="icon-map-marker icon-fixed-width"></i> My Addresses</a></p>
-	<p><a href="orders"><i class="icon-list icon-fixed-width"></i> My Orders</a></p>
-	<p><a href="tickets"><i class="icon-tags icon-fixed-width"></i> My Tickets</a></p>
-	<p><a href="server.py?cmd=web_logout"><i class="icon-signout icon-fixed-width"></i> Logout</a></p>
+	<!-- <h3>My Account</h3> -->
+	<ul class="nav nav-stacked pull-left">
+		<li><a href="profile"><i class="icon-user icon-fixed-width"></i> 
+			Change my name, password</a></li>
+		<li><a href="addresses"><i class="icon-map-marker icon-fixed-width"></i> 
+			My Addresses</a></li>
+		<li><a href="orders"><i class="icon-list icon-fixed-width"></i> My Orders</a></li>
+		<li><a href="tickets"><i class="icon-tags icon-fixed-width"></i> My Tickets</a></li>
+		<li style="border-top: 1px solid #ddd"></li>
+		<li><a href="invoices"><i class="icon-file-text icon-fixed-width"></i> Invoices</a></li>
+		<li><a href="shipments"><i class="icon-truck icon-fixed-width"></i> Shipments</a></li>
+		<li style="border-top: 1px solid #ddd"></li>
+		<li><a href="server.py?cmd=web_logout"><i class="icon-signout icon-fixed-width"></i>
+			Logout</a></li>
 	</ul>
 </div>
 {% endblock %}

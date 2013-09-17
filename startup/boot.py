@@ -33,7 +33,7 @@ def boot_session(bootinfo):
 		
 		# load subscription info
 		import conf
-		for key in ['max_users', 'expires_on', 'max_space', 'status', 'developer_mode']:
+		for key in ['max_users', 'expires_on', 'max_space', 'status', 'commercial_support']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
 		bootinfo['docs'] += webnotes.conn.sql("""select name, default_currency, cost_center

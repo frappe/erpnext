@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Hiding Modules and Features"
+	"_label": "Hiding Modules and Features "
 }
 ---
 ### Hiding Unused Features

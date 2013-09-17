@@ -21,6 +21,14 @@ The Chart of Accounts helps you to answer:
 
 > Tip: If you can’t read a Balance Sheet (I confess it took me a long time to figure this out) it's a good opportunity to start learning about this. It will be worth the effort. You can also take the help of your accountant to setup your Chart of Accounts.
 
+Financial statement of your company is easily viewable in ERPNext. An Example of a financial statement is given below:
+
+
+
+![Financial Analytics Balance Sheet](img/financial-analytic-bs.png)
+
+
+
 To edit your Chart of Accounts in ERPNext go to:
 
 > [Accounts](docs.user.accounts.html)  > Chart of Accounts 
@@ -48,6 +56,18 @@ Two special accounts to note here are Accounts Receivable (money you have to col
 Profit and Loss is the group of Income and Expense accounts that represent your accounting transactions over a period.
 
 Unlike Balance sheet accounts, Profit and Loss accounts (or PL accounts) do not represent net worth (assets), but rather represent the amount of money spent and collected in servicing customers during the period. Hence at the beginning and end of your Fiscal Year, they become zero.
+
+In ERPNext it is easy to create a Profit and Loss analysis chart. An example of a Profit and Loss analysis chart is given below:
+
+
+
+
+![Financial Analytics Profit and Loss](img/financial-analytic-pl.png)
+
+
+
+
+
 
 (On the first day of the year you have not made any profit or loss, but you still have assets, hence balance sheet accounts never become zero at the beginning or end of a period)
 

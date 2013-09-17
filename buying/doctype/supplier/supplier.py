@@ -132,14 +132,10 @@ class DocType(TransactionBase):
 			sql("delete from `tabAddress` where name=%s",(rec['name']))
 	
 	def delete_supplier_contact(self):
-		for rec in sql("select * from `tabContact` where supplier=%s", (self.doc.name,), as_dict=1):
-			sql("delete from `tabContact` where name=%s",(rec['name']))
-			
-	def delete_supplier_communication(self):
-		webnotes.conn.sql("""\
-			delete from `tabCommunication`
-			where supplier = %s and customer is null""", self.doc.name)
-			
+		for contact in webnotes.conn.sql_list("""select name from `tabContact` 
+			where supplier=%s""", self.doc.name):
+				webnotes.delete_doc("Contact", contact)
+	
 	def delete_supplier_account(self):
 		"""delete supplier's ledger if exist and check balance before deletion"""
 		acc = sql("select name from `tabAccount` where master_type = 'Supplier' \

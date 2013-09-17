@@ -40,13 +40,15 @@ class DocType:
 			msgprint(_("Expense Account is mandatory"), raise_exception=1)
 
 	def validate_all_link_fields(self):
-		accounts = {"Account": [self.doc.cash_bank_account, self.doc.income_account, self.doc.expense_account], \
-			"Cost Center": [self.doc.cost_center], "Warehouse": [self.doc.warehouse]}
+		accounts = {"Account": [self.doc.cash_bank_account, self.doc.income_account, 
+			self.doc.expense_account], "Cost Center": [self.doc.cost_center], 
+			"Warehouse": [self.doc.warehouse]}
 		
 		for link_dt, dn_list in accounts.items():
 			for link_dn in dn_list:
-				if not webnotes.conn.exists({"doctype": link_dt, "company": self.doc.company, "name": link_dn}):
-					msgprint(link_dn +_(" does not belong to ") + self.doc.company)
+				if link_dn and not webnotes.conn.exists({"doctype": link_dt, 
+						"company": self.doc.company, "name": link_dn}):
+					webnotes.throw(link_dn +_(" does not belong to ") + self.doc.company)
 
 	def on_update(self):
 		webnotes.defaults.clear_default("is_pos")

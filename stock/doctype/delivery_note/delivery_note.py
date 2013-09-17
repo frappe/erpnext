@@ -35,7 +35,7 @@ class DocType(SellingController):
 		
 	def onload(self):
 		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
-			where delivery_note=%s""", self.doc.name)
+			where docstatus=1 and delivery_note=%s""", self.doc.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
@@ -344,6 +344,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 	
 	def update_accounts(source, target):
 		si = webnotes.bean(target)
+		si.doc.is_pos = 0
 		si.run_method("onload_post_render")
 		
 		si.set_doclist(si.doclist.get({"parentfield": ["!=", "entries"]}) +

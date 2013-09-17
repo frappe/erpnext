@@ -9,6 +9,13 @@ To create a Journal Voucher go to:
 
 > Accounts > Journal Voucher > New Journal Voucher
 
+
+
+![Journal Voucher](img/journal-voucher.png)
+
+
+
+
 In a Journal Voucher, you must select.
 
 - Type of Voucher from the drop down. 

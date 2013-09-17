@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import webnotes
 import webnotes.utils
-import json
 
 from webnotes.utils import cstr, flt, getdate
 from webnotes.model.bean import getlist
@@ -289,55 +288,6 @@ class DocType(SellingController):
 	def on_update(self):
 		pass
 		
-@webnotes.whitelist()
-def get_orders():
-	# find customer id
-	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
-		"customer")
-		
-	if customer:
-		orders = webnotes.conn.sql("""select 
-			name, creation, currency from `tabSales Order`
-			where customer=%s
-			and docstatus=1
-			order by creation desc
-			limit 20
-			""", customer, as_dict=1)
-		for order in orders:
-			order.items = webnotes.conn.sql("""select 
-				item_name, qty, export_rate, export_amount, delivered_qty, stock_uom
-				from `tabSales Order Item` 
-				where parent=%s 
-				order by idx""", order.name, as_dict=1)
-				
-		return orders
-	else:
-		return []
-		
-def get_website_args():	
-	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
-		"customer")
-	bean = webnotes.bean("Sales Order", webnotes.form_dict.name)
-	if bean.doc.customer != customer:
-		return {
-			"doc": {"name": "Not Allowed"}
-		}
-	else:
-		return {
-			"doc": bean.doc,
-			"doclist": bean.doclist,
-			"webnotes": webnotes,
-			"utils": webnotes.utils
-		}
-		
-def get_currency_and_number_format():
-	return {
-		"global_number_format": webnotes.conn.get_default("number_format") or "#,###.##",
-		"currency": webnotes.conn.get_default("currency"),
-		"currency_symbols": json.dumps(dict(webnotes.conn.sql("""select name, symbol
-			from tabCurrency where ifnull(enabled,0)=1""")))
-	}
-	
 def set_missing_values(source, target):
 	bean = webnotes.bean(target)
 	bean.run_method("onload_post_render")
@@ -409,7 +359,12 @@ def make_delivery_note(source_name, target_doclist=None):
 	return [d.fields for d in doclist]
 
 @webnotes.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):	
+def make_sales_invoice(source_name, target_doclist=None):
+	def set_missing_values(source, target):
+		bean = webnotes.bean(target)
+		bean.doc.is_pos = 0
+		bean.run_method("onload_post_render")
+		
 	def update_item(obj, target, source_parent):
 		target.export_amount = flt(obj.export_amount) - flt(obj.billed_amt)
 		target.amount = target.export_amount * flt(source_parent.conversion_rate)

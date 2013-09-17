@@ -1,44 +1,9 @@
 ---
 {
-	"_label": "Setting up Users, Roles and Permissions"
+	"_label": "Setting up Permissions"
 }
 ---
 ERPNext has a role-based permission system, which means that you can assign Roles to Users, and permissions on Roles.
-
-## Users (Profile)
-
-Each ERPNext user has a Profile. The Profile contains the user’s email and authentication and can be set from:
-
-> Setup > Users and Permissions > Users
-
-#### Adding a new User
-￼
-To add a new user, click on “Add” button and enter the user’s
-
-- Email Id
-- First Name
-- Last Name
-- Password
-
-An invitation email will be sent to the user with the login details.
-
-#### Setting Roles
-
-ERPNext comes with a bunch of predefined roles. Each role comes with predefined permissions. See the Preset Permission Chart to find out what permission each role comes with.
-
-After creating the User, you can add / remove Roles for that User by clicking on “Roles” button. To find out what permission each role has, click on the “?” sign next to the Role.
-
-You can also create new Roles as you wish via
-
-> Document > Role
-
-#### Security Settings
-
-- Enabling / disabling users: You can enable or disable users. Disabled users will not be able to log in.
-- Setting login time: If login time is set, users can only log-in within the defined hours as per your timezone.
-- Change Password: You can update the user’s password by setting the password field.
-
-## Permissions
 
 ERPNext has a very powerful permission structure that will allow you to set permissions right up to the field level.
 
@@ -55,6 +20,11 @@ When you define a “match” rule, the User will only be allowed to access (or 
 ERPNext comes with pre-set permission rules that you can change anytime by going to
 
 > Setup > Users and Permissions > Permission Manager
+
+![Permission Manager](img/permission-manager.png)
+
+
+
 
 ## Using the Permission Manager
 

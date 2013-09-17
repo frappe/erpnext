@@ -259,6 +259,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(w.doc.outstanding_amount, w.doc.grand_total)
 		
 	def test_payment(self):
+		webnotes.conn.sql("""delete from `tabGL Entry`""")
 		w = self.make()
 		
 		from accounts.doctype.journal_voucher.test_journal_voucher \
@@ -711,6 +712,7 @@ test_records = [
 		{
 			"naming_series": "_T-Sales Invoice-",
 			"company": "_Test Company", 
+			"is_pos": 0,
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
 			"debit_to": "_Test Customer - _TC",
@@ -774,6 +776,7 @@ test_records = [
 		{
 			"naming_series": "_T-Sales Invoice-",
 			"company": "_Test Company", 
+			"is_pos": 0,
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
 			"debit_to": "_Test Customer - _TC",
@@ -827,6 +830,7 @@ test_records = [
 		{
 			"naming_series": "_T-Sales Invoice-",
 			"company": "_Test Company", 
+			"is_pos": 0,
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
 			"debit_to": "_Test Customer - _TC",
@@ -952,6 +956,7 @@ test_records = [
 		{
 			"naming_series": "_T-Sales Invoice-",
 			"company": "_Test Company", 
+			"is_pos": 0,
 			"conversion_rate": 1.0, 
 			"currency": "INR", 
 			"debit_to": "_Test Customer - _TC",

@@ -27,10 +27,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if (cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) {
-			this.frm.set_value("is_pos", 1);
-			this.is_pos();
-			cur_frm.cscript.toggle_pos(true);
+		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
+				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
+					this.frm.set_value("is_pos", 1);
+					this.is_pos();
+					cur_frm.cscript.toggle_pos(true);
 		}
 		
 		// if document is POS then change default print format to "POS Invoice"
@@ -61,8 +62,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
-			if(cint(doc.update_stock)!=1)
-				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+			if(cint(doc.update_stock)!=1) {
+				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
+				var from_delivery_note = false;
+				from_delivery_note = cur_frm.get_doclist({parentfield: "entries"})
+					.some(function(item) { 
+						return item.delivery_note ? true : false; 
+					});
+				
+				if(!from_delivery_note)
+					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+			}
+				
 
 			if(doc.outstanding_amount!=0)
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
@@ -191,7 +202,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
 		}
 		
-		this.frm.runclientscript("write_off_amount");
+		this.frm.script_manager.trigger("write_off_amount");
 	},
 	
 	write_off_amount: function() {

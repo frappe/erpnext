@@ -339,7 +339,7 @@ erpnext.POS = Class.extend({
 		}
 
 		// if form is submitted & cancelled then disable all input box & buttons
-		if (cur_frm.doc.docstatus>=1) {
+		if (cur_frm.doc.docstatus>=1 && cint(cur_frm.doc.is_pos)) {
 			me.wrapper.find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
@@ -425,7 +425,7 @@ erpnext.POS = Class.extend({
 					dialog.show();
 					cur_frm.pos.barcode.$input.focus();
 					
-					dialog.get_input("total_amount").attr("disabled", "disabled");
+					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
 						cur_frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);

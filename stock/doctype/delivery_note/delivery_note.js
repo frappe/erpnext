@@ -16,7 +16,17 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		
-		if(!doc.__billing_complete && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+		if(!doc.__billing_complete && doc.docstatus==1) {
+			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
+			var from_sales_invoice = false;
+			from_sales_invoice = cur_frm.get_doclist({parentfield: "delivery_note_details"})
+				.some(function(item) { 
+					return item.prevdoc_doctype==="Sales Invoice" ? true : false; 
+				});
+			
+			if(!from_sales_invoice)
+				cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
 			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);

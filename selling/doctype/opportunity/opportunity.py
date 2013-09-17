@@ -160,6 +160,11 @@ class DocType(TransactionBase):
 def make_quotation(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
+	def set_missing_values(source, target):
+		quotation = webnotes.bean(target)
+		quotation.run_method("onload_post_render")
+		quotation.run_method("calculate_taxes_and_totals")
+	
 	doclist = get_mapped_doclist("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Quotation", 
@@ -181,6 +186,6 @@ def make_quotation(source_name, target_doclist=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doclist)
+	}, target_doclist, set_missing_values)
 		
 	return [d.fields for d in doclist]

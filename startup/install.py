@@ -64,7 +64,8 @@ def post_import():
 
 def feature_setup():
 	"""save global defaults and features setup"""
-	doc = webnotes.doc("Features Setup", "Features Setup")
+	bean = webnotes.bean("Features Setup", "Features Setup")
+	bean.ignore_permissions = True
 
 	# store value as 1 for all these fields
 	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
@@ -74,8 +75,8 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	doc.fields.update(dict(zip(flds, [1]*len(flds))))
-	doc.save()
+	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
+	bean.save()
 
 def import_country_and_currency():
 	from webnotes.country_info import get_all

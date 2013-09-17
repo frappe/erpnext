@@ -97,6 +97,12 @@ class DocType(DocListController):
 	
 	def validate_serial_no(self):
 		item_det = self.get_item_details()
+						
+		if not self.doc.stock_uom:
+			self.doc.stock_uom = item_det.stock_uom
+			
+		self.validate_serial_no(item_det)
+
 		if item_det.has_serial_no=="No":
 			if self.doc.serial_no:
 				webnotes.throw(_("Serial Number should be blank for Non Serialized Item" + ": " + self.doc.item), 

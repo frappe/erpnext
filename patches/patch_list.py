@@ -263,7 +263,9 @@ patch_list = [
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-09-02",
 	"patches.september_2013.p01_fix_buying_amount_gl_entries",
 	"patches.september_2013.p01_update_communication",
+	"execute:webnotes.reload_doc('setup', 'doctype', 'features_setup') # 2013-09-05",
 	"patches.september_2013.p02_fix_serial_no_status",
 	"patches.august_2013.p06_deprecate_is_cancelled",
 	"execute:webnotes.delete_doc('DocType', 'Budget Control')",
+	"patches.september_2013.p03_update_stock_uom_in_sle",
 ]

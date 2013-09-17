@@ -1,8 +1,21 @@
 ---
 {
-	"_label": "Accounts"
+	"_label": "Accounts",
+	"_toc": [
+		"docs.user.accounts.sales_invoice",
+		"docs.user.accounts.purchase_invoice",
+		"docs.user.accounts.payments",
+		"docs.user.accounts.journal_voucher",
+		"docs.user.accounts.opening_entry",
+		"docs.user.accounts.closing",
+		"docs.user.accounts.reports",
+		"docs.user.accounts.voucher_import",
+		"docs.user.accounts.pos"
+	]
 }
 ---
+
+
 At end of the sales and purchase cycle is billing and payments. You may have an accountant in your team, or you may be doing accounting yourself or you may have outsourced your accounting. Financial accounting forms the core of any business management system like an ERP.
 
 In ERPNext, your accounting operations consists of 3 main transactions:

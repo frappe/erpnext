@@ -244,6 +244,7 @@ class DocType(StockController):
 			"voucher_type": self.doc.doctype,
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
+			"stock_uom": webnotes.conn.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
 		})

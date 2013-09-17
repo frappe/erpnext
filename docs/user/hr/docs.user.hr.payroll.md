@@ -13,7 +13,11 @@ To process Payroll in ERPNext,
 
 The Salary Structure represents how Salaries are calculated based on Earnings and Deductions. To create a new Salary Structure go to:
 
-> HR > Salary and Payroll > Salary Structure > New Salary Structure
+> HR > Salary Structure > New Salary Structure
+
+
+![Salary Structure](img/salary-structure.png)
+s
 
 ### In the Salary Structure,
 
@@ -31,9 +35,24 @@ If you don’t want ERPNext to manage LWP, just don’t click on LWP in any of t
 
 ### Creating Salary Slips
 
-Once the Salary Structure is created, you can process your payroll for the month using the Salary Manager
+Once the Salary Structure is created, you can make a salary slip from the same form or you can process your payroll for the month using the Salary Manager.
 
-> HR > Salary and Payroll > Process Payroll
+To create a salary slip from Salary Structure, click on the button Make Salary Slip.
+
+
+![Salary Slip](img/salary-slip-1.png)
+
+<br>
+
+
+Through Salary Manager:
+
+> HR > Process Payroll
+
+
+![Salary Manager](img/salary-manager.png)
+
+
 
 In the Salary Manager tool,
 

@@ -80,7 +80,6 @@ class DocType(SellingController):
 		return webnotes.conn.get_value('Sales Email Settings',None,'email_id')
 
 	def on_trash(self):
-		webnotes.conn.sql("""update tabCommunication set lead=null where lead=%s""", self.doc.name)
 		webnotes.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)
 		

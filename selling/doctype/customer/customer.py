@@ -126,14 +126,10 @@ class DocType(TransactionBase):
 				webnotes.conn.sql("""delete from `tabAddress` where name=%s""", name)
 	
 	def delete_customer_contact(self):
-		for rec in sql("select * from `tabContact` where customer=%s", (self.doc.name,), as_dict=1):
-			sql("delete from `tabContact` where name=%s",(rec['name']))
+		for contact in webnotes.conn.sql_list("""select name from `tabContact` 
+			where customer=%s""", self.doc.name):
+				webnotes.delete_doc("Contact", contact)
 	
-	def delete_customer_communication(self):
-		webnotes.conn.sql("""\
-			delete from `tabCommunication`
-			where customer = %s and supplier is null""", self.doc.name)
-			
 	def delete_customer_account(self):
 		"""delete customer's ledger if exist and check balance before deletion"""
 		acc = sql("select name from `tabAccount` where master_type = 'Customer' \
@@ -145,7 +141,6 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		self.delete_customer_address()
 		self.delete_customer_contact()
-		self.delete_customer_communication()
 		self.delete_customer_account()
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)

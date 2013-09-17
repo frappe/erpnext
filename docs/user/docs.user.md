@@ -8,7 +8,7 @@
 		"docs.user.selling",
 		"docs.user.buying",
 		"docs.user.stock",
-		"docs.user.accounting",
+		"docs.user.accounts",
 		"docs.user.hr",
 		"docs.user.mfg",
 		"docs.user.support",
@@ -48,19 +48,20 @@ Contents
 	1. [Email Settings](docs.user.setup.email.html)
 	1. [SMS Settings](docs.user.setup.sms.html)
 	1. [Setting up Taxes](docs.user.setup.taxes.html)
-	1. [Price Lists](docs.user.setup.price_lists.html)
+	1. [Price Lists](docs.user.setup.price_list.html)
 	1. [Adding Opening Entries](docs.user.setup.opening.html)
 	1. [POS Setting](docs.user.setup.pos_setting.html)
 	1. [Third Party Backups](docs.user.setup.third_party_backups.html)	
 1. [Selling](docs.user.selling.html)
-	1. Selling Setup
+	1. [Selling Setup](docs.user.selling.selling_setup.html)
 		1. [Customer Group](docs.user.selling.customer_groups.html)
 		1. [Territory](docs.user.selling.territory.html)
 		1. [Sales Partner](docs.user.selling.sales_partner.html)
 		1. [Sales Person](docs.user.selling.sales_person.html)
 		1. [Campaign](docs.user.selling.campaign.html)
 		1. [Terms and Conditions](docs.user.selling.terms.html)
-		1. [Price Lists](docs.user.setup.price_lists.html)
+		1. [Price Lists](docs.user.setup.price_list.html)
+		1. [Discount](docs.user.selling.discount.html)
 	1. [Customers](docs.user.selling.customer.html)
 	1. [Lead](docs.user.selling.lead.html)
 	1. [Opportunity](docs.user.selling.opportunity.html)
@@ -73,7 +74,7 @@ Contents
 	1. [Supplier Quotation](docs.user.buying.supplier_quotation.html)
 	1. [Purchase Order](docs.user.buying.purchase_order.html)
 	1. [Purchase Taxes](docs.user.buying.purchase_taxes.html)
-	1. [Price Lists](docs.user.setup.price_lists.html)
+	1. [Price Lists](docs.user.setup.price_list.html)
 	1. [Sub Contracting](docs.user.stock.sub_contracting.html)
 1. [Stock (Inventory)](docs.user.stock.html)
 	1. [Warehouse](docs.user.stock.warehouse.html)
@@ -89,7 +90,7 @@ Contents
 	1. [Projected Quantity](docs.user.stock.projected_quantity.html)
 	1. [Accounting for Stock](docs.user.stock.accounting_for_stock.html)
 	1. [Perpetual Inventory](docs.user.stock.perpetual_inventory.html)
-1. [Accounting](docs.user.accounting.html)
+1. [Accounts](docs.user.accounts.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)
 	1. [Sales Invoice](docs.user.accounts.sales_invoice.html)
@@ -100,7 +101,7 @@ Contents
 	1. [Period Closing](docs.user.accounts.closing.html)
 	1. [Accounting Reports](docs.user.accounts.reports.html)
 	1. [Upload Journal Entries in Bulk](docs.user.accounts.voucher_import.html)
-	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)
+	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)	
 1. [Human Resources (HR)](docs.user.hr.html)
 	1. [HR Setup](docs.user.hr.setup.html)
 	1. [Employee](docs.user.hr.employee.html)
@@ -137,6 +138,6 @@ Contents
 1. [Customize](docs.user.customize.html)
 	1. [Custom Fields](docs.user.customize.custom_field.html)
 	1. [Customize Form](docs.user.customize.custom_form.html)
-	1. [Hide / Unhide modules](docs.user.customize.module.html)
+	1. [Hide / Unhide modules](docs.user.customize.hide_unhide.html)
 	1. [Print Formats](docs.user.customize.print_formats.html)
 	1. [Custom Scripts](docs.user.customize.custom_scripts.html)

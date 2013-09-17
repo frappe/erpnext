@@ -55,7 +55,5 @@ class DocType(TransactionBase):
 					self.doc.is_primary_contact = 1
 
 	def on_trash(self):
-		webnotes.conn.sql("""update tabCommunication set contact='' where contact=%s""",
-			self.doc.name)
 		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
 			self.doc.name)
