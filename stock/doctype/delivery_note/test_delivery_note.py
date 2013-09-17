@@ -7,7 +7,7 @@ import unittest
 import webnotes
 import webnotes.defaults
 from webnotes.utils import cint
-from stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, test_records as pr_test_records
+from stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, set_perpetual_inventory, test_records as pr_test_records
 
 class TestDeliveryNote(unittest.TestCase):
 	def _insert_purchase_receipt(self, item_code=None):
@@ -41,7 +41,7 @@ class TestDeliveryNote(unittest.TestCase):
 	
 	def test_delivery_note_no_gl_entry(self):
 		self.clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 0)
 		
 		self._insert_purchase_receipt()
@@ -65,8 +65,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 	def test_delivery_note_gl_entry(self):
 		self.clear_stock_account_balance()
-		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 		
@@ -76,8 +75,8 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", dn.doclist[1].warehouse, 
-			"account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", 
+			{"master_name": dn.doclist[1].warehouse})
 		
 		from accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
@@ -118,12 +117,11 @@ class TestDeliveryNote(unittest.TestCase):
 					
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
-		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 			
 	def test_delivery_note_gl_entry_packing_item(self):
 		self.clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 		
 		self._insert_purchase_receipt()
 		self._insert_purchase_receipt("_Test Item Home Desktop 100")
@@ -132,8 +130,8 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.doclist[1].item_code = "_Test Sales BOM Item"
 		dn.doclist[1].qty = 1
 	
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", dn.doclist[1].warehouse, 
-			"account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", 
+			{"master_name": dn.doclist[1].warehouse})
 		
 		from accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
@@ -158,7 +156,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
 		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		
 	def test_serialized(self):
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item

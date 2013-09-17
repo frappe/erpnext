@@ -23,7 +23,7 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "charge")
-		
+					
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
 			if not (self.doc.contact_person and self.doc.customer_address and self.doc.customer_name):

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:23:30", 
+  "modified": "2013-09-16 12:21:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -162,7 +162,7 @@
   "label": "Account Type", 
   "oldfieldname": "account_type", 
   "oldfieldtype": "Select", 
-  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
+  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable\nWarehouse", 
   "permlevel": 0, 
   "search_index": 0
  }, 

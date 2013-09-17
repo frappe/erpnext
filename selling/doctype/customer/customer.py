@@ -68,9 +68,9 @@ class DocType(TransactionBase):
 				ac_bean.ignore_permissions = True
 				ac_bean.insert()
 				
-				msgprint("Account Head: %s created" % ac_bean.doc.name)
+				msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
 		else :
-			msgprint("Please Select Company under which you want to create account head")
+			msgprint(_("Please Select Company under which you want to create account head"))
 
 	def update_credit_days_limit(self):
 		webnotes.conn.sql("""update tabAccount set credit_days = %s, credit_limit = %s 

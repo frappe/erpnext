@@ -6,10 +6,12 @@ import unittest, json
 from webnotes.utils import flt, cint
 from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
 from accounts.utils import get_stock_and_account_difference
+from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = webnotes.bean(copy=test_records[0])
+		w.doc.is_pos = 0
 		w.insert()
 		w.submit()
 		return w
@@ -93,7 +95,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.doclist[1].ref_rate = 1
 		si.doclist[2].export_rate = 3
 		si.doclist[2].ref_rate = 3
-		si.run_method("calculate_taxes_and_totals")
 		si.insert()
 		
 		expected_values = {
@@ -259,6 +260,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_payment(self):
 		w = self.make()
+		
 		from accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
@@ -298,8 +300,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"Batched for Billing")
 			
 	def test_sales_invoice_gl_entry_without_aii(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 		self.clear_stock_account_balance()
+		set_perpetual_inventory(0)
 		si = webnotes.bean(copy=test_records[1])
 		si.insert()
 		si.submit()
@@ -331,10 +333,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 		
 	def test_pos_gl_entry_with_aii(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("delete from `tabGL Entry`")
-		webnotes.conn.sql("delete from `tabBin`")
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		self.clear_stock_account_balance()
+		set_perpetual_inventory()
 		
 		self._insert_purchase_receipt()
 		self._insert_pos_settings()
@@ -359,18 +359,19 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
 		
 		# check gl entries
-		
 		gl_entries = webnotes.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
+		
+		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
 			[pos[1]["income_account"], 0.0, 500.0],
 			[pos[2]["account_head"], 0.0, 80.0],
 			[pos[3]["account_head"], 0.0, 50.0],
-			["_Test Account Stock In Hand - _TC", 0.0, 75.0],
+			[stock_in_hand, 0.0, 75.0],
 			[pos[1]["expense_account"], 75.0, 0.0],
 			[si.doc.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
@@ -389,12 +390,13 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertFalse(gle)
 		
-		self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
+		self.assertFalse(get_stock_and_account_difference([stock_in_hand]))
 		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		
-	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):	
+		self.clear_stock_account_balance()
+		set_perpetual_inventory()
 				
 		si_copy = webnotes.copy_doclist(test_records[1])
 		si_copy[1]["item_code"] = None
@@ -417,12 +419,12 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][0], gle.account)
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
-				
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
-	
-	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
+		set_perpetual_inventory(0)
+	
+	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):
+		self.clear_stock_account_balance()
+		set_perpetual_inventory()
 		si_copy = webnotes.copy_doclist(test_records[1])
 		si_copy[1]["item_code"] = "_Test Non Stock Item"
 		si = webnotes.bean(si_copy)
@@ -445,7 +447,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
 				
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		
 	def _insert_purchase_receipt(self):
 		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \

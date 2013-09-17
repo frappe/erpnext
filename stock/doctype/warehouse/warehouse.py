@@ -6,7 +6,7 @@ import webnotes
 
 from webnotes.utils import cint, flt, validate_email_add
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -23,21 +23,47 @@ class DocType:
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
-				
-		self.account_mandatory()
 		
-	def account_mandatory(self):
-		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
-			sle_exists = webnotes.conn.get_value("Stock Ledger Entry", {"warehouse": self.doc.name})
-			if not self.doc.account and (self.doc.__islocal or not sle_exists):
-				webnotes.throw(_("Asset/Expense Account mandatory"))
+		self.validate_parent_account()
 				
-			if not self.doc.__islocal and sle_exists:
-				old_account = webnotes.conn.get_value("Warehouse", self.doc.name, "account")
-				if old_account != self.doc.account:
-					webnotes.throw(_("Account can not be changed/assigned/removed as \
-						stock transactions exist for this warehouse"))
+	def on_update(self):
+		self.create_account_head()
 						
+	def create_account_head(self):
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+					"master_name": self.doc.name}):
+				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
+						{"warehouse": self.doc.name}):
+					ac_bean = webnotes.bean({
+						"doctype": "Account",
+						'account_name': self.doc.warehouse_name, 
+						'parent_account': self.doc.create_account_under, 
+						'group_or_ledger':'Ledger', 
+						'company':self.doc.company, 
+						"account_type": "Warehouse",
+						"master_name": self.doc.name,
+						"freeze_account": "No"
+					})
+					ac_bean.ignore_permissions = True
+					ac_bean.insert()
+					
+					msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
+	
+	def validate_parent_account(self):
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) and \
+			not self.doc.create_account_under:
+				parent_account = webnotes.conn.get_value("Account", 
+					{"account_name": "Stock Assets", "company": self.doc.company})
+				if parent_account:
+					self.doc.create_account_under = parent_account
+				else:
+					webnotes.throw(_("Please enter account group under which account \
+						for warehouse ") + self.doc.name +_(" will be created"))
+			
+	def on_rename(self, new, old):
+		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": old}, 
+			"master_name", new)
 
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
@@ -51,6 +77,15 @@ class DocType:
 		from webnotes.model import rename_doc
 		link_fields = rename_doc.get_link_fields('Warehouse')
 		rename_doc.update_link_field_values(link_fields, self.doc.name, self.doc.merge_with)
+		
+		account_link_fields = rename_doc.get_link_fields('Account')
+		old_warehouse_account = webnotes.conn.get_value("Account", {"master_name": self.doc.name})
+		new_warehouse_account = webnotes.conn.get_value("Account", 
+			{"master_name": self.doc.merge_with})
+		rename_doc.update_link_field_values(account_link_fields, old_warehouse_account, 
+			new_warehouse_account)
+			
+		webnotes.conn.delete_doc("Account", old_warehouse_account)
 		
 		for item_code in items:
 			self.repost(item_code[0], self.doc.merge_with)
@@ -159,6 +194,11 @@ class DocType:
 					% (self.doc.name, d['item_code']), raise_exception=1)
 			else:
 				sql("delete from `tabBin` where name = %s", d['name'])
+				
+		warehouse_account = webnotes.conn.get_value("Account", 
+			{"account_type": "Warehosue", "master_name": self.doc.name})
+		if warehouse_account:
+			webnotes.delete_doc("Account", warehouse_account)
 				
 		# delete cancelled sle
 		if sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):

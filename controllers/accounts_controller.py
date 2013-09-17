@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
-from setup.utils import get_company_currency, get_price_list_currency
+from setup.utils import get_company_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
@@ -13,7 +13,6 @@ import json
 class AccountsController(TransactionBase):
 	def validate(self):
 		self.set_missing_values(for_validate=True)
-		
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -54,35 +53,37 @@ class AccountsController(TransactionBase):
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
 	def set_price_list_currency(self, buying_or_selling):
-		company_currency = get_company_currency(self.doc.company)
-		fieldname = buying_or_selling.lower() + "_price_list"
-		# TODO - change this, since price list now has only one currency allowed
-		if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname) and \
-			not self.doc.price_list_currency:
-				self.doc.fields.update(get_price_list_currency(self.doc.fields.get(fieldname)))
-				
-				if self.doc.price_list_currency:
-					if not self.doc.plc_conversion_rate:
-						if self.doc.price_list_currency == company_currency:
-							self.doc.plc_conversion_rate = 1.0
-						else:
-							exchange = self.doc.price_list_currency + "-" + company_currency
-							self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-								exchange, "exchange_rate"))
-						
-					if not self.doc.currency:
-						self.doc.currency = self.doc.price_list_currency
-						self.doc.conversion_rate = self.doc.plc_conversion_rate
-						
 		if self.meta.get_field("currency"):
-			if self.doc.currency and self.doc.currency != company_currency:
-				if not self.doc.conversion_rate:
-					exchange = self.doc.currency + "-" + company_currency
-					self.doc.conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-						exchange, "exchange_rate"))
-			else:
-				self.doc.conversion_rate = 1
-						
+			company_currency = get_company_currency(self.doc.company)
+			
+			# price list part
+			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
+				else "buying_price_list"
+			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
+				if not self.doc.price_list_currency:
+					self.doc.price_list_currency = webnotes.conn.get_value("Price List",
+						self.doc.fields.get(fieldame), "currency")
+				
+				if self.doc.price_list_currency == company_currency:
+					self.doc.plc_conversion_rate = 1.0
+				elif not self.doc.plc_conversion_rate:
+					self.doc.plc_conversion_rate = self.get_exchange_rate(
+						self.doc.price_list_currency, company_currency)
+			
+			# currency
+			if not self.doc.currency:
+				self.doc.currency = self.doc.price_list_currency
+				self.doc.conversion_rate = self.doc.plc_conversion_rate
+			elif self.doc.currency == company_currency:
+				self.doc.conversion_rate = 1.0
+			elif not self.doc.conversion_rate:
+				self.doc.conversion_rate = self.get_exchange_rate(self.doc.currency,
+					company_currency)
+
+	def get_exchange_rate(self, from_currency, to_currency):
+		exchange = "%s-%s" % (from_currency, to_currency)
+		return flt(webnotes.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
+
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""
 		for item in self.doclist.get({"parentfield": self.fname}):

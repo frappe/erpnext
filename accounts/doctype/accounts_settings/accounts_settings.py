@@ -13,5 +13,9 @@ class DocType:
 		self.doc, self.doclist = d, dl
 
 	def on_update(self):
-		for key in ["auto_accounting_for_stock"]:
-			webnotes.conn.set_default(key, self.doc.fields.get(key, ''))
+		webnotes.conn.set_default("auto_accounting_for_stock", self.doc.auto_accounting_for_stock)
+		
+		if self.doc.auto_accounting_for_stock:
+			for wh in webnotes.conn.sql("select name from `tabWarehouse`"):
+				wh_bean = webnotes.bean("Warehouse", wh[0])
+				wh_bean.save()

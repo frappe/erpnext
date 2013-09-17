@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-08-01 15:27:49", 
+  "modified": "2013-09-16 10:45:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,9 +28,9 @@
   "parent": "Warehouse", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
-  "submit": 0
+  "report": 1
  }, 
  {
   "doctype": "DocType", 
@@ -71,11 +71,12 @@
   "search_index": 1
  }, 
  {
-  "description": "This account will be used for perpetual accounting for inventory e.g. Stock-in-Hand, Fixed Asset Account etc", 
+  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
+  "description": "Account for the warehouse (Perpetual Inventory) will be created under this Account.", 
   "doctype": "DocField", 
-  "fieldname": "account", 
+  "fieldname": "create_account_under", 
   "fieldtype": "Link", 
-  "label": "Account", 
+  "label": "Create Account Under", 
   "options": "Account", 
   "permlevel": 0
  }, 
@@ -231,16 +232,8 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material Master Manager", 
-  "write": 1
- }, 
- {
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
+  "submit": 0, 
   "write": 1
  }, 
  {
@@ -248,26 +241,20 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Material Manager", 
-  "write": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
   "role": "Material User", 
+  "submit": 0, 
   "write": 0
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "System Manager", 
-  "write": 1
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
  }
 ]

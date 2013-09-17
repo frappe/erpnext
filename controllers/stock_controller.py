@@ -16,7 +16,7 @@ class StockController(AccountsController):
 			return
 
 		if self.doc.docstatus==1:
-			gl_entries = self.get_gl_entries_for_stock()			
+			gl_entries = self.get_gl_entries_for_stock()
 			make_gl_entries(gl_entries)
 		else:	
 			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
@@ -31,12 +31,12 @@ class StockController(AccountsController):
 			default_cost_center)
 		
 		gl_list = []
+		warehouse_with_no_account = []
 		for detail in voucher_details:
 			sle_list = stock_ledger.get(detail.name)
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
-						
 						# from warehouse account
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse],
@@ -54,6 +54,12 @@ class StockController(AccountsController):
 							"remarks": self.doc.remarks or "Accounting Entry for Stock",
 							"credit": sle.stock_value_difference
 						}))
+					elif sle.warehouse not in warehouse_with_no_account:
+						warehouse_with_no_account.append(sle.warehouse)
+						
+		if warehouse_with_no_account:				
+			msgprint(_("No accounting entries for following warehouses") + ": \n" + 
+				"\n".join(warehouse_with_no_account))
 		
 		return process_gl_map(gl_list)
 			
@@ -80,9 +86,11 @@ class StockController(AccountsController):
 		return stock_ledger
 		
 	def get_warehouse_account(self):
-		warehouse_account = dict(webnotes.conn.sql("""select name, account from `tabWarehouse`
-			where ifnull(account, '') != ''"""))
-				
+		for d in webnotes.conn.sql("select name from tabWarehouse"):
+			webnotes.bean("Warehouse", d[0]).save()
+
+		warehouse_account = dict(webnotes.conn.sql("""select master_name, name from tabAccount 
+			where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 		return warehouse_account
 		
 	def update_gl_entries_after(self):

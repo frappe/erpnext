@@ -59,14 +59,12 @@ class DocType:
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
-			wh = {
+			webnotes.bean({
 				"doctype":"Warehouse",
 				"warehouse_name": whname,
 				"company": self.doc.name,
-			}
-			wh.update({"account": "Stock In Hand - " + self.doc.abbr})
-				
-			webnotes.bean(wh).insert()
+				"create_account_under": "Stock Assets - " + self.doc.abbr
+			}).insert()
 			
 	def create_default_web_page(self):
 		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
@@ -116,7 +114,6 @@ class DocType:
 					['Securities and Deposits','Current Assets','Group','No','','Debit',self.doc.name,''],
 						['Earnest Money','Securities and Deposits','Ledger','No','','Debit',self.doc.name,''],
 					['Stock Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
-						['Stock In Hand','Stock Assets','Ledger','No','','Debit',self.doc.name,''],
 					['Tax Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','No','','Debit',self.doc.name,''],
 					['Capital Equipments','Fixed Assets','Ledger','No','Fixed Asset Account','Debit',self.doc.name,''],
@@ -289,9 +286,6 @@ class DocType:
 		"""
 		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
 		if not rec:
-			# delete gl entry
-			webnotes.conn.sql("delete from `tabGL Entry` where company = %s", self.doc.name)
-
 			#delete tabAccount
 			webnotes.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
 			
@@ -299,6 +293,9 @@ class DocType:
 			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
 			#delete cost center
 			webnotes.conn.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
+			
+		if not webnotes.conn.get_value("Stock Ledger Entry", {"company": self.doc.name}):
+			webnotes.conn.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
 			
 		webnotes.defaults.clear_default("company", value=self.doc.name)
 			

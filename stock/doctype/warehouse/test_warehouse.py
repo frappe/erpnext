@@ -6,18 +6,18 @@ test_records = [
 		"doctype": "Warehouse",
 		"warehouse_name": "_Test Warehouse",
 		"company": "_Test Company", 
-		"account": "_Test Account Stock In Hand - _TC"
+		"create_account_under": "Stock Assets - _TC"
 	}],
 	[{
 		"doctype": "Warehouse",
 		"warehouse_name": "_Test Warehouse 1",
 		"company": "_Test Company",
-		"account": "_Test Account Fixed Assets - _TC"
+		"create_account_under": "Fixed Assets - _TC"
 	}],
 	[{
 		"doctype": "Warehouse",
 		"warehouse_name": "_Test Warehouse 2",
-		"account": "_Test Account Stock In Hand - _TC1",
+		"create_account_under": "Stock Assets - _TC",
 		"company": "_Test Company 1"
 	}, {
 		"doctype": "Warehouse User",

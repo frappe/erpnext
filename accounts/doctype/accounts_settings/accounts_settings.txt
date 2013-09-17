@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 15:49:57", 
   "docstatus": 0, 
-  "modified": "2013-08-28 18:55:43", 
+  "modified": "2013-09-16 14:24:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,7 +44,7 @@
   "doctype": "DocField", 
   "fieldname": "auto_accounting_for_stock", 
   "fieldtype": "Check", 
-  "label": "Make Accounting Entry For Every Stock Entry"
+  "label": "Make Accounting Entry For Every Stock Movement"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
