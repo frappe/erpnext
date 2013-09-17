@@ -10,7 +10,7 @@ You can Customize Forms by changing its layout, making certain fields mandatory,
 > Setup > Customize ERPNext > Customize Forms
 
 
-![Customize Forms](img/customize-form.png)
+![Customize Forms](img/customize-form-1.png)
 
 
 Select the Form you want to customize and the fields table will be updated with the fields from that form. Here you can:
@@ -23,5 +23,13 @@ Select the Form you want to customize and the fields table will be updated with 
 - Add / edit “Select” Options. (for example, you can add more sources in Leads etc).
 
 You can also allow attachments, set max number of attachments and set the default Print Format.
+
+
+![Customize Forms](img/customize-form-2.png)
+
+
+<br>
+
+
 
 > Though we want you to do everything you can to customize your ERP based on your business needs, we recommend that you do not make “wild” changes to the forms. This is because, these changes may affect certain operations and may mess up your forms. Make small changes and see its effect before doing some more.
