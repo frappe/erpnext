@@ -62,6 +62,56 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
+
+		// Show POS button only if it is enabled from features setup
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+			this.pos_btn();
+	},
+
+	pos_btn: function() {
+		if(this.$pos_btn) 
+			this.$pos_btn.remove();
+
+		if(!this.pos_active) {
+			var btn_label = wn._("POS View"),
+				icon = "icon-desktop";
+		} else {
+			var btn_label = wn._(this.frm.doctype) + wn._(" View"),
+				icon = "icon-file-text";
+
+
+			if (this.frm.doc.docstatus===0) {
+				this.frm.clear_custom_buttons();
+			}
+		}
+		var me = this;
+
+		this.$pos_btn = this.frm.add_custom_button(btn_label, function() {
+			me.toggle_pos();
+			me.pos_btn();
+		}, icon);
+	},
+
+	toggle_pos: function(show) {
+		if (!this.frm.doc.selling_price_list)
+			msgprint(wn._("Please select Price List"))
+		else {
+			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
+
+			// make pos
+			if(!this.pos) {
+				this.frm.layout.add_view("pos");
+				this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+			}
+
+			// toggle view
+			this.frm.layout.set_view(this.pos_active ? "" : "pos");
+			this.pos_active = !this.pos_active;
+
+			// refresh
+			if(this.pos_active)
+				this.frm.pos.refresh();
+		}
 	},
 	
 	validate: function() {
@@ -418,10 +468,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
 			false;
 		
-		// if(!valid_conversion_rate) {
-		// 	wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-		// 		" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
-		// }
+		if(!valid_conversion_rate) {
+			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
+				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+		}
 	},
 	
 	calculate_taxes_and_totals: function() {
