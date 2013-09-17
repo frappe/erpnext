@@ -94,6 +94,11 @@ class DocType(DocListController):
 		price_list_currency_map = webnotes.conn.get_values("Price List", 
 			[d.selling_price_list for d in self.doclist.get({"parentfield": "price_lists"})],
 			"currency")
+		
+		# check if all price lists have a currency
+		for price_list, currency in price_list_currency_map.items():
+			if not currency:
+				webnotes.throw("%s: %s" % (_("Currency is missing for Price List"), price_list))
 			
 		expected_to_exist = [currency + "-" + company_currency 
 			for currency in price_list_currency_map.values()
