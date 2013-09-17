@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 $(document).ready(function() {
-	var item_code = $('[itemscope] [itemprop="name"]').text().trim();
+	var item_code = $('[itemscope] [itemprop="productID"]').text().trim();
 	var qty = 0;
 	
 	wn.call({
