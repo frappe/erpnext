@@ -78,11 +78,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		} else {
 			var btn_label = wn._(this.frm.doctype) + wn._(" View"),
 				icon = "icon-file-text";
-
-
-			if (this.frm.doc.docstatus===0) {
-				this.frm.clear_custom_buttons();
-			}
 		}
 		var me = this;
 

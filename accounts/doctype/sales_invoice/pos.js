@@ -96,6 +96,7 @@ erpnext.POS = Class.extend({
 	},
 	make_customer: function() {
 		var me = this;
+		console.log(this.frm);
 		this.customer = wn.ui.form.make_control({
 			df: {
 				"fieldtype": "Link",
@@ -109,7 +110,7 @@ erpnext.POS = Class.extend({
 		this.customer.make_input();
 		this.customer.$input.on("change", function() {
 			if(!me.customer.autocomplete_open)
-				wn.model.set_value("Sales Invoice", me.frm.docname, "customer", this.value);
+				wn.model.set_value(this.frm.doctype, me.frm.docname, "customer", this.value);
 		});
 	},
 	make_item_group: function() {
@@ -221,8 +222,8 @@ erpnext.POS = Class.extend({
 
 		// check whether the item is already added
 		if (no_of_items != 0) {
-			$.each(wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
-			"Sales Invoice"), function(i, d) {
+			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
+			this.frm.doctype), function(i, d) {
 				if (d.item_code == item_code)
 					caught = true;
 			});
@@ -233,15 +234,15 @@ erpnext.POS = Class.extend({
 			me.update_qty(item_code, 1);
 		}
 		else {
-			var child = wn.model.add_child(me.frm.doc, "Sales Invoice Item", "entries");
+			var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", "entries");
 			child.item_code = item_code;
 			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
 		}
 	},
 	update_qty: function(item_code, qty, textbox_qty) {
 		var me = this;
-		$.each(wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
-		"Sales Invoice"), function(i, d) {
+		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
+		this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
 				if (textbox_qty) {
 					if (qty == 0 && d.item_code == item_code)
@@ -265,8 +266,8 @@ erpnext.POS = Class.extend({
 		// add items
 		var $items = me.wrapper.find("#cart tbody").empty();
 
-		$.each(wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
-			"Sales Invoice"), function(i, d) {
+		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
+			this.frm.doctype), function(i, d) {
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
 					<td><input type="text" value="%(qty)s" \
@@ -285,7 +286,7 @@ erpnext.POS = Class.extend({
 
 		// taxes
 		var taxes = wn.model.get_children("Sales Taxes and Charges", this.frm.doc.name, "other_charges", 
-			"Sales Invoice");
+			this.frm.doctype);
 		$(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
@@ -378,8 +379,8 @@ erpnext.POS = Class.extend({
 			}
 		}
 		
-		var child = wn.model.get_children("Sales Invoice Item", this.frm.doc.name, "entries", 
-		"Sales Invoice");
+		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
+		this.frm.doctype);
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
 				if (d.item_code == selected_items[i]) {

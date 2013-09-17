@@ -78,7 +78,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
-		if (doc.docstatus===0) {
+		if (doc.docstatus===0 && !this.pos_active) {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}
