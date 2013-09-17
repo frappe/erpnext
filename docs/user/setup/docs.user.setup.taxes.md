@@ -3,7 +3,7 @@
 	"_label": "Setting up Taxes"
 }
 ---
-One of the primary motivator for compulsory use of accounting tools is calculation of Taxes. You may or may not make money but your government will (to help your country be safe and prosperous). And if you don’t do your taxes correctly, they get very unhappy. Ok, philosophy aside, ERPNext allows you to make configurable tax templates that you can apply to your sales or purchase.
+One of the primary motivator for compulsory use of accounting tools is calculation of Taxes. You may or may not make money but your government will (to help your country be safe and prosperous). And if you don’t calculate your taxes correctly, they get very unhappy. Ok, philosophy aside, ERPNext allows you to make configurable tax templates that you can apply to your sales or purchase.
 
 ### Tax Accounts
 
@@ -17,7 +17,12 @@ The way ERPNext sets up taxes is via templates. Other types of charges that may 
 
 To create a new sales tax template called Sales Taxes and Charges Master, you have to go to:
 
-> Selling > Setup (sidebar) > Sales Taxes and Charge Master
+> Setup > Accounts > Sales Taxes and Charge Master
+
+
+![Sales Tax Master](img/sales-tax-master.png)
+
+
 
 When you create a new master, you will have to add a row for each tax type.
 
@@ -45,6 +50,7 @@ Once you setup your template, you can select this in your sales transactions.
 Similar to your Sales Taxes and Charges Master is the Purchase Taxes and Charges Master.
 
 This is the tax template that you can use in your Purchase Orders and Purchase Invoices. If you have value added taxes (VAT), where you pay to the government the difference between your incoming and outgoing taxes, you can select the same Account that you use for sales taxes.
+For more details see [Purchase Taxes](docs.user.buying.purchase_taxes.html)
 
 The columns in this table are similar to the Sales Taxes and Charges Master with the difference as follows:
 

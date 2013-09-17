@@ -149,6 +149,7 @@ def install_python_modules():
 		exec_in_shell("easy_install pip")
 	
 	exec_in_shell("pip install --upgrade pip")
+	exec_in_shell("pip install --upgrade setuptools")
 	exec_in_shell("pip install --upgrade virtualenv")
 	exec_in_shell("pip install -q %s" % python_modules)
 	

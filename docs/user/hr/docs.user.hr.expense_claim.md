@@ -9,6 +9,12 @@ To make a new Expense Claim, go to:
 
 > HR > Expense Claim > New Expense Claim
 
+
+![Expense Claim](img/expense-claim.png)
+
+
+
+
 Set the Employee ID, date and the list of expenses that are to be claimed and “Submit” the record.
 
 ### Approving Expenses
