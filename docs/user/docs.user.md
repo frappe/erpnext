@@ -98,7 +98,6 @@ Contents
 	1. [Opening Entry](docs.user.accounts.opening_entry.html)
 	1. [Period Closing](docs.user.accounts.closing.html)
 	1. [Accounting Reports](docs.user.accounts.reports.html)
-	1. [Upload Journal Entries in Bulk](docs.user.accounts.voucher_import.html)
 	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)	
 1. [Human Resources (HR)](docs.user.hr.html)
 	1. [HR Setup](docs.user.hr.setup.html)

@@ -9,9 +9,13 @@ You can Customize Forms by changing its layout, making certain fields mandatory,
 
 > Setup > Customize ERPNext > Customize Forms
 
+
+![Customize Forms](img/customize-form.png)
+
+
 Select the Form you want to customize and the fields table will be updated with the fields from that form. Here you can:
 
-- Change field types (for e.g. you want to increase the number of decimal places, you can convert come fields from Float to Currency).
+- Change field types (for e.g. you want to increase the number of decimal places, you can convert some fields from Float to Currency).
 - Change labels to suit your industry / language.
 - Make certain fields mandatory.
 - Hide certain fields.

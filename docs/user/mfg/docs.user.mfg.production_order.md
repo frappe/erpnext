@@ -9,6 +9,11 @@ The **Production Order** is generated directly from the **Production Planning To
 
 > Manufacturing > Production Order > New Production Order
 
+
+![Production Order](img/production-order.png)
+
+
+
 - Select the Item to be produced (must have a Bill of Materials).
 - Select the BOM
 - Select Quantities
@@ -19,9 +24,13 @@ and “Submit” the Production Order.
 
 Once you “Submit”, you will see two more buttons:
 
-1. Make Transfer: This will create a Stock Entry with all the Items required to complete this Production Order to be added to the WIP Warehouse. (this will add sub-Items with BOM as one Item or explode their children based on your setting above). 
-1. Back Flush: This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.
+![Production Order](img/production-order-2.png)
 
-When you Back Flush your Items back to the Finished Goods Warehouse, the “Produced Quantity” will be updated in the Production Order.
 
-> Tip: You can also partially complete a Production Order by updating the Finished Goods stock creating a Stock Entry and selecting “Back flush” as the type.
+1. Transfer Raw Material: This will create a Stock Entry with all the Items required to complete this Production Order to be added to the WIP Warehouse. (this will add sub-Items with BOM as one Item or explode their children based on your setting above). 
+1. Update Finished Goods: This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.
+
+> Tip: You can also partially complete a Production Order by updating the Finished Goods stock creating a Stock Entry.
+
+When you Update Finished Goods to the Finished Goods Warehouse, the “Produced Quantity” will be updated in the Production Order.
+

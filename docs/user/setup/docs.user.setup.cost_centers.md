@@ -29,6 +29,10 @@ To setup your Chart of Cost Centers go to:
 
 > Accounts > Chart of Cost Centers
 
+
+![Chart of Cost Center](img/chart-of-cost-centers.png)
+
+
 Cost centers help you in one more activity, budgeting.
 
 ### Budgeting
