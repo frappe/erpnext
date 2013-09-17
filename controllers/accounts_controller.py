@@ -62,7 +62,7 @@ class AccountsController(TransactionBase):
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
 				if not self.doc.price_list_currency:
 					self.doc.price_list_currency = webnotes.conn.get_value("Price List",
-						self.doc.fields.get(fieldame), "currency")
+						self.doc.fields.get(fieldname), "currency")
 				
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0

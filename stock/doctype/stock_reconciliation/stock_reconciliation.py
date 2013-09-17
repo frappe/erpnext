@@ -295,12 +295,12 @@ class DocType(StockController):
 
 		webnotes.conn.set(self.doc, "stock_value_difference", json.dumps(stock_value_difference))
 			
-	def get_gl_entries_for_stock(self):
+	def get_gl_entries_for_stock(self, warehouse_account=None):
 		if not self.doc.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 			
-		return super(DocType, self).get_gl_entries_for_stock(self.doc.expense_account, 
-			self.doc.cost_center)
+		return super(DocType, self).get_gl_entries_for_stock(warehouse_account, 		
+			self.doc.expense_account, self.doc.cost_center)
 		
 			
 	def validate_expense_account(self):

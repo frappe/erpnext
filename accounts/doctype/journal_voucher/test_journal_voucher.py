@@ -34,16 +34,17 @@ class TestJournalVoucher(unittest.TestCase):
 			where against_jv=%s""", jv_invoice.doc.name))
 	
 	def test_jv_against_stock_account(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+		set_perpetual_inventory()
 		
 		jv = webnotes.bean(copy=test_records[0])
-		jv.doclist[1].account = "_Test Account Stock in Hand - _TC"
+		jv.doclist[1].account = "_Test Warehouse - _TC"
 		jv.insert()
 		
 		from accounts.general_ledger import StockAccountInvalidTransaction
 		self.assertRaises(StockAccountInvalidTransaction, jv.submit)
 
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 			
 	def test_monthly_budget_crossed_ignore(self):
 		webnotes.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")

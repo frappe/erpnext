@@ -4,7 +4,7 @@
 }
 ---
 
-The value of available inventory is treated as an Asset in company's Chart of Accounts. Depending on the type of item, it can be treated as Fixed Asset or Current Asset. To prepare Balance Sheet, you should make the accounting entries for those assets. 
+The value of available inventory is treated as an Asset in company's Chart of Accounts. Depending on the type of items, it can be treated as Fixed Asset or Current Asset. To prepare Balance Sheet, you should make the accounting entries for those assets. 
 There are generally two different methods of accounting for inventory:
 
 
@@ -12,7 +12,7 @@ There are generally two different methods of accounting for inventory:
 
 In this process, for each stock transactions system posts relevant accounting entries to sync stock balance and accounting balance. This is the default settings in ERPNext for new accounts.
 
-When you buy and receive items, those items are booked as the company’s assets (stock-in-hand / fixed-assets). When you sell and deliver those items, an expense (cost-of-goods-sold) equal to the buying cost of the items is booked. General Ledger entries are made after every transaction. This improves accuracy of Balance Sheet and Profit and Loss statement. And the value as per Stock Ledger always remains same with the relevant account balance.
+When you buy and receive items, those items are booked as the company’s assets (stock-in-hand / fixed-assets). When you sell and deliver those items, an expense (cost-of-goods-sold) equal to the buying cost of the items is booked. General Ledger entries are made after every stock transaction. This improves accuracy of Balance Sheet and Profit and Loss statement. And the value as per Stock Ledger always remains same with the relevant account balance.
 
 To check accounting entries for a particular stock transaction, please check [**examples**](docs.user.stock.perpetual_inventory.html)
 

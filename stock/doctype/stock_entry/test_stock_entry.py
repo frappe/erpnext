@@ -8,10 +8,12 @@ from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
 from stock.doctype.stock_ledger_entry.stock_ledger_entry import *
+from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		if hasattr(self, "old_default_company"):
 			webnotes.conn.set_default("company", self.old_default_company)
 
@@ -81,14 +83,14 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 		
 		mr = webnotes.bean(copy=test_records[0])
 		mr.insert()
 		mr.submit()
 		
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mr.doclist[1].t_warehouse, 
-			"account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": mr.doclist[1].t_warehouse})
 		
 		self.check_stock_ledger_entries("Stock Entry", mr.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
@@ -111,7 +113,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_material_issue_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 		
 		self._insert_material_receipt()
 		
@@ -122,8 +124,9 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 		
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mi.doclist[1].s_warehouse, 
-			"account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": mi.doclist[1].s_warehouse})
+
 		self.check_gl_entries("Stock Entry", mi.doc.name, 
 			sorted([
 				[stock_in_hand_account, 0.0, 4000.0], 
@@ -146,7 +149,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	def test_material_transfer_gl_entry(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 
 		self._insert_material_receipt()
 		
@@ -157,10 +160,12 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name, 
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", mtn.doclist[1].s_warehouse, 
-			"account")
-		fixed_asset_account = webnotes.conn.get_value("Warehouse", mtn.doclist[1].t_warehouse, 
-			"account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": mtn.doclist[1].s_warehouse})
+
+		fixed_asset_account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": mtn.doclist[1].t_warehouse})
+
 			
 		self.check_gl_entries("Stock Entry", mtn.doc.name, 
 			sorted([
@@ -180,7 +185,7 @@ class TestStockEntry(unittest.TestCase):
 				
 	def test_repack_no_change_in_valuation(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 
 		self._insert_material_receipt()
 
@@ -197,11 +202,11 @@ class TestStockEntry(unittest.TestCase):
 			order by account desc""", repack.doc.name, as_dict=1)
 		self.assertFalse(gl_entries)
 		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 		
 	def test_repack_with_change_in_valuation(self):
 		self._clear_stock_account_balance()
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		set_perpetual_inventory()
 
 		self._insert_material_receipt()
 		
@@ -210,8 +215,8 @@ class TestStockEntry(unittest.TestCase):
 		repack.insert()
 		repack.submit()
 		
-		stock_in_hand_account = webnotes.conn.get_value("Warehouse", 
-			repack.doclist[2].t_warehouse, "account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": repack.doclist[2].t_warehouse})
 			
 		self.check_gl_entries("Stock Entry", repack.doc.name, 
 			sorted([
@@ -219,7 +224,7 @@ class TestStockEntry(unittest.TestCase):
 				["Stock Adjustment - _TC", 0.0, 1000.0],
 			])
 		)
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		set_perpetual_inventory(0)
 			
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[0])

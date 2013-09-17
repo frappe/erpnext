@@ -14,18 +14,23 @@ class StockController(AccountsController):
 	def make_gl_entries(self):
 		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-
+		
+		warehouse_account = self.get_warehouse_account()
+		
 		if self.doc.docstatus==1:
-			gl_entries = self.get_gl_entries_for_stock()
+			gl_entries = self.get_gl_entries_for_stock(warehouse_account)
 			make_gl_entries(gl_entries)
 		else:	
 			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
 		
-		self.update_gl_entries_after()
+		self.update_gl_entries_after(warehouse_account)
 	
-	def get_gl_entries_for_stock(self, default_expense_account=None, default_cost_center=None):
+	def get_gl_entries_for_stock(self, warehouse_account=None, default_expense_account=None,
+			default_cost_center=None):
 		from accounts.general_ledger import process_gl_map
-		warehouse_account = self.get_warehouse_account()
+		if not warehouse_account:
+			warehouse_account = self.get_warehouse_account()
+		
 		stock_ledger = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(stock_ledger, default_expense_account, 
 			default_cost_center)
@@ -93,14 +98,17 @@ class StockController(AccountsController):
 			where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 		return warehouse_account
 		
-	def update_gl_entries_after(self):
+	def update_gl_entries_after(self, warehouse_account=None):
 		from accounts.utils import get_stock_and_account_difference
 		future_stock_vouchers = self.get_future_stock_vouchers()
 		gle = self.get_voucherwise_gl_entries(future_stock_vouchers)
+		if not warehouse_account:
+			warehouse_account = self.get_warehouse_account()
+		
 		for voucher_type, voucher_no in future_stock_vouchers:
 			existing_gle = gle.get((voucher_type, voucher_no), [])
 			voucher_obj = webnotes.get_obj(voucher_type, voucher_no)
-			expected_gle = voucher_obj.get_gl_entries_for_stock()
+			expected_gle = voucher_obj.get_gl_entries_for_stock(warehouse_account)
 			
 			if expected_gle:
 				matched = True

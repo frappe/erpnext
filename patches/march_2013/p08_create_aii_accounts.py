@@ -44,7 +44,6 @@ def add_group_accounts():
 	
 def add_ledger_accounts():
 	accounts_to_add = [
-		["Stock In Hand", "Stock Assets", "Ledger", ""],
 		["Cost of Goods Sold", "Stock Expenses", "Ledger", "Expense Account"],
 		["Stock Adjustment", "Stock Expenses", "Ledger", "Expense Account"],
 		["Expenses Included In Valuation", "Stock Expenses", "Ledger", "Expense Account"],

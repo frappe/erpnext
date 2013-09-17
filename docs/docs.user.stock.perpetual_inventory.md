@@ -4,7 +4,7 @@
 }
 ---
 
-In perpetual accounting, system creates accounting entries for each stock transactions. Hence, stock balance are always remains same as relevant account balance.
+In perpetual accounting, system creates accounting entries for each stock transactions. Hence, stock balance will always remains same as relevant account balance.
 
 ## **Activation**
 
@@ -14,22 +14,21 @@ In perpetual accounting, system creates accounting entries for each stock transa
 	- Expenses Included In Valuation
 	- Cost Center
 	
-2. Go to Setup > Accounts Settings > check "Make Accounting Entry For Every Stock Entry"
-![Activation](img/accounting-for-stock-1.png)
+2. The system will create an account head for each warehouse. Enter "Create Account Under" (account group under which account will be created) in warehouse master, based on type of items it stores (Stores, Fixed Asset Warehouse, etc).
 
-3. Enter Asset / Expense account for each warehouse depending upon type of warehouse (Stores, Fixed Asset Warehouse etc)
+3. Go to Setup > Accounts Settings > check "Make Accounting Entry For Every Stock Movement"
+![Activation](img/accounting-for-stock-1.png)
 
 
 ## **Migration from Periodic Inventory**
 
-Migration from Periodic Inventory is not a one click settings, it involves some speacial steps. As Perpetual Inventory always maintain a sync between stock and account balance, it is not possible to enable it with existing Warehouse setup. You have to create a whole new set of Warehouses, each linked to relevant account. 
+Migration from Periodic Inventory is not a one click settings, it involves some special steps. As Perpetual Inventory always maintain a sync between stock and account balance, it is not possible to enable it with existing Warehouse setup. You have to create a whole new set of Warehouses, each linked to relevant account. 
 
 Steps to be followed:
 
 - Nullify current stock-in-hand / fixed-asset account balance through Journal Voucher.
-- Create new warehouse for each existing warehouse.
-- Assign Asset / Expense account while creating new warehouse.
-- Follow Activation Step 1 & 2
+- Create new warehouse for each existing warehouse
+- Follow Activation Step 1, 2 & 3
 - Create Stock Entry (Material Transfer) to transfer available stock from existing warehouse to new warehouse
 
 >Note: System will not  post any accounting entries for existing stock transactions submitted prior to the activation of Perpetual Inventory as those old warehouses will not be linked to account.
@@ -47,11 +46,13 @@ Consider following Chart of Accounts and Warehouse setup for your company:
 >    - Accounts Receivable
 >      - Jane Doe
 >    - Stock Assets
->      - Stock In Hand
+>      - Stores
+>      - Finished Goods
+>      - Work In Progress
 >    - Tax Assets
 >      - VAT
 >  - Fixed Assets
->    - Office Equipments
+>    - Fixed Asset Warehouse
 >- Liabilities (Cr)
 >  - Current Liabilities
 >    - Accounts Payable
@@ -74,10 +75,10 @@ Consider following Chart of Accounts and Warehouse setup for your company:
   
 #### Warehouse - Account Configuration
 
->- Stores - Stock In Hand
->- Work In Progress - Stock In Hand
->- Finished Goods - Stock In Hand
->- Fixed Asset Warehouse - Office Equipments
+>- Stores
+>- Work In Progress
+>- Finished Goods
+>- Fixed Asset Warehouse
 
 ### **Purchase Receipt**
 
@@ -125,7 +126,7 @@ Consider following Chart of Accounts and Warehouse setup for your company:
 
 ![pr_general_ledger](img/accounting-for-stock-3.png)
 
-As stock balance increases through Purchase Receipt, "Stock In Hand" account has been debited and a temporary account "Stock Receipt But Not Billed" account has been credited, to maintain double entry accounting system.
+As stock balance increases through Purchase Receipt, "Store" and "Fixed Asset Warehouse" accounts have been debited and a temporary account "Stock Receipt But Not Billed" account has been credited, to maintain double entry accounting system.
 
 
 --
@@ -180,7 +181,7 @@ Here "Stock Received But Not Billed" account has been debited and nullified the 
 
 ![dn_general_ledger](img/accounting-for-stock-6.png)
 
-As item has delivered from "Stores" warehouse, "Stock In Hand" account has been credited and equal amount will be debited to the expense account "Cost of Goods Sold". The debit/credit amount is equal to the total buying cost of the selling items. And buying cost is calculated based on valuation method (FIFO / Moving Average) or serial no cost for serialized items.
+As item has delivered from "Stores" warehouse, "Stores" account has been credited and equal amount will be debited to the expense account "Cost of Goods Sold". The debit/credit amount is equal to the total buying cost of the selling items. And buying cost is calculated based on valuation method (FIFO / Moving Average) or serial no cost for serialized items.
 
 In this eample, Buying cost of RM0001 = (2200/10)*5 = 1100
 
@@ -198,7 +199,7 @@ In this eample, Buying cost of RM0001 = (2200/10)*5 = 1100
 
 ![si_general_ledger](img/accounting-for-stock-8.png)
 
-Here apart from normal account entries for invoice, "Stock In Hand" and "Cost of Goods Sold" accounts are also affected based on buying cost.
+Here apart from normal account entries for invoice, "Stores" and "Cost of Goods Sold" accounts are also affected based on buying cost.
 
 --
 
