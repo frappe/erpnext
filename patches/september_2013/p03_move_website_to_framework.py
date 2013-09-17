@@ -15,4 +15,3 @@ def execute():
 	old_path = os.path.join(get_base_path(), "app", "website")
 	if os.path.exists(old_path):
 		shutil.rmtree(old_path)
-	
