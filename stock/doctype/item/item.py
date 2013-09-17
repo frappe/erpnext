@@ -11,7 +11,6 @@ from webnotes import msgprint, _
 
 from webnotes.model.controller import DocListController
 
-class PriceListCurrencyMismatch(Exception): pass
 class WarehouseNotSet(Exception): pass
 
 class DocType(DocListController):
@@ -32,9 +31,8 @@ class DocType(DocListController):
 		self.check_stock_uom_with_bin()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
-		self.valiadte_item_type()
+		self.validate_item_type()
 		self.check_for_active_boms()
-		self.validate_price_lists()
 		self.fill_customer_code()
 		self.check_item_tax()
 		self.validate_barcode()
@@ -109,7 +107,7 @@ class DocType(DocListController):
 					As UOM: %s is not Stock UOM of Item: %s""" % 
 					(d.uom, d.uom, self.doc.name)), raise_exception=1)
 					
-	def valiadte_item_type(self):
+	def validate_item_type(self):
 		if cstr(self.doc.is_manufactured_item) == "No":
 			self.doc.is_pro_applicable = "No"
 
@@ -147,22 +145,7 @@ class DocType(DocListController):
 					'is_pro_applicable'		 :'Allow Production Order'}
 			for d in fl:
 				if cstr(self.doc.fields.get(d)) != 'Yes':
-					_check_for_active_boms(fl[d])
-			
-	def validate_price_lists(self):
-		price_lists=[]
-		for d in getlist(self.doclist,'ref_rate_details'):
-			if d.price_list in price_lists:
-				msgprint(_("Cannot have two prices for same Price List") + ": " + d.price_list,
-					raise_exception= webnotes.DuplicateEntryError)
-			else:
-				price_list_currency = webnotes.conn.get_value("Price List", d.price_list, "currency")
-				if price_list_currency and d.ref_currency != price_list_currency:
-					msgprint(_("Currency does not match Price List Currency for Price List") \
-						+ ": " + d.price_list, raise_exception=PriceListCurrencyMismatch)
-				
-				price_lists.append(d.price_list)
-			
+					_check_for_active_boms(fl[d])			
 					
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """

@@ -178,7 +178,7 @@ class DocType(AccountsController):
 			if account_type == 'Bank or Cash':
 				company_currency = get_company_currency(self.doc.company)
 				amt = flt(d.debit) and d.debit or d.credit	
-				self.doc.total_amount = company_currency +' '+ cstr(amt)
+				self.doc.total_amount = company_currency + ' ' + cstr(amt)
 				from webnotes.utils import money_in_words
 				self.doc.total_amount_in_words = money_in_words(amt, company_currency)
 

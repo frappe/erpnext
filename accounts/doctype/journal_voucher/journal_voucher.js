@@ -79,6 +79,10 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 }
 
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	cur_frm.refresh_fields();
+}
+
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');

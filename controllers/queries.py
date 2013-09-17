@@ -157,14 +157,6 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		order by `tabProject`.name asc 
 		limit %(start)s, %(page_len)s """ % {'cond': cond,'txt': "%%%s%%" % txt, 
 		'mcond':get_match_cond(doctype, searchfield),'start': start, 'page_len': page_len})
-		
-def get_price_list_currency(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select ref_currency from `tabItem Price` 
-		where price_list = %s and buying_or_selling = %s
-		and `%s` like %s order by ref_currency asc limit %s, %s""" %
-		("%s", "%s", searchfield, "%s", "%s", "%s"), 
-		(filters["price_list"], filters['buying_or_selling'], "%%%s%%" % txt, 
-			start, page_len))
 			
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return webnotes.conn.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name

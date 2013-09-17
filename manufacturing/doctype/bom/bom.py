@@ -121,8 +121,8 @@ class DocType:
 			elif self.doc.rm_cost_as_per == "Price List":
 				if not self.doc.buying_price_list:
 					webnotes.throw(_("Please select Price List"))
-				rate = webnotes.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
-					"parent": arg["item_code"]}, "ref_rate") or 0
+				rate = webnotes.conn.get_value("Item Price", {"parent": self.doc.buying_price_list, 
+					"item_code": arg["item_code"]}, "ref_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
 

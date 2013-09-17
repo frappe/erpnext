@@ -59,13 +59,13 @@ class AccountsController(TransactionBase):
 		
 		# TODO - change this, since price list now has only one currency allowed
 		if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-			if not self.doc.price_list_currency:
-				self.doc.fields.update(get_price_list_currency(self.doc.fields.get(fieldname)))
+			self.doc.fields.update(get_price_list_currency(self.doc.fields.get(fieldname)))
 				
 			if self.doc.price_list_currency:
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0
-				elif not self.doc.plc_conversion_rate:
+				elif not self.doc.plc_conversion_rate or \
+						(flt(self.doc.plc_conversion_rate)==1 and company_currency!= self.doc.price_list_currency):
 					exchange = self.doc.price_list_currency + "-" + company_currency
 					self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
 						exchange, "exchange_rate"))
