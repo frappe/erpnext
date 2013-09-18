@@ -105,7 +105,6 @@ def get_lead_options():
 	}
 
 
-lead_naming_series = None
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
@@ -119,7 +118,7 @@ def create_lead(email_id):
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
 		"status": "Contacted",
-		"naming_series": lead_naming_series or get_lead_naming_series(),
+		"naming_series": get_lead_naming_series(),
 		"company": webnotes.conn.get_default("company"),
 		"source": "Email"
 	})
@@ -127,7 +126,7 @@ def create_lead(email_id):
 	
 def get_lead_naming_series():
 	"""gets lead's default naming series"""
-	global lead_naming_series
+	lead_naming_series = None
 	naming_series_field = webnotes.get_doctype("Lead").get_field("naming_series")
 	if naming_series_field.default:
 		lead_naming_series = naming_series_field.default
