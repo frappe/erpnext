@@ -7,7 +7,6 @@ import webnotes
 from webnotes.utils import flt, fmt_money
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 
 class DocType:

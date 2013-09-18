@@ -8,7 +8,6 @@ from webnotes.utils import getdate, validate_email_add, cstr
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,doc,doclist=[]):

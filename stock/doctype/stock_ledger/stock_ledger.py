@@ -11,7 +11,6 @@ from webnotes.model.code import get_obj
 from webnotes import session, msgprint
 from stock.utils import get_valid_serial_nos
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):

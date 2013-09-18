@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes import session, msgprint
 from setup.utils import get_company_currency
 
-sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
 

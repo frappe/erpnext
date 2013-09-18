@@ -12,7 +12,6 @@ from setup.utils import get_company_currency
 
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 	
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):

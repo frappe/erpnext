@@ -9,7 +9,6 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 from utilities.transaction_base import TransactionBase, delete_events

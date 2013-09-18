@@ -8,7 +8,6 @@ from webnotes.utils import flt, validate_email_add
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):

@@ -7,7 +7,6 @@ import webnotes
 from webnotes.utils import getdate, nowdate
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):

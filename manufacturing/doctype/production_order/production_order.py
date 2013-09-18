@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class OverProductionError(webnotes.ValidationError): pass
 

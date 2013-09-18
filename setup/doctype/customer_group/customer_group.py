@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 from webnotes.utils.nestedset import DocTypeNestedSet
 class DocType(DocTypeNestedSet):

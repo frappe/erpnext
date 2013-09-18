@@ -8,7 +8,6 @@ from webnotes.utils import flt, fmt_money, getdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 	
 class DocType:
 	def __init__(self,d,dl):

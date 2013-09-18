@@ -6,7 +6,6 @@ import webnotes
 
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,d,dl):

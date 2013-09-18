@@ -11,7 +11,6 @@ from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 

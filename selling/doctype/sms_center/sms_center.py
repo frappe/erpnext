@@ -10,7 +10,6 @@ from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
   
 # ----------
 

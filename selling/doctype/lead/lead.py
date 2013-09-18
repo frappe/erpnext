@@ -7,7 +7,6 @@ from webnotes import _
 from webnotes.utils import cstr, validate_email_add, cint, extract_email_id
 from webnotes import session, msgprint
 
-sql = webnotes.conn.sql
 	
 from controllers.selling_controller import SellingController
 

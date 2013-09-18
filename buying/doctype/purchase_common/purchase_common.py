@@ -10,7 +10,6 @@ from webnotes import msgprint, _
 
 from buying.utils import get_last_purchase_details
 
-sql = webnotes.conn.sql
 	
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):

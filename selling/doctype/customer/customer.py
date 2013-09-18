@@ -9,7 +9,6 @@ from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 from utilities.transaction_base import TransactionBase
 

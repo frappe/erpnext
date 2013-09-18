@@ -8,7 +8,6 @@ from webnotes.utils import cstr, getdate, cint
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
 

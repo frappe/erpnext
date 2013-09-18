@@ -10,7 +10,6 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):

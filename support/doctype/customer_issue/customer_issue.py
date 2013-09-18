@@ -7,7 +7,6 @@ import webnotes
 from webnotes import session, msgprint
 from webnotes.utils import today
 
-sql = webnotes.conn.sql
 	
 
 from utilities.transaction_base import TransactionBase

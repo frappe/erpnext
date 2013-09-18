@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, filter_strip_join
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=None):

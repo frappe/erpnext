@@ -10,8 +10,6 @@ from webnotes.model.doc import Document
 from webnotes import msgprint
 from webnotes.model.bean import getlist, copy_doclist
 
-sql = webnotes.conn.sql
-	
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc

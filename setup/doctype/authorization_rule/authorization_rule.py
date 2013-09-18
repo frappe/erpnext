@@ -9,7 +9,6 @@ from webnotes.model import db_exists
 from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 

@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
-sql = webnotes.conn.sql
 	
 
 from controllers.selling_controller import SellingController

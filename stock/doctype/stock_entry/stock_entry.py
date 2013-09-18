@@ -15,7 +15,6 @@ from stock.stock_ledger import get_previous_sle
 from controllers.queries import get_match_cond
 import json
 
-sql = webnotes.conn.sql
 
 class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass

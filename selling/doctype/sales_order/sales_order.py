@@ -11,7 +11,6 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 from webnotes.model.mapper import get_mapped_doclist
 
-sql = webnotes.conn.sql
 	
 
 from controllers.selling_controller import SellingController

@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild, make_autoname
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,doc,doclist=[]):

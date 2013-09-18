@@ -11,7 +11,6 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
-sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
 

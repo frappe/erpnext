@@ -10,7 +10,6 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist, copy_doclist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 

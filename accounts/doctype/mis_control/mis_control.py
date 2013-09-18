@@ -11,7 +11,6 @@ from webnotes import session, msgprint
 
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 from accounts.utils import get_balance_on, get_fiscal_year
 
