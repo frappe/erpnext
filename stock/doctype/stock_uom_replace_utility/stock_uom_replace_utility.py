@@ -83,11 +83,12 @@ class DocType:
 		self.validate_mandatory()
 		self.validate_uom_integer_type()
 			
-		self.update_item_master()
-		
 		self.update_stock_ledger_entry()
 		
 		self.update_bin()
+		
+		self.update_item_master()
+
 		
 	def validate_uom_integer_type(self):
 		current_is_integer = webnotes.conn.get_value("UOM", self.doc.current_stock_uom, "must_be_whole_number")
