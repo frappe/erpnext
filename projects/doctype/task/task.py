@@ -16,13 +16,13 @@ class DocType:
 		self.doclist = doclist
 	
 	def get_project_details(self):
-		cust = sql("select customer, customer_name from `tabProject` where name = %s", self.doc.project)
+		cust = webnotes.conn.sql("select customer, customer_name from `tabProject` where name = %s", self.doc.project)
 		if cust:
 			ret = {'customer': cust and cust[0][0] or '', 'customer_name': cust and cust[0][1] or ''}
 			return ret
 
 	def get_customer_details(self):
-		cust = sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
+		cust = webnotes.conn.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
 		if cust:
 			ret = {'customer_name': cust and cust[0][0] or ''}
 			return ret

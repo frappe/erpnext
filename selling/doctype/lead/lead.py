@@ -37,7 +37,7 @@ class DocType(SellingController):
 		webnotes.conn.set(self.doc, 'status', status)
 
 	def check_status(self):
-		chk = sql("select status from `tabLead` where name=%s", self.doc.name)
+		chk = webnotes.conn.sql("select status from `tabLead` where name=%s", self.doc.name)
 		chk = chk and chk[0][0] or ''
 		return cstr(chk)
 	

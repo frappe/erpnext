@@ -387,7 +387,7 @@ class DocType(StockController):
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
 
-		item = sql("""select stock_uom, description, item_name from `tabItem` 
+		item = webnotes.conn.sql("""select stock_uom, description, item_name from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
 			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
 		if not item: 
@@ -411,7 +411,7 @@ class DocType(StockController):
 
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
-		uom = sql("""select conversion_factor from `tabUOM Conversion Detail` 
+		uom = webnotes.conn.sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom:
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
@@ -522,7 +522,7 @@ class DocType(StockController):
 		
 		if self.doc.use_multi_level_bom:
 			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = sql("""select 
+			fl_bom_sa_child_item = webnotes.conn.sql("""select 
 					fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, 
 					fb.description, 
@@ -542,7 +542,7 @@ class DocType(StockController):
 				_make_items_dict(fl_bom_sa_child_item)
 		else:
 			# get only BOM items
-			fl_bom_sa_items = sql("""select 
+			fl_bom_sa_items = webnotes.conn.sql("""select 
 					`tabItem`.item_code,
 					ifnull(sum(`tabBOM Item`.qty_consumed_per_unit), 0) *%s as qty,
 					`tabItem`.description, 
@@ -600,7 +600,7 @@ class DocType(StockController):
 
 	def get_issued_qty(self):
 		issued_item_qty = {}
-		result = sql("""select t1.item_code, sum(t1.qty)
+		result = webnotes.conn.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
 			and t2.purpose = 'Material Transfer'
@@ -666,7 +666,7 @@ class DocType(StockController):
 		
 	def get_cust_addr(self):
 		from utilities.transaction_base import get_default_address, get_address_display
-		res = sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
+		res = webnotes.conn.sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
 		address_display = None
 		customer_address = get_default_address("customer", self.doc.customer)
 		if customer_address:
@@ -687,7 +687,7 @@ class DocType(StockController):
 		
 	def get_supp_addr(self):
 		from utilities.transaction_base import get_default_address, get_address_display
-		res = sql("""select supplier_name from `tabSupplier`
+		res = webnotes.conn.sql("""select supplier_name from `tabSupplier`
 			where name=%s""", self.doc.supplier)
 		address_display = None
 		supplier_address = get_default_address("customer", self.doc.customer)

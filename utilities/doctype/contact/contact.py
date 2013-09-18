@@ -35,23 +35,22 @@ class DocType(TransactionBase):
 		self.validate_primary_contact()
 
 	def validate_primary_contact(self):
-		sql = webnotes.conn.sql
 		if self.doc.is_primary_contact == 1:
 			if self.doc.customer:
-				sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
 			elif self.doc.supplier:
-				sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
 			elif self.doc.sales_partner:
-				sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
 		else:
 			if self.doc.customer:
-				if not sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.supplier:
-				if not sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.sales_partner:
-				if not sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
 					self.doc.is_primary_contact = 1
 
 	def on_trash(self):

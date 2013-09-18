@@ -60,7 +60,7 @@ class DocType:
 		self.doc.save()
 		
 	def get_first_sle(self):
-		sle = sql("""
+		sle = webnotes.conn.sql("""
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s

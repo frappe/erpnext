@@ -32,7 +32,7 @@ class DocType:
 		self.doclist = self.doc.clear_table(self.doclist,'lc_pr_details',1)
 		self.check_mandatory()
 		
-		pr = sql("select name from `tabPurchase Receipt` where docstatus = 1 and posting_date >= '%s' and posting_date <= '%s' and currency = '%s' order by name " % (self.doc.from_pr_date, self.doc.to_pr_date, self.doc.currency), as_dict = 1)
+		pr = webnotes.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and posting_date >= '%s' and posting_date <= '%s' and currency = '%s' order by name " % (self.doc.from_pr_date, self.doc.to_pr_date, self.doc.currency), as_dict = 1)
 		if len(pr)>200:
 			msgprint("Please enter date of shorter duration as there are too many purchase receipt, hence it cannot be loaded.", raise_exception=1)
 			
@@ -50,14 +50,14 @@ class DocType:
 		
 	def validate_selected_pr(self):
 		"""Validate selected PR as submitted"""
-		invalid_pr =  sql("SELECT name FROM `tabPurchase Receipt` WHERE docstatus != 1 and name in (%s)" % ("'" + "', '".join(self.selected_pr) + "'"))
+		invalid_pr =  webnotes.conn.sql("SELECT name FROM `tabPurchase Receipt` WHERE docstatus != 1 and name in (%s)" % ("'" + "', '".join(self.selected_pr) + "'"))
 		if invalid_pr:
 			msgprint("Selected purchase receipts must be submitted. Following PR are not submitted: %s" % invalid_pr, raise_exception=1)
 			
 
 	def get_total_amt(self):
 		""" Get sum of net total of all selected PR"""		
-		return sql("SELECT SUM(net_total) FROM `tabPurchase Receipt` WHERE name in (%s)" % ("'" + "', '".join(self.selected_pr) + "'"))[0][0]
+		return webnotes.conn.sql("SELECT SUM(net_total) FROM `tabPurchase Receipt` WHERE name in (%s)" % ("'" + "', '".join(self.selected_pr) + "'"))[0][0]
 		
 
 	def add_charges_in_pr(self):
@@ -73,7 +73,7 @@ class DocType:
 				self.prwise_cost[pr] = self.prwise_cost.get(pr, 0) + amt
 				cumulative_grand_total += amt
 				
-				pr_oc_row = sql("select name from `tabPurchase Taxes and Charges` where parent = %s and category = 'Valuation' and add_deduct_tax = 'Add' and charge_type = 'Actual' and account_head = %s",(pr, lc.account_head))
+				pr_oc_row = webnotes.conn.sql("select name from `tabPurchase Taxes and Charges` where parent = %s and category = 'Valuation' and add_deduct_tax = 'Add' and charge_type = 'Actual' and account_head = %s",(pr, lc.account_head))
 				if not pr_oc_row:	# add if not exists
 					ch = addchild(pr_obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges')
 					ch.category = 'Valuation'
@@ -88,7 +88,7 @@ class DocType:
 					ch.idx = 500 # add at the end
 					ch.save(1)
 				else:	# overwrite if exists
-					sql("update `tabPurchase Taxes and Charges` set rate = %s, tax_amount = %s where name = %s and parent = %s ", (amt, amt, pr_oc_row[0][0], pr))
+					webnotes.conn.sql("update `tabPurchase Taxes and Charges` set rate = %s, tax_amount = %s where name = %s and parent = %s ", (amt, amt, pr_oc_row[0][0], pr))
 		
 		
 	def reset_other_charges(self, pr_obj):
@@ -200,9 +200,9 @@ class DocType:
 					d.save()
 					if d.serial_no:
 						self.update_serial_no(d.serial_no, d.valuation_rate)
-				sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
+				webnotes.conn.sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
 				
-				res = sql("""select item_code, warehouse, posting_date, posting_time 
+				res = webnotes.conn.sql("""select item_code, warehouse, posting_date, posting_time 
 					from `tabStock Ledger Entry` where voucher_detail_no = %s LIMIT 1""", 
 					d.name, as_dict=1)
 

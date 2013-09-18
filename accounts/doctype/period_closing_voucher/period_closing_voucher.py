@@ -23,7 +23,7 @@ class DocType:
 
 
 	def validate_account_head(self):
-		acc_det = sql("select debit_or_credit, is_pl_account, group_or_ledger, company \
+		acc_det = webnotes.conn.sql("select debit_or_credit, is_pl_account, group_or_ledger, company \
 			from `tabAccount` where name = '%s'" % (self.doc.closing_account_head))
 
 		# Account should be under liability 
@@ -43,7 +43,7 @@ class DocType:
 
 
 	def validate_posting_date(self):
-		yr = sql("""select year_start_date, adddate(year_start_date, interval 1 year)
+		yr = webnotes.conn.sql("""select year_start_date, adddate(year_start_date, interval 1 year)
 			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year, ))
 		self.year_start_date = yr and yr[0][0] or ''
 		self.year_end_date = yr and yr[0][1] or ''
@@ -54,7 +54,7 @@ class DocType:
 			raise Exception
 
 		# Period Closing Entry
-		pce = sql("select name from `tabPeriod Closing Voucher` \
+		pce = webnotes.conn.sql("select name from `tabPeriod Closing Voucher` \
 			where posting_date > '%s' and fiscal_year = '%s' and docstatus = 1" \
 			% (self.doc.posting_date, self.doc.fiscal_year))
 		if pce and pce[0][0]:
@@ -64,13 +64,13 @@ class DocType:
 		 
 		
 	def validate_pl_balances(self):
-		income_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+		income_bal = webnotes.conn.sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
 			from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name \
 			and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Credit' \
 			and t2.group_or_ledger = 'Ledger' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 \
 			and t2.company = '%s'" % (self.year_start_date, self.doc.posting_date, self.doc.company))
 			
-		expense_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+		expense_bal = webnotes.conn.sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
 			from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name \
 			and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Debit' \
 			and t2.group_or_ledger = 'Ledger' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 \
@@ -86,7 +86,7 @@ class DocType:
 		
 	def get_pl_balances(self, d_or_c):
 		"""Get account (pl) specific balance"""
-		acc_bal = sql("select	t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+		acc_bal = webnotes.conn.sql("select	t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
 			from `tabGL Entry` t1, `tabAccount` t2 where t1.account = t2.name and t2.group_or_ledger = 'Ledger' \
  			and ifnull(t2.is_pl_account, 'No') = 'Yes' and ifnull(is_cancelled, 'No') = 'No' \
 			and t2.debit_or_credit = '%s' and t2.docstatus < 2 and t2.company = '%s' \
@@ -169,7 +169,7 @@ class DocType:
 
 	def on_cancel(self):
 		# get all submit entries of current closing entry voucher
-		gl_entries = sql("select account, debit, credit from `tabGL Entry` where voucher_type = 'Period Closing Voucher' and voucher_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name))
+		gl_entries = webnotes.conn.sql("select account, debit, credit from `tabGL Entry` where voucher_type = 'Period Closing Voucher' and voucher_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name))
 
 		# Swap Debit & Credit Column and make gl entry
 		for gl in gl_entries:
@@ -177,4 +177,4 @@ class DocType:
 			self.save_entry(fdict, is_cancel = 'Yes')
 
 		# Update is_cancelled = 'Yes' to all gl entries for current voucher
-		sql("update `tabGL Entry` set is_cancelled = 'Yes' where voucher_type = '%s' and voucher_no = '%s'" % (self.doc.doctype, self.doc.name))
+		webnotes.conn.sql("update `tabGL Entry` set is_cancelled = 'Yes' where voucher_type = '%s' and voucher_no = '%s'" % (self.doc.doctype, self.doc.name))

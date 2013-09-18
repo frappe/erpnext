@@ -63,7 +63,7 @@ class DocType:
 		tot_outstanding = 0	#needed when there is no GL Entry in the system for that acc head
 		if (self.doc.voucher_type=='Journal Voucher' or self.doc.voucher_type=='Sales Invoice') \
 				and (master_type =='Customer' and master_name):
-			dbcr = sql("""select sum(debit), sum(credit) from `tabGL Entry` 
+			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
 				where account = '%s' and is_cancelled='No'""" % self.doc.account)
 			if dbcr:
 				tot_outstanding = flt(dbcr[0][0]) - flt(dbcr[0][1]) + \
@@ -80,7 +80,7 @@ class DocType:
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 		
-		ret = sql("""select group_or_ledger, docstatus, freeze_account, company 
+		ret = webnotes.conn.sql("""select group_or_ledger, docstatus, freeze_account, company 
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)
 		
 		if ret and ret[0]["group_or_ledger"]=='Group':
@@ -145,7 +145,7 @@ class DocType:
 
 	def update_outstanding_amt(self):
 		# get final outstanding amt
-		bal = flt(sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
+		bal = flt(webnotes.conn.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
 			where against_voucher=%s and against_voucher_type=%s and account = %s
 			and ifnull(is_cancelled,'No') = 'No'""", (self.doc.against_voucher, 
 			self.doc.against_voucher_type, self.doc.account))[0][0] or 0.0)
@@ -170,5 +170,5 @@ class DocType:
 			
 		# Update outstanding amt on against voucher
 		if self.doc.against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-			sql("update `tab%s` set outstanding_amount=%s where name='%s'"%
+			webnotes.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'"%
 			 	(self.doc.against_voucher_type, bal, self.doc.against_voucher))

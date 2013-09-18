@@ -61,7 +61,7 @@ class DocType(BuyingController):
 			"purchase_receipt_details")
 
 	def get_credit_to(self):
-		acc_head = sql("""select name, credit_days from `tabAccount` 
+		acc_head = webnotes.conn.sql("""select name, credit_days from `tabAccount` 
 			where (name = %s or (master_name = %s and master_type = 'supplier')) 
 			and docstatus != 2 and company = %s""", 
 			(cstr(self.doc.supplier) + " - " + self.company_abbr, 
@@ -88,14 +88,14 @@ class DocType(BuyingController):
 		return get_obj('Purchase Common').get_rate(arg,self)
 
 	def get_rate1(self,acc):
-		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
+		rate = webnotes.conn.sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
 
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				valid_item = sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
+				valid_item = webnotes.conn.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
 				if valid_item[0][0] == 2:
 					msgprint("Item : '%s' is Inactive, you can restore it from Trash" %(d.item_code))
 					raise Exception
@@ -115,7 +115,7 @@ class DocType(BuyingController):
 	def validate_bill_no(self):
 		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
 				not in ['na', 'not applicable', 'none']:
-			b_no = sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
+			b_no = webnotes.conn.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
 				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
@@ -131,7 +131,7 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
+		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
 			self.doc.credit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.credit_to + "does not exist")
@@ -147,7 +147,7 @@ class DocType(BuyingController):
 	# ------------------------------------------------------------
 	def check_for_acc_head_of_supplier(self): 
 		if self.doc.supplier and self.doc.credit_to:
-			acc_head = sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
+			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
 				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
@@ -159,7 +159,7 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purhcase_order)
-				stopped = sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
+				stopped = webnotes.conn.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
 				if stopped:
 					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
 					raise Exception
@@ -258,11 +258,11 @@ class DocType(BuyingController):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order:
-				submitted = sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
+				submitted = webnotes.conn.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
 				if not submitted:
 					webnotes.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
 			if d.purchase_receipt:
-				submitted = sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
+				submitted = webnotes.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
 				if not submitted:
 					webnotes.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					

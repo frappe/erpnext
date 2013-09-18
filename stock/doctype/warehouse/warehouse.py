@@ -21,7 +21,7 @@ class DocType:
 	
 	def get_bin(self, item_code, warehouse=None):
 		warehouse = warehouse or self.doc.name
-		bin = sql("select name from tabBin where item_code = %s and \
+		bin = webnotes.conn.sql("select name from tabBin where item_code = %s and \
 				warehouse = %s", (item_code, warehouse))
 		bin = bin and bin[0][0] or ''
 		if not bin:
@@ -163,22 +163,22 @@ class DocType:
 
 	def on_trash(self):
 		# delete bin
-		bins = sql("select * from `tabBin` where warehouse = %s", self.doc.name, as_dict=1)
+		bins = webnotes.conn.sql("select * from `tabBin` where warehouse = %s", self.doc.name, as_dict=1)
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
 				msgprint("""Warehouse: %s can not be deleted as qty exists for item: %s""" 
 					% (self.doc.name, d['item_code']), raise_exception=1)
 			else:
-				sql("delete from `tabBin` where name = %s", d['name'])
+				webnotes.conn.sql("delete from `tabBin` where name = %s", d['name'])
 				
 		# delete cancelled sle
-		if sql("""select name from `tabStock Ledger Entry` 
+		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
 				where warehouse = %s and ifnull('is_cancelled', '') = 'No'""", self.doc.name):
 			msgprint("""Warehosue can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 		else:
-			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
+			webnotes.conn.sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
 
 	def on_rename(self, newdn, olddn, merge=False):
 		if merge:

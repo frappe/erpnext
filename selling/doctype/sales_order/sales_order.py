@@ -87,14 +87,14 @@ class DocType(SellingController):
 			# used for production plan
 			d.transaction_date = self.doc.transaction_date
 			
-			tot_avail_qty = sql("select projected_qty from `tabBin` \
+			tot_avail_qty = webnotes.conn.sql("select projected_qty from `tabBin` \
 				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 	def validate_sales_mntc_quotation(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if d.prevdoc_docname:
-				res = sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.doc.order_type))
+				res = webnotes.conn.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.doc.order_type))
 				if not res:
 					msgprint("""Order Type (%s) should be same in Quotation: %s \
 						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
@@ -111,7 +111,7 @@ class DocType(SellingController):
 
 	def validate_proj_cust(self):
 		if self.doc.project_name and self.doc.customer_name:
-			res = sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
@@ -167,28 +167,28 @@ class DocType(SellingController):
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
-			cancel_quo = sql("select name from `tabQuotation` where docstatus = 2 and name = '%s'" % d.prevdoc_docname)
+			cancel_quo = webnotes.conn.sql("select name from `tabQuotation` where docstatus = 2 and name = '%s'" % d.prevdoc_docname)
 			if cancel_quo:
 				msgprint("Quotation :" + cstr(cancel_quo[0][0]) + " is already cancelled !")
 				raise Exception , "Validation Error. "
 	
 	def update_enquiry_status(self, prevdoc, flag):
-		enq = sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
+		enq = webnotes.conn.sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
 		if enq:
-			sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
+			webnotes.conn.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if d.prevdoc_docname:
 				if flag=='submit':
-					sql("update `tabQuotation` set status = 'Order Confirmed' where name=%s",d.prevdoc_docname)
+					webnotes.conn.sql("update `tabQuotation` set status = 'Order Confirmed' where name=%s",d.prevdoc_docname)
 					
 					#update enquiry
 					self.update_enquiry_status(d.prevdoc_docname, 'Order Confirmed')
 				elif flag == 'cancel':
-					chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
+					chk = webnotes.conn.sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
 					if not chk:
-						sql("update `tabQuotation` set status = 'Submitted' where name=%s",d.prevdoc_docname)
+						webnotes.conn.sql("update `tabQuotation` set status = 'Submitted' where name=%s",d.prevdoc_docname)
 						
 						#update enquiry
 						self.update_enquiry_status(d.prevdoc_docname, 'Quotation Sent')
@@ -218,35 +218,35 @@ class DocType(SellingController):
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
 		# Checks Sales Invoice
-		submit_rv = sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = webnotes.conn.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
 		#check maintenance schedule
-		submit_ms = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_ms = webnotes.conn.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_ms:
 			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
 		# check maintenance visit
-		submit_mv = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_mv = webnotes.conn.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_mv:
 			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 		
 		# check production order
-		pro_order = sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.doc.name)
+		pro_order = webnotes.conn.sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.doc.name)
 		if pro_order:
 			msgprint("""Production Order: %s exists against this sales order. 
 				Please cancel production order first and then cancel this sales order""" % 
 				pro_order[0][0], raise_exception=1)
 
 	def check_modified_date(self):
-		mod_db = sql("select modified from `tabSales Order` where name = '%s'" % self.doc.name)
-		date_diff = sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
+		mod_db = webnotes.conn.sql("select modified from `tabSales Order` where name = '%s'" % self.doc.name)
+		date_diff = webnotes.conn.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
 		if date_diff and date_diff[0][0]:
 			msgprint("%s: %s has been modified after you have opened. Please Refresh"
 				% (self.doc.doctype, self.doc.name), raise_exception=1)

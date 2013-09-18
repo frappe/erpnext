@@ -26,7 +26,7 @@ class DocType(TransactionBase):
 		})
 		
 	def get_item_details(self, item_code):
-		item = sql("""select item_name, stock_uom, description_html, description, item_group, brand
+		item = webnotes.conn.sql("""select item_name, stock_uom, description_html, description, item_group, brand
 			from `tabItem` where name = %s""", item_code, as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 		return ret
 
 	def get_cust_address(self,name):
-		details = sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		details = webnotes.conn.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if details:
 			ret = {
 				'customer_name':	details and details[0]['customer_name'] or '',
@@ -48,7 +48,7 @@ class DocType(TransactionBase):
 			}
 			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
 
-			contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
+			contact_det = webnotes.conn.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
@@ -61,7 +61,7 @@ class DocType(TransactionBase):
 			
 	def get_contact_details(self, arg):
 		arg = eval(arg)
-		contact = sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s'" %(arg['contact_person'],arg['customer']), as_dict = 1)
+		contact = webnotes.conn.sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s'" %(arg['contact_person'],arg['customer']), as_dict = 1)
 		ret = {
 			'contact_no' : contact and contact[0]['contact_no'] or '',
 			'email_id' : contact and contact[0]['email_id'] or ''
@@ -135,7 +135,7 @@ class DocType(TransactionBase):
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
-		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
+		chk = webnotes.conn.sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus can not be cancelled.")
 			raise Exception
@@ -143,7 +143,7 @@ class DocType(TransactionBase):
 			webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		
 	def declare_enquiry_lost(self,arg):
-		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
+		chk = webnotes.conn.sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus 'Opportunity Lost' can not be declared against it.")
 			raise Exception

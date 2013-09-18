@@ -17,7 +17,7 @@ class DocType:
 		self.doclist = doclist
 
 	def autoname(self):
-		last_name = sql("""select max(name) from `tabBOM` 
+		last_name = webnotes.conn.sql("""select max(name) from `tabBOM` 
 			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
@@ -143,7 +143,7 @@ class DocType:
 			webnotes.bean(self.doclist).update_after_submit()
 
 	def get_bom_unitcost(self, bom_no):
-		bom = sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
+		bom = webnotes.conn.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
 			where is_active = 1 and name = %s""", bom_no, as_dict=1)
 		return bom and bom[0]['unit_cost'] or 0
 
@@ -155,7 +155,7 @@ class DocType:
 		from stock.utils import get_incoming_rate
 		dt = self.doc.costing_date or nowdate()
 		time = self.doc.costing_date == nowdate() and now().split()[1] or '23:59'
-		warehouse = sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
+		warehouse = webnotes.conn.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
 		rate = []
 		for wh in warehouse:
 			r = get_incoming_rate({
@@ -183,7 +183,7 @@ class DocType:
 			if not self.doc.is_active:
 				webnotes.conn.set(self.doc, "is_default", 0)
 			
-			sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
+			webnotes.conn.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
 				 (self.doc.item, self.doc.name))
 
 	def clear_operations(self):
@@ -249,7 +249,7 @@ class DocType:
 
 	def validate_bom_no(self, item, bom_no, idx):
 		"""Validate BOM No of sub-contracted items"""
-		bom = sql("""select name from `tabBOM` where name = %s and item = %s 
+		bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 			and is_active=1 and docstatus=1""", 
 			(bom_no, item), as_dict =1)
 		if not bom:
@@ -271,7 +271,7 @@ class DocType:
 		for d in check_list:
 			bom_list, count = [self.doc.name], 0
 			while (len(bom_list) > count ):
-				boms = sql(" select %s from `tabBOM Item` where %s = '%s' " % 
+				boms = webnotes.conn.sql(" select %s from `tabBOM Item` where %s = '%s' " % 
 					(d[0], d[1], cstr(bom_list[count])))
 				count = count + 1
 				for b in boms:
@@ -363,7 +363,7 @@ class DocType:
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
-		child_fb_items = sql("""select item_code, description, stock_uom, qty, rate, 
+		child_fb_items = webnotes.conn.sql("""select item_code, description, stock_uom, qty, rate, 
 			qty_consumed_per_unit from `tabBOM Explosion Item` 
 			where parent = %s and docstatus = 1""", bom_no, as_dict = 1)
 			
@@ -389,12 +389,12 @@ class DocType:
 			ch.save(1)
 
 	def get_parent_bom_list(self, bom_no):
-		p_bom = sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
+		p_bom = webnotes.conn.sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
 		return p_bom and [i[0] for i in p_bom] or []
 
 	def validate_bom_links(self):
 		if not self.doc.is_active:
-			act_pbom = sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
+			act_pbom = webnotes.conn.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
 				where bom_item.bom_no = %s and bom_item.docstatus = 1
 				and exists (select * from `tabBOM` where name = bom_item.parent
 					and docstatus = 1 and is_active = 1)""", self.doc.name)

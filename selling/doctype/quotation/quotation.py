@@ -77,7 +77,7 @@ class DocType(SellingController):
 		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)
+				is_service_item = webnotes.conn.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
 				if is_service_item == 'No':
@@ -85,7 +85,7 @@ class DocType(SellingController):
 					raise Exception
 		else:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_sales_item = sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
+				is_sales_item = webnotes.conn.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
 				if is_sales_item == 'No':
@@ -141,18 +141,18 @@ class DocType(SellingController):
 		
 		if prevdoc:
 			if flag == 'submit': #on submit
-				sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
+				webnotes.conn.sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
 			elif flag == 'cancel': #on cancel
-				sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
+				webnotes.conn.sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
 			elif flag == 'order lost': #order lost
-				sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
+				webnotes.conn.sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
 			elif flag == 'order confirm': #order confirm
-				sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
+				webnotes.conn.sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
 	
 	# declare as order lost
 	#-------------------------
 	def declare_order_lost(self, arg):
-		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
+		chk = webnotes.conn.sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
 			raise Exception
