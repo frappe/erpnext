@@ -27,7 +27,7 @@ def get_product_info(item_code):
 	else:
 		in_stock = -1
 		
-	price = price_list and webnotes.conn.sql("""select ip.ref_rate, pl.ref_currency from
+	price = price_list and webnotes.conn.sql("""select ip.ref_rate, pl.currency from
 		`tabItem Price` ip, `tabPrice List` pl where ip.parent = pl.name and 
 		ip.item_code=%s and ip.parent=%s""", 
 		(item_code, price_list), as_dict=1) or []
@@ -36,10 +36,10 @@ def get_product_info(item_code):
 	qty = 0
 
 	if price:
-		price["formatted_price"] = fmt_money(price["ref_rate"], currency=price["ref_currency"])
+		price["formatted_price"] = fmt_money(price["ref_rate"], currency=price["currency"])
 		
-		price["ref_currency"] = not cint(webnotes.conn.get_default("hide_currency_symbol")) \
-			and (webnotes.conn.get_value("Currency", price.ref_currency, "symbol") or price.ref_currency) \
+		price["currency"] = not cint(webnotes.conn.get_default("hide_currency_symbol")) \
+			and (webnotes.conn.get_value("Currency", price.currency, "symbol") or price.currency) \
 			or ""
 		
 		if webnotes.session.user != "Guest":
