@@ -88,7 +88,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	toggle_pos: function(show) {
-		if (!this.frm.doc.selling_price_list)
+		// Check whether it is Selling or Buying cycle
+		var price_list = wn.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
+			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
+		
+		if (!price_list)
 			msgprint(wn._("Please select Price List"))
 		else {
 			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
@@ -106,6 +110,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// refresh
 			if(this.pos_active)
 				this.frm.pos.refresh();
+			this.frm.refresh();
 		}
 	},
 	

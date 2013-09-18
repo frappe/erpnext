@@ -7,7 +7,7 @@ erpnext.POS = Class.extend({
 		this.frm = frm;
 		this.wrapper.html('<div class="container">\
 			<div class="row">\
-				<div class="customer-area col-sm-3 col-xs-6"></div>\
+				<div class="party-area col-sm-3 col-xs-6"></div>\
 				<div class="barcode-area col-sm-3 col-xs-6"></div>\
 				<div class="search-area col-sm-3 col-xs-6"></div>\
 				<div class="item-group-area col-sm-3 col-xs-6"></div>\
@@ -88,29 +88,31 @@ erpnext.POS = Class.extend({
 		});
 	},
 	make: function() {
-		this.make_customer();
+		this.make_party();
 		this.make_item_group();
 		this.make_search();
 		this.make_barcode();
 		this.make_item_list();
 	},
-	make_customer: function() {
+	make_party: function() {
 		var me = this;
-		console.log(this.frm);
-		this.customer = wn.ui.form.make_control({
+		this.party = wn.meta.has_field(cur_frm.doc.doctype, "customer") ?"Customer" : "Supplier";
+			
+		this.party_field = wn.ui.form.make_control({
 			df: {
 				"fieldtype": "Link",
-				"options": "Customer",
-				"label": "Customer",
-				"fieldname": "pos_customer",
-				"placeholder": "Customer"
+				"options": this.party,
+				"label": this.party,
+				"fieldname": "pos_party",
+				"placeholder": this.party
 			},
-			parent: this.wrapper.find(".customer-area")
+			parent: this.wrapper.find(".party-area")
 		});
-		this.customer.make_input();
-		this.customer.$input.on("change", function() {
-			if(!me.customer.autocomplete_open)
-				wn.model.set_value(this.frm.doctype, me.frm.docname, "customer", this.value);
+		this.party_field.make_input();
+		this.party_field.$input.on("change", function() {
+			if(!me.party_field.autocomplete_open)
+				wn.model.set_value(me.frm.doctype, me.frm.docname, 
+					me.party.toLowerCase(), this.value);
 		});
 	},
 	make_item_group: function() {
@@ -169,10 +171,17 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		var price_list = wn.meta.has_field(this.frm.doc.doctype, "selling_price_list") ?
+			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
+
+		var sales_or_purchase = wn.meta.has_field(this.frm.doc.doctype, "selling_price_list") ?
+			"Sales" : "Purchase";
+		
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_items',
 			args: {
-				price_list: cur_frm.doc.selling_price_list,
+				sales_or_purchase: sales_or_purchase,
+				price_list: price_list,
 				item_group: this.item_group.$input.val(),
 				item: this.search.$input.val()
 			},
@@ -203,8 +212,8 @@ erpnext.POS = Class.extend({
 				// if form is local then allow this function
 				if (cur_frm.doc.docstatus===0) {
 					$("div.pos-item").on("click", function() {
-						if(!cur_frm.doc.customer) {
-							msgprint("Please select customer first.");
+						if(!cur_frm.doc[me.party.toLowerCase()]) {
+							msgprint("Please select " + me.party + " first.");
 							return;
 						}
 						me.add_to_cart($(this).attr("data-item_code"));
@@ -222,8 +231,8 @@ erpnext.POS = Class.extend({
 
 		// check whether the item is already added
 		if (no_of_items != 0) {
-			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
-			this.frm.doctype), function(i, d) {
+			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
 				if (d.item_code == item_code)
 					caught = true;
 			});
@@ -234,15 +243,16 @@ erpnext.POS = Class.extend({
 			me.update_qty(item_code, 1);
 		}
 		else {
-			var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", "entries");
+			var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+				this.frm.cscript.fname);
 			child.item_code = item_code;
 			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
 		}
 	},
 	update_qty: function(item_code, qty, textbox_qty) {
 		var me = this;
-		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
-		this.frm.doctype), function(i, d) {
+		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
 				if (textbox_qty) {
 					if (qty == 0 && d.item_code == item_code)
@@ -260,14 +270,14 @@ erpnext.POS = Class.extend({
 	},
 	refresh: function() {
 		var me = this;
-		this.customer.set_input(this.frm.doc.customer);
+		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
 
 		// add items
 		var $items = me.wrapper.find("#cart tbody").empty();
 
-		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
-			this.frm.doctype), function(i, d) {
+		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
 					<td><input type="text" value="%(qty)s" \
@@ -379,17 +389,16 @@ erpnext.POS = Class.extend({
 			}
 		}
 		
-		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, "entries", 
-		this.frm.doctype);
+		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+			this.frm.cscript.fname, this.frm.doctype);
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
 				if (d.item_code == selected_items[i]) {
-					// cur_frm.fields_dict["entries"].grid.grid_rows[d.idx].remove();
 					wn.model.clear_doc(d.doctype, d.name);
 				}
 			}
 		});
-		cur_frm.fields_dict["entries"].grid.refresh();
+		cur_frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		cur_frm.script_manager.trigger("calculate_taxes_and_totals");
 		me.frm.dirty();
 		me.refresh();
