@@ -39,4 +39,4 @@ The difference between the value of the items remaining to be sold and the previ
 
 This complete process is called Periodic Inventory.
 
-If you are an existing user using Periodic Inventory and want to use Perpetual Inventory, you have to follow some steps to migrate. For details, check [**Migration From Periodic Inventory**](docs.user.stock.perpetual_inventory.html)
+If you are an existing user using Periodic Inventory and want to use Perpetual Inventory, you have to follow some steps to migrate. For details, check [**Migration From Periodic Inventory**](docs.user.stock.periodic_to_perpetual.html)
