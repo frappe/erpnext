@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 from controllers.accounts_controller import AccountsController
