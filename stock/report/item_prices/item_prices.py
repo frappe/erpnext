@@ -23,8 +23,8 @@ def execute(filters=None):
 			item_map[item]["description"], item_map[item]["stock_uom"], 
 			flt(last_purchase_rate.get(item, 0), precision), 
 			flt(val_rate_map.get(item, 0), precision), 
-			pl.get(item, {}).get("selling"), 
-			pl.get(item, {}).get("buying"), 
+			pl.get(item, {}).get("Selling"), 
+			pl.get(item, {}).get("Buying"), 
 			flt(bom_rate.get(item, 0), precision), 
 			flt(item_map[item]["standard_rate"], precision)
 		])
@@ -56,24 +56,21 @@ def get_price_list():
 	"""Get selling & buying price list of every item"""
 
 	rate = {}
-	
-	price_list = webnotes.conn.sql("""select parent, selling, buying, 
-		concat(price_list, " - ", ref_currency, " ", ref_rate) as price
-		from `tabItem Price` where docstatus<2""", as_dict=1)
+
+	price_list = webnotes.conn.sql("""select ip.item_code, pl.buying_or_selling, 
+		concat(pl.name, " - ", pl.currency, " ", ip.ref_rate) as price 
+		from `tabItem Price` ip, `tabPrice List` pl where 
+		ip.parent = pl.name and pl.docstatus<2""", as_dict=1)
 
 	for j in price_list:
 		if j.price:
-			if j.selling:
-				rate.setdefault(j.parent, {}).setdefault("selling", []).append(j.price)
-			if j.buying:
-				rate.setdefault(j.parent, {}).setdefault("buying", []).append(j.price)
-
+			rate.setdefault(j.item_code, {}).setdefault(j.buying_or_selling, []).append(j.price)
 	item_rate_map = {}
 	
 	for item in rate:
-		item_rate_map.setdefault(item, {}).setdefault("selling", 
-			", ".join(rate[item].get("selling", [])))
-		item_rate_map[item]["buying"] = ", ".join(rate[item].get("buying", []))
+		for buying_or_selling in rate[item]:
+			item_rate_map.setdefault(item, {}).setdefault(buying_or_selling, 
+				", ".join(rate[item].get(buying_or_selling, [])))
 	
 	return item_rate_map
 

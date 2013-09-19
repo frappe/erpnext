@@ -24,6 +24,9 @@ class DocType(TransactionBase):
 		if signature:
 			content += '<p>' + signature + '</p>'
 		return content
+		
+	def get_portal_page(self):
+		return "ticket"
 	
 	def validate(self):
 		self.update_status()
@@ -73,17 +76,3 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
-
-def get_website_args():
-	bean = webnotes.bean("Support Ticket", webnotes.form_dict.name)
-	if bean.doc.raised_by != webnotes.session.user:
-		return {
-			"doc": {"name": "Not Allowed"}
-		}
-	else:
-		return {
-			"doc": bean.doc,
-			"doclist": bean.doclist,
-			"webnotes": webnotes,
-			"utils": webnotes.utils
-		}

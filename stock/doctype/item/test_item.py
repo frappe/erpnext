@@ -9,20 +9,6 @@ test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
 class TestItem(unittest.TestCase):
-	def test_duplicate_price_list(self):
-		item = webnotes.bean(copy=test_records[0])
-		item.doc.item_code = "_Test Item 10"
-		item_price = item.doclist.get({"doctype": "Item Price"})[0]
-		item.doclist.append(webnotes.doc(item_price.fields.copy()))
-		self.assertRaises(webnotes.DuplicateEntryError, item.insert)
-
-	def test_price_list_mismatch(self):
-		from stock.doctype.item.item import PriceListCurrencyMismatch
-		item = webnotes.bean(copy=test_records[0])
-		item.doc.item_code = "_Test Item 11"
-		item_price = item.doclist.get({"doctype": "Item Price"})[0].ref_currency="USD"
-		self.assertRaises(PriceListCurrencyMismatch, item.insert)
-
 	def test_default_warehouse(self):
 		from stock.doctype.item.item import WarehouseNotSet
 		item = webnotes.bean(copy=test_records[0])
@@ -57,14 +43,7 @@ test_records = [
 		"warehouse_reorder_level": 20,
 		"warehouse_reorder_qty": 20,
 		"material_request_type": "Purchase"
-	}, {
-		"doctype": "Item Price",
-		"parentfield": "ref_rate_details",
-		"price_list": "_Test Price List",
-		"ref_rate": 100,
-		"ref_currency": "INR",
-		"buying_or_selling": "Selling"
-	}
+	},
 	],
 	[{
 		"doctype": "Item",

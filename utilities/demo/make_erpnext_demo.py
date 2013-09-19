@@ -19,7 +19,7 @@ def make_demo_user():
 	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
 		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
 		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
-		"Material Master Manager", "Material User", "Partner", "Manufacturing Manager", 
+		"Material Master Manager", "Material User", "Manufacturing Manager", 
 		"Manufacturing User", "Projects User", "Purchase Manager", "Purchase Master Manager", 
 		"Purchase User", "Quality Manager", "Report Manager", "Sales Master Manager", 
 		"Sales User", "Supplier", "Support Team"]

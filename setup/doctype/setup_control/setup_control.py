@@ -101,7 +101,6 @@ class DocType:
 			'default_currency': args.get('currency'),
 			'default_company':args.get('company_name'),
 			'date_format': webnotes.conn.get_value("Country", args.get("country"), "date_format"),
-			'emp_created_by':'Naming Series',
 			"float_precision": 4
 		})
 		global_defaults.save()
@@ -134,6 +133,10 @@ class DocType:
 		notification_control.doc.sales_invoice = 1
 		notification_control.doc.purchase_order = 1
 		notification_control.save()
+
+		hr_settings = webnotes.bean("HR Settings")
+		hr_settings.doc.emp_created_by = "Naming Series"
+		hr_settings.save()
 
 		# control panel
 		cp = webnotes.doc("Control Panel", "Control Panel")

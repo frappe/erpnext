@@ -8,7 +8,7 @@ import MySQLdb
 
 def execute():
 	webnotes.reload_doc("setup", "doctype", "price_list")
-	webnotes.reload_doc("stock", "doctype", "item_price")
+	webnotes.reload_doc("setup", "doctype", "item_price")
 	
 	try:
 		for price_list in webnotes.conn.sql_list("""select name from `tabPrice List`"""):
@@ -20,10 +20,9 @@ def execute():
 		
 			buying_or_selling = "Selling" if selling else "Buying"
 			webnotes.conn.set_value("Price List", price_list, "buying_or_selling", buying_or_selling)
-			webnotes.conn.sql("""update `tabItem Price` set buying_or_selling=%s 
-				where price_list_name=%s""", (buying_or_selling, price_list))
 	except MySQLdb.OperationalError, e:
 		if e.args[0] == 1054:
-			webnotes.conn.sql("""update `tabItem Price` set buying_or_selling="Selling" """)
+			webnotes.conn.sql("""update `tabPrice List` set buying_or_selling='Selling' 
+				where ifnull(buying_or_selling, '')='' """)
 		else:
 			raise e

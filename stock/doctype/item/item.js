@@ -1,26 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.stock");
-
-erpnext.stock.Item = wn.ui.form.Controller.extend({
-	onload: function() {
-		this.frm.add_fetch("price_list", "currency", "ref_currency");
-		this.frm.add_fetch("price_list", "buying_or_selling", "buying_or_selling");
-	},
-	
-	ref_rate_details_add: function(doc, cdt, cdn) {
-		var row = wn.model.get_doc(cdt, cdn);
-		if(row.price_list && !row.ref_currency) {
-			// execute fetch
-			var df = wn.meta.get_docfield(row.doctype, "price_list", row.parent);
-			this.frm.script_manager.validate_link_and_fetch(df, row.name, row.price_list);
-		}
-	}
-});
-
-cur_frm.script_manager.make(erpnext.stock.Item);
-
 cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists

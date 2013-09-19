@@ -121,7 +121,6 @@ patch_list = [
 	"patches.january_2013.update_country_info",
 	"patches.january_2013.remove_tds_entry_from_gl_mapper",
 	"patches.january_2013.update_number_format",
-	"patches.january_2013.purchase_price_list",
 	"execute:webnotes.reload_doc('core', 'doctype', 'print_format') #2013-01",
 	"execute:webnotes.reload_doc('accounts','Print Format','Payment Receipt Voucher')",
 	"patches.january_2013.update_fraction_for_usd",
@@ -263,5 +262,7 @@ patch_list = [
 	"patches.september_2013.p01_update_communication",
 	"execute:webnotes.reload_doc('setup', 'doctype', 'features_setup') # 2013-09-05",
 	"patches.september_2013.p02_fix_serial_no_status",
+	"patches.september_2013.p03_modify_item_price_include_in_price_list",
 	"patches.september_2013.p03_update_stock_uom_in_sle",
+	"patches.september_2013.p03_move_website_to_framework",
 ]

@@ -106,13 +106,12 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test1@example.com", "Leave Approver")
 		add_role("test2@example.com", "Leave Approver")
 		
-		self._test_leave_approval_basic_case_1()
-		self._test_leave_approval_basic_case_2()
+		self._test_leave_approval_basic_case()
 		self._test_leave_approval_invalid_leave_approver_insert()
 		self._test_leave_approval_invalid_leave_approver_submit()
 		self._test_leave_approval_valid_leave_approver_insert()
 		
-	def _test_leave_approval_basic_case_1(self):
+	def _test_leave_approval_basic_case(self):
 		self._clear_applications()
 		
 		# create leave application as Employee
@@ -123,19 +122,6 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		# submit leave application by Leave Approver
 		webnotes.session.user = "test1@example.com"
-		application.doc.status = "Approved"
-		application.submit()
-		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,
-			"docstatus"), 1)
-		
-	def _test_leave_approval_basic_case_2(self):
-		self._clear_applications()
-		
-		# create leave application by any leave approver, 
-		# when no leave approver specified in employee's leave approvers list
-		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test1@example.com"
-		application.insert()
 		application.doc.status = "Approved"
 		application.submit()
 		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,
@@ -186,11 +172,13 @@ class TestLeaveApplication(unittest.TestCase):
 		original_department = webnotes.conn.get_value("Employee", "_T-Employee-0001", "department")
 		webnotes.conn.set_value("Employee", "_T-Employee-0001", "department", None)
 		
-		# change to valid leave approver and try to create and submit leave application
-		webnotes.session.user = "test2@example.com"
+		webnotes.session.user = "test@example.com"
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
+
+		# change to valid leave approver and try to submit leave application
+		webnotes.session.user = "test2@example.com"
 		application.doc.status = "Approved"
 		application.submit()
 		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,

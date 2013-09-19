@@ -23,8 +23,6 @@ $.extend(cur_frm.cscript, {
 	set_exchange_rate_label: function() {
 		if(cur_frm.doc.from_currency && cur_frm.doc.to_currency) {
 			var default_label = wn._(wn.meta.docfield_map[cur_frm.doctype]["exchange_rate"].label);
-			console.log(default_label + 
-				repl(" (1 %(from_currency)s = [?] %(to_currency)s)", cur_frm.doc));
 			cur_frm.fields_dict.exchange_rate.set_label(default_label + 
 				repl(" (1 %(from_currency)s = [?] %(to_currency)s)", cur_frm.doc));
 		}

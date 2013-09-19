@@ -286,6 +286,9 @@ class DocType(SellingController):
 	def on_update(self):
 		pass
 		
+	def get_portal_page(self):
+		return "order" if self.doc.docstatus==1 else None
+		
 def set_missing_values(source, target):
 	bean = webnotes.bean(target)
 	bean.run_method("onload_post_render")

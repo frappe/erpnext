@@ -43,6 +43,9 @@ class DocType(SellingController):
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
+			
+	def get_portal_page(self):
+		return "shipment" if self.doc.docstatus==1 else None
 		
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)

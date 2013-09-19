@@ -29,7 +29,7 @@ class DocType:
 		else:
 			return ''
 			
-	def prepare_template_args(self):
+	def get_context(self):
 		address = webnotes.conn.get_value("Address", 
 			{"sales_partner": self.doc.name, "is_primary_address": 1}, 
 			"*", as_dict=True)
