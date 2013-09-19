@@ -147,7 +147,6 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		self.delete_supplier_address()
 		self.delete_supplier_contact()
-		self.delete_supplier_communication()
 		self.delete_supplier_account()
 		
 	def on_rename(self, new, old, merge=False):

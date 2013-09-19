@@ -149,6 +149,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	price_list_currency: function() {
+		var me=this;
 		this.set_dynamic_labels();
 		
 		var company_currency = this.get_company_currency();
@@ -156,7 +157,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency, 
 				function(exchange_rate) {
 					if(exchange_rate) {
-						me.frm.set_value("price_list_currency", exchange_rate);
+						me.frm.set_value("plc_conversion_rate", exchange_rate);
 						me.plc_conversion_rate();
 					}
 				});
@@ -348,8 +349,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 		});
 		
-		console.log(distinct_items);
-		
 		var rows = $.map(distinct_items, function(item) {
 			var item_tax_record = item_tax[item.item_code || item.item_name];
 			if(!item_tax_record) { return null; }
@@ -419,10 +418,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
 			false;
 		
-		if(!valid_conversion_rate) {
-			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
-		}
+		// if(!valid_conversion_rate) {
+		// 	wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
+		// 		" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+		// }
 	},
 	
 	calculate_taxes_and_totals: function() {

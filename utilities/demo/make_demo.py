@@ -44,6 +44,7 @@ def setup():
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
+	make_price_lists()
 	make_users_and_employees()
 	make_bank_account()
 	# make_opening_stock()
@@ -377,6 +378,9 @@ def complete_setup():
 def make_items():
 	import_data("Item")
 	import_data("BOM", submit=True)
+
+def make_price_lists():
+	import_data("Price_List", overwrite=True)
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])
@@ -400,7 +404,7 @@ def make_bank_account():
 	webnotes.set_value("Company", company, "default_bank_account", ba.doc.name)
 	webnotes.conn.commit()
 
-def import_data(dt, submit=False):
+def import_data(dt, submit=False, overwrite=False):
 	if not isinstance(dt, (tuple, list)):
 		dt = [dt]
 	
@@ -410,4 +414,4 @@ def import_data(dt, submit=False):
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")
-		upload()
+		upload(overwrite=overwrite)

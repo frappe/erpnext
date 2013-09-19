@@ -89,12 +89,15 @@ def _get_price_list_rate(args, item_bean, meta):
 	
 	# try fetching from price list
 	if args.buying_price_list and args.price_list_currency:
-		price_list_rate = item_bean.doclist.get({
-			"parentfield": "ref_rate_details", 
-			"price_list": args.buying_price_list, 
-			"ref_currency": args.price_list_currency,
-			"buying_or_selling": "Buying"})
+		price_list_rate = webnotes.conn.sql("""select ip.ref_rate from `tabItem Price` ip, 
+		`tabPrice List` pl where ip.parent = pl.name and ip.parent=%s and 
+		ip.item_code=%s and pl.buying_or_selling='Buying'""", 
+		(args.buying_price_list, args.item_code), as_dict=1)
+		
 		if price_list_rate:
+			from utilities.transaction_base import validate_currency
+			validate_currency(args, item_bean.doc, meta)
+				
 			out.import_ref_rate = \
 				flt(price_list_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)
 		

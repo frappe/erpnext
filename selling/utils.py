@@ -141,20 +141,19 @@ def _get_basic_details(args, item_bean, warehouse_fieldname):
 	return out
 	
 def _get_price_list_rate(args, item_bean, meta):
-	base_ref_rate = item_bean.doclist.get({
-		"parentfield": "ref_rate_details",
-		"price_list": args.selling_price_list, 
-		"ref_currency": args.price_list_currency,
-		"buying_or_selling": "Selling"})
+	ref_rate = webnotes.conn.sql("""select ip.ref_rate from `tabItem Price` ip, 
+		`tabPrice List` pl where ip.parent = pl.name and ip.parent=%s and 
+		ip.item_code=%s and pl.buying_or_selling='Selling'""", 
+		(args.selling_price_list, args.item_code), as_dict=1)
 
-	if not base_ref_rate:
+	if not ref_rate:
 		return {}
 	
 	# found price list rate - now we can validate
 	from utilities.transaction_base import validate_currency
 	validate_currency(args, item_bean.doc, meta)
 	
-	return {"ref_rate": flt(base_ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}
+	return {"ref_rate": flt(ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}
 	
 def _get_item_discount(item_group, customer):
 	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 
