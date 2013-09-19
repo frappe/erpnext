@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-09-01 05:26:13", 
+  "modified": "2013-09-19 11:42:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -180,6 +180,7 @@
   "search_index": 1
  }, 
  {
+  "default": "Today", 
   "description": "Enter the date by which payments from customer is expected against this invoice.", 
   "doctype": "DocField", 
   "fieldname": "due_date", 
@@ -411,7 +412,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges", 
   "fieldtype": "Table", 
-  "label": "Taxes and Charges1", 
+  "label": "Sales Taxes and Charges", 
   "oldfieldname": "other_charges", 
   "oldfieldtype": "Table", 
   "options": "Sales Taxes and Charges", 
