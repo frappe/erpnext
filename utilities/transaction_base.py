@@ -243,7 +243,8 @@ class TransactionBase(StatusUpdater):
 			
 	def delete_events(self):
 		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
-			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)))
+			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)), 
+			ignore_permissions=True)
 			
 	def _add_calendar_event(self, opts):
 		opts = webnotes._dict(opts)

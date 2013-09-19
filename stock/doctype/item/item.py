@@ -75,8 +75,8 @@ class DocType(DocListController):
 				bin_list = webnotes.conn.sql("select * from tabBin where item_code=%s", 
 					self.doc.item_code, as_dict=1)
 				for bin in bin_list:
-					if bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
-						or bin.planned_qty > 0 and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
+					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
+						or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
 							matched = False
 							break
 						

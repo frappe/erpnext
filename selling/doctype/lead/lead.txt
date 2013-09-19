@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:52:20", 
+  "modified": "2013-09-19 10:38:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -158,9 +158,76 @@
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
-  "label": "Communication History", 
+  "label": "Communication", 
   "options": "icon-comments", 
   "print_hide": 1
+ }, 
+ {
+  "default": "__user", 
+  "doctype": "DocField", 
+  "fieldname": "lead_owner", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Lead Owner", 
+  "oldfieldname": "lead_owner", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "search_index": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "Date on which the lead was last contacted", 
+  "doctype": "DocField", 
+  "fieldname": "last_contact_date", 
+  "fieldtype": "Date", 
+  "label": "Last Contact Date", 
+  "no_copy": 1, 
+  "oldfieldname": "last_contact_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break123", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "description": "Your sales person who will contact the lead in future", 
+  "doctype": "DocField", 
+  "fieldname": "contact_by", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Next Contact By", 
+  "oldfieldname": "contact_by", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "print_hide": 0, 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "description": "Your sales person will get a reminder on this date to contact the lead", 
+  "doctype": "DocField", 
+  "fieldname": "contact_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Next Contact Date", 
+  "no_copy": 1, 
+  "oldfieldname": "contact_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sec_break123", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
   "allow_on_submit": 0, 
@@ -275,18 +342,6 @@
   "options": "\nClient\nChannel Partner\nConsultant"
  }, 
  {
-  "default": "__user", 
-  "doctype": "DocField", 
-  "fieldname": "lead_owner", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Lead Owner", 
-  "oldfieldname": "lead_owner", 
-  "oldfieldtype": "Link", 
-  "options": "Profile", 
-  "search_index": 1
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "market_segment", 
   "fieldtype": "Select", 
@@ -346,49 +401,6 @@
   "oldfieldname": "order_lost_reason", 
   "oldfieldtype": "Link", 
   "options": "Quotation Lost Reason"
- }, 
- {
-  "allow_on_submit": 0, 
-  "description": "Your sales person who will contact the lead in future", 
-  "doctype": "DocField", 
-  "fieldname": "contact_by", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_filter": 1, 
-  "label": "Next Contact By", 
-  "oldfieldname": "contact_by", 
-  "oldfieldtype": "Link", 
-  "options": "Profile", 
-  "print_hide": 0, 
-  "reqd": 0, 
-  "width": "100px"
- }, 
- {
-  "allow_on_submit": 0, 
-  "description": "Your sales person will get a reminder on this date to contact the lead", 
-  "doctype": "DocField", 
-  "fieldname": "contact_date", 
-  "fieldtype": "Date", 
-  "in_filter": 1, 
-  "label": "Next Contact Date", 
-  "no_copy": 1, 
-  "oldfieldname": "contact_date", 
-  "oldfieldtype": "Date", 
-  "reqd": 0, 
-  "width": "100px"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "description": "Date on which the lead was last contacted", 
-  "doctype": "DocField", 
-  "fieldname": "last_contact_date", 
-  "fieldtype": "Date", 
-  "label": "Last Contact Date", 
-  "no_copy": 1, 
-  "oldfieldname": "last_contact_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

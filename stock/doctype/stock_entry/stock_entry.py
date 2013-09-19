@@ -886,7 +886,8 @@ def make_return_jv(stock_entry):
 			"account": r.get("account"),
 			"against_invoice": r.get("against_invoice"),
 			"against_voucher": r.get("against_voucher"),
-			"balance": get_balance_on(r.get("account"), se.doc.posting_date)
+			"balance": get_balance_on(r.get("account"), se.doc.posting_date) \
+				if r.get("account") else 0
 		})
 		
 	return jv_list
