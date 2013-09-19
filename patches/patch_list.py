@@ -255,7 +255,6 @@ patch_list = [
 	"patches.august_2013.p05_employee_birthdays",
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-08-16",
 	"patches.august_2013.p06_fix_sle_against_stock_entry",
-	"execute:webnotes.bean('Style Settings').save() #2013-08-20",
 	"patches.september_2013.p01_add_user_defaults_from_pos_setting",
 	"execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2013-09-02",
 	"patches.september_2013.p01_fix_buying_amount_gl_entries",
@@ -265,4 +264,5 @@ patch_list = [
 	"patches.september_2013.p03_modify_item_price_include_in_price_list",
 	"patches.september_2013.p03_update_stock_uom_in_sle",
 	"patches.september_2013.p03_move_website_to_framework",
+	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
 ]
