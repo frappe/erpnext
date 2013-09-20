@@ -42,16 +42,46 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
+	def validate(self):
+		super(DocType, self).validate()
+		
+		self.po_required()
+
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+
+		self.validate_with_previous_doc()
+		self.validate_rejected_warehouse()
+		self.validate_accepted_rejected_qty()
+		self.validate_inspection()
+		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_challan_no()
+
+		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj.validate_for_items(self)
+		pc_obj.get_prevdoc_date(self)
+		self.check_for_stopped_status(pc_obj)
+
+		# sub-contracting
+		self.validate_for_subcontracting()
+		self.update_raw_materials_supplied("pr_raw_material_details")
+		
+		self.update_valuation_rate("purchase_receipt_details")
+
+	def validate_rejected_warehouse(self):
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if flt(d.rejected_qty) and not d.rejected_warehouse:
+				d.rejected_warehouse = self.doc.rejected_warehouse
+				if not d.rejected_warehouse:
+					webnotes.throw(_("Rejected Warehouse is mandatory against regected item"))		
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
 		for d in getlist(self.doclist, "purchase_receipt_details"):
-
-			# If Reject Qty than Rejected warehouse is mandatory
-			if flt(d.rejected_qty) and (not self.doc.rejected_warehouse):
-				msgprint("Rejected Warehouse is necessary if there are rejections.")
-				raise Exception
-
 			if not flt(d.received_qty) and flt(d.qty):
 				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
@@ -110,40 +140,6 @@ class DocType(BuyingController):
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
-	def validate(self):
-		super(DocType, self).validate()
-		
-		self.po_required()
-
-		if not self.doc.status:
-			self.doc.status = "Draft"
-
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
-
-		self.validate_with_previous_doc()
-		self.validate_accepted_rejected_qty()
-		self.validate_inspection()
-		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
-		self.validate_uom_is_integer("stock_uom", "stock_qty")
-		self.validate_challan_no()
-
-		pc_obj = get_obj(dt='Purchase Common')
-		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
-		self.check_for_stopped_status(pc_obj)
-
-		# sub-contracting
-		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("pr_raw_material_details")
-		
-		self.update_valuation_rate("purchase_receipt_details")
-		
-	def on_update(self):
-		if self.doc.rejected_warehouse:
-			for d in getlist(self.doclist,'purchase_receipt_details'):
-				d.rejected_warehouse = self.doc.rejected_warehouse
-
 	def update_stock(self):
 		sl_entries = []
 		stock_items = self.get_stock_items()
@@ -161,7 +157,7 @@ class DocType(BuyingController):
 				
 				if flt(d.rejected_qty) > 0:
 					sl_entries.append(self.get_sl_entries(d, {
-						"warehouse": self.doc.rejected_warehouse,
+						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
 						"serial_no": cstr(d.rejected_serial_no).strip(),
 						"incoming_rate": d.valuation_rate

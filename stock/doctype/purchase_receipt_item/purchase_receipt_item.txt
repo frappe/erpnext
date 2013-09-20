@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-08-07 14:45:23", 
+  "modified": "2013-09-20 11:36:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -310,7 +310,7 @@
   "doctype": "DocField", 
   "fieldname": "rejected_warehouse", 
   "fieldtype": "Link", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Rejected Warehouse", 
   "no_copy": 1, 
   "oldfieldname": "rejected_warehouse", 
@@ -318,7 +318,7 @@
   "options": "Warehouse", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 1, 
+  "read_only": 0, 
   "width": "100px"
  }, 
  {
