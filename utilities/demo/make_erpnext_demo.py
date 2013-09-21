@@ -42,7 +42,7 @@ def make_demo_user():
 	p.doc.last_name = "User"
 	p.doc.enabled = 1
 	p.doc.user_type = "ERPNext Demo"
-	p.doc.send_invite_email = 0
+	# p.doc.send_invite_email = 0
 	p.doc.new_password = "demo"
 	p.insert()
 	add_roles(p)

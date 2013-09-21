@@ -1,7 +1,7 @@
 
   def on_login(self):
     from webnotes.utils import validate_email_add
-    import conf
+    from webnotes import conf
     if hasattr(conf, "demo_notify_url"):
       if webnotes.form_dict.lead_email and validate_email_add(webnotes.form_dict.lead_email):
         import requests

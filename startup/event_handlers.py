@@ -39,7 +39,7 @@ def on_logout(login_manager):
 		
 def check_if_expired():
 	"""check if account is expired. If expired, do not allow login"""
-	import conf
+	from webnotes import conf
 	# check if expires_on is specified
 	if not hasattr(conf, 'expires_on'): return
 	

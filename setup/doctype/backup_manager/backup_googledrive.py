@@ -113,7 +113,7 @@ def backup_to_gdrive():
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
-	import conf
+	from webnotes import conf
 	
 	if not hasattr(conf, "gdrive_client_id"):
 		webnotes.msgprint(_("Please set Google Drive access keys in") + " conf.py", 

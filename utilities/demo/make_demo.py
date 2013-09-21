@@ -355,7 +355,7 @@ def how_many(doctype):
 def install():
 	print "Creating Fresh Database..."
 	from webnotes.install_lib.install import Installer
-	import conf
+	from webnotes import conf
 	inst = Installer('root')
 	inst.import_from_db(conf.demo_db_name, verbose = 1)
 

@@ -32,7 +32,7 @@ def boot_session(bootinfo):
 		
 		
 		# load subscription info
-		import conf
+		from webnotes import conf
 		for key in ['max_users', 'expires_on', 'max_space', 'status', 'commercial_support']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
