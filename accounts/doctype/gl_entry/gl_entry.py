@@ -91,10 +91,17 @@ class DocType:
 			msgprint(_("Account") + ": " + self.doc.account + _(" is not active"), raise_exception=1)
 			
 		# Account has been freezed for other users except account manager
-		if ret and ret[0]["freeze_account"]== 'Yes' and not adv_adj \
-				and not 'Accounts Manager' in webnotes.user.get_roles():
-			msgprint(_("Account") + ": " + self.doc.account + _(" has been freezed. \
-				Only Accounts Manager can do transaction against this account"), raise_exception=1)
+		if ret and ret[0]["freeze_account"]== 'Yes' and not adv_adj:
+			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
+				'frozen_accounts_modifier')
+			if not frozen_accounts_modifier:
+				webnotes.throw(self.doc.account + _(" is a frozen account. \
+					Either make the account active or assign role in Accounts Settings \
+					who can do / modify entries against this account"))
+			elif frozen_accounts_modifier not in webnotes.user.get_roles():
+				webnotes.throw(self.doc.account + _(" is a frozen account. ") + 
+					_("To make / edit transactions against this account, you need role") + ": " +  
+					frozen_accounts_modifier)
 		
 		if self.doc.is_cancelled in ("No", None) and ret and ret[0]["company"] != self.doc.company:
 			msgprint(_("Account") + ": " + self.doc.account + _(" does not belong to the company") \

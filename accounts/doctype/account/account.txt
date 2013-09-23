@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:23:30", 
+  "modified": "2013-09-23 23:55:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -179,7 +179,7 @@
   "reqd": 0
  }, 
  {
-  "description": "If the account is frozen, entries are allowed for the \"Account Manager\" only.", 
+  "description": "If the account is frozen, entries are allowed to restricted users.", 
   "doctype": "DocField", 
   "fieldname": "freeze_account", 
   "fieldtype": "Select", 
