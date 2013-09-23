@@ -10,7 +10,7 @@ To make accurate Purchase Requests, you must always maintain correct BOMs. To ma
 > Manufacturing > Bill of Materials > New BOM
 
 
-![Bill of Materials](img/mfg-bom.png)
+![Bill of Materials](img/bom.png)
 
 
 

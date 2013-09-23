@@ -29,7 +29,7 @@ To  upload an image for your icon that will appear in all transactions, save the
 
 ### Item Pricing
 
-Item Price and Price Lists: ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a place where different rate plans can be stored. It’s a name you can give to a set of Item prices. In case you have different zones (based on the shipping costs), for different currencies etc, you can maintain different Price Lists. A Price List is formed when you create different Item Prices. To import Item Price visit “Import Item Price”.
+Item Price and Price Lists: ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a place where different rate plans can be stored. It’s a name you can give to a set of Item prices. In case you have different zones (based on the shipping costs), for different currencies etc, you can maintain different Price Lists. A Price List is formed when you create different Item Prices. To import Item Price see [Importing Data](docs.user.data_import.md).
 
 ## Inventory : Warehouse and Stock Setting
 
@@ -56,10 +56,29 @@ These numbers help to track individual units or batches of Items which you sell.
 
 ### Item Tax
 
-These settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account. For example,  If you have a tax Account, “VAT 10%” and this particular Item is exempted from tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column.
+These settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account. For example,  If you have a tax Account, “VAT 10%” and this particular Item is exempted from tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column. 
+
+Go to [Setting Up Taxes](docs.user.setup.taxes.html) to understand this topic in detail.
 
 ### Inspection
 
 Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase 	Receipt is submitted.
 
 Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection. Examples of Criteria are: Weight, Length, Finish etc.
+
+### Purchase Details
+
+**Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
+
+
+**Default Expense Account:** It is the account in which cost of the Item will be debited.
+
+**Default Cost Centre:** It is used for tracking expense for this Item.
+
+### Sales Details
+
+**Default Income Account:**  Income account selected here will be fetched automatically in sales invoice for this item.
+
+**Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
+
+Visit [Manufacturing](docs.user.mfg.html) and [Website](docs.user.website.html) to understand these topics in detail.

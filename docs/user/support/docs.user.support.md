@@ -5,7 +5,8 @@
 		"docs.user.support.support_ticket",
 		"docs.user.support.customer_issue",
 		"docs.user.support.maintenance_visit",
-		"docs.user.support.maintenance_schedule"
+		"docs.user.support.maintenance_schedule",
+		"docs.user.support.newsletter"
 	]
 }
 ---

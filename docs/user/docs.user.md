@@ -15,7 +15,8 @@
 		"docs.user.projects",
 		"docs.user.website",
 		"docs.user.tools",
-		"docs.user.customize"
+		"docs.user.customize",
+		"docs.user.knowledge"
 	],
 	"_no_toc": 1
 }
@@ -120,10 +121,11 @@ Contents
 	1. [Maintenance Schedule](docs.user.support.maintenance_schedule.html)
 	1. [Maintenance Visit](docs.user.support.maintenance_visit.html)
 	1. [Maintenance Schedule](docs.user.support.maintenance_schedule.html)
+	1. [Newsletter](docs.user.support.newsletter.html)
 1. [Projects](docs.user.projects.html)
 	1. [Projects](docs.user.projects.projects.html)
 	1. [Task](docs.user.projects.task.html)
-	1. [Time Log](docs.user.projects.time_log.html)
+	1. [Time Log](docs.user.projects.timelog.html)
 1. [Website](docs.user.website.html)
 	1. [Setup](docs.user.website.setup.html)
 	1. [Web Pages](docs.user.website.web_page.html)
@@ -144,3 +146,6 @@ Contents
 	1. [Hide / Unhide modules](docs.user.customize.hide_unhide.html)
 	1. [Print Formats](docs.user.customize.print_formats.html)
 	1. [Custom Scripts](docs.user.customize.custom_scripts.html)
+1. [Knowledge Library](docs.user.knowledge.html)
+	1. [Fiscal Year](docs.user.knowledge.fiscal_year.html)
+	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
