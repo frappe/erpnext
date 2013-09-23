@@ -260,15 +260,6 @@ class DocType(AccountsController):
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 
-	def get_outstanding(self, args):
-		args = eval(args)
-		o_s = webnotes.conn.sql("""select outstanding_amount from `tab%s` where name = %s""" % 
-			(args['doctype'], '%s'), args['docname'])
-		if args['doctype'] == 'Purchase Invoice':
-			return {'debit': o_s and flt(o_s[0][0]) or 0}
-		if args['doctype'] == 'Sales Invoice':
-			return {'credit': o_s and flt(o_s[0][0]) or 0}
-	
 	def get_balance(self):
 		if not getlist(self.doclist,'entries'):
 			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
@@ -435,3 +426,30 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))
+
+@webnotes.whitelist()		
+def get_outstanding(args):
+	args = eval(args)
+	if args.get("doctype") == "Journal Voucher" and args.get("account"):
+		against_jv_amount = webnotes.conn.sql("""
+			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+			from `tabJournal Voucher Detail` where parent=%s and account=%s 
+			and ifnull(against_invoice, '')='' and ifnull(against_voucher, '')=''
+			and ifnull(against_jv, '')=''""", (args['docname'], args['account']))
+			
+		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
+		if against_jv_amount > 0:
+			return {"credit": against_jv_amount}
+		else:
+			return {"debit": -1* against_jv_amount}
+		
+	elif args.get("doctype") == "Sales Invoice":
+		return {
+			"credit": flt(webnotes.conn.get_value("Sales Invoice", args["docname"], 
+				"outstanding_amount"))
+		}
+	elif args.get("doctype") == "Purchase Invoice":
+		return {
+			"debit": flt(webnotes.conn.get_value("Purchase Invoice", args["docname"], 
+				"outstanding_amount"))
+		}
