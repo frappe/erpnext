@@ -98,8 +98,8 @@ def _get_price_list_rate(args, item_bean, meta):
 			from utilities.transaction_base import validate_currency
 			validate_currency(args, item_bean.doc, meta)
 				
-			out.import_ref_rate = \
-				flt(price_list_rate[0].ref_rate * args.plc_conversion_rate / args.conversion_rate)
+			out.import_ref_rate = flt(price_list_rate[0].ref_rate) * \
+				flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 		
 	# if not found, fetch from last purchase transaction
 	if not out.import_ref_rate:
