@@ -100,6 +100,7 @@ Contents
 	1. [Payment Entry](docs.user.accounts.payments.html)
 	1. [Journal Voucher](docs.user.accounts.journal_voucher.html)
 	1. [Opening Entry](docs.user.accounts.opening_entry.html)
+	1. [Opening Stock](docs.user.accounts.opening_stock.html)
 	1. [Period Closing](docs.user.accounts.closing.html)
 	1. [Accounting Reports](docs.user.accounts.reports.html)
 	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)	
