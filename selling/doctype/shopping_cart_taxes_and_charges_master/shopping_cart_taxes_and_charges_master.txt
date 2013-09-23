@@ -1,0 +1,36 @@
+[
+ {
+  "creation": "2013-06-20 16:57:03", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_taxes_and_charges_master", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Tax Master", 
+  "name": "__common__", 
+  "options": "Sales Taxes and Charges Master", 
+  "parent": "Shopping Cart Taxes and Charges Master", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shopping Cart Taxes and Charges Master"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

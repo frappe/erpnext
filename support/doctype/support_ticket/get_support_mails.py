@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, cint, decode_dict
+from webnotes.utils import cstr, cint, decode_dict, today
 from webnotes.utils.email_lib import sendmail		
 from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
@@ -22,32 +22,13 @@ class SupportMailbox(POP3Mailbox):
 		if mail.from_email == self.email_settings.fields.get('support_email'):
 			return
 		thread_id = mail.get_thread_id()
-		ticket = None
 		new_ticket = False
 
-		if thread_id and webnotes.conn.exists("Support Ticket", thread_id):
-			ticket = webnotes.bean("Support Ticket", thread_id)
-			ticket.doc.status = 'Open'
-			ticket.doc.save()
-				
-		else:
-			ticket = webnotes.bean([decode_dict({
-				"doctype":"Support Ticket",
-				"description": mail.content,
-				"subject": mail.subject,
-				"raised_by": mail.from_email,
-				"content_type": mail.content_type,
-				"status": "Open",
-			})])
-						
-			ticket.insert()
+		if not (thread_id and webnotes.conn.exists("Support Ticket", thread_id)):
 			new_ticket = True
-
-		mail.save_attachments_in_doc(ticket.doc)
-				
-		make(content=mail.content, sender=mail.from_email, subject = ticket.doc.subject,
-			doctype="Support Ticket", name=ticket.doc.name,
-			date=mail.date)
+		
+		ticket = add_support_communication(mail.subject, mail.content, mail.from_email,
+			docname=None if new_ticket else thread_id, mail=mail)
 			
 		if new_ticket and cint(self.email_settings.send_autoreply) and \
 			"mailer-daemon" not in mail.from_email.lower():
@@ -79,3 +60,30 @@ Original Query:
 def get_support_mails():
 	if cint(webnotes.conn.get_value('Email Settings', None, 'sync_support_mails')):
 		SupportMailbox()
+		
+def add_support_communication(subject, content, sender, docname=None, mail=None):
+	if docname:
+		ticket = webnotes.bean("Support Ticket", docname)
+		ticket.doc.status = 'Open'
+		ticket.ignore_permissions = True
+		ticket.doc.save()
+	else:
+		ticket = webnotes.bean([decode_dict({
+			"doctype":"Support Ticket",
+			"description": content,
+			"subject": subject,
+			"raised_by": sender,
+			"content_type": mail.content_type if mail else None,
+			"status": "Open",
+		})])
+		ticket.ignore_permissions = True
+		ticket.insert()
+	
+	make(content=content, sender=sender, subject = subject,
+		doctype="Support Ticket", name=ticket.doc.name,
+		date=mail.date if mail else today())
+
+	if mail:
+		mail.save_attachments_in_doc(ticket.doc)
+		
+	return ticket

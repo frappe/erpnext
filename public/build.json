@@ -1,7 +1,6 @@
 {
 	"public/css/all-web.css": [
 		"app/public/js/startup.css",
-		"app/website/css/website.css"	
 	],
 	"public/css/all-app.css": [
 		"app/public/js/startup.css"

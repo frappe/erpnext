@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 from controllers.accounts_controller import AccountsController
@@ -178,7 +178,7 @@ class DocType(AccountsController):
 			if account_type == 'Bank or Cash':
 				company_currency = get_company_currency(self.doc.company)
 				amt = flt(d.debit) and d.debit or d.credit	
-				self.doc.total_amount = company_currency +' '+ cstr(amt)
+				self.doc.total_amount = company_currency + ' ' + cstr(amt)
 				from webnotes.utils import money_in_words
 				self.doc.total_amount_in_words = money_in_words(amt, company_currency)
 

@@ -9,7 +9,7 @@ from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdat
 	get_first_day, get_last_day
 
 from webnotes.utils.email_lib import sendmail
-from webnotes.utils import comma_and
+from webnotes.utils import comma_and, get_url
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
@@ -147,6 +147,9 @@ class DocType(SellingController):
 	def on_update_after_submit(self):
 		self.validate_recurring_invoice()
 		self.convert_to_recurring()
+		
+	def get_portal_page(self):
+		return "invoice" if self.doc.docstatus==1 else None
 		
 	def set_missing_values(self, for_validate=False):
 		self.set_pos_fields(for_validate)
@@ -916,7 +919,7 @@ def notify_errors(inv, owner):
 		Regards,
 		Administrator
 		
-	""" % (inv, website.get_site_address(), inv)
+	""" % (inv, get_url(), inv)
 	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
 
 	from webnotes.profile import get_system_managers

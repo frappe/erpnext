@@ -73,50 +73,56 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				if(!from_delivery_note)
 					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 			}
-				
 
 			if(doc.outstanding_amount!=0)
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
 		if (doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Sales Order'), 
-				function() {
-					wn.model.map_current_doc({
-						method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
-						source_doctype: "Sales Order",
-						get_query_filters: {
-							docstatus: 1,
-							status: ["!=", "Stopped"],
-							per_billed: ["<", 99.99],
-							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
-						}
-					})
-				});
-
-			cur_frm.add_custom_button(wn._('From Delivery Note'), 
-				function() {
-					wn.model.map_current_doc({
-						method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-						source_doctype: "Delivery Note",
-						get_query: function() {
-							var filters = {
-								company: cur_frm.doc.company
-							};
-							if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
-							return {
-								query: "controllers.queries.get_delivery_notes_to_be_billed",
-								filters: filters
-							};
-						}
-					});
-				});
+			cur_frm.cscript.sales_order_btn();
+			cur_frm.cscript.delivery_note_btn();
 		}
 		
 		// Show POS button only if it enabled from features setup
 		if(cint(sys_defaults.fs_pos_view)===1)
 			cur_frm.cscript.pos_btn();
+	},
+
+	sales_order_btn: function() {
+		this.$sales_order_btn = cur_frm.add_custom_button(wn._('From Sales Order'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+					source_doctype: "Sales Order",
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+						per_billed: ["<", 99.99],
+						customer: cur_frm.doc.customer || undefined,
+						company: cur_frm.doc.company
+					}
+				})
+			});
+	},
+
+	delivery_note_btn: function() {
+		this.$delivery_note_btn = cur_frm.add_custom_button(wn._('From Delivery Note'), 
+			function() {
+				wn.model.map_current_doc({
+					method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+					source_doctype: "Delivery Note",
+					get_query: function() {
+						var filters = {
+							company: cur_frm.doc.company
+						};
+						if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
+						return {
+							query: "controllers.queries.get_delivery_notes_to_be_billed",
+							filters: filters
+						};
+					}
+				});
+			});
 	},
 
 	pos_btn: function() {
@@ -126,9 +132,17 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(!cur_frm.pos_active) {
 			var btn_label = wn._("POS View"),
 				icon = "icon-desktop";
+
+			cur_frm.cscript.sales_order_btn();
+			cur_frm.cscript.delivery_note_btn();
 		} else {
 			var btn_label = wn._("Invoice View"),
 				icon = "icon-file-text";
+
+			if (cur_frm.doc.docstatus===0) {
+				this.$delivery_note_btn.remove();
+				this.$sales_order_btn.remove();
+			}
 		}
 
 		cur_frm.$pos_btn = cur_frm.add_custom_button(btn_label, function() {

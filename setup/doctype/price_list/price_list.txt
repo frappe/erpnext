@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-07-26 11:19:06", 
+  "modified": "2013-09-06 15:03:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -94,28 +94,9 @@
  {
   "doctype": "DocField", 
   "fieldname": "item_prices", 
-  "fieldtype": "HTML", 
-  "label": "Item Prices"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_10", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "section_break_1", 
-  "fieldtype": "Section Break", 
-  "label": "How to upload"
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "how_to_upload", 
-  "fieldtype": "HTML", 
-  "label": "How to upload", 
-  "options": "<div class=\"well\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
+  "fieldtype": "Table", 
+  "label": "Item Prices", 
+  "options": "Item Price"
  }, 
  {
   "amend": 0, 

@@ -104,7 +104,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 		
 		if account.master_name:
 			map_fields(["against_sales_invoice:against_invoice", 
-				"against_purhase_invoice:against_voucher", 
+				"against_purchase_invoice:against_voucher", 
 				"against_journal_voucher:against_jv"], d, detail.fields)
 	
 	webnotes.conn.commit()

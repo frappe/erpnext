@@ -51,25 +51,3 @@ class DocType:
 				webnotes.conn.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
 					(is_address_type, fieldname, "%s", "%s"), (self.doc.fields[fieldname], self.doc.name))
 				break
-				
-def get_website_args():
-	def _get_fields(fieldnames):
-		return [webnotes._dict(zip(["label", "fieldname", "fieldtype", "options"], 
-				[df.label, df.fieldname, df.fieldtype, df.options]))
-			for df in webnotes.get_doctype("Address", processed=True).get({"fieldname": ["in", fieldnames]})]
-	
-	bean = None
-	if webnotes.form_dict.name:
-		bean = webnotes.bean("Address", webnotes.form_dict.name)
-	
-	return {
-		"doc": bean.doc if bean else None,
-		"meta": webnotes._dict({
-			"left_fields": _get_fields(["address_title", "address_type", "address_line1", "address_line2",
-				"city", "state", "pincode", "country"]),
-			"right_fields": _get_fields(["email_id", "phone", "fax", "is_primary_address",
-				"is_shipping_address"])
-		}),
-		"cint": cint
-	}
-	

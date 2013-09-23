@@ -57,6 +57,8 @@ class TestCustomer(unittest.TestCase):
 		# check that old name doesn't exist
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer"), ())
 		self.assertEqual(webnotes.conn.exists("Account", "_Test Customer - _TC"), ())
+
+test_ignore = ["Price List"]
 			
 test_records = [
 	[{
