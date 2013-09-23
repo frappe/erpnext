@@ -256,7 +256,6 @@ cur_frm.cscript.hide_fields = function(doc) {
 	'total_commission', 'advances'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
-	item_flds_pos = ['serial_no', 'batch_no', 'actual_qty', 'expense_account']
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
@@ -271,7 +270,9 @@ cur_frm.cscript.hide_fields = function(doc) {
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
 	
-	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos, (cint(doc.update_stock)==1?true:false));
+	item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse']
+	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_stock,
+		(cint(doc.update_stock)==1 ? true : false));
 	
 	// India related fields
 	var cp = wn.control_panel;
