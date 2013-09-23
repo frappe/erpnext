@@ -106,7 +106,7 @@ erpnext.POS = Class.extend({
 		this.make_item_list();
 	},
 	make_party: function() {
-		var me = this;	
+		var me = this;
 		this.party_field = wn.ui.form.make_control({
 			df: {
 				"fieldtype": "Link",
@@ -179,7 +179,7 @@ erpnext.POS = Class.extend({
 		});
 	},
 	make_item_list: function() {
-		var me = this;		
+		var me = this;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_items',
 			args: {
@@ -349,7 +349,6 @@ erpnext.POS = Class.extend({
 				
 			});
 
-			this.make_item_list();
 			me.refresh_delete_btn();
 			cur_frm.pos.barcode.$input.focus();
 		}
@@ -368,7 +367,8 @@ erpnext.POS = Class.extend({
 			$(".make-payment").hide();
 
 		if (this.frm.doctype == "Quotation")
-			$(".party-area").toggle(cur_frm.doc.quotation_to=="Customer" ? true : false)
+			if (cur_frm.doc.quotation_to=="Customer")
+				this.party_field.remove();
 	},
 	refresh_delete_btn: function() {
 		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		

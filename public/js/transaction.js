@@ -98,7 +98,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
 
 			// make pos
-			if(!this.pos) {
+			if(!this.frm.pos) {
 				this.frm.layout.add_view("pos");
 				this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
 			}
