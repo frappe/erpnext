@@ -12,6 +12,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
