@@ -5,44 +5,6 @@ from __future__ import unicode_literals
 
 import webnotes
 
-def pre_import():
-	webnotes.conn.begin()
-	make_modules()
-	make_roles()
-	webnotes.conn.commit()
-	
-def make_modules():
-	modules = [
-		"Home", "System", "Utilities", "Website", "Setup",
-		"Selling", "Buying", "Projects", "Accounts", "Stock",
-		"Support", "HR", "Manufacturing"]
-	
-	for m in modules:
-		doc = webnotes.doc(fielddata = {
-			"doctype": "Module Def",
-			"module_name": m,
-		})
-		doc.insert()
-	
-def make_roles():
-	roles = [
-		"Accounts Manager", "Accounts User", "Analytics", "Auditor",
-		"Blogger", "Customer", "Employee", "Expense Approver",
-		"HR Manager", "HR User", "Leave Approver", "Maintenance Manager",
-		"Maintenance User", "Manufacturing Manager", "Manufacturing User",
-		"Material Manager", "Material Master Manager", "Material User",
-		"Partner", "Projects User", "Projects Manager", "Purchase Manager", "Purchase Master Manager",
-		"Purchase User", "Quality Manager", "Sales Manager",
-		"Sales Master Manager", "Sales User", "Supplier", "Support Manager",
-		"Support Team", "Website Manager"]
-		
-	for r in roles:
-		doc = webnotes.doc(fielddata = {
-			"doctype":"Role",
-			"role_name": r
-		})
-		doc.insert()
-
 def post_import():
 	webnotes.conn.begin()
 

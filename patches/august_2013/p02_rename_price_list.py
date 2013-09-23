@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
-	webnotes.reload_doc("website", "doctype", "shopping_cart_price_list")
+	webnotes.reload_doc("selling", "doctype", "shopping_cart_price_list")
 	
 	for t in [
 			("Supplier Quotation", "price_list_name", "buying_price_list"),

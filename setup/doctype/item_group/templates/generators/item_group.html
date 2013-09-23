@@ -1,0 +1,42 @@
+{% extends base_template %}
+
+{% block content %}
+{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
+{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
+<div class="col-md-12">
+	{% if slideshow %}<!-- slideshow -->
+	{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
+	{% endif %}
+	{% if description %}<!-- description -->
+	<div>{{ description or ""}}</div>
+	{% else %}
+	<h3>{{ name }}</h3>
+	{% endif %}
+</div>
+<div class="col-md-12">
+	{% if sub_groups %}
+	<hr />
+	<div class="row">
+	{% for d in sub_groups %}
+		<div class="col-md-4">
+			<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
+		</div>
+	{% endfor %}
+	</div>
+	<hr />
+	{% endif %}
+	{% if items %}
+	<div id="search-list" class="row">
+		{% for item in items %}
+			{{ item }}
+		{% endfor %}
+	</div>
+		{% if (items|length)==100 %}
+			<div class="alert alert-info info">Showing top 100 items.</div>
+		{% endif %}
+	{% else %}
+		<div class="alert alert-warning">No items listed.</div>
+	{% endif %}
+</div>
+
+{% endblock %}

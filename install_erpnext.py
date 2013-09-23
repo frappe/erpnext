@@ -289,7 +289,7 @@ NameVirtualHost *:8080
 		RewriteCond %%{REQUEST_FILENAME} !-f
 		RewriteCond %%{REQUEST_FILENAME} !-d
 		RewriteCond %%{REQUEST_FILENAME} !-l
-		RewriteRule ^([^/]+)$ /web.py?page=$1 [QSA,L]		
+		RewriteRule ^([^/]+)$ /web.py?page=$1 [QSA,L]
 	</Directory>
 </VirtualHost>""" % (install_path, install_path)
 	

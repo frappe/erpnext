@@ -1,0 +1,5 @@
+{% extends "app/portal/templates/sale.html" %}
+
+{% block status -%}
+	{% if doc.status %}{{ doc.status }}{% endif %}
+{%- endblock %}
