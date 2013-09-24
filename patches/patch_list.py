@@ -211,5 +211,6 @@ patch_list = [
 	"patches.september_2013.p03_update_stock_uom_in_sle",
 	"patches.september_2013.p03_move_website_to_framework",
 	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
-	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') #2013-09-24",
+	"execute:webnotes.reload_doc('accounts', 'doctype', 'accounts_settings') # 2013-09-24"
+	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
 ]
