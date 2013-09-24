@@ -119,10 +119,10 @@ class DocType:
 			if not frozen_accounts_modifier:
 				webnotes.throw(self.doc.account + _(" is a frozen account. \
 					Either make the account active or assign role in Accounts Settings \
-					who can do / modify entries against this account"))
+					who can create / modify entries against this account"))
 			elif frozen_accounts_modifier not in webnotes.user.get_roles():
 				webnotes.throw(self.doc.account + _(" is a frozen account. ") + 
-					_("To make / edit transactions against this account, you need role") + ": " +  
+					_("To create / edit transactions against this account, you need role") + ": " +  
 					frozen_accounts_modifier)
 	
 	def check_freezing_date(self, adv_adj):
