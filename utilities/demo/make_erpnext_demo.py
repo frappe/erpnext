@@ -5,9 +5,9 @@ if __name__=="__main__":
 import webnotes, os
 import utilities.demo.make_demo
 
-def make_demo_app():
+def make_demo_app(site=None):
 	webnotes.mute_emails = 1
-	webnotes.connect()
+	webnotes.connect(site)
 	utilities.demo.make_demo.make(reset=True, simulate=False)
 	# setup demo user etc so that the site it up faster, while the data loads
 	make_demo_user()

@@ -35,13 +35,13 @@ def on_login_post_session(login_manager):
 		set_cart_count()
 		
 def on_logout(login_manager):
-	webnotes.add_cookies["cart_count"] = ""
+	webnotes._response.set_cookie("cart_count", "")
 		
 def check_if_expired():
 	"""check if account is expired. If expired, do not allow login"""
 	from webnotes import conf
 	# check if expires_on is specified
-	if not hasattr(conf, 'expires_on'): return
+	if not 'expires_on' in conf: return
 	
 	# check if expired
 	from datetime import datetime, date

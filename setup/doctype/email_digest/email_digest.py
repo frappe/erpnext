@@ -458,7 +458,7 @@ def send():
 	now_date = now_datetime().date()
 	
 	from webnotes import conf
-	if hasattr(conf, "expires_on") and now_date > getdate(conf.expires_on):
+	if "expires_on" in conf and now_date > getdate(conf.expires_on):
 		# do not send email digests to expired accounts
 		return
 	

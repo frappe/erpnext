@@ -36,11 +36,15 @@ def make(reset=False, simulate=True):
 	
 	if reset:
 		setup()
+	else:
+		webnotes.connect()
+	
 	if simulate:
 		_simulate()
-	
+		
 def setup():
 	install()
+	webnotes.connect()
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
