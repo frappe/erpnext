@@ -18,4 +18,5 @@ Set default values as defined.
 ![POS Setting](img/pos-setting.png)
 
 
-> Important : If you specify a particular User, the POS setting will be applied only to that User. If the User option is left blank, the setting will be set for all users.
+> Important : If you specify a particular User, the POS setting will be applied only to that User. If the User option is left blank, the setting will be set for all users. To understand POS in detail visit [Point of Sale](docs.user.accounts.pos.html)
+
