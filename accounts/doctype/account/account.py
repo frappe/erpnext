@@ -24,6 +24,17 @@ class DocType:
 		address = webnotes.conn.get_value(self.doc.master_type, self.doc.master_name, "address")
 		return {'address': address}
 		
+	def validate(self): 
+		self.validate_master_name()
+		self.validate_parent()
+		self.validate_duplicate_account()
+		self.validate_root_details()
+		self.validate_mandatory()
+		self.validate_frozen_accounts_modifier()
+	
+		if not self.doc.parent_account:
+			self.doc.parent_account = ''
+		
 	def validate_master_name(self):
 		"""Remind to add master name"""
 		if (self.doc.master_type == 'Customer' or self.doc.master_type == 'Supplier') \
@@ -71,6 +82,15 @@ class DocType:
 		if webnotes.conn.exists("Account", self.doc.name):
 			if not webnotes.conn.get_value("Account", self.doc.name, "parent_account"):
 				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
+				
+	def validate_frozen_accounts_modifier(self):
+		old_value = webnotes.conn.get_value("Account", self.doc.name, "freeze_account")
+		if old_value != self.doc.freeze_account:
+			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
+				'frozen_accounts_modifier')
+			if not frozen_accounts_modifier or \
+				frozen_accounts_modifier not in webnotes.user.get_roles():
+					webnotes.throw(_("You are not authorized to set Frozen value"))
 			
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
@@ -111,16 +131,6 @@ class DocType:
 			msgprint("Debit or Credit field is mandatory", raise_exception=1)
 		if not self.doc.is_pl_account:
 			msgprint("Is PL Account field is mandatory", raise_exception=1)
-
-	def validate(self): 
-		self.validate_master_name()
-		self.validate_parent()
-		self.validate_duplicate_account()
-		self.validate_root_details()
-		self.validate_mandatory()
-	
-		if not self.doc.parent_account:
-			self.doc.parent_account = ''
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""

@@ -18,12 +18,22 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('account_name', doc.__islocal);
 	
 	// hide fields if group
-	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 'freeze_account', 
+	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 		
 	// disable fields
 	cur_frm.toggle_enable(['account_name', 'debit_or_credit', 'group_or_ledger', 
 		'is_pl_account', 'company'], false);
+	
+	if(doc.group_or_ledger=='Ledger') {
+		wn.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
+			var accounts_settings = wn.model.get_doc("Accounts Settings", name);
+			var display = accounts_settings["frozen_accounts_modifier"] 
+				&& in_list(user_roles, accounts_settings["frozen_accounts_modifier"]);
+			
+			cur_frm.toggle_display('freeze_account', display);
+		});
+	}
 
 	// read-only for root accounts
 	if(!doc.parent_account) {

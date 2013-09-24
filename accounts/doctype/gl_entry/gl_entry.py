@@ -25,6 +25,7 @@ class DocType:
 	def on_update(self, adv_adj, cancel, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
 		self.validate_cost_center()
+		self.validate_frozen_account(adv_adj)
 		self.check_freezing_date(adv_adj)
 		self.check_negative_balance(adv_adj)
 
@@ -81,31 +82,18 @@ class DocType:
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 		
-		ret = sql("""select group_or_ledger, docstatus, freeze_account, company 
+		ret = sql("""select group_or_ledger, docstatus, company 
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)
 		
 		if ret and ret[0]["group_or_ledger"]=='Group':
-			msgprint(_("Account") + ": " + self.doc.account + _(" is not a ledger"), raise_exception=1)
+			webnotes.throw(_("Account is not a ledger") + "(%s)" % self.doc.account)
 
 		if ret and ret[0]["docstatus"]==2:
-			msgprint(_("Account") + ": " + self.doc.account + _(" is not active"), raise_exception=1)
-			
-		# Account has been freezed for other users except account manager
-		if ret and ret[0]["freeze_account"]== 'Yes' and not adv_adj:
-			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
-				'frozen_accounts_modifier')
-			if not frozen_accounts_modifier:
-				webnotes.throw(self.doc.account + _(" is a frozen account. \
-					Either make the account active or assign role in Accounts Settings \
-					who can do / modify entries against this account"))
-			elif frozen_accounts_modifier not in webnotes.user.get_roles():
-				webnotes.throw(self.doc.account + _(" is a frozen account. ") + 
-					_("To make / edit transactions against this account, you need role") + ": " +  
-					frozen_accounts_modifier)
+			webnotes.throw(_("Account is not active ") + "(%s)" % self.doc.account)
 		
 		if self.doc.is_cancelled in ("No", None) and ret and ret[0]["company"] != self.doc.company:
-			msgprint(_("Account") + ": " + self.doc.account + _(" does not belong to the company") \
-				+ ": " + self.doc.company, raise_exception=1)
+			webnotes.throw(_("Account") + ": " + self.doc.account + 
+				_(" does not belong to the company") + ": " + self.doc.company)
 				
 	def validate_cost_center(self):
 		if not hasattr(self, "cost_center_company"):
@@ -122,7 +110,21 @@ class DocType:
 			self.doc.cost_center and _get_cost_center_company() != self.doc.company:
 				msgprint(_("Cost Center") + ": " + self.doc.cost_center \
 					+ _(" does not belong to the company") + ": " + self.doc.company, raise_exception=True)
-		
+	
+	def validate_frozen_account(self, adv_adj):
+		frozen_account = webnotes.conn.get_value("Account", self.doc.account, "freeze_account")
+		if frozen_account == 'Yes' and not adv_adj:
+			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
+				'frozen_accounts_modifier')
+			if not frozen_accounts_modifier:
+				webnotes.throw(self.doc.account + _(" is a frozen account. \
+					Either make the account active or assign role in Accounts Settings \
+					who can do / modify entries against this account"))
+			elif frozen_accounts_modifier not in webnotes.user.get_roles():
+				webnotes.throw(self.doc.account + _(" is a frozen account. ") + 
+					_("To make / edit transactions against this account, you need role") + ": " +  
+					frozen_accounts_modifier)
+	
 	def check_freezing_date(self, adv_adj):
 		"""
 			Nobody can do GL Entries where posting date is before freezing date 
