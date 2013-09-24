@@ -193,6 +193,7 @@ patch_list = [
 	"patches.july_2013.p10_change_partner_user_to_website_user",
 	"patches.july_2013.p11_update_price_list_currency",
 	"execute:webnotes.bean('Selling Settings').save() #2013-07-29",
+	"execute:webnotes.reload_doc('accounts', 'doctype', 'accounts_settings') # 2013-09-24",
 	"patches.august_2013.p01_auto_accounting_for_stock_patch",
 	"patches.august_2013.p01_hr_settings",
 	"patches.august_2013.p02_rename_price_list",
@@ -215,6 +216,5 @@ patch_list = [
 	"patches.september_2013.p03_update_stock_uom_in_sle",
 	"patches.september_2013.p03_move_website_to_framework",
 	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
-	"execute:webnotes.reload_doc('accounts', 'doctype', 'accounts_settings') # 2013-09-24"
 	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
 ]

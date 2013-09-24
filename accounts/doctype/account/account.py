@@ -97,7 +97,7 @@ class DocType:
 				
 	def validate_frozen_accounts_modifier(self):
 		old_value = webnotes.conn.get_value("Account", self.doc.name, "freeze_account")
-		if old_value != self.doc.freeze_account:
+		if old_value and old_value != self.doc.freeze_account:
 			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
 				'frozen_accounts_modifier')
 			if not frozen_accounts_modifier or \
