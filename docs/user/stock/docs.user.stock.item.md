@@ -68,6 +68,9 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Purchase Details
 
+![Purchase Details](img/item-purchase.png)
+
+
 **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
 
@@ -77,8 +80,18 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Sales Details
 
+
+![Sales Details](img/item-sales.png)
+
+
 **Default Income Account:**  Income account selected here will be fetched automatically in sales invoice for this item.
 
 **Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
+
+### Manufacturing And Website
+
+![Manufacturing](img/item-manufacturing-website.png)
+
+
 
 Visit [Manufacturing](docs.user.mfg.html) and [Website](docs.user.website.html) to understand these topics in detail.

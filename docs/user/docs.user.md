@@ -150,3 +150,4 @@ Contents
 1. [Knowledge Library](docs.user.knowledge.html)
 	1. [Fiscal Year](docs.user.knowledge.fiscal_year.html)
 	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
+	1. [Accounting Entries](docs.user.knowledge.accounting_entries.html)

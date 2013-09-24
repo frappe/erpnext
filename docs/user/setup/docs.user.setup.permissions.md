@@ -51,7 +51,7 @@ To set “match” rules, select the drop-down in the last column.  For exam
 
 In the same way, add a row for each user.
 
-#### Step 1:Select Sales Order in "Set Permissions For"
+#### Step 1: Select Sales Order in "Set Permissions For"
 
 
 ![Permissions Manager](img/permission-manager-1.png)
@@ -63,7 +63,7 @@ In the same way, add a row for each user.
 
 <br>
 
-#### Step 3:To assign Territories to users. click on "Set Users/Roles"
+#### Step 3: To assign Territories to users, click on "Set Users/Roles"
 
 <br>
 

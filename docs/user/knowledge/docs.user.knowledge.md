@@ -3,7 +3,8 @@
 	"_label": "Knowledge Library",
 	"_toc": [
 		"docs.user.knowledge.fiscal_year",
-		"docs.user.knowledge.accounting"		
+		"docs.user.knowledge.accounting",
+		"docs.user.knowledge.accounting_entries"		
 	]
 }
 ---
