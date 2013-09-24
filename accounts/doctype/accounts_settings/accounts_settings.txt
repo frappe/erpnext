@@ -39,11 +39,12 @@
   "name": "Accounts Settings"
  }, 
  {
+  "default": "1", 
   "description": "If enabled, the system will post accounting entries for inventory automatically.", 
   "doctype": "DocField", 
-  "fieldname": "auto_inventory_accounting", 
+  "fieldname": "auto_accounting_for_stock", 
   "fieldtype": "Check", 
-  "label": "Enable Auto Inventory Accounting"
+  "label": "Make Accounting Entry For Every Stock Movement"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 

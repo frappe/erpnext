@@ -82,7 +82,7 @@ class DocType(SellingController):
 
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:			
-			self.update_stock_ledger(update_stock=1)
+			self.update_stock_ledger()
 			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
@@ -90,7 +90,6 @@ class DocType(SellingController):
 				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
 				 	self.doc.company, self.doc.grand_total, self)
 				
-		self.set_buying_amount()
 		self.check_prev_docstatus()
 		
 		self.update_status_updater_args()
@@ -111,7 +110,7 @@ class DocType(SellingController):
 
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
-			self.update_stock_ledger(update_stock = -1)
+			self.update_stock_ledger()
 			self.update_serial_nos(cancel = True)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
@@ -196,8 +195,6 @@ class DocType(SellingController):
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
-			self.doc.conversion_rate = flt(pos.conversion_rate)
-			
 			if not for_validate:
 				self.doc.customer = pos.customer
 				self.set_customer_defaults()
@@ -526,41 +523,18 @@ class DocType(SellingController):
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
 
-
-	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d['item_code'])
-		self.values.append({
-			'item_code'			: d['item_code'],
-			'warehouse'			: wh,
-			'posting_date'		: self.doc.posting_date,
-			'posting_time'		: self.doc.posting_time,
-			'voucher_type'		: 'Sales Invoice',
-			'voucher_no'		: cstr(self.doc.name),
-			'voucher_detail_no'	: cstr(d['name']), 
-			'actual_qty'		: qty, 
-			'stock_uom'			: st_uom and st_uom[0][0] or '',
-			'incoming_rate'		: in_value,
-			'company'			: self.doc.company,
-			'fiscal_year'		: self.doc.fiscal_year,
-			'is_cancelled'		: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'			: cstr(d['batch_no']),
-			'serial_no'			: d['serial_no'],
-			"project"			: self.doc.project_name
-		})			
-
-	def update_stock_ledger(self, update_stock):
-		self.values = []
+	def update_stock_ledger(self):
+		sl_entries = []
 		items = get_obj('Sales Common').get_item_list(self)
 		for d in items:
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				if not d['warehouse']:
-					msgprint("Message: Please enter Warehouse for item %s as it is stock item." \
-						% d['item_code'], raise_exception=1)
-
-				# Reduce actual qty from warehouse
-				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+					and d.warehouse:
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d.qty),
+					"stock_uom": webnotes.conn.get_value("Item", d.item_code, "stock_uom")
+				}))
 		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+		self.make_sl_entries(sl_entries)
 		
 	def make_gl_entries(self):
 		from accounts.general_ledger import make_gl_entries, merge_similar_entries
@@ -583,6 +557,10 @@ class DocType(SellingController):
 		if gl_entries:
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
+				
+			if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
+					and cint(self.doc.update_stock):
+				self.update_gl_entries_after()
 				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
@@ -625,15 +603,9 @@ class DocType(SellingController):
 				)
 				
 		# expense account gl entries
-		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.doc.update_stock):
-			
-			for item in self.doclist.get({"parentfield": "entries"}):
-				self.check_expense_account(item)
-			
-				if item.buying_amount:
-					gl_entries += self.get_gl_entries_for_stock(item.expense_account, 
-						-1*item.buying_amount, cost_center=item.cost_center)
+			gl_entries += self.get_gl_entries_for_stock()
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

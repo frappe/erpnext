@@ -53,7 +53,7 @@ def get_stock_ledger_entries(filters):
 		voucher_detail_no, posting_date, posting_time, stock_value,
 		warehouse, actual_qty as qty
 		from `tabStock Ledger Entry`
-		where ifnull(`is_cancelled`, "No") = "No" """
+		where ifnull(`is_cancelled`, 'No') = No'"""
 	
 	if filters.get("company"):
 		query += """ and company=%(company)s"""

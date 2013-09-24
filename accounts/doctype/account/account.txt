@@ -153,7 +153,8 @@
   "label": "Account Type", 
   "oldfieldname": "account_type", 
   "oldfieldtype": "Select", 
-  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
+  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable\nWarehouse", 
+  "permlevel": 0, 
   "search_index": 0
  }, 
  {

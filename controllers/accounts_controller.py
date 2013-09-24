@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
-from setup.utils import get_company_currency, get_price_list_currency
+from setup.utils import get_company_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
@@ -13,7 +13,6 @@ import json
 class AccountsController(TransactionBase):
 	def validate(self):
 		self.set_missing_values(for_validate=True)
-		
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -21,7 +20,7 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 			
 		self.validate_for_freezed_account()
-			
+		
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
@@ -54,35 +53,38 @@ class AccountsController(TransactionBase):
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
 	def set_price_list_currency(self, buying_or_selling):
-		company_currency = get_company_currency(self.doc.company)
-		fieldname = buying_or_selling.lower() + "_price_list"
-		
-		# TODO - change this, since price list now has only one currency allowed
-		if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-			self.doc.fields.update(get_price_list_currency(self.doc.fields.get(fieldname)))
+		if self.meta.get_field("currency"):
+			company_currency = get_company_currency(self.doc.company)
+			
+			# price list part
+			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
+				else "buying_price_list"
+			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
+				if not self.doc.price_list_currency:
+					self.doc.price_list_currency = webnotes.conn.get_value("Price List",
+						self.doc.fields.get(fieldname), "currency")
 				
-			if self.doc.price_list_currency:
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0
-				elif not self.doc.plc_conversion_rate or \
-						(flt(self.doc.plc_conversion_rate)==1 and company_currency!= self.doc.price_list_currency):
-					exchange = self.doc.price_list_currency + "-" + company_currency
-					self.doc.plc_conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-						exchange, "exchange_rate"))
-					
-				if not self.doc.currency:
-					self.doc.currency = self.doc.price_list_currency
-					self.doc.conversion_rate = self.doc.plc_conversion_rate
-						
-		if self.meta.get_field("currency"):
-			if self.doc.currency and self.doc.currency != company_currency:
-				if not self.doc.conversion_rate:
-					exchange = self.doc.currency + "-" + company_currency
-					self.doc.conversion_rate = flt(webnotes.conn.get_value("Currency Exchange",
-						exchange, "exchange_rate"))
-			else:
-				self.doc.conversion_rate = 1
-				
+
+				elif not self.doc.plc_conversion_rate:
+					self.doc.plc_conversion_rate = self.get_exchange_rate(
+						self.doc.price_list_currency, company_currency)
+			
+			# currency
+			if not self.doc.currency:
+				self.doc.currency = self.doc.price_list_currency
+				self.doc.conversion_rate = self.doc.plc_conversion_rate
+			elif self.doc.currency == company_currency:
+				self.doc.conversion_rate = 1.0
+			elif not self.doc.conversion_rate:
+				self.doc.conversion_rate = self.get_exchange_rate(self.doc.currency,
+					company_currency)
+
+	def get_exchange_rate(self, from_currency, to_currency):
+		exchange = "%s-%s" % (from_currency, to_currency)
+		return flt(webnotes.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
+
 	def set_missing_item_details(self, get_item_details):
 		"""set missing item values"""
 		for item in self.doclist.get({"parentfield": self.fname}):
@@ -335,24 +337,20 @@ class AccountsController(TransactionBase):
 			
 			self.calculate_outstanding_amount()
 
-	def get_gl_dict(self, args, cancel=None):
+	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""
-		if cancel is None:
-			cancel = (self.doc.docstatus == 2)
-			
-		gl_dict = {
+		gl_dict = webnotes._dict({
 			'company': self.doc.company, 
 			'posting_date': self.doc.posting_date,
 			'voucher_type': self.doc.doctype,
 			'voucher_no': self.doc.name,
 			'aging_date': self.doc.fields.get("aging_date") or self.doc.posting_date,
 			'remarks': self.doc.remarks,
-			'is_cancelled': cancel and "Yes" or "No",
 			'fiscal_year': self.doc.fiscal_year,
 			'debit': 0,
 			'credit': 0,
 			'is_opening': self.doc.fields.get("is_opening") or "No",
-		}
+		})
 		gl_dict.update(args)
 		return gl_dict
 				
@@ -407,20 +405,17 @@ class AccountsController(TransactionBase):
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)
-			
 		
-	@property
-	def stock_items(self):
-		if not hasattr(self, "_stock_items"):
-			self._stock_items = []
-			item_codes = list(set(item.item_code for item in 
-				self.doclist.get({"parentfield": self.fname})))
-			if item_codes:
-				self._stock_items = [r[0] for r in webnotes.conn.sql("""select name
-					from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
-					(", ".join((["%s"]*len(item_codes))),), item_codes)]
+	def get_stock_items(self):
+		stock_items = []
+		item_codes = list(set(item.item_code for item in 
+			self.doclist.get({"parentfield": self.fname})))
+		if item_codes:
+			stock_items = [r[0] for r in webnotes.conn.sql("""select name
+				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 				
-		return self._stock_items
+		return stock_items
 		
 	@property
 	def company_abbr(self):

@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:31", 
+  "modified": "2013-08-24 15:16:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -198,16 +198,6 @@
   "report_hide": 0, 
   "reqd": 1, 
   "search_index": 0
- }, 
- {
-  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
-  "doctype": "DocField", 
-  "fieldname": "expense_adjustment_account", 
-  "fieldtype": "Link", 
-  "label": "Expense/Adjustment Account", 
-  "options": "Account", 
-  "print_hide": 1, 
-  "read_only": 0
  }, 
  {
   "doctype": "DocField", 

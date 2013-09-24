@@ -1,1 +1,0 @@
-Control (to be deprecated) for updating stock entries.

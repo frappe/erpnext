@@ -10,7 +10,7 @@ from webnotes.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 	def test_make_purchase_order(self):
 		from stock.doctype.material_request.material_request import make_purchase_order

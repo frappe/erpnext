@@ -23,7 +23,7 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "charge")
-		
+					
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
 			if not (self.doc.contact_person and self.doc.customer_address and self.doc.customer_name):
@@ -83,46 +83,6 @@ class SellingController(StockController):
 		if self.meta.get_field("in_words_export"):
 			self.doc.in_words_export = money_in_words(disable_rounded_total and 
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
-
-	def set_buying_amount(self, stock_ledger_entries = None):
-		from stock.utils import get_buying_amount, get_sales_bom_buying_amount
-		if not stock_ledger_entries:
-			stock_ledger_entries = self.get_stock_ledger_entries()
-
-		item_sales_bom = {}
-		for d in self.doclist.get({"parentfield": "packing_details"}):
-			new_d = webnotes._dict(d.fields.copy())
-			new_d.total_qty = -1 * d.qty
-			item_sales_bom.setdefault(d.parent_item, []).append(new_d)
-		
-		if stock_ledger_entries:
-			for item in self.doclist.get({"parentfield": self.fname}):
-				if item.item_code in self.stock_items or \
-						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					
-					buying_amount = 0
-					if item.item_code in self.stock_items:
-						buying_amount = get_buying_amount(self.doc.doctype, self.doc.name, 
-							item.name, stock_ledger_entries.get((item.item_code, 
-								item.warehouse), []))
-					elif item_sales_bom and item_sales_bom.get(item.item_code):
-						buying_amount = get_sales_bom_buying_amount(item.item_code, item.warehouse, 
-							self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
-							item_sales_bom)
-					
-					# buying_amount >= 0.01 so that gl entry doesn't get created for such small amounts
-					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
-					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
-						item.buying_amount)
-						
-	def check_expense_account(self, item):
-		if item.buying_amount and not item.expense_account:
-			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
-				raise_exception=1)
-				
-		if item.buying_amount and not item.cost_center:
-			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code, 
-				raise_exception=1)
 				
 	def calculate_taxes_and_totals(self):
 		self.other_fname = "other_charges"

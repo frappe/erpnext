@@ -267,17 +267,19 @@ class DocType(SellingController):
 
 
 	def update_stock_ledger(self, update_stock, is_stopped = 0):
+		from stock.utils import update_bin
 		for d in self.get_item_list(is_stopped):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {
 					"item_code": d['item_code'],
+					"warehouse": d['reserved_warehouse'], 
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
 					"voucher_no": self.doc.name,
 					"is_amended": self.doc.amended_from and 'Yes' or 'No'
 				}
-				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
+				update_bin(args)
 				
 				
 	def get_item_list(self, is_stopped):

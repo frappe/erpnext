@@ -41,6 +41,9 @@ class DocType(DocListController):
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, self.meta.get_label("posting_date"))
 		
+	def on_submit(self):
+		self.validate_serial_no()
+		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:
@@ -71,10 +74,7 @@ class DocType(DocListController):
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
-		item_det = webnotes.conn.sql("""select name, has_batch_no, docstatus, 
-			is_stock_item, has_serial_no, serial_no_series, stock_uom 
-			from tabItem where name=%s""", 
-			self.doc.item_code, as_dict=True)[0]
+		item_det = self.get_item_details()
 
 		if item_det.is_stock_item != 'Yes':
 			webnotes.throw("""Item: "%s" is not a Stock Item.""" % self.doc.item_code)
@@ -91,10 +91,16 @@ class DocType(DocListController):
 				
 		if not self.doc.stock_uom:
 			self.doc.stock_uom = item_det.stock_uom
-			
-		self.validate_serial_no(item_det)
+					
+	def get_item_details(self):
+		return webnotes.conn.sql("""select name, has_batch_no, docstatus, 
+			is_stock_item, has_serial_no, serial_no_series 
+			from tabItem where name=%s""", 
+			self.doc.item_code, as_dict=True)[0]
 	
-	def validate_serial_no(self, item_det):
+	def validate_serial_no(self):
+		item_det = self.get_item_details()
+
 		if item_det.has_serial_no=="No":
 			if self.doc.serial_no:
 				webnotes.throw(_("Serial Number should be blank for Non Serialized Item" + ": " + self.doc.item), 

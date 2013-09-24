@@ -9,14 +9,15 @@ import webnotes.model
 import json	
 from webnotes.utils import cint
 import webnotes.defaults
+from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
-	def test_gl_entries_without_auto_inventory_accounting(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
-		self.assertTrue(not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")))
+	def test_gl_entries_without_auto_accounting_for_stock(self):
+		set_perpetual_inventory(0)
+		self.assertTrue(not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")))
 		
 		wrapper = webnotes.bean(copy=test_records[0])
 		wrapper.run_method("calculate_taxes_and_totals")
@@ -41,9 +42,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
-	def test_gl_entries_with_auto_inventory_accounting(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+	def test_gl_entries_with_auto_accounting_for_stock(self):
+		set_perpetual_inventory(1)
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pi = webnotes.bean(copy=test_records[1])
 		pi.run_method("calculate_taxes_and_totals")
@@ -68,11 +69,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
 		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		set_perpetual_inventory(0)
 
 	def test_gl_entries_with_aia_for_non_stock_items(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		set_perpetual_inventory()
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pi = webnotes.bean(copy=test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
@@ -98,8 +99,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][0], gle.account)
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
-		
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		set_perpetual_inventory(0)
 			
 	def test_purchase_invoice_calculation(self):
 		wrapper = webnotes.bean(copy=test_records[0])
