@@ -217,4 +217,5 @@ patch_list = [
 	"patches.september_2013.p03_move_website_to_framework",
 	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
 	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
+	"patches.september_2013.p04_unsubmit_serial_nos",
 ]
