@@ -403,7 +403,7 @@ class DocType(StockController):
 		arg, ret = eval(arg), {}
 		uom = sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
-		if not uom:
+		if not uom or not flt(uom[0].conversion_factor):
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
 				arg['item_code']))
 			ret = {'uom' : ''}
