@@ -68,7 +68,8 @@ class DocType:
 				}).insert()
 			
 	def create_default_web_page(self):
-		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
+		if not webnotes.conn.get_value("Website Settings", None, "home_page") and \
+				not webnotes.conn.sql("select name from tabCompany where name!=%s", self.doc.name):
 			import os
 			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
 				webpage = webnotes.bean({
