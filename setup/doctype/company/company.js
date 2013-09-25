@@ -90,18 +90,7 @@ cur_frm.fields_dict.cost_center.get_query = function(doc) {
 	}  
 }
 
-if (sys_defaults.auto_inventory_accounting) {
-	cur_frm.fields_dict["stock_in_hand_account"].get_query = function(doc) {
-		return {
-			"filters": {
-				"is_pl_account": "No",
-				"debit_or_credit": "Debit",
-				"company": doc.name,
-				'group_or_ledger': "Ledger"
-			}
-		}
-	}
-
+if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
 		return {
 			"filters": {
@@ -124,12 +113,6 @@ if (sys_defaults.auto_inventory_accounting) {
 				"company": doc.name,
 				'group_or_ledger': "Ledger"
 			}
-		}
-	}
-
-	cur_frm.fields_dict["stock_adjustment_cost_center"].get_query = function(doc) {
-		return {
-			"filters": {"company": doc.name}
 		}
 	}
 }

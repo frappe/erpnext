@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-08-05 15:39:36", 
+  "modified": "2013-08-28 19:15:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -221,19 +221,9 @@
  {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "fieldname": "auto_inventory_accounting_settings", 
+  "fieldname": "auto_accounting_for_stock_settings", 
   "fieldtype": "Section Break", 
-  "label": "Auto Inventory Accounting Settings", 
-  "read_only": 0
- }, 
- {
-  "description": "This account will be used to maintain value of available stock", 
-  "doctype": "DocField", 
-  "fieldname": "stock_in_hand_account", 
-  "fieldtype": "Link", 
-  "label": "Stock In Hand Account", 
-  "no_copy": 1, 
-  "options": "Account", 
+  "label": "Auto Accounting For Stock Settings", 
   "read_only": 0
  }, 
  {
@@ -244,13 +234,6 @@
   "no_copy": 1, 
   "options": "Account", 
   "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break23", 
-  "fieldtype": "Column Break", 
-  "read_only": 0, 
-  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
@@ -268,15 +251,6 @@
   "label": "Expenses Included In Valuation", 
   "no_copy": 1, 
   "options": "Account", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "stock_adjustment_cost_center", 
-  "fieldtype": "Link", 
-  "label": "Stock Adjustment Cost Center", 
-  "no_copy": 1, 
-  "options": "Cost Center", 
   "read_only": 0
  }, 
  {

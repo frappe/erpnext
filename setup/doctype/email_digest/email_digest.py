@@ -362,8 +362,8 @@ class DocType(DocListController):
 		gl_entries = webnotes.conn.sql("""select `account`, 
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
-			where company=%s and ifnull(is_cancelled, "No")="No" and
-			posting_date <= %s %s""" % ("%s", "%s", 
+			where company=%s 
+			and posting_date <= %s %s""" % ("%s", "%s", 
 			from_date and "and posting_date>='%s'" % from_date or ""),
 			(self.doc.company, to_date or self.to_date), as_dict=1)
 		

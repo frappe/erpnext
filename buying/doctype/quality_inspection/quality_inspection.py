@@ -33,3 +33,17 @@ class DocType:
 			webnotes.conn.sql("update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 set t1.qa_no = '', t2.modified = '%s' \
 				where t1.parent = '%s' and t1.item_code = '%s' and t1.parent = t2.name" \
 				% (self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
+
+
+def item_query(doctype, txt, searchfield, start, page_len, filters):
+	if filters.get("from"):
+		from webnotes.widgets.reportview import get_match_cond
+		filters.update({
+			"txt": txt,
+			"mcond": get_match_cond(filters["from"], searchfield),
+			"start": start,
+			"page_len": page_len
+		})
+		return webnotes.conn.sql("""select item_code from `tab%(from)s` 
+			where parent='%(parent)s' and docstatus < 2 and item_code like '%%%(txt)s%%' %(mcond)s
+			order by item_code limit %(start)s, %(page_len)s""" % filters)

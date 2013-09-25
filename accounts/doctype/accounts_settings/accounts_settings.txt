@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 15:49:57", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:23:40", 
+  "modified": "2013-09-24 11:52:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -39,11 +39,12 @@
   "name": "Accounts Settings"
  }, 
  {
+  "default": "1", 
   "description": "If enabled, the system will post accounting entries for inventory automatically.", 
   "doctype": "DocField", 
-  "fieldname": "auto_inventory_accounting", 
+  "fieldname": "auto_accounting_for_stock", 
   "fieldtype": "Check", 
-  "label": "Enable Auto Inventory Accounting"
+  "label": "Make Accounting Entry For Every Stock Movement"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
@@ -53,11 +54,19 @@
   "label": "Accounts Frozen Upto"
  }, 
  {
-  "description": "Users with this role are allowed to do / modify accounting entry before frozen date", 
+  "description": "Users with this role are allowed to create / modify accounting entry before frozen date", 
   "doctype": "DocField", 
   "fieldname": "bde_auth_role", 
   "fieldtype": "Link", 
-  "label": "Allow Editing of Frozen Accounts For", 
+  "label": "Allowed Role to Edit Entries Before Frozen Date", 
+  "options": "Role"
+ }, 
+ {
+  "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts", 
+  "doctype": "DocField", 
+  "fieldname": "frozen_accounts_modifier", 
+  "fieldtype": "Link", 
+  "label": "Frozen Accounts Modifier", 
   "options": "Role"
  }, 
  {

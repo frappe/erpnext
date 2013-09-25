@@ -62,7 +62,7 @@ class BuyingController(StockController):
 					raise_exception=WrongWarehouseCompany)
 
 	def validate_stock_or_nonstock_items(self):
-		if not self.stock_items:
+		if not self.get_stock_items():
 			tax_for_valuation = [d.account_head for d in 
 				self.doclist.get({"parentfield": "purchase_tax_details"}) 
 				if d.category in ["Valuation", "Valuation and Total"]]

@@ -7,6 +7,10 @@ A Maintenance Visit is a record for a visit made by an engineer to a Customer’
 
 > Support > Maintenance Visit > New Maintenance Visit
 
+
+![Maintenance Visit](img/maintenance-visit.png)
+
+
 The Maintenance Visit contains information about the:
 
 - Customer.

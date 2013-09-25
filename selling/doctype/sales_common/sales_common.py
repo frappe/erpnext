@@ -140,7 +140,7 @@ class DocType(TransactionBase):
 				for p in getlist(obj.doclist, 'packing_details'):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
-						il.append({
+						il.append(webnotes._dict({
 							'warehouse': p.warehouse,
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
@@ -150,9 +150,9 @@ class DocType(TransactionBase):
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
 							'name': d.name
-						})
+						}))
 			else:
-				il.append({
+				il.append(webnotes._dict({
 					'warehouse': d.warehouse,
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
@@ -162,7 +162,7 @@ class DocType(TransactionBase):
 					'batch_no': cstr(d.batch_no).strip(),
 					'serial_no': cstr(d.serial_no).strip(),
 					'name': d.name
-				})
+				}))
 		return il
 
 	def get_already_delivered_qty(self, dn, so, so_detail):
@@ -311,7 +311,8 @@ class DocType(TransactionBase):
 		acc_head = webnotes.conn.sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
 		if acc_head:
 			tot_outstanding = 0
-			dbcr = webnotes.conn.sql("select sum(debit), sum(credit) from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No')='No'" % acc_head[0][0])
+			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
+				where account = %s""", acc_head[0][0])
 			if dbcr:
 				tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1])
 
@@ -336,7 +337,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
 				where item_code = '%(item_code)s' 
 					and warehouse = '%(warehouse)s' 
-					and ifnull(is_cancelled, 'No') = 'No' 
 					and batch_no like '%(txt)s' 
 					and exists(select * from `tabBatch` 
 							where name = sle.batch_no 

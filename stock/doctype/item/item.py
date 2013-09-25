@@ -67,7 +67,7 @@ class DocType(DocListController):
 		if not self.doc.fields.get("__islocal"):
 			matched=True
 			ref_uom = webnotes.conn.get_value("Stock Ledger Entry", 
-				{"item_code": self.doc.name, "is_cancelled": "No"}, "stock_uom")
+				{"item_code": self.doc.name}, "stock_uom")
 			if ref_uom:
 				if cstr(ref_uom) != cstr(self.doc.stock_uom):
 					matched = False
@@ -75,8 +75,8 @@ class DocType(DocListController):
 				bin_list = webnotes.conn.sql("select * from tabBin where item_code=%s", 
 					self.doc.item_code, as_dict=1)
 				for bin in bin_list:
-					if bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
-						or bin.planned_qty > 0 and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
+					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
+						or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
 							matched = False
 							break
 						
@@ -199,7 +199,7 @@ class DocType(DocListController):
 	
 	def check_if_sle_exists(self):
 		sle = webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
-			where item_code = %s and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name)
+			where item_code = %s""", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
@@ -260,8 +260,6 @@ class DocType(DocListController):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
-			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache

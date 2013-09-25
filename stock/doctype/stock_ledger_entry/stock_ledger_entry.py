@@ -34,25 +34,35 @@ class DocType(DocListController):
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
 		self.validate_warehouse_company()
-		self.actual_amt_check()
-		self.check_stock_frozen_date()
 		self.scrub_posting_time()
 		
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, self.meta.get_label("posting_date"))
 		
+	def on_submit(self):
+		self.check_stock_frozen_date()
+		self.actual_amt_check()
+		self.validate_serial_no()
+		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:
-			batch_bal = flt(webnotes.conn.sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and batch_no = '%s'"%(self.doc.warehouse,self.doc.item_code,self.doc.batch_no))[0][0])
-			self.doc.fields.update({'batch_bal': batch_bal})
+			batch_bal_after_transaction = flt(webnotes.conn.sql("""select sum(actual_qty) 
+				from `tabStock Ledger Entry` 
+				where warehouse=%s and item_code=%s and batch_no=%s""", 
+				(self.doc.warehouse, self.doc.item_code, self.doc.batch_no))[0][0])
+			
+			if batch_bal_after_transaction < 0:
+				self.doc.fields.update({
+					'batch_bal': batch_bal_after_transaction - self.doc.actual_qty
+				})
+				
+				webnotes.throw("""Not enough quantity (requested: %(actual_qty)s, \
+					current: %(batch_bal)s in Batch <b>%(batch_no)s</b> for Item \
+					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
+					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
 
-			if (batch_bal + self.doc.actual_qty) < 0:
-				msgprint("""Not enough quantity (requested: %(actual_qty)s, current: %(batch_bal)s in Batch 
-		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> 
-		as on %(posting_date)s %(posting_time)s""" % self.doc.fields, raise_exception = 1)
-
-			self.doc.fields.pop('batch_bal')
+				sself.doc.fields.pop('batch_bal')
 			 
 	def validate_warehouse_company(self):
 		warehouse_company = webnotes.conn.get_value("Warehouse", self.doc.warehouse, "company")
@@ -71,10 +81,7 @@ class DocType(DocListController):
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
-		item_det = webnotes.conn.sql("""select name, has_batch_no, docstatus, 
-			is_stock_item, has_serial_no, serial_no_series, stock_uom 
-			from tabItem where name=%s""", 
-			self.doc.item_code, as_dict=True)[0]
+		item_det = self.get_item_details()
 
 		if item_det.is_stock_item != 'Yes':
 			webnotes.throw("""Item: "%s" is not a Stock Item.""" % self.doc.item_code)
@@ -91,10 +98,16 @@ class DocType(DocListController):
 				
 		if not self.doc.stock_uom:
 			self.doc.stock_uom = item_det.stock_uom
-			
-		self.validate_serial_no(item_det)
+					
+	def get_item_details(self):
+		return webnotes.conn.sql("""select name, has_batch_no, docstatus, 
+			is_stock_item, has_serial_no, serial_no_series 
+			from tabItem where name=%s""", 
+			self.doc.item_code, as_dict=True)[0]
 	
-	def validate_serial_no(self, item_det):
+	def validate_serial_no(self):
+		item_det = self.get_item_details()
+
 		if item_det.has_serial_no=="No":
 			if self.doc.serial_no:
 				webnotes.throw(_("Serial Number should be blank for Non Serialized Item" + ": " + self.doc.item), 

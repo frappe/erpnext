@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import nowdate, cstr, flt, now
+from webnotes.utils import nowdate, nowtime, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
@@ -12,6 +12,8 @@ from utilities import build_filter_conditions
 
 
 class FiscalYearError(webnotes.ValidationError): pass
+class BudgetError(webnotes.ValidationError): pass
+
 
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
 	return get_fiscal_years(date, fiscal_year, label, verbose=1)[0]
@@ -91,15 +93,10 @@ def get_balance_on(account=None, date=None):
 	else:
 		cond.append("""gle.account = "%s" """ % (account, ))
 	
-	# join conditional conditions
-	cond = " and ".join(cond)
-	if cond:
-		cond += " and "
-	
 	bal = webnotes.conn.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		FROM `tabGL Entry` gle
-		WHERE %s ifnull(is_cancelled, 'No') = 'No' """ % (cond, ))[0][0]
+		WHERE %s""" % " and ".join(cond))[0][0]
 
 	# if credit account, it should calculate credit - debit
 	if bal and acc.debit_or_credit == 'Credit':
@@ -236,8 +233,7 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != ifnull(against_voucher, "")
-		and ifnull(is_cancelled, "No")="No" """,
+		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), webnotes.session.user, ref_type, ref_no))
 
 @webnotes.whitelist()
@@ -250,79 +246,6 @@ def get_company_default(company, fieldname):
 			_("' in Company: ") + company), raise_exception=True)
 			
 	return value
-		
-def create_stock_in_hand_jv(reverse=False):
-	from webnotes.utils import nowdate
-	today = nowdate()
-	fiscal_year = get_fiscal_year(today)[0]
-	jv_list = []
-	
-	for company in webnotes.conn.sql_list("select name from `tabCompany`"):
-		stock_rbnb_value = get_stock_rbnb_value(company)
-		stock_rbnb_value = reverse and -1*stock_rbnb_value or stock_rbnb_value
-		if stock_rbnb_value:
-			jv = webnotes.bean([
-				{
-					"doctype": "Journal Voucher",
-					"naming_series": "JV-AUTO-",
-					"company": company,
-					"posting_date": today,
-					"fiscal_year": fiscal_year,
-					"voucher_type": "Journal Entry",
-					"user_remark": (_("Auto Inventory Accounting") + ": " +
-						(_("Disabled") if reverse else _("Enabled")) + ". " +
-						_("Journal Entry for inventory that is received but not yet invoiced"))
-				},
-				{
-					"doctype": "Journal Voucher Detail",
-					"parentfield": "entries",
-					"account": get_company_default(company, "stock_received_but_not_billed"),
-						(stock_rbnb_value > 0 and "credit" or "debit"): abs(stock_rbnb_value)
-				},
-				{
-					"doctype": "Journal Voucher Detail",
-					"parentfield": "entries",
-					"account": get_company_default(company, "stock_adjustment_account"),
-						(stock_rbnb_value > 0 and "debit" or "credit"): abs(stock_rbnb_value),
-					"cost_center": get_company_default(company, "stock_adjustment_cost_center")
-				},
-			])
-			jv.insert()
-			
-			jv_list.append(jv.doc.name)
-	
-	if jv_list:
-		msgprint(_("Following Journal Vouchers have been created automatically") + \
-			":\n%s" % ("\n".join([("<a href=\"#Form/Journal Voucher/%s\">%s</a>" % (jv, jv)) for jv in jv_list]),))
-		
-		msgprint(_("""These adjustment vouchers book the difference between \
-			the total value of received items and the total value of invoiced items, \
-			as a required step to use Auto Inventory Accounting.
-			This is an approximation to get you started.
-			You will need to submit these vouchers after checking if the values are correct.
-			For more details, read: \
-			<a href="http://erpnext.com/auto-inventory-accounting" target="_blank">\
-			Auto Inventory Accounting</a>"""))
-			
-	webnotes.msgprint("""Please refresh the system to get effect of Auto Inventory Accounting""")
-			
-		
-def get_stock_rbnb_value(company):
-	total_received_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
-		from `tabPurchase Receipt Item` pr_item where docstatus=1 
-		and exists(select name from `tabItem` where name = pr_item.item_code 
-			and is_stock_item='Yes')
-		and exists(select name from `tabPurchase Receipt` 
-			where name = pr_item.parent and company = %s)""", company)
-		
-	total_billed_amount = webnotes.conn.sql("""select sum(valuation_rate*qty*conversion_factor) 
-		from `tabPurchase Invoice Item` pi_item where docstatus=1 
-		and exists(select name from `tabItem` where name = pi_item.item_code 
-			and is_stock_item='Yes')
-		and exists(select name from `tabPurchase Invoice` 
-			where name = pi_item.parent and company = %s)""", company)
-	return flt(total_received_amount[0][0]) - flt(total_billed_amount[0][0])
-
 
 def fix_total_debit_credit():
 	vouchers = webnotes.conn.sql("""select voucher_type, voucher_no, 
@@ -339,3 +262,90 @@ def fix_total_debit_credit():
 				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
 				(d.diff, d.voucher_type, d.voucher_no))
+	
+def get_stock_and_account_difference(account_list=None, posting_date=None):
+	from stock.utils import get_stock_balance_on
+	
+	if not posting_date: posting_date = nowdate()
+	
+	difference = {}
+	
+	account_warehouse = dict(webnotes.conn.sql("""select name, master_name from tabAccount 
+		where account_type = 'Warehouse' and ifnull(master_name, '') != '' 
+		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
+			
+	for account, warehouse in account_warehouse.items():
+		account_balance = get_balance_on(account, posting_date)
+		stock_value = get_stock_balance_on(warehouse, posting_date)
+		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
+			difference.setdefault(account, flt(stock_value) - flt(account_balance))
+
+	return difference
+
+def validate_expense_against_budget(args):
+	args = webnotes._dict(args)
+	if webnotes.conn.get_value("Account", {"name": args.account, "is_pl_account": "Yes", 
+		"debit_or_credit": "Debit"}):
+			budget = webnotes.conn.sql("""
+				select bd.budget_allocated, cc.distribution_id 
+				from `tabCost Center` cc, `tabBudget Detail` bd
+				where cc.name=bd.parent and cc.name=%s and account=%s and bd.fiscal_year=%s
+			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
+			
+			if budget and budget[0].budget_allocated:
+				yearly_action, monthly_action = webnotes.conn.get_value("Company", args.company, 
+					["yearly_bgt_flag", "monthly_bgt_flag"])
+				action_for = action = ""
+
+				if monthly_action in ["Stop", "Warn"]:
+					budget_amount = get_allocated_budget(budget[0].distribution_id, 
+						args.posting_date, args.fiscal_year, budget[0].budget_allocated)
+					
+					args["month_end_date"] = webnotes.conn.sql("select LAST_DAY(%s)", 
+						args.posting_date)[0][0]
+					action_for, action = "Monthly", monthly_action
+					
+				elif yearly_action in ["Stop", "Warn"]:
+					budget_amount = budget[0].budget_allocated
+					action_for, action = "Monthly", yearly_action
+
+				if action_for:
+					actual_expense = get_actual_expense(args)
+					if actual_expense > budget_amount:
+						webnotes.msgprint(action_for + _(" budget ") + cstr(budget_amount) + 
+							_(" for account ") + args.account + _(" against cost center ") + 
+							args.cost_center + _(" will exceed by ") + 
+							cstr(actual_expense - budget_amount) + _(" after this transaction.")
+							, raise_exception=BudgetError if action=="Stop" else False)
+					
+def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
+	if distribution_id:
+		distribution = {}
+		for d in webnotes.conn.sql("""select bdd.month, bdd.percentage_allocation 
+			from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
+			where bdd.parent=bd.name and bd.fiscal_year=%s""", fiscal_year, as_dict=1):
+				distribution.setdefault(d.month, d.percentage_allocation)
+
+	dt = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
+	budget_percentage = 0.0
+	
+	while(dt <= getdate(posting_date)):
+		if distribution_id:
+			budget_percentage += distribution.get(getdate(dt).strftime("%B"), 0)
+		else:
+			budget_percentage += 100.0/12
+			
+		dt = add_months(dt, 1)
+		
+	return yearly_budget * budget_percentage / 100
+				
+def get_actual_expense(args):
+	args["condition"] = " and posting_date<='%s'" % args.month_end_date \
+		if args.get("month_end_date") else ""
+		
+	return webnotes.conn.sql("""
+		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+		from `tabGL Entry`
+		where account='%(account)s' and cost_center='%(cost_center)s' 
+		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
+	""" % (args))[0][0]

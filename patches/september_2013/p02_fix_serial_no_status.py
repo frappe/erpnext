@@ -17,7 +17,7 @@ def execute():
 		serial_nos = d.serial_no.split("\n")
 		for sr in serial_nos:
 			serial_no = sr.strip()
-			if serial_no:
+			if serial_no and webnotes.conn.exists("Serial No", serial_no):
 				serial_bean = webnotes.bean("Serial No", serial_no)
 				if serial_bean.doc.status == "Not Available":
 					latest_sle = webnotes.conn.sql("""select voucher_no from `tabStock Ledger Entry`

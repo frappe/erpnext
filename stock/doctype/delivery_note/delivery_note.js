@@ -43,8 +43,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	
 		set_print_hide(doc, dt, dn);
 	
-		// unhide expense_account and cost_center is auto_inventory_accounting enabled
-		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
+		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
+		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
@@ -201,7 +201,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-if (sys_defaults.auto_inventory_accounting) {
+if (sys_defaults.auto_accounting_for_stock) {
 
 	cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];

@@ -36,7 +36,6 @@ data_map = {
 	"GL Entry": {
 		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", 
 			"is_opening", "company", "voucher_type", "voucher_no", "remarks"],
-		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, account",
 		"links": {
 			"account": ["Account", "name"],
@@ -81,7 +80,6 @@ data_map = {
 		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", 
 			"actual_qty as qty", "voucher_type", "voucher_no", "project",
 			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
-		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],

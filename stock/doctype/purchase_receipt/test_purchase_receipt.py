@@ -10,6 +10,8 @@ from webnotes.utils import cint
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
+		self._clear_stock_account_balance()
+		set_perpetual_inventory(0)
 		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		pr = webnotes.bean(copy=test_records[0]).insert()
@@ -29,45 +31,63 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
+		self._clear_stock_account_balance()
+		set_perpetual_inventory(0)
 		pr = webnotes.bean(copy=test_records[0])
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
-			order by account desc""", pr.doc.name, as_dict=1)
-			
-		self.assertTrue(not gl_entries)
+		stock_value, stock_value_difference = webnotes.conn.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.doc.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
+			["stock_value", "stock_value_difference"])
+		self.assertEqual(stock_value, 375)
+		self.assertEqual(stock_value_difference, 375)
+		
+		bin_stock_value = webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+		self.assertEqual(bin_stock_value, 375)
+		
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
 		
 	def test_purchase_receipt_gl_entry(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_inventory_accounting")), 1)
+		self._clear_stock_account_balance()
+		
+		set_perpetual_inventory()
+		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pr = webnotes.bean(copy=test_records[0])
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
-			order by account desc""", pr.doc.name, as_dict=1)
+		gl_entries = get_gl_entries("Purchase Receipt", pr.doc.name)
+		
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand_account = webnotes.conn.get_value("Company", pr.doc.company, 
-			"stock_in_hand_account")
+		stock_in_hand_account = webnotes.conn.get_value("Account", 
+			{"master_name": pr.doclist[1].warehouse})		
+		fixed_asset_account = webnotes.conn.get_value("Account", 
+			{"master_name": pr.doclist[2].warehouse})
 		
-		expected_values = [
-			[stock_in_hand_account, 750.0, 0.0],
-			["Stock Received But Not Billed - _TC", 0.0, 750.0]
-		]
+		expected_values = {
+			stock_in_hand_account: [375.0, 0.0],
+			fixed_asset_account: [375.0, 0.0],
+			"Stock Received But Not Billed - _TC": [0.0, 750.0]
+		}
 		
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.debit)
+			self.assertEquals(expected_values[gle.account][1], gle.credit)
 			
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		pr.cancel()
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
+		
+		set_perpetual_inventory(0)
+		
+	def _clear_stock_account_balance(self):
+		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
+		webnotes.conn.sql("""delete from `tabBin`""")
+		webnotes.conn.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
 		pr = webnotes.bean(copy=test_records[1])
@@ -95,7 +115,16 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
+			
+def get_gl_entries(voucher_type, voucher_no):
+	return webnotes.conn.sql("""select account, debit, credit
+		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
+		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 		
+def set_perpetual_inventory(enable=1):
+	accounts_settings = webnotes.bean("Accounts Settings")
+	accounts_settings.doc.auto_accounting_for_stock = enable
+	accounts_settings.save()
 	
 		
 test_dependencies = ["BOM"]
@@ -122,12 +151,28 @@ test_records = [
 			"item_code": "_Test Item", 
 			"item_name": "_Test Item", 
 			"parentfield": "purchase_receipt_details", 
-			"received_qty": 10.0,
-			"qty": 10.0,
+			"received_qty": 5.0,
+			"qty": 5.0,
 			"rejected_qty": 0.0,
 			"import_rate": 50.0,
-			"amount": 500.0,
+			"amount": 250.0,
 			"warehouse": "_Test Warehouse - _TC", 
+			"stock_uom": "Nos", 
+			"uom": "_Test UOM",
+		},
+		{
+			"conversion_factor": 1.0, 
+			"description": "_Test Item", 
+			"doctype": "Purchase Receipt Item", 
+			"item_code": "_Test Item", 
+			"item_name": "_Test Item", 
+			"parentfield": "purchase_receipt_details", 
+			"received_qty": 5.0,
+			"qty": 5.0,
+			"rejected_qty": 0.0,
+			"import_rate": 50.0,
+			"amount": 250.0,
+			"warehouse": "_Test Warehouse 1 - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
 		},

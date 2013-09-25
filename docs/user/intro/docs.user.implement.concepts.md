@@ -13,7 +13,7 @@ Before you start implementation, lets get familiar with the terminology that is 
 
 This represents the Company records for which ERPNext is setup. With this same setup, you can create multiple Company records, each representing a different legal entity. The accounting for each Company will be different, but they will share the Customer, Supplier and Item records.
 
-> Setup > Company > Companies
+> Setup > Company 
 
 #### Customer
 
@@ -59,11 +59,11 @@ A list of all Communication with a Contact or Lead. All emails sent from the sys
 
 #### Price List
 
-A table of sale price for an Item. An Item can have multiple prices based on Customer / Supplier or Territory etc..
+A Price List is a place where different rate plans can be stored. It’s a name you give to a set of Item Prices stored under a particular List.
 
-> Selling > Setup > Price List
+> Selling > Price List
 
-> Buying > Setup > Price List
+> Buying > Price List
 
 ---
 
@@ -73,7 +73,7 @@ A table of sale price for an Item. An Item can have multiple prices based on Cus
 
 Represents a Financial Year or Accounting Year. You can operate multiple Fiscal Years at the same time. Each Fiscal Year has a start date and an end date and transactions can only be recorded in this period. When you “close” a fiscal year, it's balances are transferred as “opening” balances for the next fiscal year.
 
-> Setup > Company > Fiscal Years
+> Setup > Company > Fiscal Year
 
 #### Cost Center
 
@@ -85,7 +85,7 @@ A Cost Center is like an Account, but the only difference is that its structure 
 
 A document that contains General Ledger (GL) entries and the sum of Debits and Credits of those entries is the same. In ERPNext you can update Payments, Returns etc using Journal Vouchers.
 
-> Accounts > Journal Vouchers
+> Accounts > Journal Voucher
 
 #### Sales Invoice
 
@@ -103,7 +103,7 @@ A bill sent by a Supplier for delivery of Items (goods or services).
 
 ERPNext allows you to book transactions in multiple currencies. There is only one currency for your book of accounts though. While posting your Invoices, payments in different currencies, the amount is converted to the default currency by the specified conversion rate.
 
-> Setup > Company > Currencies
+> Setup > Currency
 
 ---
 
@@ -113,7 +113,7 @@ ERPNext allows you to book transactions in multiple currencies. There is only on
 
 A classification of Customers, usually based on market segment.
 
-> Selling > Setup (sidebar) > Customer Group
+> Selling > Setup > Customer Group
 
 #### Lead
 
@@ -215,19 +215,19 @@ A unified table for all material movement from one warehouse to another. This is
 
 Update Stock of multiple Items from a spreadsheet (CSV) file.
 
-> Stock > Stock Reconciliation (in sidebar)
+> Stock > Stock Reconciliation
 
 #### Quality Inspection
 
 A note prepared to record certain parameters of an Item at the time of Receipt from Supplier, or Delivery to Customer.
 
-> Stock > Tools > Quality Inspection
+> Stock > Quality Inspection
 
 #### Item Group
 
 A classification of Item.
 
-> Stock > Setup (sidebar) > Item Group
+> Stock > Setup > Item Group
 
 ---
 
@@ -249,7 +249,7 @@ A record of an approved or rejected request for leave.
 
 A type of leave (for example, Sick Leave, Maternity Leave etc.)
 
-> Human Resource > Leave and Attendance (sidebar) > Leave Type
+> Human Resource > Leave and Attendance > Leave Type
 
 #### Salary Manager
 
@@ -357,7 +357,7 @@ A title that can be set on a transaction just for printing. For example, you wan
 
 Text of your terms of contract.
 
-> Selling > Setup > Terms and Conditions Template
+> Selling > Setup > Terms and Conditions 
 
 #### Unit of Measure (UOM)
 

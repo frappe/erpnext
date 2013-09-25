@@ -28,7 +28,7 @@ class SupportMailbox(POP3Mailbox):
 			new_ticket = True
 		
 		ticket = add_support_communication(mail.subject, mail.content, mail.from_email,
-			docname=thread_id if new_ticket else None, mail=mail)
+			docname=None if new_ticket else thread_id, mail=mail)
 			
 		if new_ticket and cint(self.email_settings.send_autoreply) and \
 			"mailer-daemon" not in mail.from_email.lower():

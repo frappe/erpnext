@@ -3,7 +3,7 @@
 	"_label": "Customer Issue"
 }
 ---
-If you are selling **Items** under warranty or if you have sold and extended service contract Annual Maintenance Contract (AMC), your **Customer** may call you about an issue or a bread-down and give you the Serial No of this Item.
+If you are selling **Items** under warranty or if you have sold and extended service contract like the Annual Maintenance Contract (AMC), your **Customer** may call you about an issue or a break-down and give you the Serial No of this Item.
 
 To record this, you can create a new **Customer Issue** and add the **Customer** and **Item** / **Serial No**. The system will then automatically fetch the Serial No’s details and indicate whether this is under warranty or AMC.
 
@@ -12,6 +12,11 @@ You must also add a description of the **Customer**’s issue and assign it to t
 To create a new **Customer Issue**:
 
 > Support > Customer Issue > New Customer Issue
+
+
+![Customer Issue](img/customer-issue.png)
+
+
 
 If a Customer visit is required to address the issue, you can create a new Maintenance Visit record from this.
 

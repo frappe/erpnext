@@ -10,10 +10,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
 from webnotes.model.mapper import get_mapped_doclist
-
-
-
-
+from stock.utils import update_bin
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -129,7 +126,6 @@ class DocType(SellingController):
 					}
 				})
 			
-		
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
@@ -163,7 +159,7 @@ class DocType(SellingController):
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
 						% d['item_code'], raise_exception=1)
-
+				
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
@@ -188,12 +184,11 @@ class DocType(SellingController):
 		self.update_prevdoc_status()
 		
 		# create stock ledger entry
-		self.update_stock_ledger(update_stock = 1)
+		self.update_stock_ledger()
 		self.update_serial_nos()
 
 		self.credit_limit()
 		
-		self.set_buying_amount()
 		self.make_gl_entries()
 
 		# set DN status
@@ -207,7 +202,7 @@ class DocType(SellingController):
 				
 		self.update_prevdoc_status()
 		
-		self.update_stock_ledger(update_stock = -1)
+		self.update_stock_ledger()
 		self.update_serial_nos(cancel=True)
 
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
@@ -291,59 +286,38 @@ class DocType(SellingController):
 			webnotes.msgprint(_("Packing Slip(s) Cancelled"))
 
 
-	def update_stock_ledger(self, update_stock):
-		self.values = []
+	def update_stock_ledger(self):
+		sl_entries = []
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				# this happens when item is changed from non-stock to stock item
-				if not d["warehouse"]:
-					continue
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+					and d.warehouse:
+				self.update_reserved_qty(d)
+										
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+				}))
+					
+		self.make_sl_entries(sl_entries)
+			
+	def update_reserved_qty(self, d):
+		if d['reserved_qty'] < 0 :
+			# Reduce reserved qty from reserved warehouse mentioned in so
+			if not d["reserved_warehouse"]:
+				webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
 				
-				if d['reserved_qty'] < 0 :
-					# Reduce reserved qty from reserved warehouse mentioned in so
-					if not d["reserved_warehouse"]:
-						webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
-						
-					args = {
-						"item_code": d['item_code'],
-						"voucher_type": self.doc.doctype,
-						"voucher_no": self.doc.name,
-						"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
-						"posting_date": self.doc.posting_date,
-						"is_amended": self.doc.amended_from and 'Yes' or 'No'
-					}
-					get_obj("Warehouse", d["reserved_warehouse"]).update_bin(args)
-						
-				# Reduce actual qty from warehouse
-				self.make_sl_entry(d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-
+			args = {
+				"item_code": d['item_code'],
+				"warehouse": d["reserved_warehouse"],
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
+				"posting_date": self.doc.posting_date,
+				"is_amended": self.doc.amended_from and 'Yes' or 'No'
+			}
+			update_bin(args)
 
 	def get_item_list(self):
 	 return get_obj('Sales Common').get_item_list(self)
-
-
-	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		self.values.append({
-			'item_code'					: d['item_code'],
-			'warehouse'					: wh,
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Delivery Note',
-			'voucher_no'				: self.doc.name,
-			'voucher_detail_no'	 		: d['name'],
-			'actual_qty'				: qty,
-			'stock_uom'					: d['uom'],
-			'incoming_rate'			 	: in_value,
-			'company'					: self.doc.company,
-			'fiscal_year'				: self.doc.fiscal_year,
-			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'					: d['batch_no'],
-			'serial_no'					: d['serial_no'],
-			"project"					: self.doc.project_name
-		})
-
 
 	def credit_limit(self):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""
@@ -354,22 +328,6 @@ class DocType(SellingController):
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			get_obj('Sales Common').check_credit(self, total)
-		
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
-			return
-			
-		gl_entries = []	
-		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-			self.check_expense_account(item)
-			
-			if item.buying_amount:
-				gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
-					cost_center=item.cost_center)
-				
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

@@ -12,7 +12,10 @@
 		"docs.user.stock.material_issue",
 		"docs.user.stock.sales_return",
 		"docs.user.stock.purchase_return",
-		"docs.user.stock.projected_quantity"
+		"docs.user.stock.projected_quantity",
+		"docs.user.stock.accounting_for_stock",
+		"docs.user.stock.perpetual_inventory",
+		"docs.user.stock.migrate_to_perpetual"
 	]
 }
 ---

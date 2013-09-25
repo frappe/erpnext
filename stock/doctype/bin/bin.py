@@ -64,7 +64,6 @@ class DocType:
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s
-			and ifnull(is_cancelled, 'No') = 'No'
 			order by timestamp(posting_date, posting_time) asc, name asc
 			limit 1
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)

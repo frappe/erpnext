@@ -9,11 +9,28 @@ To create a new Quotation go to:
 
 > Selling > Quotation > New Quotation
 
+#### Step 1: Enter Customer Details and Order Type.
 
+<br>
 
 
 ![Quotation](img/quotation.png)
 
+<br>
+
+#### Step 2: Add Currency and Price List
+
+<br>
+
+![Quotation](img/quotation-1.png)
+
+
+
+#### Step #: Enter Item and Tax Details.
+<br>
+
+
+![Quotation](img/quotation-2.png)
 
 
 
@@ -41,7 +58,8 @@ The rates you quote may depend on two things.
 
 ### Taxes
 
-To add taxes to your Quotation, you can either select a tax template, Sales Taxes and Charges Master or add the taxes on your own.
+To add taxes to your Quotation, you can either select a tax template, Sales Taxes and Charges Master or add the taxes on your own. To understand taxes in detail visit [Taxes](docs.user.setup.taxes.html)
+
 
 You can add taxes in the same manner as the Sales Taxes and Charges Master.
 
@@ -50,7 +68,7 @@ You can add taxes in the same manner as the Sales Taxes and Charges Master.
 Each Quotation must ideally contain a set of terms, of your contract. It is usually a good idea to make templates of your Terms and Conditions, so that you have a standard set of terms. 
 You can do this by going to:
 
-> Selling > Terms and Conditions  (right sidebar)
+> Selling > Terms and Conditions  
 
 #### What should Terms and Conditions Contain?
 

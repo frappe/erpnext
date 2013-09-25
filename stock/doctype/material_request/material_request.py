@@ -87,6 +87,8 @@ class DocType(BuyingController):
 	
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
+		
+		from stock.utils import update_bin
 		for d in getlist(self.doclist, 'indent_details'):
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
@@ -99,10 +101,11 @@ class DocType(BuyingController):
 			
 				args = {
 					"item_code": d.item_code,
+					"warehouse": d.warehouse,
 					"indented_qty": (is_submit and 1 or -1) * flt(qty),
 					"posting_date": self.doc.transaction_date
 				}
-				get_obj('Warehouse', d.warehouse).update_bin(args)		
+				update_bin(args)		
 		
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
@@ -200,6 +203,7 @@ def update_completed_qty(controller, caller_method):
 			
 def _update_requested_qty(controller, mr_obj, mr_items):
 	"""update requested qty (before ordered_qty is updated)"""
+	from stock.utils import update_bin
 	for mr_item_name in mr_items:
 		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
 		se_detail = controller.doclist.getone({"parentfield": "mtn_details",
@@ -218,8 +222,9 @@ def _update_requested_qty(controller, mr_obj, mr_items):
 		else:
 			add_indented_qty = se_detail.transfer_qty
 	
-		webnotes.get_obj("Warehouse", se_detail.t_warehouse).update_bin({
+		update_bin({
 			"item_code": se_detail.item_code,
+			"warehouse": se_detail.t_warehouse,
 			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
 			"posting_date": controller.doc.posting_date,
 		})
