@@ -7,8 +7,6 @@ import unittest
 import webnotes
 import webnotes.defaults
 from webnotes.utils import cint
-from accounts.utils import get_stock_and_account_difference
-
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):

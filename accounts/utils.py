@@ -268,17 +268,15 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	
 	if not posting_date: posting_date = nowdate()
 	
-	account_warehouse_map = {}
 	difference = {}
-	warehouse_account = webnotes.conn.sql("""select name, account from tabWarehouse 
-		where account in (%s)""" % ', '.join(['%s']*len(account_list)), account_list, as_dict=1)
-		
-	for wh in warehouse_account:
-			account_warehouse_map.setdefault(wh.account, []).append(wh.name)
+	
+	account_warehouse = dict(webnotes.conn.sql("""select name, master_name from tabAccount 
+		where account_type = 'Warehouse' and ifnull(master_name, '') != '' 
+		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
 			
-	for account, warehouse_list in account_warehouse_map.items():
+	for account, warehouse in account_warehouse.items():
 		account_balance = get_balance_on(account, posting_date)
-		stock_value = get_stock_balance_on(warehouse_list, posting_date)
+		stock_value = get_stock_balance_on(warehouse, posting_date)
 		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 

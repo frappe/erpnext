@@ -6,7 +6,6 @@
 
 from __future__ import unicode_literals
 import webnotes, unittest
-from accounts.utils import get_stock_and_account_difference
 
 test_dependencies = ["Item"]
 test_records = []

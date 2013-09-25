@@ -22,7 +22,6 @@ class DocType(StockController):
 		
 	def on_submit(self):
 		self.insert_stock_ledger_entries()
-		self.set_stock_value_difference()
 		self.make_gl_entries()
 		
 	def on_cancel(self):
@@ -274,26 +273,6 @@ class DocType(StockController):
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time
 			})
-			
-	def set_stock_value_difference(self):
-		"""stock_value_difference is the increment in the stock value"""
-		from stock.utils import get_buying_amount
-		
-		item_list = [d.item_code for d in self.entries]
-		warehouse_list = [d.warehouse for d in self.entries]
-		if not (item_list and warehouse_list):
-			webnotes.throw(_("Invalid Item or Warehouse Data"))
-		
-		stock_ledger_entries = self.get_stock_ledger_entries(item_list, warehouse_list)
-		
-		stock_value_difference = {}
-		for d in self.entries:
-			diff = get_buying_amount(self.doc.doctype, self.doc.name, d.voucher_detail_no, 
-				stock_ledger_entries.get((d.item_code, d.warehouse), []))
-			stock_value_difference.setdefault(d.warehouse, 0.0)
-			stock_value_difference[d.warehouse] -= diff
-
-		webnotes.conn.set(self.doc, "stock_value_difference", json.dumps(stock_value_difference))
 			
 	def get_gl_entries_for_stock(self, warehouse_account=None):
 		if not self.doc.cost_center:

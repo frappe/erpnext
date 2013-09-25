@@ -67,7 +67,7 @@ class DocType(DocListController):
 		if not self.doc.fields.get("__islocal"):
 			matched=True
 			ref_uom = webnotes.conn.get_value("Stock Ledger Entry", 
-				{"item_code": self.doc.name, "is_cancelled": "No"}, "stock_uom")
+				{"item_code": self.doc.name}, "stock_uom")
 			if ref_uom:
 				if cstr(ref_uom) != cstr(self.doc.stock_uom):
 					matched = False

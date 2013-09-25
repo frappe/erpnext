@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-08-29 16:46:33", 
+  "modified": "2013-09-24 15:35:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -154,15 +154,6 @@
   "no_copy": 1, 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "stock_value_difference", 
-  "fieldtype": "Long Text", 
-  "hidden": 1, 
-  "in_list_view": 1, 
-  "label": "Stock Value Difference", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm"
