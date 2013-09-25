@@ -23,11 +23,18 @@ You may not have shipping expenses for your walk-in customers, and no shop-rent 
 
 Thus when you do your analysis you get a better understanding as to which side of your business is doing better. Since ERPNext has an option to add multiple Companies, you can create Cost Centers for each Company and manage it separately.
 
+To understand chart of cost centers in detail visit [Accounting Knowledge](docs.user.knowledge.accounting.html)
+
+
 ### Chart of Cost Centers
 
 To setup your Chart of Cost Centers go to:
 
 > Accounts > Chart of Cost Centers
+
+
+![Chart of Cost Center](img/chart-of-cost-centers.png)
+
 
 Cost centers help you in one more activity, budgeting.
 

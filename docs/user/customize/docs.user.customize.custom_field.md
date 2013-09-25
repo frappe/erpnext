@@ -7,6 +7,10 @@ A very common customization is adding of custom fields. You can add Custom Field
 
 > Setup > Custom Field > New Custom Field
 
+![Custome Field](img/custom-field.png)
+
+
+
 In the form:
 
 - Select the Document on which you want to add the Custom Field.

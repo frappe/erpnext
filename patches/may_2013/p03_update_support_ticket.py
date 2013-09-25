@@ -11,4 +11,4 @@ def execute():
 		tic = webnotes.get_obj("Support Ticket", d.name)
 		tic.set_lead_contact(d.raised_by)
 		webnotes.conn.sql("""update `tabSupport Ticket` set lead = %s, contact = %s, company = %s 
-			where name = %s""", (tic.doc.lead, tic.doc.contact, tic.doc.company, d.name))
+			where name = %s""", (tic.doc.lead, tic.doc.contact, tic.doc.company, d.name

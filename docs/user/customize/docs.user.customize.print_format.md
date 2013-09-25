@@ -8,11 +8,18 @@ Print Formats are the layouts that are generated when you want to Print or Email
 - The auto-generated “Standard” Print Format: This type of format follows the same layout as the form and is generated automatically by ERPNext.
 - Based on the Print Format document. There are templates in HTML that will be rendered with data.
 
-ERPNext comes with a number of pre-defined templates in three styles: Modern, Classic and Spartan. You modify these templates or create their own. Editing ERPNext templates is not allowed because they may be over-written in an upcoming release.
+ERPNext comes with a number of pre-defined templates in three styles: Modern, Classic and Spartan. You modify these templates or create your own. Editing ERPNext templates is not allowed because they may be over-written in an upcoming release.
 
 To create your own versions, open an existing template from:
 
-> Setup > Branding and Printing > Print Formats
+> Setup > Printing > Print Formats
+
+
+![Print Format](img/print-format.png)
+
+<br>
+
+
 
 Select the type of Print Format you want to edit and click on the “Copy” button on the right column. A new Print Format will open up with “Is Standard” set as “No” and you can edit the Print Format.
 
