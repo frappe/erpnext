@@ -87,5 +87,9 @@ def create_chart_of_accounts_if_not_exists():
 				default_expense_account = '', default_income_account = '', cost_center = '', 
 				stock_received_but_not_billed = '', stock_adjustment_account = '', 
 				expenses_included_in_valuation = '' where name = %s""", company[0])
+				
+			webnotes.conn.sql("""update `tabCompany` set domain = 'Services' 
+				where name = %s and ifnull(domain, '') = ''""", company[0])
+				
 			webnotes.bean("Company", company[0]).save()
 				
