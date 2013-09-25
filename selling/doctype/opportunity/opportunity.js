@@ -53,6 +53,11 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 			this.frm.set_query("contact_by", erpnext.queries.profile);
 		}
 		
+		this.frm.set_query("customer_address", function() {
+			if(me.frm.doc.lead) return {filters: { lead: me.frm.doc.lead } };
+			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
+		});
+		
 		this.frm.set_query("item_code", "enquiry_details", function() {
 			return {
 				query: "controllers.queries.item_query",
@@ -63,7 +68,6 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["customer_address", "customer_filter"], 
 			["contact_person", "customer_filter"],
 			["territory", "not_a_group_filter"]], function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
@@ -151,8 +155,14 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 	}
 }
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.customer) return get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc, dt, dn) {
+	args = {
+		address: doc.customer_address, 
+		contact: doc.contact_person
+	}
+	if(doc.customer) args.update({customer: doc.customer});
+	
+	return get_server_fields('get_customer_address', JSON.stringify(args),'', doc, dt, dn, 1);
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
@@ -163,7 +173,7 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 		source_name: cur_frm.doc.lead
 	})
 	
-	unhide_field(['customer_name', 'address_display','contact_mobile', 
+	unhide_field(['customer_name', 'address_display','contact_mobile', 'customer_address', 
 		'contact_email', 'territory']);	
 }
 
