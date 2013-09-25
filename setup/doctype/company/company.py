@@ -59,12 +59,13 @@ class DocType:
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
-			webnotes.bean({
-				"doctype":"Warehouse",
-				"warehouse_name": whname,
-				"company": self.doc.name,
-				"create_account_under": "Stock Assets - " + self.doc.abbr
-			}).insert()
+			if not webnotes.conn.exists("Warehouse", whname + " - " + self.doc.abbr):
+				webnotes.bean({
+					"doctype":"Warehouse",
+					"warehouse_name": whname,
+					"company": self.doc.name,
+					"create_account_under": "Stock Assets - " + self.doc.abbr
+				}).insert()
 			
 	def create_default_web_page(self):
 		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
