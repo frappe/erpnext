@@ -232,6 +232,29 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	tax_rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
+
+	// serial_no: function(doc, cdt, cdn) {
+	// 	var me = this;
+	// 	var item = wn.model.get_doc(cdt, cdn);
+	// 	if (!item.item_code) {
+	// 		wn.call({
+	// 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_serial_no',
+	// 			args: {serial_no: this.serial_no.$input.val()},
+	// 			callback: function(r) {
+	// 				if (r.message) {
+	// 					var item_code = r.message[0].item_code;
+	// 					var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+	// 						this.frm.cscript.fname);
+	// 							child.item_code = item_code;
+	// 							me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
+	// 				}
+	// 				else
+	// 					msgprint(wn._("Invalid Serial No."));
+	// 				me.refresh();
+	// 			}
+	// 		});
+	// 	}
+	// },
 	
 	row_id: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);

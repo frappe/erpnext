@@ -34,6 +34,7 @@ def get_item_details(args):
 			"plc_conversion_rate": 1.0
 		}
 	"""
+
 	if isinstance(args, basestring):
 		args = json.loads(args)
 	args = webnotes._dict(args)

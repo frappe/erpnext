@@ -425,6 +425,7 @@ def get_address_territory(address_doc):
 	
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
+
 	if conversion_rate == 0:
 		msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
 	

@@ -132,7 +132,7 @@ erpnext.POS = Class.extend({
 				"options": "Item Group",
 				"label": "Item Group",
 				"fieldname": "pos_item_group",
-				"placeholder": "Filter by Item Group"
+				"placeholder": "Item Group"
 			},
 			parent: this.wrapper.find(".item-group-area")
 		});
@@ -150,7 +150,7 @@ erpnext.POS = Class.extend({
 				"options": "Item",
 				"label": "Item",
 				"fieldname": "pos_item",
-				"placeholder": "Select Item"
+				"placeholder": "Item"
 			},
 			parent: this.wrapper.find(".search-area")
 		});
@@ -167,7 +167,7 @@ erpnext.POS = Class.extend({
 				"fieldtype": "Data",
 				"label": "Barcode",
 				"fieldname": "pos_barcode",
-				"placeholder": "Select Barcode"
+				"placeholder": "Barcode"
 			},
 			parent: this.wrapper.find(".barcode-area")
 		});
@@ -215,7 +215,9 @@ erpnext.POS = Class.extend({
 				// if form is local then allow this function
 				if (cur_frm.doc.docstatus===0) {
 					$("div.pos-item").on("click", function() {
-						if(!cur_frm.doc[me.party.toLowerCase()]) {
+						if(!cur_frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
+								cur_frm.doc.quotation_to == "Customer") 
+								|| me.frm.doctype != "Quotation")) {
 							msgprint("Please select " + me.party + " first.");
 							return;
 						}
@@ -282,6 +284,16 @@ erpnext.POS = Class.extend({
 
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
+
+			if (me.sales_or_purchase == "Sales") {
+				item_amount = d.export_amount;
+				rate = d.export_rate;
+			}
+			else {
+				item_amount = d.import_amount;
+				rate = d.import_rate;
+			}
+
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
 					<td><input type="text" value="%(qty)s" \
@@ -292,8 +304,8 @@ erpnext.POS = Class.extend({
 					item_code: d.item_code,
 					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
 					qty: d.qty,
-					rate: format_currency(d.ref_rate, cur_frm.doc.currency),
-					amount: format_currency(d.export_amount, cur_frm.doc.currency)
+					rate: format_currency(rate, cur_frm.doc.currency),
+					amount: format_currency(item_amount, cur_frm.doc.currency)
 				}
 			)).appendTo($items);
 		});
@@ -312,15 +324,24 @@ erpnext.POS = Class.extend({
 			<tr>', {
 				description: d.description,
 				rate: d.rate,
-				tax_amount: format_currency(d.tax_amount, me.frm.doc.currency)
+				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+					me.frm.doc.currency)
 			})).appendTo(".tax-table tbody");
 		});
 
 		// set totals
-		this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
-			cur_frm.doc.currency));
-		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
-			cur_frm.doc.currency));
+		if (this.sales_or_purchase == "Sales") {
+			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
+				cur_frm.doc.currency));
+			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
+				cur_frm.doc.currency));
+		}
+		else {
+			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_import, 
+				cur_frm.doc.currency));
+			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_import, 
+				cur_frm.doc.currency));
+		}
 
 		// if form is local then only run all these functions
 		if (cur_frm.doc.docstatus===0) {
@@ -366,9 +387,12 @@ erpnext.POS = Class.extend({
 		if (this.frm.doctype != "Sales Invoice")
 			$(".make-payment").hide();
 
-		if (this.frm.doctype == "Quotation")
-			if (cur_frm.doc.quotation_to=="Customer")
-				this.party_field.remove();
+		// If quotation to is not Customer then remove party
+		if (this.frm.doctype == "Quotation") {
+			this.party_field.$wrapper.remove();
+			if (cur_frm.doc.quotation_to == "Customer")
+				this.make_party();
+		}
 	},
 	refresh_delete_btn: function() {
 		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		

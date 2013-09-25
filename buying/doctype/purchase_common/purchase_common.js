@@ -108,8 +108,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code) {
 			if(!this.validate_company_and_party("supplier")) {
-				item.item_code = null;
-				refresh_field("item_code", item.name, item.parentfield);
+				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
 					method: "buying.utils.get_item_details",

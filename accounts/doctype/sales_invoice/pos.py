@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, errprint
 
 @webnotes.whitelist()
 def get_items(price_list, sales_or_purchase, item=None, item_group=None):
@@ -35,6 +34,11 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 def get_item_from_barcode(barcode):
 	return webnotes.conn.sql("""select name from `tabItem` where barcode=%s""",
 		(barcode), as_dict=1)
+
+@webnotes.whitelist()
+def get_item_from_serial_no(serial_no):
+	return webnotes.conn.sql("""select name, item_code from `tabSerial No` where 
+		name=%s""", (serial_no), as_dict=1)
 
 @webnotes.whitelist()
 def get_mode_of_payment():
