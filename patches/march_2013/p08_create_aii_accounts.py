@@ -83,6 +83,9 @@ def create_chart_of_accounts_if_not_exists():
 	for company in webnotes.conn.sql("select name from `tabCompany`"):
 		if not webnotes.conn.sql("select * from `tabAccount` where company = %s", company[0]):
 			webnotes.conn.sql("""update `tabCompany` set receivables_group = '', 
-				payables_group = '' where name = %s""", company[0])
+				payables_group = '', default_bank_account = '', default_cash_account = '',
+				default_expense_account = '', default_income_account = '', cost_center = '', 
+				stock_received_but_not_billed = '', stock_adjustment_account = '', 
+				expenses_included_in_valuation = '' where name = %s""", company[0])
 			webnotes.bean("Company", company[0]).save()
 				
