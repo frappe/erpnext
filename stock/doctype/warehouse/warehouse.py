@@ -23,8 +23,6 @@ class DocType:
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
-		
-		self.validate_parent_account()
 				
 	def on_update(self):
 		self.create_account_head()
@@ -36,6 +34,7 @@ class DocType:
 					{"account_name": self.doc.warehouse_name}):
 				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
 						{"warehouse": self.doc.name}):
+					self.validate_parent_account()
 					ac_bean = webnotes.bean({
 						"doctype": "Account",
 						'account_name': self.doc.warehouse_name, 
@@ -52,15 +51,14 @@ class DocType:
 					msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
 	
 	def validate_parent_account(self):
-		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) and \
-			not self.doc.create_account_under:
-				parent_account = webnotes.conn.get_value("Account", 
-					{"account_name": "Stock Assets", "company": self.doc.company})
-				if parent_account:
-					self.doc.create_account_under = parent_account
-				else:
-					webnotes.throw(_("Please enter account group under which account \
-						for warehouse ") + self.doc.name +_(" will be created"))
+		if not self.doc.create_account_under:
+			parent_account = webnotes.conn.get_value("Account", 
+				{"account_name": "Stock Assets", "company": self.doc.company})
+			if parent_account:
+				self.doc.create_account_under = parent_account
+			else:
+				webnotes.throw(_("Please enter account group under which account \
+					for warehouse ") + self.doc.name +_(" will be created"))
 			
 	def on_rename(self, new, old):
 		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": old}, 
