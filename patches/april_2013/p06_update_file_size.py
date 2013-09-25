@@ -4,7 +4,7 @@
 import webnotes, os, webnotes.utils
 
 def execute():
-	files_path = webnotes.utils.get_storage_path(webnotes.conf.files_path)
+	files_path = webnotes.utils.get_site_path(webnotes.conf.files_path)
 	webnotes.conn.auto_commit_on_many_writes = 1
 
 	for f in webnotes.conn.sql("""select name, file_name from 
