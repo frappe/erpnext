@@ -32,7 +32,8 @@ class DocType:
 	def create_account_head(self):
 		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
-					"master_name": self.doc.name}):
+					"master_name": self.doc.name}) and not webnotes.conn.get_value("Account", 
+					{"account_name": self.doc.warehouse_name}):
 				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
 						{"warehouse": self.doc.name}):
 					ac_bean = webnotes.bean({
