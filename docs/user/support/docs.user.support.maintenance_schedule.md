@@ -11,6 +11,26 @@ To create a new Maintenance Schedule go to:
 
 > Support > Maintenance Schedule > New Maintenance Schedule
 
+#### Step 1: Enter Customer Details
+
+
+![Maintenance Schedule](img/maintenance-schedule-1.png)
+
+
+
+<br>
+
+
+
+#### Step 2: Fill Item and Maintenance Details
+
+
+
+![Maintenance Schedule](img/maintenance-schedule-2.png)
+
+
+<br>
+
 In the Maintenance Schedule, there are two sections:
 
 In the first section, you select the Items for which you want to generate the schedule and set how frequently you want to plan a visit or a maintenance. These can be optionally fetched from a Sales Order. After selecting the Items, “Save” the record.

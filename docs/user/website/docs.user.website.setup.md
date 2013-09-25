@@ -29,6 +29,12 @@ To define the Top Bar Menus, Brand, Footers and Home Page, go to:
 
 > Website > Website Settings
 
+
+![Website Setting](img/website-settings.png)
+
+<br>
+
+
 #### Top Menu
 
 Add each top menu item on a new link.
@@ -45,4 +51,4 @@ To set your brand, create a logo with a transparent background and white foregro
 
 ##### What is Website Analytics?
 
-Website analytics help you track each visitor on your website. The analytics will tell you from which country, at what time, and what pages the visitor viewed. This will help you understand who your visitors are and what are they looking for. There are many analytics engines available and the most popular and Free service is Google Analytics. We definitely recommend using one of them to gain insight into your website visitors.
+Website analytics helps you to track each visitor on your website. The analytics will tell you from which country, at what time, and which pages the visitor viewed. This will help you understand who your visitors are and what they are looking for. There are many analytics engines available and the most popular and Free service is Google Analytics. We definitely recommend using one of them to gain insight into your website visitors.

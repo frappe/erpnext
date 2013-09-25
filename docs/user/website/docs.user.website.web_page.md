@@ -7,6 +7,10 @@ Static Content like your Home Page, About Us, Contact Us, Terms pages can be cre
 
 > Website > Web Page > New Web Page
 
+![Web Page](img/webpage.png)
+
+
+
 #### Title
 
 The first thing to set is the title of your page. The title has the maximum weight for search engines so choose a title that reflects the keywords that you are targeting for your audience.

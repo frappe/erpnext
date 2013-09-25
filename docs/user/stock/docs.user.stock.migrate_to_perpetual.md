@@ -1,10 +1,10 @@
 ---
 {
-	"_label": "Migration from Periodic Inventory"
+	"_label": "Migrate to Perpetual Inventory"
 }
 ---
 
-Migration from Periodic Inventory is not a one click setting, it involves some special steps. As Perpetual Inventory always maintains a sync between stock and account balance, it is not possible to enable it with existing Warehouse setup. You have to create a whole new set of Warehouses, each linked to relevant account. 
+ Existing Users, need to follow some steps to activate the new Perpetual Inventory system. As Perpetual Inventory always maintains a sync between stock and account balance, it is not possible to enable it with existing Warehouse setup. You have to create a whole new set of Warehouses, each linked to relevant account. 
 
 Steps:
 

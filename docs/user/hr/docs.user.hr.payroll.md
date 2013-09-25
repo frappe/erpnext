@@ -17,7 +17,7 @@ The Salary Structure represents how Salaries are calculated based on Earnings an
 
 
 ![Salary Structure](img/salary-structure.png)
-s
+
 
 ### In the Salary Structure,
 
