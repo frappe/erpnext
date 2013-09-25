@@ -59,10 +59,7 @@ class DocType:
 			else:
 				webnotes.throw(_("Please enter account group under which account \
 					for warehouse ") + self.doc.name +_(" will be created"))
-			
-	def on_rename(self, new, old):
-		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": old}, 
-			"master_name", new)
+
 
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
@@ -207,6 +204,9 @@ class DocType:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
 
 	def on_rename(self, newdn, olddn, merge=False):
+		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": olddn}, 
+			"master_name", newdn)
+			
 		if merge:
 			from stock.stock_ledger import update_entries_after
 			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 

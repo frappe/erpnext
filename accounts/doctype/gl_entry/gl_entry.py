@@ -117,7 +117,7 @@ def check_negative_balance(account, adv_adj=False):
 				flt(balance[0][0]) or -1*flt(balance[0][0])
 		
 			if flt(balance) < 0:
-				webnotes.throw(_("Negative balance is not allowed for account ") + self.doc.account)
+				webnotes.throw(_("Negative balance is not allowed for account ") + account)
 
 def check_freezing_date(posting_date, adv_adj=False):
 	"""
