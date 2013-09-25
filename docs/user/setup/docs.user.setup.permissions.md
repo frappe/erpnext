@@ -3,7 +3,7 @@
 	"_label": "Setting up Permissions"
 }
 ---
-ERPNext has a role-based permission system, which means that you can assign Roles to Users, and permissions on Roles.
+ERPNext has a role-based permission system, which means that you can assign Roles to Users, and Permissions on Roles.
 
 ERPNext has a very powerful permission structure that will allow you to set permissions right up to the field level.
 
@@ -40,6 +40,7 @@ To delete a rule, just uncheck all the boxes of the row and click on “Update�
 
 To set “match” rules, select the drop-down in the last column.  For example, you want to restrict Users of Role “Sales User” by Territories in Sales Order. 
 
+
 1. Select Sales Order in “Set Permissions For”
 1. In the row for Role “Sales User”, in the last column “Restrict By”, select “territory”.
 1. To assign Territories to Users, click on “Set Users / Roles”
@@ -50,7 +51,41 @@ To set “match” rules, select the drop-down in the last column.  For exam
 
 In the same way, add a row for each user.
 
+#### Step 1: Select Sales Order in "Set Permissions For"
+
+
+![Permissions Manager](img/permission-manager-1.png)
+
+#### Step 2: Select restriction option as Territory
+
+<br>
+![Permissions Manager](img/permission-manager-2.png)
+
+<br>
+
+#### Step 3: To assign Territories to users, click on "Set Users/Roles"
+
+<br>
+
+![Permissions Manager](img/permission-manager-3.png)
+
+
+#### Step 3: Restrict User by selecting Territory
+
+
+![Permission Manager](img/permission-manager-4.png)
+
+
+#### Step 4: Select the User to assign to a Territory
+
+
+![Permission Manager](img/permission-manager-5.png)
+
+
 > **Note 1:** The “match” rules apply to all documents that you have matched by Territory.
 
 > **Note 2:** You can set multiple rules for the same User. In this example, you can set a User to access more than one Territories.
  
+
+If you have more than two companies, we recommend that you should maintain seperate databases for these companies (2/3 ERPnext accounts). This avoids data leak from one company to another.
+

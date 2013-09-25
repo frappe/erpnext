@@ -7,6 +7,11 @@
 	]
 }
 ---
+
+![Implementation](img/implementation-image.png)
+
+
+
 We have seen dozens of ERP implementations over the past few years and we realize that successful implementation is a lot about intangibles and attitude.
 
 **ERPs are not required.**

@@ -7,7 +7,14 @@ One of the primary motivator for compulsory use of accounting tools is calculati
 
 ### Tax Accounts
 
-For Tax Accounts that you want to use in the tax templates, you must mention them as type “Tax” in your Chart of Accounts.
+For Tax Accounts that you want to use in the tax templates, you must mention them as type “Tax” in your Chart of Accounts. Some Item-tax features are given below :
+
+- **Discount**: The maximum Discount that can be applied on an Item can be fixed in the Item master. Read [Discount](docs.user.selling.discount.html)
+- **Inclusive and Exclusive Tax**: ERPNext allows you to enter Item rates which are tax inclusive.
+- **Flat Discount**: This feature will be added soon.
+- **Exception to the rule**: Item tax settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account
+
+
 
 ## Sales Taxes and Charges Master
 

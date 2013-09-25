@@ -15,7 +15,8 @@
 		"docs.user.projects",
 		"docs.user.website",
 		"docs.user.tools",
-		"docs.user.customize"
+		"docs.user.customize",
+		"docs.user.knowledge"
 	],
 	"_no_toc": 1
 }
@@ -90,7 +91,7 @@ Contents
 	1. [Projected Quantity](docs.user.stock.projected_quantity.html)
 	1. [Accounting for Stock](docs.user.stock.accounting_for_stock.html)
 	1. [Perpetual Inventory](docs.user.stock.perpetual_inventory.html)
-	1. [Perpetual Inventory Migration](docs.user.stock.periodic_to_perpetual.html)
+	1. [Migrate to Perpetual Inventory](docs.user.stock.migrate_to_perpetual.html)
 1. [Accounts](docs.user.accounts.html)
 	1. [Chart of Accounts](docs.user.setup.accounting.html)
 	1. [Chart of Cost Centers](docs.user.setup.cost_centers.html)
@@ -99,9 +100,9 @@ Contents
 	1. [Payment Entry](docs.user.accounts.payments.html)
 	1. [Journal Voucher](docs.user.accounts.journal_voucher.html)
 	1. [Opening Entry](docs.user.accounts.opening_entry.html)
+	1. [Opening Stock](docs.user.accounts.opening_stock.html)
 	1. [Period Closing](docs.user.accounts.closing.html)
 	1. [Accounting Reports](docs.user.accounts.reports.html)
-	1. [Upload Journal Entries in Bulk](docs.user.accounts.voucher_import.html)
 	1. [Point of Sale (POS) Invoice](docs.user.accounts.pos.html)	
 1. [Human Resources (HR)](docs.user.hr.html)
 	1. [HR Setup](docs.user.hr.setup.html)
@@ -121,10 +122,11 @@ Contents
 	1. [Maintenance Schedule](docs.user.support.maintenance_schedule.html)
 	1. [Maintenance Visit](docs.user.support.maintenance_visit.html)
 	1. [Maintenance Schedule](docs.user.support.maintenance_schedule.html)
+	1. [Newsletter](docs.user.support.newsletter.html)
 1. [Projects](docs.user.projects.html)
 	1. [Projects](docs.user.projects.projects.html)
 	1. [Task](docs.user.projects.task.html)
-	1. [Time Log](docs.user.projects.time_log.html)
+	1. [Time Log](docs.user.projects.timelog.html)
 1. [Website](docs.user.website.html)
 	1. [Setup](docs.user.website.setup.html)
 	1. [Web Pages](docs.user.website.web_page.html)
@@ -136,9 +138,16 @@ Contents
 	1. [Calendar](docs.user.tools.calendar.html)
 	1. [Assignments](docs.user.tools.assignment.html)
 	1. [Tags](docs.user.tools.tags.html)
+	1. [Forms](docs.user.tools.form_tools.html)
+	1. [Messages](docs.user.tools.messages.html)
+	1. [Notes](docs.user.tools.notes.html)
 1. [Customize](docs.user.customize.html)
 	1. [Custom Fields](docs.user.customize.custom_field.html)
 	1. [Customize Form](docs.user.customize.custom_form.html)
 	1. [Hide / Unhide modules](docs.user.customize.hide_unhide.html)
 	1. [Print Formats](docs.user.customize.print_formats.html)
 	1. [Custom Scripts](docs.user.customize.custom_scripts.html)
+1. [Knowledge Library](docs.user.knowledge.html)
+	1. [Fiscal Year](docs.user.knowledge.fiscal_year.html)
+	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
+	1. [Accounting Entries](docs.user.knowledge.accounting_entries.html)
