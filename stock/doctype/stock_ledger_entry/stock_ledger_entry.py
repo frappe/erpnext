@@ -34,28 +34,35 @@ class DocType(DocListController):
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
 		self.validate_warehouse_company()
-		self.actual_amt_check()
-		self.check_stock_frozen_date()
 		self.scrub_posting_time()
 		
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, self.meta.get_label("posting_date"))
 		
 	def on_submit(self):
+		self.check_stock_frozen_date()
+		self.actual_amt_check()
 		self.validate_serial_no()
 		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:
-			batch_bal = flt(webnotes.conn.sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and batch_no = '%s'"%(self.doc.warehouse,self.doc.item_code,self.doc.batch_no))[0][0])
-			self.doc.fields.update({'batch_bal': batch_bal})
+			batch_bal_after_transaction = flt(webnotes.conn.sql("""select sum(actual_qty) 
+				from `tabStock Ledger Entry` 
+				where warehouse=%s and item_code=%s and batch_no=%s""", 
+				(self.doc.warehouse, self.doc.item_code, self.doc.batch_no))[0][0])
+			
+			if batch_bal_after_transaction < 0:
+				self.doc.fields.update({
+					'batch_bal': batch_bal_after_transaction - self.doc.actual_qty
+				})
+				
+				webnotes.throw("""Not enough quantity (requested: %(actual_qty)s, \
+					current: %(batch_bal)s in Batch <b>%(batch_no)s</b> for Item \
+					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
+					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
 
-			if (batch_bal + self.doc.actual_qty) < 0:
-				msgprint("""Not enough quantity (requested: %(actual_qty)s, current: %(batch_bal)s in Batch 
-		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> 
-		as on %(posting_date)s %(posting_time)s""" % self.doc.fields, raise_exception = 1)
-
-			self.doc.fields.pop('batch_bal')
+				sself.doc.fields.pop('batch_bal')
 			 
 	def validate_warehouse_company(self):
 		warehouse_company = webnotes.conn.get_value("Warehouse", self.doc.warehouse, "company")
