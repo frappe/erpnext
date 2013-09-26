@@ -9,7 +9,6 @@ $(document).ready(function() {
 		type: "POST",
 		method: "selling.utils.cart.get_cart_quotation",
 		callback: function(r) {
-			console.log(r);
 			$("#cart-container").removeClass("hide");
 			$(".progress").remove();
 			if(r.exc) {
@@ -126,8 +125,8 @@ $.extend(erpnext.cart, {
 	},
 	
 	render_item_row: function($cart_items, doc) {
-		doc.image_html = doc.image ?
-			'<div style="height: 120px; overflow: hidden;"><img src="' + doc.image + '" /></div>' :
+		doc.image_html = doc.website_image ?
+			'<div style="height: 120px; overflow: hidden;"><img src="' + doc.website_image + '" /></div>' :
 			'{% include "app/stock/doctype/item/templates/includes/product_missing_image.html" %}';
 			
 		if(doc.description === doc.item_name) doc.description = "";
