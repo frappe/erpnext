@@ -45,7 +45,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.reset(doc);
 	if(doc.__islocal) 
 		return;
-	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
+	cur_frm.dashboard.set_headline('<span class="text-muted">'+ wn._('Loading...')+ '</span>')
 	
 	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
 	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
@@ -99,7 +99,7 @@ cur_frm.cscript.make_contact = function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
-			no_results_message: 'No contacts created',
+			no_results_message: wn._('No contacts created'),
 			render_row: cur_frm.cscript.render_contact_row,
 		});
 		// note: render_contact_row is defined in contact_control.js
