@@ -10,6 +10,8 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		cur_frm.set_value("status", "Open");
 		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
+	
+	var leave_approver = doc.leave_approver;
 	return cur_frm.call({
 		method:"hr.utils.get_leave_approver_list",
 		callback: function(r) {
@@ -17,6 +19,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 				function(profile) { 
 					return {value: profile, label: wn.user_info(profile).fullname}; 
 				}));
+			if(leave_approver) cur_frm.set_value("leave_approver", leave_approver);
 			cur_frm.cscript.get_leave_balance(cur_frm.doc);
 		}
 	});
