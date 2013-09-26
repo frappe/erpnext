@@ -347,9 +347,16 @@ def make_supplier_quotation(source_name, target_doclist=None):
 @webnotes.whitelist()
 def make_stock_entry(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
-
-	def set_purpose(source, target):
+	
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1
+		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
+		target.transfer_qty = flt(obj.qty) - flt(obj.ordered_qty)
+	
+	def set_missing_values(source, target):
 		target[0].purpose = "Material Transfer"
+		se = webnotes.bean(target)
+		se.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doclist("Material Request", source_name, {
 		"Material Request": {
@@ -369,6 +376,6 @@ def make_stock_entry(source_name, target_doclist=None):
 			},
 			"postprocess": update_item
 		}
-	}, target_doclist, set_purpose)
+	}, target_doclist, set_missing_values)
 
 	return [d.fields for d in doclist]
