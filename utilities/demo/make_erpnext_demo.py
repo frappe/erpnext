@@ -7,7 +7,9 @@ import utilities.demo.make_demo
 
 def make_demo_app(site=None):
 	webnotes.mute_emails = 1
-	webnotes.connect(site)
+	webnotes.init(site=site)
+	webnotes.connect(db_name=webnotes.conf.demo_db_name, site=site)
+
 	utilities.demo.make_demo.make(reset=True, simulate=False)
 	# setup demo user etc so that the site it up faster, while the data loads
 	make_demo_user()
@@ -116,4 +118,6 @@ def make_demo_on_login_script():
 	webnotes.conn.commit()
 
 if __name__=="__main__":
-	make_demo_app()
+	import sys
+	site = sys.argv[1:]
+	make_demo_app(site=site and site[0] or None)

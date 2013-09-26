@@ -31,7 +31,7 @@ class DocType:
 			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
 					"master_name": self.doc.name}) and not webnotes.conn.get_value("Account", 
 					{"account_name": self.doc.warehouse_name}):
-				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
+				if self.doc.fields.get("__islocal") or not webnotes.conn.get_value("Stock Ledger Entry", 
 						{"warehouse": self.doc.name}):
 					self.validate_parent_account()
 					ac_bean = webnotes.bean({
