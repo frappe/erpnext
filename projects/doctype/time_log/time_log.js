@@ -10,3 +10,5 @@ erpnext.projects.TimeLog = wn.ui.form.Controller.extend({
 });
 
 cur_frm.cscript = new erpnext.projects.TimeLog({frm: cur_frm});
+
+cur_frm.add_fetch('task','project','project');
