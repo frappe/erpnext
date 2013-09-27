@@ -70,7 +70,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
 				var item = wn.model.get_doc(cdt, cdn);
 				if(!item.item_code) {
-					wn.throw("Please enter Item Code to get batch no");
+					wn.throw(wn._("Please enter Item Code to get batch no"));
 				} else {
 					if(item.warehouse) {
 						return {
@@ -632,12 +632,12 @@ var set_sales_bom_help = function(doc) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			help_msg = "<div class='alert alert-warning'> \
-				For 'Sales BOM' items, warehouse, serial no and batch no \
+			help_msg = "<div class='alert alert-warning'>" +
+				wn._("For 'Sales BOM' items, warehouse, serial no and batch no \
 				will be considered from the 'Packing List' table. \
 				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
-				those values can be entered in the main item table, values will be copied to 'Packing List' table. \
-			</div>";
+				those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
+			"</div>";
 			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
 		} 
 	} else {
