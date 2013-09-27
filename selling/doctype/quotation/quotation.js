@@ -83,12 +83,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	
 	validate_company_and_party: function(party_field) {
-		if(this.frm.doc.quotation_to == "Lead") {
-			return true;
-		} else if(!this.frm.doc.quotation_to) {
+		if(!this.frm.doc.quotation_to) {
 			msgprint(wn._("Please select a value for" + " " + wn.meta.get_label(this.frm.doc.doctype,
 				"quotation_to", this.frm.doc.name)));
 			return false;
+		} else if (this.frm.doc.quotation_to == "Lead") {
+			return true;
 		} else {
 			return this._super(party_field);
 		}

@@ -213,10 +213,10 @@ erpnext.POS = Class.extend({
 				});
 
 				// if form is local then allow this function
-				if (cur_frm.doc.docstatus===0) {
+				if (me.frm.doc.docstatus===0) {
 					$("div.pos-item").on("click", function() {
-						if(!cur_frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
-								cur_frm.doc.quotation_to == "Customer") 
+						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
+								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
 							msgprint("Please select " + me.party + " first.");
 							return;
@@ -304,8 +304,8 @@ erpnext.POS = Class.extend({
 					item_code: d.item_code,
 					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
 					qty: d.qty,
-					rate: format_currency(rate, cur_frm.doc.currency),
-					amount: format_currency(item_amount, cur_frm.doc.currency)
+					rate: format_currency(rate, me.frm.doc.currency),
+					amount: format_currency(item_amount, me.frm.doc.currency)
 				}
 			)).appendTo($items);
 		});
@@ -332,19 +332,19 @@ erpnext.POS = Class.extend({
 		// set totals
 		if (this.sales_or_purchase == "Sales") {
 			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
-				cur_frm.doc.currency));
+				me.frm.doc.currency));
 			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
-				cur_frm.doc.currency));
+				me.frm.doc.currency));
 		}
 		else {
 			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_import, 
-				cur_frm.doc.currency));
+				me.frm.doc.currency));
 			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_import, 
-				cur_frm.doc.currency));
+				me.frm.doc.currency));
 		}
 
 		// if form is local then only run all these functions
-		if (cur_frm.doc.docstatus===0) {
+		if (this.frm.doc.docstatus===0) {
 			$("input.qty").on("focus", function() {
 				$(this).select();
 			});
@@ -371,11 +371,11 @@ erpnext.POS = Class.extend({
 			});
 
 			me.refresh_delete_btn();
-			cur_frm.pos.barcode.$input.focus();
+			this.frm.pos.barcode.$input.focus();
 		}
 
 		// if form is submitted & cancelled then disable all input box & buttons
-		if (cur_frm.doc.docstatus>=1) {
+		if (this.frm.doc.docstatus>=1) {
 			me.wrapper.find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
@@ -390,7 +390,7 @@ erpnext.POS = Class.extend({
 		// If quotation to is not Customer then remove party
 		if (this.frm.doctype == "Quotation") {
 			this.party_field.$wrapper.remove();
-			if (cur_frm.doc.quotation_to == "Customer")
+			if (this.frm.doc.quotation_to == "Customer")
 				this.make_party();
 		}
 	},
@@ -435,8 +435,8 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
-		cur_frm.fields_dict[this.frm.cscript.fname].grid.refresh();
-		cur_frm.script_manager.trigger("calculate_taxes_and_totals");
+		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
+		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		me.frm.dirty();
 		me.refresh();
 	},
@@ -470,15 +470,15 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
-					cur_frm.pos.barcode.$input.focus();
+					me.frm.pos.barcode.$input.focus();
 					
 					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
-						cur_frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);
-						cur_frm.set_value("paid_amount", dialog.get_values().total_amount);
-						cur_frm.cscript.mode_of_payment(cur_frm.doc);
-						cur_frm.save();
+						me.frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);
+						me.frm.set_value("paid_amount", dialog.get_values().total_amount);
+						me.frm.cscript.mode_of_payment(me.frm.doc);
+						me.frm.save();
 						dialog.hide();
 						me.refresh();
 					};
