@@ -34,11 +34,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 		
 		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
-			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
+			cur_frm.add_custom_button(wn._('Make Sales Order'), cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Order Confirmed") {
-				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
+				cur_frm.add_custom_button(wn._('Set as Lost'), cur_frm.cscript['Declare Order Lost']);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 		}
 		
 		if (this.frm.doc.docstatus===0) {
@@ -130,9 +130,9 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	var dialog = new wn.ui.Dialog({
 		title: "Set as Lost",
 		fields: [
-			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -145,7 +145,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint("There were errors.");
+					msgprint(wn._("There were errors."));
 					return;
 				}
 				dialog.hide();
