@@ -40,6 +40,7 @@ def make(reset=False, simulate=True):
 	if reset:
 		setup()
 	else:
+		webnotes.conn.close()
 		webnotes.connect(db_name=webnotes.conf.demo_db_name)
 	
 	if simulate:

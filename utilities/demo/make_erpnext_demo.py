@@ -8,7 +8,6 @@ import utilities.demo.make_demo
 def make_demo_app(site=None):
 	webnotes.mute_emails = 1
 	webnotes.init(site=site)
-	webnotes.connect(db_name=webnotes.conf.demo_db_name, site=site)
 
 	utilities.demo.make_demo.make(reset=True, simulate=False)
 	# setup demo user etc so that the site it up faster, while the data loads
@@ -18,6 +17,8 @@ def make_demo_app(site=None):
 	utilities.demo.make_demo.make(reset=False, simulate=True)
 
 def make_demo_user():
+	from webnotes.auth import _update_password
+	
 	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
 		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
 		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
@@ -44,10 +45,10 @@ def make_demo_user():
 	p.doc.last_name = "User"
 	p.doc.enabled = 1
 	p.doc.user_type = "ERPNext Demo"
-	p.doc.new_password = "demo"
 	p.insert()
 	add_roles(p)
 	p.save()
+	_update_password("demo@erpnext.com", "demo")
 	
 	# make system manager user
 	if webnotes.conn.exists("Profile", "admin@erpnext.com"):
@@ -59,11 +60,11 @@ def make_demo_user():
 	p.doc.last_name = "User"
 	p.doc.enabled = 1
 	p.doc.user_type = "System User"
-	p.doc.new_password = "admin010123"
 	p.insert()
 	roles.append("System Manager")
 	add_roles(p)
 	p.save()
+	_update_password("admin@erpnext.com", "admin010123")
 	
 	# only read for newsletter
 	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
