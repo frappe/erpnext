@@ -11,7 +11,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
-		msgprint("Please create new account from Chart of Accounts.");
+		msgprint(wn._("Please create new account from Chart of Accounts."));
 		throw "cannot create";
 	}
 
@@ -38,7 +38,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// read-only for root accounts
 	if(!doc.parent_account) {
 		cur_frm.perm = [[1,0,0], [1,0,0]];
-		cur_frm.set_intro("This is a root account and cannot be edited.");
+		cur_frm.set_intro(wn._("This is a root account and cannot be edited."));
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
@@ -81,17 +81,17 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
-	cur_frm.add_custom_button('Chart of Accounts', 
+	cur_frm.add_custom_button(wn._('Chart of Accounts'), 
 		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button('Convert to Ledger', 
+		cur_frm.add_custom_button(wn._('Convert to Ledger'), 
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button('Convert to Group', 
+		cur_frm.add_custom_button(wn._('Convert to Group'), 
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 			
-		cur_frm.add_custom_button('View Ledger', function() {
+		cur_frm.add_custom_button(wn._('View Ledger'), function() {
 			wn.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
