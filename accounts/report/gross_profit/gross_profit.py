@@ -55,7 +55,7 @@ def get_stock_ledger_entries(filters):
 		from `tabStock Ledger Entry`"""
 	
 	if filters.get("company"):
-		query += """ and company=%(company)s"""
+		query += """ where company=%(company)s"""
 	
 	query += " order by item_code desc, warehouse desc, posting_date desc, posting_time desc, name desc"
 	
