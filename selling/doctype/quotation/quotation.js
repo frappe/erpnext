@@ -11,6 +11,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -82,12 +83,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	
 	validate_company_and_party: function(party_field) {
-		if(this.frm.doc.quotation_to == "Lead") {
-			return true;
-		} else if(!this.frm.doc.quotation_to) {
+		if(!this.frm.doc.quotation_to) {
 			msgprint(wn._("Please select a value for" + " " + wn.meta.get_label(this.frm.doc.doctype,
 				"quotation_to", this.frm.doc.name)));
 			return false;
+		} else if (this.frm.doc.quotation_to == "Lead") {
+			return true;
 		} else {
 			return this._super(party_field);
 		}
