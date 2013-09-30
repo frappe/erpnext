@@ -6,7 +6,7 @@ erpnext.fs = {}
 pscript['onload_Financial Statements'] = function(wrapper) {
 	wn.ui.make_app_page({
 		parent: wrapper,
-		"title": "Financial Statements",
+		"title": wn._("Financial Statements"),
 		"single_column": true,
 	});
 	
