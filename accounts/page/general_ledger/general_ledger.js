@@ -4,7 +4,7 @@
 wn.pages['general-ledger'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'General Ledger',
+		title: wn._('General Ledger'),
 		single_column: true
 	});
 	
@@ -16,7 +16,7 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 erpnext.GeneralLedger = wn.views.GridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "General Ledger",
+			title: wn._("General Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -54,11 +54,11 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value;
 			}},
-		{fieldtype:"Link", label: "Account", link:"Account",
+		{fieldtype:"Link", label: wn._("Account"), link:"Account",
 			filter: function(val, item, opts, me) {
 				if(!val) {
 					return true;
@@ -68,22 +68,22 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					return me.is_child_account(val, item.account);
 				}
 			}},
-		{fieldtype:"Data", label: "Voucher No",
+		{fieldtype:"Data", label: wn._("Voucher No"),
 			filter: function(val, item, opts) {
 				if(!val) return true;
 				return (item.voucher_no && item.voucher_no.indexOf(val)!=-1);
 			}},
-		{fieldtype:"Date", label: "From Date", filter: function(val, item) {
+		{fieldtype:"Date", label: wn._("From Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date", filter: function(val, item) {
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype: "Check", label: "Group by Ledger"},
-		{fieldtype: "Check", label: "Group by Voucher"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype: "Check", label: wn._("Group by Ledger")},
+		{fieldtype: "Check", label: wn._("Group by Voucher")},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		this._super();
@@ -160,7 +160,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var to_date = dateutil.str_to_obj(this.to_date);
 		
 		if(to_date < from_date) {
-			msgprint("From Date must be before To Date");
+			msgprint(wn._("From Date must be before To Date"));
 			return;
 		}
 		
