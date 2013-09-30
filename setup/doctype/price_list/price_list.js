@@ -164,7 +164,7 @@ wn.ui.form.TableGrid = Class.extend({
 		if (row)
 			this.dialog.set_values(this.make_dialog_values(row));
 
-		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons());
+		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons(row));
 		this.dialog.show();
 
 		this.dialog.$wrapper.find('button.update').on('click', function() {
@@ -186,12 +186,12 @@ wn.ui.form.TableGrid = Class.extend({
 
 		return dialog_values;
 	},
-	make_dialog_buttons: function() {
+	make_dialog_buttons: function(row) {
 		var me = this;
 		var buttons = '<button class="btn btn-primary update">Update</button>';
 
 		// if user can delete then only add the delete button in dialog
-		if (wn.model.can_delete(me.frm.doc.doctype))
+		if (wn.model.can_delete(me.frm.doc.doctype) && row)
 			buttons += ' <button class="btn btn-default delete">Delete</button>';
 
 		return buttons;
