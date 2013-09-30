@@ -41,8 +41,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['group_or_ledger', 'company'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
-		intro_txt += '<p><b>Note:</b>'+ wn._('This Cost Center is a')+ '<i>'+wn._('Group')+'</i>'+ wn._(', \
-			Accounting Entries are not allowed against groups.')+'</p>';
+		intro_txt += '<p><b>'+wn._('Note:')+'</b>'+ wn._('This Cost Center is a')+ '<i>'+wn._('Group')+'</i>, '+ 
+		wn._('Accounting Entries are not allowed against groups.')+'</p>';
 	}
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
