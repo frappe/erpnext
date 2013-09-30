@@ -5,8 +5,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.toggle_enable('year_start_date', doc.__islocal)
 	
 	if (!doc.__islocal && (doc.name != sys_defaults.fiscal_year)) {
-		cur_frm.add_custom_button("Set as Default", cur_frm.cscript.set_as_default);
-		cur_frm.set_intro("To set this Fiscal Year as Deafult, click on 'Set as Default'");
+		cur_frm.add_custom_button(wn._("Set as Default"), cur_frm.cscript.set_as_default);
+		cur_frm.set_intro(wn._("To set this Fiscal Year as Deafult, click on 'Set as Default'"));
 	} else cur_frm.set_intro("");
 }
 
