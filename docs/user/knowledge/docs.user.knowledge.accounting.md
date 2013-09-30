@@ -22,34 +22,34 @@ Accounting Entries
 
 The balance of account can be increased / decreased, depending on account type and transaction type.
 
-<table class="table table-bordered">
+<table class="table table-bordered text-center">
     <thead>
         <tr class="active">
-            <td style="text-align: center;">Account Type</td>
-            <td style="text-align: center;">Transaction Type</td>
-            <td style="text-align: center;">Effect on account balance</td>
+            <td>Account Type</td>
+            <td>Transaction Type</td>
+            <td>Effect on account balance</td>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Increases</td>
+            <td>Debit</td>
+            <td>Debit</td>
+            <td>Increases</td>
         </tr>
         <tr>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Credit</td>
-            <td style="text-align: center;">Decreases</td>
+            <td>Debit</td>
+            <td>Credit</td>
+            <td>Decreases</td>
         </tr>
         <tr>
-            <td style="text-align: center;">Credit</td>
-            <td style="text-align: center;">Credit</td>
-            <td style="text-align: center;">Increases</td>
+            <td>Credit</td>
+            <td>Credit</td>
+            <td>Increases</td>
         </tr>
         <tr>
-            <td style="text-align: center;">Credit</td>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Decreases</td>
+            <td>Credit</td>
+            <td>Debit</td>
+            <td>Decreases</td>
         </tr>
     </tbody>
 </table>
@@ -62,48 +62,48 @@ This means that every accounting entry has two parts, one debit and one credit a
 
 As the company will receive a payment from customer, the customer is considered as an asset account. For booking income, company maintains an account called "Sales of Laptop". So, entries will be done in the following manner: 
 
-<table class="table table-bordered">
+<table class="table table-bordered text-center">
     <thead>
         <tr class="active">
-            <td style="text-align: center;">Account</td>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Credit</td>
+            <td>Account</td>
+            <td>Debit</td>
+            <td>Credit</td>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align: center;">Customer A</td>
-            <td style="text-align: center;">50000</td>
-            <td style="text-align: center;"></td>
+            <td>Customer A</td>
+            <td>50000</td>
+            <td></td>
         </tr>
         <tr>
-            <td style="text-align: center;">Sales of Laptop</td>
-            <td style="text-align: center;"></td>
-            <td style="text-align: center;">50000</td>
+            <td>Sales of Laptop</td>
+            <td></td>
+            <td>50000</td>
         </tr>
     </tbody>
 </table>
 
 Customer A has made the payment, so customer balance should decreased based on the paid amount, which will increase "Cash" balance.
 
-<table class="table table-bordered">
+<table class="table table-bordered text-center">
     <thead>
         <tr class="active">
-            <td style="text-align: center;">Account</td>
-            <td style="text-align: center;">Debit</td>
-            <td style="text-align: center;">Credit</td>
+            <td>Account</td>
+            <td>Debit</td>
+            <td>Credit</td>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td style="text-align: center;">Customer A</td>
-            <td style="text-align: center;"></td>
-            <td style="text-align: center;">50000</td>
+            <td>Customer A</td>
+            <td></td>
+            <td>50000</td>
         </tr>
         <tr>
-            <td style="text-align: center;">Cash</td>
-            <td style="text-align: center;">50000</td>
-            <td style="text-align: center;"></td>
+            <td>Cash</td>
+            <td>50000</td>
+            <td></td>
         </tr>
     </tbody>
 </table>

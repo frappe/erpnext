@@ -3,9 +3,11 @@
 	"_label": "Supplier Type"
 }
 ---
+A supplier may be distinguished from a contractor or subcontractor, who commonly adds specialized input to deliverables. A supplier is also known as a vendor. There are different types of suppliers based on their goods and products. 
 
-Based on what the suppliers supply, they are classified into different categories called Supplier Type.
-There can be different types of suppliers. You can create your own category of Supplier Type.
+ERPNext allows you to create your own categories of suppliers. These categories are known as Supplier Type. For Example, if your suppliers are mainly pharmaceutical companies and FMCG distributors, You can create a new Type for them and name them accordingly.
+
+Based on what the suppliers supply, they are classified into different categories called Supplier Type. There can be different types of suppliers. You can create your own category of Supplier Type.
 
 > Buying > Supplier Type > New Supplier Type
 
