@@ -181,7 +181,7 @@ wn.ui.form.TableGrid = Class.extend({
 		var dialog_values = {};
 
 		$.each(this.fields, function(i, item) {
-			dialog_values[item.fieldname] = $(row).find('td[data-fieldname="'+ item.fieldname +'"]').data('fieldvalue');
+			dialog_values[item.fieldname] = $(row).find('td[data-fieldname="'+ item.fieldname +'"]').attr('data-fieldvalue');
 		});
 
 		return dialog_values;
@@ -206,9 +206,9 @@ wn.ui.form.TableGrid = Class.extend({
 			$.each(me.fields, function(i, item) {
 				var $td = $(row).find('td[data-fieldname="'+ item.fieldname +'"]');
 				var val = me.dialog.get_values()[item.fieldname];
-				
+
 				wn.model.set_value(me.table_field.options, $td.attr('data-doc_name'), 
-					item.fieldname, me.dialog.get_values()[item.fieldname]);
+					item.fieldname, val);
 				$td.attr('data-fieldvalue', val);
 				
 				// If field type is currency the update with format currency
@@ -279,6 +279,10 @@ wn.ui.form.TableGrid = Class.extend({
 			}
 		});
 
+		// refresh field to push to grid rows
+		refresh_field(this.table_field.fieldname);
+
+		// append row to tbody of grid
 		$(new_row).appendTo($(this.parent).find(".grid tbody"));
 	}
 });
