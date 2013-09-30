@@ -24,39 +24,40 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		});
 	},
 	setup_columns: function() {
+		var DEFAULT_COMPANY_VALUE = wn._("Select Company...");
 		this.columns = [
-			{id: "posting_date", name: "Posting Date", field: "posting_date", width: 100,
+			{id: "posting_date", name: wn._("Posting Date"), field: "posting_date", width: 100,
 				formatter: this.date_formatter},
-			{id: "account", name: "Account", field: "account", width: 240, 	
+			{id: "account", name: wn._("Account"), field: "account", width: 240, 	
 				link_formatter: {
 					filter_input: "account",
 					open_btn: true,
 					doctype: "'Account'"
 				}},
-			{id: "against_account", name: "Against Account", field: "against_account", 
+			{id: "against_account", name: wn._("Against Account"), field: "against_account", 
 				width: 240, hidden: !this.account},
 
-			{id: "debit", name: "Debit", field: "debit", width: 100,
+			{id: "debit", name: wn._("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "credit", name: "Credit", field: "credit", width: 100,
+			{id: "credit", name: wn._("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "voucher_type", name: "Voucher Type", field: "voucher_type", width: 120},
-			{id: "voucher_no", name: "Voucher No", field: "voucher_no", width: 160,
+			{id: "voucher_type", name: wn._("Voucher Type"), field: "voucher_type", width: 120},
+			{id: "voucher_no", name: wn._("Voucher No"), field: "voucher_no", width: 160,
 				link_formatter: {
 					filter_input: "voucher_no",
 					open_btn: true,
 					doctype: "dataContext.voucher_type"
 				}},
-			{id: "remarks", name: "Remarks", field: "remarks", width: 200,
+			{id: "remarks", name: wn._("Remarks"), field: "remarks", width: 200,
 				formatter: this.text_formatter},
 				
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: DEFAULT_COMPANY_VALUE,
 			filter: function(val, item, opts) {
-				return item.company == val || val == opts.default_value;
+				return item.company == val || val == DEFAULT_COMPANY_VALUE;
 			}},
 		{fieldtype:"Link", label: wn._("Account"), link:"Account",
 			filter: function(val, item, opts, me) {
