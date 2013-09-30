@@ -93,11 +93,16 @@ wn.ui.form.TableGrid = Class.extend({
 
 		// Make other headers with label as heading
 		$.each(this.fields, function(i, obj) {
-			if (obj.in_list_view===1)
-				var th = document.createElement("th");
+			var th = document.createElement("th");
+			
+			// If currency then move header to right
+			if (obj.fieldtype == "Currency")
+				$(th).attr("style", "vertical-align:middle; text-align:right;");
+			else
 				$(th).attr("style", "vertical-align:middle");
-				$(th).html(obj.label);
-				$(th).appendTo(row);
+			
+			$(th).html(obj.label);
+			$(th).appendTo(row);
 		});
 
 		return header;
