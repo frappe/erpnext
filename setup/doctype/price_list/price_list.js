@@ -12,8 +12,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.show_item_prices = function() {
-	var counter = 0;
 	var item_price = wn.model.get("Item Price", {parent: cur_frm.doc.name});
+	var show = item_price && item_price.length;
+
+	cur_frm.toggle_display("item_prices", show);
+	$(cur_frm.fields_dict.item_prices.wrapper).empty();
+	if (!show) return;
 	
 	new wn.ui.form.TableGrid({
 		parent: cur_frm.fields_dict.item_prices.wrapper,
@@ -159,7 +163,8 @@ wn.ui.form.TableGrid = Class.extend({
 			fields: this.fields
 		});
 
-		this.dialog.set_values(this.make_dialog_values(row));
+		if (row)
+			this.dialog.set_values(this.make_dialog_values(row));
 
 		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons());
 		this.dialog.show();
@@ -173,34 +178,6 @@ wn.ui.form.TableGrid = Class.extend({
 		});
 		return row;
 	},
-	// make_dialog_fields: function() {
-	// 	var me = this;
-	// 	var fields = [];
-		
-	// 	$.each(this.fields, function(i, obj) {
-	// 		var dialog_field = {
-	// 			fieldtype: obj.fieldtype, 
-	// 			fieldname: obj.fieldname, 
-	// 			label: obj.label
-	// 		}
-
-	// 		// check if fields has options
-	// 		if (obj.options) {
-	// 			var options = {options: obj.options}
-	// 			$.extend(dialog_field, options);
-	// 		}
-
-	// 		// check if field is mandatory
-	// 		if (obj.reqd == 1) {
-	// 			var reqd = {reqd: obj.reqd}
-	// 			$.extend(dialog_field, reqd);
-	// 		}
-
-	// 		fields.push(obj);
-	// 	});
-
-	// 	return fields;
-	// },
 	make_dialog_values: function(row) {
 		var me = this;
 		var dialog_values = {};
