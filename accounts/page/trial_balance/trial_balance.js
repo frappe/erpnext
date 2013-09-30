@@ -6,7 +6,7 @@ wn.require("app/js/account_tree_grid.js");
 wn.pages['trial-balance'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Trial Balance',
+		title: wn._('Trial Balance'),
 		single_column: true
 	});
 	var TrialBalance = erpnext.AccountTreeGrid.extend({
