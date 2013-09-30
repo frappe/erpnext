@@ -13,11 +13,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.show_item_prices = function() {
 	var item_price = wn.model.get("Item Price", {parent: cur_frm.doc.name});
-	var show = item_price && item_price.length;
-
-	cur_frm.toggle_display("item_prices", show);
+	
+	cur_frm.toggle_display("item_prices", true);
 	$(cur_frm.fields_dict.item_prices.wrapper).empty();
-	if (!show) return;
 	
 	new wn.ui.form.TableGrid({
 		parent: cur_frm.fields_dict.item_prices.wrapper,
