@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:36:59", 
+  "modified": "2013-09-25 11:36:11", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -41,6 +41,7 @@
  }, 
  {
   "default": "Draft", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "approval_status", 
   "fieldtype": "Select", 
@@ -50,7 +51,7 @@
   "no_copy": 1, 
   "oldfieldname": "approval_status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nApproved\nRejected", 
+  "options": "Draft\nApproved\nRejected", 
   "search_index": 1
  }, 
  {

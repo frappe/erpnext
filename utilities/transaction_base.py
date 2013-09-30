@@ -143,7 +143,8 @@ class TransactionBase(StatusUpdater):
 		self.doc.fields.update(self.get_lead_defaults())
 	
 	def get_customer_address(self, args):
-		args = load_json(args)		
+		args = load_json(args)
+		webnotes.errprint(args)
 		ret = {
 			'customer_address' : args["address"],
 			'address_display' : get_address_display(args["address"]),

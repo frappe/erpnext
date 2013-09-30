@@ -271,7 +271,9 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 		st = webnotes.bean(make_stock_entry(pro_id, purpose))
 		st.doc.posting_date = current_date
 		st.doc.fiscal_year = "2013"
-		st.doc.expense_adjustment_account = "Stock in Hand - WP"
+		for d in st.doclist.get({"parentfield": "mtn_details"}):
+			d.expense_account = "Stock Adjustment - " + company_abbr
+			d.cost_center = "Main - " + company_abbr
 		st.insert()
 		webnotes.conn.commit()
 		st.submit()

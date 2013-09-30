@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-09-19 10:38:58", 
+  "modified": "2013-09-26 16:30:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -111,7 +111,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nOpen\nReplied\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted\nPassive", 
+  "options": "\nOpen\nReplied\nAttempted to Contact\nContact in Future\nContacted\nOpportunity Made\nInterested\nNot interested\nLead Lost\nConverted\nPassive", 
   "reqd": 1, 
   "search_index": 1
  }, 

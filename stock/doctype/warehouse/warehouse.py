@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import flt, validate_email_add
+from webnotes.utils import cint, flt, validate_email_add
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -19,39 +19,47 @@ class DocType:
 		suffix = " - " + webnotes.conn.get_value("Company", self.doc.company, "abbr")
 		if not self.doc.warehouse_name.endswith(suffix):
 			self.doc.name = self.doc.warehouse_name + suffix
-	
-	def get_bin(self, item_code, warehouse=None):
-		warehouse = warehouse or self.doc.name
-		bin = sql("select name from tabBin where item_code = %s and \
-				warehouse = %s", (item_code, warehouse))
-		bin = bin and bin[0][0] or ''
-		if not bin:
-			bin_wrapper = webnotes.bean([{
-				"doctype": "Bin",
-				"item_code": item_code,
-				"warehouse": warehouse,
-			}])
-			bin_wrapper.ignore_permissions = 1
-			bin_wrapper.insert()
-			
-			bin_obj = bin_wrapper.make_controller()
-		else:
-			bin_obj = get_obj('Bin', bin)
-		return bin_obj
-	
-	def update_bin(self, args):
-		is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
-		if is_stock_item == 'Yes':
-			bin = self.get_bin(args.get("item_code"))
-			bin.update_stock(args)
-			return bin
-		else:
-			msgprint("[Stock Update] Ignored %s since it is not a stock item" 
-				% args.get("item_code"))
 
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
+				
+	def on_update(self):
+		self.create_account_head()
+						
+	def create_account_head(self):
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+					"master_name": self.doc.name}) and not webnotes.conn.get_value("Account", 
+					{"account_name": self.doc.warehouse_name}):
+				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
+						{"warehouse": self.doc.name}):
+					self.validate_parent_account()
+					ac_bean = webnotes.bean({
+						"doctype": "Account",
+						'account_name': self.doc.warehouse_name, 
+						'parent_account': self.doc.create_account_under, 
+						'group_or_ledger':'Ledger', 
+						'company':self.doc.company, 
+						"account_type": "Warehouse",
+						"master_name": self.doc.name,
+						"freeze_account": "No"
+					})
+					ac_bean.ignore_permissions = True
+					ac_bean.insert()
+					
+					msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
+	
+	def validate_parent_account(self):
+		if not self.doc.create_account_under:
+			parent_account = webnotes.conn.get_value("Account", 
+				{"account_name": "Stock Assets", "company": self.doc.company})
+			if parent_account:
+				self.doc.create_account_under = parent_account
+			else:
+				webnotes.throw(_("Please enter account group under which account \
+					for warehouse ") + self.doc.name +_(" will be created"))
+
 
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
@@ -66,6 +74,15 @@ class DocType:
 		link_fields = rename_doc.get_link_fields('Warehouse')
 		rename_doc.update_link_field_values(link_fields, self.doc.name, self.doc.merge_with)
 		
+		account_link_fields = rename_doc.get_link_fields('Account')
+		old_warehouse_account = webnotes.conn.get_value("Account", {"master_name": self.doc.name})
+		new_warehouse_account = webnotes.conn.get_value("Account", 
+			{"master_name": self.doc.merge_with})
+		rename_doc.update_link_field_values(account_link_fields, old_warehouse_account, 
+			new_warehouse_account)
+			
+		webnotes.conn.delete_doc("Account", old_warehouse_account)
+		
 		for item_code in items:
 			self.repost(item_code[0], self.doc.merge_with)
 			
@@ -76,9 +93,10 @@ class DocType:
 		
 
 	def repost(self, item_code, warehouse=None):
+		from stock.utils import get_bin
 		self.repost_actual_qty(item_code, warehouse)
 		
-		bin = self.get_bin(item_code, warehouse)
+		bin = get_bin(item_code, warehouse)
 		self.repost_reserved_qty(bin)
 		self.repost_indented_qty(bin)
 		self.repost_ordered_qty(bin)
@@ -173,15 +191,22 @@ class DocType:
 			else:
 				sql("delete from `tabBin` where name = %s", d['name'])
 				
+		warehouse_account = webnotes.conn.get_value("Account", 
+			{"account_type": "Warehosue", "master_name": self.doc.name})
+		if warehouse_account:
+			webnotes.delete_doc("Account", warehouse_account)
+				
 		# delete cancelled sle
-		if sql("""select name from `tabStock Ledger Entry` 
-				where warehouse = %s and ifnull('is_cancelled', '') = 'No'""", self.doc.name):
+		if sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):
 			msgprint("""Warehosue can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 		else:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
 
 	def on_rename(self, newdn, olddn, merge=False):
+		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": olddn}, 
+			"master_name", newdn)
+			
 		if merge:
 			from stock.stock_ledger import update_entries_after
 			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 

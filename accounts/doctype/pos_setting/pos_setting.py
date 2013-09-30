@@ -35,7 +35,7 @@ class DocType:
 					(res[0][0], self.doc.company), raise_exception=1)
 
 	def validate_expense_account(self):
-		if cint(webnotes.defaults.get_global_default("auto_inventory_accounting")) \
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
 				and not self.doc.expense_account:
 			msgprint(_("Expense Account is mandatory"), raise_exception=1)
 

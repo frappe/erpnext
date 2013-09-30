@@ -20,7 +20,7 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 	},
 	show_general_ledger: function() {
 		var me = this;
-		if(this.frm.doc.docstatus===1 && cint(wn.defaults.get_default("auto_inventory_accounting"))) { 
+		if(this.frm.doc.docstatus===1 && cint(wn.defaults.get_default("auto_accounting_for_stock"))) { 
 			cur_frm.add_custom_button('Accounting Ledger', function() {
 				wn.route_options = {
 					"voucher_no": me.frm.doc.name,

@@ -9,10 +9,14 @@
 		"docs.user.stock.purchase_receipt",
 		"docs.user.stock.delivery_note",
 		"docs.user.stock.stock_entry",
+		"docs.user.stock.opening_stock",
 		"docs.user.stock.material_issue",
 		"docs.user.stock.sales_return",
 		"docs.user.stock.purchase_return",
-		"docs.user.stock.projected_quantity"
+		"docs.user.stock.projected_quantity",
+		"docs.user.stock.accounting_for_stock",
+		"docs.user.stock.perpetual_inventory",
+		"docs.user.stock.migrate_to_perpetual"
 	]
 }
 ---

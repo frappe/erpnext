@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:39:10", 
+  "modified": "2013-08-23 12:23:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -226,6 +226,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "stock_value_difference", 
+  "fieldtype": "Currency", 
+  "label": "Stock Value Difference", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "stock_queue", 
   "fieldtype": "Text", 
   "hidden": 1, 
@@ -276,15 +284,10 @@
   "doctype": "DocField", 
   "fieldname": "is_cancelled", 
   "fieldtype": "Select", 
-  "in_filter": 1, 
+  "hidden": 1, 
   "label": "Is Cancelled", 
-  "oldfieldname": "is_cancelled", 
-  "oldfieldtype": "Select", 
-  "options": "\nYes\nNo", 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "search_index": 0, 
-  "width": "100px"
+  "options": "\nNo\nYes", 
+  "report_hide": 1
  }, 
  {
   "amend": 0, 

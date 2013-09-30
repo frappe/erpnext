@@ -14,6 +14,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	onload: function() {
 		this.frm.toggle_display(["esic_card_no", "gratuity_lic_id", "pan_number", "pf_number"],
 			wn.control_panel.country==="India");
+		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
 	},
 	
 	refresh: function() {

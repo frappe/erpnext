@@ -39,7 +39,6 @@ class DocType(StockController):
 		self.validate_item()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
-
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order(pro_obj)
 		self.get_stock_and_rate()
@@ -52,13 +51,13 @@ class DocType(StockController):
 		self.set_total_amount()
 		
 	def on_submit(self):
-		self.update_stock_ledger(0)
+		self.update_stock_ledger()
 		self.update_serial_no(1)
 		self.update_production_order(1)
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.update_stock_ledger(1)
+		self.update_stock_ledger()
 		self.update_serial_no(0)
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()
@@ -76,8 +75,9 @@ class DocType(StockController):
 				raise_exception=True)
 		
 	def validate_item(self):
+		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
-			if item.item_code not in self.stock_items:
+			if item.item_code not in stock_items:
 				msgprint(_("""Only Stock Items are allowed for Stock Entry"""),
 					raise_exception=True)
 		
@@ -177,33 +177,6 @@ class DocType(StockController):
 	def set_total_amount(self):
 		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
 			
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
-			return
-		
-		if not self.doc.expense_adjustment_account:
-			webnotes.msgprint(_("Please enter Expense/Adjustment Account"), raise_exception=1)
-		
-		from accounts.general_ledger import make_gl_entries
-		
-		total_valuation_amount = self.get_total_valuation_amount()
-		
-		gl_entries = self.get_gl_entries_for_stock(self.doc.expense_adjustment_account, 
-			total_valuation_amount)
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
-				
-	def get_total_valuation_amount(self):
-		total_valuation_amount = 0
-		for item in self.doclist.get({"parentfield": "mtn_details"}):
-			if item.t_warehouse and not item.s_warehouse:
-				total_valuation_amount += flt(item.incoming_rate, 2) * flt(item.transfer_qty)
-			
-			if item.s_warehouse and not item.t_warehouse:
-				total_valuation_amount -= flt(item.incoming_rate, 2) * flt(item.transfer_qty)
-		
-		return total_valuation_amount
-			
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
@@ -232,7 +205,7 @@ class DocType(StockController):
 			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 
 				actual_qty, stock_value, warehouse from `tabStock Ledger Entry` 
 				where voucher_type = %s and voucher_no = %s and 
-				item_code = %s and ifnull(is_cancelled, 'No') = 'No' limit 1""", 
+				item_code = %s limit 1""", 
 				((self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"),
 				self.doc.delivery_note_no or self.doc.sales_invoice_no, args.item_code), as_dict=1)
 			if sle:
@@ -340,20 +313,34 @@ class DocType(StockController):
 					sr.doc.status = "Sales Returned" if is_submit else "Delivered"
 					sr.save()
 						
-	def update_stock_ledger(self, is_cancelled=0):
-		self.values = []			
+	def update_stock_ledger(self):
+		sl_entries = []			
 		for d in getlist(self.doclist, 'mtn_details'):
-			if cstr(d.s_warehouse) and not is_cancelled:
-				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
+			if cstr(d.s_warehouse) and self.doc.docstatus == 1:
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.s_warehouse),
+					"actual_qty": -flt(d.transfer_qty),
+					"incoming_rate": 0
+				}))
 				
 			if cstr(d.t_warehouse):
-				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.t_warehouse),
+					"actual_qty": flt(d.transfer_qty),
+					"incoming_rate": flt(d.incoming_rate)
+				}))
+			
+			# On cancellation, make stock ledger entry for 
+			# target warehouse first, to update serial no values properly
+			
+			if cstr(d.s_warehouse) and self.doc.docstatus == 2:
+				sl_entries.append(self.get_sl_entries(d, {
+					"warehouse": cstr(d.s_warehouse),
+					"actual_qty": -flt(d.transfer_qty),
+					"incoming_rate": 0
+				}))
 				
-			if cstr(d.s_warehouse) and is_cancelled:
-				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
-		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, 
-			self.doc.amended_from and 'Yes' or 'No')
+		self.make_sl_entries(sl_entries, self.doc.amended_from and 'Yes' or 'No')
 
 	def update_production_order(self, is_submit):
 		if self.doc.production_order:
@@ -371,14 +358,16 @@ class DocType(StockController):
 					
 			# update bin
 			if self.doc.purpose == "Manufacture/Repack":
+				from stock.utils import update_bin
 				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
 					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
 				args = {
 					"item_code": pro_obj.doc.production_item,
+					"warehouse": pro_obj.doc.fg_warehouse,
 					"posting_date": self.doc.posting_date,
 					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
 				}
-				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
+				update_bin(args)
 			
 			# update production order status
 			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
@@ -414,7 +403,7 @@ class DocType(StockController):
 		arg, ret = eval(arg), {}
 		uom = sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
-		if not uom:
+		if not uom or not flt(uom[0].conversion_factor):
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
 				arg['item_code']))
 			ret = {'uom' : ''}
@@ -630,26 +619,6 @@ class DocType(StockController):
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
 
-	def add_to_values(self, d, wh, qty, is_cancelled):
-		self.values.append({
-			'item_code': d.item_code,
-			'warehouse': wh,
-			'posting_date': self.doc.posting_date,
-			'posting_time': self.doc.posting_time,
-			'voucher_type': 'Stock Entry',
-			'voucher_no': self.doc.name, 
-			'voucher_detail_no': d.name,
-			'actual_qty': qty,
-			'incoming_rate': flt(d.incoming_rate, 2) or 0,
-			'stock_uom': d.stock_uom,
-			'company': self.doc.company,
-			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
-			'batch_no': cstr(d.batch_no).strip(),
-			'serial_no': cstr(d.serial_no).strip(),
-			"project": self.doc.project_name,
-			"fiscal_year": self.doc.fiscal_year,
-		})
-	
 	def get_cust_values(self):
 		"""fetches customer details"""
 		if self.doc.delivery_note_no:
@@ -788,7 +757,6 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			from `tabStock Ledger Entry` sle 
 			where item_code = '%(item_code)s' 
 				and warehouse = '%(s_warehouse)s'
-				and ifnull(is_cancelled, 'No') = 'No' 
 				and batch_no like '%(txt)s' 
 				and exists(select * from `tabBatch` 
 					where name = sle.batch_no 

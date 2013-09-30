@@ -3,9 +3,15 @@
 	"_label": "Collaborating around Forms"
 }
 ---
-### Email
+### Assigned to
 
-You can email any transaction from the system by clicking on the “Email” button in the right sidebar. A log of all your sent emails will be maintained in Communication.
+You can email any transaction from the system by clicking on the “Assigned to” button in the right sidebar. A log of all your sent emails will be maintained in Communication.
+
+
+
+![Forms](img/forms.png)
+
+
 
 ### Comments
 
@@ -13,4 +19,5 @@ Comments are a great way to add information about a transaction that is not a pa
 
 ### Tags
 
-Like Assignments and Comments, you can also add your own tags to each type of transactions. These tags can help you search a document and also classify it. ERPNext will also show you all the important tags in the document list.
+[Tags](docs.user.tools.tags.html)
+

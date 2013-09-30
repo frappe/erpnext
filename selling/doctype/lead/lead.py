@@ -126,6 +126,10 @@ def make_opportunity(source_name, target_doclist=None):
 				"campaign_name": "campaign",
 				"doctype": "enquiry_from",
 				"name": "lead",
+				"lead_name": "contact_display",
+				"company_name": "customer_name",
+				"email_id": "contact_email",
+				"mobile_no": "contact_mobile"
 			}
 		}}, target_doclist)
 		

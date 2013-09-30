@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 
-from webnotes.utils import cstr
+from webnotes.utils import cstr, cint
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 import webnotes.defaults
@@ -59,14 +59,17 @@ class DocType:
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
-			webnotes.bean({
-				"doctype":"Warehouse",
-				"warehouse_name": whname,
-				"company": self.doc.name
-			}).insert()
+			if not webnotes.conn.exists("Warehouse", whname + " - " + self.doc.abbr):
+				webnotes.bean({
+					"doctype":"Warehouse",
+					"warehouse_name": whname,
+					"company": self.doc.name,
+					"create_account_under": "Stock Assets - " + self.doc.abbr
+				}).insert()
 			
 	def create_default_web_page(self):
-		if not webnotes.conn.get_value("Website Settings", None, "home_page"):
+		if not webnotes.conn.get_value("Website Settings", None, "home_page") and \
+				not webnotes.conn.sql("select name from tabCompany where name!=%s", self.doc.name):
 			import os
 			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
 				webpage = webnotes.bean({
@@ -113,7 +116,6 @@ class DocType:
 					['Securities and Deposits','Current Assets','Group','No','','Debit',self.doc.name,''],
 						['Earnest Money','Securities and Deposits','Ledger','No','','Debit',self.doc.name,''],
 					['Stock Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
-						['Stock In Hand','Stock Assets','Ledger','No','','Debit',self.doc.name,''],
 					['Tax Assets','Current Assets','Group','No','','Debit',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','No','','Debit',self.doc.name,''],
 					['Capital Equipments','Fixed Assets','Ledger','No','Fixed Asset Account','Debit',self.doc.name,''],
@@ -243,8 +245,8 @@ class DocType:
 			"default_expense_account": "Cost of Goods Sold",
 			"receivables_group": "Accounts Receivable",
 			"payables_group": "Accounts Payable",
+			"default_cash_account": "Cash",
 			"stock_received_but_not_billed": "Stock Received But Not Billed",
-			"stock_in_hand_account": "Stock In Hand",
 			"stock_adjustment_account": "Stock Adjustment",
 			"expenses_included_in_valuation": "Expenses Included In Valuation"
 		}
@@ -253,9 +255,6 @@ class DocType:
 			account_name = accounts[a] + " - " + self.doc.abbr
 			if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
 				webnotes.conn.set(self.doc, a, account_name)
-
-		if not self.doc.stock_adjustment_cost_center:
-				webnotes.conn.set(self.doc, "stock_adjustment_cost_center", self.doc.cost_center)
 
 	def create_default_cost_center(self):
 		cc_list = [
@@ -276,10 +275,9 @@ class DocType:
 			cc.update({"doctype": "Cost Center"})
 			cc_bean = webnotes.bean(cc)
 			cc_bean.ignore_permissions = True
-			
+		
 			if cc.get("cost_center_name") == self.doc.name:
 				cc_bean.ignore_mandatory = True
-			
 			cc_bean.insert()
 			
 		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
@@ -288,11 +286,8 @@ class DocType:
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'No' and company = %s", self.doc.name)
+		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
 		if not rec:
-			# delete gl entry
-			webnotes.conn.sql("delete from `tabGL Entry` where company = %s", self.doc.name)
-
 			#delete tabAccount
 			webnotes.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
 			
@@ -300,6 +295,9 @@ class DocType:
 			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
 			#delete cost center
 			webnotes.conn.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
+			
+		if not webnotes.conn.get_value("Stock Ledger Entry", {"company": self.doc.name}):
+			webnotes.conn.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
 			
 		webnotes.defaults.clear_default("company", value=self.doc.name)
 			

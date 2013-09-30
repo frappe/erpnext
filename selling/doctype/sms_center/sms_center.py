@@ -42,7 +42,7 @@ class DocType:
     for d in rec:
       rec_list += d[0] + ' - ' + d[1] + '\n'
     self.doc.receiver_list = rec_list
-    webnotes.errprint(rec_list)
+
   def get_receiver_nos(self):
     receiver_nos = []
     for d in self.doc.receiver_list.split('\n'):

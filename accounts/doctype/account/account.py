@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import flt, fmt_money
+from webnotes.utils import flt, fmt_money, cstr, cint
 from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
@@ -16,13 +16,36 @@ class DocType:
 		self.nsm_parent_field = 'parent_account'
 
 	def autoname(self):
-		"""Append abbreviation to company on naming"""
 		self.doc.name = self.doc.account_name.strip() + ' - ' + \
 			webnotes.conn.get_value("Company", self.doc.company, "abbr")
 
 	def get_address(self):
-		address = webnotes.conn.get_value(self.doc.master_type, self.doc.master_name, "address")
-		return {'address': address}
+		return {
+			'address': webnotes.conn.get_value(self.doc.master_type, 
+				self.doc.master_name, "address")
+		}
+		
+	def validate(self): 
+		self.validate_master_name()
+		self.validate_parent()
+		self.validate_duplicate_account()
+		self.validate_root_details()
+		self.validate_mandatory()
+		self.validate_warehouse_account()
+	
+		if not self.doc.parent_account:
+			self.doc.parent_account = ''
+		
+	def validate(self): 
+		self.validate_master_name()
+		self.validate_parent()
+		self.validate_duplicate_account()
+		self.validate_root_details()
+		self.validate_mandatory()
+		self.validate_frozen_accounts_modifier()
+	
+		if not self.doc.parent_account:
+			self.doc.parent_account = ''
 		
 	def validate_master_name(self):
 		"""Remind to add master name"""
@@ -71,6 +94,15 @@ class DocType:
 		if webnotes.conn.exists("Account", self.doc.name):
 			if not webnotes.conn.get_value("Account", self.doc.name, "parent_account"):
 				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
+				
+	def validate_frozen_accounts_modifier(self):
+		old_value = webnotes.conn.get_value("Account", self.doc.name, "freeze_account")
+		if old_value and old_value != self.doc.freeze_account:
+			frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
+				'frozen_accounts_modifier')
+			if not frozen_accounts_modifier or \
+				frozen_accounts_modifier not in webnotes.user.get_roles():
+					webnotes.throw(_("You are not authorized to set Frozen value"))
 			
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
@@ -98,9 +130,7 @@ class DocType:
 
 	# Check if any previous balance exists
 	def check_gle_exists(self):
-		exists = sql("""select name from `tabGL Entry` where account = %s
-			and ifnull(is_cancelled, 'No') = 'No'""", self.doc.name)
-		return exists and exists[0][0] or ''
+		return webnotes.conn.get_value("GL Entry", {"account": self.doc.name})
 
 	def check_if_child_exists(self):
 		return sql("""select name from `tabAccount` where parent_account = %s 
@@ -111,16 +141,25 @@ class DocType:
 			msgprint("Debit or Credit field is mandatory", raise_exception=1)
 		if not self.doc.is_pl_account:
 			msgprint("Is PL Account field is mandatory", raise_exception=1)
-
-	def validate(self): 
-		self.validate_master_name()
-		self.validate_parent()
-		self.validate_duplicate_account()
-		self.validate_root_details()
-		self.validate_mandatory()
-	
-		if not self.doc.parent_account:
-			self.doc.parent_account = ''
+			
+	def validate_warehouse_account(self):
+		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+			return
+			
+		if self.doc.account_type == "Warehouse":
+			old_warehouse = cstr(webnotes.conn.get_value("Account", self.doc.name, "master_name"))
+			if old_warehouse != cstr(self.doc.master_name):
+				if old_warehouse:
+					self.validate_warehouse(old_warehouse)
+				if self.doc.master_name:
+					self.validate_warehouse(self.doc.master_name)
+				else:
+					webnotes.throw(_("Master Name is mandatory if account type is Warehouse"))
+		
+	def validate_warehouse(self, warehouse):
+		if webnotes.conn.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
+			webnotes.throw(_("Stock transactions exist against warehouse ") + warehouse + 
+				_(" .You can not assign / modify / remove Master Name"))
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
@@ -173,10 +212,6 @@ class DocType:
 		self.validate_trash()
 		self.update_nsm_model()
 
-		# delete all cancelled gl entry of this account
-		sql("""delete from `tabGL Entry` where account = %s and 
-			ifnull(is_cancelled, 'No') = 'Yes'""", self.doc.name)
-
 	def on_rename(self, new, old, merge=False):
 		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
 		parts = new.split(" - ")	
@@ -204,9 +239,11 @@ class DocType:
 		return " - ".join(parts)
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name from `tab%s` where %s like %s 
+	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""
+		
+	return webnotes.conn.sql("""select name from `tab%s` where %s like %s %s
 		order by name limit %s, %s""" %
-		(filters["master_type"], searchfield, "%s", "%s", "%s"), 
+		(filters["master_type"], searchfield, "%s", conditions, "%s", "%s"), 
 		("%%%s%%" % txt, start, page_len), as_list=1)
 		
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):

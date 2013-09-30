@@ -9,6 +9,59 @@ from webnotes.defaults import get_global_default
 from webnotes.utils.email_lib import sendmail
 
 class UserNotAllowedForWarehouse(webnotes.ValidationError): pass
+	
+def get_stock_balance_on(warehouse, posting_date=None):
+	if not posting_date: posting_date = nowdate()
+	
+	stock_ledger_entries = webnotes.conn.sql("""
+		SELECT 
+			item_code, stock_value
+		FROM 
+			`tabStock Ledger Entry`
+		WHERE 
+			warehouse=%s AND posting_date <= %s
+		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
+	""", (warehouse, posting_date), as_dict=1)
+	 
+	sle_map = {}
+	for sle in stock_ledger_entries:
+		sle_map.setdefault(sle.item_code, flt(sle.stock_value))
+		
+	return sum(sle_map.values())
+	
+def get_latest_stock_balance():
+	bin_map = {}
+	for d in webnotes.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value 
+		FROM tabBin""", as_dict=1):
+			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
+			
+	return bin_map
+	
+def get_bin(item_code, warehouse):
+	bin = webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	if not bin:
+		bin_wrapper = webnotes.bean([{
+			"doctype": "Bin",
+			"item_code": item_code,
+			"warehouse": warehouse,
+		}])
+		bin_wrapper.ignore_permissions = 1
+		bin_wrapper.insert()
+		bin_obj = bin_wrapper.make_controller()
+	else:
+		from webnotes.model.code import get_obj
+		bin_obj = get_obj('Bin', bin)
+	return bin_obj
+
+def update_bin(args):
+	is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
+	if is_stock_item == 'Yes':
+		bin = get_bin(args.get("item_code"), args.get("warehouse"))
+		bin.update_stock(args)
+		return bin
+	else:
+		msgprint("[Stock Update] Ignored %s since it is not a stock item" 
+			% args.get("item_code"))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -184,7 +237,6 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 			sle.voucher_detail_no == item_row:
 				previous_stock_value = len(stock_ledger_entries) > i+1 and \
 					flt(stock_ledger_entries[i+1].stock_value) or 0.0
-				
 				buying_amount =  previous_stock_value - flt(sle.stock_value)						
 				
 				return buying_amount
@@ -335,3 +387,12 @@ def notify_errors(exceptions_list):
 
 	from webnotes.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)
+
+
+def repost():
+	"""
+	Repost everything!
+	"""
+	from webnotes.model.code import get_obj
+	for wh in webnotes.conn.sql("select name from tabWarehouse"):
+		get_obj('Warehouse', wh[0]).repost_stock()

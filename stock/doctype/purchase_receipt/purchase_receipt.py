@@ -9,8 +9,7 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 import webnotes.defaults
-
-sql = webnotes.conn.sql
+from stock.utils import update_bin
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -43,16 +42,46 @@ class DocType(BuyingController):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
+	def validate(self):
+		super(DocType, self).validate()
+		
+		self.po_required()
+
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+
+		self.validate_with_previous_doc()
+		self.validate_rejected_warehouse()
+		self.validate_accepted_rejected_qty()
+		self.validate_inspection()
+		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_challan_no()
+
+		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj.validate_for_items(self)
+		pc_obj.get_prevdoc_date(self)
+		self.check_for_stopped_status(pc_obj)
+
+		# sub-contracting
+		self.validate_for_subcontracting()
+		self.update_raw_materials_supplied("pr_raw_material_details")
+		
+		self.update_valuation_rate("purchase_receipt_details")
+
+	def validate_rejected_warehouse(self):
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if flt(d.rejected_qty) and not d.rejected_warehouse:
+				d.rejected_warehouse = self.doc.rejected_warehouse
+				if not d.rejected_warehouse:
+					webnotes.throw(_("Rejected Warehouse is mandatory against regected item"))		
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
 		for d in getlist(self.doclist, "purchase_receipt_details"):
-
-			# If Reject Qty than Rejected warehouse is mandatory
-			if flt(d.rejected_qty) and (not self.doc.rejected_warehouse):
-				msgprint("Rejected Warehouse is necessary if there are rejections.")
-				raise Exception
-
 			if not flt(d.received_qty) and flt(d.qty):
 				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
@@ -88,8 +117,7 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "prevdoc_detail_docname",
-				"compare_fields": [["project_name", "="], ["warehouse", "="], 
-					["uom", "="], ["item_code", "="]],
+				"compare_fields": [["project_name", "="], ["uom", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
@@ -111,113 +139,83 @@ class DocType(BuyingController):
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
-	def validate(self):
-		super(DocType, self).validate()
+	def update_stock(self):
+		sl_entries = []
+		stock_items = self.get_stock_items()
 		
-		self.po_required()
-
-		if not self.doc.status:
-			self.doc.status = "Draft"
-
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
-
-		self.validate_with_previous_doc()
-		self.validate_accepted_rejected_qty()
-		self.validate_inspection()
-		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
-		self.validate_uom_is_integer("stock_uom", "stock_qty")
-		self.validate_challan_no()
-
-		pc_obj = get_obj(dt='Purchase Common')
-		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
-		self.check_for_stopped_status(pc_obj)
-
-		# sub-contracting
-		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("pr_raw_material_details")
-		
-		self.update_valuation_rate("purchase_receipt_details")
-		
-	def on_update(self):
-		if self.doc.rejected_warehouse:
-			for d in getlist(self.doclist,'purchase_receipt_details'):
-				d.rejected_warehouse = self.doc.rejected_warehouse
-
-	def update_stock(self, is_submit):
-		pc_obj = get_obj('Purchase Common')
-		self.values = []
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				if not d.warehouse:
-					continue
-				
-				ord_qty = 0
+			if d.item_code in stock_items and d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-
-				if cstr(d.prevdoc_doctype) == 'Purchase Order':
-					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Purchase Order Item', 
-						'Purchase Order - Purchase Receipt', self.doc.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
-					 	flt(curr_ref_qty.split('~~~')[0]), 0
-
-					if flt(qty) + flt(pr_qty) > flt(max_qty):
-						curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
-					else:
-						curr_qty = flt(pr_qty)
-
-					ord_qty = -flt(curr_qty)
-					
-					# update ordered qty in bin
-					args = {
-						"item_code": d.item_code,
-						"posting_date": self.doc.posting_date,
-						"ordered_qty": (is_submit and 1 or -1) * flt(ord_qty)
-					}
-					get_obj("Warehouse", d.warehouse).update_bin(args)
-
-				# UPDATE actual qty to warehouse by pr_qty
-				if pr_qty:
-					self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
 				
-				# UPDATE actual to rejected warehouse by rejected qty
+				if pr_qty:
+					sl_entries.append(self.get_sl_entries(d, {
+						"actual_qty": flt(pr_qty),
+						"serial_no": cstr(d.serial_no).strip(),
+						"incoming_rate": d.valuation_rate
+					}))
+				
 				if flt(d.rejected_qty) > 0:
-					self.make_sl_entry(d, self.doc.rejected_warehouse, flt(d.rejected_qty) * flt(d.conversion_factor), d.valuation_rate, is_submit, rejected = 1)
+					sl_entries.append(self.get_sl_entries(d, {
+						"warehouse": d.rejected_warehouse,
+						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+						"serial_no": cstr(d.rejected_serial_no).strip(),
+						"incoming_rate": d.valuation_rate
+					}))
+						
+		self.bk_flush_supp_wh(sl_entries)
+		self.make_sl_entries(sl_entries)
+				
+	def update_ordered_qty(self):
+		stock_items = self.get_stock_items()
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+			if d.item_code in stock_items and d.warehouse \
+					and cstr(d.prevdoc_doctype) == 'Purchase Order':
+									
+				already_received_qty = self.get_already_received_qty(d.prevdoc_docname, 
+					d.prevdoc_detail_docname)
+				po_qty, ordered_warehouse = self.get_po_qty_and_warehouse(d.prevdoc_detail_docname)
+				
+				if not ordered_warehouse:
+					webnotes.throw(_("Warehouse is missing in Purchase Order"))
+				
+				if already_received_qty + d.qty > po_qty:
+					ordered_qty = - (po_qty - already_received_qty) * flt(d.conversion_factor)
+				else:
+					ordered_qty = - flt(d.qty) * flt(d.conversion_factor)
+				
+				update_bin({
+					"item_code": d.item_code,
+					"warehouse": ordered_warehouse,
+					"posting_date": self.doc.posting_date,
+					"ordered_qty": flt(ordered_qty) if self.doc.docstatus==1 else -flt(ordered_qty)
+				})
 
-		self.bk_flush_supp_wh(is_submit)
-
-		if self.values:
-			get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-
-
-	# make Stock Entry
-	def make_sl_entry(self, d, wh, qty, in_value, is_submit, rejected = 0):
-		self.values.append({
-			'item_code'			: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
-			'warehouse'			: wh,
-			'posting_date'		: self.doc.posting_date,
-			'posting_time'		: self.doc.posting_time,
-			'voucher_type'		: 'Purchase Receipt',
-			'voucher_no'		: self.doc.name,
-			'voucher_detail_no'	: d.name,
-			'actual_qty'		: qty,
-			'stock_uom'			: d.stock_uom,
-			'incoming_rate'		: in_value,
-			'company'			: self.doc.company,
-			'fiscal_year'		: self.doc.fiscal_year,
-			'is_cancelled'		: (is_submit==1) and 'No' or 'Yes',
-			'batch_no'			: cstr(d.batch_no).strip(),
-			'serial_no'			: d.serial_no,
-			"project"			: d.project_name
-			})
-
+	def get_already_received_qty(self, po, po_detail):
+		qty = webnotes.conn.sql("""select sum(qty) from `tabPurchase Receipt Item` 
+			where prevdoc_detail_docname = %s and docstatus = 1 
+			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s 
+			and parent != %s""", (po_detail, po, self.doc.name))
+		return qty and flt(qty[0][0]) or 0.0
+		
+	def get_po_qty_and_warehouse(self, po_detail):
+		po_qty, po_warehouse = webnotes.conn.get_value("Purchase Order Item", po_detail, 
+			["qty", "warehouse"])
+		return po_qty, po_warehouse
+	
+	def bk_flush_supp_wh(self, sl_entries):
+		for d in getlist(self.doclist, 'pr_raw_material_details'):
+			# negative quantity is passed as raw material qty has to be decreased 
+			# when PR is submitted and it has to be increased when PR is cancelled
+			sl_entries.append(self.get_sl_entries(d, {
+				"item_code": d.rm_item_code,
+				"warehouse": self.doc.supplier_warehouse,
+				"actual_qty": -1*flt(d.consumed_qty),
+				"incoming_rate": 0
+			}))
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = sql("select inspection_required from `tabItem` where name = %s",
+			ins_reqd = webnotes.conn.sql("select inspection_required from `tabItem` where name = %s",
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
@@ -244,12 +242,12 @@ class DocType(BuyingController):
 
 		self.update_prevdoc_status()
 		
-		# Update Stock
-		self.update_stock(is_submit = 1)
+		self.update_ordered_qty()
+		
+		self.update_stock()
 
 		self.update_serial_nos()
 
-		# Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, 1)
 		
 		self.make_gl_entries()
@@ -270,7 +268,7 @@ class DocType(BuyingController):
 				sr.save()
 
 	def check_next_docstatus(self):
-		submit_rv = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -280,69 +278,43 @@ class DocType(BuyingController):
 		pc_obj = get_obj('Purchase Common')
 
 		self.check_for_stopped_status(pc_obj)
-		# 1.Check if Purchase Invoice has been submitted against current Purchase Order
+		# Check if Purchase Invoice has been submitted against current Purchase Order
 		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 
-		submitted = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
-		# 2.Set Status as Cancelled
+		
 		webnotes.conn.set(self.doc,'status','Cancelled')
 
-		# 3. Cancel Serial No
-
-		# 4.Update Bin
-		self.update_stock(is_submit = 0)
+		self.update_ordered_qty()
+		
+		self.update_stock()
 		self.update_serial_nos(cancel=True)
 
 		self.update_prevdoc_status()
-
-		# 6. Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, 0)
 		
 		self.make_cancel_gl_entries()
-
-	def bk_flush_supp_wh(self, is_submit):
-		for d in getlist(self.doclist, 'pr_raw_material_details'):
-			# negative quantity is passed as raw material qty has to be decreased 
-			# when PR is submitted and it has to be increased when PR is cancelled
-			consumed_qty = - flt(d.consumed_qty)
-			self.make_sl_entry(d, self.doc.supplier_warehouse, flt(consumed_qty), 0, is_submit)
-
+			
 	def get_current_stock(self):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			if self.doc.supplier_warehouse:
-				bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
+				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
-	
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
-			return
-		
-		from accounts.general_ledger import make_gl_entries
-		
+			
+	def get_gl_entries_for_stock(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
-		total_valuation_amount = self.get_total_valuation_amount()
-		gl_entries = self.get_gl_entries_for_stock(against_stock_account, total_valuation_amount)
 		
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
-		
-	def get_total_valuation_amount(self):
-		total_valuation_amount = 0.0
-		
-		for item in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			if item.item_code in self.stock_items:
-				total_valuation_amount += flt(item.valuation_rate) * \
-					flt(item.qty) * flt(item.conversion_factor)
-
-		return total_valuation_amount
+		gl_entries = super(DocType, self).get_gl_entries_for_stock(warehouse_account, 
+			against_stock_account)
+		return gl_entries
 		
 	
 @webnotes.whitelist()

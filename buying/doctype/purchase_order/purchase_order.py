@@ -89,6 +89,7 @@ class DocType(BuyingController):
 
 		
 	def update_bin(self, is_submit, is_stopped = 0):
+		from stock.utils import update_bin
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'
@@ -123,12 +124,13 @@ class DocType(BuyingController):
 
 				# Update ordered_qty and indented_qty in bin
 				args = {
-					"item_code" : d.item_code,
-					"ordered_qty" : (is_submit and 1 or -1) * flt(po_qty),
-					"indented_qty" : (is_submit and 1 or -1) * flt(ind_qty),
+					"item_code": d.item_code,
+					"warehouse": d.warehouse,
+					"ordered_qty": (is_submit and 1 or -1) * flt(po_qty),
+					"indented_qty": (is_submit and 1 or -1) * flt(ind_qty),
 					"posting_date": self.doc.transaction_date
 				}
-				get_obj("Warehouse", d.warehouse).update_bin(args)
+				update_bin(args)
 				
 	def check_modified_date(self):
 		mod_db = sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)

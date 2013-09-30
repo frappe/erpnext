@@ -16,3 +16,13 @@ cur_frm.cscript.merge = function(doc, cdt, cdn) {
 		return $c_obj(make_doclist(cdt, cdn), 'merge_warehouses', '', '');
 	}
 }
+
+cur_frm.set_query("create_account_under", function() {
+	return {
+		filters: {
+			"company": cur_frm.doc.company,
+			"debit_or_credit": "Debit",
+			'group_or_ledger': "Group"
+		}
+	}
+})

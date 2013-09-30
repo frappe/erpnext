@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-08-09 16:35:03", 
+  "modified": "2013-08-28 19:13:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -163,7 +163,7 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "eval:sys_defaults.auto_inventory_accounting", 
+  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 

@@ -128,12 +128,12 @@ class DocType(TransactionBase):
 		
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
-		
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		self.doc.status = "Draft"
 
 	def on_submit(self):
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		if self.doc.lead and webnotes.conn.get_value("Lead", self.doc.lead, "status")!="Converted":
+			webnotes.conn.set_value("Lead", self.doc.lead, "status", "Opportunity Made")
 	
 	def on_cancel(self):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
@@ -142,6 +142,14 @@ class DocType(TransactionBase):
 			raise Exception
 		else:
 			webnotes.conn.set(self.doc, 'status', 'Cancelled')
+			if self.doc.lead and webnotes.conn.get_value("Lead", self.doc.lead,
+				"status")!="Converted":
+					if webnotes.conn.get_value("Communication", {"parent": self.doc.lead}):
+						status = "Contacted"
+					else:
+						status = "Open"
+					
+					webnotes.conn.set_value("Lead", self.doc.lead, "status", status)
 		
 	def declare_enquiry_lost(self,arg):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)

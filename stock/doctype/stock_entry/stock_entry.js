@@ -38,10 +38,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		};
 		
-		if(cint(wn.defaults.get_default("auto_inventory_accounting"))) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_adjustment_account");
-
-			this.frm.fields_dict["expense_adjustment_account"].get_query = function() {
+		if(cint(wn.defaults.get_default("auto_accounting_for_stock"))) {
+			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
+			this.frm.fields_dict.mtn_details.grid.get_field('expense_account').get_query = 
+					function() {
 				return {
 					filters: { 
 						"company": me.frm.doc.company,
@@ -88,7 +88,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function() {
 		var me = this;
 		
-		if (cint(wn.defaults.get_default("auto_inventory_accounting")) && !this.frm.doc.expense_adjustment_account) {
+		if(cint(wn.defaults.get_default("auto_accounting_for_stock"))) {
 			var account_for = "stock_adjustment_account";
 			if (this.frm.doc.purpose == "Sales Return")
 				account_for = "stock_in_hand_account";
@@ -102,10 +102,20 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {
-					if (!r.exc) me.frm.set_value("expense_adjustment_account", r.message);
+					if (!r.exc) {
+						for(d in getchildren('Stock Entry Detail',doc.name,'mtn_details')) {
+							if(!d.expense_account) d.expense_account = r.message;
+						}
+					}
 				}
 			});
 		}
+	},
+	
+	entries_add: function(doc, cdt, cdn) {
+		var row = wn.model.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
+			["expense_account", "cost_center"]);
 	},
 	
 	clean_up: function() {

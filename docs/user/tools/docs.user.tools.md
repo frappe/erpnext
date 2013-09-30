@@ -5,7 +5,10 @@
 		"docs.user.tools.todo",
 		"docs.user.tools.form_tools",
 		"docs.user.tools.messages",
-		"docs.user.tools.notes"
+		"docs.user.tools.notes",
+		"docs.user.tools.calendar",
+		"docs.user.tools.assignment",
+		"docs.user.tools.tags"
 	]
 }
 ---

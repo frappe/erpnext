@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:10", 
+  "modified": "2013-09-02 17:36:19", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -14,7 +14,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Landed Cost Item", 
   "parentfield": "fields", 
@@ -30,6 +29,7 @@
   "doctype": "DocField", 
   "fieldname": "account_head", 
   "fieldtype": "Link", 
+  "in_list_view": 1, 
   "label": "Account Head", 
   "oldfieldname": "account_head", 
   "oldfieldtype": "Link", 
@@ -38,8 +38,16 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "options": "Cost Center"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Data", 
+  "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
   "oldfieldtype": "Data", 
@@ -50,6 +58,7 @@
   "doctype": "DocField", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "amount", 
   "oldfieldtype": "Currency", 

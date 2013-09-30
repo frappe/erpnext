@@ -14,6 +14,11 @@ To use the Production Planning Tool, go to: 
 
 > Manufacturing > Production Planning Tool
 
+
+![Production Planning Tool](img/production-planning-tool.png)
+
+
+
 The Production Planning Tool is used in two stages:
 
 - Selection of Open Sales Orders for the period based on “Expected Delivery Date”.
