@@ -130,7 +130,7 @@ wn.module_page["Accounts"] = [
 			{
 				"label": wn._("Point-of-Sale Setting"),
 				"doctype":"POS Setting",
-				"description": "User settings for Point-of-sale (POS)"
+				"description": wn._("User settings for Point-of-sale (POS)")
 			},
 			{
 				"doctype":"Budget Distribution",
