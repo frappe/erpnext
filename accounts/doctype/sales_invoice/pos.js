@@ -214,7 +214,7 @@ erpnext.POS = Class.extend({
 
 				// if form is local then allow this function
 				if (me.frm.doc.docstatus===0) {
-					$("div.pos-item").on("click", function() {
+					$(me.wrapper).find("div.pos-item").on("click", function() {
 						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
 								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
@@ -313,7 +313,7 @@ erpnext.POS = Class.extend({
 		// taxes
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
-		$(".tax-table")
+		$(this.wrapper).find(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
 		
@@ -345,18 +345,18 @@ erpnext.POS = Class.extend({
 
 		// if form is local then only run all these functions
 		if (this.frm.doc.docstatus===0) {
-			$("input.qty").on("focus", function() {
+			$(this.wrapper).find("input.qty").on("focus", function() {
 				$(this).select();
 			});
 
 			// append quantity to the respective item after change from input box
-			$("input.qty").on("change", function() {
+			$(this.wrapper).find("input.qty").on("change", function() {
 				var item_code = $(this).closest("tr")[0].id;
 				me.update_qty(item_code, $(this).val(), true);
 			});
 
 			// on td click toggle the highlighting of row
-			me.wrapper.find("#cart tbody tr td").on("click", function() {
+			$(this.wrapper).find("#cart tbody tr td").on("click", function() {
 				var row = $(this).closest("tr");
 				if (row.attr("data-selected") == "false") {
 					row.attr("class", "warning");
@@ -376,16 +376,22 @@ erpnext.POS = Class.extend({
 
 		// if form is submitted & cancelled then disable all input box & buttons
 		if (this.frm.doc.docstatus>=1) {
-			me.wrapper.find('input, button').each(function () {
+			$(this.wrapper).find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
-			$(".delete-items").hide();
-			$(".make-payment").hide();
+			$(this.wrapper).find(".delete-items").hide();
+			$(this.wrapper).find(".make-payment").hide();
+		}
+		else {
+			$(this.wrapper).find('input, button').each(function () {
+				$(this).prop('disabled', false);
+			});
+			$(this.wrapper).find(".make-payment").show();
 		}
 
 		// Show Make Payment button only in Sales Invoice
 		if (this.frm.doctype != "Sales Invoice")
-			$(".make-payment").hide();
+			$(this.wrapper).find(".make-payment").hide();
 
 		// If quotation to is not Customer then remove party
 		if (this.frm.doctype == "Quotation") {
@@ -395,7 +401,7 @@ erpnext.POS = Class.extend({
 		}
 	},
 	refresh_delete_btn: function() {
-		$(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
+		$(this.wrapper).find(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
@@ -417,9 +423,9 @@ erpnext.POS = Class.extend({
 	remove_selected_item: function() {
 		var me = this;
 		var selected_items = [];
-		var no_of_items = me.wrapper.find("#cart tbody tr").length;
+		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
 		for(var x=0; x<=no_of_items - 1; x++) {
-			var row = me.wrapper.find("#cart tbody tr:eq(" + x + ")");
+			var row = $(this.wrapper).find("#cart tbody tr:eq(" + x + ")");
 			if(row.attr("data-selected") == "true") {
 				selected_items.push(row.attr("id"));
 			}
@@ -442,7 +448,7 @@ erpnext.POS = Class.extend({
 	},
 	make_payment: function() {
 		var me = this;
-		var no_of_items = me.wrapper.find("#cart tbody tr").length;
+		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
 		var mode_of_payment = [];
 		
 		if (no_of_items == 0)
