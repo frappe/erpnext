@@ -93,11 +93,16 @@ wn.ui.form.TableGrid = Class.extend({
 
 		// Make other headers with label as heading
 		$.each(this.fields, function(i, obj) {
-			if (obj.in_list_view===1)
-				var th = document.createElement("th");
+			var th = document.createElement("th");
+			
+			// If currency then move header to right
+			if (obj.fieldtype == "Currency")
+				$(th).attr("style", "vertical-align:middle; text-align:right;");
+			else
 				$(th).attr("style", "vertical-align:middle");
-				$(th).html(obj.label);
-				$(th).appendTo(row);
+			
+			$(th).html(obj.label);
+			$(th).appendTo(row);
 		});
 
 		return header;
@@ -164,7 +169,7 @@ wn.ui.form.TableGrid = Class.extend({
 		if (row)
 			this.dialog.set_values(this.make_dialog_values(row));
 
-		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons());
+		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons(row));
 		this.dialog.show();
 
 		this.dialog.$wrapper.find('button.update').on('click', function() {
@@ -186,12 +191,12 @@ wn.ui.form.TableGrid = Class.extend({
 
 		return dialog_values;
 	},
-	make_dialog_buttons: function() {
+	make_dialog_buttons: function(row) {
 		var me = this;
 		var buttons = '<button class="btn btn-primary update">Update</button>';
 
 		// if user can delete then only add the delete button in dialog
-		if (wn.model.can_delete(me.frm.doc.doctype))
+		if (wn.model.can_delete(me.frm.doc.doctype) && row)
 			buttons += ' <button class="btn btn-default delete">Delete</button>';
 
 		return buttons;
