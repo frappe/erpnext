@@ -151,3 +151,7 @@ Contents
 	1. [Fiscal Year](docs.user.knowledge.fiscal_year.html)
 	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
 	1. [Accounting Entries](docs.user.knowledge.accounting_entries.html)
+	1. [DocType Definitions](docs.user.knowledge.doctype.html)
+	1. [Attachment and CSV Files](docs.user.knowledge.attachment_csv.html)
+	1. [Format using Markdown](docs.user.knowledge.markdown.html)
+	

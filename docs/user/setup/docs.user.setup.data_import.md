@@ -3,7 +3,7 @@
 	"_label": "Data Import Tool"
 }
 ---
-The ￼Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system. To start the tool go to:
+The ￼Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system. 
 
 To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button:
 
@@ -15,7 +15,7 @@ The tool has two sections, one to download a template and the second to upload t
 
 ### 1. Downloading The Template
 
-Data in ERPNext is stored in tables, much like a spreadsheet with columns and rows of data. Each entity in ERPNext can have multiple child tables associated with it too. The child tables are linked to the parent tables and are implemented where are multiple values for any property. For example an Item can have multiple prices, An Invoice has multiple Items and so on.
+Data in ERPNext is stored in tables, much like a spreadsheet with columns and rows of data. Each entity in ERPNext can have multiple child tables associated with it too. The child tables are linked to the parent tables and are implemented where there are multiple values for any property. For example an Item can have multiple prices, An Invoice has multiple Items and so on.
 
 You can import each table separately, or all at a time. In the child table, you must mention the parent of the row in the “parent” column so that ERPNext knows which Item’s price or tax you are trying to set if you are importing separately.
 
@@ -36,7 +36,7 @@ Then export your template or save it as a **Comma Separated Values** (CSV) file.
 
 ### 3. Upload the .csv File
 
-Finally attach the .csv file in the section section click on the "Upload and Import" button.
+Finally attach the .csv file in the section. Click on the "Upload and Import" button.
 
 ![Attach and Upload](img/import-5.png)
 

@@ -27,11 +27,7 @@ To  upload an image for your icon that will appear in all transactions, save the
 
 ![Item Properties](img/item-add-image.png)
 
-### Item Pricing
-
-Item Price and Price Lists: ERPNext lets you maintain multiple selling prices for an Item using Price Lists. A Price List is a place where different rate plans can be stored. It’s a name you can give to a set of Item prices. In case you have different zones (based on the shipping costs), for different currencies etc, you can maintain different Price Lists. A Price List is formed when you create different Item Prices. To import Item Price see [Importing Data](docs.user.data_import.md).
-
-## Inventory : Warehouse and Stock Setting
+### Inventory : Warehouse and Stock Setting
 
 In ERPNext, you can select  different type of Warehouses to stock your different Items. This can be selected based on Item types. It could be Fixed Asset Item, Stock Item or even Manufacturing Item. 
 
