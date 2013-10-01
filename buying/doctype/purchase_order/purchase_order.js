@@ -23,19 +23,19 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				doc.per_billed);
 
 
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript['Send SMS']);
 			if(flt(doc.per_received, 2) < 100) 
-				cur_frm.add_custom_button('Make Purchase Receipt', this.make_purchase_receipt);	
+				cur_frm.add_custom_button(wn._('Make Purchase Receipt'), this.make_purchase_receipt);	
 			if(flt(doc.per_billed, 2) < 100) 
-				cur_frm.add_custom_button('Make Invoice', this.make_purchase_invoice);
+				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_purchase_invoice);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) 
-				cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+				cur_frm.add_custom_button(wn._('Stop'), cur_frm.cscript['Stop Purchase Order']);
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button('Unstop Purchase Order', 
+			cur_frm.add_custom_button(wn._('Unstop Purchase Order'), 
 				cur_frm.cscript['Unstop Purchase Order']);
 	},
 		
@@ -136,7 +136,7 @@ cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 
 cur_frm.cscript['Stop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to STOP " + doc.name);
+	var check = confirm(wn._("Do you really want to STOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
@@ -147,7 +147,7 @@ cur_frm.cscript['Stop Purchase Order'] = function() {
 
 cur_frm.cscript['Unstop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to UNSTOP " + doc.name);
+	var check = confirm(wn._("Do you really want to UNSTOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
