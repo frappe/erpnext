@@ -45,7 +45,7 @@ pscript['onload_Financial Statements'] = function(wrapper) {
 	$(wrapper).find(".layout-main").html('<div id="print_html">\
 		<div id="stmt_title1" style="margin:16px 0px 4px 0px; font-size: 16px; font-weight: bold; color: #888;"></div>\
 		<div id="stmt_title2" style="margin:0px 0px 8px 0px; font-size: 16px; font-weight: bold;"></div>\
-		<div id="stmt_tree" style="margin: 0px 0px 16px; overflow: auto;">Please select options and click on Create</div>\
+		<div id="stmt_tree" style="margin: 0px 0px 16px; overflow: auto;">'+wn._('Please select options and click on Create')+'</div>\
 	</div>').css({"min-height": "400px"});
 
   // load companies
@@ -61,7 +61,7 @@ pscript['onload_Financial Statements'] = function(wrapper) {
 
 pscript.stmt_new = function(stmt,company_name,level,period,year) {
     
-  $i('stmt_tree').innerHTML = 'Refreshing....';
+  $i('stmt_tree').innerHTML = wn._('Refreshing....');
   $i('stmt_tree').style.display = 'block';
   
   var company =erpnext.fs.stmt_company.get_value();
