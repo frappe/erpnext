@@ -213,8 +213,8 @@ erpnext.POS = Class.extend({
 				});
 
 				// if form is local then allow this function
-				if (me.frm.doc.docstatus===0) {
-					$(me.wrapper).find("div.pos-item").on("click", function() {
+				$(me.wrapper).find("div.pos-item").on("click", function() {
+					if(me.frm.doc.docstatus==0) {
 						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
 								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
@@ -223,8 +223,8 @@ erpnext.POS = Class.extend({
 						}
 						else
 							me.add_to_cart($(this).attr("data-item_code"));
-					});
-				}
+					}
+				});
 			}
 		});
 	},
@@ -371,7 +371,7 @@ erpnext.POS = Class.extend({
 			});
 
 			me.refresh_delete_btn();
-			this.frm.pos.barcode.$input.focus();
+			this.barcode.$input.focus();
 		}
 
 		// if form is submitted & cancelled then disable all input box & buttons
@@ -476,7 +476,7 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
-					me.frm.pos.barcode.$input.focus();
+					me.barcode.$input.focus();
 					
 					dialog.get_input("total_amount").prop("disabled", true);
 					
