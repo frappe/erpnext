@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-08-28 19:15:04", 
+  "modified": "2013-10-02 06:31:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -269,6 +269,14 @@
   "oldfieldname": "address", 
   "oldfieldtype": "Small Text", 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "country", 
+  "fieldtype": "Select", 
+  "label": "Country", 
+  "options": "link:Country", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

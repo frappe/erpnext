@@ -10,6 +10,8 @@ from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 import webnotes.defaults
 
+import  os, json
+
 sql = webnotes.conn.sql
 
 class DocType:
@@ -56,6 +58,10 @@ class DocType:
 
 		if self.doc.default_currency:
 			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+
+		if not webnotes.conn.sql("""select name from tabCompany
+			where country=%s and docstatus<2 limit 1""", self.doc.country):
+			self.create_fields_for_locale(self.doc.locale)
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
@@ -238,6 +244,22 @@ class DocType:
 			account.doc.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
 			
 		account.insert()
+
+	def create_fields_for_locale(self, country):
+		all_data = []
+		with open(os.path.join(os.path.dirname(__file__), "fields", "custom_fields.json"), "r") as local_fields:
+			all_data = json.loads(local_fields.read())
+		if all_data: all_data = webnotes._dict.get(country, [])
+
+		for d in all_data:
+			self.add_cfield(d)
+
+	def add_cfield(self, fieldata):
+		common = {
+			"doctype": "Custom Field",
+		}
+		common.update(fielddata)
+		webnotes.doc(common).insert()
 
 	def set_default_accounts(self):
 		accounts = {
