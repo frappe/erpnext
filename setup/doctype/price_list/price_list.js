@@ -188,6 +188,13 @@ wn.ui.form.TableGrid = Class.extend({
 		if(!docname && row) docname = $(row).attr("data-docname");
 		$.each(me.fields, function(i, df) {
 			var val = me.dialog.get_values()[df.fieldname];
+			
+			if(["Currency", "Float"].indexOf(df.fieldtype)!==-1) {
+				val = flt(val);
+			} else if(["Int", "Check"].indexOf(df.fieldtype)!==-1) {
+				val = cint(val);
+			}
+			
 			wn.model.set_value(me.table_field.options, docname, 
 				df.fieldname, val);
 				
