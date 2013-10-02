@@ -106,7 +106,7 @@ wn.ui.form.TableGrid = Class.extend({
 
 		// Creating table body
 		var table_body = document.createElement("tbody");
-		table_body.style = "cursor: pointer";
+		table_body.setAttribute("style", "cursor: pointer;");
 
 		var item_prices = wn.model.get_children(this.table_field.options, this.frm.doc.name, 
 			this.table_field.fieldname, this.frm.doctype);
