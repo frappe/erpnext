@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-09-30 15:50:52", 
+  "modified": "2013-10-02 11:36:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -94,8 +94,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item_prices_html", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "item_prices", 
   "fieldtype": "Table", 
+  "hidden": 1, 
   "label": "Item Prices", 
   "options": "Item Price"
  }, 

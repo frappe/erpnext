@@ -14,46 +14,42 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 cur_frm.cscript.show_item_prices = function() {
 	var item_price = wn.model.get("Item Price", {parent: cur_frm.doc.name});
 	
-	cur_frm.toggle_display("item_prices", true);
-	$(cur_frm.fields_dict.item_prices.wrapper).empty();
+	$(cur_frm.fields_dict.item_prices_html.wrapper).empty();
 	
 	new wn.ui.form.TableGrid({
-		parent: cur_frm.fields_dict.item_prices.wrapper,
+		parent: cur_frm.fields_dict.item_prices_html.wrapper,
 		frm: cur_frm,
-		table_field: wn.model.get("DocField", {parent:"Price List", fieldname:"item_prices"})[0]
+		table_field: wn.meta.get_docfield("Price List", "item_prices", cur_frm.doc.name)
 	});
 }
 
 wn.ui.form.TableGrid = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
-		this.fields = wn.model.get("DocField", {parent: this.table_field.options});
+		this.fields = wn.meta.get_docfields("Item Price", cur_frm.doc.name);
 		this.make_table();
 	},
 	make_table: function() {
 		var me = this;
 		// Creating table & assigning attributes
 		var grid_table = document.createElement("table");
-		$(grid_table).attr("class", "table table-hover table-bordered grid");
+		grid_table.className = "table table-hover table-bordered table-grid";
 		
 		// Appending header & rows to table
-
-		$(this.make_table_headers()).appendTo(grid_table);
-		$(this.make_table_rows()).appendTo(grid_table);
+		grid_table.appendChild(this.make_table_headers());
+		grid_table.appendChild(this.make_table_rows());
 				
 		// Creating button to add new row
 		var btn_div = document.createElement("div");
 		var new_row_btn = document.createElement("button");
-		$new_row_btn = $(new_row_btn);
-		$new_row_btn.attr({
-			"class": "btn btn-success table-new-row",
-			"title": "Add new row"
-		});
+		new_row_btn.className = "btn btn-success table-new-row";
+		new_row_btn.title = "Add new row";
+
 		var btn_icon = document.createElement("i");
-		$(btn_icon).attr("class", "icon-plus");
-		$(btn_icon).appendTo(new_row_btn);
-		$new_row_btn.append(" Add new row");
-		$new_row_btn.appendTo(btn_div);
+		btn_icon.className = "icon-plus";
+		new_row_btn.appendChild(btn_icon);
+		new_row_btn.innerHTML += " Add new row";
+		btn_div.appendChild(new_row_btn);
 
 		// Appending table & button to parent
 		var $grid_table = $(grid_table).appendTo($(this.parent));
@@ -75,35 +71,31 @@ wn.ui.form.TableGrid = Class.extend({
 		
 		// Creating header row
 		var row = document.createElement("tr");
-		$(row).attr({
-			"class": "active",
-			"style": "height:50px"
-		});
-		$(row).appendTo(header);
-
+		row.className = "active";
+		
 		// Creating head first cell
 		var th = document.createElement("th");
-		$(th).attr({
-			"width": "8%",
-			"style": "vertical-align:middle",
-			"class": "text-center"
-		});
-		$(th).html("#");
-		$(th).appendTo(row);
+		th.width = "8%";
+		th.className = "text-center";
+		th.innerHTML = "#";
+		row.appendChild(th);
 
 		// Make other headers with label as heading
-		$.each(this.fields, function(i, obj) {
-			var th = document.createElement("th");
+		for(var i=0, l=this.fields.length; i<l; i++) {
+			var df = this.fields[i];
 			
-			// If currency then move header to right
-			if (obj.fieldtype == "Currency")
-				$(th).attr("style", "vertical-align:middle; text-align:right;");
-			else
-				$(th).attr("style", "vertical-align:middle");
+			if(!!!df.hidden && df.in_list_view === 1) {
+				var th = document.createElement("th");
 			
-			$(th).html(obj.label);
-			$(th).appendTo(row);
-		});
+				// If currency then move header to right
+				if(["Int", "Currency", "Float"].indexOf(df.fieldtype) !== -1) th.className = "text-right";
+			
+				th.innerHTML = wn._(df.label);
+				row.appendChild(th);
+			}
+		}
+		
+		header.appendChild(row);
 
 		return header;
 	},
@@ -112,49 +104,21 @@ wn.ui.form.TableGrid = Class.extend({
 
 		// Creating table body
 		var table_body = document.createElement("tbody");
-		$(table_body).attr("style", "cursor:pointer");
 
-		$.each(wn.model.get_children(this.table_field.options, this.frm.doc.name, 
-			this.table_field.fieldname, this.frm.doctype), function(index, d) {
-
-				// Creating table row
-				var tr = document.createElement("tr");
-				$(tr).attr({
-					"class": "table-row",
-					"data-idx": d.idx
-				});
-
-				// Creating table data & appending to row
-				var td = document.createElement("td");
-				$(td).attr("class", "text-center");
-				$(td).html(d.idx);
-				$(td).appendTo(tr);
-
-				$.each(me.fields, function(i, obj) {
-					if (obj.in_list_view===1) {
-						var td = document.createElement("td");
-						$(td).attr({
-							"data-fieldtype": obj.fieldtype,
-							"data-fieldname": obj.fieldname,
-							"data-fieldvalue": d[obj.fieldname],
-							"data-doc_name": d["name"]
-						});
-						$(td).html(d[obj.fieldname]);
-						
-						// if field is currency then add style & change text
-						if (obj.fieldtype=="Currency") {
-							$(td).attr("style", "text-align:right");
-							$(td).html(format_currency(d[obj.fieldname], me.frm.doc.currency));
-						}
-						
-						// Append td to row
-						$(td).appendTo(tr);
-					}
-				});
-
-				// Append row to table body
-				$(tr).appendTo(table_body);
-		});
+		var item_prices = wn.model.get_children(this.table_field.options, this.frm.doc.name, 
+			this.table_field.fieldname, this.frm.doctype);
+			
+		for(var i=0, l=item_prices.length; i<l; i++) {
+			var d = item_prices[i];
+			
+			// Creating table row
+			var tr = this.add_new_row(d);
+			
+			// append row to table body
+			table_body.appendChild(tr);
+		}
+		
+		this.table_body = table_body;
 		
 		return table_body;
 	},
@@ -205,89 +169,89 @@ wn.ui.form.TableGrid = Class.extend({
 		var me = this;
 
 		if (!row) {
-			me.add_new_row();
+			var d = wn.model.add_child(this.frm.doc, this.table_field.options, 
+				this.table_field.fieldname);
+			refresh_field(this.table_field.fieldname);
+			this.update_item_price(d.name);
+			var tr = this.add_new_row(d);
+			this.table_body.appendChild(tr);
 		}
 		else {
-			$.each(me.fields, function(i, item) {
-				var $td = $(row).find('td[data-fieldname="'+ item.fieldname +'"]');
-				var val = me.dialog.get_values()[item.fieldname];
-
-				wn.model.set_value(me.table_field.options, $td.attr('data-doc_name'), 
-					item.fieldname, val);
-				$td.attr('data-fieldvalue', val);
-				
-				// If field type is currency the update with format currency
-				if ($td.attr('data-fieldtype') == "Currency")
-					$td.html(format_currency(val, me.frm.doc.currency));
-				else
-					$td.html(val);
-			});
+			this.update_item_price(null, row);
 		}
 		
 		this.dialog.hide();
 	},
+	
+	update_item_price: function(docname, row) {
+		var me = this;
+		if(!docname && row) docname = $(row).attr("data-docname");
+		$.each(me.fields, function(i, df) {
+			var val = me.dialog.get_values()[df.fieldname];
+			
+			if(["Currency", "Float"].indexOf(df.fieldtype)!==-1) {
+				val = flt(val);
+			} else if(["Int", "Check"].indexOf(df.fieldtype)!==-1) {
+				val = cint(val);
+			}
+			
+			wn.model.set_value(me.table_field.options, docname, 
+				df.fieldname, val);
+				
+			if(row) {
+				var $td = $(row).find('td[data-fieldname="'+ df.fieldname +'"]');
+				$td.attr('data-fieldvalue', val);
+				// If field type is currency the update with format currency
+				$td.html(wn.format(val, df));
+			}
+		});
+	},
+	
 	delete_row: function(row) {
 		var me = this;
-		var doc_name = $(row).find('td:last').attr('data-doc_name');
-		wn.model.clear_doc(me.table_field.options, doc_name);
+		var docname = $(row).find('td:last').attr('data-docname');
+		wn.model.clear_doc(me.table_field.options, docname);
 		$(row).remove();
 
 		// Re-assign idx
-		$.each($(this.parent).find(".grid tbody tr"), function(idx, data) {
-			$(data).attr("data-idx", idx + 1);
+		$.each($(this.parent).find("tbody tr"), function(idx, data) {
 			var $td = $(data).find('td:first');
 			$td.html(idx + 1);
 		});
 		this.dialog.hide();
 	},
-	add_new_row: function() {
-		var me = this;
-		var row = $(this.parent).find(".grid tbody tr");
-
-		// Creating new row
-		var new_row = document.createElement("tr");
-		$(new_row).attr({
-			"class": "table-row",
-			"data-idx": row.length + 1
-		});
-
-		// Creating first table data
-		var td = document.createElement("td");
-		$(td).attr("class", "text-center");
-		$(td).html(row.length + 1);
-		$(td).appendTo(new_row);
-
-		var child = wn.model.add_child(this.frm.doc, this.table_field.options, 
-			this.table_field.fieldname);
+	
+	add_new_row: function(d) {
+		var tr = document.createElement("tr");
+		tr.className = "table-row";
+		tr.setAttribute("data-docname", d.name);
 		
-		$.each(this.fields, function(i, obj) {
-			if (obj.in_list_view===1) {
-				child[obj.fieldname] = me.dialog.get_values()[obj.fieldname];
-				
+		// Creating table data & appending to row
+		var td = document.createElement("td");
+		td.className = "text-center";
+		td.innerHTML = d.idx;
+		tr.appendChild(td);
+		
+		for(var f=0, lf=this.fields.length; f<lf; f++) {
+			var df = this.fields[f];
+			if(!!!df.hidden && df.in_list_view===1) {
 				var td = document.createElement("td");
-				$(td).attr({
-					"data-fieldtype": obj.fieldtype,
-					"data-fieldname": obj.fieldname,
-					"data-fieldvalue": child[obj.fieldname],
-					"data-doc_name": child["name"]
-				});
-				$(td).html(child[obj.fieldname]);
+				td.setAttribute("data-fieldname", df.fieldname);
+				td.setAttribute("data-fieldvalue", d[df.fieldname]);
+				td.setAttribute("data-docname", d.name);
 				
-				// if field is currency then add style & change text
-				if (obj.fieldtype=="Currency") {
-					$(td).attr("style", "text-align:right");
-					$(td).html(format_currency(child[obj.fieldname], me.frm.doc.currency));
+				// If currency then move header to right
+				if(["Int", "Currency", "Float"].indexOf(df.fieldtype) !== -1) {
+					td.className = "text-right";
 				}
 				
-				// Append td to row
-				$(td).appendTo(new_row);
+				// format and set display
+				td.innerHTML = wn.format(d[df.fieldname], df);
+				
+				// append column to tabel row
+				tr.appendChild(td);
 			}
-		});
-
-		// refresh field to push to grid rows
-		refresh_field(this.table_field.fieldname);
-
-		// append row to tbody of grid
-		$(new_row).appendTo($(this.parent).find(".grid tbody"));
+		}
+		return tr;
 	}
 });
