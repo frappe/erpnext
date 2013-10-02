@@ -2,11 +2,12 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:52:49", 
+  "modified": "2013-10-02 14:24:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "description": "Potential Sales Deal", 
   "doctype": "DocType", 
@@ -168,7 +169,6 @@
   "label": "Communication History", 
   "oldfieldtype": "Section Break", 
   "options": "icon-comments", 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -179,7 +179,6 @@
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
   "oldfieldtype": "Table", 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -450,8 +449,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "doctype": "DocPerm", 

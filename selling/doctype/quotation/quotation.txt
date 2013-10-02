@@ -2,13 +2,14 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:46:33", 
+  "modified": "2013-10-02 14:24:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
   "allow_email": 0, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
@@ -841,8 +842,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "amend": 1, 
