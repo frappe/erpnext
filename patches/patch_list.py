@@ -218,4 +218,6 @@ patch_list = [
 	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
 	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
 	"patches.september_2013.p04_unsubmit_serial_nos",
+	"patches.september_2013.p05_fix_customer_in_pos",
+	"patches.october_2013.fix_is_cancelled_in_sle",
 ]

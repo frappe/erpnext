@@ -62,6 +62,56 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
+
+		// Show POS button only if it is enabled from features setup
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+			this.pos_btn();
+	},
+
+	pos_btn: function() {
+		if(this.$pos_btn) 
+			this.$pos_btn.remove();
+
+		if(!this.pos_active) {
+			var btn_label = wn._("POS View"),
+				icon = "icon-desktop";
+		} else {
+			var btn_label = wn._(this.frm.doctype) + wn._(" View"),
+				icon = "icon-file-text";
+		}
+		var me = this;
+
+		this.$pos_btn = this.frm.add_custom_button(btn_label, function() {
+			me.toggle_pos();
+			me.pos_btn();
+		}, icon);
+	},
+
+	toggle_pos: function(show) {
+		// Check whether it is Selling or Buying cycle
+		var price_list = wn.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
+			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
+		
+		if (!price_list)
+			msgprint(wn._("Please select Price List"))
+		else {
+			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
+
+			// make pos
+			if(!this.frm.pos) {
+				this.frm.layout.add_view("pos");
+				this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+			}
+
+			// toggle view
+			this.frm.layout.set_view(this.pos_active ? "" : "pos");
+			this.pos_active = !this.pos_active;
+
+			// refresh
+			if(this.pos_active)
+				this.frm.pos.refresh();
+			this.frm.refresh();
+		}
 	},
 	
 	validate: function() {
@@ -182,6 +232,29 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	tax_rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
+
+	// serial_no: function(doc, cdt, cdn) {
+	// 	var me = this;
+	// 	var item = wn.model.get_doc(cdt, cdn);
+	// 	if (!item.item_code) {
+	// 		wn.call({
+	// 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_serial_no',
+	// 			args: {serial_no: this.serial_no.$input.val()},
+	// 			callback: function(r) {
+	// 				if (r.message) {
+	// 					var item_code = r.message[0].item_code;
+	// 					var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+	// 						this.frm.cscript.fname);
+	// 							child.item_code = item_code;
+	// 							me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
+	// 				}
+	// 				else
+	// 					msgprint(wn._("Invalid Serial No."));
+	// 				me.refresh();
+	// 			}
+	// 		});
+	// 	}
+	// },
 	
 	row_id: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);
@@ -418,10 +491,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
 			false;
 		
-		// if(!valid_conversion_rate) {
-		// 	wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-		// 		" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
-		// }
+		if(!valid_conversion_rate) {
+			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
+				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+		}
 	},
 	
 	calculate_taxes_and_totals: function() {

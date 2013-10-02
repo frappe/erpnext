@@ -61,19 +61,23 @@ class DocType(BuyingController):
 			"purchase_receipt_details")
 
 	def get_credit_to(self):
-		acc_head = webnotes.conn.sql("""select name, credit_days from `tabAccount` 
-			where (name = %s or (master_name = %s and master_type = 'supplier')) 
-			and docstatus != 2 and company = %s""", 
-			(cstr(self.doc.supplier) + " - " + self.company_abbr, 
-			self.doc.supplier, self.doc.company))
-
 		ret = {}
-		if acc_head and acc_head[0][0]:
-			ret['credit_to'] = acc_head[0][0]
-			if not self.doc.due_date:
-				ret['due_date'] = add_days(cstr(self.doc.posting_date), acc_head and cint(acc_head[0][1]) or 0)
-		elif not acc_head:
-			msgprint("%s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
+		if self.doc.supplier:
+			acc_head = webnotes.conn.sql("""select name, credit_days from `tabAccount` 
+				where (name = %s or (master_name = %s and master_type = 'supplier')) 
+				and docstatus != 2 and company = %s""", 
+				(cstr(self.doc.supplier) + " - " + self.company_abbr, 
+				self.doc.supplier, self.doc.company))
+		
+			if acc_head and acc_head[0][0]:
+				ret['credit_to'] = acc_head[0][0]
+				if not self.doc.due_date:
+					ret['due_date'] = add_days(cstr(self.doc.posting_date), 
+						acc_head and cint(acc_head[0][1]) or 0)
+			elif not acc_head:
+				msgprint("%s does not have an Account Head in %s. \
+					You must first create it from the Supplier Master" % \
+					(self.doc.supplier, self.doc.company))
 		return ret
 		
 	def set_supplier_defaults(self):

@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 import webnotes.defaults
+from webnotes.utils import flt
 
 class TestPurchaseOrder(unittest.TestCase):
-	def test_make_purchase_receipt(self):
+	def test_make_purchase_receipt(self):		
 		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
 		po = webnotes.bean(copy=test_records[0]).insert()
@@ -18,6 +19,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po = webnotes.bean("Purchase Order", po.doc.name)
 		po.submit()
+		
 		pr = make_purchase_receipt(po.doc.name)
 		pr[0]["supplier_warehouse"] = "_Test Warehouse 1 - _TC"
 		
@@ -25,7 +27,52 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pr), len(test_records[0]))
 		
 		pr[0].naming_series = "_T-Purchase Receipt-"
-		webnotes.bean(pr).insert()
+		pr_bean = webnotes.bean(pr)
+		pr_bean.insert()
+			
+	def test_ordered_qty(self):
+		webnotes.conn.sql("delete from tabBin")
+		
+		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
+		po = webnotes.bean(copy=test_records[0]).insert()
+
+		self.assertRaises(webnotes.ValidationError, make_purchase_receipt, 
+			po.doc.name)
+
+		po = webnotes.bean("Purchase Order", po.doc.name)
+		po.doc.is_subcontracted = "No"
+		po.doclist[1].item_code = "_Test Item"
+		po.submit()
+		
+		self.assertEquals(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty"), 10)
+		
+		pr = make_purchase_receipt(po.doc.name)
+		
+		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
+		self.assertEquals(len(pr), len(test_records[0]))
+		
+		pr[0].naming_series = "_T-Purchase Receipt-"
+		pr[1].qty = 4.0
+		pr_bean = webnotes.bean(pr)
+		pr_bean.insert()
+		pr_bean.submit()
+		
+		self.assertEquals(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 6.0)
+			
+		webnotes.conn.set_value('Item', '_Test Item', 'tolerance', 50)
+			
+		pr1 = make_purchase_receipt(po.doc.name)
+		pr1[0].naming_series = "_T-Purchase Receipt-"
+		pr1[1].qty = 8
+		pr1_bean = webnotes.bean(pr1)
+		pr1_bean.insert()
+		pr1_bean.submit()
+		
+		self.assertEquals(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
 		
 	def test_make_purchase_invocie(self):
 		from buying.doctype.purchase_order.purchase_order import make_purchase_invoice

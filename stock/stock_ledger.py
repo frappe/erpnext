@@ -14,29 +14,31 @@ _exceptions = webnotes.local('stockledger_exceptions')
 # _exceptions = []
 
 def make_sl_entries(sl_entries, is_amended=None):
-	from stock.utils import update_bin
+	if sl_entries:
+		from stock.utils import update_bin
 	
-	cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
-	if cancel:
-		set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+		cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
+		if cancel:
+			set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
 	
-	for sle in sl_entries:
-		sle_id = None
-		if sle.get('is_cancelled') == 'Yes':
-			sle['actual_qty'] = -flt(sle['actual_qty'])
+		for sle in sl_entries:
+			sle_id = None
+			if sle.get('is_cancelled') == 'Yes':
+				sle['actual_qty'] = -flt(sle['actual_qty'])
 		
-		if sle.get("actual_qty"):
-			sle_id = make_entry(sle)
+			if sle.get("actual_qty"):
+				sle_id = make_entry(sle)
 			
-		args = sle.copy()
-		args.update({
-			"sle_id": sle_id,
-			"is_amended": is_amended
-		})
-		update_bin(args)
+			args = sle.copy()
+			args.update({
+				"sle_id": sle_id,
+				"is_amended": is_amended
+			})
+			update_bin(args)
 		
-	if cancel:
-		delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
+		if cancel:
+			delete_cancelled_entry(sl_entries[0].get('voucher_type'), 
+				sl_entries[0].get('voucher_no'))
 			
 def set_as_cancel(voucher_type, voucher_no):
 	webnotes.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',

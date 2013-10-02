@@ -286,7 +286,7 @@ def apply_cart_settings(party=None, quotation=None):
 	cart_settings = webnotes.get_obj("Shopping Cart Settings")
 	
 	billing_territory = get_address_territory(quotation.doc.customer_address) or \
-		party.territory
+		party.territory or "All Territories"
 		
 	set_price_list_and_rate(quotation, cart_settings, billing_territory)
 	

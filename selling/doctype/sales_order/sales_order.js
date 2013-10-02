@@ -12,6 +12,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
@@ -26,34 +27,34 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
 					doc.per_billed);
 
-				cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
-					cur_frm.add_custom_button('Make Delivery', this.make_delivery_note);
+					cur_frm.add_custom_button(wn._('Make Delivery'), this.make_delivery_note);
 			
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
-					cur_frm.add_custom_button('Make Maint. Visit', this.make_maintenance_visit);
-					cur_frm.add_custom_button('Make Maint. Schedule', 
+					cur_frm.add_custom_button(wn._('Make Maint. Visit'), this.make_maintenance_visit);
+					cur_frm.add_custom_button(wn._('Make Maint. Schedule'), 
 						this.make_maintenance_schedule);
 				}
 
 				// indent
 				if(!doc.order_type || (doc.order_type == 'Sales'))
-					cur_frm.add_custom_button('Make ' + wn._('Material Request'), 
+					cur_frm.add_custom_button(wn._('Make ') + wn._('Material Request'), 
 						this.make_material_request);
 			
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100)
-					cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+					cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
 			
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
+					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order']);
 			} else {	
 				// un-stop
-				cur_frm.dashboard.set_headline_alert("Stopped", "alert-danger", "icon-stop");
-				cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
+				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
+				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order']);
 			}
 		}
 
@@ -157,7 +158,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.cscript['Stop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
-	var check = confirm("Are you sure you want to STOP " + doc.name);
+	var check = confirm(wn._("Are you sure you want to STOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', {
@@ -172,7 +173,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 cur_frm.cscript['Unstop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
-	var check = confirm("Are you sure you want to UNSTOP " + doc.name);
+	var check = confirm(wn._("Are you sure you want to UNSTOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', {

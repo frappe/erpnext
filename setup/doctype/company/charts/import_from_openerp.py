@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 import os, json
 from xml.etree import ElementTree as ET
 from webnotes.utils.datautils import read_csv_content
+from webnotes.utils import cstr
 
 path = "/Users/rmehta/Downloads/openerp/openerp/addons"
 chart_roots = []
@@ -108,6 +109,7 @@ def find_charts():
 		basename = os.path.basename(basepath)
 		if basename.startswith("l10n"):
 			for fname in files:
+				fname = cstr(fname)
 				filepath = os.path.join(basepath, fname)
 				if fname.endswith(".xml"):
 					tree = ET.parse(filepath)

@@ -143,7 +143,8 @@ class TransactionBase(StatusUpdater):
 		self.doc.fields.update(self.get_lead_defaults())
 	
 	def get_customer_address(self, args):
-		args = load_json(args)		
+		args = load_json(args)
+		webnotes.errprint(args)
 		ret = {
 			'customer_address' : args["address"],
 			'address_display' : get_address_display(args["address"]),
@@ -425,6 +426,7 @@ def get_address_territory(address_doc):
 	
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
+
 	if conversion_rate == 0:
 		msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
 	

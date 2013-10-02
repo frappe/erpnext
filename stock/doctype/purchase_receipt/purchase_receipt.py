@@ -117,8 +117,7 @@ class DocType(BuyingController):
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "prevdoc_detail_docname",
-				"compare_fields": [["project_name", "="], ["warehouse", "="], 
-					["uom", "="], ["item_code", "="]],
+				"compare_fields": [["project_name", "="], ["uom", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
@@ -165,34 +164,43 @@ class DocType(BuyingController):
 						
 		self.bk_flush_supp_wh(sl_entries)
 		self.make_sl_entries(sl_entries)
-		
-	def update_ordered_qty(self, is_cancelled="No"):
-		pc_obj = get_obj('Purchase Common')
+				
+	def update_ordered_qty(self):
 		stock_items = self.get_stock_items()
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
+		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
 			if d.item_code in stock_items and d.warehouse \
 					and cstr(d.prevdoc_doctype) == 'Purchase Order':
-				pr_qty = flt(d.qty) * flt(d.conversion_factor)
-
-				# get qty and pending_qty of prevdoc
-				curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
-				 	d.prevdoc_detail_docname, 'Purchase Order Item', 
-					'Purchase Order - Purchase Receipt', self.doc.name)
-				max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
-				 	flt(curr_ref_qty.split('~~~')[0]), 0
-
-				if flt(qty) + flt(pr_qty) > flt(max_qty):
-					curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
+									
+				already_received_qty = self.get_already_received_qty(d.prevdoc_docname, 
+					d.prevdoc_detail_docname)
+				po_qty, ordered_warehouse = self.get_po_qty_and_warehouse(d.prevdoc_detail_docname)
+				
+				if not ordered_warehouse:
+					webnotes.throw(_("Warehouse is missing in Purchase Order"))
+				
+				if already_received_qty + d.qty > po_qty:
+					ordered_qty = - (po_qty - already_received_qty) * flt(d.conversion_factor)
 				else:
-					curr_qty = flt(pr_qty)
-			
-				args = {
+					ordered_qty = - flt(d.qty) * flt(d.conversion_factor)
+				
+				update_bin({
 					"item_code": d.item_code,
-					"warehouse": d.warehouse,
+					"warehouse": ordered_warehouse,
 					"posting_date": self.doc.posting_date,
-					"ordered_qty": (is_cancelled=="Yes" and -1 or 1)*flt(curr_qty)
-				}
-				update_bin(args)
+					"ordered_qty": flt(ordered_qty) if self.doc.docstatus==1 else -flt(ordered_qty)
+				})
+
+	def get_already_received_qty(self, po, po_detail):
+		qty = webnotes.conn.sql("""select sum(qty) from `tabPurchase Receipt Item` 
+			where prevdoc_detail_docname = %s and docstatus = 1 
+			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s 
+			and parent != %s""", (po_detail, po, self.doc.name))
+		return qty and flt(qty[0][0]) or 0.0
+		
+	def get_po_qty_and_warehouse(self, po_detail):
+		po_qty, po_warehouse = webnotes.conn.get_value("Purchase Order Item", po_detail, 
+			["qty", "warehouse"])
+		return po_qty, po_warehouse
 	
 	def bk_flush_supp_wh(self, sl_entries):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
@@ -201,7 +209,7 @@ class DocType(BuyingController):
 			sl_entries.append(self.get_sl_entries(d, {
 				"item_code": d.rm_item_code,
 				"warehouse": self.doc.supplier_warehouse,
-				"actual_qty": -1*flt(consumed_qty),
+				"actual_qty": -1*flt(d.consumed_qty),
 				"incoming_rate": 0
 			}))
 
@@ -281,7 +289,7 @@ class DocType(BuyingController):
 		
 		webnotes.conn.set(self.doc,'status','Cancelled')
 
-		self.update_ordered_qty(is_cancelled="Yes")
+		self.update_ordered_qty()
 		
 		self.update_stock()
 		self.update_serial_nos(cancel=True)
