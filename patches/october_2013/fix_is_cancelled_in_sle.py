@@ -10,4 +10,4 @@ def execute():
 		
 	webnotes.conn.sql("""update tabBin b set b.stock_uom = 
 		(select i.stock_uom from tabItem i where i.name = b.item_code) 
-		where b.created_on>='2013-09-01'""")
+		where b.creation>='2013-09-01'""")
