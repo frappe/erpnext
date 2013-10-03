@@ -116,7 +116,7 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 // in the "alternate_description" field
 cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.image) {
-		msgprint('Please select an "Image" first');
+		msgprint(wn._('Please select an "Image" first'));
 		return;
 	}
 
@@ -132,7 +132,7 @@ cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 
   if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom)
   {
-    alert('Weight is mentioned,\nPlease mention "Weight UOM" too');
+    alert(wn._('Weight is mentioned,\nPlease mention "Weight UOM" too'));
     validated=0;
   }
 }
