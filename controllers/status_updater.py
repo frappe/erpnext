@@ -8,6 +8,51 @@ from webnotes import msgprint
 
 from webnotes.model.controller import DocListController
 
+status_map = {
+	"Contact": [
+		["Replied", "communication_sent"],
+		["Open", "communication_received"]
+	],
+	"Job Applicant": [
+		["Replied", "communication_sent"],
+		["Open", "communication_received"]
+	],
+	"Lead": [
+		["Replied", "communication_sent"],
+		["Converted", "has_customer"],
+		["Opportunity", "has_opportunity"],
+		["Open", "communication_received"],
+	],
+	"Opportunity": [
+		["Draft", None],
+		["Submitted", "eval:self.doc.docstatus==1"],
+		["Lost", "eval:self.doc.status=='Lost'"],
+		["Quotation", "has_quotation"],
+		["Replied", "communication_sent"],
+		["Cancelled", "eval:self.doc.docstatus==2"],
+		["Open", "communication_received"],
+	],
+	"Quotation": [
+		["Draft", None],
+		["Submitted", "eval:self.doc.docstatus==1"],
+		["Lost", "eval:self.doc.status=='Lost'"],
+		["Ordered", "has_sales_order"],
+		["Replied", "communication_sent"],
+		["Cancelled", "eval:self.doc.docstatus==2"],
+		["Open", "communication_received"],
+	],
+	"Sales Order": [
+		["Draft", None],
+		["Submitted", "eval:self.doc.docstatus==1"],
+		["Stopped", "eval:self.doc.status=='Stopped'"],
+		["Cancelled", "eval:self.doc.docstatus==2"],
+	],
+	"Support Ticket": [
+		["Replied", "communication_sent"],
+		["Open", "communication_received"]
+	],
+}
+
 class StatusUpdater(DocListController):
 	"""
 		Updates the status of the calling records
@@ -20,6 +65,39 @@ class StatusUpdater(DocListController):
 		self.update_qty()
 		self.validate_qty()
 	
+	def set_status(self, update=False):
+		if self.doc.get("__islocal"):
+			return
+			
+		if self.doc.doctype in status_map.keys():
+			for s in status_map[self.doc.doctype].reverse():
+				if not s[1]:
+					self.doc.status = s[0]
+					break
+				elif s[1].startwith("eval:"):
+					if eval(s[1][5:]):
+						self.doc.status = s[0]
+						break
+				elif getattr(self, s[1])():
+					self.doc.status = s[0]
+					break
+		
+			if update:
+				webnotes.conn.set_value(self.doc.doctype, self.doc.name, "status", self.doc.status)
+	
+	def on_communication(self):
+		self.set_status(update=True)
+	
+	def communication_received(self):
+		last_comm = self.doclist.get({"doctype":"Communication"})[-1]
+		if last_comm:
+			return last_comm.sent_or_received == "Received"
+
+	def communication_sent(self):
+		last_comm = self.doclist.get({"doctype":"Communication"})[-1]
+		if last_comm:
+			return last_comm.sent_or_received == "Sent"
+			
 	def validate_qty(self):
 		"""
 			Validates qty at row level

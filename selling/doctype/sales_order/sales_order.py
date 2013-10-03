@@ -165,36 +165,20 @@ class DocType(SellingController):
 		})
 
 		
-	def check_prev_docstatus(self):
-		for d in getlist(self.doclist, 'sales_order_details'):
-			cancel_quo = webnotes.conn.sql("select name from `tabQuotation` where docstatus = 2 and name = '%s'" % d.prevdoc_docname)
-			if cancel_quo:
-				msgprint("Quotation :" + cstr(cancel_quo[0][0]) + " is already cancelled !")
-				raise Exception , "Validation Error. "
-	
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = webnotes.conn.sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
 		if enq:
 			webnotes.conn.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
-	def update_prevdoc_status(self, flag):
-		for d in getlist(self.doclist, 'sales_order_details'):
-			if d.prevdoc_docname:
-				if flag=='submit':
-					webnotes.conn.sql("update `tabQuotation` set status = 'Order Confirmed' where name=%s",d.prevdoc_docname)
-					
-					#update enquiry
-					self.update_enquiry_status(d.prevdoc_docname, 'Order Confirmed')
-				elif flag == 'cancel':
-					chk = webnotes.conn.sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
-					if not chk:
-						webnotes.conn.sql("update `tabQuotation` set status = 'Submitted' where name=%s",d.prevdoc_docname)
-						
-						#update enquiry
-						self.update_enquiry_status(d.prevdoc_docname, 'Quotation Sent')
+	def update_prevdoc_status(self, flag):				
+		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
+			bean = webnotes.bean("Quotation", quotation)
+			if bean.doc.docstatus==2:
+				webnotes.throw(d.prevdoc_docname + ": " + webnotes._("Quotation is cancelled."))
+				
+			bean.get_controller().set_status(update=True)
 
 	def on_submit(self):
-		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
 
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)

@@ -47,6 +47,11 @@ class DocType(SellingController):
 						if not doc.fields.get(r):
 							doc.fields[r] = res[r]
 
+
+	def has_sales_order(self):
+		return webnotes.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+				
+		
 	# Re-calculates Basic Rate & amount based on Price List Selected
 	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
@@ -108,13 +113,7 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		import utilities
-		if not self.doc.status:
-			self.doc.status = "Draft"
-		else:
-			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
-				"Order Confirmed", "Order Lost", "Cancelled"])
-
+		self.set_status()
 		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
@@ -125,42 +124,22 @@ class DocType(SellingController):
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.validate_max_discount(self,'quotation_details')
 		sales_com_obj.check_conversion_rate(self)
-		
-
-	def on_update(self):
-		# Set Quotation Status
-		webnotes.conn.set(self.doc, 'status', 'Draft')
-	
+			
 	#update enquiry
 	#------------------
-	def update_enquiry(self, flag):
-		prevdoc=''
-		for d in getlist(self.doclist, 'quotation_details'):
-			if d.prevdoc_docname:
-				prevdoc = d.prevdoc_docname
-		
-		if prevdoc:
-			if flag == 'submit': #on submit
-				webnotes.conn.sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
-			elif flag == 'cancel': #on cancel
-				webnotes.conn.sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
-			elif flag == 'order lost': #order lost
-				webnotes.conn.sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
-			elif flag == 'order confirm': #order confirm
-				webnotes.conn.sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
+	def update_opportunity(self):
+		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
+			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
 	
 	# declare as order lost
 	#-------------------------
 	def declare_order_lost(self, arg):
-		chk = webnotes.conn.sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
-		if chk:
-			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
-			raise Exception
-		else:
-			webnotes.conn.set(self.doc, 'status', 'Order Lost')
+		if not self.has_sales_order():
+			webnotes.conn.set(self.doc, 'status', 'Lost')
 			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
-			self.update_enquiry('order lost')
-			return 'true'
+			self.update_opportunity()
+		else:
+			webnotes.throw(_("Cannot set as Lost as Sales Order is made."))
 	
 	#check if value entered in item table
 	#--------------------------------------
@@ -176,21 +155,17 @@ class DocType(SellingController):
 		
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
-
-		# Set Quotation Status
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
-		
+			
 		#update enquiry status
-		self.update_enquiry('submit')
+		self.update_opportunity()
 		
 		
 # ON CANCEL
 # ==========================================================================
 	def on_cancel(self):
 		#update enquiry status
-		self.update_enquiry('cancel')
-		
-		webnotes.conn.set(self.doc,'status','Cancelled')
+		self.set_status()
+		self.update_opportunity()
 			
 # Print other charges
 # ===========================================================================
@@ -202,6 +177,7 @@ class DocType(SellingController):
 			lst1.append(d.total)
 			print_lst.append(lst1)
 		return print_lst
+		
 	
 @webnotes.whitelist()
 def make_sales_order(source_name, target_doclist=None):

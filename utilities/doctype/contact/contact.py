@@ -12,14 +12,6 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def on_communication(self, comm):
-		if webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
-			status = "Replied"
-		else:
-			status = "Open"
-			
-		webnotes.conn.set(self.doc, 'status', status)
-
 	def autoname(self):
 		# concat first and last name
 		self.doc.name = " ".join(filter(None, 
@@ -32,6 +24,7 @@ class DocType(TransactionBase):
 				break
 		
 	def validate(self):
+		self.set_status()
 		self.validate_primary_contact()
 
 	def validate_primary_contact(self):

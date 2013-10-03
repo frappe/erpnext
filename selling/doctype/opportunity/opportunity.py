@@ -6,7 +6,7 @@ import webnotes
 
 from webnotes.utils import cstr, getdate, cint
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 	
 from utilities.transaction_base import TransactionBase
@@ -67,7 +67,8 @@ class DocType(TransactionBase):
 			'email_id' : contact and contact[0]['email_id'] or ''
 		}
 		return ret
-		
+			
+	
 	def on_update(self):
 		# Add to calendar
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
@@ -120,6 +121,7 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
+		self.set_status()
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
@@ -127,41 +129,28 @@ class DocType(TransactionBase):
 		
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
-		self.doc.status = "Draft"
 
 	def on_submit(self):
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
-		if self.doc.lead and webnotes.conn.get_value("Lead", self.doc.lead, "status")!="Converted":
-			webnotes.conn.set_value("Lead", self.doc.lead, "status", "Opportunity Made")
+		if self.doc.lead:
+			webnotes.bean("Lead", self.doc.lead).get_controller().set_status(update=True)
 	
 	def on_cancel(self):
-		chk = webnotes.conn.sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
-		if chk:
-			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus can not be cancelled.")
-			raise Exception
-		else:
-			webnotes.conn.set(self.doc, 'status', 'Cancelled')
-			if self.doc.lead and webnotes.conn.get_value("Lead", self.doc.lead,
-				"status")!="Converted":
-					if webnotes.conn.get_value("Communication", {"parent": self.doc.lead}):
-						status = "Contacted"
-					else:
-						status = "Open"
-					
-					webnotes.conn.set_value("Lead", self.doc.lead, "status", status)
+		if self.has_quotation():
+			webnotes.throw(_("Cannot Cancel Opportunity as Quotation Exists"))
+		self.set_status(update=True)
 		
 	def declare_enquiry_lost(self,arg):
-		chk = webnotes.conn.sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
-		if chk:
-			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus 'Opportunity Lost' can not be declared against it.")
-			raise Exception
-		else:
-			webnotes.conn.set(self.doc, 'status', 'Opportunity Lost')
+		if not self.has_quotation():
+			webnotes.conn.set(self.doc, 'status', 'Lost')
 			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
-			return 'true'
+		else:
+			webnotes.throw(_("Cannot declare as lost, because Quotation has been made."))
 
 	def on_trash(self):
 		self.delete_events()
+		
+	def has_quotation(self):
+		return webnotes.conn.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
 		
 @webnotes.whitelist()
 def make_quotation(source_name, target_doclist=None):

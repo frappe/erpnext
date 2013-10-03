@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:24:35", 
+  "modified": "2013-10-03 16:31:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -734,7 +734,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
+  "options": "Draft\nSubmitted\nOrdered\nLost\nCancelled", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 

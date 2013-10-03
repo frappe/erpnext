@@ -66,7 +66,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						source_doctype: "Quotation",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Order Lost"],
+							status: ["!=", "Lost"],
 							order_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company
