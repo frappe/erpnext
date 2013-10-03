@@ -5,7 +5,7 @@
 wn.pages['stock-ageing'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Ageing',
+		title: wn._('Stock Ageing'),
 		single_column: true
 	});
 
@@ -21,7 +21,7 @@ wn.require("app/js/stock_grid_report.js");
 erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Stock Ageing",
+			title: wn._("Stock Ageing"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -50,17 +50,17 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		];
 	},
 	filters: [
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Select", label: "Brand", link:"Brand", 
+		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: "Plot By", 
+		{fieldtype:"Select", label: wn._("Plot By"), 
 			options: ["Average Age", "Earliest", "Latest"]},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;
