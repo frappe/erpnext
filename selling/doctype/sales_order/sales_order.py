@@ -341,8 +341,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			"field_map": {
 				"export_rate": "export_rate", 
 				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype", 
+				"parent": "against_sales_order", 
 				"reserved_warehouse": "warehouse"
 			},
 			"postprocess": update_item,

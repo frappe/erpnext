@@ -895,8 +895,7 @@ def make_return_jv_from_delivery_note(se, ref):
 		ref.doclist[0].name)
 	
 	if not invoices_against_delivery:
-		sales_orders_against_delivery = [d.prevdoc_docname for d in 
-			ref.doclist.get({"prevdoc_doctype": "Sales Order"}) if d.prevdoc_docname]
+		sales_orders_against_delivery = [d.against_sales_order for d in ref.doclist if d.against_sales_order]
 		
 		if sales_orders_against_delivery:
 			invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",

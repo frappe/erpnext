@@ -123,12 +123,12 @@ class DocType(TransactionBase):
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
-			if obj.doc.doctype == "Delivery Note" and d.prevdoc_doctype == 'Sales Order':
+			if obj.doc.doctype == "Delivery Note" and d.against_sales_order:
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12
 				
 				already_delivered_qty = self.get_already_delivered_qty(obj.doc.name, 
-					d.prevdoc_docname, d.prevdoc_detail_docname)
+					d.against_sales_order, d.prevdoc_detail_docname)
 				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
 				
 				if already_delivered_qty + d.qty > so_qty:
@@ -168,7 +168,7 @@ class DocType(TransactionBase):
 	def get_already_delivered_qty(self, dn, so, so_detail):
 		qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Item` 
 			where prevdoc_detail_docname = %s and docstatus = 1 
-			and prevdoc_doctype = 'Sales Order' and prevdoc_docname = %s 
+			and against_sales_order = %s 
 			and parent != %s""", (so_detail, so, dn))
 		return qty and flt(qty[0][0]) or 0.0
 
@@ -218,7 +218,6 @@ class DocType(TransactionBase):
 		pi.qty = flt(qty)
 		pi.actual_qty = bin and flt(bin['actual_qty']) or 0
 		pi.projected_qty = bin and flt(bin['projected_qty']) or 0
-		pi.prevdoc_doctype = line.prevdoc_doctype
 		if not pi.warehouse:
 			pi.warehouse = warehouse
 		if not pi.batch_no:
@@ -283,8 +282,8 @@ class DocType(TransactionBase):
 	def check_stop_sales_order(self,obj):
 		for d in getlist(obj.doclist,obj.fname):
 			ref_doc_name = ''
-			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_doctype == 'Sales Order':
-				ref_doc_name = d.prevdoc_docname
+			if d.fields.has_key('against_sales_order') and d.against_sales_order:
+				ref_doc_name = d.against_sales_order
 			elif d.fields.has_key('sales_order') and d.sales_order and not d.delivery_note:
 				ref_doc_name = d.sales_order
 			if ref_doc_name:
@@ -321,14 +320,22 @@ class DocType(TransactionBase):
 
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):
-			if d.prevdoc_doctype and d.prevdoc_docname:
-				if d.prevdoc_doctype in ["Sales Invoice", "Delivery Note"]:
+			date_field = None
+
+			pdoctype, pname = d.prevdoc_doctype, d.prevdoc_docname
+
+			if d.against_sales_invoice:
+				pdoctype, pname = "Sales Invoice", d.against_sales_invoice
+			elif d.against_sales_order:
+				pdoctype, pname = "Sales Order", d.against_sales_order
+
+			if pdoctype and pname:
+				if pdoctype in ["Sales Invoice", "Delivery Note"]:
 					date_field = "posting_date"
 				else:
 					date_field = "transaction_date"
-					
-				d.prevdoc_date = webnotes.conn.get_value(d.prevdoc_doctype, 
-					d.prevdoc_docname, date_field)
+
+				d.prevdoc_date = webnotes.conn.get_value(pdoctype, pname, date_field)
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
