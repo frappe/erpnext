@@ -4,7 +4,7 @@
 wn.pages['stock-ledger'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Ledger',
+		title: wn._('Stock Ledger'),
 		single_column: true
 	});
 	
@@ -17,7 +17,7 @@ wn.require("app/js/stock_grid_report.js");
 erpnext.StockLedger = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Stock Ledger",
+			title: wn._("Stock Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -28,29 +28,29 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 	setup_columns: function() {
 		this.hide_balance = (this.is_default("item_code") || this.voucher_no) ? true : false;
 		this.columns = [
-			{id: "posting_datetime", name: "Posting Date", field: "posting_datetime", width: 120,
+			{id: "posting_datetime", name: wn._("Posting Date"), field: "posting_datetime", width: 120,
 				formatter: this.date_formatter},
-			{id: "item_code", name: "Item Code", field: "item_code", width: 160, 	
+			{id: "item_code", name: wn._("Item Code"), field: "item_code", width: 160, 	
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
 					doctype: '"Item"',
 				}},
-			{id: "description", name: "Description", field: "description", width: 200,
+			{id: "description", name: wn._("Description"), field: "description", width: 200,
 				formatter: this.text_formatter},
-			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
+			{id: "warehouse", name: wn._("Warehouse"), field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
-			{id: "qty", name: "Qty", field: "qty", width: 100,
+			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: wn._("UOM"), field: "stock_uom", width: 100},
+			{id: "qty", name: wn._("Qty"), field: "qty", width: 100,
 				formatter: this.currency_formatter},
-			{id: "balance", name: "Balance Qty", field: "balance", width: 100,
+			{id: "balance", name: wn._("Balance Qty"), field: "balance", width: 100,
 				formatter: this.currency_formatter,
 				hidden: this.hide_balance},
-			{id: "balance_value", name: "Balance Value", field: "balance_value", width: 100,
+			{id: "balance_value", name: wn._("Balance Value"), field: "balance_value", width: 100,
 				formatter: this.currency_formatter, hidden: this.hide_balance},
-			{id: "voucher_type", name: "Voucher Type", field: "voucher_type", width: 120},
-			{id: "voucher_no", name: "Voucher No", field: "voucher_no", width: 160,
+			{id: "voucher_type", name: wn._("Voucher Type"), field: "voucher_type", width: 120},
+			{id: "voucher_no", name: wn._("Voucher No"), field: "voucher_no", width: 160,
 				link_formatter: {
 					filter_input: "voucher_no",
 					open_btn: true,
@@ -60,11 +60,11 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 	},
 	filters: [
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
-		{fieldtype:"Link", label: "Item Code", link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: wn._("Item Code"), link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
 				return item.item_code == val || !val;
 			}},
@@ -72,20 +72,20 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Data", label: "Voucher No",
+		{fieldtype:"Data", label: wn._("Voucher No"),
 			filter: function(val, item, opts) {
 				if(!val) return true;
 				return (item.voucher_no && item.voucher_no.indexOf(val)!=-1);
 			}},
-		{fieldtype:"Date", label: "From Date", filter: function(val, item) {
+		{fieldtype:"Date", label: wn._("From Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date", filter: function(val, item) {
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	
 	setup_filters: function() {
