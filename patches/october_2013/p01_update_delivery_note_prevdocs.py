@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
+	webnotes.reload_doc("stock", "doctype", "delivery_note_item")
 	webnotes.conn.sql("""update `tabDelivery Note Item` set against_sales_order=prevdoc_docname
 		where prevdoc_doctype='Sales Order' """)
 		

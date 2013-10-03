@@ -69,12 +69,14 @@ class StatusUpdater(DocListController):
 		if self.doc.get("__islocal"):
 			return
 			
-		if self.doc.doctype in status_map.keys():
-			for s in status_map[self.doc.doctype].reverse():
+		if self.doc.doctype in status_map:
+			sl = status_map[self.doc.doctype][:]
+			sl.reverse()
+			for s in sl:
 				if not s[1]:
 					self.doc.status = s[0]
 					break
-				elif s[1].startwith("eval:"):
+				elif s[1].startswith("eval:"):
 					if eval(s[1][5:]):
 						self.doc.status = s[0]
 						break
@@ -89,14 +91,14 @@ class StatusUpdater(DocListController):
 		self.set_status(update=True)
 	
 	def communication_received(self):
-		last_comm = self.doclist.get({"doctype":"Communication"})[-1]
+		last_comm = self.doclist.get({"doctype":"Communication"})
 		if last_comm:
-			return last_comm.sent_or_received == "Received"
+			return last_comm[-1].sent_or_received == "Received"
 
 	def communication_sent(self):
-		last_comm = self.doclist.get({"doctype":"Communication"})[-1]
+		last_comm = self.doclist.get({"doctype":"Communication"})
 		if last_comm:
-			return last_comm.sent_or_received == "Sent"
+			return last_comm[-1].sent_or_received == "Sent"
 			
 	def validate_qty(self):
 		"""
