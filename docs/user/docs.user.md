@@ -33,6 +33,7 @@ Contents
 1. [Five-Day-Setup](docs.user.five.html)
 	1. [Day-1](docs.user.five.day_1.html)
 	1. [Day-2](docs.user.five.day_2.html)
+	1. [Day-3](docs.user.five.day_3.html)
 1. [Implementation](docs.user.implement.html)
 	1. [Implementation Strategy](docs.user.implement.strategy.html)
 	1. [Concepts](docs.user.implement.concepts.html)

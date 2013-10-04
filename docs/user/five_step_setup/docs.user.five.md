@@ -3,7 +3,8 @@
 	"_label": "Five-Day Setup",
 	"_toc": [
 		"docs.user.five.day_1",
-		"docs.user.five.day_2"
+		"docs.user.five.day_2",
+		"docs.user.five.day_3"
 			
 	]
 }
@@ -30,11 +31,12 @@ The setup help is divided into day-wise instructions for 5 consecutive days. Day
 
 - Sales Cycle
 - Purchase Cycle
-- Manufacturing Cycle
+
 	
 
 #### Day 4
 
+- Manufacturing Cycle
 - Fulfillment Cycle- Inventory, Delivery Note, Warehouse etc
 - Accounts
 
