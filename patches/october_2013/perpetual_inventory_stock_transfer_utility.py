@@ -39,8 +39,8 @@ def execute():
 				
 			if item_details.has_serial_no == "Yes":
 				serial_no = "\n".join([d[0] for d in webnotes.conn.sql("""select name 
-					from `tabSerial No` where item_code = %s and warehouse = %s""", 
-					(bin.item_code, bin.warehouse))])
+					from `tabSerial No` where item_code = %s and warehouse = %s 
+					and status='Available'""", (bin.item_code, bin.warehouse))])
 			else:
 				serial_no = None
 			
