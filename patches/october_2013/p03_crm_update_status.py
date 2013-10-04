@@ -36,12 +36,12 @@ def execute():
 			webnotes.conn.sql("""update `tab%s` set status=%s where status=%s""" % \
 				(dt, "%s", "%s"), (status[1], status[0]))
 				
-	# for dt in ["Lead", "Opportunity"]:
-	# 	for name in webnotes.conn.sql_list("""select name from `tab%s`""" % dt):
-	# 		bean = webnotes.bean(dt, name)
-	# 		before_status = bean.doc.status
-	# 		bean.get_controller().set_status()
-	# 		
-	# 		if bean.doc.status != before_status:
-	# 			webnotes.conn.sql("""update `tab%s` set status=%s where name=%s""" % (dt, "%s", "%s"),
-	# 				(bean.doc.status, name))
+	for dt in ["Lead", "Opportunity"]:
+		for name in webnotes.conn.sql_list("""select name from `tab%s`""" % dt):
+			bean = webnotes.bean(dt, name)
+			before_status = bean.doc.status
+			bean.get_controller().set_status()
+			
+			if bean.doc.status != before_status:
+				webnotes.conn.sql("""update `tab%s` set status=%s where name=%s""" % (dt, "%s", "%s"),
+					(bean.doc.status, name))

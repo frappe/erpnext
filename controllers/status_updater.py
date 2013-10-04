@@ -88,17 +88,21 @@ class StatusUpdater(DocListController):
 				webnotes.conn.set_value(self.doc.doctype, self.doc.name, "status", self.doc.status)
 	
 	def on_communication(self):
+		self.communication_set = True
 		self.set_status(update=True)
+		del self.communication_set
 	
 	def communication_received(self):
-		last_comm = self.doclist.get({"doctype":"Communication"})
-		if last_comm:
-			return last_comm[-1].sent_or_received == "Received"
+		if getattr(self, "communication_set", False):
+			last_comm = self.doclist.get({"doctype":"Communication"})
+			if last_comm:
+				return last_comm[-1].sent_or_received == "Received"
 
 	def communication_sent(self):
-		last_comm = self.doclist.get({"doctype":"Communication"})
-		if last_comm:
-			return last_comm[-1].sent_or_received == "Sent"
+		if getattr(self, "communication_set", False):
+			last_comm = self.doclist.get({"doctype":"Communication"})
+			if last_comm:
+				return last_comm[-1].sent_or_received == "Sent"
 			
 	def validate_qty(self):
 		"""
