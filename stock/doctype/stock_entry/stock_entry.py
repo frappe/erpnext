@@ -42,7 +42,7 @@ class DocType(StockController):
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order(pro_obj)
 		self.get_stock_and_rate()
-		# self.validate_incoming_rate()
+		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
