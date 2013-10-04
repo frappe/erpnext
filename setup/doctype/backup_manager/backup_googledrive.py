@@ -85,6 +85,7 @@ def backup_to_gdrive():
 	webnotes.conn.close()
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
+		filename = cstr(filename)
 		found = False
 		filepath = os.path.join(path, filename)
 		ext = filename.split('.')[-1]

@@ -29,9 +29,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// toggle to pos view if is_pos is 1 in user_defaults
 		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
 				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
-					this.frm.set_value("is_pos", 1);
-					this.is_pos();
-					cur_frm.cscript.toggle_pos(true);
+					if(this.frm.doc.__islocal && !this.frm.doc.amended_from) {
+						this.frm.set_value("is_pos", 1);
+						this.is_pos(function() {cur_frm.cscript.toggle_pos(true);});
+					}
 		}
 		
 		// if document is POS then change default print format to "POS Invoice"
@@ -126,7 +127,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.get_terms();
 	},
 	
-	is_pos: function() {
+	is_pos: function(callback_fn) {
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
@@ -140,6 +141,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("update_stock");
+							if(callback_fn) callback_fn()
 						}
 					}
 				});

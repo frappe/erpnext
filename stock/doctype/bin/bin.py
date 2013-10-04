@@ -16,7 +16,7 @@ class DocType:
 		self.doclist = doclist
 		
 	def validate(self):
-		if not self.doc.stock_uom:
+		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:
 			self.doc.stock_uom = webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom')
 				
 		self.validate_mandatory()

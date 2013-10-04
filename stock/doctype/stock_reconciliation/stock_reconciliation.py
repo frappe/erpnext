@@ -246,6 +246,7 @@ class DocType(StockController):
 			"stock_uom": webnotes.conn.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
+			"is_cancelled": "No"
 		})
 		args.update(opts)
 		self.make_sl_entries([args])

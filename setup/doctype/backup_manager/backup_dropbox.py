@@ -96,6 +96,7 @@ def backup_to_dropbox():
 	error_log = []
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
+		filename = cstr(filename)
 		if filename in ignore_list:
 			continue
 		

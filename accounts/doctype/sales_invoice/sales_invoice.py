@@ -195,7 +195,7 @@ class DocType(SellingController):
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
-			if not for_validate:
+			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
 				self.set_customer_defaults()
 

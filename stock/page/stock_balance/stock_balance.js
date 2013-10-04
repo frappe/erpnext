@@ -126,10 +126,11 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 						} else {
 							item.inflow_value += value_diff;
 						}
-					}
 					
-					item.closing_qty += qty_diff;
-					item.closing_value += value_diff;
+						item.closing_qty += qty_diff;
+						item.closing_value += value_diff;
+					}
+
 				} else {
 					break;
 				}
