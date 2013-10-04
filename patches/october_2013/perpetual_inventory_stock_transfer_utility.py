@@ -41,7 +41,6 @@ def execute():
 				serial_no = "\n".join([d[0] for d in webnotes.conn.sql("""select name 
 					from `tabSerial No` where item_code = %s and warehouse = %s""", 
 					(bin.item_code, bin.warehouse))])
-				print serial_no
 			else:
 				serial_no = None
 			
