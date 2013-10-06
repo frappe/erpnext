@@ -12,8 +12,6 @@ import webnotes.defaults
 
 import  os, json
 
-sql = webnotes.conn.sql
-
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
@@ -61,7 +59,7 @@ class DocType:
 
 		if not webnotes.conn.sql("""select name from tabCompany
 			where country=%s and docstatus<2 limit 1""", self.doc.country):
-			self.create_fields_for_locale(self.doc.locale)
+			self.create_fields_for_locale(self.doc.country)
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
@@ -255,11 +253,7 @@ class DocType:
 			self.add_cfield(d)
 
 	def add_cfield(self, fieldata):
-		common = {
-			"doctype": "Custom Field",
-		}
-		common.update(fielddata)
-		webnotes.doc(common).insert()
+		webnotes.bean("Custom Fields", fieldata).insert()
 
 	def set_default_accounts(self):
 		accounts = {

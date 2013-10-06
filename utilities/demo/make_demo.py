@@ -34,13 +34,23 @@ def make(reset=False, simulate=True):
 	webnotes.mute_emails = True
 	webnotes.rollback_on_exception = True
 	
+	if not webnotes.conf.demo_db_name:
+		raise Exception("conf.py does not have demo_db_name")
+	
 	if reset:
 		setup()
+	else:
+		if webnotes.conn:
+			webnotes.conn.close()
+		
+		webnotes.connect(db_name=webnotes.conf.demo_db_name)
+	
 	if simulate:
 		_simulate()
-	
+		
 def setup():
 	install()
+	webnotes.connect(db_name=webnotes.conf.demo_db_name)
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
@@ -138,14 +148,17 @@ def run_stock(current_date):
 	# make purchase requests
 	if can_make("Purchase Receipt"):
 		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from stock.stock_ledger import NegativeStockError
 		report = "Purchase Order Items To Be Received"
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
 			pr.doc.posting_date = current_date
 			pr.doc.fiscal_year = "2013"
 			pr.insert()
-			pr.submit()
-			webnotes.conn.commit()
+			try:
+				pr.submit()
+				webnotes.conn.commit()
+			except NegativeStockError: pass
 	
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
@@ -357,9 +370,9 @@ def how_many(doctype):
 def install():
 	print "Creating Fresh Database..."
 	from webnotes.install_lib.install import Installer
-	import conf
+	from webnotes import conf
 	inst = Installer('root')
-	inst.import_from_db(conf.demo_db_name, verbose = 1)
+	inst.install(conf.demo_db_name, verbose=1, force=1)
 
 def complete_setup():
 	print "Complete Setup..."

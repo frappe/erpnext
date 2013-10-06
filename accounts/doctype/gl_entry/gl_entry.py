@@ -161,16 +161,6 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		webnotes.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
 		 	(against_voucher_type, bal, against_voucher))
 			
-def validate_freezed_account(account, adv_adj=False):
-	"""Account has been freezed for other users except account manager"""
-	
-	freezed_account = webnotes.conn.get_value("Account", account, "freeze_account")
-	
-	if freezed_account == 'Yes' and not adv_adj \
-		and 'Accounts Manager' not in webnotes.user.get_roles():
-			webnotes.throw(_("Account") + ": " + account + _(" has been freezed. \
-			Only Accounts Manager can do transaction against this account"))
-
 def validate_frozen_account(account, adv_adj):
 	frozen_account = webnotes.conn.get_value("Account", account, "freeze_account")
 	if frozen_account == 'Yes' and not adv_adj:

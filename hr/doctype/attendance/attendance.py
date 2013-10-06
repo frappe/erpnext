@@ -7,7 +7,6 @@ import webnotes
 from webnotes.utils import getdate, nowdate
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -15,7 +14,7 @@ class DocType:
 		self.doclist = doclist
 	
 	def validate_duplicate_record(self):	 
-		res = sql("""select name from `tabAttendance` where employee = %s and att_date = %s 
+		res = webnotes.conn.sql("""select name from `tabAttendance` where employee = %s and att_date = %s 
 			and name != %s and docstatus = 1""", 
 			(self.doc.employee, self.doc.att_date, self.doc.name))
 		if res:
@@ -24,7 +23,7 @@ class DocType:
 			
 	def check_leave_record(self):
 		if self.doc.status == 'Present':
-			leave = sql("""select name from `tabLeave Application` 
+			leave = webnotes.conn.sql("""select name from `tabLeave Application` 
 				where employee = %s and %s between from_date and to_date and status = 'Approved' 
 				and docstatus = 1""", (self.doc.employee, self.doc.att_date))
 			
@@ -42,7 +41,7 @@ class DocType:
 			msgprint(_("Attendance can not be marked for future dates"), raise_exception=1)
 
 	def validate_employee(self):
-		emp = sql("select name from `tabEmployee` where name = %s and status = 'Active'",
+		emp = webnotes.conn.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
 		 	self.doc.employee)
 		if not emp:
 			msgprint(_("Employee: ") + self.doc.employee + 

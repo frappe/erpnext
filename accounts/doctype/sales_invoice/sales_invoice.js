@@ -29,9 +29,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// toggle to pos view if is_pos is 1 in user_defaults
 		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
 				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
-					this.frm.set_value("is_pos", 1);
-					this.is_pos();
-					cur_frm.cscript.toggle_pos(true);
+					if(this.frm.doc.__islocal && !this.frm.doc.amended_from) {
+						this.frm.set_value("is_pos", 1);
+						this.is_pos(function() {cur_frm.cscript.toggle_pos(true);});
+					}
 		}
 		
 		// if document is POS then change default print format to "POS Invoice"
@@ -78,14 +79,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 		}
 
-		if (doc.docstatus===0) {
+		// Show buttons only when pos view is active
+		if (doc.docstatus===0 && !this.pos_active) {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}
-		
-		// Show POS button only if it enabled from features setup
-		if(cint(sys_defaults.fs_pos_view)===1)
-			cur_frm.cscript.pos_btn();
 	},
 
 	sales_order_btn: function() {
@@ -124,62 +122,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			});
 	},
-
-	pos_btn: function() {
-		if(cur_frm.$pos_btn) 
-			cur_frm.$pos_btn.remove();
-
-		if(!cur_frm.pos_active) {
-			var btn_label = wn._("POS View"),
-				icon = "icon-desktop";
-
-			cur_frm.cscript.sales_order_btn();
-			cur_frm.cscript.delivery_note_btn();
-		} else {
-			var btn_label = wn._("Invoice View"),
-				icon = "icon-file-text";
-
-			if (cur_frm.doc.docstatus===0) {
-				this.$delivery_note_btn.remove();
-				this.$sales_order_btn.remove();
-			}
-		}
-
-		cur_frm.$pos_btn = cur_frm.add_custom_button(btn_label, function() {
-			cur_frm.cscript.toggle_pos();
-			cur_frm.cscript.pos_btn();
-		}, icon);
-	},
-
-	toggle_pos: function(show) {		
-		if (!this.frm.doc.selling_price_list)
-			msgprint(wn._("Please select Price List"))
-		else {
-			if((show===true && cur_frm.pos_active) || (show===false && !cur_frm.pos_active)) return;
-
-			// make pos
-			if(!cur_frm.pos) {
-				cur_frm.layout.add_view("pos");
-				cur_frm.pos = new erpnext.POS(cur_frm.layout.views.pos, cur_frm);
-			}
-
-			// toggle view
-			cur_frm.layout.set_view(cur_frm.pos_active ? "" : "pos");
-			cur_frm.pos_active = !cur_frm.pos_active;
-
-			// refresh
-			if(cur_frm.pos_active)
-				cur_frm.pos.refresh();
-		}
-	},
 	
 	tc_name: function() {
 		this.get_terms();
 	},
 	
-	is_pos: function() {
+	is_pos: function(callback_fn) {
 		cur_frm.cscript.hide_fields(this.frm.doc);
-		
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
@@ -192,11 +141,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("update_stock");
+							if(callback_fn) callback_fn()
 						}
 					}
 				});
 			}
 		}
+
 	},
 	
 	debit_to: function() {

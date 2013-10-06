@@ -195,7 +195,7 @@ class DocType(SellingController):
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
-			if not for_validate:
+			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
 				self.set_customer_defaults()
 
@@ -965,8 +965,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			"doctype": "Delivery Note Item", 
 			"field_map": {
 				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype",
+				"parent": "against_sales_invoice", 
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item

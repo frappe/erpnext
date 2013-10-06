@@ -9,7 +9,7 @@ test_records = []
 
 # from webnotes.model.doc import Document
 # from webnotes.model.code import get_obj
-# sql = webnotes.conn.sql
+# webnotes.conn.sql = webnotes.conn.sql
 # 
 # class TestSalaryManager(unittest.TestCase):
 # 	def setUp(self):
@@ -20,15 +20,15 @@ test_records = []
 # 		ss1[0].employee = emp1.name
 # 		for s in ss1: s.save(1)
 # 		for s in ss1[1:]:
-# 			sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
-# 			sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			webnotes.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			webnotes.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
 # 			
 # 		
 # 		ss2[0].employee = emp2.name
 # 		for s in ss2: s.save(1)		
 # 		for s in ss2[1:]:
-# 			sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
-# 			sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			webnotes.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			webnotes.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
 # 			
 # 		sman.save()
 # 		self.sm = get_obj('Salary Manager')	
@@ -36,7 +36,7 @@ test_records = []
 # 		self.sm.create_sal_slip()
 # 		
 # 	def test_creation(self):
-# 		ssid = sql("""
+# 		ssid = webnotes.conn.sql("""
 # 			select name, department 
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012'""")
@@ -46,7 +46,7 @@ test_records = []
 # 		
 # 		
 # 	def test_lwp_calc(self):
-# 		ss = sql("""
+# 		ss = webnotes.conn.sql("""
 # 			select payment_days
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012' and employee = '%s'

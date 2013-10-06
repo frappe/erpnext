@@ -20,7 +20,15 @@ You can create a new Supplier via:
 
 > Tip: When you select a Supplier in any transaction, one Contact and Address gets pre-selected. This is the “Default Contact or Address”. So make sure you set your defaults correctly!
 
+### Integration with Accounts
 
+In ERPNext, there is a separate Account record for each Supplier, of Each company.
+
+When you create a new Supplier, ERPNext will automatically create an Account Ledger for the Supplier under “Accounts Receivable” in the Company set in the Supplier record. 
+
+> Advanced Tip: If you want to change the Account Group under which the Supplier Account is created, you can set it in the Company master.
+
+If you want to create an Account in another Company, just change the Company value and “Save” the Supplier again.
 
 
 > Buying > Contact > New Contact

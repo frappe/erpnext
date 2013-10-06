@@ -1,7 +1,7 @@
 {
 	"Brazil": [
 		{
-			"name": "l10n_BRA-Customer-person_type",
+			"name": "locale_BRA-Customer-person_type",
 			"dt": "Customer",
 			"fieldname": "person_type",
 			"fieldtype": "Select",
@@ -12,7 +12,7 @@
 			"permlevel": 0
 		},
 		{
-			"name": "l10n_BRA-Customer-documents_sb",
+			"name": "locale_BRA-Customer-documents_sb",
 			"dt": "Customer",
 			"fieldname": "documentos_sb",
 			"fieldtype": "Section Break",
@@ -21,7 +21,7 @@
 			"permlevel": 0
 		},
 		{
-			"name": "l10n_BRA-Customer-cnpj_cpf",
+			"name": "locale_BRA-Customer-cnpj_cpf",
 			"dt": "Customer",
 			"fieldname": "cnpj_cpf",
 			"fieldtype": "Data",
@@ -31,7 +31,7 @@
 			"reqd": 1
 		},
 		{
-			"name": "l10n_BRA-Customer-inscr_est",
+			"name": "locale_BRA-Customer-inscr_est",
 			"dt": "Customer",
 			"fieldname": "inscr_est",
 			"fieldtype": "Data",
@@ -41,7 +41,7 @@
 			"reqd": 1
 		},
 		{
-			"name": "l10n_BRA-Customer-legal_name",
+			"name": "locale_BRA-Customer-legal_name",
 			"dt": "Customer",
 			"fieldname": "legal_name",
 			"fieldtype": "Data",

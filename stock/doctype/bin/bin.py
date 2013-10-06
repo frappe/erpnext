@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import add_days, cint,flt, nowdate, get_url_to_form, formatdate
 from webnotes import msgprint, _
-sql = webnotes.conn.sql
 
 import webnotes.defaults
 
@@ -16,7 +15,7 @@ class DocType:
 		self.doclist = doclist
 		
 	def validate(self):
-		if not self.doc.stock_uom:
+		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:
 			self.doc.stock_uom = webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom')
 				
 		self.validate_mandatory()
@@ -61,7 +60,7 @@ class DocType:
 		self.doc.save()
 		
 	def get_first_sle(self):
-		sle = sql("""
+		sle = webnotes.conn.sql("""
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s

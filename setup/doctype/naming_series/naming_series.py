@@ -8,7 +8,6 @@ from webnotes.utils import cstr
 from webnotes import msgprint
 import webnotes.model.doctype
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, d, dl):
@@ -23,7 +22,7 @@ class DocType:
 					where fieldname='naming_series'""")
 				)))),
 			"prefixes": "\n".join([''] + [i[0] for i in 
-				sql("""select name from tabSeries""")])
+				webnotes.conn.sql("""select name from tabSeries""")])
 		}
 	
 	def scrub_options_list(self, ol):
@@ -126,12 +125,12 @@ class DocType:
 	def insert_series(self, series):
 		"""insert series if missing"""
 		if not webnotes.conn.exists('Series', series):
-			sql("insert into tabSeries (name, current) values (%s,0)", (series))			
+			webnotes.conn.sql("insert into tabSeries (name, current) values (%s,0)", (series))			
 
 	def update_series_start(self):
 		if self.doc.prefix:
 			self.insert_series(self.doc.prefix)
-			sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.current_value,self.doc.prefix))
+			webnotes.conn.sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.current_value,self.doc.prefix))
 			msgprint("Series Updated Successfully")
 		else:
 			msgprint("Please select prefix first")

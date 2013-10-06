@@ -4,7 +4,9 @@
 	"_title_image": "img/customers.png"
 }
 ---
-You can either directly create your Customers via 
+A customer, who is sometimes known as a client, buyer, or purchaser is the one who receives goods, services, products, or ideas, from a seller for a monetary consideration. A customer can also receive goods or services from a vendor or a supplier for other valuable considerations.
+
+ You can either directly create your Customers via 
 
 > Selling > Customer
 
