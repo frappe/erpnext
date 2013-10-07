@@ -4,17 +4,16 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, getdate, now, nowdate, get_defaults
-from webnotes.model.doc import Document, addchild
-from webnotes.model.code import get_obj
-from webnotes import session, form, msgprint
+from webnotes.utils import cint, cstr, getdate, nowdate, get_defaults
+from webnotes.model.doc import Document
+from webnotes import msgprint
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 	
 	def setup_account(self, args):
-		import webnotes, json
+		import json
 		if isinstance(args, basestring):
 			args = json.loads(args)
 		webnotes.conn.begin()
@@ -175,7 +174,6 @@ class DocType:
 		system_managers = get_system_managers()
 		if not system_managers: return
 		
-		from webnotes.model.doc import Document
 		for company in companies_list:
 			if company and company[0]:
 				edigest = webnotes.bean({
@@ -216,28 +214,19 @@ class DocType:
 			abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
 		return fy, stdt, abbr
 			
-	def create_profile(self, user_email, user_fname, user_lname, pwd=None):
-		pr = Document('Profile')
-		pr.first_name = user_fname
-		pr.last_name = user_lname
-		pr.name = pr.email = user_email
-		pr.enabled = 1
-		pr.save(1)
-		if pwd:
-			webnotes.conn.sql("""insert into __Auth (user, `password`) 
-				values (%s, password(%s)) 
-				on duplicate key update `password`=password(%s)""", 
-				(user_email, pwd, pwd))
-				
-		add_all_roles_to(pr.name)
-				
-def add_all_roles_to(name):
-	profile = webnotes.doc("Profile", name)
+def add_all_roles_to(profile):
+	if isinstance(profile, basestring):
+		profile = webnotes.bean("Profile", profile)
+	
 	for role in webnotes.conn.sql("""select name from tabRole"""):
 		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
-			d = profile.addchild("user_roles", "UserRole")
-			d.role = role[0]
-			d.insert()
+			profile.doclist.append({
+				"doctype": "UserRole",
+				"parentfield": "user_roles",
+				"role": role[0]
+			})
+	
+	profile.save()
 			
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
