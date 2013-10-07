@@ -11,21 +11,21 @@
   "icon": "icon-filter", 
   "module": "Selling", 
   "name": "__common__", 
-  "page_name": "crm-funnel", 
+  "page_name": "sales-funnel", 
   "standard": "Yes", 
-  "title": "CRM Funnel"
+  "title": "Sales Funnel"
  }, 
  {
   "doctype": "Page Role", 
   "name": "__common__", 
-  "parent": "crm-funnel", 
+  "parent": "sales-funnel", 
   "parentfield": "roles", 
   "parenttype": "Page", 
   "role": "Sales Manager"
  }, 
  {
   "doctype": "Page", 
-  "name": "crm-funnel"
+  "name": "sales-funnel"
  }, 
  {
   "doctype": "Page Role"

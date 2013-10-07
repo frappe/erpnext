@@ -1,14 +1,18 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
-wn.pages['crm-funnel'].onload = function(wrapper) { 
+wn.pages['sales-funnel'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'CRM Funnel',
+		title: 'Sales Funnel',
 		single_column: true
 	});
 	
 	wrapper.crm_funnel = new erpnext.CRMFunnel(wrapper);
+	
+	wrapper.appframe.add_module_icon("Selling", "sales-funnel", function() {
+		wn.set_route("selling-home");
+	});
 }
 
 erpnext.CRMFunnel = Class.extend({
@@ -40,8 +44,8 @@ erpnext.CRMFunnel = Class.extend({
 			.appendTo(this.elements.layout);
 		
 		this.options = {
-			from_date: wn.datetime.get_today(),
-			to_date: wn.datetime.add_months(wn.datetime.get_today(), -1)
+			from_date: wn.datetime.add_months(wn.datetime.get_today(), -1),
+			to_date: wn.datetime.get_today()
 		};
 		
 		// set defaults and bind on change
@@ -108,7 +112,7 @@ erpnext.CRMFunnel = Class.extend({
 			y_old = y;
 
 			// new y
-			y = y + (me.options.height * d.value / me.options.total_value);
+			y = y + d.height;
 			
 			// new x
 			var half_side = (me.options.height - y) / Math.sqrt(3);
@@ -122,15 +126,24 @@ erpnext.CRMFunnel = Class.extend({
 	},
 	
 	prepare: function() {
+		var me = this;
+		
 		this.elements.no_data.toggle(false);
 		
 		// calculate width and height options
 		this.options.width = $(this.elements.funnel_wrapper).width() * 2.0 / 3.0;
 		this.options.height = (Math.sqrt(3) * this.options.width) / 2.0;
 		
-		// calculate total value
-		this.options.total_value = this.options.data.reduce(
-			function(prev, curr) { return prev + curr.value; }, 0.0);
+		// calculate total weightage
+		// as height decreases, area decreases by the square of the reduction
+		// hence, compensating by squaring the index value
+		this.options.total_weightage = this.options.data.reduce(
+			function(prev, curr, i) { return prev + Math.pow(i+1, 2) * curr.value; }, 0.0);
+		
+		// calculate height for each data
+		$.each(this.options.data, function(i, d) {
+			d.height = me.options.height * d.value * Math.pow(i+1, 2) / me.options.total_weightage;
+		});
 		
 		this.elements.canvas = $('<canvas></canvas>')
 			.appendTo(this.elements.funnel_wrapper.empty())
