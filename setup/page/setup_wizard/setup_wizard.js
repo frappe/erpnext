@@ -1,14 +1,18 @@
 wn.pages['setup-wizard'].onload = function(wrapper) { 
+	$(".navbar:first").toggle(false);
+	
 	erpnext.wiz = new wn.wiz.Wizard({
 		parent: wrapper,
 		title: wn._("ERPNext Setup Guide"),
 		slides: [
 			// User
 			{
-				title: wn._("The First User"),
+				title: wn._("The First User: You"),
+				icon: "icon-user",
 				fields: [
 					{"fieldname": "first_name", "label": wn._("First Name"), "fieldtype": "Data", reqd:1},
 					{"fieldname": "last_name", "label": wn._("Last Name"), "fieldtype": "Data", reqd:1},
+					{fieldtype:"Attach Image", fieldname:"attach_profile", label:"Attach Your Profile..."},
 				],
 				help: wn._('The first user will become the System Manager (you can change that later).')
 			},
@@ -16,6 +20,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			// Organization
 			{
 				title: wn._("The Organization"),
+				icon: "icon-building",
 				fields: [
 					{fieldname:'company_name', label: wn._('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: 'e.g. "My Company LLC"'},
@@ -37,6 +42,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			// Country
 			{
 				title: wn._("Country, Timezone and Currency"),
+				icon: "icon-flag",
 				fields: [
 					{fieldname:'country', label: wn._('Country'), reqd:1,
 						options: "", fieldtype: 'Select'},
@@ -81,48 +87,122 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			
 			// Logo
 			{
+				icon: "icon-bookmark",
 				title: wn._("Logo and Letter Heads"),
 				help: wn._('Upload your letter head and logo - you can edit them later.'),
-				html: '<h4>' + wn._('Upload Logo') + '</h4><div class="upload-area-letter-head"></div><hr>'
-					+'<h4>' + wn._('Upload Letter Head') + '</h4><div class="upload-area-logo"></div>',
+				fields: [
+					{fieldtype:"Attach Image", fieldname:"attach_letterhead", label:"Attach Letterhead..."},
+					{fieldtype:"Attach Image", fieldname:"attach_logo", label:"Attach Logo..."},
+				],
+				// html: '<h4>' + wn._('Upload Logo') + '</h4><div class="upload-area-letter-head"></div><hr>'
+				// 	+'<h4>' + wn._('Upload Letter Head') + '</h4><div class="upload-area-logo"></div>',
 				onload: function(slide) {
-					wn.upload.make({
-						parent: slide.$wrapper.find(".upload-area-letter-head").css({"margin-left": "10px"}),
-						on_attach: function(fileobj) {
-							console.log(fileobj);
-						}
-					});
-
-					wn.upload.make({
-						parent: slide.$wrapper.find(".upload-area-logo").css({"margin-left": "10px"}),
-						on_attach: function(fileobj) {
-							console.log(fileobj);
-						}
-					});
+					// wn.upload.make({
+					// 	parent: slide.$wrapper.find(".upload-area-letter-head").css({"margin-left": "10px"}),
+					// 	on_attach: function(fileobj) {
+					// 		console.log(fileobj);
+					// 	}
+					// });
+					// 
+					// wn.upload.make({
+					// 	parent: slide.$wrapper.find(".upload-area-logo").css({"margin-left": "10px"}),
+					// 	on_attach: function(fileobj) {
+					// 		console.log(fileobj);
+					// 	}
+					// });
 				}
 				
 			},
 			
 			// Taxes
 			{
+				icon: "icon-money",
 				"title": wn._("Add Taxes"),
 				"help": wn._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
 				"fields": [
+					{fieldtype:"Column Break", fieldname:"cb_1", "label": "Tax Heads"},
 					{fieldtype:"Data", fieldname:"tax_1", label:"Tax 1", placeholder:"e.g. VAT"},
-					{fieldtype:"Data", fieldname:"tax_rate_1", label:"Rate for Tax 1 (%)", placeholder:"e.g. 5"},
 					{fieldtype:"Data", fieldname:"tax_2", label:"Tax 2", placeholder:"e.g. Customs Duty"},
-					{fieldtype:"Data", fieldname:"tax_rate_2", label:"Rate for Tax 2 (%)", placeholder:"e.g. 5"},
 					{fieldtype:"Data", fieldname:"tax_3", label:"Tax 3", placeholder:"e.g. Excise"},
-					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate for Tax 3 (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Column Break", fieldname:"cb_2", "label": "Tax Rates"},
+					{fieldtype:"Data", fieldname:"tax_rate_1", label:"Rate (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Data", fieldname:"tax_rate_2", label:"Rate (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate (%)", placeholder:"e.g. 5"},
 				],
 				onload: function(slide) {
-					slide.form.fields_dict.tax_rate_1.$wrapper.css("margin-left", "50%");
-					slide.form.fields_dict.tax_rate_2.$wrapper.css("margin-left", "50%");
-					slide.form.fields_dict.tax_rate_3.$wrapper.css("margin-left", "50%");
+				}
+			},
+			
+			// Items to Sell
+			{
+				icon: "icon-barcode",
+				"title": wn._("Your Products or Services"),
+				"help": wn._("List your products or services that you sell to your customers."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"item_1", label:"Item 1", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_2", label:"Item 2", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_3", label:"Item 3", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_4", label:"Item 4", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_5", label:"Item 5", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break", fieldname:"cb_2", "label": "Attachments"},
+					{fieldtype:"Attach", fieldname:"item_img_1", label:"Attach Image..."},
+					{fieldtype:"Attach", fieldname:"item_img_2", label:"Attach Image..."},
+					{fieldtype:"Attach", fieldname:"item_img_3", label:"Attach Image..."},
+					{fieldtype:"Attach", fieldname:"item_img_4", label:"Attach Image..."},
+					{fieldtype:"Attach", fieldname:"item_img_5", label:"Attach Image..."},
+				],
+				onload: function(slide) {
+				}
+			},
+
+			// Items to Buy
+			{
+				icon: "icon-barcode",
+				"title": wn._("Products or Services You Buy"),
+				"help": wn._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"item_buy_1", label:"Item 1", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_2", label:"Item 2", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_3", label:"Item 3", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_4", label:"Item 4", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_5", label:"Item 5", placeholder:"A Product or Service"},
+				],
+				onload: function(slide) {
+				}
+			},
+
+			// Customers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Customers"),
+				"help": wn._("List a few of your customers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"customer_1", label:"Customer 1", placeholder:"Customer Name"},
+					{fieldtype:"Data", fieldname:"customer_2", label:"Customer 2", placeholder:"Customer Name"},
+					{fieldtype:"Data", fieldname:"customer_3", label:"Customer 3", placeholder:"Customer Name"},
+					{fieldtype:"Data", fieldname:"customer_4", label:"Customer 4", placeholder:"Customer Name"},
+					{fieldtype:"Data", fieldname:"customer_5", label:"Customer 5", placeholder:"Customer Name"},
+				],
+				onload: function(slide) {
+				}
+			},
+
+			// Suppliers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Suppliers"),
+				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"supplier_1", label:"Supplier 1", placeholder:"Supplier Name"},
+					{fieldtype:"Data", fieldname:"supplier_2", label:"Supplier 2", placeholder:"Supplier Name"},
+					{fieldtype:"Data", fieldname:"supplier_3", label:"Supplier 3", placeholder:"Supplier Name"},
+					{fieldtype:"Data", fieldname:"supplier_4", label:"Supplier 4", placeholder:"Supplier Name"},
+					{fieldtype:"Data", fieldname:"supplier_5", label:"Supplier 5", placeholder:"Supplier Name"},
+				],
+				onload: function(slide) {
 				}
 			}
-			
-			// 
+
 		]
 		
 	})
@@ -163,20 +243,22 @@ wn.wiz.WizardSlide = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		this.$wrapper = $(repl('<div class="panel panel-default" style="margin: 30px;">\
-			<div class="panel-heading"><div class="panel-title">%(main_title)s: %(title)s</div></div>\
+		this.$wrapper = $(repl('<div class="panel panel-default" style="margin: 0px 30px;">\
+			<div class="panel-heading"><div class="panel-title">%(main_title)s: Step %(step)s</div></div>\
 			<div class="panel-body">\
 				<div class="progress">\
 					<div class="progress-bar" style="width: %(width)s%"></div>\
 				</div>\
+				<h3><i class="%(icon)s text-muted"></i> %(title)s</h3><br>\
 				<div class="row">\
 					<div class="col-sm-6 form"></div>\
-					<div class="col-sm-6 help"><h3>%(title)s</h3><p class="text-muted">%(help)s</p></div>\
+					<div class="col-sm-6 help"><p class="text-muted">%(help)s</p></div>\
 				</div>\
 				<hr>\
 				<div class="footer"></div>\
 			</div>\
-		</div>', {help:this.help, title:this.title, main_title:this.wiz.title, width: (flt(this.id + 1) / this.wiz.slides.length) * 100}))
+		</div>', {help:this.help, title:this.title, main_title:this.wiz.title, step: this.id + 1,
+				width: (flt(this.id + 1) / (this.wiz.slides.length+1)) * 100, icon:this.icon}))
 			.appendTo(this.wiz.parent);
 		
 		this.body = this.$wrapper.find(".form")[0];
@@ -184,7 +266,8 @@ wn.wiz.WizardSlide = Class.extend({
 		if(this.fields) {
 			this.form = new wn.ui.FieldGroup({
 				fields: this.fields,
-				body: this.body
+				body: this.body,
+				no_submit_on_enter: true
 			});
 			this.form.make();
 		} else {
