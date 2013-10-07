@@ -166,7 +166,7 @@ class DocType(DocListController):
 						serial_nos.append(self.make_serial_no(make_autoname(item_det.serial_no_series)))
 					self.doc.serial_no = "\n".join(serial_nos)
 				else:
-					webnotes.throw(_("Serial Number Required for Serialized Item" + ": " + self.doc.item),
+					webnotes.throw(_("Serial Number Required for Serialized Item" + ": " + self.doc.item_code),
 						SerialNoRequiredError)
 	
 	def make_serial_no(self, serial_no):
