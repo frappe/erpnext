@@ -4,7 +4,9 @@
 	"_toc": [
 		"docs.user.five.day_1",
 		"docs.user.five.day_2",
-		"docs.user.five.day_3"
+		"docs.user.five.day_3",
+		"docs.user.five.day_4",
+		"docs.user.five.day_5"
 			
 	]
 }
@@ -33,16 +35,15 @@ The setup help is divided into day-wise instructions for 5 consecutive days. Day
 - Purchase Cycle
 
 	
-
 #### Day 4
 
 - Manufacturing Cycle
-- Fulfillment Cycle- Inventory, Delivery Note, Warehouse etc
+- Delivery Note and Warehouse 
 - Accounts
 
 #### Day 5
 
-- Billing
-- Payments
-- HR Reports
+- Projects
+- Calendar
+- Website
 

@@ -1,0 +1,96 @@
+---
+{
+	"_label": "Day-4"
+}
+---
+
+### Manufacturing Cycle
+
+Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool > Production Order > Stock Entry (material issue) > Stock Entry (sales return)
+
+#### Bill of Materials
+
+To go to Bill of Materials, Click on Manufacturing. On the Manufacturing page, click on Bill of Materials.
+
+![Bill of Materials](img/fourthdaysetup_bom.png)
+
+<br>
+
+> To understand BOM in detail, visit [Bill of Materials](docs.user.mfg.bom.html)
+
+#### Production Planning Tool
+
+To go to Production Planning Tool, click on the Manufacturing Icon. On the Manufacturing Page, click on Production Planning Tool to go to that page.
+
+![Production Planning Page](img/fourthdaysetup_ppt.png)
+
+<br>
+
+> To understand Production Planning Tool in detail, visit [Production Planning](docs.user.mfg.planning.html)
+
+
+#### Production Order
+
+To go to Production Order click on the Manufacturing Icon. On the Manufacturing Page, click on Production Order.
+
+![Production Order](img/fourthdaysetup_po.png)
+
+<br>
+
+> To understand Production Order in detail, visit [Production Order](docs.user.mfg.production_order.html)
+
+#### Stock Entry
+
+To go to Stock Entry, click on the Stock Icon and go to Stock Entry.
+
+![Stock Entry](img/fourthdaysetup_stock.png)
+
+<br>
+
+> To understand Material Issue, visit [Material Issue](docs.user.stock.material_issue.html)
+
+
+> To understand Sales Return, visit [Sales Return](docs.user.stock.sales_return.html)
+
+
+#### Delivery Note
+
+To go to Delivery Note, click on Stock. On the Stock Page, click on Delivery Note.
+
+[Delivery Note](img/fourthdaysetup_delivery_note.png)
+
+<br>
+
+> To understand Delivery Note in detail, visit [Delivery Note](docs.user.stock.delivery_note.html)
+
+
+
+#### Warehouse
+
+To go to Warehouse, Click on Stock. On the Stock Page, go to Warehouse.
+
+![Warehouse](img/fourthdaysetup_warehouse.png)
+
+<br>
+
+> To understand Warehouse in detail, visit  [Warehouse](docs.user.stock.warehouse.html)
+
+
+#### Accounts
+
+Make a few Journal Vouchers. Generate some Accounting Reports.
+
+#### Journal Voucher.
+
+To go to a Journal Voucher, click on Accounts. On the Accounts page, click on Journal Voucher.
+
+![Journal Voucher](img/fourthdaysetup_jv.png)
+
+> To understand Journal Voucher in detail, visit [Journal Voucher](docs.user.accounts.journal_voucher.html)
+
+#### Accounting Reports
+
+Some of the major Accounting Reports are General Ledger, Trial Balance, Accounts  Payable and Accounts Receivables, and Sales and Purchase Register.
+
+> To be able to generate these accounts, visti [Accounting Reports](docs.user.accounts.report.html)
+
