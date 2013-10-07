@@ -15,7 +15,7 @@ cur_frm.cscript.to_date = function(doc, cdt, cdn) {
     function(r, rt) {
     var doc = locals[cdt][cdn];
     if (r.message) {
-      alert("To date cannot be before from date");
+      alert(wn._("To date cannot be before from date"));
       doc.to_date = '';
       refresh_field('to_date');
     }
