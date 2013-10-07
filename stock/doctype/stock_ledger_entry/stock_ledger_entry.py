@@ -7,7 +7,6 @@ from webnotes import _, msgprint, ValidationError
 from webnotes.utils import cint, flt, getdate, cstr
 from webnotes.model.controller import DocListController
 
-class InvalidWarehouseCompany(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
 class SerialNoRequiredError(ValidationError): pass
 class SerialNoQtyError(ValidationError): pass
@@ -25,7 +24,7 @@ class DocType(DocListController):
 		self.doclist = doclist
 
 	def validate(self):
-		from stock.utils import validate_warehouse_user
+		from stock.utils import validate_warehouse_user, validate_warehouse_company
 		if not hasattr(webnotes, "new_stock_ledger_entries"):
 			webnotes.new_stock_ledger_entries = []
 			
@@ -33,7 +32,7 @@ class DocType(DocListController):
 		self.validate_mandatory()
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
-		self.validate_warehouse_company()
+		validate_warehouse_company(self.doc.warehouse, self.doc.company)
 		self.scrub_posting_time()
 		
 		from accounts.utils import validate_fiscal_year
@@ -63,13 +62,6 @@ class DocType(DocListController):
 					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
 
 				sself.doc.fields.pop('batch_bal')
-			 
-	def validate_warehouse_company(self):
-		warehouse_company = webnotes.conn.get_value("Warehouse", self.doc.warehouse, "company")
-		if warehouse_company and warehouse_company != self.doc.company:
-			webnotes.msgprint(_("Warehouse does not belong to company.") + " (" + \
-				self.doc.warehouse + ", " + self.doc.company +")", 
-				raise_exception=InvalidWarehouseCompany)
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
