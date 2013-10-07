@@ -8,6 +8,7 @@
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "default_print_format": "Standard", 
   "doctype": "DocType", 

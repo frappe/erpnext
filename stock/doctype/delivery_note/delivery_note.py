@@ -28,7 +28,7 @@ class DocType(SellingController):
 			'target_parent_field': 'per_delivered',
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
+			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
 			'keyword': 'Delivered'
 		}]
@@ -73,7 +73,7 @@ class DocType(SellingController):
 		"""check in manage account if sales order required or not"""
 		if webnotes.conn.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
-				 if not d.prevdoc_docname:
+				 if not d.against_sales_order:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
 					 raise Exception
 
@@ -106,26 +106,27 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
 	def validate_with_previous_doc(self):
-		prev_doctype = [d.prevdoc_doctype for d in self.doclist.get({
-			"parentfield": "delivery_note_details"}) if cstr(d.prevdoc_doctype) != ""]
-			
-		if prev_doctype:
-			super(DocType, self).validate_with_previous_doc(self.tname, {
-				prev_doctype[0]: {
-					"ref_dn_field": "prevdoc_docname",
-					"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
-						["currency", "="]],
-				},
-			})
-			if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+		items = self.doclist.get({"parentfield": "delivery_note_details"})
+		
+		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
+			if items.get_distinct_values(fn[1]):
 				super(DocType, self).validate_with_previous_doc(self.tname, {
-					prev_doctype[0] + " Item": {
-						"ref_dn_field": "prevdoc_detail_docname",
-						"compare_fields": [["export_rate", "="]],
-						"is_child_table": True
-					}
+					fn[0]: {
+						"ref_dn_field": fn[1],
+						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+							["currency", "="]],
+					},
 				})
-			
+
+				if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+					super(DocType, self).validate_with_previous_doc(self.tname, {
+						fn[0] + " Item": {
+							"ref_dn_field": "prevdoc_detail_docname",
+							"compare_fields": [["export_rate", "="]],
+							"is_child_table": True
+						}
+					})
+						
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
@@ -137,8 +138,8 @@ class DocType(SellingController):
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
 		for d in getlist(self.doclist,'delivery_note_details'):
-			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '', d.batch_no or '']
-			f = [d.item_code, d.description, d.prevdoc_docname or '']
+			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if e in check_list:
@@ -323,7 +324,7 @@ class DocType(SellingController):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""
 		amount, total = 0, 0
 		for d in getlist(self.doclist, 'delivery_note_details'):
-			if not d.prevdoc_docname:
+			if not (d.against_sales_order or d.against_sales_invoice):
 				amount += d.amount
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
@@ -375,7 +376,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"name": "dn_detail", 
 				"parent": "delivery_note", 
 				"prevdoc_detail_docname": "so_detail", 
-				"prevdoc_docname": "sales_order", 
+				"against_sales_order": "sales_order", 
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item

@@ -69,7 +69,6 @@ class DocType(AccountsController):
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
-		
 		return webnotes.conn.sql("""
 			select t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
 			from `tabGL Entry` t1, `tabAccount` t2 

@@ -11,7 +11,6 @@ from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 
@@ -30,7 +29,7 @@ class DocType:
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 		
-		emp_list = sql("""
+		emp_list = webnotes.conn.sql("""
 			select t1.name
 			from `tabEmployee` t1, `tabSalary Structure` t2 
 			where t1.docstatus!=2 and t2.docstatus != 2 
@@ -68,7 +67,7 @@ class DocType:
 		
 	
 	def get_month_details(self, year, month):
-		ysd = sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
+		ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
 		if ysd:
 			from dateutil.relativedelta import relativedelta
 			import calendar, datetime
@@ -96,7 +95,7 @@ class DocType:
 		emp_list = self.get_emp_list()
 		ss_list = []
 		for emp in emp_list:
-			if not sql("""select name from `tabSalary Slip` 
+			if not webnotes.conn.sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
 					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
 				ss = webnotes.bean({
@@ -127,7 +126,7 @@ class DocType:
 			which are not submitted
 		"""
 		cond = self.get_filter_condition()
-		ss_list = sql("""
+		ss_list = webnotes.conn.sql("""
 			select t1.name from `tabSalary Slip` t1 
 			where t1.docstatus = 0 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -189,7 +188,7 @@ class DocType:
 			Get total salary amount from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		tot = sql("""
+		tot = webnotes.conn.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
 			where t1.docstatus = 1 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -202,7 +201,7 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		com = sql("select default_bank_account from `tabCompany` where name = '%s'" % self.doc.company)
+		com = webnotes.conn.sql("select default_bank_account from `tabCompany` where name = '%s'" % self.doc.company)
 		
 		if not com[0][0] or not com[0][1]:
 			msgprint("You can set Default Bank Account in Company master.")

@@ -24,19 +24,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
-
-		cur_frm.dashboard.reset(doc);
-		if(!doc.__islocal) {
-			if(doc.status=="Converted" || doc.status=="Order Confirmed") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
-			} else if(doc.status==="Order Lost") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-			}
-		}
 		
-		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
+		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
-			if(doc.status!=="Order Confirmed") {
+			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
