@@ -26,20 +26,20 @@ After filling this form, you will get a pop-up message for completing the  set-u
 
 The Organisation details are updated in ERPNext, after filling the first form. Go directly to the Customer Icon.
 
-![Customer](img/firstdaysetup_customer.png)
+![Customer](img/firstdaysetup-customer.png)
 <br>
 
 
 After clicking on Customer, a new form will appear. 
 <br>
 
-![Customer](img/firstdaysetup_customer_1.png)
+![Customer](img/firstdaysetup-customer-1.png)
 
 To see how customer details are added, visit [Customer](docs.user.selling.customer.html). Create 5 new customer records in the system. 
 
 Now proceed to make an Item. To go to the main menu, click on erpnext icon which is on the left hand corner of the page. On the main menu page, click on Setup
 
-![Main Menu](img/firstdaysetup_main_menu.png)
+![Main Menu](img/firstdaysetup-main-menu.png)
 
 <br>
 
@@ -48,7 +48,7 @@ Now proceed to make an Item. To go to the main menu, click on erpnext icon which
 On the setup page go to Item.
 
 
-![Item](img/firstdaysetup_item.png)
+![Item](img/firstdaysetup-item.png)
 
 
 Create a new Item. An Item is your company's product or a service.The term Item is applicable to your core products as well as your raw materials. It can be a product or service that you buy/sell from your customers/ suppliers.

@@ -33,7 +33,7 @@ To go to Production Planning Tool, click on the Manufacturing Icon. On the Manuf
 
 To go to Production Order click on the Manufacturing Icon. On the Manufacturing Page, click on Production Order.
 
-![Production Order](img/fourthdaysetup_po.png)
+![Production Order](img/fourthdaysetup-po.png)
 
 <br>
 
@@ -43,7 +43,7 @@ To go to Production Order click on the Manufacturing Icon. On the Manufacturing 
 
 To go to Stock Entry, click on the Stock Icon and go to Stock Entry.
 
-![Stock Entry](img/fourthdaysetup_stock.png)
+![Stock Entry](img/fourthdaysetup-stock.png)
 
 <br>
 
@@ -69,7 +69,7 @@ To go to Delivery Note, click on Stock. On the Stock Page, click on Delivery Not
 
 To go to Warehouse, Click on Stock. On the Stock Page, go to Warehouse.
 
-![Warehouse](img/fourthdaysetup_warehouse.png)
+![Warehouse](img/fourthdaysetup-warehouse.png)
 
 <br>
 
@@ -84,7 +84,7 @@ Make a few Journal Vouchers. Generate some Accounting Reports.
 
 To go to a Journal Voucher, click on Accounts. On the Accounts page, click on Journal Voucher.
 
-![Journal Voucher](img/fourthdaysetup_jv.png)
+![Journal Voucher](img/fourthdaysetup-jv.png)
 
 > To understand Journal Voucher in detail, visit [Journal Voucher](docs.user.accounts.journal_voucher.html)
 

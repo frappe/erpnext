@@ -3,7 +3,7 @@
 	"_label": "User Guide",
 	"_toc": [
 		"docs.user.intro",
-		"docs.user.five",
+		"docs.user.five_day_setup",
 		"docs.user.implement",
 		"docs.user.setup",
 		"docs.user.selling",
@@ -30,12 +30,12 @@ Contents
 	1. [Open Source](docs.user.intro.open_source.html)
 	1. [Ways to get started](docs.user.intro.try.html)
 	1. [Getting Help](docs.user.help.html)
-1. [Five-Day-Setup](docs.user.five.html)
-	1. [Day-1](docs.user.five.day_1.html)
-	1. [Day-2](docs.user.five.day_2.html)
-	1. [Day-3](docs.user.five.day_3.html)
-	1. [Day-4](docs.user.five.day_4.html)
-	1. [Day-5](docs.user.five.day_5.html)
+1. [Five-Day-Setup](docs.user.five_day_setup.html)
+	1. [Day-1](docs.user.five_day_setup.day_1.html)
+	1. [Day-2](docs.user.five_day_setup.day_2.html)
+	1. [Day-3](docs.user.five_day_setup.day_3.html)
+	1. [Day-4](docs.user.five_day_setup.day_4.html)
+	1. [Day-5](docs.user.five_day_setup.day_5.html)
 1. [Implementation](docs.user.implement.html)
 	1. [Implementation Strategy](docs.user.implement.strategy.html)
 	1. [Concepts](docs.user.implement.concepts.html)

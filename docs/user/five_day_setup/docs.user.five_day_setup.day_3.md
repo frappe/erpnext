@@ -14,7 +14,7 @@ Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order >
 
 To begin the sales cycle, go to the Selling Icon. On the selling page, click on Lead. 
 
-![Lead](img/thirddaysetup_lead.png)
+![Lead](img/thirddaysetup-lead.png)
 
 Fill the Lead form.
 
@@ -83,7 +83,7 @@ Save and Submit your Delivery Note to generate a Sales Invoice. You can also gen
 
 A Journal Voucher or a payment entry can be generated directly from the Sales Invoice.
 
-![Payment Entry](img/thirddaysetup_payment_entry.png)
+![Payment Entry](img/thirddaysetup-payment-entry.png)
 
 > To understand a Journal Voucher in detail, visit [Journal Voucher](docs.user.accounts.journal_voucher.html)
 

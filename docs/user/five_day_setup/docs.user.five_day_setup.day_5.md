@@ -14,7 +14,7 @@ Project is divided into Tasks and each Task is allocated to a resource. In ERPNe
 
 To create a Task, go to Project and click on Task.
 
-![Tasks](img/fifthdaysetup_task.png)
+![Tasks](img/fifthdaysetup-tasks.png)
 
 <br>
 
