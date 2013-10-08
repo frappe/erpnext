@@ -233,28 +233,39 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	// serial_no: function(doc, cdt, cdn) {
-	// 	var me = this;
-	// 	var item = wn.model.get_doc(cdt, cdn);
-	// 	if (!item.item_code) {
-	// 		wn.call({
-	// 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_serial_no',
-	// 			args: {serial_no: this.serial_no.$input.val()},
-	// 			callback: function(r) {
-	// 				if (r.message) {
-	// 					var item_code = r.message[0].item_code;
-	// 					var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
-	// 						this.frm.cscript.fname);
-	// 							child.item_code = item_code;
-	// 							me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
-	// 				}
-	// 				else
-	// 					msgprint(wn._("Invalid Serial No."));
-	// 				me.refresh();
-	// 			}
-	// 		});
-	// 	}
-	// },
+	serial_no: function(doc, cdt, cdn) {
+		var me = this;
+		var item = wn.model.get_doc(cdt, cdn);
+
+		if (item.serial_no) {
+			if (!item.item_code) {
+				this.frm.script_manager.trigger("item_code", cdt, cdn);
+			}
+			else {
+				var sr_no = [];
+
+				// Replacing all occurences of comma with carriage return
+				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
+
+				serial_nos = serial_nos.trim().split('\n');
+				
+				// Trim each string and push unique string to new list
+				for (var x=0; x<=serial_nos.length - 1; x++) {
+					if (serial_nos[x].trim() != "" && sr_no.indexOf(serial_nos[x].trim()) == -1) {
+						sr_no.push(serial_nos[x].trim());
+					}
+				}
+
+				// Add the new list to the serial no. field in grid with each in new line
+				item.serial_no = "";
+				for (var x=0; x<=sr_no.length - 1; x++)
+					item.serial_no += sr_no[x] + '\n';
+
+				refresh_field("serial_no", item.name, item.parentfield);
+				wn.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+			}
+		}
+	},
 	
 	row_id: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);

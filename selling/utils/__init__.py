@@ -40,7 +40,9 @@ def get_item_details(args):
 	args = webnotes._dict(args)
 	
 	if args.barcode:
-		args.item_code = _get_item_code(args.barcode)
+		args.item_code = _get_item_code(barcode=args.barcode)
+	elif not args.item_code and args.serial_no:
+		args.item_code = _get_item_code(serial_no=args.serial_no)
 	
 	item_bean = webnotes.bean("Item", args.item_code)
 	
@@ -88,16 +90,18 @@ def _get_serial_nos_by_fifo(args, item_bean):
 			"qty": cint(args.qty)
 		}))
 
-def _get_item_code(barcode):
-	item_code = webnotes.conn.sql_list("""select name from `tabItem` where barcode=%s""", barcode)
-			
+def _get_item_code(barcode=None, serial_no=None):
+	if barcode:
+		input_type = "Barcode"
+		item_code = webnotes.conn.sql_list("""select name from `tabItem` where barcode=%s""", barcode)
+	elif serial_no:
+		input_type = "Serial No"
+		item_code = webnotes.conn.sql_list("""select item_code from `tabSerial No` 
+			where name=%s""", serial_no)
+	
 	if not item_code:
-		msgprint(_("No Item found with Barcode") + ": %s" % barcode, raise_exception=True)
-	
-	elif len(item_code) > 1:
-		msgprint(_("Items") + " %s " % comma_and(item_code) + 
-			_("have the same Barcode") + " %s" % barcode, raise_exception=True)
-	
+		msgprint(_("No Item found with ") + input_type + ": %s" % (barcode or serial_no), raise_exception=True)
+		
 	return item_code[0]
 	
 def _validate_item_details(args, item):

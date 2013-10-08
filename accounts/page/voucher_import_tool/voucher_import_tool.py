@@ -67,7 +67,7 @@ def upload():
 		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
 		messages.append("""<p style='color: red'>%s</p>""" % (err_msg or "No message"))
 		webnotes.errprint(webnotes.getTraceback())
-		webnotes.message_log = []
+		webnotes.local.message_log = []
 		return messages
 		
 	return import_vouchers(common_values, data, start_idx, rows[0][0])
@@ -117,11 +117,11 @@ def import_vouchers(common_values, data, start_idx, import_type):
 			
 			d = data[i][0]
 			if import_type == "Voucher Import: Two Accounts" and flt(d.get("amount")) == 0:
-				webnotes.message_log = ["Amount not specified"]
+				webnotes.local.message_log = ["Amount not specified"]
 				raise Exception
 			elif import_type == "Voucher Import: Multiple Accounts" and \
 			 		(flt(d.get("total_debit")) == 0 or flt(d.get("total_credit")) == 0):
-				webnotes.message_log = ["Total Debit and Total Credit amount can not be zero"]
+				webnotes.local.message_log = ["Total Debit and Total Credit amount can not be zero"]
 				raise Exception
 			else:
 				d.posting_date = parse_date(d.posting_date)
@@ -174,7 +174,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 						details.append(detail)
 								
 				if not details:
-					webnotes.message_log = ["""No accounts found. 
+					webnotes.local.message_log = ["""No accounts found. 
 						If you entered accounts correctly, please check template once"""]
 					raise Exception
 					
@@ -198,7 +198,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 			% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
 		messages.append("<p style='color: red'>All transactions rolled back</p>")
 		webnotes.errprint(webnotes.getTraceback())
-		webnotes.message_log = []
+		webnotes.local.message_log = []
 			
 	return messages
 
