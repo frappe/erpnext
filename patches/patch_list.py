@@ -223,4 +223,5 @@ patch_list = [
 	"patches.october_2013.p01_update_delivery_note_prevdocs",
 	"patches.october_2013.p02_set_communication_status",
 	"patches.october_2013.p03_crm_update_status",
+	"execute:webnotes.delete_doc('DocType', 'Setup Control')",
 ]

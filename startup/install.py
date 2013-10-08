@@ -13,13 +13,13 @@ def post_import():
 	import_country_and_currency()
 	
 	# home page
-	webnotes.conn.set_value('Control Panel', None, 'home_page', 'desktop')
+	webnotes.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
 
 	# features
 	feature_setup()
 	
 	# all roles to Administrator
-	from setup.doctype.setup_control.setup_control import add_all_roles_to
+	from setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	
 	webnotes.conn.commit()

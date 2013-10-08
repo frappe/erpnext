@@ -376,7 +376,8 @@ def install():
 
 def complete_setup():
 	print "Complete Setup..."
-	webnotes.get_obj("Setup Control").setup_account({
+	from setup.page.setup_wizard.setup_wizard import setup_account
+	setup_account({
 		"first_name": "Test",
 		"last_name": "User",
 		"fy_start": "1st Jan",
