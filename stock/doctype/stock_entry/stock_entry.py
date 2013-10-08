@@ -52,13 +52,15 @@ class DocType(StockController):
 		
 	def on_submit(self):
 		self.update_stock_ledger()
-		self.update_serial_no(1)
+
+		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		update_serial_nos_after_submit(self, "Stock Entry", "mtn_details")
+		
 		self.update_production_order(1)
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
-		self.update_serial_no(0)
 		self.update_production_order(0)
 		self.make_cancel_gl_entries()
 		
@@ -294,24 +296,6 @@ class DocType(StockController):
 			from `tabStock Entry Detail` where parent in (
 				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
 			group by item_code""" % (ref_fieldname, "%s"), (self.doc.fields.get(ref_fieldname),)))
-		
-	def update_serial_no(self, is_submit):
-		"""Create / Update Serial No"""
-
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, "Stock Entry", "mtn_details")
-		
-		for d in getlist(self.doclist, 'mtn_details'):
-			for serial_no in get_serial_nos(d.serial_no):
-				if self.doc.purpose == 'Purchase Return':
-					sr = webnotes.bean("Serial No", serial_no)
-					sr.doc.status = "Purchase Returned" if is_submit else "Available"
-					sr.save()
-				
-				if self.doc.purpose == "Sales Return":
-					sr = webnotes.bean("Serial No", serial_no)
-					sr.doc.status = "Sales Returned" if is_submit else "Delivered"
-					sr.save()
 						
 	def update_stock_ledger(self):
 		sl_entries = []			
