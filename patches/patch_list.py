@@ -225,4 +225,5 @@ patch_list = [
 	"patches.october_2013.p03_crm_update_status",
 	"execute:webnotes.delete_doc('DocType', 'Setup Control')",
 	"patches.october_2013.p04_wsgi_migration",
+	"patches.october_2013.p04_update_price_list_and_item_details_in_item_price"
 ]
