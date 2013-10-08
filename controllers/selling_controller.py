@@ -14,7 +14,10 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		
+	
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Sales Email Settings', None, 'email_id')
+	
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		

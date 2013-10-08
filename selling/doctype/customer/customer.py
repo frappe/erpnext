@@ -9,7 +9,6 @@ from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 from utilities.transaction_base import TransactionBase
 
@@ -31,7 +30,7 @@ class DocType(TransactionBase):
 		return webnotes.conn.get_value('Company', self.doc.company, 'abbr')
 
 	def get_receivables_group(self):
-		g = sql("select receivables_group from tabCompany where name=%s", self.doc.company)
+		g = webnotes.conn.sql("select receivables_group from tabCompany where name=%s", self.doc.company)
 		g = g and g[0][0] or '' 
 		if not g:
 			msgprint("Update Company master, assign a default group for Receivables")
@@ -47,7 +46,7 @@ class DocType(TransactionBase):
 
 	def update_lead_status(self):
 		if self.doc.lead_name:
-			sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
+			webnotes.conn.sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
 
 	def create_account_head(self):
 		if self.doc.company :
@@ -132,7 +131,7 @@ class DocType(TransactionBase):
 	
 	def delete_customer_account(self):
 		"""delete customer's ledger if exist and check balance before deletion"""
-		acc = sql("select name from `tabAccount` where master_type = 'Customer' \
+		acc = webnotes.conn.sql("select name from `tabAccount` where master_type = 'Customer' \
 			and master_name = %s and docstatus < 2", self.doc.name)
 		if acc:
 			from webnotes.model import delete_doc
@@ -143,7 +142,7 @@ class DocType(TransactionBase):
 		self.delete_customer_contact()
 		self.delete_customer_account()
 		if self.doc.lead_name:
-			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
+			webnotes.conn.sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
 	def on_rename(self, new, old, merge=False):
 		#update customer_name if not naming series

@@ -342,7 +342,7 @@ def create_material_request(material_requests):
 			except:
 				if webnotes.message_log:
 					exceptions_list.append([] + webnotes.message_log)
-					webnotes.message_log = []
+					webnotes.local.message_log = []
 				else:
 					exceptions_list.append(webnotes.getTraceback())
 

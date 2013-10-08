@@ -74,8 +74,7 @@ class TestSalesOrder(unittest.TestCase):
 		from stock.doctype.delivery_note.test_delivery_note import test_records as dn_test_records
 		dn = webnotes.bean(webnotes.copy_doclist(dn_test_records[0]))
 		dn.doclist[1].item_code = so.doclist[1].item_code
-		dn.doclist[1].prevdoc_doctype = "Sales Order"
-		dn.doclist[1].prevdoc_docname = so.doc.name
+		dn.doclist[1].against_sales_order = so.doc.name
 		dn.doclist[1].prevdoc_detail_docname = so.doclist[1].name
 		if delivered_qty:
 			dn.doclist[1].qty = delivered_qty

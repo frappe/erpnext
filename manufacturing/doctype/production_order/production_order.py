@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class OverProductionError(webnotes.ValidationError): pass
 
@@ -22,16 +21,15 @@ class DocType:
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"In Process", "Completed", "Cancelled"])
 
-		self.validate_bom_no()
-		self.validate_sales_order()
-		self.validate_warehouse()
-		
-		from utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
-		
-	def validate_bom_no(self):
+		if self.doc.production_item :
+			item_detail = webnotes.conn.sql("select name from `tabItem` where name = '%s' and docstatus != 2"
+			 	% self.doc.production_item, as_dict = 1)
+			if not item_detail:
+				msgprint("Item '%s' does not exist or cancelled in the system." 
+					% cstr(self.doc.production_item), raise_exception=1)
+
 		if self.doc.bom_no:
-			bom = sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
@@ -109,7 +107,7 @@ class DocType:
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = sql("""select name from `tabStock Entry` 
+		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
 			msgprint("""Submitted Stock Entry %s exists against this production order. 

@@ -10,7 +10,6 @@ from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
   
 # ----------
 
@@ -29,15 +28,15 @@ class DocType:
       where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % self.doc.sales_partner or " and ifnull(sales_partner, '') != ''"
 
     if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-      rec = sql("select CONCAT(ifnull(first_name,''),'',ifnull(last_name,'')), mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and docstatus != 2 %s" % where_clause)
+      rec = webnotes.conn.sql("select CONCAT(ifnull(first_name,''),'',ifnull(last_name,'')), mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and docstatus != 2 %s" % where_clause)
     elif self.doc.send_to == 'All Lead (Open)':
-      rec = sql("select lead_name, mobile_no from tabLead where ifnull(mobile_no,'')!='' and docstatus != 2 and status = 'Open'")
+      rec = webnotes.conn.sql("select lead_name, mobile_no from tabLead where ifnull(mobile_no,'')!='' and docstatus != 2 and status = 'Open'")
     elif self.doc.send_to == 'All Employee (Active)':
       where_clause = self.doc.department and " and department = '%s'" % self.doc.department or ""
       where_clause += self.doc.branch and " and branch = '%s'" % self.doc.branch or ""
-      rec = sql("select employee_name, cell_number from `tabEmployee` where status = 'Active' and docstatus < 2 and ifnull(cell_number,'')!='' %s" % where_clause)
+      rec = webnotes.conn.sql("select employee_name, cell_number from `tabEmployee` where status = 'Active' and docstatus < 2 and ifnull(cell_number,'')!='' %s" % where_clause)
     elif self.doc.send_to == 'All Sales Person':
-      rec = sql("select sales_person_name, mobile_no from `tabSales Person` where docstatus != 2 and ifnull(mobile_no,'')!=''")
+      rec = webnotes.conn.sql("select sales_person_name, mobile_no from `tabSales Person` where docstatus != 2 and ifnull(mobile_no,'')!=''")
     rec_list = ''
     for d in rec:
       rec_list += d[0] + ' - ' + d[1] + '\n'

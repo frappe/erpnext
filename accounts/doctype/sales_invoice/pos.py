@@ -31,14 +31,20 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 			%s""" % ('%s', condition), (price_list), as_dict=1)
 
 @webnotes.whitelist()
-def get_item_from_barcode(barcode):
-	return webnotes.conn.sql("""select name from `tabItem` where barcode=%s""",
-		(barcode), as_dict=1)
+def get_item_code(barcode_serial_no):
+	input_via = "serial_no"
+	item_code = webnotes.conn.sql("""select name, item_code from `tabSerial No` where 
+			name=%s""", (barcode_serial_no), as_dict=1)
 
-@webnotes.whitelist()
-def get_item_from_serial_no(serial_no):
-	return webnotes.conn.sql("""select name, item_code from `tabSerial No` where 
-		name=%s""", (serial_no), as_dict=1)
+	if not item_code:
+		item_code = webnotes.conn.sql("""select name from `tabItem` where barcode=%s""",
+			(barcode_serial_no), as_dict=1)
+		input_via = "barcode"
+	
+	if item_code:
+		return item_code, input_via
+	else:
+		webnotes.throw("Invalid Barcode / Serial No")
 
 @webnotes.whitelist()
 def get_mode_of_payment():

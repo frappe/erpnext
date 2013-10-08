@@ -160,7 +160,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = wn.model.get_doc(cdt, cdn);
-		if(item.item_code || item.barcode) {
+		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party("customer")) {
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
@@ -171,6 +171,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						args: {
 							item_code: item.item_code,
 							barcode: item.barcode,
+							serial_no: item.serial_no,
 							warehouse: item.warehouse,
 							doctype: me.frm.doc.doctype,
 							parentfield: item.parentfield,

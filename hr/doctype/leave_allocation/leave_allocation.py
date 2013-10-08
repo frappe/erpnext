@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, flt
 from webnotes import msgprint
-sql = webnotes.conn.sql
 	
 class DocType:
 	def __init__(self, doc, doclist):
@@ -37,7 +36,7 @@ class DocType:
 		
 	def check_existing_leave_allocation(self):
 		"""check whether leave for same type is already allocated or not"""
-		leave_allocation = sql("""select name from `tabLeave Allocation`
+		leave_allocation = webnotes.conn.sql("""select name from `tabLeave Allocation`
 			where employee=%s and leave_type=%s and fiscal_year=%s and docstatus=1""",
 			(self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
 		if leave_allocation:
@@ -64,14 +63,14 @@ class DocType:
 		return self.get_leaves_allocated(prev_fyear) - self.get_leaves_applied(prev_fyear)
 		
 	def get_leaves_applied(self, fiscal_year):
-		leaves_applied = sql("""select SUM(ifnull(total_leave_days, 0))
+		leaves_applied = webnotes.conn.sql("""select SUM(ifnull(total_leave_days, 0))
 			from `tabLeave Application` where employee=%s and leave_type=%s
 			and fiscal_year=%s and docstatus=1""", 
 			(self.doc.employee, self.doc.leave_type, fiscal_year))
 		return leaves_applied and flt(leaves_applied[0][0]) or 0
 
 	def get_leaves_allocated(self, fiscal_year):
-		leaves_allocated = sql("""select SUM(ifnull(total_leaves_allocated, 0))
+		leaves_allocated = webnotes.conn.sql("""select SUM(ifnull(total_leaves_allocated, 0))
 			from `tabLeave Allocation` where employee=%s and leave_type=%s
 			and fiscal_year=%s and docstatus=1 and name!=%s""",
 			(self.doc.employee, self.doc.leave_type, fiscal_year, self.doc.name))
@@ -79,7 +78,7 @@ class DocType:
 	
 	def allow_carry_forward(self):
 		"""check whether carry forward is allowed or not for this leave type"""
-		cf = sql("""select is_carry_forward from `tabLeave Type` where name = %s""",
+		cf = webnotes.conn.sql("""select is_carry_forward from `tabLeave Type` where name = %s""",
 			self.doc.leave_type)
 		cf = cf and cint(cf[0][0]) or 0
 		if not cf:
@@ -110,7 +109,7 @@ class DocType:
 		webnotes.conn.set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 
 	def check_for_leave_application(self):
-		exists = sql("""select name from `tabLeave Application`
+		exists = webnotes.conn.sql("""select name from `tabLeave Application`
 			where employee=%s and leave_type=%s and fiscal_year=%s and docstatus=1""",
 			(self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
 		if exists:

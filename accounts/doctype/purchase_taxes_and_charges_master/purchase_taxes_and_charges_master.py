@@ -8,7 +8,6 @@ from webnotes.model import db_exists
 from webnotes.model.bean import copy_doclist
 from webnotes.model.code import get_obj
 
-sql = webnotes.conn.sql
 	
 
 

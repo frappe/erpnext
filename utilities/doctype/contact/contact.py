@@ -12,14 +12,6 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def on_communication(self, comm):
-		if webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
-			status = "Replied"
-		else:
-			status = "Open"
-			
-		webnotes.conn.set(self.doc, 'status', status)
-
 	def autoname(self):
 		# concat first and last name
 		self.doc.name = " ".join(filter(None, 
@@ -32,26 +24,26 @@ class DocType(TransactionBase):
 				break
 		
 	def validate(self):
+		self.set_status()
 		self.validate_primary_contact()
 
 	def validate_primary_contact(self):
-		sql = webnotes.conn.sql
 		if self.doc.is_primary_contact == 1:
 			if self.doc.customer:
-				sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
 			elif self.doc.supplier:
-				sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
 			elif self.doc.sales_partner:
-				sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
+				webnotes.conn.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
 		else:
 			if self.doc.customer:
-				if not sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.supplier:
-				if not sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.sales_partner:
-				if not sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
+				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
 					self.doc.is_primary_contact = 1
 
 	def on_trash(self):

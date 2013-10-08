@@ -54,7 +54,7 @@ Original Query:
 		
 	def auto_close_tickets(self):
 		webnotes.conn.sql("""update `tabSupport Ticket` set status = 'Closed' 
-			where status = 'Waiting for Customer' 
+			where status = 'Replied' 
 			and date_sub(curdate(),interval 15 Day) > modified""")
 
 def get_support_mails():

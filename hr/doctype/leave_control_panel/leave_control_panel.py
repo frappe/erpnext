@@ -9,7 +9,6 @@ from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 
@@ -34,7 +33,7 @@ class DocType:
     emp_query = "select name from `tabEmployee` "
     if flag == 1:
       emp_query += condition 
-    e = sql(emp_query)
+    e = webnotes.conn.sql(emp_query)
     return e
 
   # ----------------

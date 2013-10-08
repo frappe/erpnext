@@ -5,12 +5,15 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, filter_strip_join
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
+
+	def validate(self):
+		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
+			self.doc.partner_website = "http://" + self.doc.partner_website
 
 	def on_update(self):
 		if cint(self.doc.show_in_website):
@@ -24,7 +27,7 @@ class DocType:
 		
 	def get_contacts(self,nm):
 		if nm:
-			contact_details =webnotes.conn.convert_to_lists(sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))
+			contact_details =webnotes.conn.convert_to_lists(webnotes.conn.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))
 			return contact_details
 		else:
 			return ''
