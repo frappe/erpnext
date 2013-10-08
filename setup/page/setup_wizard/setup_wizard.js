@@ -12,7 +12,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		on_complete: function(wiz) {
 			var values = wiz.get_values();
 			wiz.show_working();
-			console.log(values);
 			wn.call({
 				method: "setup.page.setup_wizard.setup_wizard.setup_account",
 				args: values,
@@ -26,7 +25,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						wiz.show_complete();
 						setTimeout(function() {
 							if(user==="Administrator") {
-								wn.msgprint(wn._("Login with your new User ID") + ":" + values.email);
+								msgprint(wn._("Login with your new User ID") + ":" + values.email);
 								setTimeout(function() {
 									wn.app.logout();
 								}, 2000);

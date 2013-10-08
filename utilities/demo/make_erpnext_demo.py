@@ -6,7 +6,7 @@ import webnotes, os
 import utilities.demo.make_demo
 
 def make_demo_app(site=None):
-	webnotes.mute_emails = 1
+	webnotes.flags.mute_emails = 1
 	webnotes.init(site=site)
 
 	utilities.demo.make_demo.make(reset=True, simulate=False)

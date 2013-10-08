@@ -35,20 +35,23 @@ def setup_account(args=None):
 
 	webnotes.clear_cache()
 	webnotes.conn.commit()
+	
+	# suppress msgprints
+	webnotes.local.message_log = []
 
 	return "okay"
 	
 def update_profile_name(args):
-	if args.get("email_id"):
+	if args.get("email"):
 		args['name'] = args.get("email")
-		webnotes.mute_emails = True
+		webnotes.flags.mute_emails = True
 		webnotes.bean({
 			"doctype":"Profile",
 			"email": args.get("email"),
 			"first_name": args.get("first_name"),
 			"last_name": args.get("last_name")
 		}).insert()
-		webnotes.mute_emails = False
+		webnotes.flags.mute_emails = False
 		from webnotes.auth import _update_password
 		_update_password(args.get("email"), args.get("password"))
 
