@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-09-13 11:50:02", 
+  "modified": "2013-10-08 12:17:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -17,14 +17,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "in_filter": 1, 
   "in_list_view": 1, 
   "name": "__common__", 
   "parent": "Item Price", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "reqd": 1
+  "permlevel": 0
  }, 
  {
   "doctype": "DocType", 
@@ -34,20 +32,38 @@
   "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
   "label": "Item Code", 
   "oldfieldname": "price_list_name", 
   "oldfieldtype": "Select", 
   "options": "Item", 
+  "reqd": 1, 
   "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "label": "Item Name", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
+  "in_filter": 1, 
   "label": "Rate", 
   "oldfieldname": "ref_rate", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
+  "reqd": 1, 
   "search_index": 0
  }
 ]

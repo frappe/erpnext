@@ -107,7 +107,7 @@ class DocType:
 					_(" does not belong to the company") + ": " + self.doc.company)
 						
 def check_negative_balance(account, adv_adj=False):
-	if not adv_adj:
+	if not adv_adj and account:
 		account_details = webnotes.conn.get_value("Account", account, 
 				["allow_negative_balance", "debit_or_credit"], as_dict=True)
 		if not account_details["allow_negative_balance"]:

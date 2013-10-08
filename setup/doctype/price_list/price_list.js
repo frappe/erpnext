@@ -33,7 +33,7 @@ wn.ui.form.TableGrid = Class.extend({
 		var me = this;
 		// Creating table & assigning attributes
 		var grid_table = document.createElement("table");
-		grid_table.className = "table table-hover table-bordered grid";
+		grid_table.className = "table table-hover table-bordered table-grid";
 		
 		// Appending header & rows to table
 		grid_table.appendChild(this.make_table_headers());
@@ -52,8 +52,9 @@ wn.ui.form.TableGrid = Class.extend({
 		btn_div.appendChild(new_row_btn);
 
 		// Appending table & button to parent
-		var $grid_table = $(grid_table).appendTo($(this.parent));
 		var $btn_div = $(btn_div).appendTo($(this.parent));
+		$(document.createElement("br")).appendTo($(this.parent));
+		var $grid_table = $(grid_table).appendTo($(this.parent));
 
 		$btn_div.on("click", ".table-new-row", function() {
 			me.make_dialog();
@@ -72,13 +73,12 @@ wn.ui.form.TableGrid = Class.extend({
 		// Creating header row
 		var row = document.createElement("tr");
 		row.className = "active";
-		// row.style = "height:50px";
-		
 		
 		// Creating head first cell
 		var th = document.createElement("th");
 		th.width = "8%";
 		th.className = "text-center";
+		th.setAttribute("style", "vertical-align: middle;");
 		th.innerHTML = "#";
 		row.appendChild(th);
 
@@ -91,7 +91,8 @@ wn.ui.form.TableGrid = Class.extend({
 			
 				// If currency then move header to right
 				if(["Int", "Currency", "Float"].indexOf(df.fieldtype) !== -1) th.className = "text-right";
-			
+				
+				th.setAttribute("style", "vertical-align: middle;");
 				th.innerHTML = wn._(df.label);
 				row.appendChild(th);
 			}
@@ -107,7 +108,7 @@ wn.ui.form.TableGrid = Class.extend({
 		// Creating table body
 		var table_body = document.createElement("tbody");
 		table_body.setAttribute("style", "cursor: pointer;");
-
+		
 		var item_prices = wn.model.get_children(this.table_field.options, this.frm.doc.name, 
 			this.table_field.fieldname, this.frm.doctype);
 			
@@ -139,6 +140,11 @@ wn.ui.form.TableGrid = Class.extend({
 		$a(this.dialog.body, 'div', '', '', this.make_dialog_buttons(row));
 		this.dialog.show();
 
+		// Make item name & description non-editable
+		this.dialog.get_input("item_name").prop("disabled", true);
+		this.dialog.get_input("description").prop("disabled", true);
+
+		// Dialog button events
 		this.dialog.$wrapper.find('button.update').on('click', function() {
 			me.update_row(row);
 		});
@@ -146,6 +152,7 @@ wn.ui.form.TableGrid = Class.extend({
 		this.dialog.$wrapper.find('button.delete').on('click', function() {
 			me.delete_row(row);
 		});
+		
 		return row;
 	},
 	make_dialog_values: function(row) {
@@ -191,6 +198,13 @@ wn.ui.form.TableGrid = Class.extend({
 		if(!docname && row) docname = $(row).attr("data-docname");
 		$.each(me.fields, function(i, df) {
 			var val = me.dialog.get_values()[df.fieldname];
+			
+			if(["Currency", "Float"].indexOf(df.fieldtype)!==-1) {
+				val = flt(val);
+			} else if(["Int", "Check"].indexOf(df.fieldtype)!==-1) {
+				val = cint(val);
+			}
+			
 			wn.model.set_value(me.table_field.options, docname, 
 				df.fieldname, val);
 				
@@ -210,8 +224,7 @@ wn.ui.form.TableGrid = Class.extend({
 		$(row).remove();
 
 		// Re-assign idx
-		$.each($(this.parent).find(".grid tbody tr"), function(idx, data) {
-			$(data).attr("data-idx", idx + 1);
+		$.each($(this.parent).find("tbody tr"), function(idx, data) {
 			var $td = $(data).find('td:first');
 			$td.html(idx + 1);
 		});
@@ -221,7 +234,6 @@ wn.ui.form.TableGrid = Class.extend({
 	add_new_row: function(d) {
 		var tr = document.createElement("tr");
 		tr.className = "table-row";
-		tr.setAttribute("data-idx", d.idx);
 		tr.setAttribute("data-docname", d.name);
 		
 		// Creating table data & appending to row

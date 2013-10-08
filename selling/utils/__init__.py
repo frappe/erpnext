@@ -74,7 +74,7 @@ def get_item_details(args):
 			out.update(apply_pos_settings(pos_settings, out))
 		
 	if args.doctype in ("Sales Invoice", "Delivery Note"):
-		if item_bean.doc.has_serial_no and not args.serial_no:
+		if item_bean.doc.has_serial_no == "Yes" and not args.serial_no:
 			out.serial_no = _get_serial_nos_by_fifo(args, item_bean)
 		
 	return out

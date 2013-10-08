@@ -9,6 +9,7 @@ from webnotes.defaults import get_global_default
 from webnotes.utils.email_lib import sendmail
 
 class UserNotAllowedForWarehouse(webnotes.ValidationError): pass
+class InvalidWarehouseCompany(webnotes.ValidationError): pass
 	
 def get_stock_balance_on(warehouse, posting_date=None):
 	if not posting_date: posting_date = nowdate()
@@ -216,6 +217,12 @@ def validate_warehouse_user(warehouse):
 	if warehouse_users and not (webnotes.session.user in warehouse_users):
 		webnotes.throw(_("Not allowed entry in Warehouse") \
 			+ ": " + warehouse, UserNotAllowedForWarehouse)
+			
+def validate_warehouse_company(warehouse, company):
+	warehouse_company = webnotes.conn.get_value("Warehouse", warehouse, "company")
+	if warehouse_company and warehouse_company != company:
+		webnotes.msgprint(_("Warehouse does not belong to company.") + " (" + \
+			warehouse + ", " + company +")", raise_exception=InvalidWarehouseCompany)
 
 def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no, 
 		stock_ledger_entries, item_sales_bom):
