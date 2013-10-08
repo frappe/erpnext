@@ -88,7 +88,7 @@ class DocType(StockController):
 			where (serial_no like %s or serial_no like %s or serial_no=%s) 
 			and item_code=%s and ifnull(is_cancelled, 'No')='No' 
 			order by name desc limit 1""", 
-			("%%%s%%" % self.doc.name+"\n", "%%%s%%" % "\n"+self.doc.name, self.doc.name, 
+			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
 				self.doc.item_code), as_dict=1)
 		
 		if last_sle:
@@ -116,9 +116,9 @@ class DocType(StockController):
 			where (serial_no like %s or serial_no like %s or serial_no=%s) 
 			and item_code=%s and actual_qty > 0 
 			and ifnull(is_cancelled, 'No')='No' order by name asc limit 1""", 
-			("%%%s%%" % self.doc.name+"\n", "%%%s%%" % "\n"+self.doc.name, self.doc.name, 
+			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
 				 self.doc.item_code), as_dict=1)
-			
+
 		if purchase_sle:
 			self.doc.purchase_document_type = purchase_sle[0].voucher_type
 			self.doc.purchase_document_no = purchase_sle[0].voucher_no
@@ -128,7 +128,7 @@ class DocType(StockController):
 			if purchase_sle[0].voucher_type == "Purchase Receipt":
 				self.doc.supplier, self.doc.supplier_name = \
 					webnotes.conn.get_value("Purchase Receipt", purchase_sle[0].voucher_no, 
-						["supplier_name", "supplier_name"])
+						["supplier", "supplier_name"])
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no", 
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
@@ -140,7 +140,7 @@ class DocType(StockController):
 			and item_code=%s and actual_qty<0 
 			and voucher_type in ('Delivery Note', 'Sales Invoice')
 			and ifnull(is_cancelled, 'No')='No' order by name desc limit 1""", 
-			("%%%s%%" % self.doc.name+"\n", "%%%s%%" % "\n"+self.doc.name, self.doc.name, 
+			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
 				 self.doc.item_code), as_dict=1)
 		if delivery_sle:
 			self.doc.delivery_document_type = delivery_sle[0].voucher_type
