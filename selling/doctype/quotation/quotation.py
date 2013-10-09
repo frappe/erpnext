@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, getdate
+from webnotes.utils import cstr
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
@@ -93,19 +93,6 @@ class DocType(SellingController):
 					msgprint("You can not select non sales item "+d.item_code+" in Sales Quotation")
 					raise Exception
 	
-	#--------------Validation For Last Contact Date-----------------
-	# ====================================================================================================================
-	def set_last_contact_date(self):
-		#if not self.doc.contact_date_ref:
-			#self.doc.contact_date_ref=self.doc.contact_date
-			#self.doc.last_contact_date=self.doc.contact_date_ref
-		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
-			if getdate(self.doc.contact_date_ref) < getdate(self.doc.contact_date):
-				self.doc.last_contact_date=self.doc.contact_date_ref
-			else:
-				msgprint("Contact Date Cannot be before Last Contact Date")
-				raise Exception
-
 	def validate(self):
 		super(DocType, self).validate()
 		
@@ -116,7 +103,6 @@ class DocType(SellingController):
 			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
 				"Order Confirmed", "Order Lost", "Cancelled"])
 
-		self.set_last_contact_date()
 		self.validate_order_type()
 		self.validate_for_items()
 

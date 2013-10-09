@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, getdate, cint
+from webnotes.utils import cstr, cint
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
@@ -18,7 +18,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
-
+		
 		self._prev = webnotes._dict({
 			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
@@ -70,10 +70,6 @@ class DocType(TransactionBase):
 		return ret
 		
 	def on_update(self):
-		# Add to calendar
-		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
-			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
@@ -101,14 +97,6 @@ class DocType(TransactionBase):
 		
 		super(DocType, self).add_calendar_event(opts, force)
 
-	def set_last_contact_date(self):
-		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
-			if getdate(self.doc.contact_date_ref) < getdate(self.doc.contact_date):
-				self.doc.last_contact_date=self.doc.contact_date_ref
-			else:
-				msgprint("Contact Date Cannot be before Last Contact Date")
-				raise Exception
-
 	def validate_item_details(self):
 		if not getlist(self.doclist, 'enquiry_details'):
 			msgprint("Please select items for which enquiry needs to be made")
@@ -121,7 +109,6 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
-		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
