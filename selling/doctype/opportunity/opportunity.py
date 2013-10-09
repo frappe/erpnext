@@ -18,13 +18,6 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
-
-		self._prev = webnotes._dict({
-			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-		})
 		
 	def get_item_details(self, item_code):
 		item = sql("""select item_name, stock_uom, description_html, description, item_group, brand
@@ -99,9 +92,9 @@ class DocType(TransactionBase):
 
 	def set_last_contact_date(self):
 		if self._prev.contact_date:
-			if not self.doc.last_contact_date or (getdate(self._prev.contact_date) <= getdate(self.doc.contact_date)):
+			if getdate(self._prev.contact_date) < getdate(self.doc.contact_date):
 				self.doc.last_contact_date = self._prev.contact_date
-			else:
+			elif getdate(self._prev.contact_date) > getdate(self.doc.contact_date):
 				webnotes.throw(webnotes._("Contact Date Cannot be before Last Contact Date"))
 
 	def validate_item_details(self):
@@ -116,6 +109,13 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
+		self._prev = webnotes._dict({
+			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+		})
+		
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
