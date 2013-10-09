@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-09-26 16:30:36", 
+  "modified": "2013-10-09 15:27:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -173,19 +173,6 @@
   "oldfieldtype": "Link", 
   "options": "Profile", 
   "search_index": 1
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "description": "Date on which the lead was last contacted", 
-  "doctype": "DocField", 
-  "fieldname": "last_contact_date", 
-  "fieldtype": "Date", 
-  "label": "Last Contact Date", 
-  "no_copy": 1, 
-  "oldfieldname": "last_contact_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
