@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-10-03 16:44:08", 
+  "modified": "2013-10-08 16:48:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -85,7 +85,7 @@
   "label": "Email Id", 
   "oldfieldname": "email_id", 
   "oldfieldtype": "Data", 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 1
  }, 
  {
@@ -95,7 +95,7 @@
   "label": "Phone", 
   "oldfieldname": "contact_no", 
   "oldfieldtype": "Data", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

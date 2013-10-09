@@ -3,6 +3,7 @@
 
 $.extend(cur_frm.cscript, {
 	price_list_name: function() {
-		buying_or_selling = wn.model.get_value("")
+		console.log(this);
+		cur_frm.add_fetch(this, buying_or_selling, buying_or_selling);
 	}
 });

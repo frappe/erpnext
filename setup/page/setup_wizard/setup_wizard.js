@@ -1,28 +1,95 @@
 wn.pages['setup-wizard'].onload = function(wrapper) { 
+	if(sys_defaults.company) {
+		wn.set_route("desktop");
+		return;
+	}
+	$(".navbar:first").toggle(false);
+	$("body").css({"padding-top":"30px"});
+	
 	erpnext.wiz = new wn.wiz.Wizard({
+		page_name: "setup-wizard",
 		parent: wrapper,
+		on_complete: function(wiz) {
+			var values = wiz.get_values();
+			wiz.show_working();
+			wn.call({
+				method: "setup.page.setup_wizard.setup_wizard.setup_account",
+				args: values,
+				callback: function(r) {
+					if(r.exc) {
+						var d = msgprint(wn._("There were errors."));
+						d.custom_onhide = function() {
+							wn.set_route(me.wiz.page_name, "0");
+						}
+					} else {
+						wiz.show_complete();
+						setTimeout(function() {
+							if(user==="Administrator") {
+								msgprint(wn._("Login with your new User ID") + ":" + values.email);
+								setTimeout(function() {
+									wn.app.logout();
+								}, 2000);
+							} else {
+								window.location = "app.html";
+							}
+						}, 2000);
+					}
+				}
+			})
+		},
 		title: wn._("ERPNext Setup Guide"),
+		welcome_html: '<h1 class="text-muted text-center"><i class="icon-magic"></i></h1>\
+			<h2 class="text-center">'+wn._('ERPNext Setup')+'</h2>\
+			<p class="text-center">' + 
+			wn._('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
+			'</p>',
+		working_html: '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
+			<h2 class="text-center">'+wn._('Setting up...')+'</h2>\
+			<p class="text-center">' + 
+			wn._('Sit tight while your system is being setup. This may take a few moments.') + 
+			'</p>',
+		complete_html: '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
+			<h2 class="text-center">'+wn._('Setup Complete!')+'</h2>\
+			<p class="text-center">' + 
+			wn._('Your setup is complete. Refreshing...') + 
+			'</p>',
 		slides: [
 			// User
 			{
-				title: wn._("The First User"),
+				title: wn._("The First User: You"),
+				icon: "icon-user",
 				fields: [
 					{"fieldname": "first_name", "label": wn._("First Name"), "fieldtype": "Data", reqd:1},
 					{"fieldname": "last_name", "label": wn._("Last Name"), "fieldtype": "Data", reqd:1},
+					{"email_id": "email", "label": wn._("Email Id"), "fieldtype": "Data", reqd:1, "description":"Your Login Id"},
+					{"password": "password", "label": wn._("Password"), "fieldtype": "Password", reqd:1},
+					{fieldtype:"Attach Image", fieldname:"attach_profile", label:"Attach Your Profile..."},
 				],
-				help: wn._('The first user will become the System Manager (you can change that later).')
+				help: wn._('The first user will become the System Manager (you can change that later).'),
+				onload: function(slide) {
+					if(user!=="Administrator") {
+						slide.form.fields_dict.password.$wrapper.toggle(false);
+						slide.form.fields_dict.email_id.$wrapper.toggle(false);
+						delete slide.form.fields_dict.email;
+						delete slide.form.fields_dict.password;
+					}
+				}
 			},
 			
 			// Organization
 			{
 				title: wn._("The Organization"),
+				icon: "icon-building",
 				fields: [
 					{fieldname:'company_name', label: wn._('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: 'e.g. "My Company LLC"'},
 					{fieldname:'company_abbr', label: wn._('Company Abbreviation'), fieldtype:'Data',
 						placeholder:'e.g. "MC"',reqd:1},
+					{fieldname:'fy_start', label:'Financial Year Start Date', fieldtype:'Select',
+						description:'Your financial year begins on', reqd:1,
+						options: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'] },
 					{fieldname:'company_tagline', label: wn._('What does it do?'), fieldtype:'Data',
-						placeholder:'e.g. "Build tools for builders"',reqd:1},
+						placeholder:'e.g. "Build tools for builders"', reqd:1},
 				],
 				help: wn._('The name of your company for which you are setting up this system.'),
 				onload: function(slide) {
@@ -37,6 +104,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			// Country
 			{
 				title: wn._("Country, Timezone and Currency"),
+				icon: "icon-flag",
 				fields: [
 					{fieldname:'country', label: wn._('Country'), reqd:1,
 						options: "", fieldtype: 'Select'},
@@ -81,55 +149,141 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			
 			// Logo
 			{
+				icon: "icon-bookmark",
 				title: wn._("Logo and Letter Heads"),
 				help: wn._('Upload your letter head and logo - you can edit them later.'),
-				html: '<h4>' + wn._('Upload Logo') + '</h4><div class="upload-area-letter-head"></div><hr>'
-					+'<h4>' + wn._('Upload Letter Head') + '</h4><div class="upload-area-logo"></div>',
-				onload: function(slide) {
-					wn.upload.make({
-						parent: slide.$wrapper.find(".upload-area-letter-head").css({"margin-left": "10px"}),
-						on_attach: function(fileobj) {
-							console.log(fileobj);
-						}
-					});
-
-					wn.upload.make({
-						parent: slide.$wrapper.find(".upload-area-logo").css({"margin-left": "10px"}),
-						on_attach: function(fileobj) {
-							console.log(fileobj);
-						}
-					});
-				}
-				
+				fields: [
+					{fieldtype:"Attach Image", fieldname:"attach_letterhead", label:"Attach Letterhead..."},
+					{fieldtype:"Attach Image", fieldname:"attach_logo", label:"Attach Logo..."},
+				],
 			},
 			
 			// Taxes
 			{
+				icon: "icon-money",
 				"title": wn._("Add Taxes"),
 				"help": wn._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
 				"fields": [
 					{fieldtype:"Data", fieldname:"tax_1", label:"Tax 1", placeholder:"e.g. VAT"},
-					{fieldtype:"Data", fieldname:"tax_rate_1", label:"Rate for Tax 1 (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"tax_rate_1", label:"Rate (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Section Break"},
 					{fieldtype:"Data", fieldname:"tax_2", label:"Tax 2", placeholder:"e.g. Customs Duty"},
-					{fieldtype:"Data", fieldname:"tax_rate_2", label:"Rate for Tax 2 (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"tax_rate_2", label:"Rate (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Section Break"},
 					{fieldtype:"Data", fieldname:"tax_3", label:"Tax 3", placeholder:"e.g. Excise"},
-					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate for Tax 3 (%)", placeholder:"e.g. 5"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate (%)", placeholder:"e.g. 5"},
 				],
-				onload: function(slide) {
-					slide.form.fields_dict.tax_rate_1.$wrapper.css("margin-left", "50%");
-					slide.form.fields_dict.tax_rate_2.$wrapper.css("margin-left", "50%");
-					slide.form.fields_dict.tax_rate_3.$wrapper.css("margin-left", "50%");
-				}
-			}
+			},
 			
-			// 
+			// Items to Sell
+			{
+				icon: "icon-barcode",
+				"title": wn._("Your Products or Services"),
+				"help": wn._("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"item_1", label:"Item 1", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Attach", fieldname:"item_img_1", label:"Attach Image..."},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"item_2", label:"Item 2", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Attach", fieldname:"item_img_2", label:"Attach Image..."},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"item_3", label:"Item 3", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Attach", fieldname:"item_img_3", label:"Attach Image..."},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"item_4", label:"Item 4", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Attach", fieldname:"item_img_4", label:"Attach Image..."},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"item_5", label:"Item 5", placeholder:"A Product or Service"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Attach", fieldname:"item_img_5", label:"Attach Image..."},
+				],
+			},
+
+			// Items to Buy
+			{
+				icon: "icon-barcode",
+				"title": wn._("Products or Services You Buy"),
+				"help": wn._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"item_buy_1", label:"Item 1", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_2", label:"Item 2", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_3", label:"Item 3", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_4", label:"Item 4", placeholder:"A Product or Service"},
+					{fieldtype:"Data", fieldname:"item_buy_5", label:"Item 5", placeholder:"A Product or Service"},
+				],
+			},
+
+			// Customers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Customers"),
+				"help": wn._("List a few of your customers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"customer_1", label:"Customer 1", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_1", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_2", label:"Customer 2", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_2", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_3", label:"Customer 3", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_3", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_4", label:"Customer 4", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_4", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_5", label:"Customer 5", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_5", label:"", placeholder:"Contact Name"},
+				],
+			},
+
+			// Suppliers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Suppliers"),
+				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"supplier_1", label:"Supplier 1", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_1", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_2", label:"Supplier 2", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_2", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_3", label:"Supplier 3", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_3", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_4", label:"Supplier 4", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_4", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_5", label:"Supplier 5", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_5", label:"", placeholder:"Contact Name"},
+				],
+			}
+
 		]
 		
 	})
 }
 
 wn.pages['setup-wizard'].onshow = function(wrapper) {
-	erpnext.wiz.show(wn.get_route()[1] || "0");
+	if(wn.get_route()[1])
+		erpnext.wiz.show(wn.get_route()[1]);
 }
 
 wn.provide("wn.wiz");
@@ -137,10 +291,45 @@ wn.provide("wn.wiz");
 wn.wiz.Wizard = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
+		this.slides = this.slides;
 		this.slide_dict = {};
-		wn.set_route("setup-wizard", "0");
+		this.show_welcome();
+	},
+	get_message: function(html) {
+		return $(repl('<div class="panel panel-default" style="max-width: 400px; margin: auto;">\
+			<div class="panel-body" style="padding: 40px;">%(html)s</div>\
+		</div>', {html:html}))
+	},
+	show_welcome: function() {
+		if(this.$welcome) 
+			return;
+		var me = this;
+		this.$welcome = this.get_message(this.welcome_html + 
+			'<br><p class="text-center"><button class="btn btn-primary">'+wn._("Start")+'</button></p>')
+			.appendTo(this.parent);
+		
+		this.$welcome.find(".btn").click(function() {
+			me.$welcome.toggle(false);
+			me.welcomed = true;
+			wn.set_route(me.page_name, "0");
+		})
+		
+		this.current_slide = {"$wrapper": this.$welcome};
+	},
+	show_working: function() {
+		this.hide_current_slide();
+		wn.set_route(this.page_name);
+		this.current_slide = {"$wrapper": this.get_message(this.working_html).appendTo(this.parent)};
+	},
+	show_complete: function() {
+		this.hide_current_slide();
+		this.current_slide = {"$wrapper": this.get_message(this.complete_html).appendTo(this.parent)};
 	},
 	show: function(id) {
+		if(!this.welcomed) {
+			wn.set_route(this.wiz.page_name);
+			return;
+		}
 		id = cint(id);
 		if(this.current_slide && this.current_slide.id===id) 
 			return;
@@ -149,12 +338,24 @@ wn.wiz.Wizard = Class.extend({
 			this.slide_dict[id].make();
 		}
 		
-		if(this.current_slide)
-			this.current_slide.$wrapper.toggle(false);
+		this.hide_current_slide();
 		
 		this.current_slide = this.slide_dict[id];
 		this.current_slide.$wrapper.toggle(true);
 	},
+	hide_current_slide: function() {
+		if(this.current_slide) {
+			this.current_slide.$wrapper.toggle(false);
+			this.current_slide = null;
+		}
+	},
+	get_values: function() {
+		var values = {};
+		$.each(this.slide_dict, function(id, slide) {
+			$.extend(values, slide.values)
+		})
+		return values;
+	}
 });
 
 wn.wiz.WizardSlide = Class.extend({
@@ -163,20 +364,24 @@ wn.wiz.WizardSlide = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		this.$wrapper = $(repl('<div class="panel panel-default" style="margin: 30px;">\
-			<div class="panel-heading"><div class="panel-title">%(main_title)s: %(title)s</div></div>\
+		this.$wrapper = $(repl('<div class="panel panel-default" style="margin: 0px 30px;">\
+			<div class="panel-heading"><div class="panel-title">%(main_title)s: Step %(step)s</div></div>\
 			<div class="panel-body">\
 				<div class="progress">\
 					<div class="progress-bar" style="width: %(width)s%"></div>\
 				</div>\
 				<div class="row">\
 					<div class="col-sm-6 form"></div>\
-					<div class="col-sm-6 help"><h3>%(title)s</h3><p class="text-muted">%(help)s</p></div>\
+					<div class="col-sm-6 help">\
+						<h3><i class="%(icon)s text-muted"></i> %(title)s</h3><br>\
+						<p class="text-muted">%(help)s</p>\
+					</div>\
 				</div>\
 				<hr>\
 				<div class="footer"></div>\
 			</div>\
-		</div>', {help:this.help, title:this.title, main_title:this.wiz.title, width: (flt(this.id + 1) / this.wiz.slides.length) * 100}))
+		</div>', {help:this.help, title:this.title, main_title:this.wiz.title, step: this.id + 1,
+				width: (flt(this.id + 1) / (this.wiz.slides.length+1)) * 100, icon:this.icon}))
 			.appendTo(this.wiz.parent);
 		
 		this.body = this.$wrapper.find(".form")[0];
@@ -184,7 +389,8 @@ wn.wiz.WizardSlide = Class.extend({
 		if(this.fields) {
 			this.form = new wn.ui.FieldGroup({
 				fields: this.fields,
-				body: this.body
+				body: this.body,
+				no_submit_on_enter: true
 			});
 			this.form.make();
 		} else {
@@ -193,17 +399,29 @@ wn.wiz.WizardSlide = Class.extend({
 		
 		if(this.id > 0) {
 			this.$prev = $("<button class='btn btn-default'>Previous</button>")
-				.click(function() { wn.set_route("setup-wizard", me.id-1 + ""); })
+				.click(function() { 
+					wn.set_route(me.wiz.page_name, me.id-1 + ""); 
+				})
 				.appendTo(this.$wrapper.find(".footer"))
 				.css({"margin-right": "5px"});
 			}
 		if(this.id+1 < this.wiz.slides.length) {
 			this.$next = $("<button class='btn btn-primary'>Next</button>")
-				.click(function() { wn.set_route("setup-wizard", me.id+1 + ""); })
+				.click(function() { 
+					me.values = me.form.get_values();
+					if(me.values===null) 
+						return;
+					wn.set_route(me.wiz.page_name, me.id+1 + ""); 
+				})
 				.appendTo(this.$wrapper.find(".footer"));
 		} else {
 			this.$complete = $("<button class='btn btn-primary'>Complete Setup</button>")
-				.click(function() { me.wiz.complete(); }).appendTo(this.$wrapper.find(".footer"));
+				.click(function() { 
+					me.values = me.form.get_values();
+					if(me.values===null) 
+						return;
+					me.wiz.on_complete(me.wiz); 
+				}).appendTo(this.$wrapper.find(".footer"));
 		}
 		
 		if(this.onload) {

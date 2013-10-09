@@ -160,6 +160,10 @@ wn.module_page["Selling"] = [
 				"label":wn._("Sales Analytics"),
 				page: "sales-analytics"
 			},
+			{
+				"label":wn._("Sales Funnel"),
+				page: "sales-funnel"
+			},
 		]
 	},
 	{

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-10-08 16:02:43", 
+  "modified": "2013-10-09 11:59:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,13 +42,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "price_list_section", 
-  "fieldtype": "Section Break", 
-  "label": "Price List", 
-  "options": "icon-tags"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "price_list_name", 
   "fieldtype": "Link", 
   "in_filter": 0, 
@@ -56,36 +49,6 @@
   "label": "Price List Name", 
   "options": "Price List", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "currency", 
-  "fieldtype": "Link", 
-  "label": "Currency", 
-  "options": "Currency", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "price_list_col_break", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "buying_or_selling", 
-  "fieldtype": "Select", 
-  "in_filter": 0, 
-  "in_list_view": 1, 
-  "label": "Valid for Buying or Selling?", 
-  "options": "Buying\nSelling", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_section", 
-  "fieldtype": "Section Break", 
-  "label": "Item", 
-  "options": "icon-tag"
  }, 
  {
   "doctype": "DocField", 
@@ -115,8 +78,27 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "item_col_break", 
+  "fieldname": "price_list_col_break", 
   "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Currency", 
+  "options": "Currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
