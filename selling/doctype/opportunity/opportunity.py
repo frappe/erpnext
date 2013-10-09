@@ -98,9 +98,9 @@ class DocType(TransactionBase):
 		super(DocType, self).add_calendar_event(opts, force)
 
 	def set_last_contact_date(self):
-		if self.doc.contact_date:
-			if not self.doc.last_contact_date or (getdate(self.doc.last_contact_date) <= getdate(self.doc.contact_date)):
-				self.doc.last_contact_date = self.doc.contact_date
+		if self._prev.contact_date:
+			if not self.doc.last_contact_date or (getdate(self._prev.contact_date) <= getdate(self.doc.contact_date)):
+				self.doc.last_contact_date = self._prev.contact_date
 			else:
 				webnotes.throw(webnotes._("Contact Date Cannot be before Last Contact Date"))
 
