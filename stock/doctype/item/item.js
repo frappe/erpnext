@@ -7,6 +7,14 @@ cur_frm.cscript.refresh = function(doc) {
 
 	cur_frm.cscript.make_dashboard()
 
+	// Make button to view all its prices
+	cur_frm.add_custom_button("Edit Prices", function() {
+		wn.route_options = {
+			"item_code": cur_frm.doc.name
+		};
+		wn.set_route("Report", "Item Price");
+	}, "icon-money");
+
 	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
 		&& doc.__islocal)
 	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"

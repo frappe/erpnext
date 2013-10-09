@@ -33,6 +33,7 @@ class DocType(DocListController):
 		
 	def on_update(self):
 		self.set_default_if_missing()
+		self.update_item_price()
 		cart_settings = webnotes.get_obj("Shopping Cart Settings")
 		if cint(cart_settings.doc.enabled):
 			cart_settings.validate_price_lists()
@@ -54,3 +55,7 @@ class DocType(DocListController):
 			if not webnotes.conn.get_value("Buying Settings", None, "buying_price_list"):
 				webnotes.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
 
+	def update_item_price(self):
+		webnotes.conn.sql("""update `tabItem Price` set currency=%s, buying_or_selling=%s 
+			where price_list=%s""", 
+			(self.doc.currency, self.doc.buying_or_selling, self.doc.name))
