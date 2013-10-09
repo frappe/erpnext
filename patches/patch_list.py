@@ -223,6 +223,6 @@ patch_list = [
 	"patches.october_2013.p01_update_delivery_note_prevdocs",
 	"patches.october_2013.p02_set_communication_status",
 	"patches.october_2013.p03_crm_update_status",
-	"patches.october_2013.p04_update_price_list_and_item_details_in_item_price"
+	"patches.october_2013.p04_update_price_list_and_item_details_in_item_price",
 	"execute:webnotes.delete_doc('DocType', 'Setup Control')",
 ]
