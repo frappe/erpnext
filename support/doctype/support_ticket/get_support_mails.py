@@ -81,7 +81,7 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 	
 	make(content=content, sender=sender, subject = subject,
 		doctype="Support Ticket", name=ticket.doc.name,
-		date=mail.date if mail else today())
+		date=mail.date if mail else today(), sent_or_received="Received")
 
 	if mail:
 		mail.save_attachments_in_doc(ticket.doc)

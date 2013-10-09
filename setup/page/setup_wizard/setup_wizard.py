@@ -27,6 +27,7 @@ def setup_account(args=None):
 	create_price_lists(args)
 	create_feed_and_todo()
 	create_email_digest()
+	create_letter_head(args)
 	create_taxes(args)
 	create_items(args)
 	create_customers(args)
@@ -234,16 +235,17 @@ def create_items(args):
 	for i in xrange(1,6):
 		item = args.get("item_" + str(i))
 		if item:
+			item_group = args.get("item_group_" + str(i))
 			webnotes.bean({
 				"doctype":"Item",
 				"item_code": item,
 				"item_name": item,
 				"description": item,
 				"is_sales_item": "Yes",
-				"is_stock_item": "Yes",
-				"item_group":"Products",
-				"stock_uom": "Unit",
-				"default_warehouse": "Finished Goods - " + args.get("company_abbr")
+				"is_stock_item": item_group!="Services" and "Yes" or "No",
+				"item_group": item_group,
+				"stock_uom": args.get("item_uom_" + str(i)),
+				"default_warehouse": item_group!="Service" and ("Finished Goods - " + args.get("company_abbr")) or ""
 			}).insert()
 			
 			if args.get("item_img_" + str(i)):
@@ -254,16 +256,17 @@ def create_items(args):
 	for i in xrange(1,6):
 		item = args.get("item_buy_" + str(i))
 		if item:
+			item_group = args.get("item_buy_group_" + str(i))
 			webnotes.bean({
 				"doctype":"Item",
 				"item_code": item,
 				"item_name": item,
 				"description": item,
 				"is_sales_item": "No",
-				"is_stock_item": "Yes",
-				"item_group":"Raw Material",
-				"stock_uom": "Unit",
-				"default_warehouse": "Stores - " + args.get("company_abbr")
+				"is_stock_item": item_group!="Services" and "Yes" or "No",
+				"item_group": item_group,
+				"stock_uom": args.get("item_buy_uom_" + str(i)),
+				"default_warehouse": item_group!="Service" and ("Stores - " + args.get("company_abbr")) or ""
 			}).insert()
 			
 			if args.get("item_img_" + str(i)):
@@ -314,20 +317,20 @@ def create_suppliers(args):
 					"last_name": len(contact) > 1 and contact[1] or ""
 				}).insert()
 
-def create_profile(user_email, user_fname, user_lname, pwd=None):
-	pr = webnotes.doc('Profile')
-	pr.first_name = user_fname
-	pr.last_name = user_lname
-	pr.name = pr.email = user_email
-	pr.enabled = 1
-	pr.save(1)
-	if pwd:
-		webnotes.conn.sql("""insert into __Auth (user, `password`) 
-			values (%s, password(%s)) 
-			on duplicate key update `password`=password(%s)""", 
-			(user_email, pwd, pwd))
-			
-	add_all_roles_to(pr.name)
+
+def create_letter_head(args):
+	if args.get("attach_letterhead"):
+		lh = webnotes.bean({
+			"doctype":"Letter Head",
+			"letter_head_name": "Standard",
+			"is_default": 1
+		}).insert()
+		
+		filename, filetype, content = args.get("attach_letterhead").split(",")
+		fileurl = save_file(filename, content, "Letter Head", "Standard", decode=True).file_name
+		webnotes.conn.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		
+		
 				
 def add_all_roles_to(name):
 	profile = webnotes.doc("Profile", name)
