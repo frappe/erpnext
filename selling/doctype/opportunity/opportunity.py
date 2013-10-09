@@ -70,10 +70,6 @@ class DocType(TransactionBase):
 		return ret
 		
 	def on_update(self):
-		# Add to calendar
-		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
-			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
@@ -102,12 +98,11 @@ class DocType(TransactionBase):
 		super(DocType, self).add_calendar_event(opts, force)
 
 	def set_last_contact_date(self):
-		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
-			if getdate(self.doc.contact_date_ref) < getdate(self.doc.contact_date):
-				self.doc.last_contact_date=self.doc.contact_date_ref
+		if self.doc.contact_date:
+			if not self.doc.last_contact_date or (getdate(self.doc.last_contact_date) <= getdate(self.doc.contact_date)):
+				self.doc.last_contact_date = self.doc.contact_date
 			else:
-				msgprint("Contact Date Cannot be before Last Contact Date")
-				raise Exception
+				webnotes.throw(webnotes._("Contact Date Cannot be before Last Contact Date"))
 
 	def validate_item_details(self):
 		if not getlist(self.doclist, 'enquiry_details'):
