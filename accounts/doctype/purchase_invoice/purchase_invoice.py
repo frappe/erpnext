@@ -335,7 +335,7 @@ class DocType(BuyingController):
 			)
 	
 		# tax table gl entries
-		valuation_tax = 0
+		valuation_tax = {}
 		for tax in self.doclist.get({"parentfield": "purchase_tax_details"}):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				gl_entries.append(
@@ -350,8 +350,11 @@ class DocType(BuyingController):
 				)
 			
 			# accumulate valuation tax
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
-				valuation_tax += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount) \
+				and tax.cost_center:
+					valuation_tax.setdefault(tax.cost_center, 0)
+					valuation_tax[tax.cost_center] += \
+						(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
@@ -392,15 +395,19 @@ class DocType(BuyingController):
 		if stock_item_and_auto_accounting_for_stock and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.get_company_default("expenses_included_in_valuation"),
-					"cost_center": self.get_company_default("cost_center"),
-					"against": self.doc.credit_to,
-					"credit": valuation_tax,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock"
-				})
-			)
+			expenses_included_in_valuation = \
+				self.get_company_default("expenses_included_in_valuation")
+				
+			for cost_center, amount in valuation_tax.items():
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": expenses_included_in_valuation,
+						"cost_center": cost_center,
+						"against": self.doc.credit_to,
+						"credit": amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					})
+				)
 		
 		# writeoff account includes petty difference in the invoice amount 
 		# and the amount that is paid
