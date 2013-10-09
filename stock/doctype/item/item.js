@@ -6,14 +6,7 @@ cur_frm.cscript.refresh = function(doc) {
 	// read only if any stock ledger entry exists
 
 	cur_frm.cscript.make_dashboard()
-
-	// Make button to view all its prices
-	cur_frm.add_custom_button("Edit Prices", function() {
-		wn.route_options = {
-			"item_code": cur_frm.doc.name
-		};
-		wn.set_route("Report", "Item Price");
-	}, "icon-money");
+	cur_frm.cscript.edit_prices_button()
 
 	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
 		&& doc.__islocal)
@@ -36,6 +29,15 @@ cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
 	if(cur_frm.doc.__islocal) 
 		return;
+}
+
+cur_frm.cscript.edit_prices_button = function() {
+	cur_frm.add_custom_button("Edit Prices", function() {
+		wn.route_options = {
+			"item_code": cur_frm.doc.name
+		};
+		wn.set_route("Report", "Item Price");
+	}, "icon-money");
 }
 
 cur_frm.cscript.item_code = function(doc) {

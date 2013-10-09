@@ -8,8 +8,6 @@ from webnotes.utils import comma_or, cint
 from webnotes.model.controller import DocListController
 import webnotes.defaults
 
-class PriceListDuplicateItem(Exception): pass
-
 class DocType(DocListController):
 	def validate(self):
 		if self.doc.buying_or_selling not in ["Buying", "Selling"]:
@@ -27,9 +25,6 @@ class DocType(DocListController):
 			else:
 				# at least one territory
 				self.validate_table_has_rows("valid_for_territories")
-
-		# check for duplicate items
-		self.check_duplicate_items()
 		
 	def on_update(self):
 		self.set_default_if_missing()
@@ -37,14 +32,6 @@ class DocType(DocListController):
 		cart_settings = webnotes.get_obj("Shopping Cart Settings")
 		if cint(cart_settings.doc.enabled):
 			cart_settings.validate_price_lists()
-
-	def check_duplicate_items(self):
-		item_codes = []
-		for d in self.doclist.get({"parentfield": "item_prices"}):
-			if d.item_code not in item_codes:
-				item_codes.append(d.item_code)
-			else:
-				msgprint(_("Duplicate Item ") + ": " + d.item_code, raise_exception=PriceListDuplicateItem)
 				
 	def set_default_if_missing(self):
 		if self.doc.buying_or_selling=="Selling":
