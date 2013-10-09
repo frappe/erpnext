@@ -260,6 +260,7 @@ class DocType(DocListController):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		webnotes.conn.sql("""delete from `tabItem Price` where item_code=%s""", self.doc.item_code)
 
 		if self.doc.page_name:
 			from webnotes.webutils import clear_cache
