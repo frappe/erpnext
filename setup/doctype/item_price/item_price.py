@@ -32,10 +32,9 @@ class DocType:
 			"description")
 
 	def check_duplicate_item(self):
-		for item_code, price_list in webnotes.conn.sql("""select item_code, price_list 
-			from `tabItem Price`"""):
-
-				if item_code == self.doc.item_code and price_list == self.doc.price_list:
-					webnotes.throw(_("Duplicate Item: ") + self.doc.item_code + 
+		if webnotes.conn.sql("""select name from `tabItem Price` 
+			where item_code=%s and price_list=%s and name!=%s""", 
+			(self.doc.item_code, self.doc.price_list, self.doc.name)):
+				webnotes.throw(_("Duplicate Item: ") + self.doc.item_code + 
 						_(" already available in Price List: ") + self.doc.price_list, 
 						ItemPriceDuplicateItem)

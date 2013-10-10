@@ -9,9 +9,7 @@ from setup.doctype.item_price.item_price import ItemPriceDuplicateItem
 class TestItem(unittest.TestCase):
 	def test_duplicate_item(self):
 		item_price = webnotes.bean(copy=test_records[0])
-		item_price.insert()
-		item_price_copy = webnotes.bean(copy=test_records[0])
-		self.assertRaises(ItemPriceDuplicateItem, item_price_copy.insert)
+		self.assertRaises(ItemPriceDuplicateItem, item_price.insert)
 
 test_records = [
 	[
