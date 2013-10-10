@@ -234,12 +234,12 @@ erpnext.POS = Class.extend({
 
 		// get no_of_items
 		var no_of_items = me.wrapper.find("#cart tbody tr").length;
-		
+				
 		// check whether the item is already added
 		if (no_of_items != 0) {
 			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
-				if (d.item_code == item_code)
+				if (d.item_code == item_code) {
 					caught = true;
 					if (serial_no) {
 						d.serial_no += '\n' + serial_no;
@@ -249,6 +249,7 @@ erpnext.POS = Class.extend({
 						d.qty += 1;
 						me.frm.script_manager.trigger("qty", d.doctype, d.name);
 					}
+				}
 			});
 		}
 		

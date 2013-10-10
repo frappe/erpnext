@@ -57,10 +57,9 @@ def get_price_list():
 
 	rate = {}
 
-	price_list = webnotes.conn.sql("""select ip.item_code, pl.buying_or_selling, 
-		concat(pl.name, " - ", pl.currency, " ", ip.ref_rate) as price 
-		from `tabItem Price` ip, `tabPrice List` pl where 
-		ip.parent = pl.name and pl.docstatus<2""", as_dict=1)
+	price_list = webnotes.conn.sql("""select item_code, buying_or_selling, 
+		concat(price_list, " - ", currency, " ", ref_rate) as price 
+		from `tabItem Price`""", as_dict=1)
 
 	for j in price_list:
 		if j.price:
