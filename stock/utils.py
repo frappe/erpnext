@@ -340,13 +340,8 @@ def create_material_request(material_requests):
 				mr_list.append(mr_bean)
 
 			except:
-<<<<<<< HEAD
-				if webnotes.message_log:
-					exceptions_list.append([] + webnotes.message_log)
-=======
 				if webnotes.local.message_log:
 					exceptions_list.append([] + webnotes.local.message_log)
->>>>>>> 9106221ea4ffc049da7bf31ca2c71531b6b248b5
 					webnotes.local.message_log = []
 				else:
 					exceptions_list.append(webnotes.getTraceback())
