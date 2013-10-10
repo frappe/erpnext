@@ -37,11 +37,8 @@ class DocType(StockController):
 		self.validate_warehouse()
 		self.validate_item()
 		
-		if self.via_stock_ledger:
-			self.set_status()
-			self.set_purchase_details()
-			self.set_sales_details()
-
+		self.on_stock_ledger_entry()
+		
 	def validate_amc_status(self):
 		"""
 			validate amc status
@@ -118,7 +115,7 @@ class DocType(StockController):
 			and ifnull(is_cancelled, 'No')='No' order by name asc limit 1""", 
 			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
 				 self.doc.item_code), as_dict=1)
-
+		
 		if purchase_sle:
 			self.doc.purchase_document_type = purchase_sle[0].voucher_type
 			self.doc.purchase_document_no = purchase_sle[0].voucher_no
@@ -181,6 +178,12 @@ class DocType(StockController):
 				webnotes.conn.sql("""update `tab%s` set serial_no = %s 
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
+					
+	def on_stock_ledger_entry(self):
+		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
+			self.set_status()
+			self.set_purchase_details()
+			self.set_sales_details()
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
@@ -233,6 +236,14 @@ def validate_serial_no(sle, item_det):
 				+ sle.item_code), SerialNoRequiredError)
 				
 def update_serial_nos(sle, item_det):
+	if not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
+		from webnotes.model.doc import make_autoname
+		serial_nos = []
+		for i in xrange(cint(sle.actual_qty)):
+			serial_nos.append(make_autoname(item_det.serial_no_series))
+		
+		webnotes.conn.set(sle, "serial_no", "\n".join(serial_nos))
+	
 	if sle.serial_no:
 		serial_nos = get_serial_nos(sle.serial_no)
 		for serial_no in serial_nos:
@@ -243,12 +254,6 @@ def update_serial_nos(sle, item_det):
 				sr.save()
 			elif sle.actual_qty > 0:
 				make_serial_no(serial_no, sle)
-	elif sle.actual_qty > 0 and item_det.serial_no_series:
-		from webnotes.model.doc import make_autoname
-		serial_nos = []
-		for i in xrange(cint(sle.actual_qty)):
-			serial_nos.append(make_serial_no(make_autoname(item_det.serial_no_series), sle))
-		sle.serial_no = "\n".join(serial_nos)
 
 def get_item_details(item_code):
 	return webnotes.conn.sql("""select name, has_batch_no, docstatus, 
@@ -270,13 +275,16 @@ def make_serial_no(serial_no, sle):
 	webnotes.msgprint(_("Serial No created") + ": " + sr.doc.name)
 	return sr.doc.name
 	
-def update_serial_nos_after_submit(controller, parenttype, parentfield):
-	if not hasattr(webnotes, "new_stock_ledger_entries"):
-		return
+def update_serial_nos_after_submit(controller, parentfield):
+	stock_ledger_entries = webnotes.conn.sql("""select voucher_detail_no, serial_no
+		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
+		(controller.doc.doctype, controller.doc.name), as_dict=True)
 		
+	if not stock_ledger_entries: return
+	
 	for d in controller.doclist.get({"parentfield": parentfield}):
 		serial_no = None
-		for sle in webnotes.new_stock_ledger_entries:
+		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
 				serial_no = sle.serial_no
 				break

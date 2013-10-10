@@ -64,7 +64,7 @@ def upload():
 		
 		data, start_idx = get_data(rows, company_abbr, rows[0][0])
 	except Exception, e:
-		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
+		err_msg = webnotes.local.message_log and "<br>".join(webnotes.local.message_log) or cstr(e)
 		messages.append("""<p style='color: red'>%s</p>""" % (err_msg or "No message"))
 		webnotes.errprint(webnotes.getTraceback())
 		webnotes.local.message_log = []
@@ -193,7 +193,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 		webnotes.conn.commit()
 	except Exception, e:
 		webnotes.conn.rollback()
-		err_msg = webnotes.message_log and "<br>".join(webnotes.message_log) or cstr(e)
+		err_msg = webnotes.local.message_log and "<br>".join(webnotes.local.message_log) or cstr(e)
 		messages.append("""<p style='color: red'>[row #%s] %s failed: %s</p>"""
 			% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
 		messages.append("<p style='color: red'>All transactions rolled back</p>")

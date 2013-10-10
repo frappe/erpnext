@@ -86,26 +86,6 @@ class DocType(TransactionBase):
 	
 		if (obj.doc.price_list_currency == default_currency and flt(obj.doc.plc_conversion_rate) != 1.00) or not obj.doc.plc_conversion_rate or (obj.doc.price_list_currency != default_currency and flt(obj.doc.plc_conversion_rate) == 1.00):
 			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
-	
-
-
-	# Get Tax rate if account type is TAX
-	# =========================================================================
-	def get_rate(self, arg):
-		arg = eval(arg)
-		rate = webnotes.conn.sql("select account_type, tax_rate from `tabAccount` where name = '%s' and docstatus != 2" %(arg['account_head']), as_dict=1)
-		ret = {'rate' : 0}
-		if arg['charge_type'] == 'Actual' and rate[0]['account_type'] == 'Tax':
-			msgprint("You cannot select ACCOUNT HEAD of type TAX as your CHARGE TYPE is 'ACTUAL'")
-			ret = {
-				'account_head'	:	''
-			}
-		elif rate[0]['account_type'] in ['Tax', 'Chargeable'] and not arg['charge_type'] == 'Actual':
-			ret = {
-				'rate'	:	rate and flt(rate[0]['tax_rate']) or 0
-			}
-		return ret
-
 
 	def get_item_list(self, obj, is_stopped=0):
 		"""get item list"""
@@ -317,25 +297,6 @@ class DocType(TransactionBase):
 
 			exact_outstanding = flt(tot_outstanding) + flt(grand_total)
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
-
-	def get_prevdoc_date(self, obj):
-		for d in getlist(obj.doclist, obj.fname):
-			date_field = None
-
-			pdoctype, pname = d.prevdoc_doctype, d.prevdoc_docname
-
-			if d.against_sales_invoice:
-				pdoctype, pname = "Sales Invoice", d.against_sales_invoice
-			elif d.against_sales_order:
-				pdoctype, pname = "Sales Order", d.against_sales_order
-
-			if pdoctype and pname:
-				if pdoctype in ["Sales Invoice", "Delivery Note"]:
-					date_field = "posting_date"
-				else:
-					date_field = "transaction_date"
-
-				d.prevdoc_date = webnotes.conn.get_value(pdoctype, pname, date_field)
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond

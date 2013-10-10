@@ -88,14 +88,6 @@ class DocType(BuyingController):
 		super(DocType, self).get_advances(self.doc.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-
-	def get_rate1(self,acc):
-		rate = webnotes.conn.sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
-		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
-		return ret
-
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV

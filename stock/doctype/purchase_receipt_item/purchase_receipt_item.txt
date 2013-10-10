@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-09-20 11:36:55", 
+  "modified": "2013-10-10 17:02:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -423,19 +423,6 @@
   "reqd": 0, 
   "search_index": 1, 
   "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "prevdoc_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "label": "Purchase Order Date", 
-  "no_copy": 1, 
-  "oldfieldname": "prevdoc_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

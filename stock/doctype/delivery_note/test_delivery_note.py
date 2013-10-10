@@ -160,7 +160,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 	def test_serialized(self):
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		from stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
@@ -180,7 +180,7 @@ class TestDeliveryNote(unittest.TestCase):
 		return dn
 			
 	def test_serialized_cancel(self):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		from stock.doctype.serial_no.serial_no import get_serial_nos
 		dn = self.test_serialized()
 		dn.cancel()
 
@@ -192,7 +192,7 @@ class TestDeliveryNote(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoStatusError, get_serial_nos
+		from stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()

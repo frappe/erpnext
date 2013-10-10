@@ -53,7 +53,7 @@ class DocType(StockController):
 		self.update_stock_ledger()
 
 		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-		update_serial_nos_after_submit(self, "Stock Entry", "mtn_details")
+		update_serial_nos_after_submit(self, "mtn_details")
 		
 		self.update_production_order(1)
 		self.make_gl_entries()

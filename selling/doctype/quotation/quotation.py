@@ -56,13 +56,7 @@ class DocType(SellingController):
 	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-	
 		
-	# Get Tax rate if account type is TAX
-	# -----------------------------------
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-	
 	# Does not allow same item code to be entered twice
 	# -------------------------------------------------
 	def validate_for_items(self):

@@ -184,9 +184,9 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 			if(cl[i].against_sales_order && prevdoc_list.indexOf(cl[i].against_sales_order) == -1) {
 				prevdoc_list.push(cl[i].against_sales_order);
 				if(prevdoc_list.length ==1)
-					out += make_row("Sales Order", cl[i].against_sales_order, cl[i].prevdoc_date, 0);
+					out += make_row("Sales Order", cl[i].against_sales_order, null, 0);
 				else
-					out += make_row('', cl[i].against_sales_order, cl[i].prevdoc_date,0);
+					out += make_row('', cl[i].against_sales_order, null,0);
 			}
 		}
 	}

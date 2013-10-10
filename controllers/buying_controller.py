@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 
@@ -11,9 +11,8 @@ from setup.utils import get_company_currency
 
 from controllers.stock_controller import StockController
 
-class WrongWarehouseCompany(Exception): pass
-
 class BuyingController(StockController):
+
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()

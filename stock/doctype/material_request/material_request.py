@@ -20,10 +20,6 @@ class DocType(BuyingController):
 		self.tname = 'Material Request Item'
 		self.fname = 'indent_details'
 
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
-
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
 

@@ -41,7 +41,6 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
 		self.check_for_stopped_status(pc_obj)
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -64,10 +63,6 @@ class DocType(BuyingController):
 				"is_child_table": True
 			}
 		})
-
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
 	def get_schedule_dates(self):
 		for d in getlist(self.doclist, 'po_details'):
@@ -185,9 +180,6 @@ class DocType(BuyingController):
 	def on_update(self):
 		pass
 		
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-
 @webnotes.whitelist()
 def make_purchase_receipt(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
