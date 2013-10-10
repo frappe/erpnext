@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-10-02 11:36:09", 
+  "modified": "2013-10-09 15:28:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -11,6 +11,7 @@
   "allow_copy": 0, 
   "allow_email": 1, 
   "allow_print": 1, 
+  "allow_rename": 1, 
   "autoname": "field:price_list_name", 
   "description": "Price List Master", 
   "doctype": "DocType", 
@@ -83,27 +84,6 @@
   "label": "Valid for Territories", 
   "options": "For Territory", 
   "reqd": 1
- }, 
- {
-  "description": "To change row values, click on the respective row", 
-  "doctype": "DocField", 
-  "fieldname": "item_prices_section", 
-  "fieldtype": "Section Break", 
-  "hidden": 0, 
-  "label": "Item Prices"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_prices_html", 
-  "fieldtype": "HTML"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_prices", 
-  "fieldtype": "Table", 
-  "hidden": 1, 
-  "label": "Item Prices", 
-  "options": "Item Price"
  }, 
  {
   "amend": 0, 

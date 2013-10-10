@@ -2,16 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import unittest
 import webnotes
-from setup.doctype.price_list.price_list import PriceListDuplicateItem
-
-class TestItem(unittest.TestCase):
-	def test_duplicate_item(self):
-		price_list = webnotes.bean(copy=test_records[0])
-		item_price = price_list.doclist.get({"doctype": "Item Price"})[0]
-		price_list.doclist.append(webnotes.doc(item_price.fields.copy()))
-		self.assertRaises(PriceListDuplicateItem, price_list.insert)
 
 # test_ignore = ["Item"]
 
@@ -28,12 +19,6 @@ test_records = [
 			"parentfield": "valid_for_territories",
 			"territory": "All Territories"
 		},
-		{
-			"doctype": "Item Price",
-			"parentfield": "item_prices",
-			"item_code": "_Test Item",
-			"ref_rate": 100
-		}
 	],
 	[
 		{
