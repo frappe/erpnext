@@ -26,13 +26,13 @@ After completing the Lead form, assume that, this same lead is getting converted
 
 ##### Step 1: Go to 'Lead List' Page and open the Lead that shows interested status.
 
-![Opportunity](img/thirddaysetup_opportunity_1.png)
+![Opportunity](img/thirddaysetup-opportunity-1.png)
 
 <br>
 
 ##### Step 2: Generate Opportunity from the selected Lead
 
-![Opportunity](img/thirddaysetup_opportunity.png)
+![Opportunity](img/thirddaysetup-opportunity.png)
 
 You can also generate an Opportunity directly from the Selling Page.
 
@@ -43,7 +43,7 @@ You can also generate an Opportunity directly from the Selling Page.
 
 Imagine that your Opportunity has shown interest and asked for a Quotation. To generate a Quotation from the same Opportunity, open the submitted Opportunity and click on Create Quotation.
 
-![Quotation](img/thirddaysetup_quotation.png)
+![Quotation](img/thirddaysetup-quotation.png)
 
 You can also generate a Quotation directly from the Selling Page.
 
@@ -54,7 +54,7 @@ You can also generate a Quotation directly from the Selling Page.
 
 Imagine that the Quotation which you sent was accepted by the prospect. You are now  reequired to send him a Sales Order. To make a sales order from this same Quotation, go to that Quotation page and click on Make Sales Order.
 
-![Sales Order](img/thirddaysetup_sales_order.png)
+![Sales Order](img/thirddaysetup-sales-order.png)
 
 You can also generate a Sales Order directly from the Selling Page.
 
@@ -65,7 +65,7 @@ You can also generate a Sales Order directly from the Selling Page.
 If your organisation has the practice of sending Delivery Note, this section will be helpful. To create a Delivery Note from the a Sales Order, go to that Sales Order and click on Make Delivery.
 
 
-![Delivery Note](img/thirddaysetup_delivery_note.png)
+![Delivery Note](img/thirddaysetup-delivery-note.png)
 
 > To understand Delivery Note in detail, visit [Delivery Note](docs.user.stock.delivery_note.html)
 
@@ -74,7 +74,7 @@ If your organisation has the practice of sending Delivery Note, this section wil
 
 Save and Submit your Delivery Note to generate a Sales Invoice. You can also generate an Invoice from Sales Order.
 
-![Sales Invoice](img/thirddaysetup_sales_invoice.png)
+![Sales Invoice](img/thirddaysetup-sales-invoice.png)
 
 <br>
 

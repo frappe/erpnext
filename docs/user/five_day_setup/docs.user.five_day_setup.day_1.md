@@ -9,7 +9,7 @@ After logging into your account you will receive a pop-up form to fill. Please f
 
 #### Form Part I
 
-![1st Form](img/firstdaysetup_1.png)
+![1st Form](img/firstdaysetup-1.png)
 <br>
 #### Form Part II
 <br>
@@ -17,7 +17,7 @@ After logging into your account you will receive a pop-up form to fill. Please f
 To understand about Company Financial Year or Fiscal Year visit [Fiscal Year](docs.user.knowledge.fiscal_year.html)
 
 
-![1st Form](img/firstdaysetup_2.png)
+![1st Form](img/firstdaysetup-2.png)
 
 After filling this form, you will get a pop-up message for completing the  set-up process. Click on the Setup button. The Setup page will appear.
 
@@ -55,7 +55,7 @@ Create a new Item. An Item is your company's product or a service.The term Item 
 
 Filling Item details is an important step in ERPNext. Do not postpone this step. After clicking on Item, make a new Item.
 
-![Item](img/firstdaysetup_item_1.png)
+![Item](img/firstdaysetup-item-1.png)
 
 To understand how to fill an Item in detail, visit [Item](docs.user.stock.item.html). Add 5 item records to ERPnext. After adding these records, go back to the Setup Page and add Suppliers.
 
@@ -65,12 +65,12 @@ To understand how to fill an Item in detail, visit [Item](docs.user.stock.item.h
 
 On the Setup page go to Supplier.
 
-![Supplier](img/firstdaysetup_supplier.png)
+![Supplier](img/firstdaysetup-supplier.png)
 <br>
 
 Suppliers are companies or individuals who provide you with products or services. They are treated in exactly the same manner as Customers in ERPNext. Create a new Supplier record.
 
-![Supplier](img/firstdaysetup_supplier_1.png)
+![Supplier](img/firstdaysetup-supplier-1.png)
 
 
 To understand how to fill Supplier details, visit [Supplier](docs.user.buying.supplier.html). 

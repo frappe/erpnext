@@ -12,7 +12,7 @@ Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool 
 
 To go to Bill of Materials, Click on Manufacturing. On the Manufacturing page, click on Bill of Materials.
 
-![Bill of Materials](img/fourthdaysetup_bom.png)
+![Bill of Materials](img/fourthdaysetup-bom.png)
 
 <br>
 
@@ -22,7 +22,7 @@ To go to Bill of Materials, Click on Manufacturing. On the Manufacturing page, c
 
 To go to Production Planning Tool, click on the Manufacturing Icon. On the Manufacturing Page, click on Production Planning Tool to go to that page.
 
-![Production Planning Page](img/fourthdaysetup_ppt.png)
+![Production Planning Page](img/fourthdaysetup-ppt.png)
 
 <br>
 
@@ -57,7 +57,7 @@ To go to Stock Entry, click on the Stock Icon and go to Stock Entry.
 
 To go to Delivery Note, click on Stock. On the Stock Page, click on Delivery Note.
 
-[Delivery Note](img/fourthdaysetup_delivery_note.png)
+![Delivery Note](img/fourthdaysetup-delivery-note.png)
 
 <br>
 
