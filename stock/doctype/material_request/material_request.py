@@ -68,22 +68,14 @@ class DocType(BuyingController):
 			self.doc.status = "Draft"
 
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
-			"Cancelled"])
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 		
-		# restrict material request type
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
-		# Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
-
-
-		# Validate for items
 		pc_obj.validate_for_items(self)
-		
-		# Validate qty against SO
-		self.validate_qty_against_so()
 
+		self.validate_qty_against_so()
 	
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""

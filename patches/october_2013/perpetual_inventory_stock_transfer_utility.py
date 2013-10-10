@@ -29,9 +29,10 @@ def execute():
 		cost_center = "Default CC Ledger - NISL"
 		
 		for bin in webnotes.conn.sql("""select * from tabBin bin where ifnull(item_code, '')!='' 
-				and ifnull(warehouse, '')!='' and ifnull(actual_qty, 0) != 0
-				and (select company from tabWarehouse where name=bin.warehouse)=%s""", 
-				company[0], as_dict=1):
+				and ifnull(warehouse, '') in (%s) and ifnull(actual_qty, 0) != 0
+				and (select company from tabWarehouse where name=bin.warehouse)=%s""" %
+				(', '.join(['%s']*len(warehouse_map)), '%s'), 
+				(warehouse_map.keys() + [company[0]]), as_dict=1):
 			item_details = item_map[bin.item_code]
 			new_warehouse = warehouse_map[bin.warehouse].get("fixed_asset_warehouse") \
 				if cstr(item_details.is_asset_item) == "Yes" \
@@ -40,7 +41,8 @@ def execute():
 			if item_details.has_serial_no == "Yes":
 				serial_no = "\n".join([d[0] for d in webnotes.conn.sql("""select name 
 					from `tabSerial No` where item_code = %s and warehouse = %s 
-					and status='Available'""", (bin.item_code, bin.warehouse))])
+					and status in ('Available', 'Sales Returned')""", 
+					(bin.item_code, bin.warehouse))])
 			else:
 				serial_no = None
 			

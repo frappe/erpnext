@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
-from stock.doctype.stock_ledger_entry.stock_ledger_entry import *
+from stock.doctype.serial_no.serial_no import *
 from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 
@@ -48,7 +48,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
+		from stock.utils import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
@@ -720,6 +720,18 @@ class TestStockEntry(unittest.TestCase):
 		se.doclist[1].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoNotExistsError, se.submit)
+		
+	def test_serial_duplicate(self):
+		self._clear_stock_account_balance()
+		self.test_serial_by_series()
+		
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item With Series"
+		se.doclist[1].qty = 1
+		se.doclist[1].serial_no = "ABCD00001"
+		se.doclist[1].transfer_qty = 1
+		se.insert()
+		self.assertRaises(SerialNoDuplicateError, se.submit)
 		
 	def test_serial_by_series(self):
 		self._clear_stock_account_balance()

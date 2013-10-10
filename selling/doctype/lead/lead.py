@@ -133,4 +133,4 @@ def make_opportunity(source_name, target_doclist=None):
 			}
 		}}, target_doclist)
 		
-	return [d.fields for d in doclist]
+	return [d if isinstance(d, dict) else d.fields for d in doclist]
