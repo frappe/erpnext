@@ -298,25 +298,6 @@ class DocType(TransactionBase):
 			exact_outstanding = flt(tot_outstanding) + flt(grand_total)
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
 
-	def get_prevdoc_date(self, obj):
-		for d in getlist(obj.doclist, obj.fname):
-			date_field = None
-
-			pdoctype, pname = d.prevdoc_doctype, d.prevdoc_docname
-
-			if d.against_sales_invoice:
-				pdoctype, pname = "Sales Invoice", d.against_sales_invoice
-			elif d.against_sales_order:
-				pdoctype, pname = "Sales Order", d.against_sales_order
-
-			if pdoctype and pname:
-				if pdoctype in ["Sales Invoice", "Delivery Note"]:
-					date_field = "posting_date"
-				else:
-					date_field = "transaction_date"
-
-				d.prevdoc_date = webnotes.conn.get_value(pdoctype, pname, date_field)
-
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 

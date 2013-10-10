@@ -86,7 +86,6 @@ class DocType(SellingController):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.get_prevdoc_date(self)
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -366,7 +365,6 @@ def make_sales_invoice(source_name, target_doclist=None):
 def make_installation_note(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.prevdoc_date = source_parent.posting_date
 		target.serial_no = obj.serial_no
 	
 	doclist = get_mapped_doclist("Delivery Note", source_name, 	{

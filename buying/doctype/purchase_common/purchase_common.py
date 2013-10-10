@@ -189,10 +189,3 @@ class DocType(BuyingController):
 			if not submitted:
 				msgprint(cstr(doctype) + ": " + cstr(submitted[0][0]) 
 					+ _(" not submitted"), raise_exception=1)
-
-	def get_prevdoc_date(self, obj):
-		for d in getlist(obj.doclist, obj.fname):
-			if d.prevdoc_doctype and d.prevdoc_docname:
-				dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = %s" 
-					% (d.prevdoc_doctype, '%s'), (d.prevdoc_docname))
-				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''

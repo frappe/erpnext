@@ -185,9 +185,9 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 			if(cl[i].prevdoc_doctype == 'Material Request' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
 				prevdoc_list.push(cl[i].prevdoc_docname);
 				if(prevdoc_list.length ==1)
-					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, null,0);
 				else
-					out += make_row('', cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row('', cl[i].prevdoc_docname,null,0);
 			}
 		}
 	}

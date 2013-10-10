@@ -14,6 +14,7 @@ from controllers.stock_controller import StockController
 class WrongWarehouseCompany(Exception): pass
 
 class BuyingController(StockController):
+
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()
@@ -280,6 +281,3 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
-
-	def get_bin_details(self, arg):
-		return {"projected_qty": webnotes.conn.get_value("Bin", json.loads(arg), "projected_qty") or 0 }

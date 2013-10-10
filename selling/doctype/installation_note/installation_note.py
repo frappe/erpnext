@@ -38,7 +38,6 @@ class DocType(TransactionBase):
 		self.check_item_table()
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.get_prevdoc_date(self)
 
 	def validate_fiscal_year(self):
 		from accounts.utils import validate_fiscal_year

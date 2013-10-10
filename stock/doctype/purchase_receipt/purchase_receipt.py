@@ -59,7 +59,6 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
 		self.check_for_stopped_status(pc_obj)
 
 		# sub-contracting
