@@ -209,7 +209,7 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	return wlist
 
 def validate_warehouse_user(warehouse):
-	if webnotes.session.user=="Administrator":
+	if webnotes.session.user=="Administrator" or not warehouse:
 		return
 	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
 		where parent=%s""", warehouse)]
