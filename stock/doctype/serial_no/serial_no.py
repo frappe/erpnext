@@ -14,9 +14,9 @@ class SerialNoCannotCreateDirectError(webnotes.ValidationError): pass
 class SerialNoCannotCannotChangeError(webnotes.ValidationError): pass
 
 class DocType(StockController):
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
-		self.doclist = doclist
+		self.doclist = doclist or []
 		self.via_stock_ledger = False
 
 	def validate(self):

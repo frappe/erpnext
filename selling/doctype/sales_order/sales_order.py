@@ -202,7 +202,7 @@ class DocType(SellingController):
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.doc.name)
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			

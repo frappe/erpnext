@@ -17,9 +17,8 @@ def setup_account(args=None):
 		args = webnotes.local.form_dict
 	if isinstance(args, basestring):
 		args = json.loads(args)
-		
-	webnotes.conn.begin()
-
+	args = webnotes._dict(args)
+	
 	update_profile_name(args)
 	create_fiscal_year_and_company(args)
 	set_defaults(args)

@@ -15,6 +15,7 @@ def make_demo_app(site=None):
 	make_demo_login_page()
 	make_demo_on_login_script()
 	utilities.demo.make_demo.make(reset=False, simulate=True)
+	webnotes.destroy()
 
 def make_demo_user():
 	from webnotes.auth import _update_password

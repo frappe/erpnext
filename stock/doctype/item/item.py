@@ -14,6 +14,9 @@ from webnotes.model.controller import DocListController
 class WarehouseNotSet(Exception): pass
 
 class DocType(DocListController):
+	def onload(self):
+		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
+	
 	def autoname(self):
 		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
 			from webnotes.model.doc import make_autoname
