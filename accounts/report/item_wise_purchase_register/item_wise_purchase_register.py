@@ -81,12 +81,12 @@ def get_tax_accounts(item_list, columns):
 		if account_head not in tax_accounts:
 			tax_accounts.append(account_head)
 		
-		invoice = item_tax.setdefault(parent, {})
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
 				for item, tax_amount in item_wise_tax_detail.items():
-					invoice.setdefault(item, {})[account_head] = flt(tax_amount)
+					item_tax.setdefault(parent, {}).setdefault(item, {})[account_head] = \
+						flt(tax_amount[1])
 				
 			except ValueError:
 				continue

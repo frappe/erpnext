@@ -145,6 +145,11 @@ wn.module_page["Buying"] = [
 				route: "query-report/Purchase Order Trends",
 				doctype: "Purchase Order"
 			},
+			{
+				"label":wn._("Supplier Addresses And Contacts"),
+				route: "query-report/Supplier Addresses and Contacts",
+				doctype: "Supplier"
+			},
 		]
 	}
 ]

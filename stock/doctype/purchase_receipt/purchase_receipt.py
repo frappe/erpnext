@@ -246,26 +246,12 @@ class DocType(BuyingController):
 		
 		self.update_stock()
 
-		self.update_serial_nos()
+		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		update_serial_nos_after_submit(self, "Purchase Receipt", "purchase_receipt_details")
 
 		purchase_controller.update_last_purchase_rate(self, 1)
 		
 		self.make_gl_entries()
-		
-	def update_serial_nos(self, cancel=False):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, "Purchase Receipt", "purchase_receipt_details")
-
-		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
-			for serial_no in get_serial_nos(d.serial_no):
-				sr = webnotes.bean("Serial No", serial_no)
-				if cancel:
-					sr.doc.supplier = None
-					sr.doc.supplier_name = None
-				else:
-					sr.doc.supplier = self.doc.supplier
-					sr.doc.supplier_name = self.doc.supplier_name
-				sr.save()
 
 	def check_next_docstatus(self):
 		submit_rv = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
@@ -292,7 +278,6 @@ class DocType(BuyingController):
 		self.update_ordered_qty()
 		
 		self.update_stock()
-		self.update_serial_nos(cancel=True)
 
 		self.update_prevdoc_status()
 		pc_obj.update_last_purchase_rate(self, 0)
@@ -308,7 +293,7 @@ class DocType(BuyingController):
 
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
-			
+		
 	def get_gl_entries_for_stock(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		

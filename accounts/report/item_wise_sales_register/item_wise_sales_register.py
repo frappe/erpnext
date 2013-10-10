@@ -9,7 +9,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 	columns = get_columns()
 	last_col = len(columns)
-	
+
 	item_list = get_items(filters)
 	item_tax, tax_accounts = get_tax_accounts(item_list, columns)
 	
@@ -21,7 +21,7 @@ def execute(filters=None):
 			
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
-			
+
 		total_tax = sum(row[last_col:])
 		row += [total_tax, d.amount + total_tax]
 		
@@ -71,19 +71,19 @@ def get_tax_accounts(item_list, columns):
 	tax_details = webnotes.conn.sql("""select parent, account_head, item_wise_tax_detail
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
 		and docstatus = 1 and ifnull(account_head, '') != ''
-		and parent in (%s)""" % ', '.join(['%s']*len(item_list)), tuple([item.parent for item in item_list]))
+		and parent in (%s)""" % ', '.join(['%s']*len(item_list)), 
+		tuple([item.parent for item in item_list]))
 		
 	for parent, account_head, item_wise_tax_detail in tax_details:
 		if account_head not in tax_accounts:
 			tax_accounts.append(account_head)
-		
-		invoice = item_tax.setdefault(parent, {})
+				
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
 				for item, tax_amount in item_wise_tax_detail.items():
-					invoice.setdefault(item, {})[account_head] = flt(tax_amount)
-				
+					item_tax.setdefault(parent, {}).setdefault(item, {})[account_head] = \
+						 flt(tax_amount[1])
 			except ValueError:
 				continue
 	

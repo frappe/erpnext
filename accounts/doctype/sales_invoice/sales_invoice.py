@@ -83,7 +83,6 @@ class DocType(SellingController):
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:			
 			self.update_stock_ledger()
-			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -111,7 +110,6 @@ class DocType(SellingController):
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
 			self.update_stock_ledger()
-			self.update_serial_nos(cancel = True)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
