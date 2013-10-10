@@ -47,18 +47,7 @@
  }, 
  {
   "doctype": "DocField", 
-<<<<<<< HEAD
-  "fieldname": "price_list_section", 
-  "fieldtype": "Section Break", 
-  "label": "Price List", 
-  "options": "icon-tags"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "price_list_name", 
-=======
   "fieldname": "price_list", 
->>>>>>> 35a1392... [price list] added button to route to reportview of item price
   "fieldtype": "Link", 
   "in_filter": 1, 
   "in_list_view": 1, 
@@ -91,13 +80,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "item_section", 
-  "fieldtype": "Section Break", 
-  "label": "Item", 
-  "options": "icon-tag"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -124,34 +106,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "item_col_break", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-<<<<<<< HEAD
-=======
-  "fieldname": "buying_or_selling", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Valid for Buying or Selling?", 
-  "options": "Buying\nSelling", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "currency", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "label": "Currency", 
-  "options": "Currency", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
->>>>>>> 35a1392... [price list] added button to route to reportview of item price
   "fieldname": "item_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
