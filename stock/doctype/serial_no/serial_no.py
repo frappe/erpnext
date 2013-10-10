@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, getdate, nowdate, cstr, flt, add_days
+from webnotes.utils import cint, getdate, cstr, flt, add_days
 import datetime
 from webnotes import msgprint, _, ValidationError
 

@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import cint, flt, getdate, cstr
+from webnotes import msgprint
+from webnotes.utils import flt, getdate
 from webnotes.model.controller import DocListController
 
 class DocType(DocListController):
@@ -52,7 +52,7 @@ class DocType(DocListController):
 					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
 					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
 
-				sself.doc.fields.pop('batch_bal')
+				self.doc.fields.pop('batch_bal')
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
