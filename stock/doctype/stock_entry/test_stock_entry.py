@@ -44,9 +44,10 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_warehouse_company_validation(self):
 		self._clear_stock_account_balance()
-		webnotes.session.user = "test2@example.com"
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			
+		webnotes.session.user = "test2@example.com"
 
 		from stock.utils import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
@@ -59,13 +60,13 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_user(self):
 		from stock.utils import UserNotAllowedForWarehouse
 
-		webnotes.session.user = "test@example.com"
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-
+			
+		webnotes.session.user = "test@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"

@@ -14,10 +14,6 @@ class DocType(DocListController):
 
 	def validate(self):
 		from stock.utils import validate_warehouse_user, validate_warehouse_company
-		if not hasattr(webnotes, "new_stock_ledger_entries"):
-			webnotes.new_stock_ledger_entries = []
-			
-		webnotes.new_stock_ledger_entries.append(self.doc)
 		self.validate_mandatory()
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
@@ -52,7 +48,7 @@ class DocType(DocListController):
 					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
 					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
 
-				sself.doc.fields.pop('batch_bal')
+				self.doc.fields.pop('batch_bal')
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']

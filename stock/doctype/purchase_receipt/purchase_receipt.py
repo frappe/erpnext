@@ -242,7 +242,7 @@ class DocType(BuyingController):
 		self.update_stock()
 
 		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-		update_serial_nos_after_submit(self, "Purchase Receipt", "purchase_receipt_details")
+		update_serial_nos_after_submit(self, "purchase_receipt_details")
 
 		purchase_controller.update_last_purchase_rate(self, 1)
 		
