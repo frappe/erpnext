@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 
@@ -280,3 +280,6 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
+
+	def get_bin_details(self, arg):
+		return {"projected_qty": webnotes.conn.get_value("Bin", json.loads(arg), "projected_qty") or 0 }

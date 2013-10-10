@@ -264,13 +264,7 @@ class DocType(SellingController):
 
 	def get_adj_percent(self, arg=''):
 		"""Fetch ref rate from item master as per selected price list"""
-		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_rate(self,arg):
-		"""Get tax rate if account type is tax"""
-		get_obj('Sales Common').get_rate(arg)
-		
+		get_obj('Sales Common').get_adj_percent(self)		
 		
 	def get_comm_rate(self, sales_partner):
 		"""Get Commission rate of Sales Partner"""

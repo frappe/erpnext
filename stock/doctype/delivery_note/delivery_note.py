@@ -66,9 +66,6 @@ class DocType(SellingController):
 		"""Re-calculates Basic Rate & amount based on Price List Selected"""
 		get_obj('Sales Common').get_adj_percent(self)
 
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if webnotes.conn.get_value("Selling Settings", None, 'so_required') == 'Yes':

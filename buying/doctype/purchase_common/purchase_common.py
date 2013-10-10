@@ -36,13 +36,6 @@ class DocType(BuyingController):
 			msgprint("Supplier : %s does not exists" % (name))
 			raise Exception
 	
-	# Get Available Qty at Warehouse
-	def get_bin_details( self, arg = ''):
-		arg = eval(arg)
-		bin = webnotes.conn.sql("select projected_qty from `tabBin` where item_code = %s and warehouse = %s", (arg['item_code'], arg['warehouse']), as_dict=1)
-		ret = { 'projected_qty' : bin and flt(bin[0]['projected_qty']) or 0 }
-		return ret
-
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""
 		
@@ -196,14 +189,6 @@ class DocType(BuyingController):
 			if not submitted:
 				msgprint(cstr(doctype) + ": " + cstr(submitted[0][0]) 
 					+ _(" not submitted"), raise_exception=1)
-
-	def get_rate(self, arg, obj):
-		arg = eval(arg)
-		rate = webnotes.conn.sql("select account_type, tax_rate from `tabAccount` where name = %s" 
-			, (arg['account_head']), as_dict=1)
-		
-		return {'rate':	rate and (rate[0]['account_type'] == 'Tax' \
-			and not arg['charge_type'] == 'Actual') and flt(rate[0]['tax_rate']) or 0 }
 
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):

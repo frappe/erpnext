@@ -6,11 +6,7 @@ import webnotes
 from webnotes.utils import cint
 from webnotes.model.controller import DocListController
 
-class DocType(DocListController):
-	def get_rate(self, arg):
-		from webnotes.model.code import get_obj
-		return get_obj('Sales Common').get_rate(arg)
-		
+class DocType(DocListController):		
 	def validate(self):
 		if self.doc.is_default == 1:
 			webnotes.conn.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 

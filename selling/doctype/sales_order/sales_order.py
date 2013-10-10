@@ -38,9 +38,6 @@ class DocType(SellingController):
 	def get_available_qty(self,args):
 		return get_obj('Sales Common').get_available_qty(eval(args))
 	
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:

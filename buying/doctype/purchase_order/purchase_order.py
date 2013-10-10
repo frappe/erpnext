@@ -65,10 +65,6 @@ class DocType(BuyingController):
 			}
 		})
 
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
-
 	def get_schedule_dates(self):
 		for d in getlist(self.doclist, 'po_details'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
@@ -185,9 +181,6 @@ class DocType(BuyingController):
 	def on_update(self):
 		pass
 		
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-
 @webnotes.whitelist()
 def make_purchase_receipt(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
