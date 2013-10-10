@@ -6,8 +6,8 @@ import webnotes, os
 import utilities.demo.make_demo
 
 def make_demo_app(site=None):
-	webnotes.flags.mute_emails = 1
 	webnotes.init(site=site)
+	webnotes.flags.mute_emails = 1
 
 	utilities.demo.make_demo.make(reset=True, simulate=False)
 	# setup demo user etc so that the site it up faster, while the data loads

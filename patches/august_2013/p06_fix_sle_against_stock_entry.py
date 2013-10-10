@@ -1,10 +1,9 @@
 import webnotes
 
-cancelled = []
-uncancelled = []
-
 def execute():
-	global cancelled, uncancelled
+	cancelled = []
+	uncancelled = []
+
 	stock_entries = webnotes.conn.sql("""select * from `tabStock Entry` 
 		where docstatus >= 1 and date(modified) >= "2013-08-16" 
 		and ifnull(production_order, '') != '' and ifnull(bom_no, '') != '' 
@@ -17,14 +16,12 @@ def execute():
 					where voucher_type='Stock Entry' and voucher_no=%s
 					and is_cancelled='No'""", entry.name, as_dict=True)
 				if res:
-					make_stock_entry_detail(entry, res)
+					make_stock_entry_detail(entry, res, cancelled, uncancelled)
 				
 	if cancelled or uncancelled:
-		send_email()
+		send_email(cancelled, uncancelled)
 			
-def make_stock_entry_detail(entry, res):
-	global cancelled, uncancelled
-	
+def make_stock_entry_detail(entry, res, cancelled, uncancelled):
 	fg_item = webnotes.conn.get_value("Production Order", entry.production_order,
 		"production_item")
 	voucher_detail_entries_map = {}
@@ -87,9 +84,8 @@ def make_stock_entry_detail(entry, res):
 
 		uncancelled.append(se.doc.name)
 		
-def send_email():
+def send_email(cancelled, uncancelled):
 	from webnotes.utils.email_lib import sendmail_to_system_managers
-	global cancelled, uncancelled
 	uncancelled = "we have undone the cancellation of the following Stock Entries through a patch:\n" + \
 		"\n".join(uncancelled) if uncancelled else ""
 	cancelled = "and cancelled the following Stock Entries:\n" + "\n".join(cancelled) \

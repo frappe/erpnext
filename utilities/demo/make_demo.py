@@ -75,7 +75,7 @@ def _simulate():
 	
 	for i in xrange(runs_for):		
 		print current_date.strftime("%Y-%m-%d")
-		webnotes.utils.current_date = current_date
+		webnotes.local.current_date = current_date
 		
 		if current_date.weekday() in (5, 6):
 			current_date = webnotes.utils.add_days(current_date, 1)
