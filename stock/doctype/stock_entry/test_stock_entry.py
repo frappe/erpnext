@@ -1,9 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt

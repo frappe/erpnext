@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-08-07 14:45:11", 
+  "modified": "2013-10-11 14:21:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -138,7 +138,7 @@
   "oldfieldname": "item_name", 
   "oldfieldtype": "Data", 
   "print_width": "100px", 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 1, 
   "width": "100px"
  }, 

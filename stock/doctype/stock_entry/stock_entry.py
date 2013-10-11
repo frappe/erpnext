@@ -472,68 +472,16 @@ class DocType(StockController):
 		self.get_stock_and_rate()
 	
 	def get_bom_raw_materials(self, qty):
-		""" 
-			get all items from flat bom except 
-			child items of sub-contracted and sub assembly items 
-			and sub assembly items itself.
-		"""
+		from manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		
 		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = {}
+		item_dict = get_bom_items_as_dict(self.doc.bom_no, qty=qty, fetch_exploded = self.doc.use_multi_level_bom)
 		
-		def _make_items_dict(items_list):
-			"""makes dict of unique items with it's qty"""
-			for item in items_list:
-				if item_dict.has_key(item.item_code):
-					item_dict[item.item_code]["qty"] += flt(item.qty)
-				else:
-					item_dict[item.item_code] = {
-						"qty": flt(item.qty), 
-						"description": item.description, 
-						"stock_uom": item.stock_uom,
-						"from_warehouse": item.default_warehouse
-					}
-		
-		if self.doc.use_multi_level_bom:
-			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = webnotes.conn.sql("""select 
-					fb.item_code, 
-					ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, 
-					fb.description, 
-					fb.stock_uom,
-					it.default_warehouse
-				from 
-					`tabBOM Explosion Item` fb,`tabItem` it 
-				where 
-					it.name = fb.item_code 
-					and ifnull(it.is_pro_applicable, 'No') = 'No'
-					and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
-					and fb.docstatus < 2 
-					and fb.parent=%s group by item_code, stock_uom""", 
-				(qty, self.doc.bom_no), as_dict=1)
-			
-			if fl_bom_sa_child_item:
-				_make_items_dict(fl_bom_sa_child_item)
-		else:
-			# get only BOM items
-			fl_bom_sa_items = webnotes.conn.sql("""select 
-					`tabItem`.item_code,
-					ifnull(sum(`tabBOM Item`.qty_consumed_per_unit), 0) *%s as qty,
-					`tabItem`.description, 
-					`tabItem`.stock_uom,
-					`tabItem`.default_warehouse
-				from 
-					`tabBOM Item`, `tabItem`
-				where 
-					`tabBOM Item`.parent = %s and 
-					`tabBOM Item`.item_code = tabItem.name and
-					`tabBOM Item`.docstatus < 2 
-				group by item_code""", (qty, self.doc.bom_no), as_dict=1)
-			
-			if fl_bom_sa_items:
-				_make_items_dict(fl_bom_sa_items)
+		for item in item_dict.values():
+			item.from_warehouse = item.default_warehouse
 			
 		return item_dict
-	
+			
 	def get_pending_raw_materials(self, pro_obj):
 		"""
 			issue (item quantity) that is pending to issue or desire to transfer,
