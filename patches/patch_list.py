@@ -221,4 +221,5 @@ patch_list = [
 	"patches.september_2013.p05_fix_customer_in_pos",
 	"patches.october_2013.fix_is_cancelled_in_sle",
 	"patches.october_2013.repost_ordered_qty",
+	"patches.october_2013.repost_planned_qty",
 ]
