@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:46:17", 
+  "modified": "2013-10-11 13:18:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -272,7 +272,6 @@
   "width": "100px"
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which customer's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 

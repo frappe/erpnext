@@ -21,8 +21,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				company: wn.defaults.get_default("company"),
 				fiscal_year: wn.defaults.get_default("fiscal_year"),
 				is_subcontracted: "No",
-				conversion_rate: 1.0,
-				plc_conversion_rate: 1.0
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
@@ -131,10 +129,16 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
+			var company_currency = this.get_company_currency();
 			if(!this.frm.doc.currency) {
-				this.frm.set_value("currency", this.get_company_currency());
+				this.frm.set_value("currency", company_currency);
 			}
 			
+			if(this.frm.doc.currency == company_currency)
+				this.frm.set_value("conversion_rate", 1.0);
+			if(this.frm.doc.price_list_currency == company_currency)
+				this.frm.set_value('plc_conversion_rate', 1.0);
+
 			this.frm.script_manager.trigger("currency");
 		}
 	},
@@ -233,29 +237,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	// serial_no: function(doc, cdt, cdn) {
-	// 	var me = this;
-	// 	var item = wn.model.get_doc(cdt, cdn);
-	// 	if (!item.item_code) {
-	// 		wn.call({
-	// 			method: 'accounts.doctype.sales_invoice.pos.get_item_from_serial_no',
-	// 			args: {serial_no: this.serial_no.$input.val()},
-	// 			callback: function(r) {
-	// 				if (r.message) {
-	// 					var item_code = r.message[0].item_code;
-	// 					var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
-	// 						this.frm.cscript.fname);
-	// 							child.item_code = item_code;
-	// 							me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
-	// 				}
-	// 				else
-	// 					msgprint(wn._("Invalid Serial No."));
-	// 				me.refresh();
-	// 			}
-	// 		});
-	// 	}
-	// },
-	
 	row_id: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);
 		try {
@@ -486,12 +467,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		
 		var company_currency = this.get_company_currency();
-		var valid_conversion_rate = this.frm.doc.conversion_rate ?
-			((this.frm.doc.currency == company_currency && this.frm.doc.conversion_rate == 1.0) ||
-			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
-			false;
 		
-		if(!valid_conversion_rate) {
+		if(!this.frm.doc.conversion_rate) {
 			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
 				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
 		}
