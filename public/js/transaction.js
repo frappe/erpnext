@@ -39,18 +39,19 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.customer) {
-			var me = this;
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "onload_post_render",
-				freeze: true,
-				callback: function(r) {
-					// remove this call when using client side mapper
-					me.set_default_values();
-					me.set_dynamic_labels();
-				}
-			});
+		if(this.frm.doc.__islocal && this.frm.doc.company && 
+			!this.frm.doc.customer && !this.frm.doc.is_pos) {
+				var me = this;
+				return this.frm.call({
+					doc: this.frm.doc,
+					method: "onload_post_render",
+					freeze: true,
+					callback: function(r) {
+						// remove this call when using client side mapper
+						me.set_default_values();
+						me.set_dynamic_labels();
+					}
+				});
 		}
 	},
 	
@@ -130,14 +131,16 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
 			var company_currency = this.get_company_currency();
-			if(!this.frm.doc.currency) {
+			if (!this.frm.doc.currency) {
 				this.frm.set_value("currency", company_currency);
 			}
 			
-			if(this.frm.doc.currency == company_currency)
+			if (this.frm.doc.currency == company_currency) {
 				this.frm.set_value("conversion_rate", 1.0);
-			if(this.frm.doc.price_list_currency == company_currency)
+			}
+			if (this.frm.doc.price_list_currency == company_currency) {
 				this.frm.set_value('plc_conversion_rate', 1.0);
+			}
 
 			this.frm.script_manager.trigger("currency");
 		}
@@ -150,15 +153,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	currency: function() {
 		var me = this;
 		this.set_dynamic_labels();
-		
+
 		var company_currency = this.get_company_currency();
 		if(this.frm.doc.currency !== company_currency) {
 			this.get_exchange_rate(this.frm.doc.currency, company_currency, 
 				function(exchange_rate) {
-					if(exchange_rate) {
-						me.frm.set_value("conversion_rate", exchange_rate);
-						me.conversion_rate();
-					}
+					me.frm.set_value("conversion_rate", exchange_rate);
+					me.conversion_rate();
 				});
 		} else {
 			this.conversion_rate();		
@@ -172,7 +173,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-		
+
 		this.calculate_taxes_and_totals();
 	},
 	

@@ -147,7 +147,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
-
 	},
 	
 	debit_to: function() {
