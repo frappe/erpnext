@@ -394,12 +394,3 @@ def notify_errors(exceptions_list):
 
 	from webnotes.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)
-
-
-def repost():
-	"""
-	Repost everything!
-	"""
-	from webnotes.model.code import get_obj
-	for wh in webnotes.conn.sql("select name from tabWarehouse"):
-		get_obj('Warehouse', wh[0]).repost_stock()
