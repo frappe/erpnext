@@ -1,11 +1,11 @@
 ---
 {
-	"_label": "Day-2"
+	"_label": "Day-2: Setup Chart of Accounts, Opening Accounts, and HR"
 }
 ---
 
-#### Setup Page- Accounts 
-
+#### Setup Page - Accounts
+<br>
 Go to the Accounts icon and make ledgers under Chart of Accounts.
 
 ![Accounts](img/seconddaysetup-accounts.png)
@@ -21,14 +21,14 @@ Create acccounting ledgers.
 
 To begin Opening Entries, go to 'Opening Accounts and Stock' on the Setup Page. 
 
-<br>
-
 ![Ledger](img/seconddaysetup-accounts-jv.png)
 
 <br>
 
 
 To understand how to create opening entries in detail visit [Opening Entry](docs.user.setup.opening.html).
+
+<br>
 
 #### Opening Stock
 
@@ -40,6 +40,7 @@ You can upload your opening stock in the system using Stock Reconciliation. Stoc
 
 To understand Stock Opening in detail visit [Opening Stock](docs.user.accounts.opening_stock.html).
 
+<br>
 
 #### Setup Page - HR Setup
 

@@ -46,4 +46,3 @@ The setup help is divided into day-wise instructions for 5 consecutive days.
 - Projects
 - Calendar
 - Website
-
