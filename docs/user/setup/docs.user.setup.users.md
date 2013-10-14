@@ -6,7 +6,7 @@
 
 ERPNext has a role-based permission system, which means that you can assign Roles to Users, and permissions on Roles.Each ERPNext user has a Profile. The Profile contains the user’s email and authentication and can be set from:
 
-> Setup > Users and Permissions > Users
+> Setup > Profile
 
 #### Step 1: Adding a new User
 
