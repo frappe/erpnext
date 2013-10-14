@@ -10,11 +10,12 @@ Before you start managing your Operations in EPRNext, you must first become fami
 ### Test Phase
 
 - Read the Manual
+- Follow the Five-Day-Setup Module or the instructions given below.
 - Create your first Customer, Supplier and Item. Add a few more so you get familiar with them.
 - Create Customer Groups, Item Groups, Warehouses, Supplier Groups, so that you can classify your Items.
 - Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Voucher)
-- Complete a standard purchase cycle - Purchase Request > Purchase Order > Purchase Receipt > Payment (Journal Voucher).
-- Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool > Production Order > Stock Entry (issue) > Stock Entry (back-flush)
+- Complete a standard purchase cycle - Material Request > Purchase Order > Purchase Receipt > Payment (Journal Voucher).
+- Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool > Production Order > Material Issue >  Sales Return
 
 > Tip: Use the 30-day free trial at [erpnext.com](https://erpnext.com) to take your test drive.
 

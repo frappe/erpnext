@@ -15,7 +15,7 @@ ERPNext is optimized for itemized management of your sales and purchase. If you 
 
 - **Item Name:** Item name is the actual name of your product or service.
 - **Item Code:** Item Code is a short-form to denote your Item. If you have very few Items, it is advisable to keep the Item Name and the Item Code same. This helps new users to recognise and update Item details in all transactions. In case you have lot of Items with long names and the list runs in hundreds, it is advisable to code. To understand naming Item codes see [Item Codification](docs.user.setup.codification.html)
-- **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under Item Group.
+- **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under [Item Group](docs.user.stock.item_group.html)
 - **Default Unit of Measure:** This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data > UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list. 
 - **Brand:** If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.
 
@@ -91,3 +91,59 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 
 Visit [Manufacturing](docs.user.mfg.html) and [Website](docs.user.website.html) to understand these topics in detail.
+
+### Listing Item on Website
+
+To list your Item on the Website, fill the Item details and save the file. Once the file is saved, a plus (+) button will appear next to the Image icon. Click on the plus button and add your Item image. The html code will be generated automatically. 
+
+##### Step 1: Save Image
+
+![Webimage](img/item-webimage.png)
+
+<br>
+
+##### Step 2: Check the 'Show in Website' box.
+
+Under the Website section, please check the box that says 'show in Website'. Once the box is checked, the page will display other fields for entering information. 
+
+![Webimage](img/item-webimage-1.png)
+
+<br>
+
+
+##### Step 3: Enter Website Details
+
+![Webimage](img/item-webimage-2.png)
+
+
+The page name will be generated automatically. Mention the Item-Group under which the Item will be displayed.
+
+#### Item Groups
+
+Mention the Item Group under this column. If you wish to list your Item under the broad category products, name your Item Group as Products. In case you have various varieties of Item and want to classify them under different names, make Item Groups with those names and check the box that says 'show in Website'. For Example, if you wish to create a category called 'Bags', create a Item Group named Bags.
+
+
+![Item Group](img/itemgroup-webimage-bags.png)
+
+Once the Item Group is created go to the Website Settings page under Website. Enter the Label, Url, and Parent Label.
+
+
+![Item Group](img/itemgroup-website-settings.png)
+
+<br>
+
+#### Webpage labels
+
+![Webpage](img/webpage-labels.png)
+
+Add more Items under a particular Item Group.
+
+To add more Items under a certain Label, mention the Item Group on the Item Page. The Items will be added automatically on the Webpage, under the Item Group Label. For Example, To add Item-Kiddies Bag and Butterfly Print Bag, check the 'Show in Website'box. The Items will be placed under the Label Bags on the Webpage.
+
+![Item Group](img/itemgroup-websettings.png)
+
+<br>
+
+Item Group Display
+
+![Item Group Display](img/webpage-itemgroup-display.png)
