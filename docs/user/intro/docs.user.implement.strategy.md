@@ -10,6 +10,7 @@ Before you start managing your Operations in EPRNext, you must first become fami
 ### Test Phase
 
 - Read the Manual
+- Follow the Five-Day-Setup Module or the instructions given below.
 - Create your first Customer, Supplier and Item. Add a few more so you get familiar with them.
 - Create Customer Groups, Item Groups, Warehouses, Supplier Groups, so that you can classify your Items.
 - Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Voucher)

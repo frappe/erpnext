@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Day-3"
+	"_label": "Day-3: Sales Cycle and Purchase Cycle"
 }
 ---
 After completing the set-up and account opening process, it is advisable  to complete a few cycles of sales, purchase, and manufacturing process.

@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Day-4"
+	"_label": "Day-4: Manufacturing Cycle and Accounting Reports"
 }
 ---
 

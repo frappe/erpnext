@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Day-2"
+	"_label": "Day-2: Setup Chart of Accounts, Opening Accounts, and HR"
 }
 ---
 

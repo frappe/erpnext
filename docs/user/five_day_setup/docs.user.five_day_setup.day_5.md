@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Day-5"
+	"_label": "Day-5: Projects Calendar and Website"
 }
 ---
 
