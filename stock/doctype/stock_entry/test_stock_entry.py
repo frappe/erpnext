@@ -43,6 +43,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
+		set_perpetual_inventory(0)
 		self._clear_stock_account_balance()
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
@@ -58,22 +59,23 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.session.user = "Administrator"
 
 	def test_warehouse_user(self):
+		set_perpetual_inventory(0)
 		from stock.utils import UserNotAllowedForWarehouse
 
-		webnotes.session.user = "test@example.com"
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-		webnotes.session.user = "test@example.com"
 		
+		webnotes.session.user = "test@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(UserNotAllowedForWarehouse, st1.submit)
 
+		webnotes.session.user = "test2@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
