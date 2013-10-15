@@ -11,8 +11,6 @@ from setup.utils import get_company_currency
 
 from controllers.stock_controller import StockController
 
-class WrongWarehouseCompany(Exception): pass
-
 class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details

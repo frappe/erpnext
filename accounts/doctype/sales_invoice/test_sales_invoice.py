@@ -641,8 +641,8 @@ class TestSalesInvoice(unittest.TestCase):
 			
 			return new_si
 		
-		# if yearly, test 3 repetitions, else test 13 repetitions
-		count = 3 if no_of_months == 12 else 13
+		# if yearly, test 3 repetitions, else test 5 repetitions
+		count = 1 if (no_of_months == 12) else 5
 		for i in xrange(count):
 			base_si = _test(i)
 			
@@ -653,7 +653,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_serialized(self):
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		from stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
@@ -674,7 +674,7 @@ class TestSalesInvoice(unittest.TestCase):
 		return si
 			
 	def test_serialized_cancel(self):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import get_serial_nos
+		from stock.doctype.serial_no.serial_no import get_serial_nos
 		si = self.test_serialized()
 		si.cancel()
 
@@ -686,7 +686,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoStatusError, get_serial_nos
+		from stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
 		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()

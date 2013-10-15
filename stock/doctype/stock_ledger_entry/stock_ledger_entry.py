@@ -14,10 +14,7 @@ class DocType(DocListController):
 
 	def validate(self):
 		from stock.utils import validate_warehouse_user, validate_warehouse_company
-		if not hasattr(webnotes, "new_stock_ledger_entries"):
-			webnotes.new_stock_ledger_entries = []
-			
-		webnotes.new_stock_ledger_entries.append(self.doc)
+
 		self.validate_mandatory()
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
