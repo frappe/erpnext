@@ -21,13 +21,14 @@ class DocType:
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"In Process", "Completed", "Cancelled"])
 
-		if self.doc.production_item :
-			item_detail = webnotes.conn.sql("select name from `tabItem` where name = '%s' and docstatus != 2"
-			 	% self.doc.production_item, as_dict = 1)
-			if not item_detail:
-				msgprint("Item '%s' does not exist or cancelled in the system." 
-					% cstr(self.doc.production_item), raise_exception=1)
-
+		self.validate_bom_no()
+		self.validate_sales_order()
+		self.validate_warehouse()
+		
+		from utilities.transaction_base import validate_uom_is_integer
+		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
+		
+	def validate_bom_no(self):
 		if self.doc.bom_no:
 			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
@@ -37,16 +38,20 @@ class DocType:
 					May be BOM not exists or inactive or not submitted 
 					or for some other item.""" % cstr(self.doc.bom_no), raise_exception=1)
 					
+	def validate_sales_order(self):
 		if self.doc.sales_order:
 			if not webnotes.conn.sql("""select name from `tabSales Order` 
 					where name=%s and docstatus = 1""", self.doc.sales_order):
 				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
-				
+			
 			self.validate_production_order_against_so()
-
-		from utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
-
+			
+	def validate_warehouse(self):
+		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		
+		for w in [self.doc.fg_warehouse, self.doc.wip_warehouse]:
+			validate_warehouse_user(w)
+			validate_warehouse_company(w, self.doc.company)
 	
 	def validate_production_order_against_so(self):
 		# already ordered qty
@@ -116,10 +121,12 @@ class DocType:
 		"""update planned qty in bin"""
 		args = {
 			"item_code": self.doc.production_item,
+			"warehouse": self.doc.fg_warehouse,
 			"posting_date": nowdate(),
 			"planned_qty": flt(qty)
 		}
-		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(args)
+		from stock.utils import update_bin
+		update_bin(args)
 
 @webnotes.whitelist()	
 def get_item_details(item):

@@ -11,8 +11,8 @@
 ---
 Websites are a core component of any business and having a good website usually means:
 
-- Lot of money.
-- Hard to update.
+- Invest lot of money.
+- Difficult to update.
 - Not interactive.
 
 Unless you are a web designer yourself. 
@@ -29,4 +29,4 @@ We will soon be adding a shopping cart facility so that your customers can place
 
 Though not necessary, to make a good website, you might have to know a bit of HTML / CSS or hire the services of a professional. The good part is that once this is setup, you can add and edit content, blogs and products directly from your ERP.
 
-> The ERPNext website (www.erpnext.com) is generated from the Website Module! In the world of startups, its called eating-your-own-dog-food!
+> The ERPNext website (www.erpnext.com) is generated from the Website Module! In the world of startups, it's called eating-your-own-dog-food!

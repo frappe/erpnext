@@ -22,7 +22,7 @@ def get_template():
 	if not webnotes.has_permission("Attendance", "create"):
 		raise webnotes.PermissionError
 	
-	args = webnotes.form_dict
+	args = webnotes.local.form_dict
 	webnotes.local.uploadattendance_doclist = webnotes.model.doctype.get("Attendance")
 
 	w = UnicodeWriter()

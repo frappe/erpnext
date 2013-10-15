@@ -11,6 +11,10 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 
+	def validate(self):
+		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
+			self.doc.partner_website = "http://" + self.doc.partner_website
+
 	def on_update(self):
 		if cint(self.doc.show_in_website):
 			from webnotes.webutils import update_page_name

@@ -2,12 +2,13 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-09-01 05:26:13", 
+  "modified": "2013-10-03 18:54:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
@@ -411,7 +412,7 @@
   "doctype": "DocField", 
   "fieldname": "other_charges", 
   "fieldtype": "Table", 
-  "label": "Taxes and Charges1", 
+  "label": "Sales Taxes and Charges", 
   "oldfieldname": "other_charges", 
   "oldfieldtype": "Table", 
   "options": "Sales Taxes and Charges", 

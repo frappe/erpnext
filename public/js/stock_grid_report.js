@@ -29,6 +29,8 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		
 			if(add_qty)
 				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);
+				
+			if(sl.serial_no) value_diff = this.get_serialized_value_diff(sl);
 		} else {
 			// outgoing
 			if(sl.serial_no) {
@@ -98,7 +100,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		
 		$.each(sl.serial_no.trim().split("\n"), function(i, sr) {
 			if(sr) {
-				value_diff += flt(me.serialized_buying_rates[sr.trim()]);
+				value_diff += flt(me.serialized_buying_rates[sr.trim().toLowerCase()]);
 			}
 		});
 		
@@ -112,7 +114,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			if(sle.qty > 0 && sle.serial_no) {
 				$.each(sle.serial_no.trim().split("\n"), function(i, sr) {
 					if(sr && sle.incoming_rate !== undefined) {
-						serialized_buying_rates[sr.trim()] = flt(sle.incoming_rate);
+						serialized_buying_rates[sr.trim().toLowerCase()] = flt(sle.incoming_rate);
 					}
 				});
 			}

@@ -46,8 +46,7 @@ class DocType(DocTypeNestedSet):
 			return 1
 
 	def check_gle_exists(self):
-		return webnotes.conn.sql("select name from `tabGL Entry` where cost_center = %s and \
-			ifnull(is_cancelled, 'No') = 'No'", (self.doc.name))
+		return webnotes.conn.get_value("GL Entry", {"cost_center": self.doc.name})
 		
 	def check_if_child_exists(self):
 		return webnotes.conn.sql("select name from `tabCost Center` where \

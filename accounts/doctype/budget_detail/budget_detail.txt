@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:04", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:06", 
+  "modified": "2013-08-22 17:27:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,7 +20,8 @@
   "parent": "Budget Detail", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocType", 
@@ -35,7 +36,6 @@
   "oldfieldname": "account", 
   "oldfieldtype": "Link", 
   "options": "Account", 
-  "reqd": 1, 
   "search_index": 1
  }, 
  {
@@ -45,18 +45,7 @@
   "label": "Budget Allocated", 
   "oldfieldname": "budget_allocated", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "actual", 
-  "fieldtype": "Currency", 
-  "label": "Actual", 
-  "oldfieldname": "actual", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 1
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 
@@ -67,7 +56,6 @@
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "reqd": 1, 
   "search_index": 1
  }
 ]

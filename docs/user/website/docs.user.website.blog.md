@@ -11,6 +11,10 @@ To create a new blog, just create a new Blog from:
 
 > Website > Blog > New Blog
 
+
+![Blog](img/blog.png)
+
+
 You can format the blog using the same Markdown format
 
 You can access your blog by going to the page “blog.html”

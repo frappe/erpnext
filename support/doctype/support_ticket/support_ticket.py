@@ -14,7 +14,7 @@ class DocType(TransactionBase):
 	
 	def get_sender(self, comm):
 		return webnotes.conn.get_value('Email Settings',None,'support_email')
-	
+
 	def get_subject(self, comm):
 		return '[' + self.doc.name + '] ' + (comm.subject or 'No Subject Specified')
 	
@@ -35,16 +35,7 @@ class DocType(TransactionBase):
 		if self.doc.status == "Closed":
 			from webnotes.widgets.form.assign_to import clear
 			clear(self.doc.doctype, self.doc.name)
-		
-	def on_communication(self, comm):
-		if comm.sender == self.get_sender(comm) or \
-			webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
-				self.doc.status = "Waiting for Customer"
-		else:
-			self.doc.status = "Open"
-		self.update_status()
-		self.doc.save()
-		
+				
 	def set_lead_contact(self, email_id):
 		import email.utils
 		email_id = email.utils.parseaddr(email_id)

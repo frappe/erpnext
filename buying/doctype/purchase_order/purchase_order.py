@@ -41,7 +41,6 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
 		self.check_for_stopped_status(pc_obj)
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -65,10 +64,6 @@ class DocType(BuyingController):
 			}
 		})
 
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
-
 	def get_schedule_dates(self):
 		for d in getlist(self.doclist, 'po_details'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
@@ -88,6 +83,7 @@ class DocType(BuyingController):
 
 		
 	def update_bin(self, is_submit, is_stopped = 0):
+		from stock.utils import update_bin
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'
@@ -122,12 +118,13 @@ class DocType(BuyingController):
 
 				# Update ordered_qty and indented_qty in bin
 				args = {
-					"item_code" : d.item_code,
-					"ordered_qty" : (is_submit and 1 or -1) * flt(po_qty),
-					"indented_qty" : (is_submit and 1 or -1) * flt(ind_qty),
+					"item_code": d.item_code,
+					"warehouse": d.warehouse,
+					"ordered_qty": (is_submit and 1 or -1) * flt(po_qty),
+					"indented_qty": (is_submit and 1 or -1) * flt(ind_qty),
 					"posting_date": self.doc.transaction_date
 				}
-				get_obj("Warehouse", d.warehouse).update_bin(args)
+				update_bin(args)
 				
 	def check_modified_date(self):
 		mod_db = webnotes.conn.sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)
@@ -183,9 +180,6 @@ class DocType(BuyingController):
 	def on_update(self):
 		pass
 		
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-
 @webnotes.whitelist()
 def make_purchase_receipt(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist

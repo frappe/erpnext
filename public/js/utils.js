@@ -20,7 +20,7 @@ $.extend(erpnext, {
 	
 	hide_company: function() {
 		if(cur_frm.fields_dict.company) {
-			var companies = Object.keys(locals[":Company"]);
+			var companies = Object.keys(locals[":Company"] || {});
 			if(companies.length === 1) {
 				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
 				cur_frm.toggle_display("company", false);

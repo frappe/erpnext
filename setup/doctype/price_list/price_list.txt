@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-09-06 15:03:38", 
+  "modified": "2013-10-02 11:36:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -85,6 +85,7 @@
   "reqd": 1
  }, 
  {
+  "description": "To change row values, click on the respective row", 
   "doctype": "DocField", 
   "fieldname": "item_prices_section", 
   "fieldtype": "Section Break", 
@@ -93,8 +94,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item_prices_html", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "item_prices", 
   "fieldtype": "Table", 
+  "hidden": 1, 
   "label": "Item Prices", 
   "options": "Item Price"
  }, 

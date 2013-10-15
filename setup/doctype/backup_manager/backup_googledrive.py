@@ -85,6 +85,7 @@ def backup_to_gdrive():
 	webnotes.conn.close()
 	path = os.path.join(get_base_path(), "public", "files")
 	for filename in os.listdir(path):
+		filename = cstr(filename)
 		found = False
 		filepath = os.path.join(path, filename)
 		ext = filename.split('.')[-1]
@@ -113,9 +114,9 @@ def backup_to_gdrive():
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
-	import conf
+	from webnotes import conf
 	
-	if not hasattr(conf, "gdrive_client_id"):
+	if not "gdrive_client_id" in conf:
 		webnotes.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
 		raise_exception=True)
 

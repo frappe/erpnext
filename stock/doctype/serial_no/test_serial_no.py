@@ -24,6 +24,6 @@ class TestSerialNo(unittest.TestCase):
 		sr.doc.warehouse = None
 		sr.insert()
 		self.assertTrue(sr.doc.name)
-		
+
 		sr.doc.warehouse = "_Test Warehouse - _TC"
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.doc.save)

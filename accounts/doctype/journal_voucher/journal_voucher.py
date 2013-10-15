@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 from controllers.accounts_controller import AccountsController
@@ -49,7 +49,7 @@ class DocType(AccountsController):
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
 		
-		self.make_gl_entries(cancel=1)
+		self.make_gl_entries(1)
 		
 	def on_trash(self):
 		pass
@@ -255,7 +255,7 @@ class DocType(AccountsController):
 						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv,
 						"remarks": self.doc.remark,
 						"cost_center": d.cost_center
-					}, cancel)
+					})
 				)
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)

@@ -1,11 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	if (doc.item_code)
-		return get_server_fields('get_purchase_receipt_item_details','','',doc,cdt,cdn,1);
-}
-
 cur_frm.cscript.inspection_type = function(doc, cdt, cdn) {
 	if(doc.inspection_type == 'Incoming'){
 		doc.delivery_note_no = '';
@@ -30,13 +25,22 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 // item code based on GRN/DN
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
-	var filter = {};
-	if (doc.purchase_receipt_no) filter['parent'] = doc.purchase_receipt_no;
-		
-	else if (doc.delivery_note_no) filter['parent'] =  doc.delivery_note_no;
-
-	return{
-		filters: filter
+	if (doc.purchase_receipt_no) {
+		return {
+			query: "buying.doctype.quality_inspection.quality_inspection.item_query",
+			filters: {
+				"from": "Purchase Receipt Item",
+				"parent": doc.purchase_receipt_no
+			}
+		}
+	} else if (doc.delivery_note_no) {
+		return {
+			query: "buying.doctype.quality_inspection.quality_inspection.item_query",
+			filters: {
+				"from": "Delivery Note Item",
+				"parent": doc.delivery_note_no
+			}
+		}
 	}
 }
 

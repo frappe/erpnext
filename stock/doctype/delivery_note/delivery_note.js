@@ -10,6 +10,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.stock");
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
@@ -21,7 +22,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			var from_sales_invoice = false;
 			from_sales_invoice = cur_frm.get_doclist({parentfield: "delivery_note_details"})
 				.some(function(item) { 
-					return item.prevdoc_doctype==="Sales Invoice" ? true : false; 
+					return item.against_sales_invoice ? true : false; 
 				});
 			
 			if(!from_sales_invoice)
@@ -43,8 +44,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	
 		set_print_hide(doc, dt, dn);
 	
-		// unhide expense_account and cost_center is auto_inventory_accounting enabled
-		var aii_enabled = cint(sys_defaults.auto_inventory_accounting)
+		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
+		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
@@ -180,12 +181,12 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 	if(cl.length){
 		prevdoc_list = new Array();
 		for(var i=0;i<cl.length;i++){
-			if(cl[i].prevdoc_doctype == 'Sales Order' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
-				prevdoc_list.push(cl[i].prevdoc_docname);
+			if(cl[i].against_sales_order && prevdoc_list.indexOf(cl[i].against_sales_order) == -1) {
+				prevdoc_list.push(cl[i].against_sales_order);
 				if(prevdoc_list.length ==1)
-					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row("Sales Order", cl[i].against_sales_order, null, 0);
 				else
-					out += make_row('', cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row('', cl[i].against_sales_order, null,0);
 			}
 		}
 	}
@@ -201,7 +202,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-if (sys_defaults.auto_inventory_accounting) {
+if (sys_defaults.auto_accounting_for_stock) {
 
 	cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];

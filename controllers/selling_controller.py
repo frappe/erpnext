@@ -14,7 +14,10 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		
+	
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Sales Email Settings', None, 'email_id')
+	
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
@@ -23,7 +26,7 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "charge")
-		
+					
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
 			if not (self.doc.contact_person and self.doc.customer_address and self.doc.customer_name):
@@ -83,46 +86,6 @@ class SellingController(StockController):
 		if self.meta.get_field("in_words_export"):
 			self.doc.in_words_export = money_in_words(disable_rounded_total and 
 				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
-
-	def set_buying_amount(self, stock_ledger_entries = None):
-		from stock.utils import get_buying_amount, get_sales_bom_buying_amount
-		if not stock_ledger_entries:
-			stock_ledger_entries = self.get_stock_ledger_entries()
-
-		item_sales_bom = {}
-		for d in self.doclist.get({"parentfield": "packing_details"}):
-			new_d = webnotes._dict(d.fields.copy())
-			new_d.total_qty = -1 * d.qty
-			item_sales_bom.setdefault(d.parent_item, []).append(new_d)
-		
-		if stock_ledger_entries:
-			for item in self.doclist.get({"parentfield": self.fname}):
-				if item.item_code in self.stock_items or \
-						(item_sales_bom and item_sales_bom.get(item.item_code)):
-					
-					buying_amount = 0
-					if item.item_code in self.stock_items:
-						buying_amount = get_buying_amount(self.doc.doctype, self.doc.name, 
-							item.name, stock_ledger_entries.get((item.item_code, 
-								item.warehouse), []))
-					elif item_sales_bom and item_sales_bom.get(item.item_code):
-						buying_amount = get_sales_bom_buying_amount(item.item_code, item.warehouse, 
-							self.doc.doctype, self.doc.name, item.name, stock_ledger_entries, 
-							item_sales_bom)
-					
-					# buying_amount >= 0.01 so that gl entry doesn't get created for such small amounts
-					item.buying_amount = buying_amount >= 0.01 and buying_amount or 0
-					webnotes.conn.set_value(item.doctype, item.name, "buying_amount", 
-						item.buying_amount)
-						
-	def check_expense_account(self, item):
-		if item.buying_amount and not item.expense_account:
-			msgprint(_("""Expense account is mandatory for item: """) + item.item_code, 
-				raise_exception=1)
-				
-		if item.buying_amount and not item.cost_center:
-			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code, 
-				raise_exception=1)
 				
 	def calculate_taxes_and_totals(self):
 		self.other_fname = "other_charges"
@@ -273,34 +236,4 @@ class SellingController(StockController):
 			self.doc.order_type = "Sales"
 		elif self.doc.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
-				_("must be one of") + ": " + comma_or(valid_types),
-				raise_exception=True)
-				
-	def update_serial_nos(self, cancel=False):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, self.doc.doctype, self.fname)
-		update_serial_nos_after_submit(self, self.doc.doctype, "packing_details")
-
-		for table_fieldname in (self.fname, "packing_details"):
-			for d in self.doclist.get({"parentfield": table_fieldname}):
-				for serial_no in get_serial_nos(d.serial_no):
-					sr = webnotes.bean("Serial No", serial_no)
-					if cancel:
-						sr.doc.status = "Available"
-						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
-							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
-							"customer_name"):
-							sr.doc.fields[fieldname] = None
-					else:
-						sr.doc.delivery_document_type = self.doc.doctype
-						sr.doc.delivery_document_no = self.doc.name
-						sr.doc.delivery_date = self.doc.posting_date
-						sr.doc.delivery_time = self.doc.posting_time
-						sr.doc.customer = self.doc.customer
-						sr.doc.customer_name	= self.doc.customer_name
-						if sr.doc.warranty_period:
-							sr.doc.warranty_expiry_date = add_days(cstr(self.doc.posting_date), 
-								cint(sr.doc.warranty_period))
-						sr.doc.status =	'Delivered'
-
-					sr.save()
+				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)

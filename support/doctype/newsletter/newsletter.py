@@ -90,8 +90,8 @@ class DocType():
 			webnotes.msgprint(_("""Please save the Newsletter before sending."""),
 				raise_exception=1)
 
-		import conf
-		if getattr(conf, "status", None) == "Trial":
+		from webnotes import conf
+		if (conf.get("status") or None) == "Trial":
 			webnotes.msgprint(_("""Sending newsletters is not allowed for Trial users, \
 				to prevent abuse of this feature."""), raise_exception=1)
 

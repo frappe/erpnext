@@ -9,6 +9,7 @@ from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, cint
 from stock.stock_ledger import update_entries_after
 from controllers.stock_controller import StockController
+from stock.utils import update_bin
 
 class DocType(StockController):
 	def setup(self):
@@ -17,14 +18,14 @@ class DocType(StockController):
 		
 	def validate(self):
 		self.validate_data()
+		self.validate_expense_account()
 		
 	def on_submit(self):
 		self.insert_stock_ledger_entries()
-		self.set_stock_value_difference()
 		self.make_gl_entries()
 		
 	def on_cancel(self):
-		self.delete_stock_ledger_entries()
+		self.delete_and_repost_sle()
 		self.make_cancel_gl_entries()
 		
 	def validate_data(self):
@@ -56,7 +57,6 @@ class DocType(StockController):
 		if len(rows) > 100:
 			msgprint(_("""Sorry! We can only allow upto 100 rows for Stock Reconciliation."""),
 				raise_exception=True)
-		
 		for row_num, row in enumerate(rows):
 			# find duplicates
 			if [row[0], row[1]] in item_warehouse_combinations:
@@ -88,7 +88,7 @@ class DocType(StockController):
 				msgprint(msg)
 			
 			raise webnotes.ValidationError
-			
+						
 	def validate_item(self, item_code, row_num):
 		from stock.utils import validate_end_of_life, validate_is_stock_item, \
 			validate_cancelled_item
@@ -244,33 +244,27 @@ class DocType(StockController):
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
 			"stock_uom": webnotes.conn.get_value("Item", row.item_code, "stock_uom"),
-			"is_cancelled": "No",
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
+			"is_cancelled": "No"
 		})
 		args.update(opts)
-		# create stock ledger entry
-		sle_wrapper = webnotes.bean([args])
-		sle_wrapper.ignore_permissions = 1
-		sle_wrapper.insert()
-		
-		# update bin
-		webnotes.get_obj('Warehouse', row.warehouse).update_bin(args)
-		
+		self.make_sl_entries([args])
+
 		# append to entries
 		self.entries.append(args)
 		
-	def delete_stock_ledger_entries(self):
-		"""	Delete Stock Ledger Entries related to this Stock Reconciliation
+	def delete_and_repost_sle(self):
+		"""	Delete Stock Ledger Entries related to this voucher
 			and repost future Stock Ledger Entries"""
-					
-		existing_entries = webnotes.conn.sql("""select item_code, warehouse 
-			from `tabStock Ledger Entry` where voucher_type='Stock Reconciliation' 
-			and voucher_no=%s""", self.doc.name, as_dict=1)
+				
+		existing_entries = webnotes.conn.sql("""select distinct item_code, warehouse 
+			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
+			(self.doc.doctype, self.doc.name), as_dict=1)
 				
 		# delete entries
 		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
-			where voucher_type='Stock Reconciliation' and voucher_no=%s""", self.doc.name)
+			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
 		
 		# repost future entries for selected item_code, warehouse
 		for entries in existing_entries:
@@ -281,36 +275,27 @@ class DocType(StockController):
 				"posting_time": self.doc.posting_time
 			})
 			
-	def set_stock_value_difference(self):
-		"""stock_value_difference is the increment in the stock value"""
-		from stock.utils import get_buying_amount
+	def get_gl_entries_for_stock(self, warehouse_account=None):
+		if not self.doc.cost_center:
+			msgprint(_("Please enter Cost Center"), raise_exception=1)
+			
+		return super(DocType, self).get_gl_entries_for_stock(warehouse_account, 		
+			self.doc.expense_account, self.doc.cost_center)
 		
-		item_list = [d.item_code for d in self.entries]
-		warehouse_list = [d.warehouse for d in self.entries]
-		if not (item_list and warehouse_list):
-			webnotes.throw(_("Invalid Item or Warehouse Data"))
-		
-		stock_ledger_entries = self.get_stock_ledger_entries(item_list, warehouse_list)
-		
-		self.doc.stock_value_difference = 0.0
-		for d in self.entries:
-			self.doc.stock_value_difference -= get_buying_amount(self.doc.doctype, self.doc.name,
-				d.voucher_detail_no, stock_ledger_entries.get((d.item_code, d.warehouse), []))
-		webnotes.conn.set(self.doc, "stock_value_difference", self.doc.stock_value_difference)
-		
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
+			
+	def validate_expense_account(self):
+		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
 			return
-		
+			
 		if not self.doc.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
-			
-		from accounts.general_ledger import make_gl_entries
-				
-		gl_entries = self.get_gl_entries_for_stock(self.doc.expense_account, 
-			self.doc.stock_value_difference)
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=self.doc.docstatus == 2)
+		elif not webnotes.conn.sql("""select * from `tabStock Ledger Entry`"""):
+			if webnotes.conn.get_value("Account", self.doc.expense_account, 
+					"is_pl_account") == "Yes":
+				msgprint(_("""Expense Account can not be a PL Account, as this stock \
+					reconciliation is an opening entry. \
+					Please select 'Temporary Account (Liabilities)' or relevant account"""), 
+					raise_exception=1)
 		
 @webnotes.whitelist()
 def upload():

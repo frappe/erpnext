@@ -8,13 +8,13 @@
 	]
 }
 ---
-The Manufacturing module in ERPNext helps you to maintain multi-level Bill of Materials (BOMs) for your Items. It helps you in Product Costing, planing your production via Production Plan, creating Production Orders for your manufacturing shop floor,s and planing your inventory by getting your material requirement via BOMs (also called Material Requirements Planning MRP).
+The Manufacturing module in ERPNext helps you to maintain multi-level Bill of Materials (BOMs) for your Items. It helps you in Product Costing, planing your production via Production Plan, creating Production Orders for your manufacturing shop floors and planing your inventory by getting your material requirement via BOMs (also called Material Requirements Planning MRP).
 
 ### Types of Production Planning
 
 Broadly there are three types of Production Planning Systems
 
-- Make-to-Stock: In these systems, production is planned based on a forecast and then the Items are sold to distributors or customers. All fast moving consumer goods that are sold in retail shops like soaps, packaged water etc and electronics like phones etc are Made to Stock.
+- Make-to-Stock: In these systems, production is planned based on a forecast and the Items are then sold to distributors or customers. All fast moving consumer goods that are sold in retail shops like soaps, packaged water etc and electronics like phones etc are Made to Stock.
 - Make-to-Order: In these systems, manufacturing takes place after a firm order is placed by a Customer.
 - Engineer-to-Order:  In this case each sale is a separate Project and has to be designed and engineered to the requirements of the Customer. Common examples of this are any custom business like furniture, machine tools, speciality devices, metal fabrication etc.
 
@@ -26,7 +26,7 @@ For engineer-to-order systems, the Manufacturing module should be used along wit
 ￼
 You can track work-in-progress by creating work-in-progress Warehouses. 
 
-ERPNext will help you track material movement by automatically creating Stock Entries from your Production Orders by building form Bill of Materials.
+ERPNext will help you track material movement by automatically creating Stock Entries from your Production Orders by building from Bill of Materials.
 
 
 ---
@@ -35,7 +35,7 @@ ERPNext will help you track material movement by automatically creating Stock En
 
 The earliest ERP systems were made for manufacturing. The earliest adopters were automobile companies who had thousands of raw materials and sub-assemblies and found it very hard to keep track of requirements and plan purchases. They started using computers to build the material requirements from forecasts and Bill of Materials. 
 
-Later these systems were expanded to include Financial, Payroll, Order Processing and Purchasing and became the more generic Enterprise Resource Systems (ERP). More recently Customer Relationship Management (CRM) was added as a function and is now an integral part of ERP systems.
+Later these systems were expanded to include Finances, Payroll, Order Processing, and Purchasing and thus became the more generic Enterprise Resource Systems (ERP). More recently Customer Relationship Management (CRM) was added as a function and is now an integral part of ERP systems.
 
 These days the term ERP is used to describe systems that help manage any kind of organization like education institutes (Education ERP) or Hospitals (Hospital ERP) and so on. 
 
@@ -43,7 +43,7 @@ These days the term ERP is used to describe systems that help manage any kind of
 
 ### Best Practice: Lean Manufacturing
 
-The state of art manufacturing philosophy (the rationale behind the planning processes) comes from Japanese auto major Toyota. At the time when American manufacturers depended on MRP systems to plan their manufacturing based on their sales forecasts, they turned the problem on its head and discovered a leaner way of planning their production. They realized that:
+The state of art manufacturing philosophy (the rationale behind the planning processes) comes from Japanese auto major Toyota. At the time when American manufacturers depended on MRP systems to plan their manufacturing based on their sales forecasts, they turned around the problem by discovering a leaner way of planning their production. They realized that:
 
 The biggest cause of wastage in manufacturing is variation (in product and quantity).
 
@@ -53,6 +53,4 @@ Their card signaling system kanban, would notify all their suppliers to stop pro
 
 They combined this system with neatly managed factories with well labeled racks.
 
-Like we discussed before, small manufacturing companies are usually make-to-order or engineer-to-order and can hardly afford to have a high level of standardization. But that should be the aim. Small manufacturing businesses should aim for repeatability by innovating processes so that there is a common platform for products.
-
-
+Small manufacturing companies are usually make-to-order or engineer-to-order and can hardly afford to have a high level of standardization. Thus small manufacturing businesses should aim for repeatability by innovating processes and creating a common platform for products.

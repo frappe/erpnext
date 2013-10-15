@@ -53,6 +53,11 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 			this.frm.set_query("contact_by", erpnext.queries.profile);
 		}
 		
+		this.frm.set_query("customer_address", function() {
+			if(me.frm.doc.lead) return {filters: { lead: me.frm.doc.lead } };
+			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
+		});
+		
 		this.frm.set_query("item_code", "enquiry_details", function() {
 			return {
 				query: "controllers.queries.item_query",
@@ -63,7 +68,6 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["customer_address", "customer_filter"], 
 			["contact_person", "customer_filter"],
 			["territory", "not_a_group_filter"]], function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
@@ -97,20 +101,13 @@ $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
-
-	cur_frm.dashboard.reset(doc);
-	if(!doc.__islocal) {
-		if(doc.status=="Converted" || doc.status=="Order Confirmed") {
-			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
-		} else if(doc.status=="Opportunity Lost") {
-			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-		}
-	}
 	
 	cur_frm.clear_custom_buttons();
-	if(doc.docstatus === 1 && doc.status!=="Opportunity Lost") {
+	if(doc.docstatus === 1 && doc.status!=="Lost") {
 		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript.create_quotation);
-		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
+		if(doc.status!=="Quotation") {
+			cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
+		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 	
@@ -151,8 +148,14 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 	}
 }
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
-	if(doc.customer) return get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc, dt, dn) {
+	args = {
+		address: doc.customer_address, 
+		contact: doc.contact_person
+	}
+	if(doc.customer) args.update({customer: doc.customer});
+	
+	return get_server_fields('get_customer_address', JSON.stringify(args),'', doc, dt, dn, 1);
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
@@ -163,7 +166,7 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 		source_name: cur_frm.doc.lead
 	})
 	
-	unhide_field(['customer_name', 'address_display','contact_mobile', 
+	unhide_field(['customer_name', 'address_display','contact_mobile', 'customer_address', 
 		'contact_email', 'territory']);	
 }
 

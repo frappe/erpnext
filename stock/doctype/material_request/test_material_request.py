@@ -10,7 +10,7 @@ from webnotes.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
-		webnotes.defaults.set_global_default("auto_inventory_accounting", 0)
+		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 	def test_make_purchase_order(self):
 		from stock.doctype.material_request.material_request import make_purchase_order
@@ -315,10 +315,10 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertRaises(webnotes.MappingMismatchError, se.insert)
 		
 	def test_warehouse_company_validation(self):
-		from controllers.buying_controller import WrongWarehouseCompany
+		from stock.utils import InvalidWarehouseCompany
 		mr = webnotes.bean(copy=test_records[0])
 		mr.doc.company = "_Test Company 1"
-		self.assertRaises(WrongWarehouseCompany, mr.insert)
+		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
 test_dependencies = ["Currency Exchange"]
 test_records = [

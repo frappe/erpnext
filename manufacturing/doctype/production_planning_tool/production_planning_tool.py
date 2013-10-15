@@ -215,14 +215,14 @@ class DocType:
 			pro = webnotes.new_bean("Production Order")
 			pro.doc.fields.update(items[key])
 			
-			webnotes.mute_messages = True
+			webnotes.flags.mute_messages = True
 			try:
 				pro.insert()
 				pro_list.append(pro.doc.name)
 			except OverProductionError, e:
 				pass
 				
-			webnotes.mute_messages = False
+			webnotes.flags.mute_messages = False
 			
 		return pro_list
 

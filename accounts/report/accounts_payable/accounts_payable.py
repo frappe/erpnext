@@ -73,7 +73,7 @@ def get_gl_entries(filters, before_report_date=True):
 	conditions, supplier_accounts = get_conditions(filters, before_report_date)
 	gl_entries = []
 	gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
-		where ifnull(is_cancelled, 'No') = 'No' %s order by posting_date, account""" % 
+		where docstatus < 2 %s order by posting_date, account""" % 
 		(conditions), tuple(supplier_accounts), as_dict=1)
 	return gl_entries
 	
@@ -126,7 +126,7 @@ def get_outstanding_amount(gle, report_date):
 		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		from `tabGL Entry` 
 		where account = %s and posting_date <= %s and against_voucher_type = %s 
-		and against_voucher = %s and name != %s and ifnull(is_cancelled, 'No') = 'No'""", 
+		and against_voucher = %s and name != %s""", 
 		(gle.account, report_date, gle.voucher_type, gle.voucher_no, gle.name))[0][0]
 		
 	outstanding_amount = flt(gle.credit) - flt(gle.debit) - flt(payment_amount)

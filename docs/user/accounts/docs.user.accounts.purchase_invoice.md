@@ -44,7 +44,7 @@ To see entries in your Purchase Invoice after you “Submit”, click on “View
 
 ---
 
-#### Is a purchase an “Expense” or “Asset”?
+#### Is purchase an “Expense” or an “Asset”?
 
 If the Item is consumed immediately on purchase, or if it is a service, then the purchase becomes an “Expense”. For example, a telephone bill or travel bill is an “Expense” - it is already consumed.
 

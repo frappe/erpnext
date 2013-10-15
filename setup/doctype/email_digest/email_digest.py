@@ -362,8 +362,8 @@ class DocType(DocListController):
 		gl_entries = webnotes.conn.sql("""select `account`, 
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
-			where company=%s and ifnull(is_cancelled, "No")="No" and
-			posting_date <= %s %s""" % ("%s", "%s", 
+			where company=%s 
+			and posting_date <= %s %s""" % ("%s", "%s", 
 			from_date and "and posting_date>='%s'" % from_date or ""),
 			(self.doc.company, to_date or self.to_date), as_dict=1)
 		
@@ -457,8 +457,8 @@ def send():
 	from webnotes.utils import getdate
 	now_date = now_datetime().date()
 	
-	import conf
-	if hasattr(conf, "expires_on") and now_date > getdate(conf.expires_on):
+	from webnotes import conf
+	if "expires_on" in conf and now_date > getdate(conf.expires_on):
 		# do not send email digests to expired accounts
 		return
 	

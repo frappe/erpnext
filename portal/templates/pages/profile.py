@@ -7,6 +7,7 @@ from webnotes import _
 from webnotes.utils import cstr
 
 no_cache = True
+no_sitemap = True
 
 def get_context():
 	from selling.utils.cart import get_lead_or_customer
@@ -33,7 +34,7 @@ def update_profile(fullname, password=None, company_name=None, mobile_no=None, p
 		return _("Name is required")
 		
 	webnotes.conn.set_value("Profile", webnotes.session.user, "first_name", fullname)
-	webnotes.add_cookies["full_name"] = fullname
+	webnotes._response.set_cookie("full_name", fullname)
 	
 	return _("Updated")
 	

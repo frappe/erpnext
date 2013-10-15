@@ -36,7 +36,25 @@ Note: Make sure to set “Is Opening” as “Yes” in the More Info section.
 > Setup > Opening Accounts and Stock > Opening Accounting Entries.
 
 
+
+#### Step 1: Select Opening Entry in the Voucher Type section.
+
 ![Opening Entry](img/opening-entry.png)
+
+<br>
+
+#### Step 2: Complete Journal Entries on the Debit and Credit side. 
+
+
+![Opening Entry](img/opening-entry-1.png)
+
+<br>
+
+
+#### Step 2: Select Yes in the "Is Opening " record under More Info.
+
+
+![Opening Entry](img/opening-entry-2.png)
 
 
 
@@ -44,6 +62,13 @@ You can make two Opening Journal Vouchers:
 
 - For all assets (excluding Accounts Receivables): This entry will contain all your assets except the amounts you are expecting from your Customers against outstanding Sales Invoices. You will have to update your receivables by making an individual entry for each Invoice (this is because, the system will help you track the invoices which are yet to be paid). Since all the entries in this voucher will be of type “Debit”, you can credit the sum of all these debits against the “Temp Opening Liabilities” account.
 - For all liabilities: Similarly you need to pass a Journal Voucher for your Opening Liabilities (except for the bills you have to pay). This can be made against the “Temp Opening Assets” account.
+
+After completing the accounting entries, the trial balance report will look like the one given below:
+
+
+![Trial Balance](img/trial-balance-1.png)
+
+
 
 #### Outstanding Invoices
 
@@ -57,21 +82,3 @@ If you don’t care what items are in that invoice, just make a dummy item entry
 
 Once all your invoices are entered, your “Temp Opening Assets” will be same as “Temp Opening Liabilities” and you can pass another “Is Opening” type of Journal Voucher and cancel them to zero!
 
----
-
-## Opening Stock
-
-You can upload your opening stock in the system using Stock Reconciliation. Stock Reconciliation will update your stock for a given Item on a given date for a given Warehouse to the given quantity.
-
-Stock Reconciliation will make a “difference entry” (the difference between the system stock and the actual stock in your file) for the Item.
-
-Tip: Stock Reconciliation can also be used to update the “value” of an Item.
-
-To make a Stock Reconciliation, go to:
-
-> Stock > Stock Reconciliation > New Stock Reconciliation
-
-and follow the steps mentioned on the page.
-
-
-![Stock Reconciliation](img/stock-reconciliation1.png)

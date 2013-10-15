@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:39", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:31:20", 
+  "modified": "2013-09-02 19:13:09", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -40,45 +40,18 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "process", 
-  "fieldtype": "HTML", 
-  "label": "Process", 
-  "options": "<div class=\"field_description\"><b>Process:</b><br>1. Fetch and select Purchase Receipt<br>2. Enter extra costs<br>3. Click on Update Landed Cost button<br> 4. Cost will be added into other charges table of selected PR proportionately based on net total<br>5. Item Valuation Rate will be recalculated</div>"
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
+  "label": "Select Purchase Receipts", 
   "options": "Simple"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "from_pr_date", 
-  "fieldtype": "Date", 
-  "label": "From PR Date", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "to_pr_date", 
-  "fieldtype": "Date", 
-  "label": "To PR Date", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "currency", 
-  "fieldtype": "Link", 
-  "label": "Currency", 
-  "options": "Currency", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "get_purchase_receipt", 
-  "fieldtype": "Button", 
-  "label": "Get Purchase Receipt", 
-  "options": "get_purchase_receipts"
  }, 
  {
   "doctype": "DocField", 
@@ -91,7 +64,7 @@
   "doctype": "DocField", 
   "fieldname": "section_break1", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "label": "Add Taxes and Charges"
  }, 
  {
   "doctype": "DocField", 
@@ -102,9 +75,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "update_pr", 
+  "fieldname": "update_landed_cost", 
   "fieldtype": "Button", 
-  "label": "Update PR", 
+  "label": "Update Landed Cost", 
   "options": "update_landed_cost"
  }, 
  {

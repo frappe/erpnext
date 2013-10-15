@@ -52,7 +52,7 @@ def get_stock_ledger_entries(filters):
 	return webnotes.conn.sql("""select item_code, warehouse, 
 		posting_date, actual_qty, company 
 		from `tabStock Ledger Entry` 
-		where ifnull(is_cancelled, 'No') = 'No' %s order by item_code, warehouse""" %
+		where docstatus < 2 %s order by item_code, warehouse""" %
 		conditions, as_dict=1)
 
 def get_item_warehouse_map(filters):

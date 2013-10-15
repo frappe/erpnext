@@ -38,9 +38,6 @@ class DocType(SellingController):
 	def get_available_qty(self,args):
 		return get_obj('Sales Common').get_available_qty(eval(args))
 	
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
@@ -126,7 +123,7 @@ class DocType(SellingController):
 		self.validate_po()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
-		self.validate_warehouse_user()
+		self.validate_warehouse()
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
@@ -147,14 +144,15 @@ class DocType(SellingController):
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
 		
 		
-	def validate_warehouse_user(self):
-		from stock.utils import validate_warehouse_user
+	def validate_warehouse(self):
+		from stock.utils import validate_warehouse_user, validate_warehouse_company
 		
 		warehouses = list(set([d.reserved_warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_user(w)
+			validate_warehouse_company(w, self.doc.company)
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -165,36 +163,20 @@ class DocType(SellingController):
 		})
 
 		
-	def check_prev_docstatus(self):
-		for d in getlist(self.doclist, 'sales_order_details'):
-			cancel_quo = webnotes.conn.sql("select name from `tabQuotation` where docstatus = 2 and name = '%s'" % d.prevdoc_docname)
-			if cancel_quo:
-				msgprint("Quotation :" + cstr(cancel_quo[0][0]) + " is already cancelled !")
-				raise Exception , "Validation Error. "
-	
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = webnotes.conn.sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
 		if enq:
 			webnotes.conn.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
-	def update_prevdoc_status(self, flag):
-		for d in getlist(self.doclist, 'sales_order_details'):
-			if d.prevdoc_docname:
-				if flag=='submit':
-					webnotes.conn.sql("update `tabQuotation` set status = 'Order Confirmed' where name=%s",d.prevdoc_docname)
-					
-					#update enquiry
-					self.update_enquiry_status(d.prevdoc_docname, 'Order Confirmed')
-				elif flag == 'cancel':
-					chk = webnotes.conn.sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
-					if not chk:
-						webnotes.conn.sql("update `tabQuotation` set status = 'Submitted' where name=%s",d.prevdoc_docname)
-						
-						#update enquiry
-						self.update_enquiry_status(d.prevdoc_docname, 'Quotation Sent')
+	def update_prevdoc_status(self, flag):				
+		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
+			bean = webnotes.bean("Quotation", quotation)
+			if bean.doc.docstatus==2:
+				webnotes.throw(d.prevdoc_docname + ": " + webnotes._("Quotation is cancelled."))
+				
+			bean.get_controller().set_status(update=True)
 
 	def on_submit(self):
-		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
 
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
@@ -218,7 +200,7 @@ class DocType(SellingController):
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.doc.name)
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
@@ -266,17 +248,19 @@ class DocType(SellingController):
 
 
 	def update_stock_ledger(self, update_stock, is_stopped = 0):
+		from stock.utils import update_bin
 		for d in self.get_item_list(is_stopped):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {
 					"item_code": d['item_code'],
+					"warehouse": d['reserved_warehouse'], 
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
 					"voucher_no": self.doc.name,
 					"is_amended": self.doc.amended_from and 'Yes' or 'No'
 				}
-				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
+				update_bin(args)
 				
 				
 	def get_item_list(self, is_stopped):
@@ -339,8 +323,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			"field_map": {
 				"export_rate": "export_rate", 
 				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype", 
+				"parent": "against_sales_order", 
 				"reserved_warehouse": "warehouse"
 			},
 			"postprocess": update_item,

@@ -201,9 +201,9 @@ wn.module_page["Stock"] = [
 				doctype: "Serial No"
 			},
 			{
-				"label":wn._("Item-Wise Price List"),
-				route: "query-report/Item-Wise Price List",
-				doctype: "Item"
+				"label":wn._("Item-wise Price List Rate"),
+				route: "Report/Price List/Item-Wise Price List",
+				doctype: "Price List"
 			},
 			{
 				"label":wn._("Purchase In Transit"),

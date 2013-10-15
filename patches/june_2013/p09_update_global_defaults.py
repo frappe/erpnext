@@ -6,7 +6,6 @@ import webnotes
 def execute():
 	from_global_defaults = {
 		"credit_controller": "Accounts Settings",
-		"auto_inventory_accounting": "Accounts Settings",
 		"acc_frozen_upto": "Accounts Settings",
 		"bde_auth_role": "Accounts Settings",
 		"auto_indent": "Stock Settings",

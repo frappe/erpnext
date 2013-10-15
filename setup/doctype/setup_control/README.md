@@ -1,1 +1,0 @@
-Account setup utility on first login.

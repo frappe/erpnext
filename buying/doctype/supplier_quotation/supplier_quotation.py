@@ -54,7 +54,6 @@ class DocType(BuyingController):
 	def validate_common(self):
 		pc = get_obj('Purchase Common')
 		pc.validate_for_items(self)
-		pc.get_prevdoc_date(self)
 
 @webnotes.whitelist()
 def make_purchase_order(source_name, target_doclist=None):

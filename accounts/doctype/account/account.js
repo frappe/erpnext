@@ -18,12 +18,22 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('account_name', doc.__islocal);
 	
 	// hide fields if group
-	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 'freeze_account', 
+	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 		
 	// disable fields
 	cur_frm.toggle_enable(['account_name', 'debit_or_credit', 'group_or_ledger', 
 		'is_pl_account', 'company'], false);
+	
+	if(doc.group_or_ledger=='Ledger') {
+		wn.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
+			var accounts_settings = wn.model.get_doc("Accounts Settings", name);
+			var display = accounts_settings["frozen_accounts_modifier"] 
+				&& in_list(user_roles, accounts_settings["frozen_accounts_modifier"]);
+			
+			cur_frm.toggle_display('freeze_account', display);
+		});
+	}
 
 	// read-only for root accounts
 	if(!doc.parent_account) {
@@ -32,10 +42,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
-		cur_frm.toggle_display(['credit_days', 'credit_limit', 'master_name'], 
-			in_list(['Customer', 'Supplier'], doc.master_type));
-
-		// hide tax_rate
+		cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'], 
+			doc.master_type));
+		
+		cur_frm.cscript.master_type(doc, cdt, cdn);
 		cur_frm.cscript.account_type(doc, cdt, cdn);
 
 		// show / hide convert buttons
@@ -44,7 +54,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.master_type = function(doc, cdt, cdn) {
-	cur_frm.toggle_display(['credit_days', 'credit_limit', 'master_name'], 
+	cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'], 
+		doc.master_type));
+		
+	cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' || 
 		in_list(['Customer', 'Supplier'], doc.master_type));
 }
 
@@ -58,10 +71,10 @@ cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
 // -----------------------------------------
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
-		cur_frm.toggle_display(['tax_rate'], 
-			doc.account_type == 'Tax');
-		cur_frm.toggle_display(['master_type', 'master_name'], 
-			cstr(doc.account_type)=='');		
+		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
+		cur_frm.toggle_display('master_type', cstr(doc.account_type)=='');
+		cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' || 
+			in_list(['Customer', 'Supplier'], doc.master_type));
 	}
 }
 
@@ -109,11 +122,15 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict['master_name'].get_query = function(doc) {
-	if (doc.master_type) {
+	if (doc.master_type || doc.account_type=="Warehouse") {
+		var dt = doc.master_type || "Warehouse";
 		return {
-			doctype: doc.master_type,
+			doctype: dt,
 			query: "accounts.doctype.account.account.get_master_name",
-			filters: {	"master_type": doc.master_type }
+			filters: {
+				"master_type": dt,
+				"company": doc.company
+			}
 		}
 	}
 }

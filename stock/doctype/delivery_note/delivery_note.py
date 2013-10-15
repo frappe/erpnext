@@ -10,10 +10,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
 from webnotes.model.mapper import get_mapped_doclist
-
-
-
-
+from stock.utils import update_bin
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -31,7 +28,7 @@ class DocType(SellingController):
 			'target_parent_field': 'per_delivered',
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
+			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
 			'keyword': 'Delivered'
 		}]
@@ -69,14 +66,11 @@ class DocType(SellingController):
 		"""Re-calculates Basic Rate & amount based on Price List Selected"""
 		get_obj('Sales Common').get_adj_percent(self)
 
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if webnotes.conn.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
-				 if not d.prevdoc_docname:
+				 if not d.against_sales_order:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
 					 raise Exception
 
@@ -92,7 +86,6 @@ class DocType(SellingController):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.get_prevdoc_date(self)
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -109,27 +102,27 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
 	def validate_with_previous_doc(self):
-		prev_doctype = [d.prevdoc_doctype for d in self.doclist.get({
-			"parentfield": "delivery_note_details"}) if cstr(d.prevdoc_doctype) != ""]
-			
-		if prev_doctype:
-			super(DocType, self).validate_with_previous_doc(self.tname, {
-				prev_doctype[0]: {
-					"ref_dn_field": "prevdoc_docname",
-					"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
-						["currency", "="]],
-				},
-			})
-			if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
-				super(DocType, self).validate_with_previous_doc(self.tname, {
-					prev_doctype[0] + " Item": {
-						"ref_dn_field": "prevdoc_detail_docname",
-						"compare_fields": [["export_rate", "="]],
-						"is_child_table": True
-					}
-				})
-			
+		items = self.doclist.get({"parentfield": "delivery_note_details"})
 		
+		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
+			if items.get_distinct_values(fn[1]):
+				super(DocType, self).validate_with_previous_doc(self.tname, {
+					fn[0]: {
+						"ref_dn_field": fn[1],
+						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+							["currency", "="]],
+					},
+				})
+
+				if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+					super(DocType, self).validate_with_previous_doc(self.tname, {
+						fn[0] + " Item": {
+							"ref_dn_field": "prevdoc_detail_docname",
+							"compare_fields": [["export_rate", "="]],
+							"is_child_table": True
+						}
+					})
+						
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
@@ -141,8 +134,8 @@ class DocType(SellingController):
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
 		for d in getlist(self.doclist,'delivery_note_details'):
-			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '', d.batch_no or '']
-			f = [d.item_code, d.description, d.prevdoc_docname or '']
+			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if e in check_list:
@@ -163,7 +156,7 @@ class DocType(SellingController):
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
 						% d['item_code'], raise_exception=1)
-
+				
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
@@ -188,12 +181,10 @@ class DocType(SellingController):
 		self.update_prevdoc_status()
 		
 		# create stock ledger entry
-		self.update_stock_ledger(update_stock = 1)
-		self.update_serial_nos()
+		self.update_stock_ledger()
 
 		self.credit_limit()
 		
-		self.set_buying_amount()
 		self.make_gl_entries()
 
 		# set DN status
@@ -207,42 +198,12 @@ class DocType(SellingController):
 				
 		self.update_prevdoc_status()
 		
-		self.update_stock_ledger(update_stock = -1)
-		self.update_serial_nos(cancel=True)
+		self.update_stock_ledger()
 
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 		
 		self.make_cancel_gl_entries()
-
-	def update_serial_nos(self, cancel=False):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, "Delivery Note", "delivery_note_details")
-		update_serial_nos_after_submit(self, "Delivery Note", "packing_details")
-
-		for table_fieldname in ("delivery_note_details", "packing_details"):
-			for d in self.doclist.get({"parentfield": table_fieldname}):
-				for serial_no in get_serial_nos(d.serial_no):
-					sr = webnotes.bean("Serial No", serial_no)
-					if cancel:
-						sr.doc.status = "Available"
-						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
-							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
-							"customer_name"):
-							sr.doc.fields[fieldname] = None
-					else:
-						sr.doc.delivery_document_type = "Delivery Note"
-						sr.doc.delivery_document_no = self.doc.name
-						sr.doc.delivery_date = self.doc.posting_date
-						sr.doc.delivery_time = self.doc.posting_time
-						sr.doc.customer = self.doc.customer
-						sr.doc.customer_name	= self.doc.customer_name
-						if sr.doc.warranty_period:
-							sr.doc.warranty_expiry_date	= add_days(cstr(self.doc.posting_date), 
-								cint(sr.doc.warranty_period))
-						sr.doc.status =	'Delivered'
-
-					sr.save()
 
 	def validate_packed_qty(self):
 		"""
@@ -291,85 +252,48 @@ class DocType(SellingController):
 			webnotes.msgprint(_("Packing Slip(s) Cancelled"))
 
 
-	def update_stock_ledger(self, update_stock):
-		self.values = []
+	def update_stock_ledger(self):
+		sl_entries = []
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				# this happens when item is changed from non-stock to stock item
-				if not d["warehouse"]:
-					continue
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+					and d.warehouse:
+				self.update_reserved_qty(d)
+										
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+				}))
+					
+		self.make_sl_entries(sl_entries)
+			
+	def update_reserved_qty(self, d):
+		if d['reserved_qty'] < 0 :
+			# Reduce reserved qty from reserved warehouse mentioned in so
+			if not d["reserved_warehouse"]:
+				webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
 				
-				if d['reserved_qty'] < 0 :
-					# Reduce reserved qty from reserved warehouse mentioned in so
-					if not d["reserved_warehouse"]:
-						webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
-						
-					args = {
-						"item_code": d['item_code'],
-						"voucher_type": self.doc.doctype,
-						"voucher_no": self.doc.name,
-						"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
-						"posting_date": self.doc.posting_date,
-						"is_amended": self.doc.amended_from and 'Yes' or 'No'
-					}
-					get_obj("Warehouse", d["reserved_warehouse"]).update_bin(args)
-						
-				# Reduce actual qty from warehouse
-				self.make_sl_entry(d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
-		
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
-
+			args = {
+				"item_code": d['item_code'],
+				"warehouse": d["reserved_warehouse"],
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
+				"posting_date": self.doc.posting_date,
+				"is_amended": self.doc.amended_from and 'Yes' or 'No'
+			}
+			update_bin(args)
 
 	def get_item_list(self):
 	 return get_obj('Sales Common').get_item_list(self)
-
-
-	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		self.values.append({
-			'item_code'					: d['item_code'],
-			'warehouse'					: wh,
-			'posting_date'				: self.doc.posting_date,
-			'posting_time'				: self.doc.posting_time,
-			'voucher_type'				: 'Delivery Note',
-			'voucher_no'				: self.doc.name,
-			'voucher_detail_no'	 		: d['name'],
-			'actual_qty'				: qty,
-			'stock_uom'					: d['uom'],
-			'incoming_rate'			 	: in_value,
-			'company'					: self.doc.company,
-			'fiscal_year'				: self.doc.fiscal_year,
-			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'					: d['batch_no'],
-			'serial_no'					: d['serial_no'],
-			"project"					: self.doc.project_name
-		})
-
 
 	def credit_limit(self):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""
 		amount, total = 0, 0
 		for d in getlist(self.doclist, 'delivery_note_details'):
-			if not d.prevdoc_docname:
+			if not (d.against_sales_order or d.against_sales_invoice):
 				amount += d.amount
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			get_obj('Sales Common').check_credit(self, total)
-		
-	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_inventory_accounting")):
-			return
-			
-		gl_entries = []	
-		for item in self.doclist.get({"parentfield": "delivery_note_details"}):
-			self.check_expense_account(item)
-			
-			if item.buying_amount:
-				gl_entries += self.get_gl_entries_for_stock(item.expense_account, -1*item.buying_amount, 
-					cost_center=item.cost_center)
-				
-		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
@@ -417,7 +341,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"name": "dn_detail", 
 				"parent": "delivery_note", 
 				"prevdoc_detail_docname": "so_detail", 
-				"prevdoc_docname": "sales_order", 
+				"against_sales_order": "sales_order", 
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item
@@ -441,7 +365,6 @@ def make_sales_invoice(source_name, target_doclist=None):
 def make_installation_note(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.prevdoc_date = source_parent.posting_date
 		target.serial_no = obj.serial_no
 	
 	doclist = get_mapped_doclist("Delivery Note", source_name, 	{

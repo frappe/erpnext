@@ -37,7 +37,7 @@ class JobsMailbox(POP3Mailbox):
 		mail.save_attachments_in_doc(applicant.doc)
 				
 		make(content=mail.content, sender=mail.from_email, 
-			doctype="Job Applicant", name=applicant.doc.name)
+			doctype="Job Applicant", name=applicant.doc.name, sent_or_received="Received")
 
 def get_job_applications():
 	if cint(webnotes.conn.get_value('Jobs Email Settings', None, 'extract_emails')):
