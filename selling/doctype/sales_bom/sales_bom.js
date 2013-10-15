@@ -15,8 +15,8 @@ cur_frm.fields_dict.new_item_code.get_query = function() {
 		query: "selling.doctype.sales_bom.sales_bom.get_new_item_code"
 	}
 }
-cur_frm.fields_dict.new_item_code.query_description = wn._('Select Item where "Is Stock Item" is "No"')+ wn._('\
-	and "Is Sales Item" is "Yes" and there is no other Sales BOM');
+cur_frm.fields_dict.new_item_code.query_description = wn._('Select Item where "Is Stock Item" is "No"')+ 
+wn._('and "Is Sales Item" is "Yes" and there is no other Sales BOM');
 
 cur_frm.cscript.item_code = function(doc, dt, dn) {
 	var d = locals[dt][dn];
