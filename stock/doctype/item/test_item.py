@@ -81,9 +81,9 @@ test_records = [
 		"is_sales_item": "Yes",
 		"is_service_item": "No",
 		"inspection_required": "No",
-		"is_pro_applicable": "Yes",
+		"is_pro_applicable": "No",
 		"is_sub_contracted_item": "No",
-		"is_manufactured_item": "Yes",
+		"is_manufactured_item": "No",
 		"stock_uom": "_Test UOM"
 	},
 	{
@@ -109,6 +109,7 @@ test_records = [
 		"inspection_required": "No",
 		"is_pro_applicable": "No",
 		"is_sub_contracted_item": "No",
+		"is_manufactured_item": "No",
 		"stock_uom": "_Test UOM"
 	}],
 	[{
@@ -205,6 +206,47 @@ test_records = [
 		"inspection_required": "No",
 		"is_pro_applicable": "Yes",
 		"is_sub_contracted_item": "No",
+		"stock_uom": "_Test UOM"
+	}],
+	[{
+		"doctype": "Item",
+		"item_code": "_Test Item Home Desktop Manufactured",
+		"item_name": "_Test Item Home Desktop Manufactured",
+		"description": "_Test Item Home Desktop Manufactured",
+		"item_group": "_Test Item Group Desktops",
+		"default_warehouse": "_Test Warehouse - _TC",
+		"default_income_account": "Sales - _TC",
+		"is_stock_item": "Yes",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "No",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "Yes",
+		"is_sub_contracted_item": "No",
+		"is_manufactured_item": "Yes",
+		"stock_uom": "_Test UOM"
+	}],
+	[{
+		"doctype": "Item",
+		"item_code": "_Test FG Item 2",
+		"item_name": "_Test FG Item 2",
+		"description": "_Test FG Item 2",
+		"item_group": "_Test Item Group Desktops",
+		"is_stock_item": "Yes",
+		"default_warehouse": "_Test Warehouse - _TC",
+		"default_income_account": "Sales - _TC",
+		"is_asset_item": "No",
+		"has_batch_no": "No",
+		"has_serial_no": "No",
+		"is_purchase_item": "Yes",
+		"is_sales_item": "Yes",
+		"is_service_item": "No",
+		"inspection_required": "No",
+		"is_pro_applicable": "Yes",
+		"is_sub_contracted_item": "Yes",
 		"stock_uom": "_Test UOM"
 	}],
 ]

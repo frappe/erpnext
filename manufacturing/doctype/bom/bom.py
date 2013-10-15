@@ -332,6 +332,7 @@ class DocType:
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
 			total_rm_cost += d.amount
+			
 		self.doc.raw_material_cost = total_rm_cost
 
 	def update_exploded_items(self):

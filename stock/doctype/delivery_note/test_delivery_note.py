@@ -9,20 +9,22 @@ import webnotes.defaults
 from webnotes.utils import cint
 from stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, set_perpetual_inventory, test_records as pr_test_records
 
+def _insert_purchase_receipt(item_code=None):
+	if not item_code:
+		item_code = pr_test_records[0][1]["item_code"]
+	
+	pr = webnotes.bean(copy=pr_test_records[0])
+	pr.doclist[1].item_code = item_code
+	pr.insert()
+	pr.submit()
+	
 class TestDeliveryNote(unittest.TestCase):
-	def _insert_purchase_receipt(self, item_code=None):
-		pr = webnotes.bean(copy=pr_test_records[0])
-		if item_code:
-			pr.doclist[1].item_code = item_code
-		pr.insert()
-		pr.submit()
-		
 	def test_over_billing_against_dn(self):
 		self.clear_stock_account_balance()
-		self._insert_purchase_receipt()
+		_insert_purchase_receipt()
 		
 		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
-		self._insert_purchase_receipt()
+		_insert_purchase_receipt()
 		dn = webnotes.bean(copy=test_records[0]).insert()
 		
 		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
@@ -44,7 +46,7 @@ class TestDeliveryNote(unittest.TestCase):
 		set_perpetual_inventory(0)
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 0)
 		
-		self._insert_purchase_receipt()
+		_insert_purchase_receipt()
 		
 		dn = webnotes.bean(copy=test_records[0])
 		dn.insert()
@@ -69,7 +71,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 		
-		self._insert_purchase_receipt()
+		_insert_purchase_receipt()
 		
 		dn = webnotes.bean(copy=test_records[0])
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
@@ -123,8 +125,8 @@ class TestDeliveryNote(unittest.TestCase):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 		
-		self._insert_purchase_receipt()
-		self._insert_purchase_receipt("_Test Item Home Desktop 100")
+		_insert_purchase_receipt()
+		_insert_purchase_receipt("_Test Item Home Desktop 100")
 		
 		dn = webnotes.bean(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Sales BOM Item"

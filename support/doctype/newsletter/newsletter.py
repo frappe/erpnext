@@ -76,14 +76,17 @@ class DocType():
 		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
 		
 		from webnotes.utils.email_lib.bulk import send
-		webnotes.conn.auto_commit_on_many_writes = True
+		
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = True
 		
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = self.send_to_doctype, email_field = "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
-		webnotes.conn.auto_commit_on_many_writes = False
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
