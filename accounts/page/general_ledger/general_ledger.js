@@ -237,7 +237,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		closing.credit = opening.credit + totals.credit;
 
 		if(me.account) {
-			me.appframe.set_title("General Ledger: " + me.account);
+			me.appframe.set_title(wn._("General Ledger: ") + me.account);
 
 			// group by ledgers
 			if(this.account_by_name[this.account].group_or_ledger==="Group"
@@ -255,7 +255,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			
 			out = [opening].concat(out).concat([totals, closing]);
 		} else {
-			me.appframe.set_title("General Ledger");
+			me.appframe.set_title(wn._("General Ledger"));
 			out = out.concat([totals]);
 		}
 
