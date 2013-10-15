@@ -15,6 +15,11 @@ To create a new blog, just create a new Blog from:
 ![Blog](img/blog.png)
 
 
-You can format the blog using the same Markdown format
+You can format a blog using the Markdown format.You can also access your blog by going to the page “blog.html”.
 
-You can access your blog by going to the page “blog.html”
+
+#### A sample blog-page.
+
+
+![Blog](img/blog-look.png)
+

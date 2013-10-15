@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, getdate, nowdate, cstr, flt, add_days
+from webnotes.utils import cint, getdate, cstr, flt, add_days
 import datetime
 from webnotes import msgprint, _, ValidationError
 
@@ -36,9 +36,8 @@ class DocType(StockController):
 		self.validate_amc_status()
 		self.validate_warehouse()
 		self.validate_item()
-		
 		self.on_stock_ledger_entry()
-		
+
 	def validate_amc_status(self):
 		"""
 			validate amc status
@@ -115,7 +114,7 @@ class DocType(StockController):
 			and ifnull(is_cancelled, 'No')='No' order by name asc limit 1""", 
 			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
 				 self.doc.item_code), as_dict=1)
-		
+
 		if purchase_sle:
 			self.doc.purchase_document_type = purchase_sle[0].voucher_type
 			self.doc.purchase_document_no = purchase_sle[0].voucher_no
@@ -178,7 +177,7 @@ class DocType(StockController):
 				webnotes.conn.sql("""update `tab%s` set serial_no = %s 
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
-					
+
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
 			self.set_status()
