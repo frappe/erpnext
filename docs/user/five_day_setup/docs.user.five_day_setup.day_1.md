@@ -10,10 +10,8 @@ After logging into your account you will receive a pop-up form to fill. Please f
 #### Form Part I
 
 ![1st Form](img/firstdaysetup-1.png)
-<br>
+<br><br>
 #### Form Part II
-<br>
-
 To understand about Company Financial Year or Fiscal Year visit [Fiscal Year](docs.user.knowledge.fiscal_year.html)
 
 
@@ -61,8 +59,6 @@ To understand how to fill an Item in detail, visit [Item](docs.user.stock.item.h
 
 <br>
 #### Setup Page - Suppliers
-<br>
-
 On the Setup page go to Supplier.
 
 ![Supplier](img/firstdaysetup-supplier.png)
