@@ -382,17 +382,6 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
 }
 
-cur_frm.cscript.copy_account_in_all_row = function(doc, cdt, cdn, fieldname) {
-	var d = locals[cdt][cdn];
-	if(d[fieldname]){
-		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++) {
-			if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
-		}
-	}
-	refresh_field(cur_frm.cscript.fname);
-}
-
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice_message);

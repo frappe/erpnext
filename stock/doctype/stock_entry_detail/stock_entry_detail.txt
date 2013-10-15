@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2013-08-28 19:25:38", 
+  "modified": "2013-10-15 14:58:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -154,6 +154,7 @@
   "print_hide": 1
  }, 
  {
+  "default": ":Company", 
   "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
