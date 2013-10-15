@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:46:32", 
+  "modified": "2013-10-11 13:19:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -230,7 +230,7 @@
   "depends_on": "eval:doc.po_no", 
   "doctype": "DocField", 
   "fieldname": "po_date", 
-  "fieldtype": "Data", 
+  "fieldtype": "Date", 
   "hidden": 1, 
   "label": "Customer's Purchase Order Date", 
   "no_copy": 0, 
@@ -263,7 +263,6 @@
   "reqd": 1
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which customer's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
