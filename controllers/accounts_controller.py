@@ -52,7 +52,7 @@ class AccountsController(TransactionBase):
 						msgprint(_("Account for this ") + fieldname + _(" has been freezed. ") + 
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
-	def set_price_list_currency(self, buying_or_selling, for_validate=False):
+	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
 			company_currency = get_company_currency(self.doc.company)
 			
@@ -66,7 +66,7 @@ class AccountsController(TransactionBase):
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0
 
-				elif not self.doc.plc_conversion_rate or not for_validate:
+				elif not self.doc.plc_conversion_rate:
 					self.doc.plc_conversion_rate = self.get_exchange_rate(
 						self.doc.price_list_currency, company_currency)
 			
@@ -76,7 +76,7 @@ class AccountsController(TransactionBase):
 				self.doc.conversion_rate = self.doc.plc_conversion_rate
 			elif self.doc.currency == company_currency:
 				self.doc.conversion_rate = 1.0
-			elif not self.doc.conversion_rate or not for_validate:
+			elif not self.doc.conversion_rate:
 				self.doc.conversion_rate = self.get_exchange_rate(self.doc.currency,
 					company_currency)
 
