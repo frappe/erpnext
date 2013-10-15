@@ -24,8 +24,8 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 
 		if(in_list(user_roles,'System Manager')) {
 			cur_frm.footer.help_area.innerHTML = '<hr>\
-				<p><a href="#Form/Sales Email Settings">Sales Email Settings</a><br>\
-				<span class="help">Automatically extract Leads from a mail box e.g. "sales@example.com"</span></p>';
+				<p><a href="#Form/Sales Email Settings">'+wn._('Sales Email Settings')+'</a><br>\
+				<span class="help">'+wn._('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
 		}
 	},
 	
@@ -68,7 +68,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 					order by is_primary_address, is_shipping_address desc'
 				},
 				as_dict: 1,
-				no_results_message: 'No addresses created',
+				no_results_message: wn._('No addresses created'),
 				render_row: this.render_address_row,
 			});
 			// note: render_address_row is defined in contact_control.js
