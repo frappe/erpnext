@@ -56,10 +56,10 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 						return v;
 					});
 
-					r.messages = ["<h4 style='color:red'>"+wn._("Import Failed!"+"</h4>"]
+					r.messages = ["<h4 style='color:red'>"+wn._("Import Failed!")+"</h4>"]
 						.concat(r.messages)
 				} else {
-					r.messages = ["<h4 style='color:green'>"+wn._("Import Successful!"+"</h4>"].
+					r.messages = ["<h4 style='color:green'>"+wn._("Import Successful!")+"</h4>"].
 						concat(r.message.messages)
 				}
 				
