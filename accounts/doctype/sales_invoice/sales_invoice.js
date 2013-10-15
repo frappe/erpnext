@@ -349,7 +349,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 
 // warehouse in detail table
 //----------------------------
-cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
+cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	return{
 		filters:[
@@ -370,31 +370,24 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 	}
 }
 
-cur_frm.cscript.income_account = function(doc, cdt, cdn){
+cur_frm.cscript.income_account = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
 }
 
-cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+}
+
+cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
 }
 
 cur_frm.cscript.copy_account_in_all_row = function(doc, cdt, cdn, fieldname) {
 	var d = locals[cdt][cdn];
 	if(d[fieldname]){
 		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++){
+		for(var i = 0; i < cl.length; i++) {
 			if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
-		}
-	}
-	refresh_field(cur_frm.cscript.fname);
-}
-
-cur_frm.cscript.cost_center = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(d.cost_center){
-		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
 		}
 	}
 	refresh_field(cur_frm.cscript.fname);
