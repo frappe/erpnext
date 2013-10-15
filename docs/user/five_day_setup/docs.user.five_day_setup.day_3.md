@@ -8,8 +8,10 @@ After completing the set-up and account opening process, it is advisable  to com
 
 ### Sales Cycle
 
-Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Voucher)
+Complete a standard Sales Cycle.
+> Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Voucher)
 
+<br>
 #### Lead
 
 To begin the sales cycle, go to the Selling Icon. On the selling page, click on Lead. 
@@ -20,6 +22,7 @@ Fill the Lead form.
 
 > To understand Lead in detail, visit [Lead](docs.user.selling.lead.html)
 
+<br>
 #### Opportunity
 
 After completing the Lead form, assume that, this same lead is getting converted into an Opportunity. Thus, to create an Opportunity from the existing lead, click on Create Opportunity, on the Lead page.
@@ -38,7 +41,7 @@ You can also generate an Opportunity directly from the Selling Page.
 
 > To understand Opportunity in detail visit [Opportunity](docs.user.selling.opportunity.html).
 
-
+<br>
 #### Quotation
 
 Imagine that your Opportunity has shown interest and asked for a Quotation. To generate a Quotation from the same Opportunity, open the submitted Opportunity and click on Create Quotation.
@@ -49,7 +52,7 @@ You can also generate a Quotation directly from the Selling Page.
 
 > To understand Quotation in detail visit [Quotation](docs.user.selling.quotation.html)
 
-
+<br>
 #### Sales Order
 
 Imagine that the Quotation which you sent was accepted by the prospect. You are now  reequired to send him a Sales Order. To make a sales order from this same Quotation, go to that Quotation page and click on Make Sales Order.
@@ -60,6 +63,7 @@ You can also generate a Sales Order directly from the Selling Page.
 
 > To understand Sales Order in detail visit [Sales Order](docs.user.selling.sales_order.html).
 
+<br>
 #### Delivery Note
 
 If your organisation has the practice of sending Delivery Note, this section will be helpful. To create a Delivery Note from the a Sales Order, go to that Sales Order and click on Make Delivery.
@@ -69,7 +73,7 @@ If your organisation has the practice of sending Delivery Note, this section wil
 
 > To understand Delivery Note in detail, visit [Delivery Note](docs.user.stock.delivery_note.html)
 
-
+<br>
 #### Sales Invoice
 
 Save and Submit your Delivery Note to generate a Sales Invoice. You can also generate an Invoice from Sales Order.
@@ -91,9 +95,10 @@ A Journal Voucher or a payment entry can be generated directly from the Sales In
 
 ### Purchase Cycle
 
-Complete a standard purchase cycle - Material Request > Purchase Order > Purchase Receipt > Payment (Journal Voucher).
+Complete a standard Purchase Cycle.
+> Material Request > Purchase Order > Purchase Receipt > Payment (Journal Voucher).
 
-
+<br>
 #### Material Request
 
 To create a Material Request, go to Stock/Buying and Click on Material Request.
@@ -102,6 +107,7 @@ To create a Material Request, go to Stock/Buying and Click on Material Request.
 
 > To understand Material Request in detail, visit [Material Request](docs.user.buying.material_request.html)
 
+<br>
 #### Purchase Order
 
 To create a Purchase Order go to Buying and click on Purchase Order
@@ -110,26 +116,24 @@ To create a Purchase Order go to Buying and click on Purchase Order
 
 > To understand Purchase Order in detail, visit [Purchase Order](docs.user.buying.purchase_order.html)
 
+<br>
 #### Purchase Receipt
 
 To create a Purchase Receipt from an existing Purchase Order, open that purchase order and click on Make Purchase Receipt.
 
 ![Purchase Receipt](img/thirddaysetup-purchase-receipt.png)
-
 <br>
 
 >To understand Purchase Receipt in detail, visit [Purchase Receipt](docs.user.stock.purchase_receipt.html)
 
 <br>
 
-#### Payment( Journal Voucher)
+#### Payment (Journal Voucher)
 
 Payments made against Sales Invoices or Purchase Invoices can be made by clicking on “Make Payment Entry” button on “Submitted” invoices.
 
 
 ![Payment Entry](img/thirddaysetup-payment-entry.png)
-
 <br>
 
 > To understand Payment Entry in detail, visit [Payment Entry](docs.user.accounts.payments.html).
-

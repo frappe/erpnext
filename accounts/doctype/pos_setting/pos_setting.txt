@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-08-28 19:13:42", 
+  "modified": "2013-10-15 11:12:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -77,16 +77,6 @@
   "oldfieldname": "currency", 
   "oldfieldtype": "Select", 
   "options": "Currency", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "conversion_rate", 
-  "fieldtype": "Float", 
-  "label": "Conversion Rate", 
-  "oldfieldname": "conversion_rate", 
-  "oldfieldtype": "Currency", 
   "read_only": 0, 
   "reqd": 1
  }, 

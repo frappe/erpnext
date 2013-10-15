@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:47:05", 
+  "modified": "2013-10-11 13:20:13", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -215,7 +215,6 @@
   "reqd": 1
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which supplier's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
