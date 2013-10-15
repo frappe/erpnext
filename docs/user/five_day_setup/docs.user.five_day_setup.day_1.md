@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Day-1: Setup Customer,Item, and Supplier"
+	"_label": "Day-1: Setup Customer, Item, and Supplier"
 }
 ---
 Login to your ERPNext account with the User ID and Password sent through the mail.

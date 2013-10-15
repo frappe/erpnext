@@ -76,29 +76,29 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 	
 def get_indented_qty(item_code, warehouse):
-	indented_qty = webnotes.conn.sql("""select sum(pr_item.qty - pr_item.ordered_qty)
+	indented_qty = webnotes.conn.sql("""select sum(pr_item.qty - ifnull(pr_item.ordered_qty, 0))
 		from `tabMaterial Request Item` pr_item, `tabMaterial Request` pr
 		where pr_item.item_code=%s and pr_item.warehouse=%s 
-		and pr_item.qty > pr_item.ordered_qty and pr_item.parent=pr.name 
+		and pr_item.qty > ifnull(pr_item.ordered_qty, 0) and pr_item.parent=pr.name 
 		and pr.status!='Stopped' and pr.docstatus=1""", (item_code, warehouse))
 		
 	return flt(indented_qty[0][0]) if indented_qty else 0
 
 def get_ordered_qty(item_code, warehouse):
 	ordered_qty = webnotes.conn.sql("""
-		select sum((po_item.qty - po_item.received_qty)*po_item.conversion_factor)
+		select sum((po_item.qty - ifnull(po_item.received_qty, 0))*po_item.conversion_factor)
 		from `tabPurchase Order Item` po_item, `tabPurchase Order` po
 		where po_item.item_code=%s and po_item.warehouse=%s 
-		and po_item.qty > po_item.received_qty and po_item.parent=po.name 
+		and po_item.qty > ifnull(po_item.received_qty, 0) and po_item.parent=po.name 
 		and po.status!='Stopped' and po.docstatus=1""", (item_code, warehouse))
 		
 	return flt(ordered_qty[0][0]) if ordered_qty else 0
 			
 def get_planned_qty(item_code, warehouse):
 	planned_qty = webnotes.conn.sql("""
-		select sum(qty - produced_qty) from `tabProduction Order` 
+		select sum(ifnull(qty, 0) - ifnull(produced_qty, 0)) from `tabProduction Order` 
 		where production_item = %s and fg_warehouse = %s and status != "Stopped"
-		and docstatus=1 and qty > produced_qty""", (item_code, warehouse))
+		and docstatus=1 and ifnull(qty, 0) > ifnull(produced_qty, 0)""", (item_code, warehouse))
 
 	return flt(planned_qty[0][0]) if planned_qty else 0
 	
