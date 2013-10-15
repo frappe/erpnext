@@ -29,7 +29,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// toggle to pos view if is_pos is 1 in user_defaults
 		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
 				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
-					if(this.frm.doc.__islocal && !this.frm.doc.amended_from) {
+					if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
 						this.frm.set_value("is_pos", 1);
 						this.is_pos(function() {cur_frm.cscript.toggle_pos(true);});
 					}

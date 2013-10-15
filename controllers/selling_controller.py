@@ -20,7 +20,7 @@ class SellingController(StockController):
 		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		self.set_price_list_and_item_details(for_validate)
+		self.set_price_list_and_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "charge")
 					
@@ -38,8 +38,8 @@ class SellingController(StockController):
 					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 						self.doc.fields[fieldname] = val
 						
-	def set_price_list_and_item_details(self, for_validate=False):
-		self.set_price_list_currency("Selling", for_validate)
+	def set_price_list_and_item_details(self):
+		self.set_price_list_currency("Selling")
 		self.set_missing_item_details(get_item_details)
 										
 	def get_other_charges(self):
