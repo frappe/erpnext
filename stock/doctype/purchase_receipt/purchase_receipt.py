@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 import webnotes.defaults
 from stock.utils import update_bin
 
