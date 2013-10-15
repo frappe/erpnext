@@ -44,11 +44,11 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	],
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: "Plot", field: "check", width: 30,
+			{id: "check", name: wn._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: "Account", field: "name", width: 300,
+			{id: "name", name: wn._("Account"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening", name: "Opening", field: "opening", hidden: true,
+			{id: "opening", name: wn._("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 		
