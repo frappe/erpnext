@@ -34,11 +34,11 @@ pscript['onload_Financial Statements'] = function(wrapper) {
 		options: ['Loading...']
 	})
 
-	wrapper.appframe.add_button("Create", function() {
+	wrapper.appframe.add_button(wn._("Create"), function() {
 		pscript.stmt_new();
 	}, "icon-refresh")
 
-	wrapper.appframe.add_button("Print", function() {
+	wrapper.appframe.add_button(wn._("Print"), function() {
 		_p.go($i('print_html').innerHTML);
 	}, "icon-print")
 		
