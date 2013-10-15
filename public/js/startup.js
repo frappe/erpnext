@@ -44,7 +44,7 @@ erpnext.startup.show_expiry_banner = function() {
 		msg = repl(wn._('Your ERPNext subscription will <b>expire %(expiry_string)s</b>. %(payment_link)s'),
 			{ expiry_string: expiry_string, payment_link: payment_link });
 	} else if (diff < 0) {
-		msg = repl(wn._('This ERPNext subscription <b>has expired</b>. %(payment_link)s'), {payment_link: payment_link});
+		msg = repl(wn._('This ERPNext subscription')+'<b>'+wn._('has expired')+'</b>. %(payment_link)s'), {payment_link: payment_link});
 	}
 	
 	if(msg) wn.ui.toolbar.show_banner(msg);
