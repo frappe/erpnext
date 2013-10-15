@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 patch_list = [
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-16",
-	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-10-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-10-15",
 	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') #2013-07-16",
 	"execute:webnotes.reload_doc('core', 'doctype', 'page') #2013-07-16",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report') #2013-07-16",
