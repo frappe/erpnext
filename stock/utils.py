@@ -209,7 +209,7 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	return wlist
 
 def validate_warehouse_user(warehouse):
-	if webnotes.session.user=="Administrator":
+	if webnotes.session.user=="Administrator" or not warehouse:
 		return
 	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
 		where parent=%s""", warehouse)]
@@ -394,12 +394,3 @@ def notify_errors(exceptions_list):
 
 	from webnotes.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)
-
-
-def repost():
-	"""
-	Repost everything!
-	"""
-	from webnotes.model.code import get_obj
-	for wh in webnotes.conn.sql("select name from tabWarehouse"):
-		get_obj('Warehouse', wh[0]).repost_stock()

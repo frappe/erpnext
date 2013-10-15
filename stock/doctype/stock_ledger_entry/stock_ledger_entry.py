@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import cint, flt, getdate, cstr
+from webnotes import msgprint
+from webnotes.utils import flt, getdate
 from webnotes.model.controller import DocListController
 
 class DocType(DocListController):

@@ -3,6 +3,7 @@
 	"_label": "User Guide",
 	"_toc": [
 		"docs.user.intro",
+		"docs.user.five_day_setup",
 		"docs.user.implement",
 		"docs.user.setup",
 		"docs.user.selling",
@@ -17,7 +18,7 @@
 		"docs.user.tools",
 		"docs.user.customize",
 		"docs.user.knowledge"
-	],
+			],
 	"_no_toc": 1
 }
 ---
@@ -29,6 +30,12 @@ Contents
 	1. [Open Source](docs.user.intro.open_source.html)
 	1. [Ways to get started](docs.user.intro.try.html)
 	1. [Getting Help](docs.user.help.html)
+1. [Five-Day-Setup](docs.user.five_day_setup.html)
+	1. [Day-1: Setup Customer,Item, and Supplier](docs.user.five_day_setup.day_1.html)
+	1. [Day-2: Setup Chart of Accounts, Opening Accounts, and HR](docs.user.five_day_setup.day_2.html)
+	1. [Day-3: Sales Cycle and Purchase Cycle](docs.user.five_day_setup.day_3.html)
+	1. [Day-4: Manufacturing Cycle and Accounting Reports](docs.user.five_day_setup.day_4.html)
+	1. [Day-5: Projects, Calendar, and Website](docs.user.five_day_setup.day_5.html)
 1. [Implementation](docs.user.implement.html)
 	1. [Implementation Strategy](docs.user.implement.strategy.html)
 	1. [Concepts](docs.user.implement.concepts.html)
@@ -154,4 +161,3 @@ Contents
 	1. [DocType Definitions](docs.user.knowledge.doctype.html)
 	1. [Attachment and CSV Files](docs.user.knowledge.attachment_csv.html)
 	1. [Format using Markdown](docs.user.knowledge.markdown.html)
-	

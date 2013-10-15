@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, flt, validate_email_add
-from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
 
@@ -91,103 +90,15 @@ class DocType:
 			
 		webnotes.conn.delete_doc("Account", old_warehouse_account)
 		
+		from utilities.repost_stock import repost
 		for item_code in items:
-			self.repost(item_code[0], self.doc.merge_with)
+			repost(item_code[0], self.doc.merge_with)
 			
 		webnotes.conn.auto_commit_on_many_writes = 0
 		
 		msgprint("Warehouse %s merged into %s. Now you can delete warehouse: %s" 
 			% (self.doc.name, self.doc.merge_with, self.doc.name))
 		
-
-	def repost(self, item_code, warehouse=None):
-		from stock.utils import get_bin
-		self.repost_actual_qty(item_code, warehouse)
-		
-		bin = get_bin(item_code, warehouse)
-		self.repost_reserved_qty(bin)
-		self.repost_indented_qty(bin)
-		self.repost_ordered_qty(bin)
-		self.repost_planned_qty(bin)
-		bin.doc.projected_qty = flt(bin.doc.actual_qty) + flt(bin.doc.planned_qty) \
-			+ flt(bin.doc.indented_qty) + flt(bin.doc.ordered_qty) - flt(bin.doc.reserved_qty)
-		bin.doc.save()
-			
-
-	def repost_actual_qty(self, item_code, warehouse=None):
-		from stock.stock_ledger import update_entries_after
-		if not warehouse:
-			warehouse = self.doc.name
-		
-		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
-
-	def repost_reserved_qty(self, bin):
-		reserved_qty = webnotes.conn.sql("""
-			select 
-				sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
-			from 
-				(
-					select
-						qty as dnpi_qty,
-						(
-							select qty from `tabSales Order Item`
-							where name = dnpi.parent_detail_docname
-						) as so_item_qty,
-						(
-							select ifnull(delivered_qty, 0) from `tabSales Order Item`
-							where name = dnpi.parent_detail_docname
-						) as so_item_delivered_qty
-					from 
-					(
-						select qty, parent_detail_docname
-						from `tabDelivery Note Packing Item` dnpi_in
-						where item_code = %s and warehouse = %s
-						and parenttype="Sales Order"
-						and exists (select * from `tabSales Order` so
-						where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
-					) dnpi
-				) tab 
-			where 
-				so_item_qty >= so_item_delivered_qty
-		""", (bin.doc.item_code, bin.doc.warehouse))
-
-		if flt(bin.doc.reserved_qty) != flt(reserved_qty[0][0]):
-			webnotes.conn.set_value("Bin", bin.doc.name, "reserved_qty", flt(reserved_qty[0][0]))
-
-
-	def repost_indented_qty(self, bin):
-		indented_qty = webnotes.conn.sql("""select sum(pr_item.qty - pr_item.ordered_qty)
-			from `tabMaterial Request Item` pr_item, `tabMaterial Request` pr
-			where pr_item.item_code=%s and pr_item.warehouse=%s 
-			and pr_item.qty > pr_item.ordered_qty and pr_item.parent=pr.name 
-			and pr.status!='Stopped' and pr.docstatus=1"""
-			, (bin.doc.item_code, bin.doc.warehouse))
-			
-		if flt(bin.doc.indented_qty) != flt(indented_qty[0][0]):
-			webnotes.conn.set_value("Bin", bin.doc.name, "indented_qty", flt(indented_qty[0][0]))
-		
-	
-	def repost_ordered_qty(self, bin):
-		ordered_qty = webnotes.conn.sql("""
-			select sum((po_item.qty - po_item.received_qty)*po_item.conversion_factor)
-			from `tabPurchase Order Item` po_item, `tabPurchase Order` po
-			where po_item.item_code=%s and po_item.warehouse=%s 
-			and po_item.qty > po_item.received_qty and po_item.parent=po.name 
-			and po.status!='Stopped' and po.docstatus=1"""
-			, (bin.doc.item_code, bin.doc.warehouse))
-			
-		if flt(bin.doc.ordered_qty) != flt(ordered_qty[0][0]):
-			webnotes.conn.set_value("Bin", bin.doc.name, "ordered_qty", flt(ordered_qty[0][0]))
-
-	def repost_planned_qty(self, bin):
-		planned_qty = webnotes.conn.sql("""
-			select sum(qty - produced_qty) from `tabProduction Order` 
-			where production_item = %s and fg_warehouse = %s and status != "Stopped"
-			and docstatus=1""", (bin.doc.item_code, bin.doc.warehouse))
-
-		if flt(bin.doc.planned_qty) != flt(planned_qty[0][0]):
-			webnotes.conn.set_value("Bin", bin.doc.name, "planned_qty", flt(planned_qty[0][0]))
-
 	def on_trash(self):
 		# delete bin
 		bins = webnotes.conn.sql("select * from `tabBin` where warehouse = %s", self.doc.name, as_dict=1)

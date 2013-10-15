@@ -144,7 +144,6 @@ class TransactionBase(StatusUpdater):
 	
 	def get_customer_address(self, args):
 		args = load_json(args)
-		webnotes.errprint(args)
 		ret = {
 			'customer_address' : args["address"],
 			'address_display' : get_address_display(args["address"]),
@@ -432,14 +431,7 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	
 	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
 	
-	# parenthesis for 'OR' are necessary as we want it to evaluate as 
-	# mandatory valid condition and (1st optional valid condition 
-	# 	or 2nd optional valid condition)
-	valid_conversion_rate = (conversion_rate and 
-		((currency == company_currency and conversion_rate == 1.00)
-			or (currency != company_currency and conversion_rate != 1.00)))
-
-	if not valid_conversion_rate:
+	if not conversion_rate:
 		msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
 			+ ("1 %s = [?] %s" % (currency, company_currency)),
 			raise_exception=True)
