@@ -91,7 +91,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
     return get_server_fields('get_no_of_visits',docstring(arg),'item_maintenance_detail',doc, cdt, cdn, 1);
   }
   else{
-    msgprint("Please enter Start Date and End Date");
+    msgprint(wn._("Please enter Start Date and End Date"));
   }
 }
 
@@ -103,7 +103,7 @@ cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
       }
     );
   } else {
-    alert("Please save the document before generating maintenance schedule");
+    alert(wn._("Please save the document before generating maintenance schedule"));
   }  
 }
 

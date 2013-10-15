@@ -6,7 +6,7 @@ wn.provide("erpnext.support");
 erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	refresh: function() {
 		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
-			cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
+			cur_frm.add_custom_button(wn._('Make Maintenance Visit'), this.make_maintenance_visit)
 		}
 	}, 
 	

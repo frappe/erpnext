@@ -6,7 +6,7 @@ wn.require("app/js/stock_grid_report.js");
 erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper, opts) {
 		var args = {
-			title: "Stock Analytics",
+			title: wn._("Stock Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -36,13 +36,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: "Plot", field: "check", width: 30,
+			{id: "check", name: wn._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: "Item", field: "name", width: 300,
+			{id: "name", name: wn._("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
-			{id: "opening", name: "Opening", field: "opening", hidden: true,
+			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: wn._("UOM"), field: "stock_uom", width: 100},
+			{id: "opening", name: wn._("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 
@@ -50,23 +50,23 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"],
+		{fieldtype:"Select", label: wn._("Value or Qty"), options:["Value", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: "Brand", link:"Brand", 
+		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Select", label: "Range", 
+		{fieldtype:"Date", label: wn._("From Date")},
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;

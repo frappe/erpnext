@@ -13,7 +13,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cfn_set_fields(doc, dt, dn);
 
 	if(doc.docstatus===0 && !doc.__islocal) {
-		cur_frm.set_intro("Submit this Production Order for further processing.");
+		cur_frm.set_intro(wn._("Submit this Production Order for further processing."));
 	} else if(doc.docstatus===1) {
 		var percent = flt(doc.produced_qty) / flt(doc.qty) * 100;
 		cur_frm.dashboard.add_progress(cint(percent) + "% " + wn._("Complete"), percent);
@@ -27,13 +27,13 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 var cfn_set_fields = function(doc, dt, dn) {
 	if (doc.docstatus == 1) {
 		if (doc.status != 'Stopped' && doc.status != 'Completed')
-		cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Production Order']);
+		cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Production Order']);
 		else if (doc.status == 'Stopped')
-			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Production Order']);
+			cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Production Order']);
 
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
-			cur_frm.add_custom_button('Transfer Raw Materials', cur_frm.cscript['Transfer Raw Materials']);
-			cur_frm.add_custom_button('Update Finished Goods', cur_frm.cscript['Update Finished Goods']);
+			cur_frm.add_custom_button(wn._('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
+			cur_frm.add_custom_button(wn._('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
 		} 
 	}
 }
@@ -47,7 +47,7 @@ cur_frm.cscript.production_item = function(doc) {
 
 cur_frm.cscript['Stop Production Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to stop production order: " + doc.name);
+	var check = confirm(wn._("Do you really want to stop production order: " + doc.name));
 	if (check) {
 		return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
 	}
@@ -55,7 +55,7 @@ cur_frm.cscript['Stop Production Order'] = function() {
 
 cur_frm.cscript['Unstop Production Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do really want to unstop production order: " + doc.name);
+	var check = confirm(wn._("Do really want to unstop production order: " + doc.name));
 	if (check)
 			return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
@@ -105,5 +105,5 @@ cur_frm.set_query("bom_no", function(doc) {
 			query:"controllers.queries.bom",
 			filters: {item: cstr(doc.production_item)}
 		}
-	} else msgprint(" Please enter Production Item first");
+	} else msgprint(wn._("Please enter Production Item first"));
 });

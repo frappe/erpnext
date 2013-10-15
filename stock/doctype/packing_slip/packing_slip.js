@@ -45,13 +45,13 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_case_nos = function(doc) {
 	doc = locals[doc.doctype][doc.name];
 	if(cint(doc.from_case_no)==0) {
-		msgprint("Case No. cannot be 0")
+		msgprint(wn._("Case No. cannot be 0"))
 		validated = false;
 	} else if(!cint(doc.to_case_no)) {
 		doc.to_case_no = doc.from_case_no;
 		refresh_field('to_case_no');
 	} else if(cint(doc.to_case_no) < cint(doc.from_case_no)) {
-		msgprint("'To Case No.' cannot be less than 'From Case No.'");
+		msgprint(wn._("'To Case No.' cannot be less than 'From Case No.'"));
 		validated = false;
 	}	
 }
@@ -72,14 +72,14 @@ cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		for(var j=0; j<ps_detail.length; j++) {
 			if(i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
-				msgprint("You have entered duplicate items. Please rectify and try again.");
+				msgprint(wn._("You have entered duplicate items. Please rectify and try again."));
 				validated = false;
 				return;
 			}
 		}
 		if(flt(ps_detail[i].qty)<=0) {
-			msgprint("Invalid quantity specified for item " + ps_detail[i].item_code +
-				". Quantity should be greater than 0.");
+			msgprint(wn._("Invalid quantity specified for item ") + ps_detail[i].item_code +
+				"."+wn._(" Quantity should be greater than 0."));
 			validated = false;
 		}
 	}
@@ -95,9 +95,9 @@ cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		var item = ps_detail[i];
 		if(item.weight_uom != doc.net_weight_uom) {
-			msgprint("Different UOM for items will lead to incorrect \
-			(Total) Net Weight value. Make sure that Net Weight of each item is \
-			in the same UOM.")
+			msgprint(wn._("Different UOM for items will lead to incorrect")+
+			wn._("(Total) Net Weight value. Make sure that Net Weight of each item is")+
+			wn._("in the same UOM."))
 			validated = false;
 		}
 		net_weight_pkg += flt(item.net_weight) * flt(item.qty);

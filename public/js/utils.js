@@ -41,19 +41,19 @@ $.extend(erpnext, {
 		if(!grid_row.fields_dict.serial_no || 
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 		
-		var $btn = $('<button class="btn btn-sm btn-default">Add Serial No</button>')
+		var $btn = $('<button class="btn btn-sm btn-default">'+wn._("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-top": "-10px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
 				
 		$btn.on("click", function() {
 			var d = new wn.ui.Dialog({
-				title: "Add Serial No",
+				title: wn._("Add Serial No"),
 				fields: [
 					{
 						"fieldtype": "Link",
 						"options": "Serial No",
-						"label": "Serial No",
+						"label": wn._("Serial No"),
 						"get_query": {
 							item_code: grid_row.doc.item_code,
 							warehouse: grid_row.doc.warehouse
@@ -61,7 +61,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
-						"label": "Add"
+						"label": wn._("Add")
 					}
 				]
 			});

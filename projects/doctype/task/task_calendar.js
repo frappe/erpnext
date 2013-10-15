@@ -6,7 +6,7 @@ wn.views.calendar["Task"] = {
 		"start": "exp_start_date",
 		"end": "exp_end_date",
 		"id": "name",
-		"title": "subject",
+		"title": wn._("subject"),
 		"allDay": "allDay"
 	},
 	gantt: true,
@@ -15,7 +15,7 @@ wn.views.calendar["Task"] = {
 			"fieldtype": "Link", 
 			"fieldname": "project", 
 			"options": "Project", 
-			"label": "Project"
+			"label": wn._("Project")
 		}
 	],
 	get_events_method: "projects.doctype.task.task.get_events"

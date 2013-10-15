@@ -21,7 +21,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		var me = this;
 		erpnext.hide_naming_series();
 		if(!this.frm.doc.__islocal) {			
-			cur_frm.add_custom_button('Make Salary Structure', function() {
+			cur_frm.add_custom_button(wn._('Make Salary Structure'), function() {
 				me.make_salary_structure(this); });
 		}
 	},

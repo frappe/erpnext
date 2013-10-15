@@ -39,7 +39,7 @@ cur_frm.cscript.make_address = function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
-			no_results_message: 'No addresses created',
+			no_results_message: wn._('No addresses created'),
 			render_row: function(wrapper, data) {
 				$(wrapper).css('padding','5px 0px');
 				var link = $ln(wrapper,cstr(data.name), function() { loaddoc("Address", this.dn); }, {fontWeight:'bold'});
@@ -69,7 +69,7 @@ cur_frm.cscript.make_contact = function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
-			no_results_message: 'No contacts created',
+			no_results_message: wn._('No contacts created'),
 			render_row: function(wrapper, data) {
 				$(wrapper).css('padding', '5px 0px');
 				var link = $ln(wrapper, cstr(data.name), function() { loaddoc("Contact", this.dn); }, {fontWeight:'bold'});
