@@ -98,11 +98,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
 
 	def test_warehouse_company_validation(self):
-		from controllers.buying_controller import WrongWarehouseCompany
+		from stock.utils import InvalidWarehouseCompany
 		po = webnotes.bean(copy=test_records[0])
 		po.doc.company = "_Test Company 1"
 		po.doc.conversion_rate = 0.0167
-		self.assertRaises(WrongWarehouseCompany, po.insert)
+		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):
 		from utilities.transaction_base import UOMMustBeIntegerError
