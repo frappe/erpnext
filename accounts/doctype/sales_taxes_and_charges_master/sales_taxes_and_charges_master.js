@@ -2,6 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 //--------- ONLOAD -------------
+
+wn.require("app/js/controllers/accounts.js");
+
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.doctype === "Sales Taxes and Charges Master")
 		erpnext.add_for_territory();
@@ -142,6 +145,7 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
 	}	
 }
 
+<<<<<<< HEAD
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
@@ -157,6 +161,8 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	refresh_field('account_head',d.name,'other_charges');
 }
 
+=======
+>>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.rate) {

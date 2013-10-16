@@ -2,12 +2,13 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-09-12 18:34:54", 
+  "modified": "2013-10-02 14:24:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
@@ -132,7 +133,6 @@
   "fieldtype": "Date", 
   "in_filter": 1, 
   "label": "Purchase Order Date", 
-  "no_copy": 1, 
   "oldfieldname": "transaction_date", 
   "oldfieldtype": "Date", 
   "reqd": 1, 

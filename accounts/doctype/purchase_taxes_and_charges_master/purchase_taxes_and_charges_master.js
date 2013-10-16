@@ -4,6 +4,8 @@
 // 
 
 //--------- ONLOAD -------------
+wn.require("app/js/controllers/accounts.js");
+
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
    
 }
@@ -134,6 +136,7 @@ cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_qu
   }
 }
 
+<<<<<<< HEAD
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.account_head){
@@ -148,6 +151,8 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
   refresh_field('account_head',d.name,'purchase_tax_details');
 }
 
+=======
+>>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.rate) {

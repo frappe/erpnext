@@ -7,7 +7,6 @@ import webnotes
 from webnotes import session, msgprint
 from webnotes.utils import today
 
-sql = webnotes.conn.sql
 	
 
 from utilities.transaction_base import TransactionBase
@@ -28,7 +27,7 @@ class DocType(TransactionBase):
 			self.doc.resolved_by = webnotes.session.user
 	
 	def on_cancel(self):
-		lst = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))
+		lst = webnotes.conn.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))
 		if lst:
 			lst1 = ','.join([x[0] for x in lst])
 			msgprint("Maintenance Visit No. "+lst1+" already created against this customer issue. So can not be Cancelled")

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:50:27", 
+  "modified": "2013-10-08 16:48:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -70,11 +70,12 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "default": "Passive", 
   "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "label": "Status", 
-  "options": "\nOpen\nReplied"
+  "options": "Passive\nOpen\nReplied"
  }, 
  {
   "doctype": "DocField", 
@@ -84,7 +85,7 @@
   "label": "Email Id", 
   "oldfieldname": "email_id", 
   "oldfieldtype": "Data", 
-  "reqd": 1, 
+  "reqd": 0, 
   "search_index": 1
  }, 
  {
@@ -94,7 +95,7 @@
   "label": "Phone", 
   "oldfieldname": "contact_no", 
   "oldfieldtype": "Data", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

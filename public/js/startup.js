@@ -9,25 +9,10 @@ erpnext.startup.start = function() {
 	console.log(wn._('Starting up...'));
 	$('#startup_div').html('Starting up...').toggle(true);
 	
-	if(user != 'Guest'){
-		// setup toolbar
-		erpnext.toolbar.setup();
-		
-		// complete registration
-		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete==='No')) { 
-			wn.require("app/js/complete_setup.js");
-			erpnext.complete_setup.show(); 
-		} else if(!wn.boot.customer_count) {
-			if(wn.get_route()[0]!=="Setup") {
-				msgprint("<a class='btn btn-success' href='#Setup'>" 
-					+ wn._("Proceed to Setup") + "</a>\
-					<br><br><p class='text-muted'>"+
-					wn._("This message goes away after you create your first customer.")+
-					"</p>", wn._("Welcome"));
-			}
-		} else if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
-			erpnext.startup.show_expiry_banner();
-		}
+	erpnext.toolbar.setup();
+	
+	if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
+		erpnext.startup.show_expiry_banner();
 	}
 }
 

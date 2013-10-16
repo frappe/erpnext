@@ -59,6 +59,50 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 			};
 		});
 	},
+	
+	against_voucher: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_voucher && !flt(d.debit)) {
+			this.get_outstanding({
+				'doctype': 'Purchase Invoice', 
+				'docname': d.against_voucher
+			}, d)
+		}
+	},
+	
+	against_invoice: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_invoice && !flt(d.credit)) {
+			this.get_outstanding({
+				'doctype': 'Sales Invoice', 
+				'docname': d.against_invoice
+			}, d)
+		}
+	},
+	
+	against_jv: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
+			this.get_outstanding({
+				'doctype': 'Journal Voucher', 
+				'docname': d.against_jv,
+				'account': d.account
+			}, d)
+		}
+	},
+	
+	get_outstanding: function(args, child) {
+		var me = this;
+		return this.frm.call({
+			child: child,
+			method: "get_outstanding",
+			args: { args: args},
+			callback: function(r) {
+				cur_frm.cscript.update_totals(me.frm.doc);
+			}
+		});
+	}
+	
 });
 
 cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
@@ -87,24 +131,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
-
-cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.against_voucher && !flt(d.debit)) {
-		args = {'doctype': 'Purchase Invoice', 'docname': d.against_voucher }
-		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
-	}
-}
-
-cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.against_invoice && !flt(d.credit)) {
-		args = {'doctype': 'Sales Invoice', 'docname': d.against_invoice }
-		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
-	}
-}
-
-// Update Totals
 
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;

@@ -83,7 +83,6 @@ class DocType(SellingController):
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:			
 			self.update_stock_ledger()
-			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -111,7 +110,6 @@ class DocType(SellingController):
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
 			self.update_stock_ledger()
-			self.update_serial_nos(cancel = True)
 		
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -195,7 +193,7 @@ class DocType(SellingController):
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
-			if not for_validate:
+			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
 				self.set_customer_defaults()
 
@@ -266,13 +264,7 @@ class DocType(SellingController):
 
 	def get_adj_percent(self, arg=''):
 		"""Fetch ref rate from item master as per selected price list"""
-		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_rate(self,arg):
-		"""Get tax rate if account type is tax"""
-		get_obj('Sales Common').get_rate(arg)
-		
+		get_obj('Sales Common').get_adj_percent(self)		
 		
 	def get_comm_rate(self, sales_partner):
 		"""Get Commission rate of Sales Partner"""
@@ -965,8 +957,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			"doctype": "Delivery Note Item", 
 			"field_map": {
 				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype",
+				"parent": "against_sales_invoice", 
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item

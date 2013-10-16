@@ -1,13 +1,10 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
-from stock.doctype.stock_ledger_entry.stock_ledger_entry import *
+from stock.doctype.serial_no.serial_no import *
 from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 
@@ -43,12 +40,13 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
+		set_perpetual_inventory(0)
 		self._clear_stock_account_balance()
-		webnotes.session.user = "test2@example.com"
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		webnotes.session.user = "test2@example.com"
 
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import InvalidWarehouseCompany
+		from stock.utils import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
@@ -57,15 +55,15 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.session.user = "Administrator"
 
 	def test_warehouse_user(self):
+		set_perpetual_inventory(0)
 		from stock.utils import UserNotAllowedForWarehouse
 
-		webnotes.session.user = "test@example.com"
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-
+		webnotes.session.user = "test@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
@@ -720,6 +718,18 @@ class TestStockEntry(unittest.TestCase):
 		se.doclist[1].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoNotExistsError, se.submit)
+		
+	def test_serial_duplicate(self):
+		self._clear_stock_account_balance()
+		self.test_serial_by_series()
+		
+		se = webnotes.bean(copy=test_records[0])
+		se.doclist[1].item_code = "_Test Serialized Item With Series"
+		se.doclist[1].qty = 1
+		se.doclist[1].serial_no = "ABCD00001"
+		se.doclist[1].transfer_qty = 1
+		se.insert()
+		self.assertRaises(SerialNoDuplicateError, se.submit)
 		
 	def test_serial_by_series(self):
 		self._clear_stock_account_balance()

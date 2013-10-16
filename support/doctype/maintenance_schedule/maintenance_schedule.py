@@ -9,7 +9,6 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 from utilities.transaction_base import TransactionBase, delete_events
@@ -20,7 +19,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = sql("select item_name, description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
+		item = webnotes.conn.sql("select item_name, description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
@@ -30,7 +29,7 @@ class DocType(TransactionBase):
 	def generate_schedule(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
 		count = 0
-		sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
+		webnotes.conn.sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			self.validate_maintenance_detail()
 			s_list =[]	
@@ -67,7 +66,7 @@ class DocType(TransactionBase):
 				email_map[d.incharge_name] = webnotes.bean("Sales Person", 
 					d.incharge_name).run_method("get_email_id")
 
-			scheduled_date =sql("select scheduled_date from `tabMaintenance Schedule Detail` \
+			scheduled_date =webnotes.conn.sql("select scheduled_date from `tabMaintenance Schedule Detail` \
 				where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
 				d.item_code, self.doc.name), as_dict=1)
 
@@ -172,7 +171,7 @@ class DocType(TransactionBase):
 	def validate_sales_order(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.prevdoc_docname:
-				chk = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", d.prevdoc_docname)
+				chk = webnotes.conn.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", d.prevdoc_docname)
 				if chk:
 					msgprint("Maintenance Schedule against "+d.prevdoc_docname+" already exist")
 					raise Exception
@@ -186,7 +185,7 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					chk = sql("select name, status from `tabSerial No` where docstatus!=2 and name=%s", (x))
+					chk = webnotes.conn.sql("select name, status from `tabSerial No` where docstatus!=2 and name=%s", (x))
 					chk1 = chk and chk[0][0] or ''
 					status = chk and chk[0][1] or ''
 					
@@ -209,7 +208,7 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					dt = sql("select delivery_date from `tabSerial No` where name = %s", x)
+					dt = webnotes.conn.sql("select delivery_date from `tabSerial No` where name = %s", x)
 					dt = dt and dt[0][0] or ''
 					
 					if dt:
@@ -225,7 +224,7 @@ class DocType(TransactionBase):
 		cur_s_no = cur_serial_no.split(',')
 		
 		for x in cur_s_no:
-			sql("update `tabSerial No` set amc_expiry_date = '%s', maintenance_status = 'Under AMC' where name = '%s'"% (amc_end_date,x))
+			webnotes.conn.sql("update `tabSerial No` set amc_expiry_date = '%s', maintenance_status = 'Under AMC' where name = '%s'"% (amc_end_date,x))
 	
 	def on_update(self):
 		webnotes.conn.set(self.doc, 'status', 'Draft')
@@ -233,7 +232,7 @@ class DocType(TransactionBase):
 	def validate_serial_no_warranty(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if cstr(d.serial_no).strip():
-				dt = sql("""select warranty_expiry_date, amc_expiry_date 
+				dt = webnotes.conn.sql("""select warranty_expiry_date, amc_expiry_date 
 					from `tabSerial No` where name = %s""", d.serial_no, as_dict=1)
 				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
 					webnotes.msgprint("""Serial No: %s is already under warranty upto %s. 

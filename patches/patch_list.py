@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 patch_list = [
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-15",
-	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-07-16",
-	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-07-16",
+	"execute:webnotes.reload_doc('core', 'doctype', 'doctype', force=True) #2013-10-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'docfield', force=True) #2013-10-15",
 	"execute:webnotes.reload_doc('core', 'doctype', 'docperm') #2013-07-16",
 	"execute:webnotes.reload_doc('core', 'doctype', 'page') #2013-07-16",
 	"execute:webnotes.reload_doc('core', 'doctype', 'report') #2013-07-16",
@@ -218,4 +216,14 @@ patch_list = [
 	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
 	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
 	"patches.september_2013.p04_unsubmit_serial_nos",
+	"patches.september_2013.p05_fix_customer_in_pos",
+	"patches.october_2013.fix_is_cancelled_in_sle",
+	"patches.october_2013.p01_update_delivery_note_prevdocs",
+	"patches.october_2013.p02_set_communication_status",
+	"patches.october_2013.p03_crm_update_status",
+	"execute:webnotes.delete_doc('DocType', 'Setup Control')",
+	"patches.october_2013.p04_wsgi_migration",
+	"patches.october_2013.p05_server_custom_script_to_file",
+	"patches.october_2013.repost_ordered_qty",
+	"patches.october_2013.repost_planned_qty",
 ]

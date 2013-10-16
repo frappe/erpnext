@@ -21,7 +21,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				+ wn._("Fulfilled"), cint(doc.per_ordered));
 		}
 		
-		if(doc.docstatus == 1 && doc.status != 'Stopped'){
+		if(doc.docstatus==0) {
+			cur_frm.add_custom_button(wn._("Get Items from BOM"), cur_frm.cscript.get_items_from_bom, "icon-sitemap");
+		}
+		
+		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(doc.material_request_type === "Purchase")
 				cur_frm.add_custom_button(wn._("Make Supplier Quotation"), 
 					this.make_supplier_quotation);
@@ -61,6 +65,53 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			cur_frm.add_custom_button(wn._('Unstop Material Request'), 
 				cur_frm.cscript['Unstop Material Request']);
 		
+	},
+	
+	schedule_date: function(doc, cdt, cdn) {
+		var val = locals[cdt][cdn].schedule_date;
+		if(val) {
+			$.each(wn.model.get("Material Request Item", { parent: cur_frm.doc.name }), function(i, d) {
+				if(!d.schedule_date) {
+					d.schedule_date = val;
+				}
+			});
+			refresh_field("indent_details");
+		}
+	},
+	
+	get_items_from_bom: function() {
+		var d = new wn.ui.Dialog({
+			title: wn._("Get Items from BOM"),
+			fields: [
+				{"fieldname":"bom", "fieldtype":"Link", "label":wn._("BOM"), 
+					options:"BOM"},
+				{"fieldname":"fetch_exploded", "fieldtype":"Check", 
+					"label":wn._("Fetch exploded BOM (including sub-assemblies)"), "default":1},
+				{fieldname:"fetch", "label":wn._("Get Items from BOM"), "fieldtype":"Button"}
+			]
+		});
+		d.get_input("fetch").on("click", function() {
+			var values = d.get_values();
+			if(!values) return;
+			
+			wn.call({
+				method:"manufacturing.doctype.bom.bom.get_bom_items",
+				args: values,
+				callback: function(r) {
+					$.each(r.message, function(i, item) {
+						var d = wn.model.add_child(cur_frm.doc, "Material Request Item", "indent_details");
+						d.item_code = item.item_code;
+						d.description = item.description;
+						d.warehouse = item.default_warehouse;
+						d.uom = item.stock_uom;
+						d.qty = item.qty;
+					});
+					d.hide();
+					refresh_field("indent_details");
+				}
+			});
+		});
+		d.show();
 	},
 	
 	tc_name: function() {

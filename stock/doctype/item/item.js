@@ -11,14 +11,16 @@ cur_frm.cscript.refresh = function(doc) {
 		&& doc.__islocal)
 	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
 		&& doc.__islocal)
+		
+	if(!doc.__islocal && doc.show_in_website) {
+		cur_frm.add_custom_button("View In Website", function() {
+			window.open(doc.page_name);
+		}, "icon-globe");
+	}
 
-
-	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
-		var callback = function(r, rt) {
-			var enabled = (r.message == 'exists') ? false : true;
-			cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'], enabled);
-		}
-		return $c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
+	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
+		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
+			doc.__sle_exists=="exists" ? false : true);
 	}
 }
 

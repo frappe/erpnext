@@ -7,6 +7,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.add_custom_button(wn._("Item Group Tree"), function() {
 		wn.set_route("Sales Browser", "Item Group");
 	})
+
+	if(!doc.__islocal && doc.show_in_website) {
+		cur_frm.add_custom_button("View In Website", function() {
+			window.open(doc.page_name);
+		}, "icon-globe");
+	}
 }
 
 cur_frm.cscript.set_root_readonly = function(doc) {

@@ -6,7 +6,7 @@ import webnotes
 import webnotes.defaults
 
 from webnotes.utils import cstr, cint, flt, comma_or, nowdate
-from webnotes.model.doc import Document, addchild
+from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -15,12 +15,12 @@ from stock.stock_ledger import get_previous_sle
 from controllers.queries import get_match_cond
 import json
 
-sql = webnotes.conn.sql
 
 class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass
 class IncorrectValuationRateError(webnotes.ValidationError): pass
 class DuplicateEntryForProductionOrderError(webnotes.ValidationError): pass
+class StockOverProductionError(webnotes.ValidationError): pass
 	
 from controllers.stock_controller import StockController
 
@@ -52,14 +52,15 @@ class DocType(StockController):
 		
 	def on_submit(self):
 		self.update_stock_ledger()
-		self.update_serial_no(1)
-		self.update_production_order(1)
+
+		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		update_serial_nos_after_submit(self, "mtn_details")
+		self.update_production_order()
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
-		self.update_serial_no(0)
-		self.update_production_order(0)
+		self.update_production_order()
 		self.make_cancel_gl_entries()
 		
 	def validate_fiscal_year(self):
@@ -294,24 +295,6 @@ class DocType(StockController):
 			from `tabStock Entry Detail` where parent in (
 				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
 			group by item_code""" % (ref_fieldname, "%s"), (self.doc.fields.get(ref_fieldname),)))
-		
-	def update_serial_no(self, is_submit):
-		"""Create / Update Serial No"""
-
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, "Stock Entry", "mtn_details")
-		
-		for d in getlist(self.doclist, 'mtn_details'):
-			for serial_no in get_serial_nos(d.serial_no):
-				if self.doc.purpose == 'Purchase Return':
-					sr = webnotes.bean("Serial No", serial_no)
-					sr.doc.status = "Purchase Returned" if is_submit else "Available"
-					sr.save()
-				
-				if self.doc.purpose == "Sales Return":
-					sr = webnotes.bean("Serial No", serial_no)
-					sr.doc.status = "Sales Returned" if is_submit else "Delivered"
-					sr.save()
 						
 	def update_stock_ledger(self):
 		sl_entries = []			
@@ -342,42 +325,49 @@ class DocType(StockController):
 				
 		self.make_sl_entries(sl_entries, self.doc.amended_from and 'Yes' or 'No')
 
-	def update_production_order(self, is_submit):
+	def update_production_order(self):
+		def _validate_production_order(pro_bean):
+			if flt(pro_bean.doc.docstatus) != 1:
+				webnotes.throw(_("Production Order must be submitted") + ": " + 
+					self.doc.production_order)
+					
+			if pro_bean.doc.status == 'Stopped':
+				msgprint(_("Transaction not allowed against stopped Production Order") + ": " + 
+					self.doc.production_order)
+		
 		if self.doc.production_order:
-			# first perform some validations
-			# (they are here coz this fn is also called during on_cancel)
-			pro_obj = get_obj("Production Order", self.doc.production_order)
-			if flt(pro_obj.doc.docstatus) != 1:
-				msgprint("""You cannot do any transaction against 
-					Production Order : %s, as it's not submitted"""
-					% (pro_obj.doc.name), raise_exception=1)
-					
-			if pro_obj.doc.status == 'Stopped':
-				msgprint("""You cannot do any transaction against Production Order : %s, 
-					as it's status is 'Stopped'"""% (pro_obj.doc.name), raise_exception=1)
-					
-			# update bin
-			if self.doc.purpose == "Manufacture/Repack":
-				from stock.utils import update_bin
-				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
-					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
-				args = {
-					"item_code": pro_obj.doc.production_item,
-					"warehouse": pro_obj.doc.fg_warehouse,
-					"posting_date": self.doc.posting_date,
-					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
-				}
-				update_bin(args)
+			pro_bean = webnotes.bean("Production Order", self.doc.production_order)
+			_validate_production_order(pro_bean)
+			self.update_produced_qty(pro_bean)
+			self.update_planned_qty(pro_bean)
 			
-			# update production order status
-			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
-				and 'Completed' or 'In Process'
-			pro_obj.doc.save()
+	def update_produced_qty(self, pro_bean):
+		if self.doc.purpose == "Manufacture/Repack":
+			produced_qty = flt(pro_bean.doc.produced_qty) + \
+				(self.doc.docstatus==1 and 1 or -1 ) * flt(self.doc.fg_completed_qty)
+				
+			if produced_qty > flt(pro_bean.doc.qty):
+				webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
+					_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
+					+ "(%s/%s)" % (produced_qty, flt(pro_bean.doc.qty)), StockOverProductionError)
+					
+			status = 'Completed' if flt(produced_qty) >= flt(pro_bean.doc.qty) else 'In Process'
+			webnotes.conn.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
+				where name=%s""", (status, produced_qty, self.doc.production_order))
+			
+	def update_planned_qty(self, pro_bean):
+		from stock.utils import update_bin
+		update_bin({
+			"item_code": pro_bean.doc.production_item,
+			"warehouse": pro_bean.doc.fg_warehouse,
+			"posting_date": self.doc.posting_date,
+			"planned_qty": (self.doc.docstatus==1 and -1 or 1 ) * flt(self.doc.fg_completed_qty)
+		})
 					
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
 
-		item = sql("""select stock_uom, description, item_name from `tabItem` 
+		item = webnotes.conn.sql("""select stock_uom, description, item_name from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
 			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
 		if not item: 
@@ -401,7 +391,7 @@ class DocType(StockController):
 
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
-		uom = sql("""select conversion_factor from `tabUOM Conversion Detail` 
+		uom = webnotes.conn.sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom or not flt(uom[0].conversion_factor):
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
@@ -431,7 +421,8 @@ class DocType(StockController):
 		return ret
 		
 	def get_items(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
+		self.doclist = filter(lambda d: d.parentfield!="mtn_details", self.doclist)
+		# self.doclist = self.doc.clear_table(self.doclist, 'mtn_details')
 		
 		pro_obj = None
 		if self.doc.production_order:
@@ -470,7 +461,7 @@ class DocType(StockController):
 						"stock_uom": pro_obj.doc.stock_uom
 					}
 				}, bom_no=pro_obj.doc.bom_no)
-				
+								
 			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack"]:
 				if self.doc.purpose=="Material Receipt":
 					self.doc.from_warehouse = ""
@@ -487,70 +478,19 @@ class DocType(StockController):
 				}, bom_no=self.doc.bom_no)
 		
 		self.get_stock_and_rate()
+		
 	
 	def get_bom_raw_materials(self, qty):
-		""" 
-			get all items from flat bom except 
-			child items of sub-contracted and sub assembly items 
-			and sub assembly items itself.
-		"""
+		from manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		
 		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = {}
+		item_dict = get_bom_items_as_dict(self.doc.bom_no, qty=qty, fetch_exploded = self.doc.use_multi_level_bom)
 		
-		def _make_items_dict(items_list):
-			"""makes dict of unique items with it's qty"""
-			for item in items_list:
-				if item_dict.has_key(item.item_code):
-					item_dict[item.item_code]["qty"] += flt(item.qty)
-				else:
-					item_dict[item.item_code] = {
-						"qty": flt(item.qty), 
-						"description": item.description, 
-						"stock_uom": item.stock_uom,
-						"from_warehouse": item.default_warehouse
-					}
-		
-		if self.doc.use_multi_level_bom:
-			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = sql("""select 
-					fb.item_code, 
-					ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, 
-					fb.description, 
-					fb.stock_uom,
-					it.default_warehouse
-				from 
-					`tabBOM Explosion Item` fb,`tabItem` it 
-				where 
-					it.name = fb.item_code 
-					and ifnull(it.is_pro_applicable, 'No') = 'No'
-					and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
-					and fb.docstatus < 2 
-					and fb.parent=%s group by item_code, stock_uom""", 
-				(qty, self.doc.bom_no), as_dict=1)
-			
-			if fl_bom_sa_child_item:
-				_make_items_dict(fl_bom_sa_child_item)
-		else:
-			# get only BOM items
-			fl_bom_sa_items = sql("""select 
-					`tabItem`.item_code,
-					ifnull(sum(`tabBOM Item`.qty_consumed_per_unit), 0) *%s as qty,
-					`tabItem`.description, 
-					`tabItem`.stock_uom,
-					`tabItem`.default_warehouse
-				from 
-					`tabBOM Item`, `tabItem`
-				where 
-					`tabBOM Item`.parent = %s and 
-					`tabBOM Item`.item_code = tabItem.name and
-					`tabBOM Item`.docstatus < 2 
-				group by item_code""", (qty, self.doc.bom_no), as_dict=1)
-			
-			if fl_bom_sa_items:
-				_make_items_dict(fl_bom_sa_items)
+		for item in item_dict.values():
+			item.from_warehouse = item.default_warehouse
 			
 		return item_dict
-	
+			
 	def get_pending_raw_materials(self, pro_obj):
 		"""
 			issue (item quantity) that is pending to issue or desire to transfer,
@@ -590,7 +530,7 @@ class DocType(StockController):
 
 	def get_issued_qty(self):
 		issued_item_qty = {}
-		result = sql("""select t1.item_code, sum(t1.qty)
+		result = webnotes.conn.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
 			and t2.purpose = 'Material Transfer'
@@ -636,7 +576,7 @@ class DocType(StockController):
 		
 	def get_cust_addr(self):
 		from utilities.transaction_base import get_default_address, get_address_display
-		res = sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
+		res = webnotes.conn.sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
 		address_display = None
 		customer_address = get_default_address("customer", self.doc.customer)
 		if customer_address:
@@ -657,7 +597,7 @@ class DocType(StockController):
 		
 	def get_supp_addr(self):
 		from utilities.transaction_base import get_default_address, get_address_display
-		res = sql("""select supplier_name from `tabSupplier`
+		res = webnotes.conn.sql("""select supplier_name from `tabSupplier`
 			where name=%s""", self.doc.supplier)
 		address_display = None
 		supplier_address = get_default_address("customer", self.doc.customer)
@@ -896,8 +836,7 @@ def make_return_jv_from_delivery_note(se, ref):
 		ref.doclist[0].name)
 	
 	if not invoices_against_delivery:
-		sales_orders_against_delivery = [d.prevdoc_docname for d in 
-			ref.doclist.get({"prevdoc_doctype": "Sales Order"}) if d.prevdoc_docname]
+		sales_orders_against_delivery = [d.against_sales_order for d in ref.doclist if d.against_sales_order]
 		
 		if sales_orders_against_delivery:
 			invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",

@@ -6,7 +6,6 @@ import webnotes
 
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,d,dl):
@@ -14,7 +13,7 @@ class DocType:
 
 	def get_message(self, arg):
 		fn = arg.lower().replace(' ', '_') + '_message'
-		v = sql("select value from tabSingles where field=%s and doctype=%s", (fn, 'Notification Control'))
+		v = webnotes.conn.sql("select value from tabSingles where field=%s and doctype=%s", (fn, 'Notification Control'))
 		return v and v[0][0] or ''
 
 	def set_message(self, arg = ''):

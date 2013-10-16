@@ -30,17 +30,27 @@ prob = {
 }
 
 def make(reset=False, simulate=True):
-	#webnotes.print_messages = True
-	webnotes.mute_emails = True
-	webnotes.rollback_on_exception = True
+	#webnotes.flags.print_messages = True
+	webnotes.flags.mute_emails = True
+	webnotes.flags.rollback_on_exception = True
+	
+	if not webnotes.conf.demo_db_name:
+		raise Exception("conf.py does not have demo_db_name")
 	
 	if reset:
 		setup()
+	else:
+		if webnotes.conn:
+			webnotes.conn.close()
+		
+		webnotes.connect(db_name=webnotes.conf.demo_db_name)
+	
 	if simulate:
 		_simulate()
-	
+		
 def setup():
 	install()
+	webnotes.connect(db_name=webnotes.conf.demo_db_name)
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
@@ -65,7 +75,7 @@ def _simulate():
 	
 	for i in xrange(runs_for):		
 		print current_date.strftime("%Y-%m-%d")
-		webnotes.utils.current_date = current_date
+		webnotes.local.current_date = current_date
 		
 		if current_date.weekday() in (5, 6):
 			current_date = webnotes.utils.add_days(current_date, 1)
@@ -138,20 +148,23 @@ def run_stock(current_date):
 	# make purchase requests
 	if can_make("Purchase Receipt"):
 		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from stock.stock_ledger import NegativeStockError
 		report = "Purchase Order Items To Be Received"
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
 			pr.doc.posting_date = current_date
 			pr.doc.fiscal_year = "2013"
 			pr.insert()
-			pr.submit()
-			webnotes.conn.commit()
+			try:
+				pr.submit()
+				webnotes.conn.commit()
+			except NegativeStockError: pass
 	
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
 		from selling.doctype.sales_order.sales_order import make_delivery_note
 		from stock.stock_ledger import NegativeStockError
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoRequiredError, SerialNoQtyError
+		from stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
@@ -357,13 +370,14 @@ def how_many(doctype):
 def install():
 	print "Creating Fresh Database..."
 	from webnotes.install_lib.install import Installer
-	import conf
+	from webnotes import conf
 	inst = Installer('root')
-	inst.import_from_db(conf.demo_db_name, verbose = 1)
+	inst.install(conf.demo_db_name, verbose=1, force=1)
 
 def complete_setup():
 	print "Complete Setup..."
-	webnotes.get_obj("Setup Control").setup_account({
+	from setup.page.setup_wizard.setup_wizard import setup_account
+	setup_account({
 		"first_name": "Test",
 		"last_name": "User",
 		"fy_start": "1st Jan",
@@ -412,7 +426,7 @@ def import_data(dt, submit=False, overwrite=False):
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
-		webnotes.form_dict = webnotes._dict()
+		webnotes.local.form_dict = webnotes._dict()
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")

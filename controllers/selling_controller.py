@@ -14,13 +14,16 @@ class SellingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
-		
+	
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Sales Email Settings', None, 'email_id')
+	
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
-		self.set_price_list_and_item_details()
+		self.set_price_list_and_item_details(for_validate)
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "charge")
 					
@@ -38,8 +41,8 @@ class SellingController(StockController):
 					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 						self.doc.fields[fieldname] = val
 						
-	def set_price_list_and_item_details(self):
-		self.set_price_list_currency("Selling")
+	def set_price_list_and_item_details(self, for_validate=False):
+		self.set_price_list_currency("Selling", for_validate)
 		self.set_missing_item_details(get_item_details)
 										
 	def get_other_charges(self):
@@ -233,34 +236,4 @@ class SellingController(StockController):
 			self.doc.order_type = "Sales"
 		elif self.doc.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
-				_("must be one of") + ": " + comma_or(valid_types),
-				raise_exception=True)
-				
-	def update_serial_nos(self, cancel=False):
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import update_serial_nos_after_submit, get_serial_nos
-		update_serial_nos_after_submit(self, self.doc.doctype, self.fname)
-		update_serial_nos_after_submit(self, self.doc.doctype, "packing_details")
-
-		for table_fieldname in (self.fname, "packing_details"):
-			for d in self.doclist.get({"parentfield": table_fieldname}):
-				for serial_no in get_serial_nos(d.serial_no):
-					sr = webnotes.bean("Serial No", serial_no)
-					if cancel:
-						sr.doc.status = "Available"
-						for fieldname in ("warranty_expiry_date", "delivery_document_type", 
-							"delivery_document_no", "delivery_date", "delivery_time", "customer", 
-							"customer_name"):
-							sr.doc.fields[fieldname] = None
-					else:
-						sr.doc.delivery_document_type = self.doc.doctype
-						sr.doc.delivery_document_no = self.doc.name
-						sr.doc.delivery_date = self.doc.posting_date
-						sr.doc.delivery_time = self.doc.posting_time
-						sr.doc.customer = self.doc.customer
-						sr.doc.customer_name	= self.doc.customer_name
-						if sr.doc.warranty_period:
-							sr.doc.warranty_expiry_date = add_days(cstr(self.doc.posting_date), 
-								cint(sr.doc.warranty_period))
-						sr.doc.status =	'Delivered'
-
-					sr.save()
+				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)

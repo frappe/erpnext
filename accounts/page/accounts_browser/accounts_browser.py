@@ -15,7 +15,7 @@ def get_companies():
 
 @webnotes.whitelist()
 def get_children():
-	args = webnotes.form_dict
+	args = webnotes.local.form_dict
 	ctype, company = args['ctype'], args['comp']
 	
 	# root

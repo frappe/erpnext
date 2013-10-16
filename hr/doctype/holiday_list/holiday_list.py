@@ -10,7 +10,6 @@ from webnotes.model.doc import addchild, make_autoname
 from webnotes.model.bean import copy_doclist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 
 import datetime
 

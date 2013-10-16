@@ -8,7 +8,6 @@ from webnotes.utils import cstr
 from webnotes.model.bean import getlist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
 	
 
 from utilities.transaction_base import TransactionBase
@@ -19,7 +18,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = sql("select item_name,description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
+		item = webnotes.conn.sql("select item_name,description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
 		ret = {
 			'item_name' : item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
@@ -28,7 +27,7 @@ class DocType(TransactionBase):
 			
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
-			if d.serial_no and not sql("select name from `tabSerial No` where name = '%s' and docstatus != 2" % d.serial_no):
+			if d.serial_no and not webnotes.conn.sql("select name from `tabSerial No` where name = '%s' and docstatus != 2" % d.serial_no):
 				msgprint("Serial No: "+ d.serial_no + " not exists in the system")
 				raise Exception
 
@@ -52,7 +51,7 @@ class DocType(TransactionBase):
 					elif self.doc.completion_status == 'Partially Completed':
 						status = 'Work In Progress'
 				else:
-					nm = sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.doc.name))
+					nm = webnotes.conn.sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.doc.name))
 					
 					if nm:
 						status = 'Work In Progress'
@@ -65,7 +64,7 @@ class DocType(TransactionBase):
 						service_person = ''
 						work_done = ''
 				
-				sql("update `tabCustomer Issue` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
+				webnotes.conn.sql("update `tabCustomer Issue` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
 	
 
 	def check_if_last_visit(self):
@@ -77,7 +76,7 @@ class DocType(TransactionBase):
 				check_for_doctype = d.prevdoc_doctype
 		
 		if check_for_docname:
-			check = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.doc.name, check_for_docname, self.doc.mntc_date, self.doc.mntc_date, self.doc.mntc_time))
+			check = webnotes.conn.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.doc.name, check_for_docname, self.doc.mntc_date, self.doc.mntc_date, self.doc.mntc_time))
 			
 			if check:
 				check_lst = [x[0] for x in check]

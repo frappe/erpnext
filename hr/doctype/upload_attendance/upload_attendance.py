@@ -9,7 +9,8 @@ from webnotes.utils import cstr, add_days, date_diff
 from webnotes import msgprint, _
 from webnotes.utils.datautils import UnicodeWriter
 
-doclist = None
+# doclist = None
+doclist = webnotes.local('uploadattendance_doclist')
 
 class DocType():
 	def __init__(self, doc, doclist=[]):
@@ -21,9 +22,8 @@ def get_template():
 	if not webnotes.has_permission("Attendance", "create"):
 		raise webnotes.PermissionError
 	
-	args = webnotes.form_dict
-	global doclist
-	doclist = webnotes.model.doctype.get("Attendance")
+	args = webnotes.local.form_dict
+	webnotes.local.uploadattendance_doclist = webnotes.model.doctype.get("Attendance")
 
 	w = UnicodeWriter()
 	w = add_header(w)

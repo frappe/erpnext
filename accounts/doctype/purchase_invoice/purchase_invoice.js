@@ -8,6 +8,7 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.provide("erpnext.accounts");
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {

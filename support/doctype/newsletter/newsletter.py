@@ -76,22 +76,25 @@ class DocType():
 		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
 		
 		from webnotes.utils.email_lib.bulk import send
-		webnotes.conn.auto_commit_on_many_writes = True
+		
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = True
 		
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = self.send_to_doctype, email_field = "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
-		webnotes.conn.auto_commit_on_many_writes = False
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
 			webnotes.msgprint(_("""Please save the Newsletter before sending."""),
 				raise_exception=1)
 
-		import conf
-		if getattr(conf, "status", None) == "Trial":
+		from webnotes import conf
+		if (conf.get("status") or None) == "Trial":
 			webnotes.msgprint(_("""Sending newsletters is not allowed for Trial users, \
 				to prevent abuse of this feature."""), raise_exception=1)
 
@@ -105,7 +108,6 @@ def get_lead_options():
 	}
 
 
-lead_naming_series = None
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
@@ -119,7 +121,7 @@ def create_lead(email_id):
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
 		"status": "Contacted",
-		"naming_series": lead_naming_series or get_lead_naming_series(),
+		"naming_series": get_lead_naming_series(),
 		"company": webnotes.conn.get_default("company"),
 		"source": "Email"
 	})
@@ -127,7 +129,7 @@ def create_lead(email_id):
 	
 def get_lead_naming_series():
 	"""gets lead's default naming series"""
-	global lead_naming_series
+	lead_naming_series = None
 	naming_series_field = webnotes.get_doctype("Lead").get_field("naming_series")
 	if naming_series_field.default:
 		lead_naming_series = naming_series_field.default

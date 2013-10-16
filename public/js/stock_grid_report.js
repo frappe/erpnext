@@ -28,7 +28,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			var value_diff = (rate * add_qty);
 		
 			if(add_qty)
-				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);
+				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);				
 		} else {
 			// outgoing
 			if(sl.serial_no) {
@@ -98,7 +98,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		
 		$.each(sl.serial_no.trim().split("\n"), function(i, sr) {
 			if(sr) {
-				value_diff += flt(me.serialized_buying_rates[sr.trim()]);
+				value_diff += flt(me.serialized_buying_rates[sr.trim().toLowerCase()]);
 			}
 		});
 		
@@ -111,8 +111,9 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		$.each(wn.report_dump.data["Stock Ledger Entry"], function(i, sle) {
 			if(sle.qty > 0 && sle.serial_no) {
 				$.each(sle.serial_no.trim().split("\n"), function(i, sr) {
-					if(sr && sle.incoming_rate !== undefined) {
-						serialized_buying_rates[sr.trim()] = flt(sle.incoming_rate);
+					if(sr && sle.incoming_rate !== undefined 
+							&& !serialized_buying_rates[sr.trim().toLowerCase()]) {
+						serialized_buying_rates[sr.trim().toLowerCase()] = flt(sle.incoming_rate);
 					}
 				});
 			}

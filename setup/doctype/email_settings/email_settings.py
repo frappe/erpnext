@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-sql = webnotes.conn.sql
 	
 from webnotes.utils import cint
 

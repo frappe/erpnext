@@ -10,6 +10,7 @@
 
 wn.provide("erpnext.selling");
 wn.require("app/js/transaction.js");
+wn.require("app/js/controllers/accounts.js");
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
@@ -162,8 +163,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode) {
 			if(!this.validate_company_and_party("customer")) {
-				item.item_code = null;
-				refresh_field("item_code", item.name, item.parentfield);
+				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
 					method: "selling.utils.get_item_details",

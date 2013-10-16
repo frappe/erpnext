@@ -65,7 +65,7 @@ def _get_basic_details(args, item_bean):
 	
 	out = webnotes._dict({
 		"description": item.description_html or item.description,
-		"qty": 0.0,
+		"qty": 1.0,
 		"uom": item.stock_uom,
 		"conversion_factor": 1.0,
 		"warehouse": args.warehouse or item.default_warehouse,

@@ -21,8 +21,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				company: wn.defaults.get_default("company"),
 				fiscal_year: wn.defaults.get_default("fiscal_year"),
 				is_subcontracted: "No",
-				conversion_rate: 1.0,
-				plc_conversion_rate: 1.0
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
@@ -41,18 +39,19 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.customer) {
-			var me = this;
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "onload_post_render",
-				freeze: true,
-				callback: function(r) {
-					// remove this call when using client side mapper
-					me.set_default_values();
-					me.set_dynamic_labels();
-				}
-			});
+		if(this.frm.doc.__islocal && this.frm.doc.company && 
+			!this.frm.doc.customer && !this.frm.doc.is_pos) {
+				var me = this;
+				return this.frm.call({
+					doc: this.frm.doc,
+					method: "onload_post_render",
+					freeze: true,
+					callback: function(r) {
+						// remove this call when using client side mapper
+						me.set_default_values();
+						me.set_dynamic_labels();
+					}
+				});
 		}
 	},
 	
@@ -62,6 +61,56 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
+
+		// Show POS button only if it is enabled from features setup
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+			this.pos_btn();
+	},
+
+	pos_btn: function() {
+		if(this.$pos_btn) 
+			this.$pos_btn.remove();
+
+		if(!this.pos_active) {
+			var btn_label = wn._("POS View"),
+				icon = "icon-desktop";
+		} else {
+			var btn_label = wn._(this.frm.doctype) + wn._(" View"),
+				icon = "icon-file-text";
+		}
+		var me = this;
+
+		this.$pos_btn = this.frm.add_custom_button(btn_label, function() {
+			me.toggle_pos();
+			me.pos_btn();
+		}, icon);
+	},
+
+	toggle_pos: function(show) {
+		// Check whether it is Selling or Buying cycle
+		var price_list = wn.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
+			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
+		
+		if (!price_list)
+			msgprint(wn._("Please select Price List"))
+		else {
+			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
+
+			// make pos
+			if(!this.frm.pos) {
+				this.frm.layout.add_view("pos");
+				this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+			}
+
+			// toggle view
+			this.frm.layout.set_view(this.pos_active ? "" : "pos");
+			this.pos_active = !this.pos_active;
+
+			// refresh
+			if(this.pos_active)
+				this.frm.pos.refresh();
+			this.frm.refresh();
+		}
 	},
 	
 	validate: function() {
@@ -81,10 +130,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
-			if(!this.frm.doc.currency) {
-				this.frm.set_value("currency", this.get_company_currency());
+			var company_currency = this.get_company_currency();
+			if (!this.frm.doc.currency) {
+				this.frm.set_value("currency", company_currency);
 			}
 			
+			if (this.frm.doc.currency == company_currency) {
+				this.frm.set_value("conversion_rate", 1.0);
+			}
+			if (this.frm.doc.price_list_currency == company_currency) {
+				this.frm.set_value('plc_conversion_rate', 1.0);
+			}
+
 			this.frm.script_manager.trigger("currency");
 		}
 	},
@@ -96,15 +153,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	currency: function() {
 		var me = this;
 		this.set_dynamic_labels();
-		
+
 		var company_currency = this.get_company_currency();
 		if(this.frm.doc.currency !== company_currency) {
 			this.get_exchange_rate(this.frm.doc.currency, company_currency, 
 				function(exchange_rate) {
-					if(exchange_rate) {
-						me.frm.set_value("conversion_rate", exchange_rate);
-						me.conversion_rate();
-					}
+					me.frm.set_value("conversion_rate", exchange_rate);
+					me.conversion_rate();
 				});
 		} else {
 			this.conversion_rate();		
@@ -118,7 +173,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-		
+
 		this.calculate_taxes_and_totals();
 	},
 	
@@ -182,7 +237,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	tax_rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
-	
+
 	row_id: function(doc, cdt, cdn) {
 		var tax = wn.model.get_doc(cdt, cdn);
 		try {
@@ -413,15 +468,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		
 		var company_currency = this.get_company_currency();
-		var valid_conversion_rate = this.frm.doc.conversion_rate ?
-			((this.frm.doc.currency == company_currency && this.frm.doc.conversion_rate == 1.0) ||
-			(this.frm.doc.currency != company_currency && this.frm.doc.conversion_rate != 1.0)) :
-			false;
 		
-		// if(!valid_conversion_rate) {
-		// 	wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-		// 		" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
-		// }
+		if(!this.frm.doc.conversion_rate) {
+			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
+				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+		}
 	},
 	
 	calculate_taxes_and_totals: function() {

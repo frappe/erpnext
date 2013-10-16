@@ -11,6 +11,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -23,20 +24,18 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
-
-		cur_frm.dashboard.reset(doc);
-		if(!doc.__islocal) {
-			if(doc.status=="Converted" || doc.status=="Order Confirmed") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
-			} else if(doc.status==="Order Lost") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-			}
-		}
 		
+<<<<<<< HEAD
 		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
 			cur_frm.add_custom_button(wn._('Make Sales Order'), cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Order Confirmed") {
 				cur_frm.add_custom_button(wn._('Set as Lost'), cur_frm.cscript['Declare Order Lost']);
+=======
+		if(doc.docstatus == 1 && doc.status!=='Lost') {
+			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
+			if(doc.status!=="Ordered") {
+				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
+>>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 			}
 			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 		}
@@ -82,12 +81,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	
 	validate_company_and_party: function(party_field) {
-		if(this.frm.doc.quotation_to == "Lead") {
-			return true;
-		} else if(!this.frm.doc.quotation_to) {
+		if(!this.frm.doc.quotation_to) {
 			msgprint(wn._("Please select a value for" + " " + wn.meta.get_label(this.frm.doc.doctype,
 				"quotation_to", this.frm.doc.name)));
 			return false;
+		} else if (this.frm.doc.quotation_to == "Lead") {
+			return true;
 		} else {
 			return this._super(party_field);
 		}

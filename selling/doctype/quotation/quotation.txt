@@ -2,13 +2,14 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:46:33", 
+  "modified": "2013-10-11 13:21:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
   "allow_email": 0, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
@@ -257,7 +258,6 @@
   "width": "100px"
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which customer's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
@@ -733,7 +733,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
+  "options": "Draft\nSubmitted\nOrdered\nLost\nCancelled", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 
@@ -841,8 +841,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "amend": 1, 

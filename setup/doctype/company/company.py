@@ -10,7 +10,6 @@ from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,d,dl):

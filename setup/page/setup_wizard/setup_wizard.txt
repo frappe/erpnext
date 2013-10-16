@@ -1,0 +1,32 @@
+[
+ {
+  "creation": "2013-10-04 13:49:33", 
+  "docstatus": 0, 
+  "modified": "2013-10-04 13:49:33", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "module": "Setup", 
+  "name": "__common__", 
+  "page_name": "setup-wizard", 
+  "standard": "Yes", 
+  "title": "Setup Wizard"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "setup-wizard", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "setup-wizard"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

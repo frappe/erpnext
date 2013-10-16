@@ -52,7 +52,7 @@ class AccountsController(TransactionBase):
 						msgprint(_("Account for this ") + fieldname + _(" has been freezed. ") + 
 							self.doc.doctype + _(" can not be made."), raise_exception=1)
 			
-	def set_price_list_currency(self, buying_or_selling):
+	def set_price_list_currency(self, buying_or_selling, for_validate=False):
 		if self.meta.get_field("currency"):
 			company_currency = get_company_currency(self.doc.company)
 			
@@ -60,14 +60,13 @@ class AccountsController(TransactionBase):
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				if not self.doc.price_list_currency:
-					self.doc.price_list_currency = webnotes.conn.get_value("Price List",
-						self.doc.fields.get(fieldname), "currency")
+				self.doc.price_list_currency = webnotes.conn.get_value("Price List",
+					self.doc.fields.get(fieldname), "currency")
 				
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0
 
-				elif not self.doc.plc_conversion_rate:
+				elif not self.doc.plc_conversion_rate or not for_validate:
 					self.doc.plc_conversion_rate = self.get_exchange_rate(
 						self.doc.price_list_currency, company_currency)
 			
@@ -77,7 +76,7 @@ class AccountsController(TransactionBase):
 				self.doc.conversion_rate = self.doc.plc_conversion_rate
 			elif self.doc.currency == company_currency:
 				self.doc.conversion_rate = 1.0
-			elif not self.doc.conversion_rate:
+			elif not self.doc.conversion_rate or not for_validate:
 				self.doc.conversion_rate = self.get_exchange_rate(self.doc.currency,
 					company_currency)
 
@@ -423,3 +422,7 @@ class AccountsController(TransactionBase):
 			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
+
+@webnotes.whitelist()
+def get_tax_rate(account_head):
+	return webnotes.conn.get_value("Account", account_head, "tax_rate")
