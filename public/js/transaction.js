@@ -24,9 +24,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
-			});
-			
-			me.frm.script_manager.trigger("company");
+			});			
 		}
 		
 		if(this.other_fname) {
@@ -39,9 +37,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company && 
-			!this.frm.doc.customer && !this.frm.doc.is_pos) {
-				var me = this;
+		var me = this;
+		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
+			if(!this.frm.doc.customer) {
 				return this.frm.call({
 					doc: this.frm.doc,
 					method: "onload_post_render",
@@ -50,8 +48,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						// remove this call when using client side mapper
 						me.set_default_values();
 						me.set_dynamic_labels();
+						me.calculate_taxes_and_totals()
 					}
 				});
+			} else {
+				this.calculate_taxes_and_totals();
+			}
 		}
 	},
 	
