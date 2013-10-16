@@ -367,9 +367,8 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 					
-					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
-						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
-						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)))
+					valuation_amt = flt(item.valuation_rate) * flt(item.qty) * \
+						flt(item.conversion_factor)
 					
 					gl_entries.append(
 						self.get_gl_dict({
