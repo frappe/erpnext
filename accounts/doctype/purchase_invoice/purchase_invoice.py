@@ -434,7 +434,7 @@ class DocType(BuyingController):
 	def update_raw_material_cost(self):
 		if self.sub_contracted_items:
 			for d in self.doclist.get({"parentfield": "entries"}):
-				rm_cost = webnotes.conn.sql(""" select raw_material_cost / quantity 
+				rm_cost = webnotes.conn.sql("""select raw_material_cost / quantity 
 					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
 					and is_active = 1 """, (d.item_code,))
 				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0

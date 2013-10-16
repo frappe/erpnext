@@ -177,6 +177,12 @@ class DocType(StockController):
 				webnotes.conn.sql("""update `tab%s` set serial_no = %s 
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
+	
+	def on_stock_ledger_entry(self):
+		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
+			self.set_status()
+			self.set_purchase_details()
+			self.set_sales_details()
 
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
@@ -240,9 +246,8 @@ def update_serial_nos(sle, item_det):
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
 			serial_nos.append(make_autoname(item_det.serial_no_series))
-		
 		webnotes.conn.set(sle, "serial_no", "\n".join(serial_nos))
-	
+		
 	if sle.serial_no:
 		serial_nos = get_serial_nos(sle.serial_no)
 		for serial_no in serial_nos:
@@ -280,7 +285,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 		(controller.doc.doctype, controller.doc.name), as_dict=True)
 		
 	if not stock_ledger_entries: return
-	
+
 	for d in controller.doclist.get({"parentfield": parentfield}):
 		serial_no = None
 		for sle in stock_ledger_entries:

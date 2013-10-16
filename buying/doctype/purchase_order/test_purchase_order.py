@@ -103,7 +103,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.doc.company = "_Test Company 1"
 		po.doc.conversion_rate = 0.0167
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
-		
+
 	def test_uom_integer_validation(self):
 		from utilities.transaction_base import UOMMustBeIntegerError
 		po = webnotes.bean(copy=test_records[0])

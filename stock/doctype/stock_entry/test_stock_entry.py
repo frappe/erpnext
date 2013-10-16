@@ -40,10 +40,10 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.conn.set_default("company", self.old_default_company)
 
 	def test_warehouse_company_validation(self):
+		set_perpetual_inventory(0)
 		self._clear_stock_account_balance()
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-			
 		webnotes.session.user = "test2@example.com"
 
 		from stock.utils import InvalidWarehouseCompany
@@ -55,6 +55,7 @@ class TestStockEntry(unittest.TestCase):
 		webnotes.session.user = "Administrator"
 
 	def test_warehouse_user(self):
+		set_perpetual_inventory(0)
 		from stock.utils import UserNotAllowedForWarehouse
 
 		webnotes.bean("Profile", "test@example.com").get_controller()\
@@ -62,7 +63,6 @@ class TestStockEntry(unittest.TestCase):
 
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-			
 		webnotes.session.user = "test@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"
