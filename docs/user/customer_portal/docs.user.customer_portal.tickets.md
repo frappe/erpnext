@@ -4,7 +4,7 @@
 }
 ---
 
-The customer portal makes it very easy for a companys' customer to raise concerns. A simple and intuitive interface facilitates your customer to report their concerns as Support Tickets. They can view the complete thread of the conversation.
+The customer portal makes it very easy for a customer to raise concerns. A simple and intuitive interface facilitates your customer to report their concerns as Support Tickets. They can view the complete thread of their conversation.
 
 #### Empty Ticket List
 

@@ -3,7 +3,7 @@
 	"_label": "Sign-Up"
 }
 ---
-Customers have to log-in to the Company Website,and sign-up as a customer. 
+Customers have to log-in to the Company Website, and sign-up as a customer. 
 
 #### Step 1: Click on Login Icon 
 
