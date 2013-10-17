@@ -169,3 +169,4 @@ Contents
 	1. [Sign Up](docs.user.customer_portal.sign_up.html)
 	2. [Login](docs.user.customer_portal.login.html)
 	3. [Customer Orders](docs.user.customer_portal.orders.html)
+	4. [Support Tickets](docs.user.customer_portal.tickets.html)
