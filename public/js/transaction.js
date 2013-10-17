@@ -46,7 +46,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					freeze: true,
 					callback: function(r) {
 						// remove this call when using client side mapper
-						me.frm.script_manager.trigger("company");
 						me.set_default_values();
 						me.set_dynamic_labels();
 						me.calculate_taxes_and_totals()
