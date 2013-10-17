@@ -18,21 +18,21 @@ wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	onload: function() {
 		this._super();
-		
-		if(!this.frm.doc.__islocal) {
+
+		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
-			if(!this.frm.doc.customer && this.frm.doc.debit_to) {
-				this.frm.set_df_property("debit_to", "print_hide", 0);
-			}
+			this.frm.set_df_property("debit_to", "print_hide", 0);
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
-				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
-					if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
-						this.frm.set_value("is_pos", 1);
-						this.is_pos(function() {cur_frm.cscript.toggle_pos(true);});
-					}
+		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos)) {
+			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
+				this.frm.set_value("is_pos", 1);
+				this.is_pos(function() {
+					if (cint(wn.defaults.get_user_defaults("fs_pos_view"))===1)
+						cur_frm.cscript.toggle_pos(true);
+				});
+			}
 		}
 		
 		// if document is POS then change default print format to "POS Invoice"
@@ -44,7 +44,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	
 	refresh: function(doc, dt, dn) {
 		this._super();
-		
+
 		cur_frm.cscript.is_opening(doc, dt, dn);
 		cur_frm.dashboard.reset();
 
@@ -141,6 +141,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("update_stock");
+							me.set_default_values();
+							me.set_dynamic_labels();
+							me.calculate_taxes_and_totals();
+
 							if(callback_fn) callback_fn()
 						}
 					}

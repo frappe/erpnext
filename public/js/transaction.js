@@ -39,7 +39,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload_post_render: function() {
 		var me = this;
 		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
-			if(!this.frm.doc.customer) {
+			if(!this.frm.doc.customer || !this.frm.doc.supplier) {
 				return this.frm.call({
 					doc: this.frm.doc,
 					method: "onload_post_render",
@@ -48,7 +48,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						// remove this call when using client side mapper
 						me.set_default_values();
 						me.set_dynamic_labels();
-						me.calculate_taxes_and_totals()
+						me.calculate_taxes_and_totals();
 					}
 				});
 			} else {
@@ -171,7 +171,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	conversion_rate: function() {
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
-		} else if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+		}
+		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
