@@ -26,7 +26,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					me.frm.set_value(fieldname, value);
 			});			
 		}
-		
+
 		if(this.other_fname) {
 			this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
@@ -225,7 +225,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
-		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
+		}
+		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 			this.calculate_taxes_and_totals();
 		}
