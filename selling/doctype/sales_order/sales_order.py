@@ -126,7 +126,7 @@ class DocType(SellingController):
 		self.validate_warehouse()
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
+		
 
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')

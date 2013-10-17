@@ -18,21 +18,21 @@ wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	onload: function() {
 		this._super();
-		
-		if(!this.frm.doc.__islocal) {
+
+		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
-			if(!this.frm.doc.customer && this.frm.doc.debit_to) {
-				this.frm.set_df_property("debit_to", "print_hide", 0);
-			}
+			this.frm.set_df_property("debit_to", "print_hide", 0);
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos) && 
-				cint(wn.defaults.get_user_defaults("fs_pos_view"))===1) {
-					if(this.frm.doc.__islocal && !this.frm.doc.amended_from) {
-						this.frm.set_value("is_pos", 1);
-						this.is_pos(function() {cur_frm.cscript.toggle_pos(true);});
-					}
+		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos)) {
+			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
+				this.frm.set_value("is_pos", 1);
+				this.is_pos(function() {
+					if (cint(wn.defaults.get_user_defaults("fs_pos_view"))===1)
+						cur_frm.cscript.toggle_pos(true);
+				});
+			}
 		}
 		
 		// if document is POS then change default print format to "POS Invoice"
@@ -44,7 +44,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	
 	refresh: function(doc, dt, dn) {
 		this._super();
-		
+
 		cur_frm.cscript.is_opening(doc, dt, dn);
 		cur_frm.dashboard.reset();
 
@@ -141,6 +141,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("update_stock");
+							me.set_default_values();
+							me.set_dynamic_labels();
+							me.calculate_taxes_and_totals();
+
 							if(callback_fn) callback_fn()
 						}
 					}
@@ -350,7 +354,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 
 // warehouse in detail table
 //----------------------------
-cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
+cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	return{
 		filters:[
@@ -371,34 +375,16 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 	}
 }
 
-cur_frm.cscript.income_account = function(doc, cdt, cdn){
+cur_frm.cscript.income_account = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
 }
 
-cur_frm.cscript.expense_account = function(doc, cdt, cdn){
+cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
 }
 
-cur_frm.cscript.copy_account_in_all_row = function(doc, cdt, cdn, fieldname) {
-	var d = locals[cdt][cdn];
-	if(d[fieldname]){
-		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++){
-			if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
-		}
-	}
-	refresh_field(cur_frm.cscript.fname);
-}
-
-cur_frm.cscript.cost_center = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	if(d.cost_center){
-		var cl = getchildren('Sales Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
-		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
-		}
-	}
-	refresh_field(cur_frm.cscript.fname);
+cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

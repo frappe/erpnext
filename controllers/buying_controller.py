@@ -29,7 +29,7 @@ class BuyingController(StockController):
 		super(BuyingController, self).set_missing_values(for_validate)
 
 		self.set_supplier_from_item_default()
-		self.set_price_list_currency("Buying", for_validate)
+		self.set_price_list_currency("Buying")
 		
 		# set contact and address details for supplier, if they are not mentioned
 		if self.doc.supplier and not (self.doc.contact_person and self.doc.supplier_address):

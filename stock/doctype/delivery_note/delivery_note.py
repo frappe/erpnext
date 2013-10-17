@@ -91,7 +91,7 @@ class DocType(SellingController):
 		self.validate_uom_is_integer("stock_uom", "qty")
 		
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
-		sales_com_obj.check_conversion_rate(self)
+		
 
 		# Set actual qty for each item in selected warehouse
 		self.update_current_stock()
