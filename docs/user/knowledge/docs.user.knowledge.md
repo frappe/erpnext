@@ -6,6 +6,7 @@
 		"docs.user.knowledge.accounting",
 		"docs.user.knowledge.accounting_entries",
 		"docs.user.knowledge.doctype",
+		"docs.user.knowledge.doctype_fields",
 		"docs.user.knowledge.attachment_csv",
 		"docs.user.knowledge.markdown"		
 	]
