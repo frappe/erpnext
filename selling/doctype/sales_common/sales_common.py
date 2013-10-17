@@ -74,21 +74,6 @@ class DocType(TransactionBase):
 				msgprint("You cannot give more than " + cstr(discount[0]['max_discount']) + " % discount on Item Code : "+cstr(d.item_code))
 				raise Exception
 			
-	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
-	# ===========================================================================
-	def check_conversion_rate(self, obj):
-		default_currency = get_company_currency(obj.doc.company)
-		if not default_currency:
-			msgprint('Message: Please enter default currency in Company Master')
-			raise Exception		
-		if (obj.doc.currency == default_currency and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != default_currency and flt(obj.doc.conversion_rate) == 1.00):
-			msgprint("Please Enter Appropriate Conversion Rate for Customer's Currency to Base Currency (%s --> %s)" % (obj.doc.currency, default_currency), raise_exception = 1)
-	
-		if (obj.doc.price_list_currency == default_currency and flt(obj.doc.plc_conversion_rate) != 1.00) or not obj.doc.plc_conversion_rate or (obj.doc.price_list_currency != default_currency and flt(obj.doc.plc_conversion_rate) == 1.00):
-			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
-	
-
-
 	# Get Tax rate if account type is TAX
 	# =========================================================================
 	def get_rate(self, arg):
