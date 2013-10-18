@@ -110,10 +110,10 @@ class DocType(SellingController):
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
 		self.validate_warehouse()
-				
+
 		from stock.doctype.packed_item.packed_item import make_packing_list
 		self.doclist = make_packing_list(self,'sales_order_details')
-		
+
 		self.validate_with_previous_doc()
 				
 		if not self.doc.status:

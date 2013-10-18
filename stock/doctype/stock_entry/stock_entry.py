@@ -366,7 +366,6 @@ class DocType(StockController):
 					
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
-
 		item = webnotes.conn.sql("""select stock_uom, description, item_name, 
 			purchase_account, cost_center from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 

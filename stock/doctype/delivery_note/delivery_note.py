@@ -69,11 +69,8 @@ class DocType(SellingController):
 		self.check_stop_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
-		self.validate_uom_is_integer("stock_uom", "qty")		
-
-		# Set actual qty for each item in selected warehouse
-		self.update_current_stock()
-		
+		self.validate_uom_is_integer("stock_uom", "qty")
+		self.update_current_stock()		
 		self.validate_with_previous_doc()
 		
 		self.doc.status = 'Draft'

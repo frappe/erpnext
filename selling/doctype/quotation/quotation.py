@@ -59,9 +59,37 @@ class DocType(SellingController):
 		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
 
+<<<<<<< HEAD
 	def update_opportunity(self):
 		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
 			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
+=======
+		sales_com_obj = get_obj('Sales Common')
+		sales_com_obj.check_active_sales_items(self)
+		sales_com_obj.validate_max_discount(self,'quotation_details')
+
+	def on_update(self):
+		# Set Quotation Status
+		webnotes.conn.set(self.doc, 'status', 'Draft')
+	
+	#update enquiry
+	#------------------
+	def update_enquiry(self, flag):
+		prevdoc=''
+		for d in getlist(self.doclist, 'quotation_details'):
+			if d.prevdoc_docname:
+				prevdoc = d.prevdoc_docname
+		
+		if prevdoc:
+			if flag == 'submit': #on submit
+				sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
+			elif flag == 'cancel': #on cancel
+				sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
+			elif flag == 'order lost': #order lost
+				sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
+			elif flag == 'order confirm': #order confirm
+				sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
+>>>>>>> 8f72d9f679fca88be7710e31b6cfa66defcde81a
 	
 	# declare as order lost
 	#-------------------------
