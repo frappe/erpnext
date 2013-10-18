@@ -111,8 +111,6 @@ class DocType(SellingController):
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.validate_max_discount(self,'quotation_details')
-		sales_com_obj.check_conversion_rate(self)
-		
 
 	def on_update(self):
 		# Set Quotation Status

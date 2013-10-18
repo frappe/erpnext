@@ -332,9 +332,11 @@ def exec_in_shell(cmd):
 
 			stdout.seek(0)
 			out = stdout.read()
+			if out: out = out.decode('utf-8')
 
 			stderr.seek(0)
 			err = stderr.read()
+			if err: err = err.decode('utf-8')
 
 	if err and any((kw in err.lower() for kw in ["traceback", "error", "exception"])):
 		print out

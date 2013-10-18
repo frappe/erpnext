@@ -210,8 +210,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-
-		this.calculate_taxes_and_totals();
+		if(flt(this.frm.doc.conversion_rate)>0.0) this.calculate_taxes_and_totals();
 	},
 	
 	get_price_list_currency: function(buying_or_selling) {

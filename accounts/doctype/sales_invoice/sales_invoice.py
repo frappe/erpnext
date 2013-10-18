@@ -52,7 +52,6 @@ class DocType(SellingController):
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
 		sales_com_obj.validate_max_discount(self, 'entries')
 		self.validate_customer_account()
 		self.validate_debit_acc()
