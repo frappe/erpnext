@@ -67,8 +67,13 @@ wn.module_page["Buying"] = [
 			},
 			{
 				label: wn._("Price List"),
-				description: wn._("Mupltiple Item prices."),
+				description: wn._("Multiple Price list."),
 				doctype:"Price List"
+			},
+			{
+				label: wn._("Item Price"),
+				description: wn._("Multiple Item prices."),
+				doctype:"Item Price"
 			},
 			{
 				"doctype":"Supplier Type",
