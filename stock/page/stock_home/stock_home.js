@@ -202,8 +202,8 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Item-wise Price List Rate"),
-				route: "Report/Price List/Item-Wise Price List",
-				doctype: "Price List"
+				route: "Report/Item Price/Item-wise Price List Rate",
+				doctype: "Item Price"
 			},
 			{
 				"label":wn._("Purchase In Transit"),

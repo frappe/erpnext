@@ -223,4 +223,5 @@ patch_list = [
 	"patches.october_2013.repost_ordered_qty",
 	"patches.october_2013.repost_planned_qty",
 	"patches.october_2013.p02_update_price_list_and_item_details_in_item_price",
+	"execute:webnotes.delete_doc('Report', 'Item-wise Price List')",
 ]
