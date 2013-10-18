@@ -13,7 +13,7 @@ $.extend(erpnext, {
 	},
 	
 	hide_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series) {
+		if(cur_frm.fields_dict.naming_series && !wn.meta.get_docfield(cur_frm.doctype, "naming_series")) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
 	},

@@ -9,10 +9,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.make_dashboard(doc);
-	if(sys_defaults.supp_master_name == 'Supplier Name')
-		hide_field('naming_series');
-	else
-		unhide_field('naming_series'); 
+	erpnext.hide_naming_series();
     
 	if(doc.__islocal){
     	hide_field(['address_html','contact_html']); 

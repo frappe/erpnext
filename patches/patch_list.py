@@ -228,4 +228,5 @@ patch_list = [
 	"patches.october_2013.repost_planned_qty",
 	"patches.october_2013.p06_rename_packing_list_doctype",
 	"execute:webnotes.delete_doc('DocType', 'Sales Common')",
+	"patches.october_2013.p09_update_naming_series_settings",
 ]

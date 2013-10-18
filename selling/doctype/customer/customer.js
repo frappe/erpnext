@@ -20,10 +20,7 @@ cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.setup_dashboard(doc);
-	if(sys_defaults.cust_master_name == 'Customer Name')
-		hide_field('naming_series');
-	else
-		unhide_field('naming_series');
+	erpnext.hide_naming_series();
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);

@@ -134,3 +134,20 @@ class DocType:
 			msgprint("Series Updated Successfully")
 		else:
 			msgprint("Please select prefix first")
+
+def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
+	from core.doctype.property_setter.property_setter import make_property_setter
+	if naming_series:
+		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
+		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
+		if hide_name_field:
+			make_property_setter(doctype, fieldname, "reqd", 0, "Check")
+			make_property_setter(doctype, fieldname, "hidden", 1, "Check")
+	else:
+		make_property_setter(doctype, "naming_series", "reqd", 0, "Check")
+		make_property_setter(doctype, "naming_series", "hidden", 1, "Check")
+		if hide_name_field:
+			make_property_setter(doctype, fieldname, "hidden", 0, "Check")
+			make_property_setter(doctype, fieldname, "reqd", 1, "Check")
+		
+	

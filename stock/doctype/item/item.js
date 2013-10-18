@@ -6,11 +6,7 @@ cur_frm.cscript.refresh = function(doc) {
 	// read only if any stock ledger entry exists
 
 	cur_frm.cscript.make_dashboard()
-
-	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
-		&& doc.__islocal)
-	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
-		&& doc.__islocal)
+	erpnext.hide_naming_series();
 		
 	if(!doc.__islocal && doc.show_in_website) {
 		cur_frm.add_custom_button("View In Website", function() {
