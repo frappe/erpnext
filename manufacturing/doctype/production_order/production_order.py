@@ -69,7 +69,7 @@ class DocType:
 			where parent = %s and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Packing Item` 
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO

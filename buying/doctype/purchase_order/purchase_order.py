@@ -147,7 +147,6 @@ class DocType(BuyingController):
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
 		
 		self.update_prevdoc_status()
 		self.update_bin(is_submit = 1, is_stopped = 0)

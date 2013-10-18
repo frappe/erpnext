@@ -16,25 +16,6 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
-
-	def is_item_table_empty(self, obj):
-		if not len(obj.doclist.get({"parentfield": obj.fname})):
-			msgprint(_("You need to put at least one item in the item table."), raise_exception=True)
-
-	def get_supplier_details(self, name = ''):
-		details = webnotes.conn.sql("select supplier_name,address from `tabSupplier` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
-		if details:
-			ret = {
-				'supplier_name'	:	details and details[0]['supplier_name'] or '',
-				'supplier_address'	:	details and details[0]['address'] or ''
-			}
-			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
-			contact_det = webnotes.conn.sql("select contact_name, contact_no, email_id from `tabContact` where supplier = '%s' and is_supplier = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			return ret
-		else:
-			msgprint("Supplier : %s does not exists" % (name))
-			raise Exception
 	
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""

@@ -293,20 +293,14 @@ class DocType(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-
 		self.check_prev_docstatus()
 		
-		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype,self.doc.company, self.doc.grand_total)
-		
+		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+			self.doc.company, self.doc.grand_total)
 		
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
-				
 		self.update_against_document_in_jv()
-		
 		self.update_prevdoc_status()
 
 	def make_gl_entries(self):

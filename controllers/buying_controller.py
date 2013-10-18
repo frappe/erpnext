@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes, json
+import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 
@@ -12,7 +12,6 @@ from setup.utils import get_company_currency
 from controllers.stock_controller import StockController
 
 class BuyingController(StockController):
-
 	def onload_post_render(self):
 		# contact, address, item details
 		self.set_missing_values()
@@ -22,6 +21,7 @@ class BuyingController(StockController):
 		if self.doc.supplier and not self.doc.supplier_name:
 			self.doc.supplier_name = webnotes.conn.get_value("Supplier", 
 				self.doc.supplier, "supplier_name")
+		self.is_item_table_empty()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
 		
@@ -279,3 +279,8 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
+
+
+	def is_item_table_empty(self):
+		if not len(self.doclist.get({"parentfield": self.fname})):
+			webnotes.throw(_("Item table can not be blank"))

@@ -14,7 +14,8 @@ def execute():
 	
 	webnotes.reload_doc("stock", "doctype", "packed_item")
 	
-	os.system("rm -rf app/stock/doctype/delivery_note_packing_item")
+	if os.path.exists("app/stock/doctype/delivery_note_packing_item"):
+		os.system("rm -rf app/stock/doctype/delivery_note_packing_item")
 	
 	if webnotes.conn.exists("DocType", "Delivery Note Packing Item"):
 			webnotes.delete_doc("DocType", "Delivery Note Packing Item")
