@@ -59,40 +59,10 @@ class DocType(SellingController):
 		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
 
-<<<<<<< HEAD
 	def update_opportunity(self):
 		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
 			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
-=======
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.validate_max_discount(self,'quotation_details')
-
-	def on_update(self):
-		# Set Quotation Status
-		webnotes.conn.set(self.doc, 'status', 'Draft')
 	
-	#update enquiry
-	#------------------
-	def update_enquiry(self, flag):
-		prevdoc=''
-		for d in getlist(self.doclist, 'quotation_details'):
-			if d.prevdoc_docname:
-				prevdoc = d.prevdoc_docname
-		
-		if prevdoc:
-			if flag == 'submit': #on submit
-				sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
-			elif flag == 'cancel': #on cancel
-				sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
-			elif flag == 'order lost': #order lost
-				sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
-			elif flag == 'order confirm': #order confirm
-				sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
->>>>>>> 8f72d9f679fca88be7710e31b6cfa66defcde81a
-	
-	# declare as order lost
-	#-------------------------
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
 			webnotes.conn.set(self.doc, 'status', 'Lost')
@@ -101,15 +71,11 @@ class DocType(SellingController):
 		else:
 			webnotes.throw(_("Cannot set as Lost as Sales Order is made."))
 	
-	#check if value entered in item table
-	#--------------------------------------
 	def check_item_table(self):
 		if not getlist(self.doclist, 'quotation_details'):
 			msgprint("Please enter item details")
 			raise Exception
 		
-	# ON SUBMIT
-	# =========================================================================
 	def on_submit(self):
 		self.check_item_table()
 		
@@ -119,16 +85,11 @@ class DocType(SellingController):
 		#update enquiry status
 		self.update_opportunity()
 		
-		
-# ON CANCEL
-# ==========================================================================
 	def on_cancel(self):
 		#update enquiry status
 		self.set_status()
 		self.update_opportunity()
 			
-# Print other charges
-# ===========================================================================
 	def print_other_charges(self,docname):
 		print_lst = []
 		for d in getlist(self.doclist,'other_charges'):
