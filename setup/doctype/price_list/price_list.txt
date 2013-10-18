@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-10-02 11:36:09", 
+  "modified": "2013-10-18 13:33:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -83,27 +83,6 @@
   "label": "Valid for Territories", 
   "options": "For Territory", 
   "reqd": 1
- }, 
- {
-  "description": "To change row values, click on the respective row", 
-  "doctype": "DocField", 
-  "fieldname": "item_prices_section", 
-  "fieldtype": "Section Break", 
-  "hidden": 0, 
-  "label": "Item Prices"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_prices_html", 
-  "fieldtype": "HTML"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_prices", 
-  "fieldtype": "Table", 
-  "hidden": 1, 
-  "label": "Item Prices", 
-  "options": "Item Price"
  }, 
  {
   "amend": 0, 
