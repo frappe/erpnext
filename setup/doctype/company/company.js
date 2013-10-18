@@ -31,7 +31,7 @@ cur_frm.cscript.company_name = function(doc){
 
 cur_frm.cscript.abbr = function(doc){
   if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){   
-    msgprint("<font color=red>"wn._("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
+    msgprint("<font color=red>"+wn._("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
     	wn._("are not allowed for")+ "</font>\nAbbr <b>" + doc.abbr +"</b>")        
     doc.abbr = '';
     refresh_field('abbr');
