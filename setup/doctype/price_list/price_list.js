@@ -7,7 +7,7 @@ $.extend(cur_frm.cscript, {
 	},
 
 	refresh: function() {
-		cur_frm.add_custom_button("Edit Prices", function() {
+		cur_frm.add_custom_button("Add / Edit Prices", function() {
 			wn.route_options = {
 				"price_list": cur_frm.doc.name
 			};
