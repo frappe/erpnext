@@ -99,7 +99,6 @@ class StockController(AccountsController):
 		return warehouse_account
 		
 	def update_gl_entries_after(self, warehouse_account=None):
-		from accounts.utils import get_stock_and_account_difference
 		future_stock_vouchers = self.get_future_stock_vouchers()
 		gle = self.get_voucherwise_gl_entries(future_stock_vouchers)
 		if not warehouse_account:

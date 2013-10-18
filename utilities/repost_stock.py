@@ -53,7 +53,7 @@ def get_reserved_qty(item_code, warehouse):
 				from 
 				(
 					select qty, parent_detail_docname, parent, name
-					from `tabDelivery Note Packing Item` dnpi_in
+					from `tabPacked Item` dnpi_in
 					where item_code = %s and warehouse = %s
 					and parenttype="Sales Order"
 				and item_code != parent_item

@@ -73,23 +73,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				if(!item.item_code) {
 					wn.throw("Please enter Item Code to get batch no");
 				} else {
-					if(item.warehouse) {
-						return {
-							query : "selling.doctype.sales_common.sales_common.get_batch_no",
-							filters: {
-								'item_code': item.item_code,
-								'warehouse': item.warehouse,
-								'posting_date': me.frm.doc.posting_date
-							}
-						}
-					} else {
-						return{
-							query : "selling.doctype.sales_common.sales_common.get_batch_no",
-							filters: {
-								'item_code': item.item_code,
-								'posting_date': me.frm.doc.posting_date
-							}
-						}
+					filters = {
+						'item_code': item.item_code,
+						'posting_date': me.frm.doc.posting_date,
+					}
+					if(item.warehouse) filters["warehouse"] = item.warehouse
+					
+					return {
+						query : "controllers.queries.get_batch_no",
+						filters: filters
 					}
 				}
 			});
@@ -628,7 +620,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
 	if(!cur_frm.fields_dict.packing_list) return;
-	if (getchildren('Delivery Note Packing Item', doc.name, 'packing_details').length) {
+	if (getchildren('Packed Item', doc.name, 'packing_details').length) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {

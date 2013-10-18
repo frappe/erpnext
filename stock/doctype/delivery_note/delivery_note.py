@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, cint, add_days
+from webnotes.utils import cstr, flt, cint
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
@@ -42,29 +42,12 @@ class DocType(SellingController):
 			
 	def get_portal_page(self):
 		return "shipment" if self.doc.docstatus==1 else None
-		
-	def get_contact_details(self):
-		return get_obj('Sales Common').get_contact_details(self,0)
-
-
-	def get_comm_rate(self, sales_partner):
-		"""Get Commission rate of Sales Partner"""
-		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
 	def set_actual_qty(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if d.item_code and d.warehouse:
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
-
-
-	def get_barcode_details(self, barcode):
-		return get_obj('Sales Common').get_barcode_details(barcode)
-
-
-	def get_adj_percent(self, arg=''):
-		"""Re-calculates Basic Rate & amount based on Price List Selected"""
-		get_obj('Sales Common').get_adj_percent(self)
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
@@ -83,15 +66,10 @@ class DocType(SellingController):
 
 		self.so_required()
 		self.validate_proj_cust()
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		sales_com_obj.check_active_sales_items(self)
+		self.check_stop_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
-		self.validate_uom_is_integer("stock_uom", "qty")
-		
-		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
-		
+		self.validate_uom_is_integer("stock_uom", "qty")		
 
 		# Set actual qty for each item in selected warehouse
 		self.update_current_stock()
@@ -169,7 +147,8 @@ class DocType(SellingController):
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 			
 	def on_update(self):
-		self.doclist = get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
+		from stock.doctype.packed_item.packed_item import make_packing_list
+		self.doclist = make_packing_list(self, 'delivery_note_details')
 
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -192,8 +171,7 @@ class DocType(SellingController):
 
 
 	def on_cancel(self):
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
+		self.check_stop_sales_order("against_sales_order")
 		self.check_next_docstatus()
 				
 		self.update_prevdoc_status()
@@ -282,9 +260,6 @@ class DocType(SellingController):
 			}
 			update_bin(args)
 
-	def get_item_list(self):
-	 return get_obj('Sales Common').get_item_list(self)
-
 	def credit_limit(self):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""
 		amount, total = 0, 0
@@ -293,7 +268,7 @@ class DocType(SellingController):
 				amount += d.amount
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
-			get_obj('Sales Common').check_credit(self, total)
+			self.check_credit(total)
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

@@ -59,16 +59,6 @@ class DocType(TransactionBase):
 			msgprint("Customer : %s does not exist in system." % (name))
 			raise Exception
 			
-	def get_contact_details(self, arg):
-		arg = eval(arg)
-		contact = webnotes.conn.sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s'" %(arg['contact_person'],arg['customer']), as_dict = 1)
-		ret = {
-			'contact_no' : contact and contact[0]['contact_no'] or '',
-			'email_id' : contact and contact[0]['email_id'] or ''
-		}
-		return ret
-			
-	
 	def on_update(self):
 		self.add_calendar_event()
 

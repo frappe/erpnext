@@ -72,7 +72,7 @@ class DocType:
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 						or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)
-					or exists (select name from `tabDelivery Note Packing Item` dnpi
+					or exists (select name from `tabPacked Item` dnpi
 						where dnpi.parent = so.name and dnpi.parent_item = so_item.item_code
 							and exists (select name from `tabItem` item where item.name=dnpi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
@@ -119,7 +119,7 @@ class DocType:
 		dnpi_items = webnotes.conn.sql("""select distinct dnpi.parent, dnpi.item_code, dnpi.warehouse as reserved_warhouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * dnpi.qty) / so_item.qty) 
 				as pending_qty
-			from `tabSales Order Item` so_item, `tabDelivery Note Packing Item` dnpi
+			from `tabSales Order Item` so_item, `tabPacked Item` dnpi
 			where so_item.parent = dnpi.parent and so_item.docstatus = 1 
 			and dnpi.parent_item = so_item.item_code
 			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)

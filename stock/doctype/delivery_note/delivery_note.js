@@ -9,7 +9,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.stock");
@@ -110,13 +110,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 		filters: {
 			'customer': doc.customer
 		}
-	}
-}
-
-cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.serial_no) {
-		 return get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
 	}
 }
 

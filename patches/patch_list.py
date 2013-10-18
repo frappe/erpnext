@@ -226,4 +226,6 @@ patch_list = [
 	"patches.october_2013.p05_server_custom_script_to_file",
 	"patches.october_2013.repost_ordered_qty",
 	"patches.october_2013.repost_planned_qty",
+	"patches.october_2013.p06_rename_packing_list_doctype",
+	"execute:webnotes.delete_doc('DocType', 'Sales Common')",
 ]
