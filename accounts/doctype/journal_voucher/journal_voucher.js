@@ -12,10 +12,13 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			wn.model.set_default_values(this.frm.doc);
-			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: "entries"}),
-				function(i, jvd) { wn.model.set_default_values(jvd); });
+			$.each(wn.model.get_doclist(this.frm.doc.doctype, 
+				this.frm.doc.name, {parentfield: "entries"}), function(i, jvd) {
+					wn.model.set_default_values(jvd);
+				}
+			);
 			
-			this.frm.doc.posting_date = get_today();
+			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = get_today();
 		}
 	},
 	
