@@ -7,20 +7,26 @@ One of the primary motivator for compulsory use of accounting tools is calculati
 
 ### Tax Accounts
 
-For Tax Accounts that you want to use in the tax templates, you must mention them as type “Tax” in your Chart of Accounts. Some Item-tax features are given below :
+For Tax Accounts that you want to use in the tax templates, you must go to Chart of Accounts and mention them as type “Tax” in your Chart of Item. 
 
-- **Discount**: The maximum Discount that can be applied on an Item can be fixed in the Item master. Read [Discount](docs.user.selling.discount.html)
+## Item Tax 
+
+If some of your Items require different tax rates as compared to others, mention them in the Item tax table. Even if you have selected your sales and purchase taxes as default tax rates, the system will pull the Item tax rate for calculations. Item tax will get preference over other sales or purchase taxes. However, if you wish to apply default sales and purchase taxes, do not mention item tax rates in the Item master. The system will then select the sales or purchase tax rate specified by you as default rates.
+
+![Item Tax](img/item-tax-1.png)
+
+
 - **Inclusive and Exclusive Tax**: ERPNext allows you to enter Item rates which are tax inclusive.
-- **Flat Discount**: This feature will be added soon.
 - **Exception to the rule**: Item tax settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account
-
-
+- **Item tax is overwrite-able**: You can overwrite or change the item tax rate by going to the Item master in the Item tax table.
 
 ## Sales Taxes and Charges Master
 
 You must usually collect taxes from your Customer and pay them to the government. At times, you may have to pay multiple taxes to multiple government bodies like local government, state or provincial and federal or central government.
 
 The way ERPNext sets up taxes is via templates. Other types of charges that may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.
+
+Select template and modify as per your need.
 
 To create a new sales tax template called Sales Taxes and Charges Master, you have to go to:
 
@@ -38,9 +44,11 @@ The tax rate you define here will be the standard tax rate for all Items. If the
 In each row, you have to mention:
 
 - Calculation Type: 
-	- This can be on net total (that is your basic amount).
-	- On previous row total / amount (for cumulative taxes or charges). If you select this 	option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
-	- Actual (as mentioned).
+	- On Net Total : This can be on net total (total amount without taxes).
+	- On Previous Row Total/Amount: You can apply taxes on previous row total / amount. If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total. Previous row amount means a particular tax amount.And, previous row total means net total plus taxes applied up to that row. In the Enter Row Field, mention row number on which you want to apply the current tax. If you want to apply the tax on the 3rd row, mention "3" in the Enter Row field.
+
+	- Actual : Enter as per actual amount in rate column.
+
 - Account Head: The Account ledger under which this tax will be booked
 - Cost Center: If the tax / charge is an income (like shipping) it needs to be booked against - a Cost Center.
 - Description: Description of the tax (that will be printed in invoices / quotes).
