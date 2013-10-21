@@ -143,7 +143,7 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 
 		# set values for mandatory
 		webnotes.conn.sql("""update `tab{doctype}` set naming_series={s} where 
-			ifnull(naming_series, '')=''""".format(doctyp=doctype, s="%s"), get_default_naming_series(doctype))
+			ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"), get_default_naming_series(doctype))
 
 		if hide_name_field:
 			make_property_setter(doctype, fieldname, "reqd", 0, "Check")
@@ -158,7 +158,7 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 			
 			# set values for mandatory
 			webnotes.conn.sql("""update `tab{doctype}` set `{fieldname}`=`name` where 
-				ifnull({fieldname}, '')=''""".format(doctyp=doctype, fieldname=fieldname))
+				ifnull({fieldname}, '')=''""".format(doctype=doctype, fieldname=fieldname))
 		
 def get_default_naming_series(doctype):
 	from webnotes.model.doctype import get_property
