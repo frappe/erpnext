@@ -140,14 +140,28 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
+
+		# set values for mandatory
+		webnotes.conn.sql("""update `tab{doctype}` set naming_series={s} where 
+			ifnull(naming_series, '')=''""".format(doctyp=doctype, s="%s"), get_default_naming_series(doctype))
+
 		if hide_name_field:
 			make_property_setter(doctype, fieldname, "reqd", 0, "Check")
 			make_property_setter(doctype, fieldname, "hidden", 1, "Check")
 	else:
 		make_property_setter(doctype, "naming_series", "reqd", 0, "Check")
 		make_property_setter(doctype, "naming_series", "hidden", 1, "Check")
+
 		if hide_name_field:
 			make_property_setter(doctype, fieldname, "hidden", 0, "Check")
 			make_property_setter(doctype, fieldname, "reqd", 1, "Check")
+			
+			# set values for mandatory
+			webnotes.conn.sql("""update `tab{doctype}` set `{fieldname}`=`name` where 
+				ifnull({fieldname}, '')=''""".format(doctyp=doctype, fieldname=fieldname))
 		
-	
+def get_default_naming_series(doctype):
+	from webnotes.model.doctype import get_property
+	naming_series = get_property(doctype, "options", "naming_series")
+	naming_series = naming_series.split("\n")
+	return naming_series[0] or naming_series[1]	
