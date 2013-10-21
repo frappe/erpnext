@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, flt, validate_email_add
+from webnotes.utils import cint, validate_email_add
 from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
@@ -115,8 +115,9 @@ class DocType:
 			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
 
 	def on_rename(self, newdn, olddn, merge=False):
-		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": olddn}, 
-			"master_name", newdn)
+		account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
+			"master_name": olddn})
+		webnotes.conn.set_value("Account", account, "master_name", newdn)
 			
 		if merge:
 			from stock.stock_ledger import update_entries_after

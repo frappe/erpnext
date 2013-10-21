@@ -5,9 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 
-from webnotes.utils import cstr, cint
-from webnotes.model.doc import Document
-from webnotes.model.code import get_obj
+from webnotes.utils import cstr
 import webnotes.defaults
 
 sql = webnotes.conn.sql
@@ -317,3 +315,18 @@ class DocType:
 			and value=%s""", (newdn, olddn))
 		
 		webnotes.defaults.clear_default("company", value=olddn)
+
+@webnotes.whitelist()
+def replace_abbr(company, old, new):
+	webnotes.conn.set_value("Company", company, "abbr", new)
+	
+	def _rename_record(dt):
+		for d in webnotes.conn.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
+			parts = d[0].split(" - ")
+			if parts[-1].lower() == old.lower():
+				name_without_abbr = " - ".join(parts[:-1])
+				webnotes.rename_doc(dt, d[0], name_without_abbr + " - " + new)
+		
+	for dt in ["Account", "Cost Center", "Warehouse"]:
+		_rename_record(dt)
+		webnotes.conn.commit()
