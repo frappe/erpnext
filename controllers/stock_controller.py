@@ -91,9 +91,6 @@ class StockController(AccountsController):
 		return stock_ledger
 		
 	def get_warehouse_account(self):
-		for d in webnotes.conn.sql("select name from tabWarehouse"):
-			webnotes.bean("Warehouse", d[0]).save()
-
 		warehouse_account = dict(webnotes.conn.sql("""select master_name, name from tabAccount 
 			where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 		return warehouse_account
