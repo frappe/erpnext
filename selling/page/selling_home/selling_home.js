@@ -168,6 +168,11 @@ wn.module_page["Selling"] = [
 		icon: "icon-list",
 		items: [
 			{
+				"label":wn._("Lead Details"),
+				route: "query-report/Lead Details",
+				doctype: "Lead"
+			},
+			{
 				"label":wn._("Customer Addresses And Contacts"),
 				route: "query-report/Customer Addresses And Contacts",
 				doctype: "Contact"
