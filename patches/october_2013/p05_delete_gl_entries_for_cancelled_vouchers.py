@@ -10,7 +10,6 @@ def execute():
 			cancelled_voucher = webnotes.conn.sql("""select name from `tab%s` where name = %s
 				and docstatus=2""" % (entry['voucher_type'], "%s"), entry['voucher_no'])
 			if cancelled_voucher:
-				print entry
 				webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type = %s and 
 					voucher_no = %s""", (entry['voucher_type'], entry['voucher_no']))
 		except:
