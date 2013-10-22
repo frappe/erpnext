@@ -4,5 +4,7 @@
 import webnotes
 
 def execute():
-	webnotes.delete_doc("DocType", "Sales and Purchase Return Item")
-	webnotes.delete_doc("DocType", "Sales and Purchase Return Tool")
+	if webnotes.conn.exists("DocType", "Sales and Purchase Return Item"):
+		webnotes.delete_doc("DocType", "Sales and Purchase Return Item")
+	if webnotes.conn.exists("DocType", "Sales and Purchase Return Tool"):
+		webnotes.delete_doc("DocType", "Sales and Purchase Return Tool")
