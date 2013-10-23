@@ -609,6 +609,9 @@ class DocType(StockController):
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		idx = 1
+		expense_account, cost_center = webnotes.conn.get_values("Company", self.doc.company, \
+			["default_expense_account", "cost_center"])[0]
+
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 
 				self.doclist)
@@ -621,10 +624,8 @@ class DocType(StockController):
 			se_child.uom = item_dict[d]["stock_uom"]
 			se_child.stock_uom = item_dict[d]["stock_uom"]
 			se_child.qty = flt(item_dict[d]["qty"])
-			se_child.expense_account = item_dict[d]["expense_account"] or \
-				webnotes.conn.get_value("Company", self.doc.company, "default_expense_account")
-			se_child.cost_center = item_dict[d]["cost_center"] or \
-				webnotes.conn.get_value("Company", self.doc.company, "cost_center")
+			se_child.expense_account = item_dict[d]["expense_account"] or expense_account
+			se_child.cost_center = item_dict[d]["cost_center"] or cost_center
 			
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
