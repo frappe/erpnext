@@ -81,7 +81,7 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"doctype":"Item Price",
-				"label": wn._("Price List"),
+				"label": wn._("Item Price"),
 				"description": wn._("Multiple Item prices.")
 			},
 			{
