@@ -34,7 +34,10 @@ def repost_stock(item_code, warehouse):
 
 def repost_actual_qty(item_code, warehouse):
 	from stock.stock_ledger import update_entries_after
-	update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+	try:
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+	except:
+		pass
 
 def get_reserved_qty(item_code, warehouse):
 	reserved_qty = webnotes.conn.sql("""
