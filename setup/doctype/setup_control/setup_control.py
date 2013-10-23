@@ -141,7 +141,7 @@ class DocType:
 
 		# control panel
 		cp = webnotes.doc("Control Panel", "Control Panel")
-		for k in ['country', 'timezone', 'company_name']:
+		for k in ['country', 'time_zone', 'company_name']:
 			cp.fields[k] = args[k]
 			
 		cp.save()
