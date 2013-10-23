@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2013-10-23 13:46:52", 
+  "modified": "2013-10-23 14:35:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -69,7 +69,9 @@
   "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "label": "Item Name"
+  "label": "Item Name", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

@@ -621,8 +621,10 @@ class DocType(StockController):
 			se_child.uom = item_dict[d]["stock_uom"]
 			se_child.stock_uom = item_dict[d]["stock_uom"]
 			se_child.qty = flt(item_dict[d]["qty"])
-			se_child.expense_account = item_dict[d]["expense_account"]
-			se_child.cost_center = item_dict[d]["cost_center"]
+			se_child.expense_account = item_dict[d]["expense_account"] or \
+				webnotes.conn.get_value("Company", self.doc.company, "default_expense_account")
+			se_child.cost_center = item_dict[d]["cost_center"] or \
+				webnotes.conn.get_value("Company", self.doc.company, "cost_center")
 			
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
