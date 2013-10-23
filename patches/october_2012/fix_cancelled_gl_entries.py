@@ -11,6 +11,7 @@ def execute():
 				and docstatus=2""" % (entry['voucher_type'], "%s"), entry['voucher_no'])
 			is_cancelled = docstatus and 'Yes' or None
 			if is_cancelled:
+				print entry['voucher_type'], entry['voucher_no']
 				webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'Yes'
 					where voucher_type = %s and voucher_no = %s""", 
 					(entry['voucher_type'], entry['voucher_no']))

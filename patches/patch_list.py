@@ -224,4 +224,7 @@ patch_list = [
 	"patches.october_2013.repost_planned_qty",
 	"patches.october_2013.p02_update_price_list_and_item_details_in_item_price",
 	"execute:webnotes.delete_doc('Report', 'Item-wise Price List')",
+	"patches.october_2013.p03_remove_sales_and_purchase_return_tool",
+	"patches.october_2013.p04_update_report_permission",
+	"patches.october_2013.p05_delete_gl_entries_for_cancelled_vouchers",
 ]
