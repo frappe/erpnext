@@ -472,11 +472,12 @@ class DocType(StockController):
 				if self.doc.purpose=="Material Receipt":
 					self.doc.from_warehouse = ""
 					
-				item = webnotes.conn.sql("""select item, description, uom from `tabBOM`
-					where name=%s""", (self.doc.bom_no,), as_dict=1)
+				item = webnotes.conn.sql("""select name, item_name, description, uom 
+					from `tabItem` where name=%s""", (self.doc.bom_no), as_dict=1)
 				self.add_to_stock_entry_detail({
 					item[0]["item"] : {
 						"qty": self.doc.fg_completed_qty,
+						"item_name": item[0].item_name,
 						"description": item[0]["description"],
 						"stock_uom": item[0]["uom"],
 						"from_warehouse": ""
@@ -484,7 +485,6 @@ class DocType(StockController):
 				}, bom_no=self.doc.bom_no)
 		
 		self.get_stock_and_rate()
-		
 	
 	def get_bom_raw_materials(self, qty):
 		""" 
@@ -503,9 +503,12 @@ class DocType(StockController):
 				else:
 					item_dict[item.item_code] = {
 						"qty": flt(item.qty), 
+						"item_name": item.item_name, 
 						"description": item.description, 
 						"stock_uom": item.stock_uom,
-						"from_warehouse": item.default_warehouse
+						"from_warehouse": item.default_warehouse,
+						"expense_account": item.purchase_account,
+						"cost_center": item.cost_center
 					}
 		
 		if self.doc.use_multi_level_bom:
@@ -515,7 +518,10 @@ class DocType(StockController):
 					ifnull(sum(fb.qty_consumed_per_unit),0)*%s as qty, 
 					fb.description, 
 					fb.stock_uom,
-					it.default_warehouse
+					it.item_name,
+					it.default_warehouse,
+					it.purchase_account,
+					it.cost_center
 				from 
 					`tabBOM Explosion Item` fb,`tabItem` it 
 				where 
@@ -532,10 +538,13 @@ class DocType(StockController):
 			# get only BOM items
 			fl_bom_sa_items = sql("""select 
 					`tabItem`.item_code,
+					`tabItem`.item_name,
 					ifnull(sum(`tabBOM Item`.qty_consumed_per_unit), 0) *%s as qty,
 					`tabItem`.description, 
 					`tabItem`.stock_uom,
-					`tabItem`.default_warehouse
+					`tabItem`.default_warehouse,
+					`tabItem`.purchase_account,
+					`tabItem`.cost_center
 				from 
 					`tabBOM Item`, `tabItem`
 				where 
@@ -599,16 +608,21 @@ class DocType(StockController):
 		return issued_item_qty
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
+		idx = 1
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 
 				self.doclist)
+			se_child.idx = idx
 			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.doc.from_warehouse)
 			se_child.t_warehouse = item_dict[d].get("to_warehouse", self.doc.to_warehouse)
 			se_child.item_code = cstr(d)
+			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
 			se_child.uom = item_dict[d]["stock_uom"]
 			se_child.stock_uom = item_dict[d]["stock_uom"]
 			se_child.qty = flt(item_dict[d]["qty"])
+			se_child.expense_account = item_dict[d]["expense_account"]
+			se_child.cost_center = item_dict[d]["cost_center"]
 			
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
@@ -616,6 +630,9 @@ class DocType(StockController):
 			
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
+
+			# increment idx by 1
+			idx += 1
 
 	def get_cust_values(self):
 		"""fetches customer details"""
@@ -682,8 +699,8 @@ class DocType(StockController):
 @webnotes.whitelist()
 def get_production_order_details(production_order):
 	result = webnotes.conn.sql("""select bom_no, 
-		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom
-		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
+		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom, 
+		wip_warehouse from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 	return result and result[0] or {}
 	
 def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):

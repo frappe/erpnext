@@ -144,11 +144,18 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	production_order: function() {
+		var me = this;
 		this.toggle_enable_bom();
 		
 		return this.frm.call({
 			method: "get_production_order_details",
-			args: {production_order: this.frm.doc.production_order}
+			args: {production_order: this.frm.doc.production_order},
+			callback: function(r) {
+				if (!r.exc) {
+					if (me.frm.doc.purpose == "Material Transfer" && !me.frm.doc.to_warehouse)
+						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
+				}
+			}
 		});
 	},
 	
