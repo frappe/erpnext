@@ -13,8 +13,11 @@ def repost():
 	"""
 	webnotes.conn.auto_commit_on_many_writes = 1
 	
-	for d in webnotes.conn.sql("select item_code, warehouse from tabBin"):
-		repost_stock(d[0], d[1])
+	for d in webnotes.conn.sql("""select distinct item_code, warehouse from 
+		(select item_code, warehouse from tabBin
+		union
+		select item_code, warehouse from `tabStock Ledger Entry`)"""):
+			repost_stock(d[0], d[1])
 		
 	webnotes.conn.auto_commit_on_many_writes = 0
 
