@@ -61,9 +61,11 @@ class DocType:
 
 	def update_control_panel(self):
 		cp_bean = webnotes.bean("Control Panel")
-		cp_bean.country = self.doc.country
-		cp_bean.time_zone = self.doc.time_zone
+		if self.doc.country:
+			cp_bean.doc.country = self.doc.country
+		if self.doc.time_zone:
+			cp_bean.doc.time_zone = self.doc.time_zone
 		cp_bean.save()
-		
+
 	def get_defaults(self):
 		return webnotes.defaults.get_defaults()

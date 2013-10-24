@@ -8,15 +8,11 @@ def execute():
 	webnotes.reload_doc("setup", "doctype", "global_defaults")
 
 	country = webnotes.conn.sql("""select value from `tabSingles` where 
-		field ='country' and doctype='Control Panel'""")
+		field='country' and doctype='Control Panel'""")
 	time_zone = webnotes.conn.sql("""select value from `tabSingles` where 
-		field ='timezone' and doctype='Control Panel'""")
-
-	cp_bean = webnotes.bean("Control Panel")
-	cp_bean.time_zone = time_zone
-	cp_bean.save()
+		field='timezone' and doctype='Control Panel'""")
 
 	gb_bean = webnotes.bean("Global Defaults")
-	gb_bean.country = country
-	gb_bean.time_zone = time_zone
+	gb_bean.doc.country = country and country[0][0] or None
+	gb_bean.doc.time_zone = time_zone and time_zone[0][0] or None
 	gb_bean.save()

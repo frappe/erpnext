@@ -2,21 +2,24 @@
 // License: GNU General Public License v3. See license.txt
 
 $.extend(cur_frm.cscript, {
-	validate: function(doc, cdt, cdn) {
-		return $c_obj(make_doclist(cdt, cdn), 'get_defaults', '', function(r, rt){
-			sys_defaults = r.message;
-		});
-	},
-
-	refresh: function() {
+	onload: function(doc) {
 		var me = this;
+		this.time_zone = doc.time_zone;
+		
 		wn.call({
 			method:"webnotes.country_info.get_country_timezone_info",
 			callback: function(data) {
 				erpnext.country_info = data.message.country_info;
 				erpnext.all_timezones = data.message.all_timezones;
-				// me.set_timezone_options();
+				me.set_timezone_options();
+				cur_frm.set_value("time_zone", me.time_zone);
 			}
+		});
+	},
+
+	validate: function(doc, cdt, cdn) {
+		return $c_obj(make_doclist(cdt, cdn), 'get_defaults', '', function(r, rt){
+			sys_defaults = r.message;
 		});
 	},
 
@@ -36,9 +39,8 @@ $.extend(cur_frm.cscript, {
 		if(!filtered_options) filtered_options = [];
 		var remaining_timezones = $.map(erpnext.all_timezones, function(v) 
 			{ return filtered_options.indexOf(v)===-1 ? v : null; });
-
-		this.frm.fields_dict.time_zone.df.options = 
-			(filtered_options.concat([""]).concat(remaining_timezones)).join("\n");
-		refresh_field("time_zone");
+		
+		this.frm.set_df_property("time_zone", "options", 
+			(filtered_options.concat([""]).concat(remaining_timezones)).join("\n"));
 	}
 });

@@ -227,4 +227,5 @@ patch_list = [
 	"patches.october_2013.p03_remove_sales_and_purchase_return_tool",
 	"patches.october_2013.p04_update_report_permission",
 	"patches.october_2013.p05_delete_gl_entries_for_cancelled_vouchers",
+	"patches.october_2013.p06_update_control_panel_and_global_defaults",
 ]
