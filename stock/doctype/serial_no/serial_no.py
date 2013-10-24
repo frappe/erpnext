@@ -40,19 +40,14 @@ class DocType(StockController):
 		self.on_stock_ledger_entry()
 
 	def validate_amc_status(self):
-		"""
-			validate amc status
-		"""
 		if (self.doc.maintenance_status == 'Out of AMC' and self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under AMC' and (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today())):
-			msgprint("AMC expiry date and maintenance status mismatch. Please verify", raise_exception=1)
+			webnotes.throw(self.doc.name + ": " + 
+				_("AMC expiry date and maintenance status mismatched"))
 
 	def validate_warranty_status(self):
-		"""
-			validate warranty status	
-		"""
 		if (self.doc.maintenance_status == 'Out of Warranty' and self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under Warranty' and (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today())):
-			msgprint("Warranty expiry date and maintenance status mismatch. Please verify", 
-				raise_exception=1)
+			webnotes.throw(self.doc.name + ": " + 
+				_("Warranty expiry date and maintenance status mismatched"))
 
 
 	def validate_warehouse(self):
