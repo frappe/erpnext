@@ -4,7 +4,7 @@
 $.extend(cur_frm.cscript, {
 	onload: function(doc) {
 		var me = this;
-		this.time_zone = doc.time_zone;
+		this.timezone = doc.time_zone;
 		
 		wn.call({
 			method:"webnotes.country_info.get_country_timezone_info",
@@ -12,7 +12,7 @@ $.extend(cur_frm.cscript, {
 				erpnext.country_info = data.message.country_info;
 				erpnext.all_timezones = data.message.all_timezones;
 				me.set_timezone_options();
-				cur_frm.set_value("time_zone", me.time_zone);
+				cur_frm.set_value("time_zone", me.timezone);
 			}
 		});
 	},
@@ -36,10 +36,11 @@ $.extend(cur_frm.cscript, {
 	},
 
 	set_timezone_options: function(filtered_options) {
+		var me = this;
 		if(!filtered_options) filtered_options = [];
 		var remaining_timezones = $.map(erpnext.all_timezones, function(v) 
 			{ return filtered_options.indexOf(v)===-1 ? v : null; });
-		
+
 		this.frm.set_df_property("time_zone", "options", 
 			(filtered_options.concat([""]).concat(remaining_timezones)).join("\n"));
 	}
