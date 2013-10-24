@@ -120,7 +120,7 @@ class DocType:
 			elif self.doc.rm_cost_as_per == "Price List":
 				if not self.doc.buying_price_list:
 					webnotes.throw(_("Please select Price List"))
-				rate = webnotes.conn.get_value("Item Price", {"parent": self.doc.buying_price_list, 
+				rate = webnotes.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
 					"item_code": arg["item_code"]}, "ref_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
@@ -413,7 +413,9 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				ifnull(sum(bom_item.qty_consumed_per_unit),0) * %(qty)s as qty, 
 				item.description, 
 				item.stock_uom,
-				item.default_warehouse
+				item.default_warehouse,
+				item.purchase_account as expense_account,
+				item.cost_center
 			from 
 				`tab%(table)s` bom_item, `tabItem` item 
 			where 

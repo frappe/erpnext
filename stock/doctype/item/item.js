@@ -13,6 +13,7 @@ cur_frm.cscript.refresh = function(doc) {
 			window.open(doc.page_name);
 		}, "icon-globe");
 	}
+	cur_frm.cscript.edit_prices_button();
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
@@ -24,6 +25,15 @@ cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
 	if(cur_frm.doc.__islocal) 
 		return;
+}
+
+cur_frm.cscript.edit_prices_button = function() {
+	cur_frm.add_custom_button("Add / Edit Prices", function() {
+		wn.route_options = {
+			"item_code": cur_frm.doc.name
+		};
+		wn.set_route("Report", "Item Price");
+	}, "icon-money");
 }
 
 cur_frm.cscript.item_code = function(doc) {

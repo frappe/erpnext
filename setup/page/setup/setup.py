@@ -41,6 +41,7 @@ items = [
 			{"doctype":"UOM"}, 
 			{"doctype":"Brand"},
 			{"doctype":"Price List"}, 
+			{"doctype": "Item Price"}, 
 			{ "title": "Stock Settings", 
 				"route": "Form/Stock Settings", "type": "Link", "icon": "icon-cog" },
 		],

@@ -5,6 +5,7 @@
 		"docs.user.stock.warehouse",
 		"docs.user.stock.item_group",
 		"docs.user.stock.item",
+		"docs.user.stock.product_listing_on_website",
 		"docs.user.stock.serialized",
 		"docs.user.stock.purchase_receipt",
 		"docs.user.stock.delivery_note",

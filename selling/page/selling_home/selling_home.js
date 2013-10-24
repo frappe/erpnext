@@ -83,8 +83,13 @@ wn.module_page["Selling"] = [
 			},
 			{
 				label: wn._("Price List"),
-				description: wn._("Mupltiple Item prices."),
+				description: wn._("Multiple Price list."),
 				doctype:"Price List"
+			},
+			{
+				label: wn._("Item Price"),
+				description: wn._("Multiple Item prices."),
+				doctype:"Item Price"
 			},
 			{
 				label: wn._("Sales BOM"),
@@ -166,6 +171,11 @@ wn.module_page["Selling"] = [
 		right: true,
 		icon: "icon-list",
 		items: [
+			{
+				"label":wn._("Lead Details"),
+				route: "query-report/Lead Details",
+				doctype: "Lead"
+			},
 			{
 				"label":wn._("Customer Addresses And Contacts"),
 				route: "query-report/Customer Addresses And Contacts",

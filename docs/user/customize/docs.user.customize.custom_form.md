@@ -3,11 +3,12 @@
 	"_label": "Customize Form"
 }
 ---
-Please read  ERPNext Structure before you start customizing.
 
 You can Customize Forms by changing its layout, making certain fields mandatory, hiding others and changing permission levels on fields by going to:
 
 > Setup > Customize ERPNext > Customize Forms
+
+#### Step 1: Select the required Form Type for Customization.
 
 
 ![Customize Forms](img/customize-form-1.png)
@@ -24,12 +25,14 @@ Select the Form you want to customize and the fields table will be updated with 
 
 You can also allow attachments, set max number of attachments and set the default Print Format.
 
+#### Step 2: Replace Fields with required changes.
 
 ![Customize Forms](img/customize-form-2.png)
 
 
 <br>
 
+To understand field definitions, visit [Doctype-Fields](docs.user.knowledge.doctype_fields.html)
 
 
 > Though we want you to do everything you can to customize your ERP based on your business needs, we recommend that you do not make “wild” changes to the forms. This is because, these changes may affect certain operations and may mess up your forms. Make small changes and see its effect before doing some more.
