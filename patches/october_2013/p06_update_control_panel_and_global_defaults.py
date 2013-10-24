@@ -12,7 +12,10 @@ def execute():
 	time_zone = webnotes.conn.sql("""select value from `tabSingles` where 
 		field='timezone' and doctype='Control Panel'""")
 
-	gb_bean = webnotes.bean("Global Defaults")
-	gb_bean.doc.country = country and country[0][0] or None
-	gb_bean.doc.time_zone = time_zone and time_zone[0][0] or None
-	gb_bean.save()
+	try:
+		gb_bean = webnotes.bean("Global Defaults")
+		gb_bean.doc.country = country and country[0][0] or None
+		gb_bean.doc.time_zone = time_zone and time_zone[0][0] or None
+		gb_bean.save()
+	except:
+		pass
