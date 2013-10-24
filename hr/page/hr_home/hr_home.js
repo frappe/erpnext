@@ -169,7 +169,7 @@ wn.module_page["HR"] = [
 				"label": wn._("HR Settings"),
 				"route": "Form/HR Settings",
 				"doctype":"HR Settings",
-				"description": "Settings for HR Module"
+				"description": wn._("Settings for HR Module")
 			}
 		]
 	},

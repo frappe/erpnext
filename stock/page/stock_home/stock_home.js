@@ -111,7 +111,7 @@ wn.module_page["Stock"] = [
 				"label": wn._("Stock Settings"),
 				"route": "Form/Stock Settings",
 				"doctype":"Stock Settings",
-				"description": "Settings for Stock Module"
+				"description": wn._("Settings for Stock Module")
 			},
 			{
 				"route":"Sales Browser/Item Group",

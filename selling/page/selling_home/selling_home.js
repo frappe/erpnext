@@ -63,7 +63,7 @@ wn.module_page["Selling"] = [
 				"label": wn._("Selling Settings"),
 				"route": "Form/Selling Settings",
 				"doctype":"Selling Settings",
-				"description": "Settings for Selling Module"
+				"description": wn._("Settings for Selling Module")
 			},
 			{
 				"route":"Form/Shopping Cart Settings",
