@@ -180,7 +180,7 @@ wn.pages.Setup.make = function(wrapper) {
 			if(r.message) {
 				body.empty();
 				if(wn.boot.expires_on) {
-					$(body).prepend("<div class='text-muted' style='text-align:right'>"+wn.("Account expires on") 
+					$(body).prepend("<div class='text-muted' style='text-align:right'>"+wn._("Account expires on") 
 							+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
 				}
 
