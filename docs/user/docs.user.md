@@ -17,8 +17,9 @@
 		"docs.user.website",
 		"docs.user.tools",
 		"docs.user.customize",
-		"docs.user.knowledge"
-			],
+		"docs.user.knowledge",
+		"docs.user.customer_portal"
+	],
 	"_no_toc": 1
 }
 ---
@@ -70,6 +71,7 @@ Contents
 		1. [Terms and Conditions](docs.user.selling.terms.html)
 		1. [Price Lists](docs.user.setup.price_list.html)
 		1. [Discount](docs.user.selling.discount.html)
+		1. [Shopping Cart](docs.user.selling.shopping_cart.html)
 	1. [Customers](docs.user.selling.customer.html)
 	1. [Lead](docs.user.selling.lead.html)
 	1. [Opportunity](docs.user.selling.opportunity.html)
@@ -88,6 +90,7 @@ Contents
 	1. [Warehouse](docs.user.stock.warehouse.html)
 	1. [Item Group](docs.user.stock.item_group.html)
 	1. [Item](docs.user.stock.item.html)
+	1. [Product Listing on Website](docs.user.stock.product_listing_on_website.html)
 	1. [Serialized Inventory](docs.user.stock.serialized.html)
 	1. [Purchase Receipt](docs.user.stock.purchase_receipt.html)
 	1. [Delivery Note](docs.user.stock.delivery_note.html)
@@ -159,5 +162,11 @@ Contents
 	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
 	1. [Accounting Entries](docs.user.knowledge.accounting_entries.html)
 	1. [DocType Definitions](docs.user.knowledge.doctype.html)
+	1. [DocType Fields](docs.user.knowledge.doctype_fields.html)
 	1. [Attachment and CSV Files](docs.user.knowledge.attachment_csv.html)
 	1. [Format using Markdown](docs.user.knowledge.markdown.html)
+1. [Customer Portal](docs.user.customer_portal.html)
+	1. [Sign Up](docs.user.customer_portal.sign_up.html)
+	2. [Login](docs.user.customer_portal.login.html)
+	3. [Customer Orders](docs.user.customer_portal.orders.html)
+	4. [Support Tickets](docs.user.customer_portal.tickets.html)
