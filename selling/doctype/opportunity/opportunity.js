@@ -103,12 +103,19 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
 	
 	cur_frm.clear_custom_buttons();
+<<<<<<< HEAD
+	if(doc.docstatus === 1 && doc.status!=="Opportunity Lost") {
+		cur_frm.add_custom_button( wn._('Create Quotation'), cur_frm.cscript.create_quotation);
+		cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
+		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+=======
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
 		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript.create_quotation);
 		if(doc.status!=="Quotation") {
 			cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+>>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 	}
 	
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
@@ -174,11 +181,11 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 
 cur_frm.cscript['Declare Opportunity Lost'] = function(){
 	var dialog = new wn.ui.Dialog({
-		title: "Set as Lost",
+		title: wn._("Set as Lost"),
 		fields: [
-			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -191,7 +198,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint("There were errors.");
+					msgprint(wn._("There were errors."));
 					return;
 				}
 				dialog.hide();

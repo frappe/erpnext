@@ -4,7 +4,7 @@
 wn.pages['sales-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Sales Analytics',
+		title: wn._('Sales Analytics'),
 		single_column: true
 	});
 	new erpnext.SalesAnalytics(wrapper);
@@ -17,7 +17,7 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Sales Analytics",
+			title: wn._("Sales Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,14 +30,14 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		
 		this.tree_grids = {
 			"Customer Group": {
-				label: "Customer Group / Customer",
+				label: wn._("Customer Group / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_customer_group", 
 				formatter: function(item) { return item.name; }
 			},
 			"Customer": {
-				label: "Customer",
+				label: wn._("Customer"),
 				show: false, 
 				item_key: "customer",
 				formatter: function(item) {
@@ -45,7 +45,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Item Group": {
-				label: "Item",
+				label: wn._("Item"),
 				show: true, 
 				parent_field: "parent_item_group", 
 				item_key: "item_code",
@@ -54,7 +54,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Item": {
-				label: "Item",
+				label: wn._("Item"),
 				show: false, 
 				item_key: "item_code",
 				formatter: function(item) {
@@ -62,7 +62,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Territory": {
-				label: "Territory / Customer",
+				label: wn._("Territory / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_territory", 
@@ -88,23 +88,23 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Tree Type", options:["Customer Group", "Customer", 
+		{fieldtype:"Select", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
 			"Item Group", "Item", "Territory"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: "Based On", options:["Sales Invoice", 
+		{fieldtype:"Select", label: wn._("Based On"), options:["Sales Invoice", 
 			"Sales Order", "Delivery Note"]},
-		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: "Company", link:"Company", 
+		{fieldtype:"Select", label:  wn._("Value or Qty"), options:["Value", "Quantity"]},
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", 
 			default_value: "Select Company..."},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Select", label: "Range", 
+		{fieldtype:"Date", label: wn._("From Date")},
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;

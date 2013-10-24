@@ -4,7 +4,7 @@
 wn.pages['stock-level'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Level',
+		title: wn._('Stock Level'),
 		single_column: true
 	});
 	
@@ -22,7 +22,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 		var me = this;
 		
 		this._super({
-			title: "Stock Level",
+			title: wn._("Stock Level"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -37,70 +37,70 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 						Projected Qty = Actual Qty + Planned Qty + Requested Qty \
 						+ Ordered Qty - Reserved Qty </li> \
 					<ul> \
-						<li>Actual Qty: Quantity available in the warehouse. </li> \
-						<li>Planned Qty: Quantity, for which, Production Order has been raised, \
-							but is pending to be manufactured. </li> \
-						<li>Requested Qty: Quantity requested for purchase, but not ordered. </li> \
-						<li>Ordered Qty: Quantity ordered for purchase, but not received.</li> \
-						<li>Reserved Qty: Quantity ordered for sale, but not delivered. </li> \
-					</ul> \
+						<li>"+wn._("Actual Qty: Quantity available in the warehouse.") +"</li>"+
+						"<li>"+wn._("Planned Qty: Quantity, for which, Production Order has been raised,")+
+							wn._("but is pending to be manufactured.")+ "</li> " +
+						"<li>"+wn._("Requested Qty: Quantity requested for purchase, but not ordered.") + "</li>" +
+						"<li>" + wn._("Ordered Qty: Quantity ordered for purchase, but not received.")+ "</li>" +
+						"<li>" + wn._("Reserved Qty: Quantity ordered for sale, but not delivered.") +  "</li>" +
+					"</ul> \
 				</ul>");
 		});
 	},
 	
 	setup_columns: function() {
 		this.columns = [
-			{id: "item_code", name: "Item Code", field: "item_code", width: 160, 	
+			{id: "item_code", name: wn._("Item Code"), field: "item_code", width: 160, 	
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
 					doctype: '"Item"',
 				}},
-			{id: "item_name", name: "Item Name", field: "item_name", width: 100,
+			{id: "item_name", name: wn._("Item Name"), field: "item_name", width: 100,
 				formatter: this.text_formatter},
-			{id: "description", name: "Description", field: "description", width: 200, 
+			{id: "description", name: wn._("Description"), field: "description", width: 200, 
 				formatter: this.text_formatter},
-			{id: "brand", name: "Brand", field: "brand", width: 100,
+			{id: "brand", name: wn._("Brand"), field: "brand", width: 100,
 				link_formatter: {filter_input: "brand"}},
-			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
+			{id: "warehouse", name: wn._("Warehouse"), field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
-			{id: "uom", name: "UOM", field: "uom", width: 60},
-			{id: "actual_qty", name: "Actual Qty", 
+			{id: "uom", name: wn._("UOM"), field: "uom", width: 60},
+			{id: "actual_qty", name: wn._("Actual Qty"), 
 				field: "actual_qty", width: 80, formatter: this.currency_formatter},
-			{id: "planned_qty", name: "Planned Qty", 
+			{id: "planned_qty", name: wn._("Planned Qty"), 
 				field: "planned_qty", width: 80, formatter: this.currency_formatter},
-			{id: "requested_qty", name: "Requested Qty", 
+			{id: "requested_qty", name: wn._("Requested Qty"), 
 				field: "requested_qty", width: 80, formatter: this.currency_formatter},
-			{id: "ordered_qty", name: "Ordered Qty", 
+			{id: "ordered_qty", name: wn._("Ordered Qty"), 
 				field: "ordered_qty", width: 80, formatter: this.currency_formatter},
-			{id: "reserved_qty", name: "Reserved Qty", 
+			{id: "reserved_qty", name: wn._("Reserved Qty"), 
 				field: "reserved_qty", width: 80, formatter: this.currency_formatter},
-			{id: "projected_qty", name: "Projected Qty", 
+			{id: "projected_qty", name: wn._("Projected Qty"), 
 				field: "projected_qty", width: 80, formatter: this.currency_formatter},
-			{id: "re_order_level", name: "Re-Order Level", 
+			{id: "re_order_level", name: wn._("Re-Order Level"), 
 				field: "re_order_level", width: 80, formatter: this.currency_formatter},
-			{id: "re_order_qty", name: "Re-Order Qty", 
+			{id: "re_order_qty", name: wn._("Re-Order Qty"), 
 				field: "re_order_qty", width: 80, formatter: this.currency_formatter},
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Link", label: "Item Code", link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: wn._("Item Code"), link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
 				return item.item_code == val || !val;
 			}},
 			
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
 		
-		{fieldtype:"Select", label: "Brand", link:"Brand", 
+		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	
 	setup_filters: function() {

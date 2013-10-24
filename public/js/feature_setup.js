@@ -198,7 +198,7 @@ $(document).bind('form_refresh', function() {
 					} else if(cur_frm.fields_dict[fort]) {
 						cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);						
 					} else {
-						msgprint('Grid "'+fort+'" does not exists');
+						msgprint(wn._('Grid "')+fort+wn._('" does not exists'));
 					}
 				}
 			}

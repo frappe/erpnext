@@ -16,7 +16,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		this._super();
 
 		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button("Make Purchase Order", this.make_purchase_order);
+			cur_frm.add_custom_button(wn._("Make Purchase Order"), this.make_purchase_order);
 		} 
 		else if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(wn._('From Material Request'), 

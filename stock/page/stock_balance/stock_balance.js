@@ -6,7 +6,7 @@ wn.require("app/js/stock_analytics.js");
 wn.pages['stock-balance'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Balance',
+		title: wn._('Stock Balance'),
 		single_column: true
 	});
 	
@@ -20,58 +20,58 @@ wn.pages['stock-balance'].onload = function(wrapper) {
 erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	init: function(wrapper) {
 		this._super(wrapper, {
-			title: "Stock Balance",
+			title: wn._("Stock Balance"),
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Stock Entry", "Project"],
 		});
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: "Item", field: "name", width: 300,
+			{id: "name", name: wn._("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "item_name", name: "Item Name", field: "item_name", width: 100},
-			{id: "description", name: "Description", field: "description", width: 200, 
+			{id: "item_name", name: wn._("Item Name"), field: "item_name", width: 100},
+			{id: "description", name: wn._("Description"), field: "description", width: 200, 
 				formatter: this.text_formatter},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
-			{id: "opening_qty", name: "Opening Qty", field: "opening_qty", width: 100, 
+			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: wn._("UOM"), field: "stock_uom", width: 100},
+			{id: "opening_qty", name: wn._("Opening Qty"), field: "opening_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_qty", name: "In Qty", field: "inflow_qty", width: 100, 
+			{id: "inflow_qty", name: wn._("In Qty"), field: "inflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_qty", name: "Out Qty", field: "outflow_qty", width: 100, 
+			{id: "outflow_qty", name: wn._("Out Qty"), field: "outflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_qty", name: "Closing Qty", field: "closing_qty", width: 100, 
+			{id: "closing_qty", name: wn._("Closing Qty"), field: "closing_qty", width: 100, 
 				formatter: this.currency_formatter},
 				
-			{id: "opening_value", name: "Opening Value", field: "opening_value", width: 100, 
+			{id: "opening_value", name: wn._("Opening Value"), field: "opening_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_value", name: "In Value", field: "inflow_value", width: 100, 
+			{id: "inflow_value", name: wn._("In Value"), field: "inflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_value", name: "Out Value", field: "outflow_value", width: 100, 
+			{id: "outflow_value", name: wn._("Out Value"), field: "outflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_value", name: "Closing Value", field: "closing_value", width: 100, 
+			{id: "closing_value", name: wn._("Closing Value"), field: "closing_value", width: 100, 
 				formatter: this.currency_formatter},
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Brand", link:"Brand", 
+		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: "Project", link:"Project", 
+		{fieldtype:"Select", label: wn._("Project"), link:"Project", 
 			default_value: "Select Project...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}, link_formatter: {filter_input: "project"}},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Date", label: wn._("From Date")},
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	
 	setup_plot_check: function() {

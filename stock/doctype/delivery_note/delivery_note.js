@@ -26,20 +26,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				});
 			
 			if(!from_sales_invoice)
-				cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
 		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
-			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
+			cur_frm.add_custom_button(wn._('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(wn._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 	
 		set_print_hide(doc, dt, dn);

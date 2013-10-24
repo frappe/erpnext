@@ -20,29 +20,31 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		chart_area = $("<div>")
 			.css({"margin-bottom": "15px"})
 			.appendTo(main),
-		help_area = $('<div class="well">\
-		<h4>Quick Help</h4>\
-		<ol>\
-		<li>To add child nodes, explore tree and click on the node under which you \
-			want to add more nodes.\
-		<li>Accounting Entries can be made against leaf nodes, called <b>Ledgers</b>.\
-		 	Entries against <b>Groups</b> are not allowed.\
-		<li>Please do NOT create Account (Ledgers) for Customers and Suppliers. \
-			They are created directly from the Customer / Supplier masters.\
-		<li><b>To create a Bank Account:</b> Go to the appropriate group \
-			(usually Application of Funds > Current Assets > Bank Accounts)\
-			and create a new Account Ledger (by clicking on Add Child) of \
-			type "Bank or Cash"\
-		<li><b>To create a Tax Account:</b> Go to the appropriate group \
-			(usually Source of Funds > Current Liabilities > Taxes and Duties) \
-			and create a new Account Ledger (by clicking on Add Child) of type\
-			 "Tax" and do mention the Tax rate.\
-		</ol>\
-		<p>Please setup your chart of accounts before you start Accounting Entries</p>\
-	</div>').appendTo(main);
+		help_area = $('<div class="well">'+
+		'<h4>'+wn._('Quick Help')+'</h4>'+
+		'<ol>'+
+			'<li>'+wn._('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
+			'<li>'+
+			      wn._('Accounting Entries can be made against leaf nodes, called')+
+				 '<b>' +wn._('Ledgers')+'</b>.'+ wn._('Entries against') +
+				 '<b>' +wn._('Groups') + '</b>'+ wn._('are not allowed.')+
+		    '</li>'+
+			'<li>'+wn._('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
+			'<li>'+
+			     '<b>'+wn._('To create a Bank Account:')+'</b>'+ 
+			      wn._('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts)')+
+			      wn._('and create a new Account Ledger (by clicking on Add Child) of type "Bank or Cash"')+
+			'</li>'+
+			'<li>'+
+			      '<b>'+wn._('To create a Tax Account:')+'</b>'+
+			      wn._('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties)')+
+			      wn._('and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
+			'</li>'+
+		'</ol>'+
+		'<p>'+wn._('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 	
 	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
-		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },
+		wrapper.appframe.add_button(wn._('New Company'), function() { newdoc('Company'); },
 			'icon-plus');
 	}
 	
@@ -145,20 +147,20 @@ erpnext.AccountsChart = Class.extend({
 		var node_links = [];
 		// edit
 		if (wn.model.can_read(this.ctype) !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.open();">Edit</a>');
+			node_links.push('<a onclick="erpnext.account_chart.open();">'+wn._('Edit')+'</a>');
 		}
 		if (data.expandable && wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
+			node_links.push('<a onclick="erpnext.account_chart.new_node();">'+wn._('Add Child')+'</a>');
 		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">'+wn._('View Ledger')+'</a>');
 		}
 
 		if (this.can_write) {
-			node_links.push('<a onclick="erpnext.account_chart.rename()">Rename</a>');
+			node_links.push('<a onclick="erpnext.account_chart.rename()">'+wn._('Rename')+'</a>');
 		};
 	
 		if (this.can_delete) {
-			node_links.push('<a onclick="erpnext.account_chart.delete()">Delete</a>');
+			node_links.push('<a onclick="erpnext.account_chart.delete()">'+wn._('Delete')+'</a>');
 		};
 		
 		link.toolbar.append(node_links.join(" | "));
@@ -204,20 +206,20 @@ erpnext.AccountsChart = Class.extend({
 		
 		// the dialog
 		var d = new wn.ui.Dialog({
-			title:'New Account',
+			title:wn._('New Account'),
 			fields: [
-				{fieldtype:'Data', fieldname:'account_name', label:'New Account Name', reqd:true, 
-					description: "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, \
-					they are created automatically from the Customer and Supplier master"},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
-					options:'Group\nLedger', description:'Further accounts can be made under Groups,\
-					 	but entries can be made against Ledger'},
-				{fieldtype:'Select', fieldname:'account_type', label:'Account Type',
+				{fieldtype:'Data', fieldname:'account_name', label:wn._('New Account Name'), reqd:true, 
+					description: wn._("Name of new Account. Note: Please don't create accounts for Customers and Suppliers,")+
+					wn._("they are created automatically from the Customer and Supplier master")},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:wn._('Group or Ledger'),
+					options:'Group\nLedger', description: wn._('Further accounts can be made under Groups,')+
+					 	wn._('but entries can be made against Ledger')},
+				{fieldtype:'Select', fieldname:'account_type', label:wn._('Account Type'),
 					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
 						'Income Account', 'Chargeable'].join('\n'),
-					description: "Optional. This setting will be used to filter in various transactions." },
-				{fieldtype:'Float', fieldname:'tax_rate', label:'Tax Rate'},
-				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+					description: wn._("Optional. This setting will be used to filter in various transactions.") },
+				{fieldtype:'Float', fieldname:'tax_rate', label:wn._('Tax Rate')},
+				{fieldtype:'Button', fieldname:'create_new', label:wn._('Create New') }
 			]
 		})
 
@@ -282,13 +284,13 @@ erpnext.AccountsChart = Class.extend({
 		var me = this;
 		// the dialog
 		var d = new wn.ui.Dialog({
-			title:'New Cost Center',
+			title:wn._('New Cost Center'),
 			fields: [
-				{fieldtype:'Data', fieldname:'cost_center_name', label:'New Cost Center Name', reqd:true},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
-					options:'Group\nLedger', description:'Further accounts can be made under Groups,\
-					 	but entries can be made against Ledger'},
-				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+				{fieldtype:'Data', fieldname:'cost_center_name', label:wn._('New Cost Center Name'), reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:wn._('Group or Ledger'),
+					options:'Group\nLedger', description:wn._('Further accounts can be made under Groups,')+
+					 	wn._('but entries can be made against Ledger')},
+				{fieldtype:'Button', fieldname:'create_new', label:wn._('Create New') }
 			]
 		});
 	
