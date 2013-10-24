@@ -28,7 +28,7 @@ $.extend(erpnext.complete_setup, {
 					options: "", fieldtype: 'Select'},
 				{fieldname:'currency', label: 'Default Currency', reqd:1,
 					options: "", fieldtype: 'Select'},
-				{fieldname:'timezone', label: 'Time Zone', reqd:1,
+				{fieldname:'time_zone', label: 'Time Zone', reqd:1,
 					options: "", fieldtype: 'Select'},
 				{fieldname:'industry', label: 'Industry', reqd:1,
 					options: erpnext.complete_setup.domains.join('\n'), fieldtype: 'Select'},
@@ -51,10 +51,10 @@ $.extend(erpnext.complete_setup, {
 				d.get_input("currency").empty()
 					.add_options(wn.utils.unique([""].concat($.map(erpnext.country_info, 
 						function(opts, country) { return opts.currency; }))).sort());
-				d.get_input("timezone").empty()
+				d.get_input("time_zone").empty()
 					.add_options([""].concat(erpnext.all_timezones));
 			}
-		})
+		});
 		
 		// on clicking update
 		d.fields_dict.update.input.onclick = function() {
@@ -84,7 +84,7 @@ $.extend(erpnext.complete_setup, {
 
 		d.fields_dict.country.input.onchange = function() {
 			var country = d.fields_dict.country.input.value;
-			var $timezone = $(d.fields_dict.timezone.input);
+			var $timezone = $(d.fields_dict.time_zone.input);
 			$timezone.empty();
 			// add country specific timezones first
 			if(country){
