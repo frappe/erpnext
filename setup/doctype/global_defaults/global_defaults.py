@@ -65,6 +65,7 @@ class DocType:
 			cp_bean.doc.country = self.doc.country
 		if self.doc.time_zone:
 			cp_bean.doc.time_zone = self.doc.time_zone
+		cp_bean.ignore_permissions = True
 		cp_bean.save()
 
 	def get_defaults(self):
