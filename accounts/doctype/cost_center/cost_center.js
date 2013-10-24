@@ -41,8 +41,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['group_or_ledger', 'company'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
-		intro_txt += '<p><b>Note:</b> This Cost Center is a <i>Group</i>, \
-			Accounting Entries are not allowed against groups.</p>';
+		intro_txt += '<p><b>'+wn._('Note:')+'</b>'+ wn._('This Cost Center is a')+ '<i>'+wn._('Group')+'</i>, '+ 
+		wn._('Accounting Entries are not allowed against groups.')+'</p>';
 	}
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
@@ -50,22 +50,22 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 	
-	cur_frm.add_custom_button('Chart of Cost Centers', 
+	cur_frm.add_custom_button(wn._('Chart of Cost Centers'), 
 		function() { wn.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
 cur_frm.cscript.parent_cost_center = function(doc,cdt,cdn){
 	if(!doc.company){
-		alert('Please enter company name first');
+		alert(wn._('Please enter company name first'));
 	}
 }
 
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button('Convert to Ledger', 
+		cur_frm.add_custom_button(wn._('Convert to Ledger'), 
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button('Convert to Group', 
+		cur_frm.add_custom_button(wn._('Convert to Group'), 
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 	}
 }

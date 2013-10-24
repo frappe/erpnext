@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-
-from webnotes.utils import cint, flt, validate_email_add
+from webnotes.utils import cint, validate_email_add
 from webnotes import msgprint, _
-
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -30,8 +28,8 @@ class DocType:
 			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
 					"master_name": self.doc.name}) and not webnotes.conn.get_value("Account", 
 					{"account_name": self.doc.warehouse_name}):
-				if self.doc.fields.get("__islocal") or not webnotes.conn.get_value("Stock Ledger Entry", 
-						{"warehouse": self.doc.name}):
+				if self.doc.fields.get("__islocal") or not webnotes.conn.get_value(
+						"Stock Ledger Entry", {"warehouse": self.doc.name}):
 					self.validate_parent_account()
 					ac_bean = webnotes.bean({
 						"doctype": "Account",
@@ -101,7 +99,8 @@ class DocType:
 		
 	def on_trash(self):
 		# delete bin
-		bins = webnotes.conn.sql("select * from `tabBin` where warehouse = %s", self.doc.name, as_dict=1)
+		bins = webnotes.conn.sql("select * from `tabBin` where warehouse = %s", 
+			self.doc.name, as_dict=1)
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
@@ -116,8 +115,10 @@ class DocType:
 			webnotes.delete_doc("Account", warehouse_account)
 				
 		# delete cancelled sle
-		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):
+		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", 
+				self.doc.name):
 			msgprint("""Warehosue can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 		else:
-			webnotes.conn.sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
+			webnotes.conn.sql("delete from `tabStock Ledger Entry` where warehouse = %s", 
+				self.doc.name)

@@ -19,46 +19,10 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
-		 
-	# Get contact person details based on customer selected
-	# ------------------------------------------------------
-	def get_contact_details(self):
-		return get_obj('Sales Common').get_contact_details(self,0)
-	
-	# Get Item Details
-	# -----------------
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {
-						'item_code': doc.fields.get('item_code'),
-						'income_account': doc.fields.get('income_account'),
-						'cost_center': doc.fields.get('cost_center'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					res = obj.get_item_details(arg, self) or {}
-					for r in res:
-						if not doc.fields.get(r):
-							doc.fields[r] = res[r]
-
 
 	def has_sales_order(self):
 		return webnotes.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
-				
-		
-	# Re-calculates Basic Rate & amount based on Price List Selected
-	# --------------------------------------------------------------
-	def get_adj_percent(self, arg=''):
-		get_obj('Sales Common').get_adj_percent(self)
-		
-	# Does not allow same item code to be entered twice
-	# -------------------------------------------------
+
 	def validate_for_items(self):
 		chk_dupl_itm = []
 		for d in getlist(self.doclist,'quotation_details'):
@@ -68,9 +32,6 @@ class DocType(SellingController):
 			else:
 				chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
-
-	#do not allow sales item in maintenance quotation and service item in sales quotation
-	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
 		super(DocType, self).validate_order_type()
 		
@@ -96,22 +57,12 @@ class DocType(SellingController):
 		self.set_status()
 		self.validate_order_type()
 		self.validate_for_items()
-
 		self.validate_uom_is_integer("stock_uom", "qty")
 
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.validate_max_discount(self,'quotation_details')
-		sales_com_obj.check_conversion_rate(self)
-			
-	#update enquiry
-	#------------------
 	def update_opportunity(self):
 		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
 			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
 	
-	# declare as order lost
-	#-------------------------
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
 			webnotes.conn.set(self.doc, 'status', 'Lost')
@@ -120,15 +71,11 @@ class DocType(SellingController):
 		else:
 			webnotes.throw(_("Cannot set as Lost as Sales Order is made."))
 	
-	#check if value entered in item table
-	#--------------------------------------
 	def check_item_table(self):
 		if not getlist(self.doclist, 'quotation_details'):
 			msgprint("Please enter item details")
 			raise Exception
 		
-	# ON SUBMIT
-	# =========================================================================
 	def on_submit(self):
 		self.check_item_table()
 		
@@ -138,16 +85,11 @@ class DocType(SellingController):
 		#update enquiry status
 		self.update_opportunity()
 		
-		
-# ON CANCEL
-# ==========================================================================
 	def on_cancel(self):
 		#update enquiry status
 		self.set_status()
 		self.update_opportunity()
 			
-# Print other charges
-# ===========================================================================
 	def print_other_charges(self,docname):
 		print_lst = []
 		for d in getlist(self.doclist,'other_charges'):

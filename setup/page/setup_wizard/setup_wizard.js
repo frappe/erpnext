@@ -69,7 +69,10 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				onload: function(slide) {
 					if(user!=="Administrator") {
 						slide.form.fields_dict.password.$wrapper.toggle(false);
-						slide.form.fields_dict.email_id.$wrapper.toggle(false);
+						slide.form.fields_dict.email.$wrapper.toggle(false);
+						slide.form.fields_dict.first_name.set_input(wn.boot.profile.first_name);
+						slide.form.fields_dict.last_name.set_input(wn.boot.profile.last_name);
+						
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;
 					}
@@ -97,7 +100,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
 						slide.get_input("company_abbr").val(abbr.toUpperCase());
-					});
+					}).val(wn.boot.control_panel.company_name || "").trigger("change");
 				}
 			},
 			

@@ -6,17 +6,14 @@ cur_frm.cscript.refresh = function(doc) {
 	// read only if any stock ledger entry exists
 
 	cur_frm.cscript.make_dashboard()
-
-	cur_frm.toggle_display("naming_series", sys_defaults.item_naming_by=="Naming Series" 
-		&& doc.__islocal)
-	cur_frm.toggle_display("item_code", sys_defaults.item_naming_by!="Naming Series"
-		&& doc.__islocal)
+	erpnext.hide_naming_series();
 		
 	if(!doc.__islocal && doc.show_in_website) {
 		cur_frm.add_custom_button("View In Website", function() {
 			window.open(doc.page_name);
 		}, "icon-globe");
 	}
+	cur_frm.cscript.edit_prices_button();
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
@@ -28,6 +25,15 @@ cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
 	if(cur_frm.doc.__islocal) 
 		return;
+}
+
+cur_frm.cscript.edit_prices_button = function() {
+	cur_frm.add_custom_button("Add / Edit Prices", function() {
+		wn.route_options = {
+			"item_code": cur_frm.doc.name
+		};
+		wn.set_route("Report", "Item Price");
+	}, "icon-money");
 }
 
 cur_frm.cscript.item_code = function(doc) {
@@ -118,7 +124,7 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 // in the "alternate_description" field
 cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.image) {
-		msgprint('Please select an "Image" first');
+		msgprint(wn._('Please select an "Image" first'));
 		return;
 	}
 
@@ -134,7 +140,7 @@ cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 
   if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom)
   {
-    alert('Weight is mentioned,\nPlease mention "Weight UOM" too');
+    alert(wn._('Weight is mentioned,\nPlease mention "Weight UOM" too'));
     validated=0;
   }
 }

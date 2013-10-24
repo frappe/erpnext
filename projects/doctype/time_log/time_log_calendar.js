@@ -6,7 +6,7 @@ wn.views.calendar["Time Log"] = {
 		"start": "from_time",
 		"end": "to_time",
 		"id": "name",
-		"title": "title",
+		"title": w._("title"),
 		"allDay": "allDay"
 	},
 	get_events_method: "projects.doctype.time_log.time_log.get_events"

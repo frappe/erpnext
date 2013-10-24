@@ -4,11 +4,11 @@
 // show tasks
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {
-		cur_frm.add_custom_button("Gantt Chart", function() {
+		cur_frm.add_custom_button(wn._("Gantt Chart"), function() {
 			wn.route_options = {"project": doc.name}
 			wn.set_route("Gantt", "Task");
 		}, "icon-tasks");
-		cur_frm.add_custom_button("Tasks", function() {
+		cur_frm.add_custom_button(wn._("Tasks"), function() {
 			wn.route_options = {"project": doc.name}
 			wn.set_route("List", "Task");
 		}, "icon-list");

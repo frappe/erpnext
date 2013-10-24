@@ -227,7 +227,6 @@ class DocType(BuyingController):
 	# on submit
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
 
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)

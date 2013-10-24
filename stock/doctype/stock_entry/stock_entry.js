@@ -1,6 +1,9 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.cscript.tname = "Stock Entry Detail";
+cur_frm.cscript.fname = "mtn_details";
+
 wn.require("public/app/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
@@ -67,10 +70,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.docstatus === 1 && 
 				wn.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button("Make Credit Note", function() { me.make_return_jv(); });
+				this.frm.add_custom_button(wn._("Make Credit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button("Make Debit Note", function() { me.make_return_jv(); });
+				this.frm.add_custom_button(wn._("Make Debit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			}
 		}
@@ -112,12 +115,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 	
-	entries_add: function(doc, cdt, cdn) {
-		var row = wn.model.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
-			["expense_account", "cost_center"]);
-	},
-	
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.production_order && 
@@ -147,11 +144,18 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 	
 	production_order: function() {
+		var me = this;
 		this.toggle_enable_bom();
 		
 		return this.frm.call({
 			method: "get_production_order_details",
-			args: {production_order: this.frm.doc.production_order}
+			args: {production_order: this.frm.doc.production_order},
+			callback: function(r) {
+				if (!r.exc) {
+					if (me.frm.doc.purpose == "Material Transfer" && !me.frm.doc.to_warehouse)
+						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
+				}
+			}
 		});
 	},
 	
@@ -191,7 +195,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	
 	add_excise_button: function() {
 		if(wn.boot.control_panel.country === "India")
-			this.frm.add_custom_button("Make Excise Invoice", function() {
+			this.frm.add_custom_button(wn._("Make Excise Invoice"), function() {
 				var excise = wn.model.make_new_doc_and_get_name('Journal Voucher');
 				excise = locals['Journal Voucher'][excise];
 				excise.voucher_type = 'Excise Voucher';
@@ -224,6 +228,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	mtn_details_add: function(doc, cdt, cdn) {
 		var row = wn.model.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
+			["expense_account", "cost_center"]);
 		
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
@@ -260,24 +266,29 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	}
 }
 
-cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){
-	if(doc.delivery_note_no) return get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
+cur_frm.cscript.delivery_note_no = function(doc, cdt, cdn) {
+	if(doc.delivery_note_no)
+		return get_server_fields('get_cust_values', '', '', doc, cdt, cdn, 1);
 }
 
-cur_frm.cscript.sales_invoice_no = function(doc,cdt,cdn){
-	if(doc.sales_invoice_no) return get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
+cur_frm.cscript.sales_invoice_no = function(doc, cdt, cdn) {
+	if(doc.sales_invoice_no) 
+		return get_server_fields('get_cust_values', '', '', doc, cdt, cdn, 1);
 }
 
-cur_frm.cscript.customer = function(doc,cdt,cdn){
-	if(doc.customer) return get_server_fields('get_cust_addr','','',doc,cdt,cdn,1);
+cur_frm.cscript.customer = function(doc, cdt, cdn) {
+	if(doc.customer) 
+		return get_server_fields('get_cust_addr', '', '', doc, cdt, cdn, 1);
 }
 
-cur_frm.cscript.purchase_receipt_no = function(doc,cdt,cdn){
-	if(doc.purchase_receipt_no)	return get_server_fields('get_supp_values','','',doc,cdt,cdn,1);
+cur_frm.cscript.purchase_receipt_no = function(doc, cdt, cdn) {
+	if(doc.purchase_receipt_no)	
+		return get_server_fields('get_supp_values', '', '', doc, cdt, cdn, 1);
 }
 
-cur_frm.cscript.supplier = function(doc,cdt,cdn){
-	if(doc.supplier) return get_server_fields('get_supp_addr','','',doc,cdt,cdn,1);
+cur_frm.cscript.supplier = function(doc, cdt, cdn) {
+	if(doc.supplier) 
+		return get_server_fields('get_supp_addr', '', '', doc, cdt, cdn, 1);
 
 }
 
@@ -307,20 +318,24 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 			}
 		}			
 	} else {
-		msgprint("Please enter Item Code to get batch no");
+		msgprint(wn._("Please enter Item Code to get batch no"));
 	}
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	args = {
-		'item_code'		: d.item_code,
-		'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-		'transfer_qty'	: d.transfer_qty,
-		'serial_no'		: d.serial_no,
-		'bom_no'		: d.bom_no
+		'item_code'			: d.item_code,
+		'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+		'transfer_qty'		: d.transfer_qty,
+		'serial_no'			: d.serial_no,
+		'bom_no'			: d.bom_no,
+		'expense_account'	: d.expense_account,
+		'cost_center'		: d.cost_center,
+		'company'			: cur_frm.doc.company
 	};
-	return get_server_fields('get_item_details',JSON.stringify(args),'mtn_details',doc,cdt,cdn,1);
+	return get_server_fields('get_item_details', JSON.stringify(args), 
+		'mtn_details', doc, cdt, cdn, 1);
 }
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
@@ -343,7 +358,8 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.uom && d.item_code){
 		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
-		return get_server_fields('get_uom_details',JSON.stringify(arg),'mtn_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_uom_details', JSON.stringify(arg), 
+			'mtn_details', doc, cdt, cdn, 1);
 	}
 }
 
@@ -354,15 +370,25 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.validate_items = function(doc) {
-	cl =	getchildren('Stock Entry Detail',doc.name,'mtn_details');
+	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
 	if (!cl.length) {
-		alert("Item table can not be blank");
+		alert(wn._("Item table can not be blank"));
 		validated = false;
 	}
 }
 
-cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-	return{ query:"controllers.queries.customer_query" } }
+cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+}
 
-cur_frm.fields_dict.supplier.get_query = function(doc,cdt,cdn) {
-	return{	query:"controllers.queries.supplier_query" } }
+cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
+}
+
+cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
+	return{ query:"controllers.queries.customer_query" }
+}
+
+cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
+	return{	query:"controllers.queries.supplier_query" }
+}

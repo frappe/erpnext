@@ -24,11 +24,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
-			});
-			
-			me.frm.script_manager.trigger("company");
+			});			
 		}
-		
+
 		if(this.other_fname) {
 			this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
@@ -39,9 +37,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	onload_post_render: function() {
-		if(this.frm.doc.__islocal && this.frm.doc.company && 
-			!this.frm.doc.customer && !this.frm.doc.is_pos) {
-				var me = this;
+		var me = this;
+		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
+			if(!this.frm.doc.customer || !this.frm.doc.supplier) {
 				return this.frm.call({
 					doc: this.frm.doc,
 					method: "onload_post_render",
@@ -50,8 +48,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						// remove this call when using client side mapper
 						me.set_default_values();
 						me.set_dynamic_labels();
+						me.calculate_taxes_and_totals();
 					}
 				});
+			} else {
+				this.calculate_taxes_and_totals();
+			}
 		}
 	},
 	
@@ -112,6 +114,40 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.refresh();
 		}
 	},
+
+	serial_no: function(doc, cdt, cdn) {
+		var me = this;
+		var item = wn.model.get_doc(cdt, cdn);
+
+		if (item.serial_no) {
+			if (!item.item_code) {
+				this.frm.script_manager.trigger("item_code", cdt, cdn);
+			}
+			else {
+				var sr_no = [];
+
+				// Replacing all occurences of comma with carriage return
+				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
+
+				serial_nos = serial_nos.trim().split('\n');
+				
+				// Trim each string and push unique string to new list
+				for (var x=0; x<=serial_nos.length - 1; x++) {
+					if (serial_nos[x].trim() != "" && sr_no.indexOf(serial_nos[x].trim()) == -1) {
+						sr_no.push(serial_nos[x].trim());
+					}
+				}
+
+				// Add the new list to the serial no. field in grid with each in new line
+				item.serial_no = "";
+				for (var x=0; x<=sr_no.length - 1; x++)
+					item.serial_no += sr_no[x] + '\n';
+
+				refresh_field("serial_no", item.name, item.parentfield);
+				wn.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+			}
+		}
+	},
 	
 	validate: function() {
 		this.calculate_taxes_and_totals();
@@ -169,12 +205,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	conversion_rate: function() {
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
-		} else if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+		}
+		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-
-		this.calculate_taxes_and_totals();
+		if(flt(this.frm.doc.conversion_rate)>0.0) this.calculate_taxes_and_totals();
 	},
 	
 	get_price_list_currency: function(buying_or_selling) {
@@ -224,7 +260,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
-		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
+		}
+		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 			this.calculate_taxes_and_totals();
 		}
@@ -289,7 +326,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate_on_previous_row: function(tax) {
 		// validate if a valid row id is mentioned in case of
 		// On Previous Row Amount and On Previous Row Total
-		if((["On Previous Row Amount", "On Previous Row Total"].indexOf(tax.charge_type) != -1) &&
+		if(([wn._("On Previous Row Amount"), wn._("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
 			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
 				var msg = repl(wn._("Row") + " # %(idx)s [%(doctype)s]: " +
 					wn._("Please specify a valid") + " %(row_id_label)s", {

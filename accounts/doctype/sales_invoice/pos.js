@@ -167,7 +167,7 @@ erpnext.POS = Class.extend({
 				"fieldtype": "Data",
 				"label": "Barcode",
 				"fieldname": "pos_barcode",
-				"placeholder": "Barcode"
+				"placeholder": "Barcode / Serial No"
 			},
 			parent: this.wrapper.find(".barcode-area")
 		});
@@ -228,7 +228,7 @@ erpnext.POS = Class.extend({
 			}
 		});
 	},
-	add_to_cart: function(item_code) {
+	add_to_cart: function(item_code, serial_no) {
 		var me = this;
 		var caught = false;
 
@@ -239,39 +239,46 @@ erpnext.POS = Class.extend({
 		if (no_of_items != 0) {
 			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
-				if (d.item_code == item_code)
+				if (d.item_code == item_code) {
 					caught = true;
+					if (serial_no) {
+						d.serial_no += '\n' + serial_no;
+						me.frm.script_manager.trigger("serial_no", d.doctype, d.name);
+					}
+					else {
+						d.qty += 1;
+						me.frm.script_manager.trigger("qty", d.doctype, d.name);
+					}
+				}
 			});
 		}
 		
-		// if duplicate row then append the qty
-		if (caught) {
-			me.update_qty(item_code, 1);
-		}
-		else {
+		// if item not found then add new item
+		if (!caught) {
 			var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
 				this.frm.cscript.fname);
 			child.item_code = item_code;
-			me.frm.cscript.item_code(me.frm.doc, child.doctype, child.name);
+
+			if (serial_no)
+				child.serial_no = serial_no;
+
+			me.frm.script_manager.trigger("item_code", child.doctype, child.name);
 		}
+		me.refresh();
 	},
-	update_qty: function(item_code, qty, textbox_qty) {
+	update_qty: function(item_code, qty) {
 		var me = this;
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
-				if (textbox_qty) {
-					if (qty == 0 && d.item_code == item_code)
-						wn.model.clear_doc(d.doctype, d.name);
+				if (qty == 0)
+					wn.model.clear_doc(d.doctype, d.name);
+				else {
 					d.qty = qty;
+					me.frm.script_manager.trigger("qty", d.doctype, d.name);
 				}
-				else
-					d.qty += 1;
-
-				me.frm.cscript.qty(me.frm.doc, d.doctype, d.name);
 			}
 		});
-		me.frm.dirty();
 		me.refresh();
 	},
 	refresh: function() {
@@ -352,7 +359,7 @@ erpnext.POS = Class.extend({
 			// append quantity to the respective item after change from input box
 			$(this.wrapper).find("input.qty").on("change", function() {
 				var item_code = $(this).closest("tr")[0].id;
-				me.update_qty(item_code, $(this).val(), true);
+				me.update_qty(item_code, $(this).val());
 			});
 
 			// on td click toggle the highlighting of row
@@ -407,11 +414,14 @@ erpnext.POS = Class.extend({
 		var me = this;
 		me.barcode_timeout = null;
 		wn.call({
-			method: 'accounts.doctype.sales_invoice.pos.get_item_from_barcode',
-			args: {barcode: this.barcode.$input.val()},
+			method: 'accounts.doctype.sales_invoice.pos.get_item_code',
+			args: {barcode_serial_no: this.barcode.$input.val()},
 			callback: function(r) {
 				if (r.message) {
-					me.add_to_cart(r.message[0].name);
+					if (r.message[1] == "serial_no")
+						me.add_to_cart(r.message[0][0].item_code, r.message[0][0].name);
+					else
+						me.add_to_cart(r.message[0][0].name);
 				}
 				else
 					msgprint(wn._("Invalid Barcode"));
@@ -443,7 +453,6 @@ erpnext.POS = Class.extend({
 		});
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
-		me.frm.dirty();
 		me.refresh();
 	},
 	make_payment: function() {

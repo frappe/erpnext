@@ -5,7 +5,7 @@
 wn.pages['stock-ageing'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Ageing',
+		title: wn._('Stock Ageing'),
 		single_column: true
 	});
 
@@ -21,7 +21,7 @@ wn.require("app/js/stock_grid_report.js");
 erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Stock Ageing",
+			title: wn._("Stock Ageing"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,37 +30,37 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: "Item", field: "name", width: 300,
+			{id: "name", name: wn._("Item"), field: "name", width: 300,
 				link_formatter: {
 					open_btn: true,
 					doctype: '"Item"'
 				}},
-			{id: "item_name", name: "Item Name", field: "item_name", 
+			{id: "item_name", name: wn._("Item Name"), field: "item_name", 
 				width: 100, formatter: this.text_formatter},
-			{id: "description", name: "Description", field: "description", 
+			{id: "description", name: wn._("Description"), field: "description", 
 				width: 200, formatter: this.text_formatter},
-			{id: "brand", name: "Brand", field: "brand", width: 100},
-			{id: "average_age", name: "Average Age", field: "average_age",
+			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
+			{id: "average_age", name: wn._("Average Age"), field: "average_age",
 				formatter: this.currency_formatter},
-			{id: "earliest", name: "Earliest", field: "earliest",
+			{id: "earliest", name: wn._("Earliest"), field: "earliest",
 				formatter: this.currency_formatter},
-			{id: "latest", name: "Latest", field: "latest",
+			{id: "latest", name: wn._("Latest"), field: "latest",
 				formatter: this.currency_formatter},
 			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 		];
 	},
 	filters: [
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Select", label: "Brand", link:"Brand", 
+		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: "Plot By", 
+		{fieldtype:"Select", label: wn._("Plot By"), 
 			options: ["Average Age", "Earliest", "Latest"]},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;

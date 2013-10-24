@@ -293,20 +293,14 @@ class DocType(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-
 		self.check_prev_docstatus()
 		
-		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype,self.doc.company, self.doc.grand_total)
-		
+		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+			self.doc.company, self.doc.grand_total)
 		
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
-				
 		self.update_against_document_in_jv()
-		
 		self.update_prevdoc_status()
 
 	def make_gl_entries(self):
@@ -353,6 +347,7 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
+		rounding_diff = 0.0
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
@@ -361,9 +356,13 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 					
-					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
+					valuation_amt = flt(flt(item.valuation_rate) * flt(item.qty) * \
+						flt(item.conversion_factor), self.precision("valuation_rate", item))
+					
+					rounding_diff += (flt(item.amount, self.precision("amount", item)) + 
 						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
-						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)))
+						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)) - 
+						valuation_amt)
 					
 					gl_entries.append(
 						self.get_gl_dict({
@@ -392,6 +391,12 @@ class DocType(BuyingController):
 			expenses_included_in_valuation = \
 				self.get_company_default("expenses_included_in_valuation")
 				
+			if rounding_diff:
+				import operator
+				cost_center_with_max_value = max(valuation_tax.iteritems(), 
+					key=operator.itemgetter(1))[0]
+				valuation_tax[cost_center_with_max_value] -= flt(rounding_diff)
+			
 			for cost_center, amount in valuation_tax.items():
 				gl_entries.append(
 					self.get_gl_dict({

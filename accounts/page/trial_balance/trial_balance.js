@@ -6,7 +6,7 @@ wn.require("app/js/account_tree_grid.js");
 wn.pages['trial-balance'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Trial Balance',
+		title: wn._('Trial Balance'),
 		single_column: true
 	});
 	var TrialBalance = erpnext.AccountTreeGrid.extend({
@@ -17,8 +17,8 @@ wn.pages['trial-balance'].onload = function(wrapper) {
 			// period closing entry checkbox
 			this.wrapper.bind("make", function() {
 				$('<div style="margin: 10px 0px; "\
-				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">\
-					With period closing entry</div>')
+				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">' + 
+						wn._("With period closing entry") + '</div>')
 					.appendTo(me.wrapper)
 					.find("input").click(function() { me.refresh(); });
 			});

@@ -9,7 +9,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.stock");
@@ -26,20 +26,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				});
 			
 			if(!from_sales_invoice)
-				cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
 		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
-			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
+			cur_frm.add_custom_button(wn._('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(wn._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 	
 		set_print_hide(doc, dt, dn);
@@ -110,13 +110,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 		filters: {
 			'customer': doc.customer
 		}
-	}
-}
-
-cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.serial_no) {
-		 return get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
 	}
 }
 

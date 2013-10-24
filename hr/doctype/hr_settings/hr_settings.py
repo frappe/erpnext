@@ -13,12 +13,18 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
-		self.original_stop_birthday_reminders = cint(webnotes.conn.get_value("HR Settings", 
-			None, "stop_birthday_reminders"))
+		self.update_birthday_reminders()
+
+		from setup.doctype.naming_series.naming_series import set_by_naming_series
+		set_by_naming_series("Employee", "employee_number", 
+			self.doc.get("emp_created_by")=="Naming Series", hide_name_field=True)
 			
-	def on_update(self):
+	def update_birthday_reminders(self):
+		original_stop_birthday_reminders = cint(webnotes.conn.get_value("HR Settings", 
+			None, "stop_birthday_reminders"))
+
 		# reset birthday reminders
-		if cint(self.doc.stop_birthday_reminders) != self.original_stop_birthday_reminders:
+		if cint(self.doc.stop_birthday_reminders) != original_stop_birthday_reminders:
 			webnotes.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and ref_type='Employee'""")
 		
 			if not self.doc.stop_birthday_reminders:

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:00", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:08", 
+  "modified": "2013-10-16 16:37:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,14 +15,14 @@
  {
   "doctype": "DocField", 
   "name": "__common__", 
-  "parent": "Delivery Note Packing Item", 
+  "parent": "Packed Item", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocType", 
-  "name": "Delivery Note Packing Item"
+  "name": "Packed Item"
  }, 
  {
   "doctype": "DocField", 

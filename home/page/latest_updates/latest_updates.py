@@ -14,6 +14,7 @@ def make():
 		out.seek(0)
 		last_commit = None
 		for l in out.readlines():
+			l = l.decode('utf-8')
 			if last_commit is not None:
 				if l.startswith("Date:"):
 					last_commit["date"] = l[8:-1]

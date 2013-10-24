@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-08-06 11:22:22", 
+  "modified": "2013-10-23 10:22:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -173,13 +173,6 @@
   "fieldtype": "Select", 
   "label": "Print Format Style", 
   "options": "Standard\nClassic\nModern\nSpartan", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "hr", 
-  "fieldtype": "Section Break", 
-  "label": "HR", 
   "read_only": 0
  }, 
  {

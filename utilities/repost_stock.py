@@ -13,8 +13,11 @@ def repost():
 	"""
 	webnotes.conn.auto_commit_on_many_writes = 1
 	
-	for d in webnotes.conn.sql("select item_code, warehouse from tabBin"):
-		repost_stock(d[0], d[1])
+	for d in webnotes.conn.sql("""select distinct item_code, warehouse from 
+		(select item_code, warehouse from tabBin
+		union
+		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
+			repost_stock(d[0], d[1])
 		
 	webnotes.conn.auto_commit_on_many_writes = 0
 
@@ -31,7 +34,10 @@ def repost_stock(item_code, warehouse):
 
 def repost_actual_qty(item_code, warehouse):
 	from stock.stock_ledger import update_entries_after
-	update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+	try:
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+	except:
+		pass
 
 def get_reserved_qty(item_code, warehouse):
 	reserved_qty = webnotes.conn.sql("""
@@ -53,7 +59,7 @@ def get_reserved_qty(item_code, warehouse):
 				from 
 				(
 					select qty, parent_detail_docname, parent, name
-					from `tabDelivery Note Packing Item` dnpi_in
+					from `tabPacked Item` dnpi_in
 					where item_code = %s and warehouse = %s
 					and parenttype="Sales Order"
 				and item_code != parent_item

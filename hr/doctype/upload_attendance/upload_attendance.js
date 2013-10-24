@@ -17,7 +17,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 	
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {
-			msgprint("Attendance From Date and Attendance To Date is mandatory");
+			msgprint(wn._("Attendance From Date and Attendance To Date is mandatory"));
 			return;
 		}
 		window.location.href = repl(wn.request.url + 
@@ -56,10 +56,10 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 						return v;
 					});
 
-					r.messages = ["<h4 style='color:red'>Import Failed!</h4>"]
+					r.messages = ["<h4 style='color:red'>"+wn._("Import Failed!")+"</h4>"]
 						.concat(r.messages)
 				} else {
-					r.messages = ["<h4 style='color:green'>Import Successful!</h4>"].
+					r.messages = ["<h4 style='color:green'>"+wn._("Import Successful!")+"</h4>"].
 						concat(r.message.messages)
 				}
 				

@@ -12,10 +12,13 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			wn.model.set_default_values(this.frm.doc);
-			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: "entries"}),
-				function(i, jvd) { wn.model.set_default_values(jvd); });
+			$.each(wn.model.get_doclist(this.frm.doc.doctype, 
+				this.frm.doc.name, {parentfield: "entries"}), function(i, jvd) {
+					wn.model.set_default_values(jvd);
+				}
+			);
 			
-			this.frm.doc.posting_date = get_today();
+			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = get_today();
 		}
 	},
 	
@@ -112,7 +115,7 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) { 
-		cur_frm.add_custom_button('View Ledger', function() {
+		cur_frm.add_custom_button(wn._('View Ledger'), function() {
 			wn.route_options = {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,
@@ -182,7 +185,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = "Journal Voucher";
+		cur_frm.pformat.print_heading = wn._("Journal Voucher");
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {

@@ -20,7 +20,7 @@ An Item can have multiple prices based on customer, currency, region, shipping c
 
 > Setup > Item Price
 
-- Enter Price List and Item Code, Valid for Buying or Selling, Item Name & Item Description will be automatically fetched.
+- Enter Price List and Item Code, Valid for Buying or Selling, Item Name and Item Description will be automatically fetched.
 - Enter Rate and save the document.
 
 ![Item-Price](img/item-price.png)

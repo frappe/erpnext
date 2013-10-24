@@ -189,6 +189,9 @@ class DocType(StockController):
 			self.set_status()
 			self.set_purchase_details()
 			self.set_sales_details()
+			
+	def on_communication(self):
+		return
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)

@@ -2,8 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+def execute():
+	from patches.march_2013 import p06_remove_sales_purchase_return_tool
+	p06_remove_sales_purchase_return_tool.execute()

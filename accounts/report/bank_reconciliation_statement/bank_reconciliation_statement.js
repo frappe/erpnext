@@ -5,7 +5,7 @@ wn.query_reports["Bank Reconciliation Statement"] = {
 	"filters": [
 		{
 			"fieldname":"account",
-			"label": "Bank Account",
+			"label": wn._("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -20,7 +20,7 @@ wn.query_reports["Bank Reconciliation Statement"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": "Date",
+			"label": wn._("Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},

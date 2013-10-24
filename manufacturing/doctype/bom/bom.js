@@ -6,7 +6,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 	
 	if (!doc.__islocal && doc.docstatus<2) {
-		cur_frm.add_custom_button("Update Cost", cur_frm.cscript.update_cost);
+		cur_frm.add_custom_button(wn._("Update Cost"), cur_frm.cscript.update_cost);
 	}
 	
 	cur_frm.cscript.with_operations(doc);
@@ -123,7 +123,7 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.bom_no) {
-		msgprint("You can not change rate if BOM mentioned agianst any item");
+		msgprint(wn._("You can not change rate if BOM mentioned agianst any item"));
 		get_bom_material_detail(doc, cdt, cdn);
 	} else {
 		calculate_rm_cost(doc);

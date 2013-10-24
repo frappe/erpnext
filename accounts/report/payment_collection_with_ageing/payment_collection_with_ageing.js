@@ -5,20 +5,20 @@ wn.query_reports["Payment Collection With Ageing"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
-			"label": "From Date",
+			"label": wn._("From Date"),
 			"fieldtype": "Date",
 			"default": wn.defaults.get_user_default("year_start_date"),
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
-			"label": "To Date",
+			"label": wn._("To Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
 		{
 			"fieldname":"account",
-			"label": "Customer Account",
+			"label": wn._("Customer Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -36,7 +36,7 @@ wn.query_reports["Payment Collection With Ageing"] = {
 		},
 		{
 			"fieldname":"company",
-			"label": "Company",
+			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": wn.defaults.get_default("company")

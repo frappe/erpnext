@@ -4,7 +4,7 @@
 wn.pages['general-ledger'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'General Ledger',
+		title: wn._('General Ledger'),
 		single_column: true
 	});
 	
@@ -16,7 +16,7 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 erpnext.GeneralLedger = wn.views.GridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "General Ledger",
+			title: wn._("General Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -24,41 +24,42 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		});
 	},
 	setup_columns: function() {
+		var DEFAULT_COMPANY_VALUE = wn._("Select Company...");
 		this.columns = [
-			{id: "posting_date", name: "Posting Date", field: "posting_date", width: 100,
+			{id: "posting_date", name: wn._("Posting Date"), field: "posting_date", width: 100,
 				formatter: this.date_formatter},
-			{id: "account", name: "Account", field: "account", width: 240, 	
+			{id: "account", name: wn._("Account"), field: "account", width: 240, 	
 				link_formatter: {
 					filter_input: "account",
 					open_btn: true,
 					doctype: "'Account'"
 				}},
-			{id: "against_account", name: "Against Account", field: "against_account", 
+			{id: "against_account", name: wn._("Against Account"), field: "against_account", 
 				width: 240, hidden: !this.account},
 
-			{id: "debit", name: "Debit", field: "debit", width: 100,
+			{id: "debit", name: wn._("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "credit", name: "Credit", field: "credit", width: 100,
+			{id: "credit", name: wn._("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "voucher_type", name: "Voucher Type", field: "voucher_type", width: 120},
-			{id: "voucher_no", name: "Voucher No", field: "voucher_no", width: 160,
+			{id: "voucher_type", name: wn._("Voucher Type"), field: "voucher_type", width: 120},
+			{id: "voucher_no", name: wn._("Voucher No"), field: "voucher_no", width: 160,
 				link_formatter: {
 					filter_input: "voucher_no",
 					open_btn: true,
 					doctype: "dataContext.voucher_type"
 				}},
-			{id: "remarks", name: "Remarks", field: "remarks", width: 200,
+			{id: "remarks", name: wn._("Remarks"), field: "remarks", width: 200,
 				formatter: this.text_formatter},
 				
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: DEFAULT_COMPANY_VALUE,
 			filter: function(val, item, opts) {
-				return item.company == val || val == opts.default_value;
+				return item.company == val || val == DEFAULT_COMPANY_VALUE;
 			}},
-		{fieldtype:"Link", label: "Account", link:"Account",
+		{fieldtype:"Link", label: wn._("Account"), link:"Account",
 			filter: function(val, item, opts, me) {
 				if(!val) {
 					return true;
@@ -68,22 +69,22 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					return me.is_child_account(val, item.account);
 				}
 			}},
-		{fieldtype:"Data", label: "Voucher No",
+		{fieldtype:"Data", label: wn._("Voucher No"),
 			filter: function(val, item, opts) {
 				if(!val) return true;
 				return (item.voucher_no && item.voucher_no.indexOf(val)!=-1);
 			}},
-		{fieldtype:"Date", label: "From Date", filter: function(val, item) {
+		{fieldtype:"Date", label: wn._("From Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date", filter: function(val, item) {
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype: "Check", label: "Group by Ledger"},
-		{fieldtype: "Check", label: "Group by Voucher"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype: "Check", label: wn._("Group by Ledger")},
+		{fieldtype: "Check", label: wn._("Group by Voucher")},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {
 		this._super();
@@ -160,7 +161,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var to_date = dateutil.str_to_obj(this.to_date);
 		
 		if(to_date < from_date) {
-			msgprint("From Date must be before To Date");
+			msgprint(wn._("From Date must be before To Date"));
 			return;
 		}
 		
@@ -236,7 +237,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		closing.credit = opening.credit + totals.credit;
 
 		if(me.account) {
-			me.appframe.set_title("General Ledger: " + me.account);
+			me.appframe.set_title(wn._("General Ledger: ") + me.account);
 
 			// group by ledgers
 			if(this.account_by_name[this.account].group_or_ledger==="Group"
@@ -254,7 +255,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			
 			out = [opening].concat(out).concat([totals, closing]);
 		} else {
-			me.appframe.set_title("General Ledger");
+			me.appframe.set_title(wn._("General Ledger"));
 			out = out.concat([totals]);
 		}
 
