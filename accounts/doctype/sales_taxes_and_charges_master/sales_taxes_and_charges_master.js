@@ -145,24 +145,6 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
 	}	
 }
 
-<<<<<<< HEAD
-
-cur_frm.cscript.account_head = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(!d.charge_type && d.account_head){
-		alert(wn._("Please select Charge Type first"));
-		validated = false;
-		d.account_head = '';
-	}
-	else if(d.account_head && d.charge_type) {
-		arg = "{'charge_type' : '" + d.charge_type +"', 'account_head' : '" + d.account_head + "'}";
-		return get_server_fields('get_rate', arg, 'other_charges', doc, cdt, cdn, 1);
-	}
-	refresh_field('account_head',d.name,'other_charges');
-}
-
-=======
->>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.rate) {

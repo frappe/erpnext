@@ -25,17 +25,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
 		
-<<<<<<< HEAD
-		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
-			cur_frm.add_custom_button(wn._('Make Sales Order'), cur_frm.cscript['Make Sales Order']);
-			if(doc.status!=="Order Confirmed") {
-				cur_frm.add_custom_button(wn._('Set as Lost'), cur_frm.cscript['Declare Order Lost']);
-=======
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
+			cur_frm.add_custom_button(wn._('Make Sales Order'), 
+				cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
->>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
+				cur_frm.add_custom_button(wn._('Set as Lost'), 
+					cur_frm.cscript['Declare Order Lost']);
 			}
 			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 		}
@@ -57,7 +52,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 					})
 				});
 		}
-		
 
 		if (!doc.__islocal) {
 			cur_frm.communication_view = new wn.views.CommunicationList({

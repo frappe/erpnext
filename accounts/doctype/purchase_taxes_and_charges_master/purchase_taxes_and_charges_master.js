@@ -136,23 +136,6 @@ cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_qu
   }
 }
 
-<<<<<<< HEAD
-cur_frm.cscript.account_head = function(doc, cdt, cdn) {
-  var d = locals[cdt][cdn];
-  if(!d.charge_type && d.account_head){
-    alert(wn._("Please select Charge Type first"));
-    validated = false;
-    d.account_head = '';
-  }
-  else if(d.account_head && d.charge_type) {
-    arg = "{'charge_type' : '" + d.charge_type + "', 'account_head' : '" + d.account_head + "'}";
-    return get_server_fields('get_rate', arg, 'purchase_tax_details', doc, cdt, cdn, 1);
-  }
-  refresh_field('account_head',d.name,'purchase_tax_details');
-}
-
-=======
->>>>>>> f146e8b7f52a3e46e335c0fefd92c347717b370b
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.rate) {
