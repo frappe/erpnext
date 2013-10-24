@@ -318,20 +318,23 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 		$.each(this.frm.item_doclist, function(i, item) {
+			// Calculate export amount in float with precision as per qty
 			wn.model.round_floats_in(item);
 			item.export_amount = flt(item.export_rate * item.qty, precision("export_amount", item));
 			
+			// Set temporary fields in company currency
 			me._set_in_company_currency(item, "ref_rate", "base_ref_rate");
 			me._set_in_company_currency(item, "export_rate", "basic_rate");
 			me._set_in_company_currency(item, "export_amount", "amount");
 		});
-		
 	},
 	
 	determine_exclusive_rate: function() {
 		var me = this;
 		$.each(me.frm.item_doclist, function(n, item) {
+			console.log(["determine_exclusive_rate", item]);
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
+			console.log(["item_tax_map", item_tax_map]);
 			var cumulated_tax_fraction = 0.0;
 			
 			$.each(me.frm.tax_doclist, function(i, tax) {

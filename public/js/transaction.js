@@ -354,6 +354,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	_load_item_tax_rate: function(item_tax_rate) {
+		console.log(["_load_item_tax_rate", item_tax_rate]);
 		return item_tax_rate ? JSON.parse(item_tax_rate) : {};
 	},
 	
@@ -480,9 +481,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.frm.item_doclist = this.get_item_doclist();
 		this.frm.tax_doclist = this.get_tax_doclist();
 		
+		console.log(["item_doclist", this.frm.item_doclist]);
+		console.log(["tax_doclist", this.frm.tax_doclist]);
+
 		this.calculate_item_values();
 		this.initialize_taxes();
-		this.determine_exclusive_rate && this.determine_exclusive_rate();
+		this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
 		this.calculate_totals();
@@ -498,8 +502,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			$.each(["tax_amount", "total",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"],
-				function(i, fieldname) { tax[fieldname] = 0.0 });
-			
+				function(i, fieldname) { 
+					tax[fieldname] = 0.0;
+					console.log([fieldname, tax[fieldname]]);
+				});
+
+			console.log(["tax", tax]);
 			me.validate_on_previous_row(tax);
 			me.validate_inclusive_tax(tax);
 			wn.model.round_floats_in(tax);

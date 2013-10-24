@@ -261,7 +261,7 @@ class AccountsController(TransactionBase):
 				if i==0:
 					tax.grand_total_for_current_item = flt(item.amount +
 						current_tax_amount, self.precision("total", tax))
-						
+					
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
