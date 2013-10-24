@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt
 
 def execute():	
 	serial_nos = webnotes.conn.sql("""select name from `tabSerial No` where status!='Not in Use' 
@@ -14,6 +13,7 @@ def execute():
 			sr_bean.make_controller().via_stock_ledger = True
 			sr_bean.run_method("validate")
 			sr_bean.save()
+			webnotes.conn.commit()
 		except:
 			pass
 			
