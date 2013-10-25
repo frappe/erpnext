@@ -3,11 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import cint, validate_email_add
 from webnotes import msgprint, _
-
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -31,8 +28,8 @@ class DocType:
 			if not webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
 					"master_name": self.doc.name}) and not webnotes.conn.get_value("Account", 
 					{"account_name": self.doc.warehouse_name}):
-				if self.doc.__islocal or not webnotes.conn.get_value("Stock Ledger Entry", 
-						{"warehouse": self.doc.name}):
+				if self.doc.fields.get("__islocal") or not webnotes.conn.get_value(
+						"Stock Ledger Entry", {"warehouse": self.doc.name}):
 					self.validate_parent_account()
 					ac_bean = webnotes.bean({
 						"doctype": "Account",
@@ -58,7 +55,16 @@ class DocType:
 			else:
 				webnotes.throw(_("Please enter account group under which account \
 					for warehouse ") + self.doc.name +_(" will be created"))
-
+			
+	def on_rename(self, new, old, merge=False):
+		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": old}, 
+			"master_name", new)
+			
+		if merge:
+			from stock.stock_ledger import update_entries_after
+			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 
+				where warehouse=%s""", new):
+					update_entries_after({"item_code": item_code, "warehouse": new})
 
 	def merge_warehouses(self):
 		webnotes.conn.auto_commit_on_many_writes = 1
@@ -93,14 +99,15 @@ class DocType:
 		
 	def on_trash(self):
 		# delete bin
-		bins = sql("select * from `tabBin` where warehouse = %s", self.doc.name, as_dict=1)
+		bins = webnotes.conn.sql("select * from `tabBin` where warehouse = %s", 
+			self.doc.name, as_dict=1)
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
 				msgprint("""Warehouse: %s can not be deleted as qty exists for item: %s""" 
 					% (self.doc.name, d['item_code']), raise_exception=1)
 			else:
-				sql("delete from `tabBin` where name = %s", d['name'])
+				webnotes.conn.sql("delete from `tabBin` where name = %s", d['name'])
 				
 		warehouse_account = webnotes.conn.get_value("Account", 
 			{"account_type": "Warehosue", "master_name": self.doc.name})
@@ -108,19 +115,10 @@ class DocType:
 			webnotes.delete_doc("Account", warehouse_account)
 				
 		# delete cancelled sle
-		if sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):
+		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", 
+				self.doc.name):
 			msgprint("""Warehosue can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 		else:
-			sql("delete from `tabStock Ledger Entry` where warehouse = %s", self.doc.name)
-
-	def on_rename(self, newdn, olddn, merge=False):
-		account = webnotes.conn.get_value("Account", {"account_type": "Warehouse", 
-			"master_name": olddn})
-		webnotes.conn.set_value("Account", account, "master_name", newdn)
-			
-		if merge:
-			from stock.stock_ledger import update_entries_after
-			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 
-				where warehouse=%s""", newdn):
-					update_entries_after({"item_code": item_code, "warehouse": newdn})
+			webnotes.conn.sql("delete from `tabStock Ledger Entry` where warehouse = %s", 
+				self.doc.name)

@@ -7,7 +7,6 @@ import webnotes
 from webnotes.utils import flt, fmt_money, cstr, cint
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 
 class DocType:
@@ -31,17 +30,6 @@ class DocType:
 		self.validate_duplicate_account()
 		self.validate_root_details()
 		self.validate_mandatory()
-		self.validate_warehouse_account()
-	
-		if not self.doc.parent_account:
-			self.doc.parent_account = ''
-		
-	def validate(self): 
-		self.validate_master_name()
-		self.validate_parent()
-		self.validate_duplicate_account()
-		self.validate_root_details()
-		self.validate_mandatory()
 		self.validate_frozen_accounts_modifier()
 	
 		if not self.doc.parent_account:
@@ -56,7 +44,7 @@ class DocType:
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
+			par = webnotes.conn.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				msgprint("Parent account does not exists", raise_exception=1)
@@ -84,7 +72,7 @@ class DocType:
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
 			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
-			if sql("""select name from tabAccount where name=%s""", 
+			if webnotes.conn.sql("""select name from tabAccount where name=%s""", 
 				(self.doc.account_name + " - " + company_abbr)):
 					msgprint("Account Name: %s already exists, please rename" 
 						% self.doc.account_name, raise_exception=1)
@@ -133,7 +121,7 @@ class DocType:
 		return webnotes.conn.get_value("GL Entry", {"account": self.doc.name})
 
 	def check_if_child_exists(self):
-		return sql("""select name from `tabAccount` where parent_account = %s 
+		return webnotes.conn.sql("""select name from `tabAccount` where parent_account = %s 
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
@@ -181,7 +169,7 @@ class DocType:
 		# Get credit limit
 		credit_limit_from = 'Customer'
 
-		cr_limit = sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
+		cr_limit = webnotes.conn.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
 			where t2.name=%s and t1.name = t2.master_name""", account)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
@@ -221,7 +209,7 @@ class DocType:
 		
 		# rename account name
 		new_account_name = " - ".join(parts[:-1])
-		sql("update `tabAccount` set account_name = %s where name = %s", (new_account_name, old))
+		webnotes.conn.sql("update `tabAccount` set account_name = %s where name = %s", (new_account_name, old))
 		
 		if merge:
 			new_name = " - ".join(parts)

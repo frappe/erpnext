@@ -8,7 +8,6 @@ from webnotes import _, msgprint
 from webnotes.utils import cstr
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,d,dl):

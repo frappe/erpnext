@@ -4,11 +4,10 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate, validate_email_add, cstr
+from webnotes.utils import getdate, validate_email_add, cstr, cint
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self,doc,doclist=[]):
@@ -21,12 +20,8 @@ class DocType:
 			webnotes.throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method=='Naming Series':
-				if not self.doc.naming_series:
-					webnotes.throw(_("Please select Naming Neries"))
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
 			elif naming_method=='Employee Number':
-				if not self.doc.employee_number:
-					webnotes.throw(_("Please enter Employee Number"))
 				self.doc.name = self.doc.employee_number
 
 		self.doc.employee = self.doc.name
@@ -40,12 +35,12 @@ class DocType:
 		self.validate_email()
 		self.validate_status()
 		self.validate_employee_leave_approver()
+		self.update_dob_event()
 		
 	def on_update(self):
 		if self.doc.user_id:
 			self.update_user_default()
 			self.update_profile()
-		self.update_dob_event()
 				
 	def update_user_default(self):
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
@@ -156,10 +151,11 @@ class DocType:
 					raise_exception=InvalidLeaveApproverError)
 
 	def update_dob_event(self):
-		if self.doc.status == "Active" and self.doc.date_of_birth:
+		if self.doc.status == "Active" and self.doc.date_of_birth \
+			and not cint(webnotes.conn.get_value("HR Settings", None, "stop_birthday_reminders")):
 			birthday_event = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
 				and ref_type='Employee' and ref_name=%s""", self.doc.name)
-
+			
 			starts_on = self.doc.date_of_birth + " 00:00:00"
 			ends_on = self.doc.date_of_birth + " 00:15:00"
 

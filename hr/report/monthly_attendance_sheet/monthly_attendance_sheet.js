@@ -5,7 +5,7 @@ wn.query_reports["Monthly Attendance Sheet"] = {
 	"filters": [
 		{
 			"fieldname":"month",
-			"label": "Month",
+			"label": wn._("Month"),
 			"fieldtype": "Select",
 			"options": "Jan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
 			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", 
@@ -13,20 +13,20 @@ wn.query_reports["Monthly Attendance Sheet"] = {
 		},
 		{
 			"fieldname":"fiscal_year",
-			"label": "Fiscal Year",
+			"label": wn._("Fiscal Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": sys_defaults.fiscal_year,
 		},
 		{
 			"fieldname":"employee",
-			"label": "Employee",
+			"label": wn._("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee"
 		},
 		{
 			"fieldname":"company",
-			"label": "Company",
+			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": wn.defaults.get_default("company")

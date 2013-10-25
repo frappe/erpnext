@@ -52,7 +52,7 @@ def update_for_doc(doctype, doc):
 		
 		exists = True
 		if not (filename.startswith("http://") or filename.startswith("https://")):
-			if not os.path.exists(webnotes.utils.get_path("public", "files", filename)):
+			if not os.path.exists(webnotes.utils.get_site_path(webnotes.conf.files_path, filename)):
 				exists = False
 
 		if exists:

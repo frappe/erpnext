@@ -14,9 +14,9 @@ $(document).ready(function() {
             callback: function(r) {
                 $(me).prop("disabled", false);
                 if(r.exc) {
-                    alert("Error, please contact support@erpnext.com");
+                    alert(wn._("Error, please contact support@erpnext.com"));
                 } else {
-                    console.log("Logged In");
+                    console.log(wn._("Logged In"));
                     window.location.href = "app.html";
                 }
             }

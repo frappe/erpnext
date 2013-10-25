@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class OverProductionError(webnotes.ValidationError): pass
 
@@ -34,7 +33,7 @@ class DocType:
 		
 	def validate_bom_no(self):
 		if self.doc.bom_no:
-			bom = sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
@@ -70,7 +69,7 @@ class DocType:
 			where parent = %s and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Packing Item` 
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
@@ -112,7 +111,7 @@ class DocType:
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = sql("""select name from `tabStock Entry` 
+		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
 			msgprint("""Submitted Stock Entry %s exists against this production order. 

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, flt, comma_or, _round, add_days, cstr
+from webnotes.utils import cint, flt, comma_or, _round, cstr
 from setup.utils import get_company_currency
 from selling.utils import get_item_details
 from webnotes import msgprint, _
@@ -15,6 +15,14 @@ class SellingController(StockController):
 		# contact, address, item details and pos details (if applicable)
 		self.set_missing_values()
 		
+	def validate(self):
+		super(SellingController, self).validate()
+		self.validate_max_discount()
+		check_active_sales_items(self)
+	
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Sales Email Settings', None, 'email_id')
+	
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 		
@@ -234,3 +242,120 @@ class SellingController(StockController):
 		elif self.doc.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)
+				
+	def check_credit(self, grand_total):
+		customer_account = webnotes.conn.get_value("Account", {"company": self.doc.company, 
+			"master_name": self.doc.customer}, "name")
+		if customer_account:
+			total_outstanding = 0
+			total_outstanding = webnotes.conn.sql("""select 
+				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+				from `tabGL Entry` where account = %s""", customer_account)[0][0]
+			
+			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
+			webnotes.bean('Account', customer_account).run_method("check_credit_limit", 
+				customer_account, self.doc.company, outstanding_including_current)
+				
+	def validate_max_discount(self):
+		for d in self.doclist.get({"parentfield": self.fname}):
+			discount = flt(webnotes.conn.get_value("Item", d.item_code, "max_discount"))
+			
+			if discount and flt(d.adj_rate) > discount:
+				webnotes.throw(_("You cannot give more than ") + cstr(discount) + "% " + 
+					_("discount on Item Code") + ": " + cstr(d.item_code))
+					
+	def get_item_list(self):
+		il = []
+		for d in self.doclist.get({"parentfield": self.fname}):
+			reserved_warehouse = ""
+			reserved_qty_for_main_item = 0
+			
+			if self.doc.doctype == "Sales Order":
+				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
+					self.has_sales_bom(d.item_code)) and not d.reserved_warehouse:
+						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
+							d.item_code + _(" as it is stock Item or packing item"))
+				reserved_warehouse = d.reserved_warehouse
+				if flt(d.qty) > flt(d.delivered_qty):
+					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
+				
+			if self.doc.doctype == "Delivery Note" and d.against_sales_order:
+				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
+				# But in this case reserved qty should only be reduced by 10 and not 12
+				
+				already_delivered_qty = self.get_already_delivered_qty(self.doc.name, 
+					d.against_sales_order, d.prevdoc_detail_docname)
+				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
+				
+				if already_delivered_qty + d.qty > so_qty:
+					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
+				else:
+					reserved_qty_for_main_item = -flt(d.qty)
+
+			if self.has_sales_bom(d.item_code):
+				for p in self.doclist.get({"parentfield": "packing_details"}):
+					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
+						# the packing details table's qty is already multiplied with parent's qty
+						il.append(webnotes._dict({
+							'warehouse': p.warehouse,
+							'reserved_warehouse': reserved_warehouse,
+							'item_code': p.item_code,
+							'qty': flt(p.qty),
+							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
+							'uom': p.uom,
+							'batch_no': cstr(p.batch_no).strip(),
+							'serial_no': cstr(p.serial_no).strip(),
+							'name': d.name
+						}))
+			else:
+				il.append(webnotes._dict({
+					'warehouse': d.warehouse,
+					'reserved_warehouse': reserved_warehouse,
+					'item_code': d.item_code,
+					'qty': d.qty,
+					'reserved_qty': reserved_qty_for_main_item,
+					'uom': d.stock_uom,
+					'batch_no': cstr(d.batch_no).strip(),
+					'serial_no': cstr(d.serial_no).strip(),
+					'name': d.name
+				}))
+		return il
+		
+	def has_sales_bom(self, item_code):
+		return webnotes.conn.sql("""select name from `tabSales BOM` 
+			where new_item_code=%s and docstatus != 2""", item_code)
+			
+	def get_already_delivered_qty(self, dn, so, so_detail):
+		qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Item` 
+			where prevdoc_detail_docname = %s and docstatus = 1 
+			and against_sales_order = %s 
+			and parent != %s""", (so_detail, so, dn))
+		return qty and flt(qty[0][0]) or 0.0
+
+	def get_so_qty_and_warehouse(self, so_detail):
+		so_item = webnotes.conn.sql("""select qty, reserved_warehouse from `tabSales Order Item`
+			where name = %s and docstatus = 1""", so_detail, as_dict=1)
+		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
+		so_warehouse = so_item and so_item[0]["reserved_warehouse"] or ""
+		return so_qty, so_warehouse
+		
+	def check_stop_sales_order(self, ref_fieldname):
+		for d in self.doclist.get({"parentfield": self.fname}):
+			if d.fields.get(ref_fieldname):
+				status = webnotes.conn.get_value("Sales Order", d.fields[ref_fieldname], "status")
+				if status == "Stopped":
+					webnotes.throw(self.doc.doctype + 
+						_(" can not be created/modified against stopped Sales Order ") + 
+						d.fields[ref_fieldname])
+		
+def check_active_sales_items(obj):
+	for d in obj.doclist.get({"parentfield": obj.fname}):
+		if d.item_code:
+			item = webnotes.conn.sql("""select docstatus, is_sales_item, 
+				is_service_item, default_income_account from tabItem where name = %s""", 
+				d.item_code, as_dict=True)[0]
+			if item.is_sales_item == 'No' and item.is_service_item == 'No':
+				webnotes.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
+			if d.income_account and not item.default_income_account:
+				webnotes.conn.set_value("Item", d.item_code, "default_income_account", 
+					d.income_account)

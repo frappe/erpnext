@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -19,7 +18,7 @@ class DocType:
 
 	def get_so_details(self, so):
 		"""Pull other details from so"""
-		so = sql("""select transaction_date, customer, grand_total 
+		so = webnotes.conn.sql("""select transaction_date, customer, grand_total 
 			from `tabSales Order` where name = %s""", so, as_dict = 1)
 		ret = {
 			'sales_order_date': so and so[0]['transaction_date'] or '',
@@ -31,7 +30,7 @@ class DocType:
 	def get_item_details(self, item_code):
 		""" Pull other item details from item master"""
 
-		item = sql("""select description, stock_uom, default_bom 
+		item = webnotes.conn.sql("""select description, stock_uom, default_bom 
 			from `tabItem` where name = %s""", item_code, as_dict =1)
 		ret = {
 			'description'	: item and item[0]['description'],
@@ -63,7 +62,7 @@ class DocType:
 		if self.doc.fg_item:
 			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
 		
-		open_so = sql("""
+		open_so = webnotes.conn.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.grand_total
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
@@ -73,7 +72,7 @@ class DocType:
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 						or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)
-					or exists (select name from `tabDelivery Note Packing Item` dnpi
+					or exists (select name from `tabPacked Item` dnpi
 						where dnpi.parent = so.name and dnpi.parent_item = so_item.item_code
 							and exists (select name from `tabItem` item where item.name=dnpi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
@@ -108,7 +107,7 @@ class DocType:
 			msgprint("Please enter sales order in the above table")
 			return []
 			
-		items = sql("""select distinct parent, item_code, reserved_warehouse,
+		items = webnotes.conn.sql("""select distinct parent, item_code, reserved_warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
@@ -117,10 +116,10 @@ class DocType:
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 		
-		dnpi_items = sql("""select distinct dnpi.parent, dnpi.item_code, dnpi.warehouse as reserved_warhouse,
+		dnpi_items = webnotes.conn.sql("""select distinct dnpi.parent, dnpi.item_code, dnpi.warehouse as reserved_warhouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * dnpi.qty) / so_item.qty) 
 				as pending_qty
-			from `tabSales Order Item` so_item, `tabDelivery Note Packing Item` dnpi
+			from `tabSales Order Item` so_item, `tabPacked Item` dnpi
 			where so_item.parent = dnpi.parent and so_item.docstatus = 1 
 			and dnpi.parent_item = so_item.item_code
 			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)
@@ -136,7 +135,7 @@ class DocType:
 		self.clear_item_table()
 
 		for p in items:
-			item_details = sql("""select description, stock_uom, default_bom 
+			item_details = webnotes.conn.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
@@ -162,7 +161,7 @@ class DocType:
 			msgprint("Please enter bom no for item: %s at row no: %s" % 
 				(d.item_code, d.idx), raise_exception=1)
 		else:
-			bom = sql("""select name from `tabBOM` where name = %s and item = %s 
+			bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
@@ -216,14 +215,14 @@ class DocType:
 			pro = webnotes.new_bean("Production Order")
 			pro.doc.fields.update(items[key])
 			
-			webnotes.mute_messages = True
+			webnotes.flags.mute_messages = True
 			try:
 				pro.insert()
 				pro_list.append(pro.doc.name)
 			except OverProductionError, e:
 				pass
 				
-			webnotes.mute_messages = False
+			webnotes.flags.mute_messages = False
 			
 		return pro_list
 
@@ -243,7 +242,7 @@ class DocType:
 		for bom in bom_dict:
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
-				fl_bom_items = sql("""select fb.item_code, 
+				fl_bom_items = webnotes.conn.sql("""select fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit), 0)*%s as qty, 
 					fb.description, fb.stock_uom, it.min_order_qty 
 					from `tabBOM Explosion Item` fb,`tabItem` it 
@@ -254,7 +253,7 @@ class DocType:
 			else:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
-				fl_bom_items = sql("""select bom_item.item_code, 
+				fl_bom_items = webnotes.conn.sql("""select bom_item.item_code, 
 						ifnull(sum(bom_item.qty_consumed_per_unit), 0) * %s, 
 						bom_item.description, bom_item.stock_uom, item.min_order_qty
 					from `tabBOM Item` bom_item, tabItem item
@@ -274,7 +273,7 @@ class DocType:
 		 	'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for d in self.item_dict:
 			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0]])
-			item_qty= sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
+			item_qty= webnotes.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
 				from `tabBin` where item_code = %s""", d)
 			i_qty, o_qty, a_qty = 0, 0, 0
 			for w in item_qty:

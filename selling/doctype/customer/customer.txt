@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:50:50", 
+  "modified": "2013-10-18 16:49:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,6 +50,16 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Document Numbering Series", 
+  "no_copy": 1, 
+  "options": "\nCUST\nCUSTMUM", 
+  "permlevel": 0, 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "hidden": 0, 
@@ -75,16 +85,6 @@
   "options": "\nCompany\nIndividual", 
   "permlevel": 0, 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "naming_series", 
-  "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
-  "no_copy": 1, 
-  "options": "\nCUST\nCUSTMUM", 
-  "permlevel": 0, 
-  "print_hide": 0
  }, 
  {
   "description": "Fetch lead which will be converted into customer.", 

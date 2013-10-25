@@ -9,7 +9,6 @@ from webnotes.utils import cint
 from webnotes import msgprint, _
 from webnotes.model.doc import make_autoname
 
-sql = webnotes.conn.sql
 
 from utilities.transaction_base import TransactionBase
 
@@ -29,7 +28,7 @@ class DocType(TransactionBase):
 			self.doc.name = make_autoname(self.doc.naming_series + '.#####')
 
 	def update_credit_days_limit(self):
-		sql("""update tabAccount set credit_days = %s where name = %s""", 
+		webnotes.conn.sql("""update tabAccount set credit_days = %s where name = %s""", 
 			(cint(self.doc.credit_days), self.doc.name + " - " + self.get_company_abbr()))
 
 	def on_update(self):
@@ -43,7 +42,7 @@ class DocType(TransactionBase):
 		self.update_credit_days_limit()
 	
 	def get_payables_group(self):
-		g = sql("select payables_group from tabCompany where name=%s", self.doc.company)
+		g = webnotes.conn.sql("select payables_group from tabCompany where name=%s", self.doc.company)
 		g = g and g[0][0] or ''
 		if not g:
 			msgprint("Update Company master, assign a default group for Payables")
@@ -65,14 +64,14 @@ class DocType(TransactionBase):
 		msgprint(_("Created Group ") + ac)
 	
 	def get_company_abbr(self):
-		return sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
+		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 	
 	def get_parent_account(self, abbr):
 		if (not self.doc.supplier_type):
 			msgprint("Supplier Type is mandatory")
 			raise Exception
 		
-		if not sql("select name from tabAccount where name=%s and debit_or_credit = 'Credit' and ifnull(is_pl_account, 'No') = 'No'", (self.doc.supplier_type + " - " + abbr)):
+		if not webnotes.conn.sql("select name from tabAccount where name=%s and debit_or_credit = 'Credit' and ifnull(is_pl_account, 'No') = 'No'", (self.doc.supplier_type + " - " + abbr)):
 
 			# if not group created , create it
 			self.add_account(self.doc.supplier_type, self.get_payables_group(), abbr)
@@ -90,7 +89,7 @@ class DocType(TransactionBase):
 			abbr = self.get_company_abbr() 
 			parent_account = self.get_parent_account(abbr)
 						
-			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
+			if not webnotes.conn.sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
 				ac_bean = webnotes.bean({
 					"doctype": "Account",
 					'account_name': self.doc.name,
@@ -121,15 +120,15 @@ class DocType(TransactionBase):
 	
 	def get_contacts(self,nm):
 		if nm:
-			contact_details =webnotes.conn.convert_to_lists(sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = '%s'"%nm))
+			contact_details =webnotes.conn.convert_to_lists(webnotes.conn.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = '%s'"%nm))
 	 
 			return contact_details
 		else:
 			return ''
 			
 	def delete_supplier_address(self):
-		for rec in sql("select * from `tabAddress` where supplier=%s", (self.doc.name,), as_dict=1):
-			sql("delete from `tabAddress` where name=%s",(rec['name']))
+		for rec in webnotes.conn.sql("select * from `tabAddress` where supplier=%s", (self.doc.name,), as_dict=1):
+			webnotes.conn.sql("delete from `tabAddress` where name=%s",(rec['name']))
 	
 	def delete_supplier_contact(self):
 		for contact in webnotes.conn.sql_list("""select name from `tabContact` 
@@ -138,7 +137,7 @@ class DocType(TransactionBase):
 	
 	def delete_supplier_account(self):
 		"""delete supplier's ledger if exist and check balance before deletion"""
-		acc = sql("select name from `tabAccount` where master_type = 'Supplier' \
+		acc = webnotes.conn.sql("select name from `tabAccount` where master_type = 'Supplier' \
 			and master_name = %s and docstatus < 2", self.doc.name)
 		if acc:
 			from webnotes.model import delete_doc
@@ -161,7 +160,7 @@ class DocType(TransactionBase):
 			('Purchase Receipt', 'supplier'),
 			('Serial No', 'supplier')]
 			for rec in update_fields:
-				sql("update `tab%s` set supplier_name = %s where `%s` = %s" % \
+				webnotes.conn.sql("update `tab%s` set supplier_name = %s where `%s` = %s" % \
 					(rec[0], '%s', rec[1], '%s'), (new, old))
 				
 		for account in webnotes.conn.sql("""select name, account_name from 

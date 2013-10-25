@@ -108,7 +108,7 @@ def get_balance_on(account=None, date=None):
 @webnotes.whitelist()
 def add_ac(args=None):
 	if not args:
-		args = webnotes.form_dict
+		args = webnotes.local.form_dict
 		args.pop("cmd")
 		
 	ac = webnotes.bean(args)
@@ -121,7 +121,7 @@ def add_ac(args=None):
 @webnotes.whitelist()
 def add_cc(args=None):
 	if not args:
-		args = webnotes.form_dict
+		args = webnotes.local.form_dict
 		args.pop("cmd")
 		
 	cc = webnotes.bean(args)

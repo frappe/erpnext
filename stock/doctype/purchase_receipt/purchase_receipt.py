@@ -38,10 +38,6 @@ class DocType(BuyingController):
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "purchase_receipt_details"})))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
 
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
-
 	def validate(self):
 		super(DocType, self).validate()
 		
@@ -63,7 +59,6 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-		pc_obj.get_prevdoc_date(self)
 		self.check_for_stopped_status(pc_obj)
 
 		# sub-contracting
@@ -232,7 +227,6 @@ class DocType(BuyingController):
 	# on submit
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
 
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
@@ -290,10 +284,6 @@ class DocType(BuyingController):
 				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
-
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-		
 	def get_gl_entries_for_stock(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		

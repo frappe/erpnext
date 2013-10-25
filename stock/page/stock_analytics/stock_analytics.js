@@ -5,7 +5,7 @@
 wn.pages['stock-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Analytics',
+		title: wn._('Stock Analytics'),
 		single_column: true
 	});
 

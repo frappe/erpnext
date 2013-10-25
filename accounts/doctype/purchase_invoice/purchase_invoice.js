@@ -27,10 +27,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button('Make Payment Entry', this.make_bank_voucher);
+			this.frm.add_custom_button(wn._('Make Payment Entry'), this.make_bank_voucher);
 
 		if(doc.docstatus==1) { 
-			cur_frm.add_custom_button('View Ledger', function() {
+			cur_frm.add_custom_button(wn._('View Ledger'), function() {
 				wn.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
@@ -214,5 +214,5 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = "Purchase Invoice";
+		cur_frm.pformat.print_heading = wn._("Purchase Invoice");
 }

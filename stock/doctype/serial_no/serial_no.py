@@ -22,9 +22,9 @@ class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
 class DocType(StockController):
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
-		self.doclist = doclist
+		self.doclist = doclist or []
 		self.via_stock_ledger = False
 
 	def validate(self):
@@ -36,7 +36,6 @@ class DocType(StockController):
 		self.validate_amc_status()
 		self.validate_warehouse()
 		self.validate_item()
-		
 		self.on_stock_ledger_entry()
 
 	def validate_amc_status(self):
@@ -180,6 +179,15 @@ class DocType(StockController):
 			self.set_purchase_details()
 			self.set_sales_details()
 
+	def on_stock_ledger_entry(self):
+		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
+			self.set_status()
+			self.set_purchase_details()
+			self.set_sales_details()
+			
+	def on_communication(self):
+		return
+
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
@@ -236,7 +244,6 @@ def update_serial_nos(sle, item_det):
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
 			serial_nos.append(make_autoname(item_det.serial_no_series))
-
 		webnotes.conn.set(sle, "serial_no", "\n".join(serial_nos))
 		
 	if sle.serial_no:

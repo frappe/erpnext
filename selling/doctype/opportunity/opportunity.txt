@@ -7,6 +7,7 @@
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "description": "Potential Sales Deal", 
   "doctype": "DocType", 
@@ -125,7 +126,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nQuotation Sent\nOrder Confirmed\nOpportunity Lost\nCancelled", 
+  "options": "Draft\nSubmitted\nQuotation\nLost\nCancelled\nReplied\nOpen", 
   "read_only": 1, 
   "reqd": 1
  }, 
@@ -168,7 +169,6 @@
   "label": "Communication History", 
   "oldfieldtype": "Section Break", 
   "options": "icon-comments", 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -179,7 +179,6 @@
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
   "oldfieldtype": "Table", 
-  "print_hide": 1, 
   "read_only": 0
  }, 
  {
@@ -352,18 +351,6 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "order_lost_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Quotation Lost Reason", 
-  "no_copy": 1, 
-  "oldfieldname": "order_lost_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1, 
-  "report_hide": 0
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Link", 
@@ -376,6 +363,15 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "order_lost_reason", 
+  "fieldtype": "Text", 
+  "label": "Lost Reason", 
+  "no_copy": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -436,8 +432,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "doctype": "DocPerm", 

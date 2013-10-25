@@ -10,7 +10,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
@@ -24,22 +24,15 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
-
-		cur_frm.dashboard.reset(doc);
-		if(!doc.__islocal) {
-			if(doc.status=="Converted" || doc.status=="Order Confirmed") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
-			} else if(doc.status==="Order Lost") {
-				cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-			}
-		}
 		
-		if(doc.docstatus == 1 && doc.status!=='Order Lost') {
-			cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
-			if(doc.status!=="Order Confirmed") {
-				cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
+		if(doc.docstatus == 1 && doc.status!=='Lost') {
+			cur_frm.add_custom_button(wn._('Make Sales Order'), 
+				cur_frm.cscript['Make Sales Order']);
+			if(doc.status!=="Ordered") {
+				cur_frm.add_custom_button(wn._('Set as Lost'), 
+					cur_frm.cscript['Declare Order Lost']);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 		}
 		
 		if (this.frm.doc.docstatus===0) {
@@ -59,7 +52,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 					})
 				});
 		}
-		
 
 		if (!doc.__islocal) {
 			cur_frm.communication_view = new wn.views.CommunicationList({
@@ -131,9 +123,9 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	var dialog = new wn.ui.Dialog({
 		title: "Set as Lost",
 		fields: [
-			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -146,7 +138,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint("There were errors.");
+					msgprint(wn._("There were errors."));
 					return;
 				}
 				dialog.hide();

@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
-sql = webnotes.conn.sql
 	
 
 from controllers.selling_controller import SellingController
@@ -20,47 +19,10 @@ class DocType(SellingController):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
-		 
-	# Get contact person details based on customer selected
-	# ------------------------------------------------------
-	def get_contact_details(self):
-		return get_obj('Sales Common').get_contact_details(self,0)
-	
-	# Get Item Details
-	# -----------------
-	def get_item_details(self, args=None):
-		import json
-		args = args and json.loads(args) or {}
-		if args.get('item_code'):
-			return get_obj('Sales Common').get_item_details(args, self)
-		else:
-			obj = get_obj('Sales Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					arg = {
-						'item_code': doc.fields.get('item_code'),
-						'income_account': doc.fields.get('income_account'),
-						'cost_center': doc.fields.get('cost_center'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					res = obj.get_item_details(arg, self) or {}
-					for r in res:
-						if not doc.fields.get(r):
-							doc.fields[r] = res[r]
 
-	# Re-calculates Basic Rate & amount based on Price List Selected
-	# --------------------------------------------------------------
-	def get_adj_percent(self, arg=''):
-		get_obj('Sales Common').get_adj_percent(self)
-	
-		
-	# Get Tax rate if account type is TAX
-	# -----------------------------------
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-	
-	# Does not allow same item code to be entered twice
-	# -------------------------------------------------
+	def has_sales_order(self):
+		return webnotes.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+
 	def validate_for_items(self):
 		chk_dupl_itm = []
 		for d in getlist(self.doclist,'quotation_details'):
@@ -70,15 +32,12 @@ class DocType(SellingController):
 			else:
 				chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
-
-	#do not allow sales item in maintenance quotation and service item in sales quotation
-	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
 		super(DocType, self).validate_order_type()
 		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_service_item = sql("select is_service_item from `tabItem` where name=%s", d.item_code)
+				is_service_item = webnotes.conn.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
 				if is_service_item == 'No':
@@ -86,7 +45,7 @@ class DocType(SellingController):
 					raise Exception
 		else:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_sales_item = sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
+				is_sales_item = webnotes.conn.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
 				if is_sales_item == 'No':
@@ -95,90 +54,42 @@ class DocType(SellingController):
 	
 	def validate(self):
 		super(DocType, self).validate()
-		
-		import utilities
-		if not self.doc.status:
-			self.doc.status = "Draft"
-		else:
-			utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
-				"Order Confirmed", "Order Lost", "Cancelled"])
-
+		self.set_status()
 		self.validate_order_type()
 		self.validate_for_items()
-
 		self.validate_uom_is_integer("stock_uom", "qty")
 
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.validate_max_discount(self,'quotation_details')
-
-	def on_update(self):
-		# Set Quotation Status
-		webnotes.conn.set(self.doc, 'status', 'Draft')
+	def update_opportunity(self):
+		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
+			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
 	
-	#update enquiry
-	#------------------
-	def update_enquiry(self, flag):
-		prevdoc=''
-		for d in getlist(self.doclist, 'quotation_details'):
-			if d.prevdoc_docname:
-				prevdoc = d.prevdoc_docname
-		
-		if prevdoc:
-			if flag == 'submit': #on submit
-				sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
-			elif flag == 'cancel': #on cancel
-				sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
-			elif flag == 'order lost': #order lost
-				sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
-			elif flag == 'order confirm': #order confirm
-				sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
-	
-	# declare as order lost
-	#-------------------------
 	def declare_order_lost(self, arg):
-		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
-		if chk:
-			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
-			raise Exception
-		else:
-			webnotes.conn.set(self.doc, 'status', 'Order Lost')
+		if not self.has_sales_order():
+			webnotes.conn.set(self.doc, 'status', 'Lost')
 			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
-			self.update_enquiry('order lost')
-			return 'true'
+			self.update_opportunity()
+		else:
+			webnotes.throw(_("Cannot set as Lost as Sales Order is made."))
 	
-	#check if value entered in item table
-	#--------------------------------------
 	def check_item_table(self):
 		if not getlist(self.doclist, 'quotation_details'):
 			msgprint("Please enter item details")
 			raise Exception
 		
-	# ON SUBMIT
-	# =========================================================================
 	def on_submit(self):
 		self.check_item_table()
 		
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
-
-		# Set Quotation Status
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
-		
+			
 		#update enquiry status
-		self.update_enquiry('submit')
+		self.update_opportunity()
 		
-		
-# ON CANCEL
-# ==========================================================================
 	def on_cancel(self):
 		#update enquiry status
-		self.update_enquiry('cancel')
-		
-		webnotes.conn.set(self.doc,'status','Cancelled')
+		self.set_status()
+		self.update_opportunity()
 			
-# Print other charges
-# ===========================================================================
 	def print_other_charges(self,docname):
 		print_lst = []
 		for d in getlist(self.doclist,'other_charges'):
@@ -187,6 +98,7 @@ class DocType(SellingController):
 			lst1.append(d.total)
 			print_lst.append(lst1)
 		return print_lst
+		
 	
 @webnotes.whitelist()
 def make_sales_order(source_name, target_doclist=None):

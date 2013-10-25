@@ -5,17 +5,21 @@ if __name__=="__main__":
 import webnotes, os
 import utilities.demo.make_demo
 
-def make_demo_app():
-	webnotes.mute_emails = 1
-	webnotes.connect()
+def make_demo_app(site=None):
+	webnotes.init(site=site)
+	webnotes.flags.mute_emails = 1
+
 	utilities.demo.make_demo.make(reset=True, simulate=False)
 	# setup demo user etc so that the site it up faster, while the data loads
 	make_demo_user()
 	make_demo_login_page()
 	make_demo_on_login_script()
 	utilities.demo.make_demo.make(reset=False, simulate=True)
+	webnotes.destroy()
 
 def make_demo_user():
+	from webnotes.auth import _update_password
+	
 	roles = ["Accounts Manager", "Analytics", "Expense Approver", "Accounts User", 
 		"Leave Approver", "Blogger", "Customer", "Sales Manager", "Employee", "Support Manager", 
 		"HR Manager", "HR User", "Maintenance Manager", "Maintenance User", "Material Manager", 
@@ -42,11 +46,10 @@ def make_demo_user():
 	p.doc.last_name = "User"
 	p.doc.enabled = 1
 	p.doc.user_type = "ERPNext Demo"
-	p.doc.send_invite_email = 0
-	p.doc.new_password = "demo"
 	p.insert()
 	add_roles(p)
 	p.save()
+	_update_password("demo@erpnext.com", "demo")
 	
 	# make system manager user
 	if webnotes.conn.exists("Profile", "admin@erpnext.com"):
@@ -58,12 +61,11 @@ def make_demo_user():
 	p.doc.last_name = "User"
 	p.doc.enabled = 1
 	p.doc.user_type = "System User"
-	p.doc.send_invite_email = 0
-	p.doc.new_password = "admin010123"
 	p.insert()
 	roles.append("System Manager")
 	add_roles(p)
 	p.save()
+	_update_password("admin@erpnext.com", "admin010123")
 	
 	# only read for newsletter
 	webnotes.conn.sql("""update `tabDocPerm` set `write`=0, `create`=0, `cancel`=0
@@ -103,13 +105,12 @@ def make_demo_login_page():
 	webnotes.conn.commit()
 
 def make_demo_on_login_script():
-	webnotes.conn.sql("""delete from `tabCustom Script` where dt='Control Panel'""")
-	s = webnotes.new_bean("Custom Script")
-	s.doc.dt = "Control Panel"
-	s.doc.script_type = "Server"
-	with open(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), "r") as dfile:
-		s.doc.script = dfile.read()
-	s.insert()
+	import shutil
+	from core.doctype.custom_script.custom_script import get_custom_server_script_path
+	custom_script_path = get_custom_server_script_path("Control Panel")
+	webnotes.create_folder(os.path.dirname(custom_script_path))
+	
+	shutil.copyfile(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), custom_script_path)
 	
 	cp = webnotes.bean("Control Panel")
 	cp.doc.custom_startup_code = """wn.ui.toolbar.show_banner('You are using ERPNext Demo. To start your own ERPNext Trial, <a href="https://erpnext.com/pricing-and-signup" target="_blank">click here</a>')"""
@@ -118,4 +119,6 @@ def make_demo_on_login_script():
 	webnotes.conn.commit()
 
 if __name__=="__main__":
-	make_demo_app()
+	import sys
+	site = sys.argv[1:]
+	make_demo_app(site=site and site[0] or None)

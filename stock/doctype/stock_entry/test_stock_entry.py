@@ -1,9 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
@@ -47,7 +44,6 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-		
 		webnotes.session.user = "test2@example.com"
 
 		from stock.utils import InvalidWarehouseCompany
@@ -67,7 +63,6 @@ class TestStockEntry(unittest.TestCase):
 
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-		
 		webnotes.session.user = "test@example.com"
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doc.company = "_Test Company 1"

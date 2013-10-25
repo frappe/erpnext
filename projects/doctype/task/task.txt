@@ -2,12 +2,13 @@
  {
   "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:57:57", 
+  "modified": "2013-10-02 14:25:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "TASK.#####", 
   "doctype": "DocType", 
   "document_type": "Master", 

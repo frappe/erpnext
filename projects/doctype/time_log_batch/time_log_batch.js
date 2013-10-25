@@ -25,7 +25,7 @@ $.extend(cur_frm.cscript, {
 		}[doc.status]);
 		
 		if(doc.status=="Submitted") {
-			cur_frm.add_custom_button("Make Sales Invoice", function() { cur_frm.cscript.make_invoice() }, 
+			cur_frm.add_custom_button(wn._("Make Sales Invoice"), function() { cur_frm.cscript.make_invoice() }, 
 				"icon-file-alt");
 		}
 	},

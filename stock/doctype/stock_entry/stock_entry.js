@@ -70,10 +70,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.docstatus === 1 && 
 				wn.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button("Make Credit Note", function() { me.make_return_jv(); });
+				this.frm.add_custom_button(wn._("Make Credit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button("Make Debit Note", function() { me.make_return_jv(); });
+				this.frm.add_custom_button(wn._("Make Debit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			}
 		}
@@ -195,7 +195,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	
 	add_excise_button: function() {
 		if(wn.boot.control_panel.country === "India")
-			this.frm.add_custom_button("Make Excise Invoice", function() {
+			this.frm.add_custom_button(wn._("Make Excise Invoice"), function() {
 				var excise = wn.model.make_new_doc_and_get_name('Journal Voucher');
 				excise = locals['Journal Voucher'][excise];
 				excise.voucher_type = 'Excise Voucher';
@@ -318,7 +318,7 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 			}
 		}			
 	} else {
-		msgprint("Please enter Item Code to get batch no");
+		msgprint(wn._("Please enter Item Code to get batch no"));
 	}
 }
 
@@ -372,7 +372,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_items = function(doc) {
 	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
 	if (!cl.length) {
-		alert("Item table can not be blank");
+		alert(wn._("Item table can not be blank"));
 		validated = false;
 	}
 }

@@ -21,23 +21,27 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				+ wn._("Fulfilled"), cint(doc.per_ordered));
 		}
 		
-		if(doc.docstatus == 1 && doc.status != 'Stopped'){
+		if(doc.docstatus==0) {
+			cur_frm.add_custom_button(wn._("Get Items from BOM"), cur_frm.cscript.get_items_from_bom, "icon-sitemap");
+		}
+		
+		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(doc.material_request_type === "Purchase")
-				cur_frm.add_custom_button("Make Supplier Quotation", 
+				cur_frm.add_custom_button(wn._("Make Supplier Quotation"), 
 					this.make_supplier_quotation);
 				
 			if(doc.material_request_type === "Transfer" && doc.status === "Submitted")
-				cur_frm.add_custom_button("Transfer Material", this.make_stock_entry);
+				cur_frm.add_custom_button(wn._("Transfer Material"), this.make_stock_entry);
 			
 			if(flt(doc.per_ordered, 2) < 100) {
 				if(doc.material_request_type === "Purchase")
-					cur_frm.add_custom_button('Make Purchase Order', 
+					cur_frm.add_custom_button(wn._('Make Purchase Order'), 
 						this.make_purchase_order);
 				
-				cur_frm.add_custom_button('Stop Material Request', 
+				cur_frm.add_custom_button(wn._('Stop Material Request'), 
 					cur_frm.cscript['Stop Material Request']);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 
 		} 
 		
@@ -58,9 +62,56 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button('Unstop Material Request', 
+			cur_frm.add_custom_button(wn._('Unstop Material Request'), 
 				cur_frm.cscript['Unstop Material Request']);
 		
+	},
+	
+	schedule_date: function(doc, cdt, cdn) {
+		var val = locals[cdt][cdn].schedule_date;
+		if(val) {
+			$.each(wn.model.get("Material Request Item", { parent: cur_frm.doc.name }), function(i, d) {
+				if(!d.schedule_date) {
+					d.schedule_date = val;
+				}
+			});
+			refresh_field("indent_details");
+		}
+	},
+	
+	get_items_from_bom: function() {
+		var d = new wn.ui.Dialog({
+			title: wn._("Get Items from BOM"),
+			fields: [
+				{"fieldname":"bom", "fieldtype":"Link", "label":wn._("BOM"), 
+					options:"BOM"},
+				{"fieldname":"fetch_exploded", "fieldtype":"Check", 
+					"label":wn._("Fetch exploded BOM (including sub-assemblies)"), "default":1},
+				{fieldname:"fetch", "label":wn._("Get Items from BOM"), "fieldtype":"Button"}
+			]
+		});
+		d.get_input("fetch").on("click", function() {
+			var values = d.get_values();
+			if(!values) return;
+			
+			wn.call({
+				method:"manufacturing.doctype.bom.bom.get_bom_items",
+				args: values,
+				callback: function(r) {
+					$.each(r.message, function(i, item) {
+						var d = wn.model.add_child(cur_frm.doc, "Material Request Item", "indent_details");
+						d.item_code = item.item_code;
+						d.description = item.description;
+						d.warehouse = item.default_warehouse;
+						d.uom = item.stock_uom;
+						d.qty = item.qty;
+					});
+					d.hide();
+					refresh_field("indent_details");
+				}
+			});
+		});
+		d.show();
 	},
 	
 	tc_name: function() {
@@ -103,12 +154,12 @@ $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))
-		alert("Warning: Material Requested Qty is less than Minimum Order Qty");
+		alert(wn._("Warning: Material Requested Qty is less than Minimum Order Qty"));
 };
 
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to STOP this Material Request?");
+	var check = confirm(wn._("Do you really want to STOP this Material Request?"));
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
@@ -119,7 +170,7 @@ cur_frm.cscript['Stop Material Request'] = function() {
 
 cur_frm.cscript['Unstop Material Request'] = function(){
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to UNSTOP this Material Request?");
+	var check = confirm(wn._("Do you really want to UNSTOP this Material Request?"));
 	
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {

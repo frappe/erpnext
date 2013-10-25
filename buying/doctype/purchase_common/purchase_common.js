@@ -8,6 +8,7 @@
 
 wn.provide("erpnext.buying");
 wn.require("app/js/transaction.js");
+wn.require("app/js/controllers/accounts.js");
 
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	onload: function() {

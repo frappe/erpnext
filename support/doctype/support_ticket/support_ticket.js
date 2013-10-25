@@ -6,7 +6,7 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 
 wn.provide("erpnext.support");
 // TODO commonify this code
-erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
+erpnext.support.SupportTicket = wn.ui.form.Controller.extend({
 	customer: function() {
 		var me = this;
 		if(this.frm.doc.customer) {
@@ -18,13 +18,13 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.support.CustomerIssue({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.support.SupportTicket({frm: cur_frm}));
 
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
-				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">'+wn._("Email Settings")+'</a><br>\
+				<span class="help">'+wn._("Integrate incoming support emails to Support Ticket")+'</span></p>';
 		}
 	},
 	

@@ -20,10 +20,7 @@ cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.setup_dashboard(doc);
-	if(sys_defaults.cust_master_name == 'Customer Name')
-		hide_field('naming_series');
-	else
-		unhide_field('naming_series');
+	erpnext.hide_naming_series();
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);
@@ -34,7 +31,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		cur_frm.cscript.make_contact(doc,dt,dn);
 
 		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"customer": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
 			doc: doc,
 		});
@@ -81,7 +77,7 @@ cur_frm.cscript.make_address = function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
-			no_results_message: 'No addresses created',
+			no_results_message: wn._('No addresses created'),
 			render_row: cur_frm.cscript.render_address_row,
 		});
 		// note: render_address_row is defined in contact_control.js

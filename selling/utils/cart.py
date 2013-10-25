@@ -12,8 +12,8 @@ class WebsitePriceListMissingError(webnotes.ValidationError): pass
 def set_cart_count(quotation=None):
 	if not quotation:
 		quotation = _get_cart_quotation()
-	webnotes.add_cookies["cart_count"] = cstr(len(quotation.doclist.get(
-		{"parentfield": "quotation_details"})) or "")
+	cart_count = cstr(len(quotation.doclist.get({"parentfield": "quotation_details"})))
+	webnotes._response.set_cookie("cart_count", cart_count)
 
 @webnotes.whitelist()
 def get_cart_quotation(doclist=None):
@@ -47,7 +47,7 @@ def place_order():
 	sales_order.ignore_permissions = True
 	sales_order.insert()
 	sales_order.submit()
-	webnotes.add_cookies["cart_count"] = ""
+	webnotes._response.set_cookie("cart_count", "")
 	
 	return sales_order.doc.name
 

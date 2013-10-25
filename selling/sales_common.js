@@ -10,6 +10,7 @@
 
 wn.provide("erpnext.selling");
 wn.require("app/js/transaction.js");
+wn.require("app/js/controllers/accounts.js");
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
@@ -70,25 +71,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
 				var item = wn.model.get_doc(cdt, cdn);
 				if(!item.item_code) {
-					wn.throw("Please enter Item Code to get batch no");
+					wn.throw(wn._("Please enter Item Code to get batch no"));
 				} else {
-					if(item.warehouse) {
-						return {
-							query : "selling.doctype.sales_common.sales_common.get_batch_no",
-							filters: {
-								'item_code': item.item_code,
-								'warehouse': item.warehouse,
-								'posting_date': me.frm.doc.posting_date
-							}
-						}
-					} else {
-						return{
-							query : "selling.doctype.sales_common.sales_common.get_batch_no",
-							filters: {
-								'item_code': item.item_code,
-								'posting_date': me.frm.doc.posting_date
-							}
-						}
+					filters = {
+						'item_code': item.item_code,
+						'posting_date': me.frm.doc.posting_date,
+					}
+					if(item.warehouse) filters["warehouse"] = item.warehouse
+					
+					return {
+						query : "controllers.queries.get_batch_no",
+						filters: filters
 					}
 				}
 			});
@@ -628,16 +621,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
 	if(!cur_frm.fields_dict.packing_list) return;
-	if (getchildren('Delivery Note Packing Item', doc.name, 'packing_details').length) {
+	if (getchildren('Packed Item', doc.name, 'packing_details').length) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			help_msg = "<div class='alert alert-warning'> \
-				For 'Sales BOM' items, warehouse, serial no and batch no \
+			help_msg = "<div class='alert alert-warning'>" +
+				wn._("For 'Sales BOM' items, warehouse, serial no and batch no \
 				will be considered from the 'Packing List' table. \
 				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
-				those values can be entered in the main item table, values will be copied to 'Packing List' table. \
-			</div>";
+				those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
+			"</div>";
 			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
 		} 
 	} else {

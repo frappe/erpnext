@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes import session, msgprint
 from setup.utils import get_company_currency
 
-sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
 
@@ -28,10 +27,10 @@ class DocType(TransactionBase):
 				amt_list.append(flt(x[0]))
 			max_amount = max(amt_list)
 			
-			app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and company = %s %s" % ('%s', '%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on, company))
+			app_dtl = webnotes.conn.sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and company = %s %s" % ('%s', '%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on, company))
 			
 			if not app_dtl:
-				app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and ifnull(company,'') = '' %s" % ('%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on)) 
+				app_dtl = webnotes.conn.sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and ifnull(company,'') = '' %s" % ('%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on)) 
 			for d in app_dtl:
 				if(d[0]): appr_users.append(d[0])
 				if(d[1]): appr_roles.append(d[1])
@@ -58,18 +57,18 @@ class DocType(TransactionBase):
 		add_cond1,add_cond2	= '',''
 		if based_on == 'Itemwise Discount':
 			add_cond1 += " and master_name = '"+cstr(item)+"'"
-			itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on, company))
+			itemwise_exists = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on, company))
 			if not itemwise_exists:
-				itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s" % ('%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on))
+				itemwise_exists = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s" % ('%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on))
 			if itemwise_exists:
 				self.get_appr_user_role(itemwise_exists, doctype_name, total, based_on, cond+add_cond1, item,company)
 				chk = 0
 		if chk == 1:
 			if based_on == 'Itemwise Discount': add_cond2 += " and ifnull(master_name,'') = ''"
-			appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, company))
+			appr = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, company))
 			
 			if not appr:
-				appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s"% ('%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on))
+				appr = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s"% ('%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on))
 			self.get_appr_user_role(appr, doctype_name, total, based_on, cond+add_cond2, item, company)
 			
 			
@@ -112,7 +111,7 @@ class DocType(TransactionBase):
 		# ================
 		# Check for authorization set for individual user
 	 
-		based_on = [x[0] for x in sql("select distinct based_on from `tabAuthorization Rule` where transaction = %s and system_user = %s and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, session['user'], company))]
+		based_on = [x[0] for x in webnotes.conn.sql("select distinct based_on from `tabAuthorization Rule` where transaction = %s and system_user = %s and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, session['user'], company))]
 
 		for d in based_on:
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 1, company)
@@ -124,7 +123,7 @@ class DocType(TransactionBase):
 		# Specific Role
 		# ===============
 		# Check for authorization set on particular roles
-		based_on = [x[0] for x in sql("""select based_on 
+		based_on = [x[0] for x in webnotes.conn.sql("""select based_on 
 			from `tabAuthorization Rule` 
 			where transaction = %s and system_role IN (%s) and based_on IN (%s) 
 			and (company = %s or ifnull(company,'')='') 
@@ -148,9 +147,9 @@ class DocType(TransactionBase):
 	# payroll related check
 	def get_value_based_rule(self,doctype_name,employee,total_claimed_amount,company):
 		val_lst =[]
-		val = sql("select value from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)< %s and company = %s and docstatus!=2",(doctype_name,employee,employee,total_claimed_amount,company))
+		val = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)< %s and company = %s and docstatus!=2",(doctype_name,employee,employee,total_claimed_amount,company))
 		if not val:
-			val = sql("select value from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)< %s and ifnull(company,'') = '' and docstatus!=2",(doctype_name, employee, employee, total_claimed_amount))
+			val = webnotes.conn.sql("select value from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)< %s and ifnull(company,'') = '' and docstatus!=2",(doctype_name, employee, employee, total_claimed_amount))
 
 		if val:
 			val_lst = [y[0] for y in val]
@@ -158,9 +157,9 @@ class DocType(TransactionBase):
 			val_lst.append(0)
 	
 		max_val = max(val_lst)
-		rule = sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and company = %s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)= %s and docstatus!=2",(doctype_name,company,employee,employee,flt(max_val)), as_dict=1)
+		rule = webnotes.conn.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and company = %s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)= %s and docstatus!=2",(doctype_name,company,employee,employee,flt(max_val)), as_dict=1)
 		if not rule:
-			rule = sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and ifnull(company,'') = '' and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)= %s and docstatus!=2",(doctype_name,employee,employee,flt(max_val)), as_dict=1)
+			rule = webnotes.conn.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and ifnull(company,'') = '' and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(value,0)= %s and docstatus!=2",(doctype_name,employee,employee,flt(max_val)), as_dict=1)
 
 		return rule
 	
@@ -175,9 +174,9 @@ class DocType(TransactionBase):
 			if doctype_name == 'Expense Claim':
 				rule = self.get_value_based_rule(doctype_name,doc_obj.doc.employee,doc_obj.doc.total_claimed_amount, doc_obj.doc.company)
 			elif doctype_name == 'Appraisal':
-				rule = sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and company = %s and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee, doc_obj.doc.company),as_dict=1)				
+				rule = webnotes.conn.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and company = %s and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee, doc_obj.doc.company),as_dict=1)				
 				if not rule:
-					rule = sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(company,'') = '' and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee),as_dict=1)				
+					rule = webnotes.conn.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(company,'') = '' and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee),as_dict=1)				
 			
 			if rule:
 				for m in rule:
@@ -185,7 +184,7 @@ class DocType(TransactionBase):
 						if m['approving_user']:
 							app_specific_user.append(m['approving_user'])
 						elif m['approving_role']:
-							user_lst = [z[0] for z in sql("select distinct t1.name from `tabProfile` t1, `tabUserRole` t2 where t2.role=%s and t2.parent=t1.name and t1.name !='Administrator' and t1.name != 'Guest' and t1.docstatus !=2",m['approving_role'])]
+							user_lst = [z[0] for z in webnotes.conn.sql("select distinct t1.name from `tabProfile` t1, `tabUserRole` t2 where t2.role=%s and t2.parent=t1.name and t1.name !='Administrator' and t1.name != 'Guest' and t1.docstatus !=2",m['approving_role'])]
 							for x in user_lst:
 								if not x in app_user:
 									app_user.append(x)

@@ -101,21 +101,14 @@ $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
-
-	cur_frm.dashboard.reset(doc);
-	if(!doc.__islocal) {
-		if(doc.status=="Converted" || doc.status=="Order Confirmed") {
-			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-success", "icon-ok-sign");
-		} else if(doc.status=="Opportunity Lost") {
-			cur_frm.dashboard.set_headline_alert(wn._(doc.status), "alert-danger", "icon-exclamation-sign");
-		}
-	}
-	
 	cur_frm.clear_custom_buttons();
-	if(doc.docstatus === 1 && doc.status!=="Opportunity Lost") {
-		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript.create_quotation);
-		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+	
+	if(doc.docstatus === 1 && doc.status!=="Lost") {
+		cur_frm.add_custom_button(wn._('Create Quotation'), cur_frm.cscript.create_quotation);
+		if(doc.status!=="Quotation") {
+			cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
+		}
+		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 	}
 	
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
@@ -181,11 +174,11 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 
 cur_frm.cscript['Declare Opportunity Lost'] = function(){
 	var dialog = new wn.ui.Dialog({
-		title: "Set as Lost",
+		title: wn._("Set as Lost"),
 		fields: [
-			{"fieldtype": "Text", "label": "Reason for losing", "fieldname": "reason",
+			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -198,7 +191,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint("There were errors.");
+					msgprint(wn._("There were errors."));
 					return;
 				}
 				dialog.hide();

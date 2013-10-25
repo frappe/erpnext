@@ -641,7 +641,7 @@ class TestSalesInvoice(unittest.TestCase):
 			
 			return new_si
 		
-		# if yearly, test 3 repetitions, else test 5 repetitions
+		# if yearly, test 1 repetition, else test 5 repetitions
 		count = 1 if (no_of_months == 12) else 5
 		for i in xrange(count):
 			base_si = _test(i)

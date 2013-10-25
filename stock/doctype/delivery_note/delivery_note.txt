@@ -355,7 +355,7 @@
   "label": "Packing Details", 
   "oldfieldname": "packing_details", 
   "oldfieldtype": "Table", 
-  "options": "Delivery Note Packing Item", 
+  "options": "Packed Item", 
   "print_hide": 1, 
   "read_only": 1
  }, 

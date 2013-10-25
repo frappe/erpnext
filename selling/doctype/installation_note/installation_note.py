@@ -6,7 +6,6 @@ import webnotes
 
 from webnotes.utils import cstr, getdate
 from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
 from webnotes import msgprint
 from stock.utils import get_valid_serial_nos	
 
@@ -36,9 +35,9 @@ class DocType(TransactionBase):
 		self.validate_fiscal_year()
 		self.validate_installation_date()
 		self.check_item_table()
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.get_prevdoc_date(self)
+		
+		from controllers.selling_controller import check_active_sales_items
+		check_active_sales_items(self)
 
 	def validate_fiscal_year(self):
 		from accounts.utils import validate_fiscal_year

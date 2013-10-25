@@ -26,9 +26,6 @@ class DocType(BuyingController):
 		self.validate_uom_is_integer("uom", "qty")
 
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-		
 		webnotes.conn.set(self.doc, "status", "Submitted")
 
 	def on_cancel(self):
@@ -54,7 +51,6 @@ class DocType(BuyingController):
 	def validate_common(self):
 		pc = get_obj('Purchase Common')
 		pc.validate_for_items(self)
-		pc.get_prevdoc_date(self)
 
 @webnotes.whitelist()
 def make_purchase_order(source_name, target_doclist=None):

@@ -17,6 +17,8 @@ class TestCustomer(unittest.TestCase):
 			(("_Test Customer 1 Renamed",),))
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1"), ())
 		
+		webnotes.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
+		
 	def test_merge(self):
 		from webnotes.test_runner import make_test_records
 		make_test_records("Sales Invoice")
@@ -57,6 +59,9 @@ class TestCustomer(unittest.TestCase):
 		# check that old name doesn't exist
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer"), ())
 		self.assertEqual(webnotes.conn.exists("Account", "_Test Customer - _TC"), ())
+		
+		# create back _Test Customer
+		webnotes.bean(copy=test_records[0]).insert()
 
 test_ignore = ["Price List"]
 			

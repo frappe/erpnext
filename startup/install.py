@@ -13,13 +13,13 @@ def post_import():
 	import_country_and_currency()
 	
 	# home page
-	webnotes.conn.set_value('Control Panel', None, 'home_page', 'desktop')
+	webnotes.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
 
 	# features
 	feature_setup()
 	
 	# all roles to Administrator
-	from setup.doctype.setup_control.setup_control import add_all_roles_to
+	from setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	
 	webnotes.conn.commit()
@@ -71,6 +71,7 @@ def import_defaults():
 		{'doctype': 'Item Group', 'item_group_name': 'Raw Material', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		{'doctype': 'Item Group', 'item_group_name': 'Services', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		{'doctype': 'Item Group', 'item_group_name': 'Sub Assemblies', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
+		{'doctype': 'Item Group', 'item_group_name': 'Consumable', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
 		
 		# deduction type
 		{'doctype': 'Deduction Type', 'name': 'Income Tax', 'description': 'Income Tax', 'deduction_name': 'Income Tax'},

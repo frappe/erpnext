@@ -3,10 +3,10 @@
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	doc = locals[dt][dn];
-	var save_msg = "You must <b>Save</b> the form before proceeding";
-	var err_msg = "There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists."
+	var save_msg = wn._("You must ")+ "<b>"+wn._("Save ")+"</b>"+wn._("the form before proceeding");
+	var err_msg = wn._("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
 	
-	cur_frm.add_custom_button('View Now', function() {
+	cur_frm.add_custom_button(wn._('View Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(make_doclist(dt, dn), 'get_digest_msg', '', function(r, rt) {
@@ -16,7 +16,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				} else {
 					//console.log(arguments);
 					var d = new wn.ui.Dialog({
-						title: 'Email Digest: ' + dn,
+						title: wn._('Email Digest: ') + dn,
 						width: 800
 					});
 
@@ -29,7 +29,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			msgprint(save_msg);
 		}	
 	}, 1);
-	cur_frm.add_custom_button('Send Now', function() {
+	cur_frm.add_custom_button(wn._('Send Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
@@ -38,7 +38,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 					console.log(r.exc);
 				} else {
 					//console.log(arguments);
-					msgprint('Message Sent');
+					msgprint(wn._('Message Sent'));
 				}
 			});
 		} else {
@@ -56,7 +56,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 			// Open a dialog and display checkboxes against email addresses
 			doc = locals[dt][dn];
 			var d = new wn.ui.Dialog({
-				title: 'Add/Remove Recipients',
+				title: wn._('Add/Remove Recipients'),
 				width: 400
 			});
 			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');

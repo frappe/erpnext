@@ -4,7 +4,7 @@
 wn.pages['activity'].onload = function(wrapper) {
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: "Activity",
+		title: wn._("Activity"),
 		single_column: true
 	})
 	wrapper.appframe.add_module_icon("Activity");
@@ -21,7 +21,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	
 	// Build Report Button
 	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
-		wrapper.appframe.add_button('Build Report', function() {
+		wrapper.appframe.add_button(wn._('Build Report'), function() {
 			wn.set_route('Report', "Feed");
 		}, 'icon-th')
 	}

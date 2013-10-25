@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-08-07 14:44:18", 
+  "modified": "2013-10-10 17:02:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -258,21 +258,6 @@
   "read_only": 1, 
   "search_index": 1, 
   "width": "120px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "prevdoc_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "in_list_view": 0, 
-  "label": "Material Request Date", 
-  "no_copy": 1, 
-  "oldfieldname": "prevdoc_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 0
  }, 
  {
   "doctype": "DocField", 

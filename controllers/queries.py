@@ -175,3 +175,35 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 				"mcond": get_match_cond(doctype),
 				"start": "%(start)s", "page_len": "%(page_len)s", "txt": "%(txt)s"
 			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })
+
+def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	if filters.has_key('warehouse'):
+		return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
+				where item_code = '%(item_code)s' 
+					and warehouse = '%(warehouse)s' 
+					and batch_no like '%(txt)s' 
+					and exists(select * from `tabBatch` 
+							where name = sle.batch_no 
+								and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s') 
+								and docstatus != 2) 
+					%(mcond)s
+				group by batch_no having sum(actual_qty) > 0 
+				order by batch_no desc 
+				limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'], 
+					'warehouse': filters['warehouse'], 'posting_date': filters['posting_date'], 
+					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+					'start': start, 'page_len': page_len})
+	else:
+		return webnotes.conn.sql("""select name from tabBatch 
+				where docstatus != 2 
+					and item = '%(item_code)s' 
+					and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s')
+					and name like '%(txt)s' 
+					%(mcond)s 
+				order by name desc 
+				limit %(start)s, %(page_len)s""" % {'item_code': filters['item_code'], 
+				'posting_date': filters['posting_date'], 'txt': "%%%s%%" % txt, 
+				'mcond':get_match_cond(doctype, searchfield),'start': start, 
+				'page_len': page_len})

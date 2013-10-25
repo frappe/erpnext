@@ -2,6 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 //--------- ONLOAD -------------
+
+wn.require("app/js/controllers/accounts.js");
+
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.doctype === "Sales Taxes and Charges Master")
 		erpnext.add_for_territory();
@@ -92,7 +95,7 @@ cur_frm.pformat.other_charges= function(doc){
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-		alert("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
+		alert(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
 		d.charge_type = '';
 	}
 	validated = false;
@@ -105,16 +108,16 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.row_id){
-		alert("Please select Charge Type first");
+		alert(wn._("Please select Charge Type first"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-		alert("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'");
+		alert(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id){
 		if(d.row_id >= d.idx){
-			alert("You cannot Enter Row no. greater than or equal to current row no. for this Charge type");
+			alert(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
 			d.row_id = '';
 		}
 	}
@@ -142,25 +145,10 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
 	}	
 }
 
-
-cur_frm.cscript.account_head = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(!d.charge_type && d.account_head){
-		alert("Please select Charge Type first");
-		validated = false;
-		d.account_head = '';
-	}
-	else if(d.account_head && d.charge_type) {
-		arg = "{'charge_type' : '" + d.charge_type +"', 'account_head' : '" + d.account_head + "'}";
-		return get_server_fields('get_rate', arg, 'other_charges', doc, cdt, cdn, 1);
-	}
-	refresh_field('account_head',d.name,'other_charges');
-}
-
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.rate) {
-		alert("Please select Charge Type first");
+		alert(wn._("Please select Charge Type first"));
 		d.rate = '';
 	}
 	validated = false;
@@ -170,11 +158,11 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.tax_amount){
-		alert("Please select Charge Type first");
+		alert(wn._("Please select Charge Type first"));
 		d.tax_amount = '';
 	}
 	else if(d.charge_type && d.tax_amount) {
-		alert("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate");
+		alert(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
 		d.tax_amount = '';
 	}
 	validated = false;

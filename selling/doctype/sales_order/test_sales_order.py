@@ -72,10 +72,13 @@ class TestSalesOrder(unittest.TestCase):
 		
 	def create_dn_against_so(self, so, delivered_qty=0):
 		from stock.doctype.delivery_note.test_delivery_note import test_records as dn_test_records
+		from stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
+
+		_insert_purchase_receipt(so.doclist[1].item_code)
+		
 		dn = webnotes.bean(webnotes.copy_doclist(dn_test_records[0]))
 		dn.doclist[1].item_code = so.doclist[1].item_code
-		dn.doclist[1].prevdoc_doctype = "Sales Order"
-		dn.doclist[1].prevdoc_docname = so.doc.name
+		dn.doclist[1].against_sales_order = so.doc.name
 		dn.doclist[1].prevdoc_detail_docname = so.doclist[1].name
 		if delivered_qty:
 			dn.doclist[1].qty = delivered_qty
@@ -273,14 +276,13 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		webnotes.session.user = "test@example.com"
-
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 			
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-
+		
+		webnotes.session.user = "test@example.com"
 
 		from stock.utils import UserNotAllowedForWarehouse
 		so = webnotes.bean(copy = test_records[0])

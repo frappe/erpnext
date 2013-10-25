@@ -10,8 +10,6 @@ from webnotes.model.doc import Document
 from webnotes import msgprint
 from webnotes.model.bean import getlist, copy_doclist
 
-sql = webnotes.conn.sql
-	
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -50,7 +48,7 @@ class DocType:
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"
 		args = load_json(arg)
-		number = sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
+		number = webnotes.conn.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
 			('%s', args['key'], '%s'), (args['contact_name'], args['value']))
 		return number and (number[0][0] or number[0][1]) or ''
 	

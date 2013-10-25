@@ -11,7 +11,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.accounts");
@@ -61,7 +61,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
 			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -72,11 +72,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 				
 				if(!from_delivery_note)
-					cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
+					cur_frm.add_custom_button(wn._('Make Delivery'), cur_frm.cscript['Make Delivery Note']);
 			}
 
 			if(doc.outstanding_amount!=0)
-				cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
+				cur_frm.add_custom_button(wn._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
 		}
 
 		// Show buttons only when pos view is active
@@ -210,7 +210,6 @@ cur_frm.cscript.hide_fields = function(doc) {
 	'total_commission', 'advances'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
-	item_flds_pos = ['serial_no', 'batch_no', 'actual_qty', 'expense_account']
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
@@ -225,7 +224,9 @@ cur_frm.cscript.hide_fields = function(doc) {
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
 	
-	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos, (cint(doc.update_stock)==1?true:false));
+	item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse']
+	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_stock,
+		(cint(doc.update_stock)==1 ? true : false));
 	
 	// India related fields
 	var cp = wn.control_panel;

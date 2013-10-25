@@ -13,14 +13,14 @@ $.extend(erpnext, {
 	},
 	
 	hide_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series) {
+		if(cur_frm.fields_dict.naming_series && !wn.meta.get_docfield(cur_frm.doctype, "naming_series")) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
 	},
 	
 	hide_company: function() {
 		if(cur_frm.fields_dict.company) {
-			var companies = Object.keys(locals[":Company"]);
+			var companies = Object.keys(locals[":Company"] || {});
 			if(companies.length === 1) {
 				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
 				cur_frm.toggle_display("company", false);
@@ -41,19 +41,19 @@ $.extend(erpnext, {
 		if(!grid_row.fields_dict.serial_no || 
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 		
-		var $btn = $('<button class="btn btn-sm btn-default">Add Serial No</button>')
+		var $btn = $('<button class="btn btn-sm btn-default">'+wn._("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-top": "-10px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
 				
 		$btn.on("click", function() {
 			var d = new wn.ui.Dialog({
-				title: "Add Serial No",
+				title: wn._("Add Serial No"),
 				fields: [
 					{
 						"fieldtype": "Link",
 						"options": "Serial No",
-						"label": "Serial No",
+						"label": wn._("Serial No"),
 						"get_query": {
 							item_code: grid_row.doc.item_code,
 							warehouse: grid_row.doc.warehouse
@@ -61,7 +61,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
-						"label": "Add"
+						"label": wn._("Add")
 					}
 				]
 			});

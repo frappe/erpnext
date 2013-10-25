@@ -7,6 +7,7 @@
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -101,7 +102,7 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "default": "Open", 
+  "default": "Lead", 
   "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
@@ -111,7 +112,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nOpen\nReplied\nAttempted to Contact\nContact in Future\nContacted\nOpportunity Made\nInterested\nNot interested\nLead Lost\nConverted\nPassive", 
+  "options": "Lead\nOpen\nReplied\nOpportunity\nInterested\nConverted\nDo Not Contact", 
   "reqd": 1, 
   "search_index": 1
  }, 
@@ -223,8 +224,7 @@
   "fieldtype": "HTML", 
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
-  "oldfieldtype": "Table", 
-  "print_hide": 1
+  "oldfieldtype": "Table"
  }, 
  {
   "doctype": "DocField", 
@@ -378,18 +378,6 @@
   "width": "50%"
  }, 
  {
-  "allow_on_submit": 0, 
-  "depends_on": "eval:doc.status == 'Lead Lost'", 
-  "doctype": "DocField", 
-  "fieldname": "order_lost_reason", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "label": "Lost Reason", 
-  "oldfieldname": "order_lost_reason", 
-  "oldfieldtype": "Link", 
-  "options": "Quotation Lost Reason"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Link", 
@@ -417,8 +405,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "cancel": 1, 

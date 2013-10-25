@@ -75,7 +75,7 @@ def get_item_sales_bom():
 	
 	for d in webnotes.conn.sql("""select parenttype, parent, parent_item,
 		item_code, warehouse, -1*qty as total_qty, parent_detail_docname
-		from `tabDelivery Note Packing Item` where docstatus=1""", as_dict=True):
+		from `tabPacked Item` where docstatus=1""", as_dict=True):
 		item_sales_bom.setdefault(d.parenttype, webnotes._dict()).setdefault(d.parent,
 			webnotes._dict()).setdefault(d.parent_item, []).append(d)
 

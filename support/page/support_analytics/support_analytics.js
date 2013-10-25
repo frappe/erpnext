@@ -4,7 +4,7 @@
 wn.pages['support-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Support Analytics',
+		title: wn._('Support Analytics'),
 		single_column: true
 	});					
 
@@ -18,7 +18,7 @@ wn.pages['support-analytics'].onload = function(wrapper) {
 erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Support Analtyics",
+			title: wn._("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -27,22 +27,22 @@ erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Fiscal Year", link:"Fiscal Year", 
+		{fieldtype:"Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Select", label: "Range", 
+		{fieldtype:"Date", label: wn._("From Date")},
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: "Plot", field: "check", width: 30,
+			{id: "check", name: wn._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "status", name: "Status", field: "status", width: 100},
+			{id: "status", name: wn._("Status"), field: "status", width: 100},
 		];
 		this.make_date_range_columns();		
 		this.columns = std_columns.concat(this.columns);

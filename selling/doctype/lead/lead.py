@@ -7,7 +7,6 @@ from webnotes import _
 from webnotes.utils import cstr, validate_email_add, cint, extract_email_id
 from webnotes import session, msgprint
 
-sql = webnotes.conn.sql
 	
 from controllers.selling_controller import SellingController
 
@@ -27,24 +26,9 @@ class DocType(SellingController):
 		customer = webnotes.conn.get_value("Customer", {"lead_name": self.doc.name})
 		if customer:
 			self.doc.fields["__is_customer"] = customer
-
-	def on_communication(self, comm):
-		if comm.sender == self.get_sender(comm) or \
-			webnotes.conn.get_value("Profile", extract_email_id(comm.sender), "user_type")=="System User":
-				status = "Replied"
-		else:
-			status = "Open"
-			
-		webnotes.conn.set(self.doc, 'status', status)
-
-	def check_status(self):
-		chk = sql("select status from `tabLead` where name=%s", self.doc.name)
-		chk = chk and chk[0][0] or ''
-		return cstr(chk)
 	
 	def validate(self):
-		if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
-			webnotes.throw("Please Enter Lost Reason under More Info section")
+		self.set_status()
 		
 		if self.doc.source == 'Campaign' and not self.doc.campaign_name and session['user'] != 'Guest':
 			webnotes.throw("Please specify campaign name")
@@ -76,14 +60,18 @@ class DocType(SellingController):
 				webnotes.msgprint(_("""Email Id must be unique, already exists for: """) + \
 					", ".join(items), raise_exception=True)
 
-	def get_sender(self, comm):
-		return webnotes.conn.get_value('Sales Email Settings',None,'email_id')
-
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)
 		
 		self.delete_events()
+		
+	def has_customer(self):
+		return webnotes.conn.get_value("Customer", {"lead_name": self.doc.name})
+		
+	def has_opportunity(self):
+		return webnotes.conn.get_value("Opportunity", {"lead": self.doc.name, "docstatus": 1,
+			"status": ["!=", "Lost"]})
 
 @webnotes.whitelist()
 def make_customer(source_name, target_doclist=None):

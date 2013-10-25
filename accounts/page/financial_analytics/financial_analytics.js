@@ -6,7 +6,7 @@ wn.require("app/js/account_tree_grid.js");
 wn.pages['financial-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Financial Analytics',
+		title: wn._('Financial Analytics'),
 		single_column: true
 	});
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
@@ -18,7 +18,7 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
-		{fieldtype:"Select", label: "PL or BS", options:["Profit and Loss", "Balance Sheet"],
+		{fieldtype:"Select", label: wn._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
 				
@@ -28,27 +28,27 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
 			}},
-		{fieldtype:"Select", label: "Fiscal Year", link:"Fiscal Year", 
+		{fieldtype:"Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Select", label: "Range", 
+		{fieldtype:"Date", label: wn._("From Date")},
+		{fieldtype:"Label", label: wn._("To")},
+		{fieldtype:"Date", label: wn._("To Date")},
+		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: "Plot", field: "check", width: 30,
+			{id: "check", name: wn._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: "Account", field: "name", width: 300,
+			{id: "name", name: wn._("Account"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening", name: "Opening", field: "opening", hidden: true,
+			{id: "opening", name: wn._("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 		

@@ -9,6 +9,7 @@
  {
   "allow_attach": 1, 
   "allow_email": 0, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
@@ -732,7 +733,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
+  "options": "Draft\nSubmitted\nOrdered\nLost\nCancelled", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 
@@ -840,8 +841,7 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication", 
-  "print_hide": 1
+  "options": "Communication"
  }, 
  {
   "amend": 1, 

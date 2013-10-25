@@ -9,7 +9,7 @@ cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
@@ -66,7 +66,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						source_doctype: "Quotation",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Order Lost"],
+							status: ["!=", "Lost"],
 							order_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company

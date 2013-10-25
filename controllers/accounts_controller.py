@@ -422,3 +422,7 @@ class AccountsController(TransactionBase):
 			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
+
+@webnotes.whitelist()
+def get_tax_rate(account_head):
+	return webnotes.conn.get_value("Account", account_head, "tax_rate")

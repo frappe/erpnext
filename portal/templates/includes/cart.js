@@ -13,11 +13,11 @@ $(document).ready(function() {
 			$(".progress").remove();
 			if(r.exc) {
 				if(r.exc.indexOf("WebsitePriceListMissingError")!==-1) {
-					erpnext.cart.show_error("Oops!", "Price List not configured.");
+					erpnext.cart.show_error("Oops!", wn._("Price List not configured."));
 				} else if(r["403"]) {
-					erpnext.cart.show_error("Hey!", "You need to be logged in to view your cart.");
+					erpnext.cart.show_error("Hey!", wn._("You need to be logged in to view your cart."));
 				} else {
-					erpnext.cart.show_error("Oops!", "Something went wrong.");
+					erpnext.cart.show_error("Oops!", wn._("Something went wrong."));
 				}
 			} else {
 				erpnext.cart.set_cart_count();
@@ -78,7 +78,7 @@ $.extend(erpnext.cart, {
 		
 		var no_items = $.map(doclist, function(d) { return d.item_code || null;}).length===0;
 		if(no_items) {
-			erpnext.cart.show_error("Empty :-(", "Go ahead and add something to your cart.");
+			erpnext.cart.show_error("Empty :-(", wn._("Go ahead and add something to your cart."));
 			$("#cart-addresses").toggle(false);
 			return;
 		}
@@ -117,7 +117,7 @@ $.extend(erpnext.cart, {
 		});
 		
 		if(!(addresses && addresses.length)) {
-			$cart_shipping_address.html('<div class="well">Hey! Go ahead and add an address</div>');
+			$cart_shipping_address.html('<div class="well">'+wn._("Hey! Go ahead and add an address")+'</div>');
 		} else {
 			erpnext.cart.render_address($cart_shipping_address, addresses, doclist[0].shipping_address_name);
 			erpnext.cart.render_address($cart_billing_address, addresses, doclist[0].customer_address);
@@ -283,7 +283,7 @@ $.extend(erpnext.cart, {
 					
 					$("#cart-error")
 						.empty()
-						.html(msg || "Something went wrong!")
+						.html(msg || wn._("Something went wrong!"))
 						.toggle(true);
 				} else {
 					window.location.href = "order?name=" + encodeURIComponent(r.message);

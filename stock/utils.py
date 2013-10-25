@@ -252,10 +252,10 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
-	if not hasattr(webnotes, "auto_indent"):
-		webnotes.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
+	if getattr(webnotes.local, "auto_indent", None) is None:
+		webnotes.local.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
 	
-	if webnotes.auto_indent:
+	if webnotes.local.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
 			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
@@ -340,18 +340,18 @@ def create_material_request(material_requests):
 				mr_list.append(mr_bean)
 
 			except:
-				if webnotes.message_log:
-					exceptions_list.append([] + webnotes.message_log)
-					webnotes.message_log = []
+				if webnotes.local.message_log:
+					exceptions_list.append([] + webnotes.local.message_log)
+					webnotes.local.message_log = []
 				else:
 					exceptions_list.append(webnotes.getTraceback())
 
 	if mr_list:
-		if not hasattr(webnotes, "reorder_email_notify"):
-			webnotes.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+		if getattr(webnotes.local, "reorder_email_notify", None) is None:
+			webnotes.local.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
 				'reorder_email_notify'))
 			
-		if(webnotes.reorder_email_notify):
+		if(webnotes.local.reorder_email_notify):
 			send_email_notification(mr_list)
 
 	if exceptions_list:

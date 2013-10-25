@@ -326,7 +326,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate_on_previous_row: function(tax) {
 		// validate if a valid row id is mentioned in case of
 		// On Previous Row Amount and On Previous Row Total
-		if((["On Previous Row Amount", "On Previous Row Total"].indexOf(tax.charge_type) != -1) &&
+		if(([wn._("On Previous Row Amount"), wn._("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
 			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
 				var msg = repl(wn._("Row") + " # %(idx)s [%(doctype)s]: " +
 					wn._("Please specify a valid") + " %(row_id_label)s", {
