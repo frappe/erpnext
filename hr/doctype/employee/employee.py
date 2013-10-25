@@ -100,7 +100,7 @@ class DocType:
 				except webnotes.DuplicateEntryError, e:
 					# already exists
 					pass
-			
+		profile_wrapper.ignore_permissions = True
 		profile_wrapper.save()
 		
 	def validate_date(self):
