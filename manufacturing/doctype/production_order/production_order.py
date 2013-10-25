@@ -134,16 +134,16 @@ class DocType:
 
 @webnotes.whitelist()	
 def get_item_details(item):
-	res = webnotes.conn.sql("""select stock_uom
+	res = webnotes.conn.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
-		and name=%s""", (item,), as_dict=1)
+		and name=%s""", item, as_dict=1)
 	
 	if not res:
 		return {}
 		
 	res = res[0]
 	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s 
-		and ifnull(is_default, 0)=1""", (item,))
+		and ifnull(is_default, 0)=1""", item)
 	if bom:
 		res.bom_no = bom[0][0]
 		
