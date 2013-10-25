@@ -451,35 +451,44 @@ class DocType(StockController):
 						item["to_warehouse"] = ""
 
 				# add raw materials to Stock Entry Detail table
-				self.add_to_stock_entry_detail(item_dict)
+				idx = self.add_to_stock_entry_detail(item_dict)
 					
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
+				item = webnotes.conn.get_value("Item", pro_obj.doc.production_item, ["item_name", 
+					"description", "stock_uom", "purchase_account", "cost_center"], as_dict=1)
 				self.add_to_stock_entry_detail({
 					cstr(pro_obj.doc.production_item): {
 						"to_warehouse": pro_obj.doc.fg_warehouse,
 						"from_warehouse": "",
 						"qty": self.doc.fg_completed_qty,
-						"description": pro_obj.doc.description,
-						"stock_uom": pro_obj.doc.stock_uom
+						"item_name": item.item_name,
+						"description": item.description,
+						"stock_uom": item.stock_uom,
+						"expense_account": item.purchase_account,
+						"cost_center": item.cost_center,
 					}
-				}, bom_no=pro_obj.doc.bom_no)
+				}, bom_no=pro_obj.doc.bom_no, idx=idx)
 								
 			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack"]:
 				if self.doc.purpose=="Material Receipt":
 					self.doc.from_warehouse = ""
 					
-				item = webnotes.conn.sql("""select name, item_name, description, uom 
-					from `tabItem` where name=%s""", (self.doc.bom_no), as_dict=1)
+				item = webnotes.conn.sql("""select name, item_name, description, 
+					uom, purchase_account, cost_center from `tabItem` 
+					where name=(select item from tabBOM where name=%s)""", 
+					self.doc.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
 					item[0]["item"] : {
 						"qty": self.doc.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],
 						"stock_uom": item[0]["uom"],
-						"from_warehouse": ""
+						"from_warehouse": "",
+						"expense_account": item[0].purchase_account,
+						"cost_center": item[0].cost_center,
 					}
-				}, bom_no=self.doc.bom_no)
+				}, bom_no=self.doc.bom_no, idx=idx)
 		
 		self.get_stock_and_rate()
 	
@@ -543,8 +552,9 @@ class DocType(StockController):
 		
 		return issued_item_qty
 
-	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		idx = 1
+	def add_to_stock_entry_detail(self, item_dict, bom_no=None, idx=None):
+		webnotes.errprint([])
+		if not idx:	idx = 1
 		expense_account, cost_center = webnotes.conn.get_values("Company", self.doc.company, \
 			["default_expense_account", "cost_center"])[0]
 
@@ -572,6 +582,7 @@ class DocType(StockController):
 
 			# increment idx by 1
 			idx += 1
+		return idx
 
 	def get_cust_values(self):
 		"""fetches customer details"""
