@@ -19,6 +19,7 @@ requirements = [
 	"requests",
 	"chardet",
 	"dropbox",
+	"Werkzeug",
 	"google-api-python-client ",
 	"pygeoip"
 ]
@@ -126,6 +127,11 @@ def install_using_apt():
 	print packages
 	print "-"*80
 	exec_in_shell("apt-get install -y %s" % packages)
+	global root_password
+	if not root_password:
+		root_password = get_root_password()
+	exec_in_shell("echo mysql-server mysql-server/root_password password %s | sudo debconf-set-selections" % root_password)
+	exec_in_shell("echo mysql-server mysql-server/root_password_again password %s | sudo debconf-set-selections" % root_password)
 	
 	if not exec_in_shell("which mysql"):
 		packages = "mysql-server libmysqlclient-dev"
@@ -141,7 +147,6 @@ def update_config_for_debian():
 def install_python_modules():
 	print "-"*80
 	print "Installing Python Modules: (This may take some time)"
-	print python_modules
 	print "-"*80
 	
 	if not exec_in_shell("which pip"):
@@ -150,7 +155,7 @@ def install_python_modules():
 	exec_in_shell("pip install --upgrade pip")
 	exec_in_shell("pip install --upgrade setuptools")
 	exec_in_shell("pip install --upgrade virtualenv")
-	exec_in_shell("pip install -r {}".format(' '.join(requirements)))
+	exec_in_shell("pip install {}".format(' '.join(requirements)))
 	
 def install_erpnext(install_path):
 	print
