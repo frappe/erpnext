@@ -553,7 +553,6 @@ class DocType(StockController):
 		return issued_item_qty
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None, idx=None):
-		webnotes.errprint([])
 		if not idx:	idx = 1
 		expense_account, cost_center = webnotes.conn.get_values("Company", self.doc.company, \
 			["default_expense_account", "cost_center"])[0]
