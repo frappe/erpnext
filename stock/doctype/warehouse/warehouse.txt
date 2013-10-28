@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-09-16 10:45:49", 
+  "modified": "2013-10-28 16:42:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,7 +76,7 @@
   "doctype": "DocField", 
   "fieldname": "create_account_under", 
   "fieldtype": "Link", 
-  "label": "Create Account Under", 
+  "label": "Parent Account", 
   "options": "Account", 
   "permlevel": 0
  }, 
@@ -84,6 +84,7 @@
   "doctype": "DocField", 
   "fieldname": "column_break_4", 
   "fieldtype": "Section Break", 
+  "label": "Allow For Users", 
   "permlevel": 0, 
   "read_only": 0
  }, 

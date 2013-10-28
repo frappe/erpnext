@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-07-05 15:04:25", 
+  "modified": "2013-10-28 15:42:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,15 +41,6 @@
  {
   "doctype": "DocType", 
   "name": "Workstation"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -113,30 +104,33 @@
   "doctype": "DocField", 
   "fieldname": "over_heads", 
   "fieldtype": "Section Break", 
-  "label": "Over Heads", 
+  "label": "Overheads", 
   "oldfieldtype": "Section Break"
  }, 
  {
+  "description": "Electricity cost per hour", 
   "doctype": "DocField", 
   "fieldname": "hour_rate_electricity", 
   "fieldtype": "Float", 
-  "label": "Hour Rate Electricity", 
+  "label": "Electricity Cost", 
   "oldfieldname": "hour_rate_electricity", 
   "oldfieldtype": "Currency"
  }, 
  {
+  "description": "Consumable cost per hour", 
   "doctype": "DocField", 
   "fieldname": "hour_rate_consumable", 
   "fieldtype": "Float", 
-  "label": "Hour Rate Consumable", 
+  "label": "Consumable Cost", 
   "oldfieldname": "hour_rate_consumable", 
   "oldfieldtype": "Currency"
  }, 
  {
+  "description": "Rent per hour", 
   "doctype": "DocField", 
   "fieldname": "hour_rate_rent", 
   "fieldtype": "Float", 
-  "label": "Hour Rate Rent", 
+  "label": "Rent Cost", 
   "oldfieldname": "hour_rate_rent", 
   "oldfieldtype": "Currency"
  }, 

@@ -6,7 +6,7 @@ erpnext.POS = Class.extend({
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.wrapper.html('<div class="container">\
-			<div class="row">\
+			<div class="row" style="margin: -13px 0px 10px -30px; border-bottom: 3px solid #c7c7c7;">\
 				<div class="party-area col-sm-3 col-xs-6"></div>\
 				<div class="barcode-area col-sm-3 col-xs-6"></div>\
 				<div class="search-area col-sm-3 col-xs-6"></div>\
@@ -115,7 +115,8 @@ erpnext.POS = Class.extend({
 				"fieldname": "pos_party",
 				"placeholder": this.party
 			},
-			parent: this.wrapper.find(".party-area")
+			parent: this.wrapper.find(".party-area"),
+			only_input: true,
 		});
 		this.party_field.make_input();
 		this.party_field.$input.on("change", function() {
@@ -134,7 +135,8 @@ erpnext.POS = Class.extend({
 				"fieldname": "pos_item_group",
 				"placeholder": "Item Group"
 			},
-			parent: this.wrapper.find(".item-group-area")
+			parent: this.wrapper.find(".item-group-area"),
+			only_input: true,
 		});
 		this.item_group.make_input();
 		this.item_group.$input.on("change", function() {
@@ -152,7 +154,8 @@ erpnext.POS = Class.extend({
 				"fieldname": "pos_item",
 				"placeholder": "Item"
 			},
-			parent: this.wrapper.find(".search-area")
+			parent: this.wrapper.find(".search-area"),
+			only_input: true,
 		});
 		this.search.make_input();
 		this.search.$input.on("change", function() {
@@ -169,7 +172,8 @@ erpnext.POS = Class.extend({
 				"fieldname": "pos_barcode",
 				"placeholder": "Barcode / Serial No"
 			},
-			parent: this.wrapper.find(".barcode-area")
+			parent: this.wrapper.find(".barcode-area"),
+			only_input: true,
 		});
 		this.barcode.make_input();
 		this.barcode.$input.on("keypress", function() {
@@ -194,12 +198,12 @@ erpnext.POS = Class.extend({
 				$.each(r.message, function(index, obj) {
 					if (obj.image)
 						image = '<img src="' + obj.image + '" class="img-responsive" \
-								style="border:1px solid #eee;height:140px;width:100%;">';
+								style="border:1px solid #eee; max-height: 140px;">';
 					else
 						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
 					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								<div>%(item_image)s</div>\
+								<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
 								<div class="small">%(item_code)s</div>\
 								<div class="small">%(item_name)s</div>\
 								<div class="small">%(item_price)s</div>\
