@@ -113,12 +113,6 @@ def install_using_yum():
 def update_config_for_redhat():
 	import re
 	
-	# update memcache user
-	with open("/etc/sysconfig/memcached", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/sysconfig/memcached", "w") as modified:
-		modified.write(re.sub('USER.*', 'USER="%s"' % apache_user,  memcached_conf))
-	
 	# set to autostart on startup
 	for service in ("mysqld", "httpd", "memcached", "ntpd"):
 		exec_in_shell("chkconfig --level 2345 %s on" % service)
