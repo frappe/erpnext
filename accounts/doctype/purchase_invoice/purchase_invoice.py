@@ -350,11 +350,14 @@ class DocType(BuyingController):
 				)
 			
 			# accumulate valuation tax
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount) \
-				and tax.cost_center:
-					valuation_tax.setdefault(tax.cost_center, 0)
-					valuation_tax[tax.cost_center] += \
-						(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				if auto_accounting_for_stock and not tax.cost_center:
+					webnotes.throw(_("Row %(row)s: Cost Center is mandatory \
+						if tax/charges category is Valuation or Valuation and Total" % 
+						{"row": tax.idx}))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
