@@ -141,14 +141,7 @@ def install_using_apt():
 	update_config_for_debian()
 	
 def update_config_for_debian():
-
-	# update memcache user
-	with open("/etc/memcached.conf", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/memcached.conf", "w") as modified:
-		modified.write(memcached_conf.replace("-u memcache", "-u %s" % apache_user))
-	
-	for service in ("mysql", "memcached", "ntpd"):
+	for service in ("mysql", "ntpd"):
 		exec_in_shell("service %s restart" % service)
 	
 def install_python_modules():
