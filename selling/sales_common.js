@@ -324,10 +324,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	determine_exclusive_rate: function() {
 		var me = this;
+
 		$.each(me.frm.item_doclist, function(n, item) {
-			console.log(["determine_exclusive_rate", item]);
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
-			console.log(["item_tax_map", item_tax_map]);
 			var cumulated_tax_fraction = 0.0;
 			
 			$.each(me.frm.tax_doclist, function(i, tax) {
@@ -388,7 +387,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_net_total: function() {
 		var me = this;
-
+		this.total_discount_amount = 0.0;
+		this.new_net_total = 0.0;
+		
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
 		$.each(this.frm.item_doclist, function(i, item) {
 			me.frm.doc.net_total += item.amount;
@@ -396,20 +397,48 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 		
 		wn.model.round_floats_in(this.frm.doc, ["net_total", "net_total_export"]);
+
+		// Calculate total discount amount from tax doclist
+		$.each(me.frm.tax_doclist, function(i, tax) {
+			if(tax.charge_type == "Discount Amount")
+				me.total_discount_amount += tax.rate;
+		});
+
+		// Calculate amount for tax for each item
+		$.each(this.frm.item_doclist, function(i, item) {
+			item["amount_for_tax"] = 0.0;
+
+			if (me.total_discount_amount != 0.0) {
+				var discount = flt(me.total_discount_amount * item.amount / 
+					me.frm.doc.net_total);
+				me.new_net_total += flt(item.amount - discount);
+				item["amount_for_tax"] = item.amount - discount;
+			}
+			else {
+				item["amount_for_tax"] = item.amount;
+				me.new_net_total += item.amount;
+			}
+		});
 	},
 	
 	calculate_totals: function() {
+		var me = this;
 		var tax_count = this.frm.tax_doclist.length;
-		this.frm.doc.grand_total = flt(
-			tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
-			precision("grand_total"));
+		
+		if (tax_count) {
+			this.frm.doc.grand_total = flt(this.new_net_total + 
+				this.frm.tax_doclist[tax_count - 1].total, precision("grand_total"));
+		}
+		else
+			this.frm.doc.grand_total = flt(this.new_net_total, precision("grand_total"));
+		
 		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
 			precision("grand_total_export"));
 			
-		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
+		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.new_net_total, 
 			precision("other_charges_total"));
-		this.frm.doc.other_charges_total_export = flt(
-			this.frm.doc.grand_total_export - this.frm.doc.net_total_export,
+		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export - 
+			(this.new_net_total / this.frm.doc.conversion_rate),
 			precision("other_charges_total_export"));
 			
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
