@@ -426,8 +426,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var tax_count = this.frm.tax_doclist.length;
 		
 		if (tax_count) {
-			this.frm.doc.grand_total = flt(this.new_net_total + 
-				this.frm.tax_doclist[tax_count - 1].total, precision("grand_total"));
+			this.frm.doc.grand_total = flt(tax_count ? 
+				this.frm.tax_doclist[tax_count - 1].total : this.new_net_total, 
+				precision("grand_total"));
 		}
 		else
 			this.frm.doc.grand_total = flt(this.new_net_total, precision("grand_total"));

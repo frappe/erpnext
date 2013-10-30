@@ -588,13 +588,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of 
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					if (tax.charge_type == "Discount Amount") {
-						tax.grand_total_for_current_item = 0.0;
-					}
-					else {
-						tax.grand_total_for_current_item = flt(item["amount_for_tax"] + current_tax_amount,
-							precision("total", tax));
-					}
+					tax.grand_total_for_current_item = flt(item["amount_for_tax"] + current_tax_amount,
+						precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item = 
 						flt(me.frm.tax_doclist[i-1].grand_total_for_current_item + current_tax_amount,
