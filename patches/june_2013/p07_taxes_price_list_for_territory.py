@@ -4,8 +4,8 @@
 import webnotes
 
 def execute():
-	webnotes.reload_doc("setup", "doctype", "for_territory")
-	webnotes.reload_doc("setup", "doctype", "price_list")
+	webnotes.reload_doc("stock", "doctype", "for_territory")
+	webnotes.reload_doc("stock", "doctype", "price_list")
 	webnotes.reload_doc("accounts", "doctype", "sales_taxes_and_charges_master")
 	webnotes.reload_doc("accounts", "doctype", "shipping_rule")
 	
