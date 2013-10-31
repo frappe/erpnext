@@ -6,7 +6,6 @@ test_records = [
 		"doctype": "POS Setting",
 		"name": "_Test POS Setting",
 		"currency": "INR",
-		"conversion_rate": 1.0,
 		"selling_price_list": "_Test Price List",
 		"company": "_Test Company",
 		"warehouse": "_Test Warehouse - _TC",

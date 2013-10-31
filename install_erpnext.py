@@ -19,6 +19,7 @@ requirements = [
 	"requests",
 	"chardet",
 	"dropbox",
+	"Werkzeug",
 	"google-api-python-client ",
 	"pygeoip"
 ]
@@ -113,12 +114,6 @@ def install_using_yum():
 def update_config_for_redhat():
 	import re
 	
-	# update memcache user
-	with open("/etc/sysconfig/memcached", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/sysconfig/memcached", "w") as modified:
-		modified.write(re.sub('USER.*', 'USER="%s"' % apache_user,  memcached_conf))
-	
 	# set to autostart on startup
 	for service in ("mysqld", "httpd", "memcached", "ntpd"):
 		exec_in_shell("chkconfig --level 2345 %s on" % service)
@@ -132,6 +127,11 @@ def install_using_apt():
 	print packages
 	print "-"*80
 	exec_in_shell("apt-get install -y %s" % packages)
+	global root_password
+	if not root_password:
+		root_password = get_root_password()
+	exec_in_shell("echo mysql-server mysql-server/root_password password %s | sudo debconf-set-selections" % root_password)
+	exec_in_shell("echo mysql-server mysql-server/root_password_again password %s | sudo debconf-set-selections" % root_password)
 	
 	if not exec_in_shell("which mysql"):
 		packages = "mysql-server libmysqlclient-dev"
@@ -141,20 +141,12 @@ def install_using_apt():
 	update_config_for_debian()
 	
 def update_config_for_debian():
-
-	# update memcache user
-	with open("/etc/memcached.conf", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/memcached.conf", "w") as modified:
-		modified.write(memcached_conf.replace("-u memcache", "-u %s" % apache_user))
-	
-	for service in ("mysql", "memcached", "ntpd"):
+	for service in ("mysql", "ntpd"):
 		exec_in_shell("service %s restart" % service)
 	
 def install_python_modules():
 	print "-"*80
 	print "Installing Python Modules: (This may take some time)"
-	print python_modules
 	print "-"*80
 	
 	if not exec_in_shell("which pip"):
@@ -163,7 +155,7 @@ def install_python_modules():
 	exec_in_shell("pip install --upgrade pip")
 	exec_in_shell("pip install --upgrade setuptools")
 	exec_in_shell("pip install --upgrade virtualenv")
-	exec_in_shell("pip install -r {}".format(' '.join(requirements)))
+	exec_in_shell("pip install {}".format(' '.join(requirements)))
 	
 def install_erpnext(install_path):
 	print
@@ -208,7 +200,7 @@ def setup_folders(install_path):
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/erpnext.git app && cd app && git checkout wsgi" % install_path)
+		exec_in_shell("cd %s && git clone https://github.com/webnotes/erpnext.git app" % install_path)
 		exec_in_shell("cd app && git config core.filemode false")
 		if not os.path.exists(app):
 			raise Exception, "Couldn't clone erpnext repository"
@@ -216,7 +208,7 @@ def setup_folders(install_path):
 	lib = os.path.join(install_path, "lib")
 	if not os.path.exists(lib):
 		print "Cloning wnframework"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/wnframework.git lib && cd lib && git checkout wsgi" % install_path)
+		exec_in_shell("cd %s && git clone https://github.com/webnotes/wnframework.git lib" % install_path)
 		exec_in_shell("cd lib && git config core.filemode false")
 		if not os.path.exists(lib):
 			raise Exception, "Couldn't clone wnframework repository"

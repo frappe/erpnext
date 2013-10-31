@@ -396,7 +396,7 @@ def make_items():
 	import_data("BOM", submit=True)
 
 def make_price_lists():
-	import_data("Price_List", overwrite=True)
+	import_data("Item_Price", overwrite=True)
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])
