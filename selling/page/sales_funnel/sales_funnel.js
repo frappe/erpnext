@@ -8,14 +8,14 @@ wn.pages['sales-funnel'].onload = function(wrapper) {
 		single_column: true
 	});
 	
-	wrapper.crm_funnel = new erpnext.CRMFunnel(wrapper);
+	wrapper.sales_funnel = new erpnext.SalesFunnel(wrapper);
 	
 	wrapper.appframe.add_module_icon("Selling", "sales-funnel", function() {
 		wn.set_route("selling-home");
 	});
 }
 
-erpnext.CRMFunnel = Class.extend({
+erpnext.SalesFunnel = Class.extend({
 	init: function(wrapper) {
 		var me = this;
 		// 0 setTimeout hack - this gives time for canvas to get width and height
@@ -72,7 +72,7 @@ erpnext.CRMFunnel = Class.extend({
 		var me = this;
 		wn.call({
 			module: "selling",
-			page: "crm_funnel",
+			page: "sales_funnel",
 			method: "get_funnel_data",
 			args: {
 				from_date: this.options.from_date,
