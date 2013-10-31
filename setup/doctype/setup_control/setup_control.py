@@ -85,7 +85,7 @@ class DocType:
 					"currency": args["currency"]
 				},
 				{
-					"doctype": "For Territory",
+					"doctype": "Applicable Territory",
 					"parentfield": "valid_for_territories",
 					"territory": "All Territories"
 				}
