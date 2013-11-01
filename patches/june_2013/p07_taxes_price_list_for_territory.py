@@ -4,8 +4,8 @@
 import webnotes
 
 def execute():
-	webnotes.reload_doc("setup", "doctype", "for_territory")
-	webnotes.reload_doc("setup", "doctype", "price_list")
+	webnotes.reload_doc("setup", "doctype", "applicable_territory")
+	webnotes.reload_doc("stock", "doctype", "price_list")
 	webnotes.reload_doc("accounts", "doctype", "sales_taxes_and_charges_master")
 	webnotes.reload_doc("accounts", "doctype", "shipping_rule")
 	
@@ -14,12 +14,12 @@ def execute():
 	
 	for parenttype in ["Sales Taxes and Charges Master", "Price List", "Shipping Rule"]:
 		for name in webnotes.conn.sql_list("""select name from `tab%s` main
-			where not exists (select parent from `tabFor Territory` territory
+			where not exists (select parent from `tabApplicable Territory` territory
 				where territory.parenttype=%s and territory.parent=main.name)""" % \
 				(parenttype, "%s"), (parenttype,)):
 			
 			doc = webnotes.doc({
-				"doctype": "For Territory",
+				"doctype": "Applicable Territory",
 				"__islocal": 1,
 				"parenttype": parenttype,
 				"parentfield": "valid_for_territories",

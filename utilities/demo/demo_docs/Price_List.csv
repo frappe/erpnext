@@ -11,7 +11,7 @@ Only mandatory fields are necessary for new records. You can delete non-mandator
 "For updating, you can update only selective columns.",,,,,,,,,,,
 You can only upload upto 5000 records in one go. (may be less in some cases),,,,,,,,,,,
 ,,,,,,,,,,,
-DocType:,Price List,,,,~,For Territory,valid_for_territories,~,Item Price,item_prices,
+DocType:,Price List,,,,~,Applicable Territory,valid_for_territories,~,Item Price,item_prices,
 Column Labels:,ID,Price List Name,Currency,Valid for Buying or Selling?,,ID,Territory,,ID,Item Code,Rate
 Column Name:,name,price_list_name,currency,buying_or_selling,~,name,territory,~,name,item_code,ref_rate
 Mandatory:,Yes,Yes,Yes,Yes,,Yes,Yes,,Yes,Yes,Yes

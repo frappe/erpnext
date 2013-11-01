@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 11:48:03", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:55:00", 
+  "modified": "2013-10-31 19:24:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -87,7 +87,7 @@
   "fieldname": "valid_for_territories", 
   "fieldtype": "Table", 
   "label": "Valid For Territories", 
-  "options": "For Territory", 
+  "options": "Applicable Territory", 
   "reqd": 1
  }, 
  {
