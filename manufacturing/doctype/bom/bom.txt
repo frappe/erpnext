@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:47:25", 
+  "modified": "2013-11-02 14:23:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -113,7 +113,6 @@
  }, 
  {
   "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
-  "description": "Price List for Costing", 
   "doctype": "DocField", 
   "fieldname": "buying_price_list", 
   "fieldtype": "Link", 

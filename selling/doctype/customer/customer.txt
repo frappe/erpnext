@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-10-18 16:49:20", 
+  "modified": "2013-11-02 14:24:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,7 +52,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "options": "\nCUST\nCUSTMUM", 
   "permlevel": 0, 
@@ -126,7 +126,6 @@
   "search_index": 1
  }, 
  {
-  "description": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -245,7 +244,6 @@
   "permlevel": 0
  }, 
  {
-  "description": "This currency will get fetched in Sales transactions of this customer", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 

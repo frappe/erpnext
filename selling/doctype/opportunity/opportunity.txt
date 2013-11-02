@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-10-09 15:26:29", 
+  "modified": "2013-11-02 14:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,11 +53,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -210,7 +209,6 @@
   "read_only": 1
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Territory\">To manage Territory, click here</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 

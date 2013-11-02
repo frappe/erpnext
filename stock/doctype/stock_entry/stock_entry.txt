@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2013-08-24 15:16:34", 
+  "modified": "2013-11-02 14:28:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -66,13 +66,12 @@
  }, 
  {
   "allow_on_submit": 0, 
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "hidden": 0, 
   "in_filter": 0, 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -535,7 +534,7 @@
   "fieldtype": "Link", 
   "hidden": 0, 
   "in_filter": 0, 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 0, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

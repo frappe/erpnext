@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-10-28 17:17:17", 
+  "modified": "2013-11-02 14:39:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -276,7 +276,6 @@
   "options": "icon-user"
  }, 
  {
-  "description": "Select name of Customer to whom project belongs", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 

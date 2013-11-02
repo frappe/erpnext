@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-10-11 13:18:47", 
+  "modified": "2013-11-02 14:40:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,11 +58,10 @@
   "width": "50%"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -71,7 +70,6 @@
   "reqd": 1
  }, 
  {
-  "description": "Select Customer", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
@@ -237,7 +235,7 @@
   "fieldtype": "Link", 
   "hidden": 1, 
   "in_filter": 1, 
-  "label": "Shipping Address Name", 
+  "label": "Shipping Address", 
   "options": "Address", 
   "print_hide": 1, 
   "read_only": 0
@@ -260,7 +258,6 @@
   "options": "icon-tag"
  }, 
  {
-  "description": "Customer's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
@@ -277,7 +274,7 @@
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Conversion Rate", 
+  "label": "Exchange Rate", 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
@@ -291,7 +288,6 @@
   "width": "50%"
  }, 
  {
-  "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
   "doctype": "DocField", 
   "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
@@ -304,7 +300,6 @@
   "width": "100px"
  }, 
  {
-  "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -319,7 +314,7 @@
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Price List Currency Conversion Rate", 
+  "label": "Price List Exchange Rate", 
   "print_hide": 1, 
   "reqd": 1
  }, 
@@ -409,7 +404,7 @@
   "doctype": "DocField", 
   "fieldname": "charge", 
   "fieldtype": "Link", 
-  "label": "Apply Taxes and Charges Master", 
+  "label": "Tax Master", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
@@ -424,7 +419,7 @@
   "doctype": "DocField", 
   "fieldname": "shipping_rule", 
   "fieldtype": "Link", 
-  "label": "Apply Shipping Rule", 
+  "label": "Shipping Rule", 
   "oldfieldtype": "Button", 
   "options": "Shipping Rule", 
   "print_hide": 1
@@ -585,7 +580,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -730,7 +725,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 
@@ -845,7 +840,6 @@
   "print_hide": 1
  }, 
  {
-  "description": "Name as entered in Sales Partner master", 
   "doctype": "DocField", 
   "fieldname": "sales_partner", 
   "fieldtype": "Link", 

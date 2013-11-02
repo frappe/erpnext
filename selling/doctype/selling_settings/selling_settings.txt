@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 10:25:16", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:46:24", 
+  "modified": "2013-11-02 14:22:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,7 +55,6 @@
   "options": "Customer Group"
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Territory\">Territory</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 

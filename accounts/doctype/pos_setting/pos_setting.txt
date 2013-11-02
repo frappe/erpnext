@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2013-10-15 11:12:02", 
+  "modified": "2013-11-02 14:17:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,7 +62,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -222,7 +222,7 @@
   "fieldname": "select_print_heading", 
   "fieldtype": "Select", 
   "in_filter": 0, 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Select", 
   "options": "link:Print Heading", 

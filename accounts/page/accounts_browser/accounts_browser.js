@@ -18,7 +18,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 
 	var main = $(wrapper).find(".layout-main"),
 		chart_area = $("<div>")
-			.css({"margin-bottom": "15px"})
+			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),
 		help_area = $('<div class="well">'+
 		'<h4>'+wn._('Quick Help')+'</h4>'+

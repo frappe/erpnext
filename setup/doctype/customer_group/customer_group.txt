@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-08-05 18:12:57", 
+  "modified": "2013-11-02 14:23:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -88,7 +88,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "This Price List will be selected as default for all Customers under this Group.", 
   "doctype": "DocField", 
   "fieldname": "default_price_list", 
   "fieldtype": "Link", 

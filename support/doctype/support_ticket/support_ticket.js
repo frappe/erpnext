@@ -52,6 +52,7 @@ $.extend(cur_frm.cscript, {
 			comm_list.push({
 				"sender": doc.raised_by,
 				"creation": doc.creation,
+				"subject": doc.subject,
 				"content": doc.description});
 		}
 					

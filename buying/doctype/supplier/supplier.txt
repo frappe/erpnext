@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:53:50", 
+  "modified": "2013-11-02 14:24:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,16 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "\nSUPP\nSUPP/10-11/"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "supplier_name", 
   "fieldtype": "Data", 
   "in_list_view": 1, 
@@ -63,6 +73,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "supplier_type", 
   "fieldtype": "Link", 
   "in_list_view": 1, 
@@ -71,22 +87,6 @@
   "oldfieldtype": "Link", 
   "options": "Supplier Type", 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "naming_series", 
-  "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
-  "no_copy": 1, 
-  "oldfieldname": "naming_series", 
-  "oldfieldtype": "Select", 
-  "options": "\nSUPP\nSUPP/10-11/"
  }, 
  {
   "doctype": "DocField", 
@@ -169,7 +169,6 @@
   "search_index": 0
  }, 
  {
-  "description": "This currency will get fetched in Purchase transactions of this supplier", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 
