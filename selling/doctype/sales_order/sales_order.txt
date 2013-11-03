@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:40:29", 
+  "modified": "2013-11-03 14:20:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -174,7 +174,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -195,7 +194,7 @@
   "fieldtype": "Date", 
   "hidden": 0, 
   "in_filter": 1, 
-  "label": "Expected Delivery Date", 
+  "label": "Delivery Date", 
   "oldfieldname": "delivery_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
@@ -204,12 +203,12 @@
   "width": "160px"
  }, 
  {
-  "description": "Purchase Order sent by customer", 
+  "description": "Customer's Purchase Order Number", 
   "doctype": "DocField", 
   "fieldname": "po_no", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "label": "Customer's Purchase Order No", 
+  "label": "PO No", 
   "oldfieldname": "po_no", 
   "oldfieldtype": "Data", 
   "print_hide": 0, 
@@ -218,11 +217,12 @@
  }, 
  {
   "depends_on": "eval:doc.po_no", 
+  "description": "Customer's Purchase Order Date", 
   "doctype": "DocField", 
   "fieldname": "po_date", 
   "fieldtype": "Date", 
   "hidden": 0, 
-  "label": "Customer's Purchase Order Date", 
+  "label": "PO Date", 
   "oldfieldname": "po_date", 
   "oldfieldtype": "Date", 
   "print_hide": 0, 
@@ -611,6 +611,7 @@
   "width": "50%"
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -622,7 +623,7 @@
   "search_index": 1
  }, 
  {
-  "description": "Category of customer as entered in Customer master", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -659,7 +660,6 @@
   "print_hide": 1
  }, 
  {
-  "description": "Filling in additional information about the Sales Order will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 

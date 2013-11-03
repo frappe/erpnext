@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:36:45", 
+  "modified": "2013-11-03 14:20:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -203,7 +203,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -559,7 +558,6 @@
   "width": "200px"
  }, 
  {
-  "description": "Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template", 
   "doctype": "DocField", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
@@ -599,6 +597,7 @@
   "read_only": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -613,6 +612,7 @@
  }, 
  {
   "depends_on": "customer", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -678,7 +678,6 @@
   "reqd": 0
  }, 
  {
-  "description": "Filling in additional information about the Quotation will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -820,6 +819,7 @@
  }, 
  {
   "allow_on_submit": 1, 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "communication_html", 
   "fieldtype": "HTML", 

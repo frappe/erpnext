@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-10-11 14:21:32", 
+  "modified": "2013-11-03 20:36:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -76,20 +76,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "warehouse", 
-  "fieldtype": "Link", 
-  "in_list_view": 1, 
-  "label": "Warehouse", 
-  "oldfieldname": "warehouse", 
-  "oldfieldtype": "Link", 
-  "options": "Warehouse", 
-  "print_hide": 0, 
-  "print_width": "100px", 
-  "reqd": 0, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
   "in_list_view": 1, 
@@ -118,6 +104,26 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "For Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "print_hide": 0, 
+  "print_width": "100px", 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "lead_time_date", 
   "fieldtype": "Date", 
   "in_list_view": 0, 
@@ -143,6 +149,7 @@
   "width": "100px"
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 

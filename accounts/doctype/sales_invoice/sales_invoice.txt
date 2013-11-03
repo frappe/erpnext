@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:35:31", 
+  "modified": "2013-11-03 14:11:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -165,7 +165,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -747,6 +746,7 @@
   "read_only": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -759,6 +759,7 @@
   "search_index": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 

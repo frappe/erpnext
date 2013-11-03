@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:58", 
   "docstatus": 0, 
-  "modified": "2013-08-22 15:43:07", 
+  "modified": "2013-11-03 14:14:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -344,6 +344,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
@@ -401,7 +402,6 @@
   "report_hide": 1
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 

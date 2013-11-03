@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:06", 
   "docstatus": 0, 
-  "modified": "2013-08-22 17:12:13", 
+  "modified": "2013-11-03 14:14:09", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,7 +41,6 @@
   "name": "GL Entry"
  }, 
  {
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -52,7 +51,6 @@
   "search_index": 1
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 

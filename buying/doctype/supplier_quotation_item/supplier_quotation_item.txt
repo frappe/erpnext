@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-10-10 17:02:11", 
+  "modified": "2013-11-02 19:41:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -288,6 +288,7 @@
   "read_only": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 

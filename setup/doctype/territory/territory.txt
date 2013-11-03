@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-08-05 18:12:29", 
+  "modified": "2013-11-02 16:59:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -64,6 +64,7 @@
   "reqd": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "parent_territory", 
   "fieldtype": "Link", 
@@ -130,6 +131,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 

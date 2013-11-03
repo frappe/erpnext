@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:36:48", 
+  "modified": "2013-11-03 14:20:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -195,7 +195,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -691,6 +690,7 @@
   "read_only": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -704,6 +704,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -733,7 +734,6 @@
   "read_only": 0
  }, 
  {
-  "description": "Filling in Additional Information about the Delivery Note will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 

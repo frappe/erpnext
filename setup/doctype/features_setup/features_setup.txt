@@ -2,7 +2,7 @@
  {
   "creation": "2012-12-20 12:50:49", 
   "docstatus": 0, 
-  "modified": "2013-08-22 15:36:43", 
+  "modified": "2013-11-03 14:20:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -235,7 +235,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Enables <b>More Info.</b> in all documents", 
   "doctype": "DocField", 
   "fieldname": "fs_more_info", 
   "fieldtype": "Check", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:32:36", 
+  "modified": "2013-11-02 16:59:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -188,6 +188,7 @@
   "search_index": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -200,6 +201,7 @@
   "search_index": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 

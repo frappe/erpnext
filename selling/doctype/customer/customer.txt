@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:24:03", 
+  "modified": "2013-11-03 14:01:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -38,7 +38,6 @@
   "name": "Customer"
  }, 
  {
-  "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
   "doctype": "DocField", 
   "fieldname": "basic_info", 
   "fieldtype": "Section Break", 
@@ -65,7 +64,7 @@
   "hidden": 0, 
   "in_filter": 1, 
   "in_list_view": 1, 
-  "label": "Customer Name", 
+  "label": "Full Name", 
   "no_copy": 1, 
   "oldfieldname": "customer_name", 
   "oldfieldtype": "Data", 
@@ -79,7 +78,7 @@
   "doctype": "DocField", 
   "fieldname": "customer_type", 
   "fieldtype": "Select", 
-  "label": "Customer Type", 
+  "label": "Type", 
   "oldfieldname": "customer_type", 
   "oldfieldtype": "Select", 
   "options": "\nCompany\nIndividual", 
@@ -87,7 +86,6 @@
   "reqd": 1
  }, 
  {
-  "description": "Fetch lead which will be converted into customer.", 
   "doctype": "DocField", 
   "fieldname": "lead_name", 
   "fieldtype": "Link", 
@@ -110,13 +108,13 @@
   "width": "50%"
  }, 
  {
-  "description": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
   "hidden": 0, 
   "in_filter": 1, 
-  "label": "Customer Group", 
+  "label": "Group", 
   "oldfieldname": "customer_group", 
   "oldfieldtype": "Link", 
   "options": "Customer Group", 
@@ -126,6 +124,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -139,20 +138,12 @@
   "reqd": 1
  }, 
  {
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "address_contacts", 
   "fieldtype": "Section Break", 
   "label": "Address & Contacts", 
   "options": "icon-map-marker", 
-  "permlevel": 0
- }, 
- {
-  "depends_on": "eval:doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "address_desc", 
-  "fieldtype": "HTML", 
-  "label": "Address Desc", 
-  "options": "<em>Addresses will appear only when you save the customer</em>", 
   "permlevel": 0
  }, 
  {
@@ -171,15 +162,6 @@
   "width": "50%"
  }, 
  {
-  "depends_on": "eval:doc.__islocal", 
-  "doctype": "DocField", 
-  "fieldname": "contact_desc", 
-  "fieldtype": "HTML", 
-  "label": "Contact Desc", 
-  "options": "<em>Contact Details will appear only when you save the customer</em>", 
-  "permlevel": 0
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "contact_html", 
   "fieldtype": "HTML", 
@@ -189,6 +171,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
@@ -236,23 +219,6 @@
   "search_index": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "default_price_list", 
-  "fieldtype": "Link", 
-  "label": "Default Price List", 
-  "options": "Price List", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "default_currency", 
-  "fieldtype": "Link", 
-  "label": "Default Currency", 
-  "no_copy": 1, 
-  "options": "Currency", 
-  "permlevel": 0
- }, 
- {
   "description": "Your Customer's TAX registration numbers (if applicable) or any general information", 
   "doctype": "DocField", 
   "fieldname": "customer_details", 
@@ -268,6 +234,23 @@
   "fieldtype": "Column Break", 
   "permlevel": 0, 
   "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "no_copy": 1, 
+  "options": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List", 
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -308,7 +291,7 @@
   "doctype": "DocField", 
   "fieldname": "default_sales_partner", 
   "fieldtype": "Link", 
-  "label": "Default Sales Partner", 
+  "label": "Sales Partner", 
   "oldfieldname": "default_sales_partner", 
   "oldfieldtype": "Link", 
   "options": "Sales Partner", 
@@ -318,7 +301,7 @@
   "doctype": "DocField", 
   "fieldname": "default_commission_rate", 
   "fieldtype": "Float", 
-  "label": "Default Commission Rate", 
+  "label": "Commission Rate", 
   "oldfieldname": "default_commission_rate", 
   "oldfieldtype": "Currency", 
   "permlevel": 0
