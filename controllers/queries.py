@@ -117,21 +117,30 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			filters.get("company"), "%%%s%%" % txt, start, page_len]))
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
+	from webnotes.utils import nowdate
+	
 	conditions = []
 
 	return webnotes.conn.sql("""select tabItem.name, 
 		if(length(tabItem.item_name) > 40, 
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name, 
 		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as decription 
+			concat(substr(tabItem.description, 1, 40), "..."), description) as decription
 		from tabItem 
-		where tabItem.docstatus<2 
-			and (tabItem.%(key)s LIKE "%(txt)s" 
-				or tabItem.item_name LIKE "%(txt)s")  
-			%(fcond)s %(mcond)s 
-		limit %(start)s,%(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
-		'fcond': get_filters_cond(doctype, filters, conditions), 
-		'mcond': get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		where tabItem.docstatus < 2
+			and (ifnull(tabItem.end_of_life, '') = '' or tabItem.end_of_life > %(today)s)
+			and (tabItem.`{key}` LIKE %(txt)s
+				or tabItem.item_name LIKE %(txt)s)  
+			{fcond} {mcond}
+		limit %(start)s, %(page_len)s """.format(key=searchfield,
+			fcond=get_filters_cond(doctype, filters, conditions),
+			mcond=get_match_cond(doctype, searchfield)), 
+			{
+				"today": nowdate(),
+				"txt": "%%%s%%" % txt,
+				"start": start,
+				"page_len": page_len
+			})
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []	
