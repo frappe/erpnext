@@ -71,7 +71,7 @@ def import_country_and_currency():
 		"role": "Sales Master Manager",
 		"read": 1,
 		"report": 1,
-	)
+	})
 
 	for name in data:
 		country = webnotes._dict(data[name])
@@ -90,7 +90,7 @@ def import_country_and_currency():
 				"symbol": country.currency_symbol,
 				"fraction_units": country.currency_fraction_units,
 				"number_format": country.number_format
-			}).insert(
+			}).insert()
 
 def import_defaults():
 	records = [
