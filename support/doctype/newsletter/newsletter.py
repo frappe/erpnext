@@ -76,14 +76,17 @@ class DocType():
 		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
 		
 		from webnotes.utils.email_lib.bulk import send
-		webnotes.conn.auto_commit_on_many_writes = True
+		
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = True
 		
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = self.send_to_doctype, email_field = "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
-		webnotes.conn.auto_commit_on_many_writes = False
+		if not webnotes.flags.in_test:
+			webnotes.conn.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
@@ -108,6 +111,7 @@ def get_lead_options():
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
+	from webnotes.model.doc import get_default_naming_series
 	real_name, email_id = parseaddr(email_id)
 	
 	if webnotes.conn.get_value("Lead", {"email_id": email_id}):
@@ -118,24 +122,8 @@ def create_lead(email_id):
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
 		"status": "Contacted",
-		"naming_series": get_lead_naming_series(),
+		"naming_series": get_default_naming_series("Lead"),
 		"company": webnotes.conn.get_default("company"),
 		"source": "Email"
 	})
 	lead.insert()
-	
-def get_lead_naming_series():
-	"""gets lead's default naming series"""
-	lead_naming_series = None
-	naming_series_field = webnotes.get_doctype("Lead").get_field("naming_series")
-	if naming_series_field.default:
-		lead_naming_series = naming_series_field.default
-	else:
-		latest_naming_series = webnotes.conn.sql("""select naming_series
-			from `tabLead` order by creation desc limit 1""")
-		if latest_naming_series:
-			lead_naming_series = latest_naming_series[0][0]
-		else:
-			lead_naming_series = filter(None, naming_series_field.options.split("\n"))[0]
-	
-	return lead_naming_series

@@ -11,8 +11,6 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 from webnotes.model.mapper import get_mapped_doclist
 
-	
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):
@@ -26,21 +24,6 @@ class DocType(SellingController):
 		self.partner_tname = 'Partner Target Detail'
 		self.territory_tname = 'Territory Target Detail'
 	
-	def get_contact_details(self):
-		get_obj('Sales Common').get_contact_details(self,0)
-
-	def get_comm_rate(self, sales_partner):
-		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
-
-	def get_adj_percent(self, arg=''):
-		get_obj('Sales Common').get_adj_percent(self)
-
-	def get_available_qty(self,args):
-		return get_obj('Sales Common').get_available_qty(eval(args))
-	
-	def get_rate(self,arg):
-		return get_obj('Sales Common').get_rate(arg)
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
@@ -126,14 +109,11 @@ class DocType(SellingController):
 		self.validate_po()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
-		self.validate_warehouse_user()
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
+		self.validate_warehouse()
 
-		sales_com_obj.validate_max_discount(self,'sales_order_details')
-		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
-		
+		from stock.doctype.packed_item.packed_item import make_packing_list
+		self.doclist = make_packing_list(self,'sales_order_details')
+
 		self.validate_with_previous_doc()
 				
 		if not self.doc.status:
@@ -147,14 +127,15 @@ class DocType(SellingController):
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
 		
 		
-	def validate_warehouse_user(self):
-		from stock.utils import validate_warehouse_user
+	def validate_warehouse(self):
+		from stock.utils import validate_warehouse_user, validate_warehouse_company
 		
 		warehouses = list(set([d.reserved_warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_user(w)
+			validate_warehouse_company(w, self.doc.company)
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -174,14 +155,14 @@ class DocType(SellingController):
 		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
 			bean = webnotes.bean("Quotation", quotation)
 			if bean.doc.docstatus==2:
-				webnotes.throw(d.prevdoc_docname + ": " + webnotes._("Quotation is cancelled."))
+				webnotes.throw(quotation + ": " + webnotes._("Quotation is cancelled."))
 				
 			bean.get_controller().set_status(update=True)
 
 	def on_submit(self):
 		self.update_stock_ledger(update_stock = 1)
 
-		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
+		self.check_credit(self.doc.grand_total)
 		
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
 		
@@ -202,7 +183,7 @@ class DocType(SellingController):
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_dn = webnotes.conn.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.doc.name)
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
@@ -237,21 +218,21 @@ class DocType(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = -1,is_stopped = 1)
+		self.update_stock_ledger(-1)
 		webnotes.conn.set(self.doc, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
 			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(update_stock = 1,is_stopped = 1)
+		self.update_stock_ledger(1)
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
 
 
-	def update_stock_ledger(self, update_stock, is_stopped = 0):
+	def update_stock_ledger(self, update_stock):
 		from stock.utils import update_bin
-		for d in self.get_item_list(is_stopped):
+		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {
 					"item_code": d['item_code'],
@@ -263,10 +244,6 @@ class DocType(SellingController):
 					"is_amended": self.doc.amended_from and 'Yes' or 'No'
 				}
 				update_bin(args)
-				
-				
-	def get_item_list(self, is_stopped):
-		return get_obj('Sales Common').get_item_list( self, is_stopped)
 
 	def on_update(self):
 		pass

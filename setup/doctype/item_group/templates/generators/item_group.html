@@ -8,7 +8,7 @@
 	{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
 	{% endif %}
 	{% if description %}<!-- description -->
-	<div>{{ description or ""}}</div>
+	<div itemprop="description">{{ description or ""}}</div>
 	{% else %}
 	<h3>{{ name }}</h3>
 	{% endif %}
@@ -38,5 +38,13 @@
 		<div class="alert alert-warning">No items listed.</div>
 	{% endif %}
 </div>
+<script>
+$(function() {
+	if(window.logged_in && getCookie("system_user")==="yes") {
+		wn.require("lib/js/wn/website/editable.js");
+		wn.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
+	}
+})
+</script>
 
 {% endblock %}

@@ -20,10 +20,6 @@ class DocType(BuyingController):
 		self.tname = 'Material Request Item'
 		self.fname = 'indent_details'
 
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
-
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
 
@@ -68,22 +64,14 @@ class DocType(BuyingController):
 			self.doc.status = "Draft"
 
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
-			"Cancelled"])
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 		
-		# restrict material request type
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
-		# Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
-
-
-		# Validate for items
 		pc_obj.validate_for_items(self)
-		
-		# Validate qty against SO
-		self.validate_qty_against_so()
 
+		self.validate_qty_against_so()
 	
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
@@ -108,9 +96,6 @@ class DocType(BuyingController):
 				update_bin(args)		
 		
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-		
 		webnotes.conn.set(self.doc,'status','Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	

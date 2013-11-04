@@ -107,7 +107,7 @@ class DocType:
 					_(" does not belong to the company") + ": " + self.doc.company)
 						
 def check_negative_balance(account, adv_adj=False):
-	if not adv_adj:
+	if not adv_adj and account:
 		account_details = webnotes.conn.get_value("Account", account, 
 				["allow_negative_balance", "debit_or_credit"], as_dict=True)
 		if not account_details["allow_negative_balance"]:
@@ -135,17 +135,18 @@ def check_freezing_date(posting_date, adv_adj=False):
 
 def update_outstanding_amt(account, against_voucher_type, against_voucher, on_cancel=False):
 	# get final outstanding amt
-	bal = flt(webnotes.conn.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
+	bal = flt(webnotes.conn.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+		from `tabGL Entry` 
 		where against_voucher_type=%s and against_voucher=%s and account = %s""", 
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Voucher":
-		against_voucher_amount = flt(webnotes.conn.sql("""select sum(debit) - sum(credit)
+		against_voucher_amount = flt(webnotes.conn.sql("""
+			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
 			and account = %s""", (against_voucher, account))[0][0])
-		
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal

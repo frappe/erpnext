@@ -1,5 +1,5 @@
 Data Import Template,,,,,,,,,,,,,,,,,,,,,,,,,,
-Table:,Lead,,,,,,,,,,,,,,,,,,,,,,,,,,
+Table:,Lead,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
 Notes:,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -11,11 +11,11 @@ Only mandatory fields are necessary for new records. You can delete non-mandator
 "If you are uploading new records, ""Naming Series"" becomes mandatory, if present.",,,,,,,,,,,,,,,,,,,,,,,,,,
 You can only upload upto 5000 records in one go. (may be less in some cases),,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,
-Column Labels,ID,Contact Name,Status,Naming Series,Company Name,Email Id,Source,From Customer,Campaign Name,Remark,Phone,Mobile No.,Fax,Website,Territory,Lead Type,Lead Owner,Market Segment,Industry,Request Type,Next Contact By,Next Contact Date,Last Contact Date,Company,Unsubscribed,Blog Subscriber
-Column Name:,name,lead_name,status,naming_series,company_name,email_id,source,customer,campaign_name,remark,phone,mobile_no,fax,website,territory,type,lead_owner,market_segment,industry,request_type,contact_by,contact_date,last_contact_date,company,unsubscribed,blog_subscriber
-Mandatory:,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No
-Type:,Data (text),Data,Select,Select,Data,Data,Select,Link,Link,Small Text,Data,Data,Data,Data,Link,Select,Link,Select,Link,Select,Link,Date,Date,Link,Check,Check
-Info:,,,"Lead, Open, Replied, Opportunity, Interested, Converted, Do Not Contact","One of: LEAD, LEAD/10-11/, LEAD/MUMBAI/",,,"One of: Advertisement, Blog Post, Campaign, Call, Customer, Exhibition, Supplier, Website, Email",Valid Customer,Valid Campaign,,,,,,Valid Territory,"One of: Client, Channel Partner, Consultant",Valid Profile,"One of: Lower Income, Middle Income, Upper Income",Valid Industry Type,"One of: Product Enquiry, Request for Information, Suggestions, Other",Valid Profile,,,Valid Company,0 or 1,0 or 1
+Column Labels,ID,Contact Name,Status,Naming Series,Company Name,Email Id,Source,From Customer,Campaign Name,Remark,Phone,Mobile No.,Fax,Website,Territory,Lead Type,Lead Owner,Market Segment,Industry,Request Type,Next Contact By,Next Contact Date,Company,Unsubscribed,Blog Subscriber,
+Column Name:,name,lead_name,status,naming_series,company_name,email_id,source,customer,campaign_name,remark,phone,mobile_no,fax,website,territory,type,lead_owner,market_segment,industry,request_type,contact_by,contact_date,company,unsubscribed,blog_subscriber,
+Mandatory:,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,No,
+Type:,Data (text),Data,Select,Select,Data,Data,Select,Link,Link,Small Text,Data,Data,Data,Data,Link,Select,Link,Select,Link,Select,Link,Date,Link,Check,Check,
+Info:,,,"Lead, Open, Replied, Opportunity, Interested, Converted, Do Not Contact","One of: LEAD, LEAD/10-11/, LEAD/MUMBAI/",,,"One of: Advertisement, Blog Post, Campaign, Call, Customer, Exhibition, Supplier, Website, Email",Valid Customer,Valid Campaign,,,,,,Valid Territory,"One of: Client, Channel Partner, Consultant",Valid Profile,"One of: Lower Income, Middle Income, Upper Income",Valid Industry Type,"One of: Product Enquiry, Request for Information, Suggestions, Other",Valid Profile,,Valid Company,0 or 1,0 or 1,
 Start entering data below this line,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,Mart Lakeman,Lead,,Zany Brainy,MartLakeman@einrot.com,,,,,,,,,,,,,,,,,,,,
 ,,Saga Lundqvist,Lead,,Patterson-Fletcher,SagaLundqvist@dayrep.com,,,,,,,,,,,,,,,,,,,,

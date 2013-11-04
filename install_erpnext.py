@@ -5,15 +5,37 @@
 from __future__ import unicode_literals
 import os, sys
 
-apache_user = None
 is_redhat = is_debian = None
 root_password = None
 
+requirements = [ 
+	"MySQL-python",
+	"pytz==2013b",
+	"python-dateutil",
+	"jinja2",
+	"markdown2",
+	"termcolor",
+	"python-memcached",
+	"requests",
+	"chardet",
+	"dropbox",
+	"Werkzeug",
+	"google-api-python-client ",
+	"pygeoip"
+]
+
 def install(install_path=None):
+	if os.getuid() != 0:
+		raise Exception, "Please run this script as root"
+
 	install_pre_requisites()
+
+	if os.environ.get('SUDO_UID'):
+		os.setuid(int(os.environ.get('SUDO_UID')))
 	
 	if not install_path:
 		install_path = os.getcwd()
+	setup_folders(install_path)
 	install_erpnext(install_path)
 	
 	post_install(install_path)
@@ -44,7 +66,7 @@ def validate_install():
 	# check python version
 	python_version = sys.version.split(" ")[0]
 	print "Python Version =", python_version
-	if not (python_version and int(python_version.split(".")[0])==2 and int(python_version.split(".")[1]) >= 6):
+	if not (python_version and int(python_version.split(".")[0])==2 and int(python_version.split(".")[1]) >= 7):
 		raise Exception, "Hey! ERPNext needs Python version to be 2.6+"
 	
 	# check distribution
@@ -59,7 +81,7 @@ def validate_install():
 	return is_redhat, is_debian
 		
 def install_using_yum():
-	packages = "python python-setuptools gcc python-devel MySQL-python httpd git memcached ntp vim-enhanced screen"
+	packages = "python python-setuptools gcc python-devel MySQL-python git memcached ntp vim-enhanced screen"
 	
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
@@ -92,15 +114,6 @@ def install_using_yum():
 def update_config_for_redhat():
 	import re
 	
-	global apache_user
-	apache_user = "apache"
-	
-	# update memcache user
-	with open("/etc/sysconfig/memcached", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/sysconfig/memcached", "w") as modified:
-		modified.write(re.sub('USER.*', 'USER="%s"' % apache_user,  memcached_conf))
-	
 	# set to autostart on startup
 	for service in ("mysqld", "httpd", "memcached", "ntpd"):
 		exec_in_shell("chkconfig --level 2345 %s on" % service)
@@ -108,12 +121,17 @@ def update_config_for_redhat():
 	
 def install_using_apt():
 	exec_in_shell("apt-get update")
-	packages = "python python-setuptools python-dev build-essential python-pip python-mysqldb apache2 git memcached ntp vim screen htop"
+	packages = "python python-setuptools python-dev build-essential python-pip python-mysqldb git memcached ntp vim screen htop"
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
 	print packages
 	print "-"*80
 	exec_in_shell("apt-get install -y %s" % packages)
+	global root_password
+	if not root_password:
+		root_password = get_root_password()
+	exec_in_shell("echo mysql-server mysql-server/root_password password %s | sudo debconf-set-selections" % root_password)
+	exec_in_shell("echo mysql-server mysql-server/root_password_again password %s | sudo debconf-set-selections" % root_password)
 	
 	if not exec_in_shell("which mysql"):
 		packages = "mysql-server libmysqlclient-dev"
@@ -123,26 +141,12 @@ def install_using_apt():
 	update_config_for_debian()
 	
 def update_config_for_debian():
-	global apache_user
-	apache_user = "www-data"
-
-	# update memcache user
-	with open("/etc/memcached.conf", "r") as original:
-		memcached_conf = original.read()
-	with open("/etc/memcached.conf", "w") as modified:
-		modified.write(memcached_conf.replace("-u memcache", "-u %s" % apache_user))
-	
-	exec_in_shell("a2enmod rewrite")
-	
-	for service in ("mysql", "apache2", "memcached", "ntpd"):
+	for service in ("mysql", "ntpd"):
 		exec_in_shell("service %s restart" % service)
 	
 def install_python_modules():
-	python_modules = "pytz python-dateutil jinja2 markdown2 termcolor python-memcached requests chardet dropbox google-api-python-client pygeoip"
-
 	print "-"*80
 	print "Installing Python Modules: (This may take some time)"
-	print python_modules
 	print "-"*80
 	
 	if not exec_in_shell("which pip"):
@@ -151,7 +155,7 @@ def install_python_modules():
 	exec_in_shell("pip install --upgrade pip")
 	exec_in_shell("pip install --upgrade setuptools")
 	exec_in_shell("pip install --upgrade virtualenv")
-	exec_in_shell("pip install -q %s" % python_modules)
+	exec_in_shell("pip install {}".format(' '.join(requirements)))
 	
 def install_erpnext(install_path):
 	print
@@ -169,19 +173,15 @@ def install_erpnext(install_path):
 	if not db_name:
 		raise Exception, "Sorry! You must specify ERPNext Database Name"
 	
-	# install folders and conf
-	setup_folders(install_path)
-	setup_conf(install_path, db_name)
-	
 	# setup paths
-	sys.path.extend([".", "lib", "app"])
+	sys.path = [".", "lib", "app"] + sys.path
+	import wnf
 	
 	# install database, run patches, update schema
-	setup_db(install_path, root_password, db_name)
-	
-	setup_cron(install_path)
-	
-	setup_apache_conf(install_path)
+	# setup_db(install_path, root_password, db_name)
+	wnf.install(db_name, root_password=root_password)
+
+	# setup_cron(install_path)
 	
 def get_root_password():
 	# ask for root mysql password
@@ -238,86 +238,13 @@ def setup_conf(install_path, db_name):
 	
 	return db_password
 	
-def setup_db(install_path, root_password, db_name):
-	from webnotes.install_lib.install import Installer
-	inst = Installer("root", root_password)
-	inst.import_from_db(db_name, verbose=1)
-
-	# run patches and sync
-	exec_in_shell("./lib/wnf.py --patch_sync_build")
-	
-def setup_cron(install_path):
-	erpnext_cron_entries = [
-		"*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> /var/log/erpnext-sch.log 2>&1" % install_path,
-		"0 */6 * * * cd %s && python lib/wnf.py --backup >> /var/log/erpnext-backup.log 2>&1" % install_path
-		]
-	
-	for row in erpnext_cron_entries:
-		try:
-			existing_cron = exec_in_shell("crontab -l")
-			if row not in existing_cron:
-				exec_in_shell('{ crontab -l; echo "%s"; } | crontab' % row)
-		except:
-			exec_in_shell('echo "%s" | crontab' % row)
-	
-def setup_apache_conf(install_path):
-	apache_conf_content = """Listen 8080
-NameVirtualHost *:8080
-<VirtualHost *:8080>
-	ServerName localhost
-	DocumentRoot %s/public/
-	
-	AddHandler cgi-script .cgi .xml .py
-	AddType application/vnd.ms-fontobject .eot
-	AddType font/ttf .ttf
-	AddType font/otf .otf
-	AddType application/x-font-woff .woff
-
-	<Directory %s/public/>
-		# directory specific options
-		Options -Indexes +FollowSymLinks +ExecCGI
-	
-		# directory's index file
-		DirectoryIndex web.py
-		
-		AllowOverride all
-		Order Allow,Deny
-		Allow from all
-
-		# rewrite rule
-		RewriteEngine on
-		RewriteCond %%{REQUEST_FILENAME} !-f
-		RewriteCond %%{REQUEST_FILENAME} !-d
-		RewriteCond %%{REQUEST_FILENAME} !-l
-		RewriteRule ^([^/]+)$ /web.py?page=$1 [QSA,L]
-	</Directory>
-</VirtualHost>""" % (install_path, install_path)
-	
-	new_apache_conf_path = os.path.join(install_path, os.path.basename(install_path)+".conf")
-	with open(new_apache_conf_path, "w") as apache_conf_file:
-		apache_conf_file.write(apache_conf_content)
-
 def post_install(install_path):
-	global apache_user
-	exec_in_shell("chown -R %s %s" % (apache_user, install_path))
-	
-	apache_conf_filename = os.path.basename(install_path)+".conf"
-	if is_redhat:
-		os.symlink(os.path.join(install_path, apache_conf_filename), 
-			os.path.join("/etc/httpd/conf.d", apache_conf_filename))
-		exec_in_shell("service httpd restart")
-		
-	elif is_debian:
-		os.symlink(os.path.join(install_path, apache_conf_filename), 
-			os.path.join("/etc/apache2/sites-enabled", apache_conf_filename))
-		exec_in_shell("service apache2 restart")
-	
 	print
 	print "-"*80
-	print "To change url domain, run: lib/wnf.py --domain example.com"
+	print "To start the development server, run lib/wnf.py --serve"
 	print "-"*80
 	print "Installation complete"
-	print "Open your browser and go to http://localhost:8080"
+	print "Open your browser and go to http://localhost:8000"
 	print "Login using username = Administrator and password = admin"
 
 def exec_in_shell(cmd):
@@ -332,9 +259,11 @@ def exec_in_shell(cmd):
 
 			stdout.seek(0)
 			out = stdout.read()
+			if out: out = out.decode('utf-8')
 
 			stderr.seek(0)
 			err = stderr.read()
+			if err: err = err.decode('utf-8')
 
 	if err and any((kw in err.lower() for kw in ["traceback", "error", "exception"])):
 		print out

@@ -4,3 +4,4 @@
 from __future__ import unicode_literals
 
 no_cache = True
+no_sitemap = True

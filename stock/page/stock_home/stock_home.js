@@ -77,7 +77,12 @@ wn.module_page["Stock"] = [
 			{
 				"doctype":"Price List",
 				"label": wn._("Price List"),
-				"description": wn._("Multiple Item Prices")
+				"description": wn._("Multiple Price list.")
+			},
+			{
+				"doctype":"Item Price",
+				"label": wn._("Item Price"),
+				"description": wn._("Multiple Item prices.")
 			},
 			{
 				"doctype":"Quality Inspection",
@@ -106,7 +111,7 @@ wn.module_page["Stock"] = [
 				"label": wn._("Stock Settings"),
 				"route": "Form/Stock Settings",
 				"doctype":"Stock Settings",
-				"description": "Settings for Stock Module"
+				"description": wn._("Settings for Stock Module")
 			},
 			{
 				"route":"Sales Browser/Item Group",
@@ -202,8 +207,8 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Item-wise Price List Rate"),
-				route: "Report/Price List/Item-Wise Price List",
-				doctype: "Price List"
+				route: "Report/Item Price/Item-wise Price List Rate",
+				doctype: "Item Price"
 			},
 			{
 				"label":wn._("Purchase In Transit"),

@@ -12,10 +12,13 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			wn.model.set_default_values(this.frm.doc);
-			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: "entries"}),
-				function(i, jvd) { wn.model.set_default_values(jvd); });
+			$.each(wn.model.get_doclist(this.frm.doc.doctype, 
+				this.frm.doc.name, {parentfield: "entries"}), function(i, jvd) {
+					wn.model.set_default_values(jvd);
+				}
+			);
 			
-			this.frm.doc.posting_date = get_today();
+			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = get_today();
 		}
 	},
 	
@@ -59,6 +62,50 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 			};
 		});
 	},
+	
+	against_voucher: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_voucher && !flt(d.debit)) {
+			this.get_outstanding({
+				'doctype': 'Purchase Invoice', 
+				'docname': d.against_voucher
+			}, d)
+		}
+	},
+	
+	against_invoice: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_invoice && !flt(d.credit)) {
+			this.get_outstanding({
+				'doctype': 'Sales Invoice', 
+				'docname': d.against_invoice
+			}, d)
+		}
+	},
+	
+	against_jv: function(doc, cdt, cdn) {
+		var d = wn.model.get_doc(cdt, cdn);
+		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
+			this.get_outstanding({
+				'doctype': 'Journal Voucher', 
+				'docname': d.against_jv,
+				'account': d.account
+			}, d)
+		}
+	},
+	
+	get_outstanding: function(args, child) {
+		var me = this;
+		return this.frm.call({
+			child: child,
+			method: "get_outstanding",
+			args: { args: args},
+			callback: function(r) {
+				cur_frm.cscript.update_totals(me.frm.doc);
+			}
+		});
+	}
+	
 });
 
 cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
@@ -68,7 +115,7 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) { 
-		cur_frm.add_custom_button('View Ledger', function() {
+		cur_frm.add_custom_button(wn._('View Ledger'), function() {
 			wn.route_options = {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,
@@ -87,24 +134,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
-
-cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.against_voucher && !flt(d.debit)) {
-		args = {'doctype': 'Purchase Invoice', 'docname': d.against_voucher }
-		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
-	}
-}
-
-cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.against_invoice && !flt(d.credit)) {
-		args = {'doctype': 'Sales Invoice', 'docname': d.against_invoice }
-		return get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
-	}
-}
-
-// Update Totals
 
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
@@ -156,7 +185,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = "Journal Voucher";
+		cur_frm.pformat.print_heading = wn._("Journal Voucher");
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {

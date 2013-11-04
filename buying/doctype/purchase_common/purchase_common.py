@@ -16,33 +16,7 @@ class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
-
-	def is_item_table_empty(self, obj):
-		if not len(obj.doclist.get({"parentfield": obj.fname})):
-			msgprint(_("You need to put at least one item in the item table."), raise_exception=True)
-
-	def get_supplier_details(self, name = ''):
-		details = webnotes.conn.sql("select supplier_name,address from `tabSupplier` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
-		if details:
-			ret = {
-				'supplier_name'	:	details and details[0]['supplier_name'] or '',
-				'supplier_address'	:	details and details[0]['address'] or ''
-			}
-			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
-			contact_det = webnotes.conn.sql("select contact_name, contact_no, email_id from `tabContact` where supplier = '%s' and is_supplier = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
-			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			return ret
-		else:
-			msgprint("Supplier : %s does not exists" % (name))
-			raise Exception
 	
-	# Get Available Qty at Warehouse
-	def get_bin_details( self, arg = ''):
-		arg = eval(arg)
-		bin = webnotes.conn.sql("select projected_qty from `tabBin` where item_code = %s and warehouse = %s", (arg['item_code'], arg['warehouse']), as_dict=1)
-		ret = { 'projected_qty' : bin and flt(bin[0]['projected_qty']) or 0 }
-		return ret
-
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""
 		
@@ -196,18 +170,3 @@ class DocType(BuyingController):
 			if not submitted:
 				msgprint(cstr(doctype) + ": " + cstr(submitted[0][0]) 
 					+ _(" not submitted"), raise_exception=1)
-
-	def get_rate(self, arg, obj):
-		arg = eval(arg)
-		rate = webnotes.conn.sql("select account_type, tax_rate from `tabAccount` where name = %s" 
-			, (arg['account_head']), as_dict=1)
-		
-		return {'rate':	rate and (rate[0]['account_type'] == 'Tax' \
-			and not arg['charge_type'] == 'Actual') and flt(rate[0]['tax_rate']) or 0 }
-
-	def get_prevdoc_date(self, obj):
-		for d in getlist(obj.doclist, obj.fname):
-			if d.prevdoc_doctype and d.prevdoc_docname:
-				dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = %s" 
-					% (d.prevdoc_doctype, '%s'), (d.prevdoc_docname))
-				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''

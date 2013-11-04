@@ -85,7 +85,6 @@ class DocType:
 			pr_bean = webnotes.bean("Purchase Receipt", pr)
 			
 			pr_bean.run_method("update_ordered_qty", is_cancelled="Yes")
-			pr_bean.run_method("update_serial_nos", cancel=True)
 			
 			webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)
@@ -97,5 +96,4 @@ class DocType:
 			pr_bean = webnotes.bean("Purchase Receipt", pr)
 			pr_bean.run_method("update_ordered_qty")
 			pr_bean.run_method("update_stock")
-			pr_bean.run_method("update_serial_nos")
 			pr_bean.run_method("make_gl_entries")

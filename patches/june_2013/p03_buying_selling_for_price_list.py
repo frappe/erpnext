@@ -7,8 +7,8 @@ from webnotes.utils import cint
 import MySQLdb
 
 def execute():
-	webnotes.reload_doc("setup", "doctype", "price_list")
-	webnotes.reload_doc("setup", "doctype", "item_price")
+	webnotes.reload_doc("stock", "doctype", "price_list")
+	webnotes.reload_doc("stock", "doctype", "item_price")
 	
 	try:
 		for price_list in webnotes.conn.sql_list("""select name from `tabPrice List`"""):

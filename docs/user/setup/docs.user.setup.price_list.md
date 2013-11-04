@@ -7,7 +7,7 @@ A Price List is a place where different rate plans can be stored. It’s a name 
 
 An Item can have multiple prices based on customer, currency, region, shipping cost etc, which can be stored as different rate plans. In ERPNext, you are required to store all the lists seperately. Buying Price List is different from Selling Price List and thus is stored separately. 
 
-> Selling > Price List
+> Setup > Price List
 
 
 ![Price-List](img/price-lists.png)
@@ -15,7 +15,14 @@ An Item can have multiple prices based on customer, currency, region, shipping c
 
 > For multiple currencies, maintain multiple Price Lists.
 
+<br>
+### Add Item in Price List
 
-To add a new Item to the Price List, add the Item Code and its rate in the Item Prices table.
+> Setup > Item Price
 
-You can also import Item Prices via [Data Import Tool](docs.user.setup.data_import.html)
+- Enter Price List and Item Code, Valid for Buying or Selling, Item Name and Item Description will be automatically fetched.
+- Enter Rate and save the document.
+
+![Item-Price](img/item-price.png)
+
+For bulk upload of Item Prices, use [Data Import Tool](docs.user.setup.data_import.html)

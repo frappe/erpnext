@@ -29,7 +29,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	parent_name = contact_name or lead_name
 
 	message = make(content=content, sender=sender, subject=subject,
-		doctype = parent_doctype, name = parent_name, date=date)
+		doctype = parent_doctype, name = parent_name, date=date, sent_or_received="Received")
 	
 	if mail:
 		# save attachments to parent if from mail

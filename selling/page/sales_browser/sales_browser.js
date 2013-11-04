@@ -15,8 +15,9 @@ pscript['onload_Sales Browser'] = function(wrapper){
 
 	$(wrapper)
 		.find(".layout-side-section")
-		.html('<div class="text-muted">Click on a link to get options to expand \
-		 	get options Add / Edit / Delete.</div>')
+		.html('<div class="text-muted">'+ 
+			wn._('Click on a link to get options to expand get options ') + 
+			wn._('Add') + ' / ' + wn._('Edit') + ' / '+ wn._('Delete') + '.</div>')
 
 	wrapper.make_tree = function() {
 		var ctype = wn.get_route()[1] || 'Territory';
@@ -87,22 +88,22 @@ erpnext.SalesChart = Class.extend({
 		var node_links = [];
 		
 		if (wn.model.can_read(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.open();">Edit</a>');
+			node_links.push('<a onclick="erpnext.sales_chart.open();">'+wn._('Edit')+'</a>');
 		}
 
 		if(data.expandable) {
 			if (wn.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
 					wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
-				node_links.push('<a onclick="erpnext.sales_chart.new_node();">Add Child</a>');
+				node_links.push('<a onclick="erpnext.sales_chart.new_node();">' + wn._('Add Child') + '</a>');
 			}
 		}
 
 		if (wn.model.can_write(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.rename()">Rename</a>');
+			node_links.push('<a onclick="erpnext.sales_chart.rename()">' + wn._('Rename') + '</a>');
 		};
 	
 		if (wn.model.can_delete(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.delete()">Delete</a>');
+			node_links.push('<a onclick="erpnext.sales_chart.delete()">' + wn._('Delete') + '</a>');
 		};
 		
 		link.toolbar.append(node_links.join(" | "));
@@ -114,18 +115,18 @@ erpnext.SalesChart = Class.extend({
 			{fieldtype:'Data', fieldname: 'name_field', 
 				label:'New ' + me.ctype + ' Name', reqd:true},
 			{fieldtype:'Select', fieldname:'is_group', label:'Group Node', options:'No\nYes', 
-				description: "Further nodes can be only created under 'Group' type nodes"}, 
+				description: wn._("Further nodes can be only created under 'Group' type nodes")}, 
 			{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
 		]
 		
 		if(me.ctype == "Sales Person") {
 			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:'Employee',
-				options:'Employee', description: "Please enter Employee Id of this sales parson"});
+				options:'Employee', description: wn._("Please enter Employee Id of this sales parson")});
 		}
 		
 		// the dialog
 		var d = new wn.ui.Dialog({
-			title:'New ' + me.ctype,
+			title: wn._('New ') + wn._(me.ctype),
 			fields: fields
 		})		
 	

@@ -4,7 +4,7 @@
 wn.pages['latest-updates'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Latest Updates',
+		title: wn._('Latest Updates'),
 		single_column: true
 	});
 		
@@ -16,9 +16,9 @@ wn.pages['latest-updates'].onload = function(wrapper) {
 		method:"home.page.latest_updates.latest_updates.get",
 		callback: function(r) {
 			parent.empty();
-			$("<p class='help'>Report issues at\
-				<a href='https://github.com/webnotes/erpnext/issues'>GitHub Issues</a></p>\
-				<hr><h3>Commit Log</h3>")
+			$("<p class='help'>"+wn._("Report issues at")+
+				"<a href='https://github.com/webnotes/erpnext/issues'>"+wn._("GitHub Issues")+"</a></p>\
+				<hr><h3>"+wn._("Commit Log")+"</h3>")
 					.appendTo(parent);
 				
 			var $tbody = $('<table class="table table-bordered"><tbody></tbody></table>')

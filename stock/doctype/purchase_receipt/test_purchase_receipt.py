@@ -104,6 +104,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.doclist[1].received_qty = 1
 		pr.insert()
 		pr.submit()
+		
 		self.assertEquals(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"supplier"), pr.doc.supplier)
 			
@@ -112,7 +113,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_serial_no_cancel(self):
 		pr = self.test_serial_no_supplier()
 		pr.cancel()
-
+		
 		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
 			

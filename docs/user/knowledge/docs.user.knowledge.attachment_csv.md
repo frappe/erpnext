@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Attachement and CSV files"
+	"_label": "Attachment and CSV files"
 }
 ---
 

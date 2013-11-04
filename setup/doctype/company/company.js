@@ -2,12 +2,51 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	if(doc.abbr && !doc.__islocal)
-		cur_frm.set_df_property("abbr", "read_only", 1)
+	if(doc.abbr && !doc.__islocal) {
+		cur_frm.set_df_property("abbr", "read_only", 1);
+		if(in_list(user_roles, "System Manager"))
+			cur_frm.add_custom_button("Replace Abbreviation", cur_frm.cscript.replace_abbr)
+	}
 		
 	if(!doc.__islocal) {
 		cur_frm.toggle_enable("default_currency", !cur_frm.doc.__transactions_exist);
 	}
+}
+
+cur_frm.cscript.replace_abbr = function() {
+	var dialog = new wn.ui.Dialog({
+		title: "Replace Abbr",
+		fields: [
+			{"fieldtype": "Data", "label": "New Abbreviation", "fieldname": "new_abbr",
+				"reqd": 1 },
+			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
+		]
+	});
+
+	dialog.fields_dict.update.$input.click(function() {
+		args = dialog.get_values();
+		if(!args) return;
+		return wn.call({
+			method: "setup.doctype.company.company.replace_abbr",
+			args: {
+				"company": cur_frm.doc.name,
+				"old": cur_frm.doc.abbr,
+				"new": args.new_abbr
+			},
+			callback: function(r) {
+				if(r.exc) {
+					msgprint(wn._("There were errors."));
+					return;
+				} else {
+					cur_frm.set_value("abbr", args.new_abbr);
+				}
+				dialog.hide();
+				cur_frm.refresh();
+			},
+			btn: this
+		})
+	});
+	dialog.show();
 }
 
 cur_frm.cscript.has_special_chars = function(t) {
@@ -22,7 +61,8 @@ cur_frm.cscript.has_special_chars = function(t) {
 
 cur_frm.cscript.company_name = function(doc){
   if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){   
-    msgprint("<font color=red>Special Characters <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> are not allowed for</font>\nCompany Name <b>" + doc.company_name +"</b>")        
+    msgprint(("<font color=red>"+wn._("Special Characters")+" <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> "+
+    	wn._("are not allowed for ")+"</font>\n"+wn._("Company Name")+" <b> "+ doc.company_name +"</b>"))        
     doc.company_name = '';
     refresh_field('company_name');
   }
@@ -30,7 +70,8 @@ cur_frm.cscript.company_name = function(doc){
 
 cur_frm.cscript.abbr = function(doc){
   if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){   
-    msgprint("<font color=red>Special Characters <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> are not allowed for</font>\nAbbr <b>" + doc.abbr +"</b>")        
+    msgprint("<font color=red>"+wn._("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
+    	wn._("are not allowed for")+ "</font>\nAbbr <b>" + doc.abbr +"</b>")        
     doc.abbr = '';
     refresh_field('abbr');
   }

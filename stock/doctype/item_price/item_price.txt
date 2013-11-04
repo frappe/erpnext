@@ -1,0 +1,127 @@
+[
+ {
+  "creation": "2013-05-02 16:29:48", 
+  "docstatus": 0, 
+  "modified": "2013-10-31 12:59:02", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "RFD/.#####", 
+  "description": "Multiple Item prices.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-flag", 
+  "in_create": 0, 
+  "istable": 0, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Item Price", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Item Price", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Price"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Price List", 
+  "options": "Price List", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
+  "options": "Item", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ref_rate", 
+  "fieldtype": "Currency", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Rate", 
+  "oldfieldname": "ref_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_br_1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Selling\nBuying", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "label": "Item Name", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_description", 
+  "fieldtype": "Text", 
+  "label": "Item Description", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Currency", 
+  "options": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager"
+ }
+]

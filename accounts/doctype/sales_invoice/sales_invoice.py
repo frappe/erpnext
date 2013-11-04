@@ -48,12 +48,7 @@ class DocType(SellingController):
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
-
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
-		sales_com_obj.validate_max_discount(self, 'entries')
+		self.check_stop_sales_order("sales_order")
 		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
@@ -83,7 +78,6 @@ class DocType(SellingController):
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:			
 			self.update_stock_ledger()
-			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -111,10 +105,8 @@ class DocType(SellingController):
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
 			self.update_stock_ledger()
-			self.update_serial_nos(cancel = True)
 		
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
+		self.check_stop_sales_order("sales_order")
 		
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
@@ -258,25 +250,7 @@ class DocType(SellingController):
 			else:
 				due_date = self.doc.posting_date
 
-		return due_date
-
-	def get_barcode_details(self, barcode):
-		return get_obj('Sales Common').get_barcode_details(barcode)
-
-
-	def get_adj_percent(self, arg=''):
-		"""Fetch ref rate from item master as per selected price list"""
-		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_rate(self,arg):
-		"""Get tax rate if account type is tax"""
-		get_obj('Sales Common').get_rate(arg)
-		
-		
-	def get_comm_rate(self, sales_partner):
-		"""Get Commission rate of Sales Partner"""
-		return get_obj('Sales Common').get_comm_rate(sales_partner, self)	
+		return due_date	
 	
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
@@ -479,10 +453,6 @@ class DocType(SellingController):
 				w = ps[0][1]
 		return w
 
-	
-	def make_packing_list(self):
-		get_obj('Sales Common').make_packing_list(self,'entries')
-
 	def on_update(self):
 		if cint(self.doc.update_stock) == 1:
 			# Set default warehouse from pos setting
@@ -493,7 +463,8 @@ class DocType(SellingController):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
-			self.make_packing_list()
+			from stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self, 'entries')
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			
@@ -525,8 +496,7 @@ class DocType(SellingController):
 
 	def update_stock_ledger(self):
 		sl_entries = []
-		items = get_obj('Sales Common').get_item_list(self)
-		for d in items:
+		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
@@ -869,7 +839,6 @@ def send_notification(new_rv):
 		
 def notify_errors(inv, owner):
 	import webnotes
-	import website
 		
 	exception_msg = """
 		Dear User,
@@ -928,11 +897,16 @@ def get_bank_cash_account(mode_of_payment):
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
+	# income account can be any Credit account, 
+	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
-				and tabAccount.docstatus!=2 
+				and tabAccount.docstatus!=2
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 

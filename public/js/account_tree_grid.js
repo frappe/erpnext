@@ -36,39 +36,39 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: "Account", field: "name", width: 300, cssClass: "cell-title", 
+			{id: "name", name: wn._("Account"), field: "name", width: 300, cssClass: "cell-title", 
 				formatter: this.tree_formatter},
-			{id: "opening_debit", name: "Opening (Dr)", field: "opening_debit", width: 100,
+			{id: "opening_debit", name: wn._("Opening (Dr)"), field: "opening_debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "opening_credit", name: "Opening (Cr)", field: "opening_credit", width: 100,
+			{id: "opening_credit", name: wn._("Opening (Cr)"), field: "opening_credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "debit", name: "Debit", field: "debit", width: 100,
+			{id: "debit", name: wn._("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "credit", name: "Credit", field: "credit", width: 100,
+			{id: "credit", name: wn._("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_debit", name: "Closing (Dr)", field: "closing_debit", width: 100,
+			{id: "closing_debit", name: wn._("Closing (Dr)"), field: "closing_debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_credit", name: "Closing (Cr)", field: "closing_credit", width: 100,
+			{id: "closing_credit", name: wn._("Closing (Cr)"), field: "closing_credit", width: 100,
 				formatter: this.currency_formatter}
 		];
 
 	},
 	filters: [
-		{fieldtype: "Select", label: "Company", link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: "Fiscal Year", link:"Fiscal Year", 
+		{fieldtype: "Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: "From Date"},
-		{fieldtype: "Label", label: "To"},
-		{fieldtype: "Date", label: "To Date"},
-		{fieldtype: "Button", label: "Refresh", icon:"icon-refresh icon-white",
+		{fieldtype: "Date", label: wn._("From Date")},
+		{fieldtype: "Label", label: wn._("To")},
+		{fieldtype: "Date", label: wn._("To Date")},
+		{fieldtype: "Button", label: wn._("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: "Reset Filters"},
+		{fieldtype: "Button", label: wn._("Reset Filters")},
 	],
 	setup_filters: function() {
 		this._super();
@@ -174,7 +174,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 		var me= this;
 		$.each(this.data, function(i, account) {
 			// update groups
-			if(account.rgt - account.lft == 1) {
+			if((account.group_or_ledger == "Ledger") || (account.rgt - account.lft == 1)) {
 				var parent = me.parent_map[account.name];
 				while(parent) {
 					var parent_account = me.item_by_name[parent];
@@ -193,7 +193,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 
 	set_fiscal_year: function() {
 		if (this.opening_date > this.closing_date) {
-			msgprint("Opening Date should be before Closing Date");
+			msgprint(wn._("Opening Date should be before Closing Date"));
 			return;
 		}
 
@@ -207,7 +207,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 		});
 
 		if (!this.fiscal_year) {
-			msgprint("Opening Date and Closing Date should be within same Fiscal Year");
+			msgprint(wn._("Opening Date and Closing Date should be within same Fiscal Year"));
 			return;
 		}
 	},

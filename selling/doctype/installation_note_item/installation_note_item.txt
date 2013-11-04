@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:51", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:09", 
+  "modified": "2013-10-10 17:02:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -47,18 +47,6 @@
   "print_width": "300px", 
   "read_only": 1, 
   "width": "300px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "prevdoc_date", 
-  "fieldtype": "Date", 
-  "hidden": 0, 
-  "in_list_view": 1, 
-  "label": "Delivery Date", 
-  "oldfieldname": "prevdoc_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 0, 
-  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

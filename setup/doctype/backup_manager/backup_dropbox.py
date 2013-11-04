@@ -61,8 +61,8 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 		allowed = 0
 		message = "Dropbox Access not approved."
 
-	webnotes.message_title = "Dropbox Approval"
-	webnotes.message = "<h3>%s</h3><p>Please close this window.</p>" % message
+	webnotes.local.message_title = "Dropbox Approval"
+	webnotes.local.message = "<h3>%s</h3><p>Please close this window.</p>" % message
 	
 	webnotes.conn.commit()
 	webnotes.response['type'] = 'page'

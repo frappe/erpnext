@@ -5,12 +5,9 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 
-from webnotes.utils import cstr, cint
-from webnotes.model.doc import Document
-from webnotes.model.code import get_obj
+from webnotes.utils import cstr
 import webnotes.defaults
 
-import  os, json
 
 class DocType:
 	def __init__(self,d,dl):
@@ -56,10 +53,6 @@ class DocType:
 
 		if self.doc.default_currency:
 			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
-
-		if not webnotes.conn.sql("""select name from tabCompany
-			where country=%s and docstatus<2 limit 1""", self.doc.country):
-			self.create_fields_for_locale(self.doc.country)
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
@@ -243,18 +236,6 @@ class DocType:
 			
 		account.insert()
 
-	def create_fields_for_locale(self, country):
-		all_data = []
-		with open(os.path.join(os.path.dirname(__file__), "fields", "custom_fields.json"), "r") as local_fields:
-			all_data = json.loads(local_fields.read())
-		if all_data: all_data = webnotes._dict.get(country, [])
-
-		for d in all_data:
-			self.add_cfield(d)
-
-	def add_cfield(self, fieldata):
-		webnotes.bean("Custom Fields", fieldata).insert()
-
 	def set_default_accounts(self):
 		accounts = {
 			"default_income_account": "Sales",
@@ -333,3 +314,18 @@ class DocType:
 			and value=%s""", (newdn, olddn))
 		
 		webnotes.defaults.clear_default("company", value=olddn)
+
+@webnotes.whitelist()
+def replace_abbr(company, old, new):
+	webnotes.conn.set_value("Company", company, "abbr", new)
+	
+	def _rename_record(dt):
+		for d in webnotes.conn.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
+			parts = d[0].split(" - ")
+			if parts[-1].lower() == old.lower():
+				name_without_abbr = " - ".join(parts[:-1])
+				webnotes.rename_doc(dt, d[0], name_without_abbr + " - " + new)
+		
+	for dt in ["Account", "Cost Center", "Warehouse"]:
+		_rename_record(dt)
+		webnotes.conn.commit()

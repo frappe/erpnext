@@ -7,6 +7,9 @@ import unittest
 from hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 
 class TestLeaveApplication(unittest.TestCase):
+	def tearDown(self):
+		webnotes.session.user = "Administrator"
+		
 	def _clear_roles(self):
 		webnotes.conn.sql("""delete from `tabUserRole` where parent in 
 			("test@example.com", "test1@example.com", "test2@example.com")""")
@@ -15,6 +18,7 @@ class TestLeaveApplication(unittest.TestCase):
 		webnotes.conn.sql("""delete from `tabLeave Application`""")
 		
 	def _add_employee_leave_approver(self, employee, leave_approver):
+		temp_session_user = webnotes.session.user
 		webnotes.session.user = "Administrator"
 		employee = webnotes.bean("Employee", employee)
 		employee.doclist.append({
@@ -23,6 +27,7 @@ class TestLeaveApplication(unittest.TestCase):
 			"leave_approver": leave_approver
 		})
 		employee.save()
+		webnotes.session.user = temp_session_user
 	
 	def get_application(self, doclist):
 		application = webnotes.bean(copy=doclist)
@@ -31,7 +36,6 @@ class TestLeaveApplication(unittest.TestCase):
 		return application
 
 	def test_block_list(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		
 		from webnotes.profile import add_role
@@ -54,7 +58,6 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertTrue(application.insert())
 		
 	def test_overlap(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		self._clear_applications()
 		
@@ -72,7 +75,6 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 		
 	def test_global_block_list(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 
 		from webnotes.profile import add_role
@@ -98,7 +100,6 @@ class TestLeaveApplication(unittest.TestCase):
 			"applies_to_all_departments", 0)
 		
 	def test_leave_approval(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		
 		from webnotes.profile import add_role

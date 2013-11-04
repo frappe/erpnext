@@ -3,6 +3,7 @@
 	"_label": "User Guide",
 	"_toc": [
 		"docs.user.intro",
+		"docs.user.five_day_setup",
 		"docs.user.implement",
 		"docs.user.setup",
 		"docs.user.selling",
@@ -16,7 +17,8 @@
 		"docs.user.website",
 		"docs.user.tools",
 		"docs.user.customize",
-		"docs.user.knowledge"
+		"docs.user.knowledge",
+		"docs.user.customer_portal"
 	],
 	"_no_toc": 1
 }
@@ -29,6 +31,12 @@ Contents
 	1. [Open Source](docs.user.intro.open_source.html)
 	1. [Ways to get started](docs.user.intro.try.html)
 	1. [Getting Help](docs.user.help.html)
+1. [Five-Day-Setup](docs.user.five_day_setup.html)
+	1. [Day-1: Setup Customer,Item, and Supplier](docs.user.five_day_setup.day_1.html)
+	1. [Day-2: Setup Chart of Accounts, Opening Accounts, and HR](docs.user.five_day_setup.day_2.html)
+	1. [Day-3: Sales Cycle and Purchase Cycle](docs.user.five_day_setup.day_3.html)
+	1. [Day-4: Manufacturing Cycle and Accounting Reports](docs.user.five_day_setup.day_4.html)
+	1. [Day-5: Projects, Calendar, and Website](docs.user.five_day_setup.day_5.html)
 1. [Implementation](docs.user.implement.html)
 	1. [Implementation Strategy](docs.user.implement.strategy.html)
 	1. [Concepts](docs.user.implement.concepts.html)
@@ -63,6 +71,7 @@ Contents
 		1. [Terms and Conditions](docs.user.selling.terms.html)
 		1. [Price Lists](docs.user.setup.price_list.html)
 		1. [Discount](docs.user.selling.discount.html)
+		1. [Shopping Cart](docs.user.selling.shopping_cart.html)
 	1. [Customers](docs.user.selling.customer.html)
 	1. [Lead](docs.user.selling.lead.html)
 	1. [Opportunity](docs.user.selling.opportunity.html)
@@ -81,6 +90,7 @@ Contents
 	1. [Warehouse](docs.user.stock.warehouse.html)
 	1. [Item Group](docs.user.stock.item_group.html)
 	1. [Item](docs.user.stock.item.html)
+	1. [Product Listing on Website](docs.user.stock.product_listing_on_website.html)
 	1. [Serialized Inventory](docs.user.stock.serialized.html)
 	1. [Purchase Receipt](docs.user.stock.purchase_receipt.html)
 	1. [Delivery Note](docs.user.stock.delivery_note.html)
@@ -152,6 +162,11 @@ Contents
 	1. [Accounting Knowledge](docs.user.knowledge.accounting.html)
 	1. [Accounting Entries](docs.user.knowledge.accounting_entries.html)
 	1. [DocType Definitions](docs.user.knowledge.doctype.html)
+	1. [DocType Fields](docs.user.knowledge.doctype_fields.html)
 	1. [Attachment and CSV Files](docs.user.knowledge.attachment_csv.html)
 	1. [Format using Markdown](docs.user.knowledge.markdown.html)
-	
+1. [Customer Portal](docs.user.customer_portal.html)
+	1. [Sign Up](docs.user.customer_portal.sign_up.html)
+	2. [Login](docs.user.customer_portal.login.html)
+	3. [Customer Orders](docs.user.customer_portal.orders.html)
+	4. [Support Tickets](docs.user.customer_portal.tickets.html)

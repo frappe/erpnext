@@ -12,18 +12,17 @@ from accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
 	def make_gl_entries(self):
-		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
-			return
-		
-		warehouse_account = self.get_warehouse_account()
-		
-		if self.doc.docstatus==1:
-			gl_entries = self.get_gl_entries_for_stock(warehouse_account)
-			make_gl_entries(gl_entries)
-		else:	
+		if self.doc.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
+			
+		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+			warehouse_account = self.get_warehouse_account()
 		
-		self.update_gl_entries_after(warehouse_account)
+			if self.doc.docstatus==1:
+				gl_entries = self.get_gl_entries_for_stock(warehouse_account)
+				make_gl_entries(gl_entries)
+
+			self.update_gl_entries_after(warehouse_account)
 	
 	def get_gl_entries_for_stock(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -91,15 +90,11 @@ class StockController(AccountsController):
 		return stock_ledger
 		
 	def get_warehouse_account(self):
-		for d in webnotes.conn.sql("select name from tabWarehouse"):
-			webnotes.bean("Warehouse", d[0]).save()
-
 		warehouse_account = dict(webnotes.conn.sql("""select master_name, name from tabAccount 
 			where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 		return warehouse_account
 		
 	def update_gl_entries_after(self, warehouse_account=None):
-		from accounts.utils import get_stock_and_account_difference
 		future_stock_vouchers = self.get_future_stock_vouchers()
 		gle = self.get_voucherwise_gl_entries(future_stock_vouchers)
 		if not warehouse_account:

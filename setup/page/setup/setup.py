@@ -41,6 +41,7 @@ items = [
 			{"doctype":"UOM"}, 
 			{"doctype":"Brand"},
 			{"doctype":"Price List"}, 
+			{"doctype": "Item Price"}, 
 			{ "title": "Stock Settings", 
 				"route": "Form/Stock Settings", "type": "Link", "icon": "icon-cog" },
 		],
@@ -225,8 +226,6 @@ items = [
 		"title": "System Administration",
 		"icon": "icon-cog"
 	},
-	{ "title": "Update ERPNext", 
-		"route": "update-manager", "type": "Link", "icon": "icon-rss" },
 	{ "title": "Manage 3rd Party Backups", 
 		"route": "Form/Backup Manager", "type": "Link", "icon": "icon-cloud" },
 	{ "title": "System Scheduler Errors", 

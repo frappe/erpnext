@@ -58,7 +58,7 @@ wn.module_page["Buying"] = [
 				"label": wn._("Buying Settings"),
 				"route": "Form/Buying Settings",
 				"doctype":"Buying Settings",
-				"description": "Settings for Buying Module"
+				"description": wn._("Settings for Buying Module")
 			},
 			{
 				"label": wn._("Purchase Taxes and Charges Master"),
@@ -67,8 +67,13 @@ wn.module_page["Buying"] = [
 			},
 			{
 				label: wn._("Price List"),
-				description: wn._("Mupltiple Item prices."),
+				description: wn._("Multiple Price list."),
 				doctype:"Price List"
+			},
+			{
+				label: wn._("Item Price"),
+				description: wn._("Multiple Item prices."),
+				doctype:"Item Price"
 			},
 			{
 				"doctype":"Supplier Type",
@@ -144,6 +149,11 @@ wn.module_page["Buying"] = [
 				"label":wn._("Purchase Order Trends"),
 				route: "query-report/Purchase Order Trends",
 				doctype: "Purchase Order"
+			},
+			{
+				"label":wn._("Supplier Addresses And Contacts"),
+				route: "query-report/Supplier Addresses and Contacts",
+				doctype: "Supplier"
 			},
 		]
 	}

@@ -120,7 +120,7 @@ class DocType:
 			elif self.doc.rm_cost_as_per == "Price List":
 				if not self.doc.buying_price_list:
 					webnotes.throw(_("Please select Price List"))
-				rate = webnotes.conn.get_value("Item Price", {"parent": self.doc.buying_price_list, 
+				rate = webnotes.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
 					"item_code": arg["item_code"]}, "ref_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
@@ -332,6 +332,7 @@ class DocType:
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
 			total_rm_cost += d.amount
+			
 		self.doc.raw_material_cost = total_rm_cost
 
 	def update_exploded_items(self):
@@ -403,3 +404,55 @@ class DocType:
 				action = self.doc.docstatus < 2 and _("deactivate") or _("cancel")
 				msgprint(_("Cannot ") + action + _(": It is linked to other active BOM(s)"),
 					raise_exception=1)
+
+def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
+	item_dict = {}
+		
+	query = """select 
+				bom_item.item_code,
+				item.item_name,
+				ifnull(sum(bom_item.qty_consumed_per_unit),0) * %(qty)s as qty, 
+				item.description, 
+				item.stock_uom,
+				item.default_warehouse,
+				item.purchase_account as expense_account,
+				item.cost_center
+			from 
+				`tab%(table)s` bom_item, `tabItem` item 
+			where 
+				bom_item.docstatus < 2 
+				and bom_item.parent = "%(bom)s"
+				and item.name = bom_item.item_code 
+				%(conditions)s
+				group by item_code, stock_uom"""
+	
+	if fetch_exploded:
+		items = webnotes.conn.sql(query % {
+			"qty": qty,
+			"table": "BOM Explosion Item",
+			"bom": bom,
+			"conditions": """and ifnull(item.is_pro_applicable, 'No') = 'No'
+					and ifnull(item.is_sub_contracted_item, 'No') = 'No' """
+		}, as_dict=True)
+	else:
+		items = webnotes.conn.sql(query % {
+			"qty": qty,
+			"table": "BOM Item",
+			"bom": bom,
+			"conditions": ""
+		}, as_dict=True)
+
+	# make unique
+	for item in items:
+		if item_dict.has_key(item.item_code):
+			item_dict[item.item_code]["qty"] += flt(item.qty)
+		else:
+			item_dict[item.item_code] = item
+		
+	return item_dict
+
+@webnotes.whitelist()
+def get_bom_items(bom, qty=1, fetch_exploded=1):
+	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
+	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
+	return items

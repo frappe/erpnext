@@ -12,7 +12,7 @@ window.get_product_list = function() {
 	
 	$.ajax({
 		method: "GET",
-		url: "server.py",
+		url: "/",
 		dataType: "json",
 		data: {
 			cmd: "selling.utils.product.get_product_list",

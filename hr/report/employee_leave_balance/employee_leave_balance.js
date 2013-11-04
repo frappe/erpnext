@@ -5,14 +5,14 @@ wn.query_reports["Employee Leave Balance"] = {
 	"filters": [
 		{
 			"fieldname":"fiscal_year",
-			"label": "Fiscal Year",
+			"label": wn._("Fiscal Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": wn.defaults.get_user_default("fiscal_year")
 		},
 		{
 			"fieldname":"company",
-			"label": "Company",
+			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": wn.defaults.get_user_default("company")

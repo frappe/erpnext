@@ -11,8 +11,6 @@ from setup.utils import get_company_currency
 
 from controllers.stock_controller import StockController
 
-class WrongWarehouseCompany(Exception): pass
-
 class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details
@@ -23,8 +21,9 @@ class BuyingController(StockController):
 		if self.doc.supplier and not self.doc.supplier_name:
 			self.doc.supplier_name = webnotes.conn.get_value("Supplier", 
 				self.doc.supplier, "supplier_name")
+		self.is_item_table_empty()
 		self.validate_stock_or_nonstock_items()
-		self.validate_warehouse_belongs_to_company()
+		self.validate_warehouse()
 		
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -49,17 +48,20 @@ class BuyingController(StockController):
 				if supplier:
 					self.doc.supplier = supplier
 					break
+					
+	def validate_warehouse(self):
+		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		
+		warehouses = list(set([d.warehouse for d in 
+			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
+				
+		for w in warehouses:
+			validate_warehouse_user(w)
+			validate_warehouse_company(w, self.doc.company)
 
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
 		self.set_taxes("purchase_tax_details", "purchase_other_charges")
-		
-	def validate_warehouse_belongs_to_company(self):
-		for warehouse, company in webnotes.conn.get_values("Warehouse", 
-			self.doclist.get_distinct_values("warehouse"), "company").items():
-			if company and company != self.doc.company:
-				webnotes.msgprint(_("Company mismatch for Warehouse") + (": %s" % (warehouse,)),
-					raise_exception=WrongWarehouseCompany)
 
 	def validate_stock_or_nonstock_items(self):
 		if not self.get_stock_items():
@@ -277,3 +279,8 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
+
+
+	def is_item_table_empty(self):
+		if not len(self.doclist.get({"parentfield": self.fname})):
+			webnotes.throw(_("Item table can not be blank"))

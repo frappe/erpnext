@@ -7,11 +7,11 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.cscript.merge = function(doc, cdt, cdn) {
 	if (!doc.merge_with) {
-		msgprint("Please enter the warehouse to which you want to merge?");
+		msgprint(wn._("Please enter the warehouse to which you want to merge?"));
 		return;
 	}
-	var check = confirm("Are you sure you want to merge this warehouse into " 
-		+ doc.merge_with + "?");
+	var check = confirm(wn._("Are you sure you want to merge this warehouse into " 
+		+ doc.merge_with + "?"));
 	if (check) {
 		return $c_obj(make_doclist(cdt, cdn), 'merge_warehouses', '', '');
 	}

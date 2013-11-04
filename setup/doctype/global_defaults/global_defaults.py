@@ -29,6 +29,7 @@ class DocType:
 	def on_update(self):
 		"""update defaults"""
 		self.validate_session_expiry()
+		self.update_control_panel()
 		
 		for key in keydict:
 			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
@@ -57,7 +58,15 @@ class DocType:
 			if len(parts)!=2 or not (cint(parts[0]) or cint(parts[1])):
 				webnotes.msgprint("""Session Expiry must be in format hh:mm""",
 					raise_exception=1)
-				
-	
+
+	def update_control_panel(self):
+		cp_bean = webnotes.bean("Control Panel")
+		if self.doc.country:
+			cp_bean.doc.country = self.doc.country
+		if self.doc.time_zone:
+			cp_bean.doc.time_zone = self.doc.time_zone
+		cp_bean.ignore_permissions = True
+		cp_bean.save()
+
 	def get_defaults(self):
 		return webnotes.defaults.get_defaults()

@@ -4,16 +4,22 @@
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
-	cur_frm.add_custom_button("Item Group Tree", function() {
+	cur_frm.add_custom_button(wn._("Item Group Tree"), function() {
 		wn.set_route("Sales Browser", "Item Group");
 	})
+
+	if(!doc.__islocal && doc.show_in_website) {
+		cur_frm.add_custom_button("View In Website", function() {
+			window.open(doc.page_name);
+		}, "icon-globe");
+	}
 }
 
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root item group
 	if(!doc.parent_item_group) {
 		cur_frm.perm = [[1,0,0], [1,0,0]];
-		cur_frm.set_intro("This is a root item group and cannot be edited.");
+		cur_frm.set_intro(wn._("This is a root item group and cannot be edited."));
 	} else {
 		cur_frm.set_intro(null);
 	}

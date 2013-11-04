@@ -7,6 +7,7 @@ from webnotes import _
 from webnotes.utils import cstr
 
 no_cache = True
+no_sitemap = True
 
 def get_context():
 	from selling.utils.cart import get_lead_or_customer
