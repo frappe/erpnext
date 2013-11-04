@@ -14,8 +14,9 @@ def execute():
 	
 	webnotes.reload_doc("setup", "doctype", "applicable_territory")
 	
-	if os.path.exists("app/setup/doctype/for_territory"):
-		os.system("rm -rf app/setup/doctype/for_territory")
+	path = os.path.join(get_base_path(), "app", "setup", "doctype", "for_territory")
+	if os.path.exists(path):
+		os.system("rm -rf {path}".format(path=path))
 	
 	if webnotes.conn.exists("DocType", "For Territory"):
 			webnotes.delete_doc("DocType", "For Territory")
