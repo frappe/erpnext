@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import webnotes, os
 
 def execute():
+	from webnotes.utils import get_base_path
 	import shutil
 	
 	webnotes.reload_doc("core", "doctype", "doctype")
