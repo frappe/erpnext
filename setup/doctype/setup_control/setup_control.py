@@ -101,7 +101,9 @@ class DocType:
 			'default_currency': args.get('currency'),
 			'default_company':args.get('company_name'),
 			'date_format': webnotes.conn.get_value("Country", args.get("country"), "date_format"),
-			"float_precision": 4
+			"float_precision": 3,
+			"time_zone": args.get("time_zone"),
+			"country": args.get("country")
 		})
 		global_defaults.save()
 		
@@ -141,9 +143,7 @@ class DocType:
 
 		# control panel
 		cp = webnotes.doc("Control Panel", "Control Panel")
-		for k in ['country', 'time_zone', 'company_name']:
-			cp.fields[k] = args[k]
-			
+		cp.company_name = args["company_name"]
 		cp.save()
 			
 	def create_feed_and_todo(self):

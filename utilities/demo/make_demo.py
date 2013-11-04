@@ -151,7 +151,7 @@ def run_stock(current_date):
 	if can_make("Delivery Note"):
 		from selling.doctype.sales_order.sales_order import make_delivery_note
 		from stock.stock_ledger import NegativeStockError
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoRequiredError, SerialNoQtyError
+		from stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
@@ -382,7 +382,7 @@ def make_items():
 	import_data("BOM", submit=True)
 
 def make_price_lists():
-	import_data("Price_List", overwrite=True)
+	import_data("Item_Price", overwrite=True)
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])
