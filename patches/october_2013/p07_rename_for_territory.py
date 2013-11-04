@@ -6,6 +6,7 @@ import webnotes, os
 
 def execute():
 	from webnotes.utils import get_base_path
+	import shutil
 	webnotes.reload_doc("core", "doctype", "doctype")
 
 	tables = webnotes.conn.sql_list("show tables")
@@ -17,7 +18,7 @@ def execute():
 	
 	path = os.path.join(get_base_path(), "app", "setup", "doctype", "for_territory")
 	if os.path.exists(path):
-		os.system("rm -rf {path}".format(path=path))
+		shutil.rmtree(path)
 	
 	if webnotes.conn.exists("DocType", "For Territory"):
 		webnotes.delete_doc("DocType", "For Territory")
