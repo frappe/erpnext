@@ -108,7 +108,7 @@ def create_price_lists(args):
 				"currency": args["currency"]
 			},
 			{
-				"doctype": "For Territory",
+				"doctype": "Applicable Territory",
 				"parentfield": "valid_for_territories",
 				"territory": "All Territories"
 			}

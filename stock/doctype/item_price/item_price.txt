@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-10-21 15:11:20", 
+  "modified": "2013-10-31 12:59:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -14,7 +14,7 @@
   "icon": "icon-flag", 
   "in_create": 0, 
   "istable": 0, 
-  "module": "Setup", 
+  "module": "Stock", 
   "name": "__common__", 
   "read_only": 0
  }, 

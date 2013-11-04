@@ -62,7 +62,7 @@ test_records = [
 			"shipping_amount": 0.0
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory"
 		}

@@ -18,7 +18,7 @@ class DocType(DocListController):
 			# if no territory, set default territory
 			if webnotes.defaults.get_user_default("territory"):
 				self.doclist.append({
-					"doctype": "For Territory",
+					"doctype": "Applicable Territory",
 					"parentfield": "valid_for_territories",
 					"territory": webnotes.defaults.get_user_default("territory")
 				})
