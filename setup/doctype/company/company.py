@@ -13,6 +13,10 @@ class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
 		
+		if not webnotes.conn.sql("""select name from tabCompany
+			where country=%s and docstatus<2 limit 1""", self.doc.country):
+			self.create_fields_for_country(self.doc.country)
+
 	def onload(self):
 		self.doc.fields["__transactions_exist"] = self.check_if_transactions_exist()
 		
@@ -64,6 +68,20 @@ class DocType:
 					"create_account_under": "Stock Assets - " + self.doc.abbr
 				}).insert()
 			
+	def create_fields_for_country(self, country):
+		all_data = []
+		with open(os.path.join(os.path.dirname(__file__), "fields", "custom_fields.json"), "r") as local_fields:
+			all_data = json.loads(local_fields.read())
+		if all_data: all_data = webnotes._dict.get(country, [])
+
+		for d in all_data:
+			self.add_cfield(d)
+
+	def add_cfield(self, fieldata):
+		bean = webnotes.new_bean('Custom Field')
+		bean.fields.update(fieldata)
+		bean.insert()
+
 	def create_default_web_page(self):
 		if not webnotes.conn.get_value("Website Settings", None, "home_page") and \
 				not webnotes.conn.sql("select name from tabCompany where name!=%s", self.doc.name):
