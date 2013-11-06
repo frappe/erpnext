@@ -409,7 +409,8 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 	item_dict = {}
 		
 	query = """select 
-				bom_item.item_code, 
+				bom_item.item_code,
+				item.item_name,
 				ifnull(sum(bom_item.qty_consumed_per_unit),0) * %(qty)s as qty, 
 				item.description, 
 				item.stock_uom,

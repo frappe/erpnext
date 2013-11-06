@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-20 12:48:38", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:09", 
+  "modified": "2013-10-31 18:56:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,7 +20,7 @@
   "label": "Territory", 
   "name": "__common__", 
   "options": "Territory", 
-  "parent": "For Territory", 
+  "parent": "Applicable Territory", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -28,7 +28,7 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "For Territory"
+  "name": "Applicable Territory"
  }, 
  {
   "doctype": "DocField"

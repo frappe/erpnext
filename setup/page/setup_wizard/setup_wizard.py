@@ -108,7 +108,7 @@ def create_price_lists(args):
 				"currency": args["currency"]
 			},
 			{
-				"doctype": "For Territory",
+				"doctype": "Applicable Territory",
 				"parentfield": "valid_for_territories",
 				"territory": "All Territories"
 			}
@@ -124,7 +124,9 @@ def set_defaults(args):
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name'),
 		'date_format': webnotes.conn.get_value("Country", args.get("country"), "date_format"),
-		"float_precision": 4
+		"float_precision": 3,
+		"country": args.get("country"),
+		"time_zone": args.get("time_zone")
 	})
 	global_defaults.save()
 	
@@ -164,9 +166,7 @@ def set_defaults(args):
 
 	# control panel
 	cp = webnotes.doc("Control Panel", "Control Panel")
-	for k in ['country', 'timezone', 'company_name']:
-		cp.fields[k] = args[k]
-		
+	cp.company_name = args["company_name"]
 	cp.save()
 			
 def create_feed_and_todo():

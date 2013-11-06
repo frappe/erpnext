@@ -897,11 +897,16 @@ def get_bank_cash_account(mode_of_payment):
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
+	# income account can be any Credit account, 
+	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
-				and tabAccount.docstatus!=2 
+				and tabAccount.docstatus!=2
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 

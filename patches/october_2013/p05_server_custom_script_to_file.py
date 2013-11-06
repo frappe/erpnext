@@ -21,8 +21,12 @@ def execute():
 	for name, dt, script in webnotes.conn.sql("""select name, dt, script from `tabCustom Script`
 		where script_type='Server'"""):
 			if script.strip():
-				script = indent_using_tabs(script)
-				make_custom_server_script_file(dt, script)
+				try:
+					script = indent_using_tabs(script)
+					make_custom_server_script_file(dt, script)
+				except IOError, e:
+					if "already exists" not in repr(e):
+						raise
 			
 def indent_using_tabs(script):
 	for line in script.split("\n"):

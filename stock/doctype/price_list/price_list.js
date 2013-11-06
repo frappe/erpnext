@@ -3,7 +3,7 @@
 
 $.extend(cur_frm.cscript, {
 	onload: function() {
-		erpnext.add_for_territory();
+		erpnext.add_applicable_territory();
 	},
 
 	refresh: function() {

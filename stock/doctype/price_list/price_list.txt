@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-10-18 13:33:07", 
+  "modified": "2013-10-31 19:24:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -17,7 +17,7 @@
   "document_type": "Master", 
   "icon": "icon-tags", 
   "max_attachments": 1, 
-  "module": "Setup", 
+  "module": "Stock", 
   "name": "__common__"
  }, 
  {
@@ -81,7 +81,7 @@
   "fieldname": "valid_for_territories", 
   "fieldtype": "Table", 
   "label": "Valid for Territories", 
-  "options": "For Territory", 
+  "options": "Applicable Territory", 
   "reqd": 1
  }, 
  {

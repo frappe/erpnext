@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
-	webnotes.reload_doc("setup", "doctype", "price_list")
-	webnotes.reload_doc("setup", "doctype", "item_price")
+	webnotes.reload_doc("stock", "doctype", "price_list")
+	webnotes.reload_doc("stock", "doctype", "item_price")
 	webnotes.reload_doc("stock", "doctype", "item")
 	
 	webnotes.conn.sql("""update `tabItem Price` set parenttype='Price List', 

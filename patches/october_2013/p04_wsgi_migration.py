@@ -27,4 +27,7 @@ def execute():
 	for file_path in (("js", "wn-web.js"), ("css", "wn-web.css")):
 		file_path = os.path.join(base_path, "public", *file_path)
 		if os.path.exists(file_path):
-			os.remove(file_path)	
+			os.remove(file_path)
+			
+	# Remove update app page
+	webnotes.delete_doc("Page", "update-manager")

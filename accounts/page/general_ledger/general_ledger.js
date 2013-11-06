@@ -24,7 +24,6 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		});
 	},
 	setup_columns: function() {
-		var DEFAULT_COMPANY_VALUE = wn._("Select Company...");
 		this.columns = [
 			{id: "posting_date", name: wn._("Posting Date"), field: "posting_date", width: 100,
 				formatter: this.date_formatter},
@@ -55,9 +54,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: DEFAULT_COMPANY_VALUE,
+		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: wn._("Select Company..."),
 			filter: function(val, item, opts) {
-				return item.company == val || val == DEFAULT_COMPANY_VALUE;
+				return item.company == val || val == opts.default_value;
 			}},
 		{fieldtype:"Link", label: wn._("Account"), link:"Account",
 			filter: function(val, item, opts, me) {

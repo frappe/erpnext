@@ -25,7 +25,7 @@ test_records = [
 			"rate": 6.36,
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "All Territories"
 		}
@@ -113,7 +113,7 @@ test_records = [
 			"row_id": 7
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory India"
 		}
@@ -141,7 +141,7 @@ test_records = [
 			"rate": 4,
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "All Territories"
 		}

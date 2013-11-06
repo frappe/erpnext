@@ -338,11 +338,14 @@ class DocType(BuyingController):
 				)
 			
 			# accumulate valuation tax
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount) \
-				and tax.cost_center:
-					valuation_tax.setdefault(tax.cost_center, 0)
-					valuation_tax[tax.cost_center] += \
-						(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				if auto_accounting_for_stock and not tax.cost_center:
+					webnotes.throw(_("Row %(row)s: Cost Center is mandatory \
+						if tax/charges category is Valuation or Valuation and Total" % 
+						{"row": tax.idx}))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
@@ -453,12 +456,17 @@ class DocType(BuyingController):
 @webnotes.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
-
+	
+	# expense account can be any Debit account, 
+	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Debit" 
-					or tabAccount.account_type = "Expense Account") 
+					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2 
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
