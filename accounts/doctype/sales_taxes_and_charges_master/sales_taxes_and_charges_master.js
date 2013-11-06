@@ -7,7 +7,7 @@ wn.require("app/js/controllers/accounts.js");
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.doctype === "Sales Taxes and Charges Master")
-		erpnext.add_for_territory();
+		erpnext.add_applicable_territory();
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {

@@ -456,12 +456,17 @@ class DocType(BuyingController):
 @webnotes.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
-
+	
+	# expense account can be any Debit account, 
+	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Debit" 
-					or tabAccount.account_type = "Expense Account") 
+					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2 
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 

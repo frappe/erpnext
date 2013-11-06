@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-11-02 16:58:44", 
+  "modified": "2013-11-06 11:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -255,14 +255,6 @@
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "remark", 
-  "fieldtype": "Small Text", 
-  "label": "Remark", 
-  "oldfieldname": "remark", 
-  "oldfieldtype": "Text"
  }, 
  {
   "doctype": "DocField", 

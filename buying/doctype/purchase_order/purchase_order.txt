@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:14:10", 
+  "modified": "2013-11-05 23:09:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -215,7 +215,6 @@
   "print_hide": 1
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -225,7 +224,6 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
@@ -308,7 +306,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "label": "Purchase Taxes and Charges", 
+  "label": "Tax Master", 
   "no_copy": 0, 
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
@@ -491,7 +489,7 @@
   "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
-  "label": "Terms and Conditions1", 
+  "label": "Terms and Conditions", 
   "oldfieldname": "terms", 
   "oldfieldtype": "Text Editor"
  }, 
@@ -609,14 +607,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "instructions", 
-  "fieldtype": "Text", 
-  "label": "Instructions", 
-  "oldfieldname": "instructions", 
-  "oldfieldtype": "Text"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "column_break5", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
@@ -651,26 +641,6 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "payment_terms", 
-  "fieldtype": "Text", 
-  "label": "Payment Terms", 
-  "no_copy": 1, 
-  "oldfieldname": "payment_terms", 
-  "oldfieldtype": "Text", 
-  "print_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "remarks", 
-  "fieldtype": "Text", 
-  "label": "Remarks", 
-  "no_copy": 1, 
-  "oldfieldname": "remarks", 
-  "oldfieldtype": "Text", 
-  "print_hide": 1
  }, 
  {
   "description": "Required raw materials issued to the supplier for producing a sub - contracted item.", 

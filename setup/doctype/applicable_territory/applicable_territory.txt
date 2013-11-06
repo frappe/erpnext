@@ -21,7 +21,7 @@
   "label": "Territory", 
   "name": "__common__", 
   "options": "Territory", 
-  "parent": "For Territory", 
+  "parent": "Applicable Territory", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
   "permlevel": 0, 
@@ -29,7 +29,7 @@
  }, 
  {
   "doctype": "DocType", 
-  "name": "For Territory"
+  "name": "Applicable Territory"
  }, 
  {
   "doctype": "DocField"

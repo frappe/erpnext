@@ -15,7 +15,7 @@ test_records = [
 			"buying_or_selling": "Selling"
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "All Territories"
 		},
@@ -28,7 +28,7 @@ test_records = [
 			"buying_or_selling": "Selling"
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory Rest of the World"
 		}
@@ -41,7 +41,7 @@ test_records = [
 			"buying_or_selling": "Selling"
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory India"
 		}
@@ -54,12 +54,12 @@ test_records = [
 			"buying_or_selling": "Selling"
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory Rest of the World"
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory United States"
 		}

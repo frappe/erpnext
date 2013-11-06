@@ -161,7 +161,6 @@ patch_list = [
 	"execute:webnotes.delete_doc('Report', 'Sales Orders Pending To Be Delivered')",
 	"patches.june_2013.p05_remove_unused_doctypes",
 	"patches.june_2013.p06_drop_unused_tables",
-	"patches.june_2013.p07_taxes_price_list_for_territory",
 	"patches.june_2013.p08_shopping_cart_settings",
 	"patches.june_2013.p09_update_global_defaults",
 	"patches.june_2013.p10_lead_address",
@@ -235,4 +234,7 @@ patch_list = [
 	"patches.october_2013.p04_update_report_permission",
 	"patches.october_2013.p05_delete_gl_entries_for_cancelled_vouchers",
 	"patches.october_2013.p06_update_control_panel_and_global_defaults",
+	"patches.october_2013.p07_rename_for_territory",
+	"patches.june_2013.p07_taxes_price_list_for_territory",
+	"patches.october_2013.p08_cleanup_after_item_price_module_change",
 ]

@@ -83,7 +83,7 @@ def get_tax_accounts(item_list, columns):
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
 				for item, tax_amount in item_wise_tax_detail.items():
 					item_tax.setdefault(parent, {}).setdefault(item, {})[account_head] = \
-						 flt(tax_amount[1])
+						 flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
 			except ValueError:
 				continue
 	

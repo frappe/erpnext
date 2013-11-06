@@ -4,12 +4,12 @@
 from __future__ import unicode_literals
 import unittest
 import webnotes
-from setup.doctype.item_price.item_price import ItemPriceDuplicateItem
 
 class TestItem(unittest.TestCase):
 	def test_duplicate_item(self):
-		item_price = webnotes.bean(copy=test_records[0])
-		self.assertRaises(ItemPriceDuplicateItem, item_price.insert)
+		from stock.doctype.item_price.item_price import ItemPriceDuplicateItem
+		bean = webnotes.bean(copy=test_records[0])
+		self.assertRaises(ItemPriceDuplicateItem, bean.insert)
 
 test_records = [
 	[
