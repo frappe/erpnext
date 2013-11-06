@@ -401,21 +401,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// Calculate total discount amount from tax doclist
 		$.each(me.frm.tax_doclist, function(i, tax) {
 			if(tax.charge_type == "Discount Amount")
-				me.total_discount_amount += tax.rate;
+				me.total_discount_amount += flt(tax.rate, precision("rate", tax));
 		});
 
 		// Calculate amount for tax for each item
 		$.each(this.frm.item_doclist, function(i, item) {
-			item["amount_for_tax"] = 0.0;
+			item.amount_for_tax = 0.0;
 
 			if (me.total_discount_amount != 0.0) {
 				var discount = flt(me.total_discount_amount * item.amount / 
-					me.frm.doc.net_total);
-				me.new_net_total += flt(item.amount - discount);
-				item["amount_for_tax"] = item.amount - discount;
-			}
-			else {
-				item["amount_for_tax"] = item.amount;
+					me.frm.doc.net_total, precision("amount", item));
+				item.amount_for_tax = flt(item.amount - discount, precision("amount", item));
+				me.new_net_total += flt(item.amount_for_tax, precision("net_total"));
+			} else {
+				item.amount_for_tax = item.amount;
 				me.new_net_total += item.amount;
 			}
 		});

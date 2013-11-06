@@ -94,9 +94,21 @@ cur_frm.pformat.other_charges= function(doc){
 
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-		alert(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
-		d.charge_type = '';
+	
+	if(d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') {
+		var msg = wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total'");
+		if (d.idx == 1) {
+			alert(msg + wn._(" for first row"));
+			d.charge_type = '';
+		} else if(d.idx > 1) {
+			var tax_doclist = wn.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name,
+				{parentfield: cur_frm.cscript.other_fname});
+
+			if (tax_doclist[d.idx - 2].charge_type == 'Discount Amount') {
+				alert(msg + wn._(" if previous row Charge Type is 'Discount Amount'"));
+				d.charge_type = '';
+			}
+		}
 	}
 	validated = false;
 	refresh_field('charge_type',d.name,'other_charges');
@@ -111,7 +123,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 		alert(wn._("Please select Charge Type first"));
 		d.row_id = '';
 	}
-	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
+	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'Discount Amount') && d.row_id) {
 		alert(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
 		d.row_id = '';
 	}

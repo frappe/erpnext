@@ -588,7 +588,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of 
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item["amount_for_tax"] + current_tax_amount,
+					tax.grand_total_for_current_item = flt(item.amount_for_tax + current_tax_amount,
 						precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item = 
@@ -597,7 +597,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				}
 
 				// in tax.total, accumulate grand total for each item
-				tax.total += tax.grand_total_for_current_item;
+				tax.total += flt(tax.grand_total_for_current_item, precision("total", tax));
 			});
 		});
 	},
@@ -611,11 +611,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.new_net_total ?
-				((item["amount_for_tax"] / this.new_net_total) * actual) :
+				((item.amount_for_tax / this.new_net_total) * actual) :
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
-			current_tax_amount = (tax_rate / 100.0) * item["amount_for_tax"];
+			current_tax_amount = (tax_rate / 100.0) * item.amount_for_tax;
 			
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
@@ -644,7 +644,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		});
 
 		$.each(this.frm.item_doclist, function(i, item) {
-			delete item["amount_for_tax"];
+			delete item.amount_for_tax;
 		});
 	},
 

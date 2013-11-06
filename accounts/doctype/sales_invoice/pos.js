@@ -271,9 +271,10 @@ erpnext.POS = Class.extend({
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
-				if (qty == 0)
+				if (qty == 0) {
 					wn.model.clear_doc(d.doctype, d.name);
-				else {
+					me.refresh_grid();
+				} else {
 					d.qty = qty;
 					me.frm.script_manager.trigger("qty", d.doctype, d.name);
 				}
@@ -321,7 +322,8 @@ erpnext.POS = Class.extend({
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length) ? true : false)
+			.toggle((taxes && taxes.length && 
+				flt(me.frm.doc.other_charges_total_export) != 0.0) ? true : false)
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
@@ -454,9 +456,12 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
+		this.refresh_grid();
+	},
+	refresh_grid: function() {
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
-		me.refresh();
+		this.refresh();
 	},
 	make_payment: function() {
 		var me = this;
