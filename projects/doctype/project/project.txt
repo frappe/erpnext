@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:39:55", 
+  "modified": "2013-11-06 15:13:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -150,7 +150,6 @@
   "search_index": 0
  }, 
  {
-  "description": "Important dates and commitments in your project life cycle", 
   "doctype": "DocField", 
   "fieldname": "sb_milestones", 
   "fieldtype": "Section Break", 
