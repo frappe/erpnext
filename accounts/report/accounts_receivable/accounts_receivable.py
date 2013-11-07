@@ -43,7 +43,7 @@ class AccountsReceivableReport(object):
 						outstanding_amount]
 					entry_date = due_date if self.filters.ageing_based_on=="Due Date" \
 						else gle.posting_date
-					row += self.get_age(entry_date, outstanding_amount)
+					row += get_age(self.age_as_on, entry_date, outstanding_amount)
 					data.append(row)
 		return data
 				
@@ -69,24 +69,6 @@ class AccountsReceivableReport(object):
 					
 		return flt(gle.debit) - flt(gle.credit) - payment_received
 		
-	def get_age(self, entry_date, oustanding_amount):
-		# [0-30, 30-60, 60-90, 90-above]
-		outstanding_range = [0.0, 0.0, 0.0, 0.0]
-		if not (self.age_as_on and entry_date):
-			return [0] + outstanding_range
-			
-		age = (self.age_as_on - getdate(entry_date)).days or 0
-		index = None
-		for i, days in enumerate([30, 60, 90]):
-			if age <= days:
-				index = i
-				break
-		
-		if index is None: index = 3
-		outstanding_range[index] = oustanding_amount
-		
-		return [age] + outstanding_range
-			
 	def get_customer(self, account):
 		return self.get_account_map().get(account).get("customer_name") or ""
 		
@@ -158,3 +140,21 @@ class AccountsReceivableReport(object):
 
 def execute(filters=None):
 	return AccountsReceivableReport(filters).run()
+	
+def get_ageing_data(age_as_on, entry_date, oustanding_amount):
+	# [0-30, 30-60, 60-90, 90-above]
+	outstanding_range = [0.0, 0.0, 0.0, 0.0]
+	if not (self.age_as_on and entry_date):
+		return [0] + outstanding_range
+		
+	age = (self.age_as_on - getdate(entry_date)).days or 0
+	index = None
+	for i, days in enumerate([30, 60, 90]):
+		if age <= days:
+			index = i
+			break
+	
+	if index is None: index = 3
+	outstanding_range[index] = oustanding_amount
+	
+	return [age] + outstanding_range
