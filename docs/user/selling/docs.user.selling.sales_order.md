@@ -3,7 +3,7 @@
 	"_label": "Sales Order"
 }
 ---
-The Sales Order confirms your sales and triggers purchase (**Purchase Request**) shipment (**Delivery Note**), billing (**Sales Invoice**) and manufacturing (**Production Plan**)
+The Sales Order confirms your sales and triggers purchase (**Material  Request**) shipment (**Delivery Note**), billing (**Sales Invoice**) and manufacturing (**Production Plan**)
 
 A Sales Order is usually a binding Contract with your Customer.
 
@@ -41,7 +41,7 @@ The “Packing List” table will be automatically updated when you “Save” t
 
 #### Reservation and Warehouses
 
-If your Sales Order contains Items for which inventory is tracked (Is Stock Item is “Yes”). ERPNext will ask you for “Reservation Warehouse”. If you have set a default Warehouse for the Item, it will automatically set this Warehouse here.
+If your Sales Order contains Items for which inventory is tracked (Is Stock Item is “Yes”) then, ERPNext will ask you for “Reservation Warehouse”. If you have set a default Warehouse for the Item, it will automatically set this Warehouse here.
 
 This “reserved” quantity will help you project what is the quantity you need to purchase based on all your commitments.
 
