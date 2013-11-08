@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2013-10-23 14:35:46", 
+  "modified": "2013-11-08 16:15:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -110,25 +110,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "incoming_rate", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Valuation Rate", 
-  "oldfieldname": "incoming_rate", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 0, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amount", 
-  "fieldtype": "Currency", 
-  "label": "Amount", 
-  "oldfieldname": "amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 1
+  "fieldname": "serial_no_batch", 
+  "fieldtype": "Section Break", 
+  "label": "Serial No / Batch"
  }, 
  {
   "doctype": "DocField", 
@@ -153,6 +137,34 @@
   "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "accounting", 
+  "fieldtype": "Section Break", 
+  "label": "Accounting"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "incoming_rate", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Valuation Rate", 
+  "oldfieldname": "incoming_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amount", 
+  "fieldtype": "Currency", 
+  "label": "Amount", 
+  "oldfieldname": "amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
   "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
@@ -173,6 +185,12 @@
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info"
  }, 
  {
   "doctype": "DocField", 

@@ -455,7 +455,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}).join("\n");
 		
 		if(!rows) return "";
-		return '<div style="overflow-x: scroll;"><table class="table table-bordered table-hover">\
+		return '<p><a href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">Show / Hide tax break-up</a><br><br></p>\
+		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \
 		</table></div>';
