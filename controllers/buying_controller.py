@@ -114,7 +114,10 @@ class BuyingController(StockController):
 			self._set_in_company_currency(item, "import_amount", "amount")
 			
 	def calculate_net_total(self):
-		self.doc.net_total = self.doc.net_total_import = self.new_net_total = 0.0
+		# temporary fields
+		self.new_net_total = self.total_discount_amount = 0.0
+
+		self.doc.net_total = self.doc.net_total_import = 0.0
 
 		for item in self.item_doclist:
 			item.amount_for_tax = item.amount

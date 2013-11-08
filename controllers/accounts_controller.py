@@ -323,6 +323,9 @@ class AccountsController(TransactionBase):
 		for item in self.item_doclist:
 			if "amount_for_tax" in item.fields:
 				del item.fields["amount_for_tax"]
+
+		del self.total_discount_amount
+		del self.new_net_total
 			
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
