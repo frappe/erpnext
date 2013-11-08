@@ -84,7 +84,7 @@ class DocType:
 		for pr in purchase_receipts:
 			pr_bean = webnotes.bean("Purchase Receipt", pr)
 			
-			pr_bean.run_method("update_ordered_qty", is_cancelled="Yes")
+			pr_bean.run_method("update_ordered_qty")
 			
 			webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)

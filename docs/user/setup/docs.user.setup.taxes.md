@@ -17,6 +17,11 @@ If some of your Items require different tax rates as compared to others, mention
 
 
 - **Inclusive and Exclusive Tax**: ERPNext allows you to enter Item rates which are tax inclusive.
+
+![Inclusive Tax](img/inclusive-tax.png)
+
+
+
 - **Exception to the rule**: Item tax settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account
 - **Item tax is overwrite-able**: You can overwrite or change the item tax rate by going to the Item master in the Item tax table.
 

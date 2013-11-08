@@ -143,6 +143,7 @@ Contents
 	1. [Style](docs.user.website.style.html)
 	1. [Blog](docs.user.website.blog.html)
 	1. [Shopping Cart](docs.user.website.shopping_cart.html)
+	1. [Add Products](docs.user.website.add_products_to_website.html)
 1. [Tools](docs.user.tools.html)
 	1. [To Do](docs.user.tools.todo.html)
 	1. [Calendar](docs.user.tools.calendar.html)

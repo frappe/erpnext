@@ -106,8 +106,8 @@ def make_demo_login_page():
 
 def make_demo_on_login_script():
 	import shutil
-	from core.doctype.custom_script.custom_script import get_custom_server_script_path
-	custom_script_path = get_custom_server_script_path("Control Panel")
+	import webnotes.plugins
+	custom_script_path = webnotes.plugins.get_path("Core", "DocType", "Control Panel")
 	webnotes.create_folder(os.path.dirname(custom_script_path))
 	
 	shutil.copyfile(os.path.join(os.path.dirname(__file__), "demo_control_panel.py"), custom_script_path)
