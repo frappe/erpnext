@@ -189,7 +189,6 @@ class DocType(SellingController):
 		if pos:
 			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
-				self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
@@ -213,6 +212,8 @@ class DocType(SellingController):
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
 				self.set_taxes("other_charges", "charge")
+
+		self.set_customer_defaults()
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -519,7 +520,7 @@ class DocType(SellingController):
 		
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
-						
+		
 		self.make_pos_gl_entries(gl_entries)
 		
 		update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account and 'No' or 'Yes'

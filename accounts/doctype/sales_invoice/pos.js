@@ -48,13 +48,20 @@ erpnext.POS = Class.extend({
 									</tbody>\
 								</table>\
 							</div>\
-							<table class="table table-condensed">\
-								<tr>\
-									<td style="vertical-align: middle;"><b>Grand Total</b></td>\
-									<td style="text-align: right; font-size: 200%; \
-										font-size: bold;" class="grand-total"></td>\
-								</tr>\
-							</table>\
+							<div class="discount-area">\
+								<button class="btn btn-link btn-sm flat-discount">\
+								<i class="icon-plus"></i> Add Flat Discount</button>\
+							</div>\
+							<br>\
+							<div class="grand-total-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td style="vertical-align: middle;"><b>Grand Total</b></td>\
+										<td style="text-align: right; font-size: 200%; \
+											font-size: bold;" class="grand-total"></td>\
+									</tr>\
+								</table>\
+							</div>\
 						</div>\
 					</div>\
 					<br><br>\
@@ -76,11 +83,15 @@ erpnext.POS = Class.extend({
 			this.party = "Customer";
 			this.price_list = this.frm.doc.selling_price_list;
 			this.sales_or_purchase = "Sales";
+			this.net_total = "net_total_export";
+			this.grand_total = "grand_total_export";
 		}
 		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
 			this.party = "Supplier";
 			this.price_list = this.frm.doc.buying_price_list;
 			this.sales_or_purchase = "Purchase";
+			this.net_total = "net_total_import";
+			this.grand_total = "grand_total_import";
 		}
 		
 		this.make();
@@ -96,6 +107,10 @@ erpnext.POS = Class.extend({
 
 		this.wrapper.find(".make-payment").on("click", function() {
 			me.make_payment();
+		});
+
+		this.wrapper.find(".flat-discount").on("click", function() {
+			me.add_flat_discount();
 		});
 	},
 	make: function() {
@@ -342,18 +357,10 @@ erpnext.POS = Class.extend({
 		});
 
 		// set totals
-		if (this.sales_or_purchase == "Sales") {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
-				me.frm.doc.currency));
-		}
-		else {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_import, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_import, 
-				me.frm.doc.currency));
-		}
+		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total], 
+			me.frm.doc.currency));
+		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total], 
+			me.frm.doc.currency));
 
 		// if form is local then only run all these functions
 		if (this.frm.doc.docstatus===0) {
@@ -493,8 +500,6 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
-					me.barcode.$input.focus();
-					
 					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
@@ -508,5 +513,39 @@ erpnext.POS = Class.extend({
 				}
 			});
 		}
+	},
+	add_flat_discount: function() {
+		var me = this;
+		// show discount wizard
+		var dialog = new wn.ui.Dialog({
+			title: 'Flat Discount', 
+			fields: [
+				{fieldtype:'Data', fieldname:'charge_type', label:'Type', reqd:1, 
+					default:'Discount Amount'},
+				{fieldtype:'Link', fieldname:'account_head', label:'Account Head', reqd: 1, 
+					options:'Account'},
+				{fieldtype:'Link', fieldname:'cost_center', label:'Cost Center', reqd: 1, 
+					options:'Cost Center'},
+				{fieldtype:'Text', fieldname:'description', label:'Description', reqd:1},
+				{fieldtype:'Data', fieldname:'rate', label:'Rate', reqd:1},
+				{fieldtype:'Button', fieldname:'add', label:'Add'}
+			]
+		});
+		dialog.show();
+		dialog.get_input("charge_type").prop("disabled", true);
+		
+		dialog.fields_dict.add.input.onclick = function() {
+			var tax = wn.model.add_child(me.frm.doc, "Sales Taxes and Charges", 
+				me.frm.cscript.other_fname);
+			tax.charge_type = dialog.get_values().charge_type;
+			tax.account_head = dialog.get_values().account_head;
+			me.frm.script_manager.trigger("account_head", tax.doctype, tax.name);
+			tax.cost_center = dialog.get_values().cost_center;
+			tax.description = dialog.get_values().description;
+			tax.rate = dialog.get_values().rate;
+			me.frm.script_manager.trigger("rate", tax.doctype, tax.name);
+			dialog.hide();
+			me.refresh();
+		};
 	},
 });

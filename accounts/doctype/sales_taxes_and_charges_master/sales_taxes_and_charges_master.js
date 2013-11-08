@@ -137,6 +137,25 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 	refresh_field('row_id',d.name,'other_charges');
 }
 
+cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	
+	if(d.charge_type == 'Discount Amount' || d.charge_type == 'Actual') {
+		var msg = repl(wn._("For row") + " # %(idx)s [%(doctype)s]: " + 
+			"%(charge_type_label)s = \"%(charge_type)s\" " +
+			wn._("cannot be included in Basic Rate"), {
+				idx: d.idx,
+				doctype: d.doctype,
+				charge_type_label: wn.meta.get_label(d.doctype, "charge_type", d.name),
+				charge_type: d.charge_type
+			});
+		msgprint(msg);
+	}
+	validated = false;
+	d.included_in_print_rate = 0;
+	refresh_field("included_in_print_rate", d.name, "other_charges");
+}
+
 /*---------------------- Get rate if account_head has account_type as TAX or CHARGEABLE-------------------------------------*/
 
 cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
