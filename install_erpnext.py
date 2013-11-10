@@ -4,6 +4,7 @@
 #!/usr/bin/env python
 from __future__ import unicode_literals
 import os, sys
+import argparse
 
 is_redhat = is_debian = None
 root_password = None
@@ -24,17 +25,7 @@ requirements = [
 	"pygeoip"
 ]
 
-def install(install_path=None):
-	if os.getuid() != 0:
-		raise Exception, "Please run this script as root"
-
-	install_pre_requisites()
-
-	if os.environ.get('SUDO_UID'):
-		os.setuid(int(os.environ.get('SUDO_UID')))
-	
-	if not install_path:
-		install_path = os.getcwd()
+def install(install_path):
 	setup_folders(install_path)
 	install_erpnext(install_path)
 	
@@ -67,7 +58,7 @@ def validate_install():
 	python_version = sys.version.split(" ")[0]
 	print "Python Version =", python_version
 	if not (python_version and int(python_version.split(".")[0])==2 and int(python_version.split(".")[1]) >= 7):
-		raise Exception, "Hey! ERPNext needs Python version to be 2.6+"
+		raise Exception, "Hey! ERPNext needs Python version to be 2.7+"
 	
 	# check distribution
 	distribution = platform.linux_distribution()[0].lower().replace('"', '')
@@ -115,7 +106,7 @@ def update_config_for_redhat():
 	import re
 	
 	# set to autostart on startup
-	for service in ("mysqld", "httpd", "memcached", "ntpd"):
+	for service in ("mysqld", "memcached", "ntpd"):
 		exec_in_shell("chkconfig --level 2345 %s on" % service)
 		exec_in_shell("service %s restart" % service)
 	
@@ -181,7 +172,7 @@ def install_erpnext(install_path):
 	# setup_db(install_path, root_password, db_name)
 	wnf.install(db_name, root_password=root_password)
 
-	# setup_cron(install_path)
+	setup_cron(install_path)
 	
 def get_root_password():
 	# ask for root mysql password
@@ -197,6 +188,7 @@ def test_root_connection(root_pwd):
 		raise Exception("Incorrect MySQL Root user's password")
 		
 def setup_folders(install_path):
+	os.chdir(install_path)
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
@@ -239,13 +231,7 @@ def setup_conf(install_path, db_name):
 	return db_password
 	
 def post_install(install_path):
-	print
-	print "-"*80
-	print "To start the development server, run lib/wnf.py --serve"
-	print "-"*80
-	print "Installation complete"
-	print "Open your browser and go to http://localhost:8000"
-	print "Login using username = Administrator and password = admin"
+	pass
 
 def exec_in_shell(cmd):
 	# using Popen instead of os.system - as recommended by python docs
@@ -273,5 +259,65 @@ def exec_in_shell(cmd):
 
 	return out
 
+def parse_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--create_user', default=False, action='store_true')
+	parser.add_argument('--username', default='erpnext')
+	parser.add_argument('--password', default='erpnext')
+	parser.add_argument('--no_install_prerequisites', default=False, action='store_true')
+	return parser.parse_args()
+
+def create_user(username, password):
+	import subprocess, pwd
+	p = subprocess.Popen("useradd -m -d /home/{username} -s {shell} {username}".format(username=username, shell=os.environ.get('SHELL')).split())
+	p.wait()
+	p = subprocess.Popen("passwd {username}".format(username=username).split(), stdin=subprocess.PIPE)
+	p.communicate('{password}\n{password}\n'.format(password=password))
+	p.wait()
+	return pwd.getpwnam(username).pw_uid
+
+def setup_cron(install_path):
+        erpnext_cron_entries = [
+                "*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> erpnext-sch.log 2>&1" % install_path,
+                "0 */6 * * * cd %s && python lib/wnf.py --backup >> erpnext-backup.log 2>&1" % install_path
+                ]
+        for row in erpnext_cron_entries:
+                try:
+                        existing_cron = exec_in_shell("crontab -l")
+                        if row not in existing_cron:
+                                exec_in_shell('{ crontab -l; echo "%s"; } | crontab' % row)
+                except:
+                        exec_in_shell('echo "%s" | crontab' % row)
+
 if __name__ == "__main__":
-	install()
+	args = parse_args()
+	install_path = os.getcwd()
+	if os.getuid() != 0 and args.create_user and not args.no_install_prequisites:
+		raise Exception, "Please run this script as root"
+
+	if args.create_user:
+		uid = create_user(args.username, args.password)
+		install_path = '/home/{username}/erpnext'.format(username=args.username)
+
+	if not args.no_install_prerequisites:
+		install_pre_requisites()
+
+	if os.environ.get('SUDO_UID') and not args.create_user:
+		os.setuid(int(os.environ.get('SUDO_UID')))
+	
+	if os.getuid() == 0 and args.create_user:
+		os.setuid(uid)
+		if install_path:
+			os.mkdir(install_path)
+	
+	install(install_path=install_path)
+	print
+	print "-"*80
+	print "Installation complete"
+	print "To start the development server,"
+	print "Login as {username} with password {password}".format(username=args.username, password=args.password)
+	print "cd {}".format(install_path)
+	print "./lib/wnf.py --serve"
+	print "-"*80
+	print "Open your browser and go to http://localhost:8000"
+	print "Login using username = Administrator and password = admin"
