@@ -163,19 +163,20 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.search = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Link",
-				"options": "Item",
+				"fieldtype": "Data",
 				"label": "Item",
 				"fieldname": "pos_item",
-				"placeholder": "Item"
+				"placeholder": "Search Item"
 			},
 			parent: this.wrapper.find(".search-area"),
 			only_input: true,
 		});
 		this.search.make_input();
-		this.search.$input.on("change", function() {
+		this.search.$input.on("keypress", function() {
 			if(!me.search.autocomplete_open)
-				me.make_item_list();
+				if(me.item_timeout)
+					clearTimeout(me.item_timeout);
+				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
 	make_barcode: function() {
@@ -199,6 +200,7 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		me.item_timeout = null;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_items',
 			args: {
@@ -284,6 +286,12 @@ erpnext.POS = Class.extend({
 			me.frm.script_manager.trigger("item_code", child.doctype, child.name);
 		}
 		me.refresh();
+		
+		// Clear Item Box and remake item list
+		if (this.search.$input.val()) {
+			this.search.set_input("");
+			this.make_item_list();
+		}
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
@@ -542,12 +550,11 @@ erpnext.POS = Class.extend({
 			var tax = wn.model.add_child(me.frm.doc, "Sales Taxes and Charges", 
 				me.frm.cscript.other_fname);
 			tax.charge_type = dialog.get_values().charge_type;
+			me.frm.script_manager.trigger("charge_type", tax.doctype, tax.name);
 			tax.account_head = dialog.get_values().account_head;
-			me.frm.script_manager.trigger("account_head", tax.doctype, tax.name);
 			tax.cost_center = dialog.get_values().cost_center;
 			tax.description = dialog.get_values().description;
 			tax.rate = dialog.get_values().rate;
-			me.frm.script_manager.trigger("rate", tax.doctype, tax.name);
 			dialog.hide();
 			me.refresh();
 		};

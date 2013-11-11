@@ -109,9 +109,9 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 				d.charge_type = '';
 			}
 		}
+		refresh_field('charge_type', d.name, 'other_charges');
 	}
 	validated = false;
-	refresh_field('charge_type',d.name,'other_charges');
 	cur_frm.cscript.row_id(doc, cdt, cdn);
 	cur_frm.cscript.rate(doc, cdt, cdn);
 	cur_frm.cscript.tax_amount(doc, cdt, cdn);
@@ -134,7 +134,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 		}
 	}
 	validated = false;
-	refresh_field('row_id',d.name,'other_charges');
+	refresh_field('row_id', d.name, 'other_charges');
 }
 
 cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
@@ -183,7 +183,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		d.rate = '';
 	}
 	validated = false;
-	refresh_field('rate',d.name,'other_charges');
+	refresh_field('rate', d.name, 'other_charges');
 }
 
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
@@ -197,5 +197,5 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 		d.tax_amount = '';
 	}
 	validated = false;
-	refresh_field('tax_amount',d.name,'other_charges');
+	refresh_field('tax_amount', d.name, 'other_charges');
 };

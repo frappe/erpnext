@@ -7,6 +7,7 @@ import webnotes
 @webnotes.whitelist()
 def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 	condition = ""
+	args = {"price_list": price_list}
 	
 	if sales_or_purchase == "Sales":
 		condition = "i.is_sales_item='Yes'"
@@ -17,7 +18,9 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 		condition += " and i.item_group='%s'" % item_group
 
 	if item:
-		condition += " and i.name='%s'" % item
+		condition += " and i.name like %(name)s order by i.name like %(item)s desc"
+		args["name"] = '%%%s%%' % item
+		args["item"] = '%s%%' % item
 
 	return webnotes.conn.sql("""select i.name, i.item_name, i.image, 
 		item_det.ref_rate, item_det.currency 
@@ -27,7 +30,7 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 		ON
 			item_det.item_code=i.name
 		where
-			%s""" % ('%s', condition), (price_list), as_dict=1)
+			%s""" % ('%(price_list)s', condition), args, as_dict=1)
 
 @webnotes.whitelist()
 def get_item_code(barcode_serial_no):
