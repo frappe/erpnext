@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-10-09 15:26:29", 
+  "modified": "2013-11-03 14:20:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -53,11 +53,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -210,7 +209,7 @@
   "read_only": 1
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Territory\">To manage Territory, click here</a>", 
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -224,7 +223,7 @@
  }, 
  {
   "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
-  "description": "<a href=\"#Sales Browser/Customer Group\">To manage Territory, click here</a>", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -285,7 +284,6 @@
   "read_only": 1
  }, 
  {
-  "description": "Filing in Additional Information about the Opportunity will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -304,7 +302,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 

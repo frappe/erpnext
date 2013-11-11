@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-10-09 15:27:54", 
+  "modified": "2013-11-06 11:27:57", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,11 +50,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -133,7 +132,6 @@
  }, 
  {
   "depends_on": "eval:doc.source == 'Customer'", 
-  "description": "Source of th", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
@@ -260,14 +258,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "remark", 
-  "fieldtype": "Small Text", 
-  "label": "Remark", 
-  "oldfieldname": "remark", 
-  "oldfieldtype": "Text"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "phone", 
   "fieldtype": "Data", 
   "label": "Phone", 
@@ -300,7 +290,7 @@
   "oldfieldtype": "Data"
  }, 
  {
-  "description": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 

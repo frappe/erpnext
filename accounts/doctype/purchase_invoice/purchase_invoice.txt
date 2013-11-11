@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:24:55", 
+  "modified": "2013-11-05 23:09:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,11 +56,10 @@
   "width": "50%"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -86,7 +85,7 @@
   "depends_on": "supplier", 
   "doctype": "DocField", 
   "fieldname": "supplier_name", 
-  "fieldtype": "Text", 
+  "fieldtype": "Data", 
   "hidden": 0, 
   "in_list_view": 1, 
   "label": "Name", 
@@ -138,7 +137,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -241,7 +239,6 @@
   "read_only": 0
  }, 
  {
-  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
@@ -251,7 +248,6 @@
   "read_only": 0
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -261,7 +257,6 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
@@ -323,7 +318,6 @@
   "read_only": 1
  }, 
  {
-  "description": "Add / Edit Taxes and Charges", 
   "doctype": "DocField", 
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
@@ -336,7 +330,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "label": "Purchase Taxes and Charges", 
+  "label": "Tax Master", 
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
   "options": "Purchase Taxes and Charges Master", 
@@ -607,7 +601,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "options": "Terms and Conditions", 
   "print_hide": 1
  }, 
@@ -707,7 +701,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

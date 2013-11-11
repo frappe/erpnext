@@ -192,7 +192,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Attach", fieldname:"item_img_1", label:"Attach Image..."},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_group_1", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_uom_1", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
@@ -201,7 +200,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Column Break"},
 					{fieldtype:"Attach", fieldname:"item_img_2", label:"Attach Image..."},
 					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_group_2", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
 					{fieldtype:"Column Break"},
@@ -212,7 +210,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Attach", fieldname:"item_img_3", label:"Attach Image..."},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_group_3", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_uom_3", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
@@ -222,7 +219,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Attach", fieldname:"item_img_4", label:"Attach Image..."},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_group_4", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_uom_4", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
@@ -231,7 +227,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Column Break"},
 					{fieldtype:"Attach", fieldname:"item_img_5", label:"Attach Image..."},
 					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_group_5", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
 					{fieldtype:"Column Break"},
@@ -248,14 +243,12 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Data", fieldname:"item_buy_1", label:"Item 1", placeholder:"A Product or Service"},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_group_1", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_uom_1", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Data", fieldname:"item_buy_2", label:"Item 2", placeholder:"A Product or Service"},
 					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_group_2", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
 					{fieldtype:"Column Break"},
@@ -264,7 +257,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Data", fieldname:"item_buy_3", label:"Item 3", placeholder:"A Product or Service"},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_group_3", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_uom_3", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
@@ -272,14 +264,12 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Data", fieldname:"item_buy_4", label:"Item 4", placeholder:"A Product or Service"},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Column Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_group_4", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_uom_4", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
 					{fieldtype:"Section Break"},
 					{fieldtype:"Data", fieldname:"item_buy_5", label:"Item 5", placeholder:"A Product or Service"},
 					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
 					{fieldtype:"Column Break"},
 					{fieldtype:"Select", fieldname:"item_buy_group_5", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
 					{fieldtype:"Column Break"},
@@ -363,7 +353,7 @@ wn.wiz.Wizard = Class.extend({
 		this.show_welcome();
 	},
 	get_message: function(html) {
-		return $(repl('<div class="panel panel-default" style="max-width: 400px; margin: auto;">\
+		return $(repl('<div class="panel panel-default">\
 			<div class="panel-body" style="padding: 40px;">%(html)s</div>\
 		</div>', {html:html}))
 	},
@@ -431,16 +421,17 @@ wn.wiz.WizardSlide = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		this.$wrapper = $(repl('<div class="panel panel-default" style="margin: 0px 30px;">\
+		this.$wrapper = $(repl('<div class="panel panel-default">\
 			<div class="panel-heading"><div class="panel-title">%(main_title)s: Step %(step)s</div></div>\
 			<div class="panel-body">\
 				<div class="progress">\
 					<div class="progress-bar" style="width: %(width)s%"></div>\
 				</div>\
+				<br>\
 				<div class="row">\
-					<div class="col-sm-6 form"></div>\
-					<div class="col-sm-6 help">\
-						<h3><i class="%(icon)s text-muted"></i> %(title)s</h3><br>\
+					<div class="col-sm-8 form"></div>\
+					<div class="col-sm-4 help">\
+						<h3 style="margin-top: 0px"><i class="%(icon)s text-muted"></i> %(title)s</h3><br>\
 						<p class="text-muted">%(help)s</p>\
 					</div>\
 				</div>\

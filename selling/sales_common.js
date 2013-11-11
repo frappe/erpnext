@@ -555,12 +555,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		setup_field_label_map(["net_total_export", "other_charges_total_export", "grand_total_export", 
 			"rounded_total_export", "in_words_export"], this.frm.doc.currency);
 		
-		setup_field_label_map(["conversion_rate"], 	"1 " + this.frm.doc.currency 
-			+ " = [?] " + company_currency);
+		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency 
+			+ " = [?] " + company_currency)
 		
 		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
-			setup_field_label_map(["plc_conversion_rate"], 	"1 " + this.frm.doc.price_list_currency 
-				+ " = [?] " + company_currency);
+			cur_frm.set_df_property("plc_conversion_rate", "description", "1 " + this.frm.doc.price_list_currency 
+				+ " = [?] " + company_currency)
 		}
 		
 		// toggle fields
@@ -568,7 +568,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			"grand_total", "rounded_total", "in_words"],
 			this.frm.doc.currency != company_currency);
 			
-		this.frm.toggle_display(["plc_conversion_rate"], 
+		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"], 
 			this.frm.doc.price_list_currency != company_currency);
 		
 		// set labels

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-10-11 10:52:53", 
+  "modified": "2013-11-03 11:19:10", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -73,11 +73,10 @@
   "report_hide": 1
  }, 
  {
-  "description": "<span class=\"sys_manager\">To setup, please go to Setup > Naming Series</span>", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -235,7 +234,7 @@
   "fieldname": "scheduled_confirmation_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
-  "label": "Scheduled Confirmation Date", 
+  "label": "Offer Date", 
   "oldfieldname": "scheduled_confirmation_date", 
   "oldfieldtype": "Date", 
   "search_index": 0
@@ -244,7 +243,7 @@
   "doctype": "DocField", 
   "fieldname": "final_confirmation_date", 
   "fieldtype": "Date", 
-  "label": "Final Confirmation Date", 
+  "label": "Confirmation Date", 
   "oldfieldname": "final_confirmation_date", 
   "oldfieldtype": "Date", 
   "search_index": 0
@@ -330,7 +329,7 @@
   "fieldname": "company_email", 
   "fieldtype": "Data", 
   "in_filter": 1, 
-  "label": "Email (By company)", 
+  "label": "Company Email", 
   "oldfieldname": "company_email", 
   "oldfieldtype": "Data", 
   "reqd": 0
@@ -339,7 +338,7 @@
   "doctype": "DocField", 
   "fieldname": "notice_number_of_days", 
   "fieldtype": "Int", 
-  "label": "Notice - Number of Days", 
+  "label": "Notice (days)", 
   "oldfieldname": "notice_number_of_days", 
   "oldfieldtype": "Int"
  }, 
@@ -458,13 +457,13 @@
   "fieldname": "emergency_contact_details", 
   "fieldtype": "HTML", 
   "label": "Emergency Contact Details", 
-  "options": "<b>Emergency Contact Details</b>"
+  "options": "<h4 class=\"text-muted\">Emergency Contact Details</h4>"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "person_to_be_contacted", 
   "fieldtype": "Data", 
-  "label": "Person To Be Contacted"
+  "label": "Emergency Contact"
  }, 
  {
   "doctype": "DocField", 
@@ -476,7 +475,7 @@
   "doctype": "DocField", 
   "fieldname": "emergency_phone_number", 
   "fieldtype": "Data", 
-  "label": "Emergency Phone Number"
+  "label": "Emergency Phone"
  }, 
  {
   "doctype": "DocField", 
@@ -488,7 +487,7 @@
   "doctype": "DocField", 
   "fieldname": "permanent_accommodation_type", 
   "fieldtype": "Select", 
-  "label": "Permanent Accommodation Type", 
+  "label": "Permanent Address Is", 
   "options": "\nRented\nOwned"
  }, 
  {
@@ -501,7 +500,7 @@
   "doctype": "DocField", 
   "fieldname": "current_accommodation_type", 
   "fieldtype": "Select", 
-  "label": "Current Accommodation Type", 
+  "label": "Current Address Is", 
   "options": "\nRented\nOwned"
  }, 
  {

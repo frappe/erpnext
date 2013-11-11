@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:24:44", 
+  "modified": "2013-11-03 14:14:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -49,11 +49,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -127,7 +126,6 @@
   "width": "50%"
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -174,7 +172,6 @@
   "options": "icon-tag"
  }, 
  {
-  "description": "Supplier's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
@@ -207,7 +204,6 @@
   "width": "50%"
  }, 
  {
-  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
@@ -484,7 +480,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -587,7 +583,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

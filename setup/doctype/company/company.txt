@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-10-08 15:18:34", 
+  "modified": "2013-11-02 14:24:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -157,7 +157,6 @@
   "width": "50%"
  }, 
  {
-  "description": "To enable more currencies go to Setup > Currency", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 

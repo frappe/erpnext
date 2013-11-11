@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-19 15:57:32", 
   "docstatus": 0, 
-  "modified": "2013-07-15 17:33:15", 
+  "modified": "2013-11-02 16:58:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,6 +58,7 @@
   "reqd": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "default_territory", 
   "fieldtype": "Link", 
@@ -71,6 +72,7 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "default_customer_group", 
   "fieldtype": "Link", 

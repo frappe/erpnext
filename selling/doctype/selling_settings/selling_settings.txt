@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 10:25:16", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:46:24", 
+  "modified": "2013-11-02 16:58:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -47,7 +47,7 @@
   "options": "Customer Name\nNaming Series"
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Customer Group\">Manage Customer Groups</a>", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -55,7 +55,7 @@
   "options": "Customer Group"
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Territory\">Territory</a>", 
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:24:49", 
+  "modified": "2013-11-05 23:09:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -49,11 +49,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -127,7 +126,6 @@
   "width": "50%"
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -179,7 +177,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Supplier's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
@@ -210,7 +207,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
@@ -219,7 +215,6 @@
   "print_hide": 1
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -229,7 +224,6 @@
   "read_only": 1
  }, 
  {
-  "depends_on": "buying_price_list", 
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
@@ -312,7 +306,7 @@
   "doctype": "DocField", 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "label": "Purchase Taxes and Charges", 
+  "label": "Tax Master", 
   "no_copy": 0, 
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
@@ -485,7 +479,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -495,7 +489,7 @@
   "doctype": "DocField", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
-  "label": "Terms and Conditions1", 
+  "label": "Terms and Conditions", 
   "oldfieldname": "terms", 
   "oldfieldtype": "Text Editor"
  }, 
@@ -603,21 +597,13 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 
   "options": "Print Heading", 
   "print_hide": 1, 
   "report_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "instructions", 
-  "fieldtype": "Text", 
-  "label": "Instructions", 
-  "oldfieldname": "instructions", 
-  "oldfieldtype": "Text"
  }, 
  {
   "doctype": "DocField", 
@@ -655,26 +641,6 @@
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "payment_terms", 
-  "fieldtype": "Text", 
-  "label": "Payment Terms", 
-  "no_copy": 1, 
-  "oldfieldname": "payment_terms", 
-  "oldfieldtype": "Text", 
-  "print_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "remarks", 
-  "fieldtype": "Text", 
-  "label": "Remarks", 
-  "no_copy": 1, 
-  "oldfieldname": "remarks", 
-  "oldfieldtype": "Text", 
-  "print_hide": 1
  }, 
  {
   "description": "Required raw materials issued to the supplier for producing a sub - contracted item.", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-08-05 18:12:57", 
+  "modified": "2013-11-02 16:52:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,6 +62,7 @@
   "reqd": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "parent_customer_group", 
   "fieldtype": "Link", 
@@ -88,7 +89,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "This Price List will be selected as default for all Customers under this Group.", 
   "doctype": "DocField", 
   "fieldname": "default_price_list", 
   "fieldtype": "Link", 
@@ -122,6 +122,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 

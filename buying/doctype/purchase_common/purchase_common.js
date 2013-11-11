@@ -414,26 +414,27 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		setup_field_label_map(["net_total_import", "grand_total_import", "in_words_import",
 			"other_charges_added_import", "other_charges_deducted_import"], this.frm.doc.currency);
 		
-		setup_field_label_map(["conversion_rate"], 	"1 " + this.frm.doc.currency 
+		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency 
 			+ " = [?] " + company_currency);
 		
 		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
-			setup_field_label_map(["plc_conversion_rate"], 	"1 " + this.frm.doc.price_list_currency 
+			cur_frm.set_df_property("plc_conversion_rate", "description", "1 " + this.frm.doc.price_list_currency 
 				+ " = [?] " + company_currency);
 		}
 		
 		// toggle fields
 		this.frm.toggle_display(["conversion_rate", "net_total", "grand_total", 
 			"in_words", "other_charges_added", "other_charges_deducted"],
-			this.frm.doc.currency != company_currency);
-			
-		this.frm.toggle_display(["plc_conversion_rate"], 
-			this.frm.price_list_currency != company_currency);
+			this.frm.doc.currency !== company_currency);
 		
+		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"], 
+			this.frm.doc.price_list_currency !== company_currency);		
+
 		// set labels
 		$.each(field_label_map, function(fname, label) {
 			me.frm.fields_dict[fname].set_label(label);
 		});
+
 	},
 	
 	change_grid_labels: function(company_currency) {

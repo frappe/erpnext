@@ -23,8 +23,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 		}
 
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<hr>\
-				<p><a href="#Form/Sales Email Settings">'+wn._('Sales Email Settings')+'</a><br>\
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+wn._('Sales Email Settings')+'</a><br>\
 				<span class="help">'+wn._('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
 		}
 	},

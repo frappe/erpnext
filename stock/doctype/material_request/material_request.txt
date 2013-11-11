@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 14:48:38", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:24:42", 
+  "modified": "2013-11-03 15:29:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,7 +50,7 @@
   "doctype": "DocField", 
   "fieldname": "type_section", 
   "fieldtype": "Section Break", 
-  "label": "Type", 
+  "label": "Basic Info", 
   "options": "icon-pushpin"
  }, 
  {
@@ -58,7 +58,7 @@
   "fieldname": "material_request_type", 
   "fieldtype": "Select", 
   "in_list_view": 1, 
-  "label": "Material Request Type", 
+  "label": "Type", 
   "options": "Purchase\nTransfer", 
   "reqd": 1
  }, 
@@ -68,11 +68,10 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -129,7 +128,6 @@
   "options": "Material Request Item"
  }, 
  {
-  "description": "Give additional details about the indent.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -146,7 +144,12 @@
   "width": "50%"
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
+  "doctype": "DocField", 
+  "fieldname": "requested_by", 
+  "fieldtype": "Data", 
+  "label": "Requested For"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -176,36 +179,12 @@
   "width": "150px"
  }, 
  {
-  "description": "Name of the entity who has requested for the Material Request", 
-  "doctype": "DocField", 
-  "fieldname": "requested_by", 
-  "fieldtype": "Data", 
-  "in_list_view": 0, 
-  "label": "Requested By", 
-  "no_copy": 1, 
-  "oldfieldname": "requested_by", 
-  "oldfieldtype": "Data", 
-  "print_width": "100px", 
-  "width": "100px"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
   "print_width": "50%", 
   "width": "50%"
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "letter_head", 
-  "fieldtype": "Select", 
-  "label": "Letter Head", 
-  "oldfieldname": "letter_head", 
-  "oldfieldtype": "Select", 
-  "options": "link:Letter Head", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
@@ -226,6 +205,26 @@
   "width": "100px"
  }, 
  {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Print Heading", 
+  "options": "Print Heading", 
+  "print_hide": 1
+ }, 
+ {
   "description": "% of materials ordered against this Material Request", 
   "doctype": "DocField", 
   "fieldname": "per_ordered", 
@@ -240,20 +239,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "remark", 
-  "fieldtype": "Small Text", 
-  "in_list_view": 0, 
-  "label": "Remarks", 
-  "no_copy": 1, 
-  "oldfieldname": "remark", 
-  "oldfieldtype": "Small Text", 
-  "print_hide": 0, 
-  "print_width": "150px", 
-  "width": "150px"
- }, 
- {
-  "description": "Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template", 
-  "doctype": "DocField", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
   "label": "Terms and Conditions", 
@@ -264,7 +249,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -278,15 +263,6 @@
   "label": "Terms and Conditions Content", 
   "oldfieldname": "terms", 
   "oldfieldtype": "Text Editor"
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "select_print_heading", 
-  "fieldtype": "Link", 
-  "label": "Select Print Heading", 
-  "options": "Print Heading", 
-  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm", 

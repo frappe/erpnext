@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:55:07", 
   "docstatus": 0, 
-  "modified": "2013-10-02 14:25:02", 
+  "modified": "2013-11-06 15:13:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,13 @@
  {
   "doctype": "DocType", 
   "name": "Project"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "overview", 
+  "fieldtype": "Section Break", 
+  "label": "Overview", 
+  "options": "icon-file"
  }, 
  {
   "doctype": "DocField", 
@@ -143,12 +150,12 @@
   "search_index": 0
  }, 
  {
-  "description": "Important dates and commitments in your project life cycle", 
   "doctype": "DocField", 
   "fieldname": "sb_milestones", 
   "fieldtype": "Section Break", 
   "label": "Milestones", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-flag"
  }, 
  {
   "description": "Milestones will be added as Events in the Calendar", 
@@ -168,7 +175,7 @@
   "fieldtype": "Section Break", 
   "label": "Project Details", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-list"
  }, 
  {
   "doctype": "DocField", 
@@ -201,7 +208,7 @@
   "fieldtype": "Section Break", 
   "label": "Project Costing", 
   "oldfieldtype": "Section Break", 
-  "options": "Simple"
+  "options": "icon-money"
  }, 
  {
   "doctype": "DocField", 
@@ -264,10 +271,10 @@
   "fieldname": "customer_details", 
   "fieldtype": "Section Break", 
   "label": "Customer Details", 
-  "oldfieldtype": "Section Break"
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
  }, 
  {
-  "description": "Select name of Customer to whom project belongs", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 

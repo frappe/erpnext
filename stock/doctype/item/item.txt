@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-09-11 11:50:10", 
+  "modified": "2013-11-02 19:41:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,7 +57,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "options": "\nITEM", 
   "read_only": 0
  }, 
@@ -89,7 +89,7 @@
   "search_index": 1
  }, 
  {
-  "description": "<a href=\"#!Sales Browser/Item Group\">Manage Item Groups</a>", 
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 

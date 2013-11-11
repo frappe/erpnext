@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:42", 
   "docstatus": 0, 
-  "modified": "2013-08-23 12:23:18", 
+  "modified": "2013-11-03 14:11:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -92,7 +92,6 @@
   "width": "100px"
  }, 
  {
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 

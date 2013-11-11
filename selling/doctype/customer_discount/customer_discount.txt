@@ -2,7 +2,7 @@
  {
   "creation": "2013-07-22 12:43:40", 
   "docstatus": 0, 
-  "modified": "2013-07-22 12:49:32", 
+  "modified": "2013-11-02 19:41:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,6 +27,7 @@
   "name": "Customer Discount"
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
@@ -36,7 +37,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "discount", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Discount (%)"
  }
 ]
