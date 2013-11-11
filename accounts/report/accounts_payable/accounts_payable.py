@@ -54,7 +54,7 @@ def execute(filters=None):
 				else:
 					ageing_based_on_date = gle.posting_date
 					
-				row += get_ageing_data(ageing_based_on_date, age_on, outstanding_amount)
+				row += get_ageing_data(age_on, ageing_based_on_date, outstanding_amount)
 				data.append(row)
 				
 	return columns, data
