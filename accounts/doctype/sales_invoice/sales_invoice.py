@@ -187,15 +187,16 @@ class DocType(SellingController):
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
-			if not for_validate and not self.doc.customer:
-				self.doc.customer = pos.customer
-
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
 					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
 						self.doc.fields[fieldname] = pos.get(fieldname)
-						
+
 			if not for_validate:
+				if not self.doc.customer:
+					self.doc.customer = pos.customer
+					self.set_customer_defaults()
+
 				self.doc.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
@@ -212,8 +213,6 @@ class DocType(SellingController):
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
 				self.set_taxes("other_charges", "charge")
-
-		self.set_customer_defaults()
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
@@ -547,8 +546,9 @@ class DocType(SellingController):
 			)
 				
 	def make_tax_gl_entries(self, gl_entries):
+		self.total_flat_discount = 0.0
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
-			if flt(tax.tax_amount):
+			if flt(tax.tax_amount) and tax.charge_type != "Discount Amount":
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
@@ -558,16 +558,20 @@ class DocType(SellingController):
 						"cost_center": tax.cost_center
 					})
 				)
+			if tax.charge_type == "Discount Amount":
+				self.total_flat_discount += flt(tax.rate, self.precision("rate", tax))
 				
-	def make_item_gl_entries(self, gl_entries):			
-		# income account gl entries	
+	def make_item_gl_entries(self, gl_entries):
+		# income account gl entries
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if flt(item.amount):
+				item_flat_discount = flt(self.total_flat_discount * item.amount / self.doc.net_total, 
+					self.precision("amount", item))
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
 						"against": self.doc.debit_to,
-						"credit": item.amount,
+						"credit": item.amount - item_flat_discount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
 					})
@@ -577,6 +581,9 @@ class DocType(SellingController):
 		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.doc.update_stock):
 			gl_entries += self.get_gl_entries_for_stock()
+
+		# delete temporary total_flat_discount property
+		del self.total_flat_discount
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

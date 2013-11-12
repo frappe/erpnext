@@ -277,7 +277,8 @@ class AccountsController(TransactionBase):
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
 			current_tax_amount = (self.new_net_total
-				and ((item.amount_for_tax / self.new_net_total) * actual)
+				and (flt(item.amount_for_tax / self.new_net_total, 
+					self.precision("amount", item)) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.amount_for_tax
@@ -324,7 +325,7 @@ class AccountsController(TransactionBase):
 			if "amount_for_tax" in item.fields:
 				del item.fields["amount_for_tax"]
 
-		del self.total_discount_amount
+		del self.total_flat_discount
 		del self.new_net_total
 			
 	def _set_in_company_currency(self, item, print_field, base_field):

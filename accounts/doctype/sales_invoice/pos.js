@@ -549,6 +549,7 @@ erpnext.POS = Class.extend({
 		dialog.fields_dict.add.input.onclick = function() {
 			var tax = wn.model.add_child(me.frm.doc, "Sales Taxes and Charges", 
 				me.frm.cscript.other_fname);
+
 			tax.charge_type = dialog.get_values().charge_type;
 			me.frm.script_manager.trigger("charge_type", tax.doctype, tax.name);
 			tax.account_head = dialog.get_values().account_head;

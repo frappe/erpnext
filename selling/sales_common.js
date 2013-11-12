@@ -387,7 +387,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_net_total: function() {
 		var me = this;
-		this.total_discount_amount = 0.0;
+		this.total_flat_discount = 0.0;
 		this.new_net_total = 0.0;
 		
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
@@ -401,20 +401,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// Calculate total discount amount from tax doclist
 		$.each(me.frm.tax_doclist, function(i, tax) {
 			if(tax.charge_type == "Discount Amount")
-				me.total_discount_amount += flt(tax.rate, precision("rate", tax));
+				me.total_flat_discount += flt(tax.rate, precision("rate", tax));
 		});
 
 		// Calculate amount for tax for each item
 		$.each(this.frm.item_doclist, function(i, item) {
-			item.amount_for_tax = 0.0;
+			item.amount_for_tax = item.amount;
 
-			if (me.total_discount_amount != 0.0) {
-				var discount = flt(me.total_discount_amount * item.amount / 
-					me.frm.doc.net_total, precision("amount", item));
+			if (me.total_flat_discount != 0.0) {
+
+				var discount = flt(me.total_flat_discount * flt(item.amount / 
+					me.frm.doc.net_total, precision("amount", item)), precision("amount", item));
 				item.amount_for_tax = flt(item.amount - discount, precision("amount", item));
 				me.new_net_total += flt(item.amount_for_tax, precision("net_total"));
 			} else {
-				item.amount_for_tax = item.amount;
 				me.new_net_total += item.amount;
 			}
 		});

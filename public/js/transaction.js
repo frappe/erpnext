@@ -522,7 +522,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		this.calculate_item_values();
 		this.initialize_taxes();
-		this.determine_exclusive_rate();
+		this.determine_exclusive_rate && this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
 		this.calculate_totals();
@@ -612,7 +612,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.new_net_total ?
-				((item.amount_for_tax / this.new_net_total) * actual) :
+				(flt(item.amount_for_tax / this.new_net_total, precision("amount", item)) * actual) :
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
@@ -647,6 +647,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		$.each(this.frm.item_doclist, function(i, item) {
 			delete item.amount_for_tax;
 		});
+
+		delete this.total_flat_discount;
+		delete this.new_net_total;
 	},
 
 	calculate_total_advance: function(parenttype, advance_parentfield) {

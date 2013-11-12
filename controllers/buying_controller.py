@@ -115,7 +115,7 @@ class BuyingController(StockController):
 			
 	def calculate_net_total(self):
 		# temporary fields
-		self.new_net_total = self.total_discount_amount = 0.0
+		self.new_net_total = self.total_flat_discount = 0.0
 
 		self.doc.net_total = self.doc.net_total_import = 0.0
 

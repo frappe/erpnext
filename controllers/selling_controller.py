@@ -175,7 +175,7 @@ class SellingController(StockController):
 			self._set_in_company_currency(item, "export_amount", "amount")
 			
 	def calculate_net_total(self):
-		self.total_discount_amount = self.new_net_total = 0.0
+		self.total_flat_discount = self.new_net_total = 0.0
 		self.doc.net_total = self.doc.net_total_export = 0.0
 
 		for item in self.item_doclist:
@@ -187,19 +187,18 @@ class SellingController(StockController):
 		# Calculate total discount amount from tax doclist
 		for tax in self.tax_doclist:
 			if tax.charge_type == "Discount Amount":
-				self.total_discount_amount += flt(tax.rate, self.precision("rate", tax))
+				self.total_flat_discount += flt(tax.rate, self.precision("rate", tax))
 
 		# Calculate amount for tax for each item
 		for item in self.item_doclist:
-			item.amount_for_tax = 0.0
+			item.amount_for_tax = item.amount
 
-			if self.total_discount_amount != 0.0:
-				discount = flt(self.total_discount_amount * item.amount / self.doc.net_total, 
-					self.precision("amount", item))
+			if self.total_flat_discount != 0.0:
+				discount = flt(self.total_flat_discount * flt(item.amount / self.doc.net_total, 
+					self.precision("amount", item)), self.precision("amount", item))
 				item.amount_for_tax = flt(item.amount - discount, self.precision("amount", item))
 				self.new_net_total += flt(item.amount_for_tax, self.precision("net_total"))
 			else:
-				item.amount_for_tax = item.amount
 				self.new_net_total += item.amount
 				
 	def calculate_totals(self):
