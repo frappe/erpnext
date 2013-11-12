@@ -502,15 +502,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var company_currency = this.get_company_currency();
 		
 		if(!this.frm.doc.conversion_rate) {
-			var msg = $(repl('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \
-				record is not created for %(from_currency)s to %(to_currency)s', 
+			wn.throw(wn._('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \
+				record is not created for %(from_currency)s to %(to_currency)s'), 
 				{
 					"conversion_rate_label": conversion_rate_label,
 					"from_currency": self.doc.currency,
 					"to_currency": company_currency
-				}));
-
-			wn.throw(wn._(msg));
+				});
 		}
 	},
 	
