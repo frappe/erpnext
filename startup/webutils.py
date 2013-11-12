@@ -24,3 +24,6 @@ def get_website_settings(context):
 		"shopping_cart_enabled": cart_enabled,
 		"post_login": post_login + context.get("post_login", [])
 	})
+	
+	if not context.get("favicon"):
+		context["favicon"] = "app/images/favicon.ico"
