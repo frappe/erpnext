@@ -8,7 +8,10 @@
 		"docs.user.knowledge.doctype",
 		"docs.user.knowledge.doctype_fields",
 		"docs.user.knowledge.attachment_csv",
-		"docs.user.knowledge.markdown"		
+		"docs.user.knowledge.markdown",
+		"docs.user.knowledge.make-to-stock",
+		"docs.user.knowledge.make-to-order",
+		"docs.user.knowledge.engineer-to-order"		
 	]
 }
 ---

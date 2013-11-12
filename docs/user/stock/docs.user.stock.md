@@ -17,7 +17,9 @@
 		"docs.user.stock.projected_quantity",
 		"docs.user.stock.accounting_for_stock",
 		"docs.user.stock.perpetual_inventory",
-		"docs.user.stock.migrate_to_perpetual"
+		"docs.user.stock.migrate_to_perpetual",
+		"docs.user.stock.how_to_repack_products",
+		"docs.user.stock.how_to"
 	]
 }
 ---
