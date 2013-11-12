@@ -42,7 +42,7 @@ Goods sold being returned is quite a common practice in Business. They could be 
 
 #### Credit Note
 
-Once the Stock Entry is submitted, you can click on Make Credit Note  button and a new Journal Voucher will be created prefilled with the customer's account and Items' income account.
+Once the Stock Entry is submitted, you can click on Make Credit Note  button and a new Journal Voucher will be created pre-filled with the customer's account and Items' income account.
 
 ![Sales Return](img/sales-return-4.png)
 
