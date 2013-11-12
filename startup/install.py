@@ -44,6 +44,35 @@ def import_country_and_currency():
 	from webnotes.country_info import get_all
 	data = get_all()
 	
+	# Sets the permissions of the new user profiles for countries
+
+	for role  in ["Sales Master Manager", "Purchase Master Manager", 
+		"HR User", "HR Manager", "System Manager"]:
+		webnotes.doc({
+			"doctype": "DocPerm",
+			"parent": "Country",
+			"parenttype": "Doctype",
+			"parentfield": "permissions",
+			"role": role,
+			"create": 1,
+			"read": 1,
+			"cancel": 0,
+			"amend": 0,
+			"submit": 0,
+			"report": 1,
+			"write": 1
+		}).insert()
+
+	webnotes.doc({
+		"doctype": "DocPerm",
+		"parent": "Country",
+		"parenttype": "Doctype",
+		"parentfield": "permissions",
+		"role": "Sales Master Manager",
+		"read": 1,
+		"report": 1,
+	})
+
 	for name in data:
 		country = webnotes._dict(data[name])
 		webnotes.doc({

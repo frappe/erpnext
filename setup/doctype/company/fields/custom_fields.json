@@ -1,0 +1,102 @@
+{
+	"Brazil": [
+		{
+			"name": "locale_BRA-Customer-person_type",
+			"dt": "Customer",
+			"fieldname": "person_type",
+			"fieldtype": "Select",
+			"label": "Tipo de Pessoa",
+			"insert_after": "Territory",
+			"options": "\nFísica\nJúridica",
+			"reqd": 1,
+			"permlevel": 0
+		},
+		{
+			"name": "locale_BRA-Customer-documents_sb",
+			"dt": "Customer",
+			"fieldname": "documentos_sb",
+			"fieldtype": "Section Break",
+			"label": "Documentos",
+			"insert_after": "Tipo de Pessoa",
+			"permlevel": 0
+		},
+		{
+			"name": "locale_BRA-Customer-cnpj_cpf",
+			"dt": "Customer",
+			"fieldname": "cnpj_cpf",
+			"fieldtype": "Data",
+			"label": "CNPJ ou CPF",
+			"insert_after": "Documentos",
+			"permlevel": 0,
+			"reqd": 1
+		},
+		{
+			"name": "locale_BRA-Customer-inscr_est",
+			"dt": "Customer",
+			"fieldname": "inscr_est",
+			"fieldtype": "Data",
+			"label": "Inscr Est ou RG",
+			"insert_after": "CNPJ ou CPF",
+			"permlevel": 0,
+			"reqd": 1
+		},
+		{
+			"name": "locale_BRA-Customer-legal_name",
+			"dt": "Customer",
+			"fieldname": "legal_name",
+			"fieldtype": "Data",
+			"label": "Razão Social",
+			"insert_after": "Inscr Est ou RG",
+			"permlevel": 0,
+		},
+		{
+			"name": "locale_BRA-Supplier-person_type",
+			"dt": "Supplier",
+			"fieldname": "person_type",
+			"fieldtype": "Select",
+			"label": "Tipo de Pessoa",
+			"insert_after": "Territory",
+			"options": "\nFísica\nJúridica",
+			"reqd": 1,
+			"permlevel": 0
+		},
+		{
+			"name": "locale_BRA-Supplier-documents_sb",
+			"dt": "Supplier",
+			"fieldname": "documentos_sb",
+			"fieldtype": "Section Break",
+			"label": "Documentos",
+			"insert_after": "Tipo de Pessoa",
+			"permlevel": 0
+		},
+		{
+			"name": "locale_BRA-Supplier-cnpj_cpf",
+			"dt": "Supplier",
+			"fieldname": "cnpj_cpf",
+			"fieldtype": "Data",
+			"label": "CNPJ ou CPF",
+			"insert_after": "Documentos",
+			"permlevel": 0,
+			"reqd": 1
+		},
+		{
+			"name": "locale_BRA-Supplier-inscr_est",
+			"dt": "Supplier",
+			"fieldname": "inscr_est",
+			"fieldtype": "Data",
+			"label": "Inscr Est ou RG",
+			"insert_after": "CNPJ ou CPF",
+			"permlevel": 0,
+			"reqd": 1
+		},
+		{
+			"name": "locale_BRA-Supplier-legal_name",
+			"dt": "Supplier",
+			"fieldname": "legal_name",
+			"fieldtype": "Data",
+			"label": "Razão Social",
+			"insert_after": "Inscr Est ou RG",
+			"permlevel": 0,
+		}
+	]
+}
