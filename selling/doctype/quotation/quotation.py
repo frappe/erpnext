@@ -168,7 +168,7 @@ def _make_customer(source_name, ignore_permissions=False):
 					customer.insert()
 					return customer
 				else:
-					raise e
+					raise
 			except webnotes.MandatoryError:
 				from webnotes.utils import get_url_to_form
 				webnotes.throw(_("Before proceeding, please create Customer from Lead") + \

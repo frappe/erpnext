@@ -10,6 +10,6 @@ def execute():
 		webnotes.conn.sql("""alter table `tabStock Ledger Entry` add index posting_sort_index(posting_date, posting_time, name)""")
 		webnotes.conn.commit()
 	except Exception, e:
-		if e.args[0]!=1061: raise e
+		if e.args[0]!=1061: raise
 	webnotes.conn.begin()
 	
