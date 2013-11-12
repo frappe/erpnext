@@ -63,7 +63,7 @@ def validate_install():
 	# check distribution
 	distribution = platform.linux_distribution()[0].lower().replace('"', '')
 	print "Distribution = ", distribution
-	is_redhat = distribution in ("redhat", "centos", "centos linux", "fedora")
+	is_redhat = distribution in ("redhat", "red hat enterprise linux server", "centos", "centos linux", "fedora")
 	is_debian = distribution in ("debian", "ubuntu", "elementary os", "linuxmint")
 	
 	if not (is_redhat or is_debian):
