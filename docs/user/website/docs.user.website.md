@@ -5,7 +5,7 @@
 		"docs.user.website.setup",
 		"docs.user.website.web_page",
 		"docs.user.website.style",
-		"docs.user.website.blog",
+		"docs.user.website.blog_post",
 		"docs.user.website.add_products_to_website"
 	]
 }
