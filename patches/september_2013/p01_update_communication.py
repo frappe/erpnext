@@ -19,4 +19,4 @@ def execute():
 				where ifnull(`%s`, '')!=''""" % ("%s", fieldname, fieldname), doctype)
 		except MySQLdb.OperationalError, e:
 			if e.args[0] != 1054:
-				raise e
+				raise

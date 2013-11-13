@@ -2,7 +2,7 @@
 {
 	"_label": "Projects",
 	"_toc": [
-		"docs.user.projects.projects",
+		"docs.user.projects.project",
 		"docs.user.projects.task",
 		"docs.user.projects.timelog"
 	]

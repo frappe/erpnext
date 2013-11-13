@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Reports"
+	"_label": "Accounting Reports"
 }
 ---
 Some of the major accounting reports are:

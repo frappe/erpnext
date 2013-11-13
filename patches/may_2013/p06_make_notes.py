@@ -33,7 +33,7 @@ def execute():
 				pass
 			except Exception, e:
 				if e.args[0] != 1062:
-					raise e
+					raise
 
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")

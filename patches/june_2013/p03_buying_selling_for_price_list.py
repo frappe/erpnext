@@ -25,4 +25,4 @@ def execute():
 			webnotes.conn.sql("""update `tabPrice List` set buying_or_selling='Selling' 
 				where ifnull(buying_or_selling, '')='' """)
 		else:
-			raise e
+			raise
