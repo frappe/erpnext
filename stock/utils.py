@@ -291,7 +291,7 @@ def reorder_item():
 						"reorder_qty": reorder_qty
 					})
 				)
-				
+		
 		create_material_request(material_requests)
 
 def create_material_request(material_requests):
@@ -311,10 +311,7 @@ def create_material_request(material_requests):
 					"company": company,
 					"fiscal_year": defaults.fiscal_year,
 					"transaction_date": nowdate(),
-					"material_request_type": request_type,
-					"remark": _("This is an auto generated Material Request.") + \
-						_("""It was raised because the (actual + ordered + indented - reserved) 
-						quantity reaches re-order level when the following record was created""")
+					"material_request_type": request_type
 				}]
 			
 				for d in items:
