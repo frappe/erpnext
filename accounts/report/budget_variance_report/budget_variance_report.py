@@ -16,10 +16,7 @@ def execute(filters=None):
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	cam_map = get_costcenter_account_month_map(filters)
 
-	precision = webnotes.conn.get_value("Global Defaults", None, "float_precision") or 2
-
 	data = []
-
 	for cost_center, cost_center_items in cam_map.items():
 		for account, monthwise_data in cost_center_items.items():
 			row = [cost_center, account]
