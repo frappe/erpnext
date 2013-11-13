@@ -121,14 +121,12 @@ def get_salesperson_item_month_map(filters):
 			for ad in achieved_details.get(sd.name, {}).get(sd.item_group, []):
 				if (filters["target_on"] == "Quantity"):
 					tav_dict.target = flt(sd.target_qty) * month_percentage / 100
-					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
-						and ad.sales_person == sd.name:
+					if ad.month_name == month:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
 					tav_dict.target = flt(sd.target_amount) * month_percentage / 100
-					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
-						and ad.sales_person == sd.name:
+					if ad.month_name == month:
 							tav_dict.achieved += ad.amount
 
 	return sim_map

@@ -119,8 +119,7 @@ def get_costcenter_account_month_map(filters):
 			tav_dict.target = flt(ccd.budget_allocated) * month_percentage /100
 			
 			for ad in actual_details.get(ccd.name, {}).get(ccd.account, []):
-				if ad.month_name == month and ad.account == ccd.account \
-					and ad.cost_center == ccd.name:
+				if ad.month_name == month:
 						tav_dict.actual += ad.debit - ad.credit
 						
 	return cam_map
