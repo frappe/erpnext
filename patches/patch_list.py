@@ -238,5 +238,7 @@ patch_list = [
 	"patches.october_2013.p08_cleanup_after_item_price_module_change",
 	"patches.october_2013.p10_plugins_refactor",
 	"patches.1311.p01_cleanup",
+	"execute:webnotes.reload_doc('website', 'doctype', 'table_of_contents') #2013-11-13",
+	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-11-13",
 	"execute:webnotes.bean('Style Settings').save() #2013-11-13",
 ]
