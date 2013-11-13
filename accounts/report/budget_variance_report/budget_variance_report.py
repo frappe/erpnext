@@ -29,7 +29,7 @@ def execute(filters=None):
 				for month in relevant_months:
 					month_data = monthwise_data.get(month, {})
 					for i, fieldname in enumerate(["target", "actual", "variance"]):
-						value = flt(month_data.get(fieldname), precision)
+						value = flt(month_data.get(fieldname))
 						period_data[i] += value
 						totals[i] += value
 				period_data[2] = period_data[0] - period_data[1]
@@ -60,7 +60,8 @@ def get_columns(filters):
 				
 			columns.append(label+":Float:120")
 
-	return columns + ["Total Target::120", "Total Actual::120", "Total Variance::120"]
+	return columns + ["Total Target:Float:120", "Total Actual:Float:120", 
+		"Total Variance:Float:120"]
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
@@ -84,12 +85,18 @@ def get_target_distribution_details(filters):
 
 #Get actual details from gl entry
 def get_actual_details(filters):
-	return webnotes.conn.sql("""select gl.account, gl.debit, gl.credit, 
+	ac_details = webnotes.conn.sql("""select gl.account, gl.debit, gl.credit, 
 		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
 		from `tabGL Entry` gl, `tabBudget Detail` bd 
 		where gl.fiscal_year=%s and company=%s
-		and bd.account=gl.account""" % ('%s', '%s'), 
+		and bd.account=gl.account and bd.parent=gl.cost_center""" % ('%s', '%s'), 
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
+		
+	cc_actual_details = {}
+	for d in ac_details:
+		cc_actual_details.setdefault(d.cost_center, {}).setdefault(d.account, []).append(d)
+		
+	return cc_actual_details
 
 def get_costcenter_account_month_map(filters):
 	import datetime
@@ -112,9 +119,9 @@ def get_costcenter_account_month_map(filters):
 			month_percentage = ccd.distribution_id and \
 				tdd.get(ccd.distribution_id, {}).get(month, 0) or 100.0/12
 				
-			tav_dict.target = flt(flt(ccd.budget_allocated) * month_percentage /100)
-
-			for ad in actual_details:
+			tav_dict.target = flt(ccd.budget_allocated) * month_percentage /100
+			
+			for ad in actual_details.get(ccd.name, {}).get(ccd.account, []):
 				if ad.month_name == month and ad.account == ccd.account \
 					and ad.cost_center == ccd.name:
 						tav_dict.actual += ad.debit - ad.credit
