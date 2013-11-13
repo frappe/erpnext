@@ -41,10 +41,12 @@
 <script>
 $(function() {
 	if(window.logged_in && getCookie("system_user")==="yes") {
-		wn.require("lib/js/wn/website/editable.js");
-		wn.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
+		wn.has_permission("Item Group", "{{ name }}", "write", function(r) {
+			wn.require("lib/js/wn/website/editable.js");
+			wn.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
+		});
 	}
-})
+});
 </script>
 
 {% endblock %}
