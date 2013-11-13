@@ -238,4 +238,5 @@ patch_list = [
 	"patches.june_2013.p07_taxes_price_list_for_territory",
 	"patches.october_2013.p08_cleanup_after_item_price_module_change",
 	"patches.october_2013.p10_plugins_refactor",
+	"patches.1311.p01_cleanup",
 ]

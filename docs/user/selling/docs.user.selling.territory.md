@@ -12,3 +12,6 @@ Territory is a place to signify where your customers come from. If you operate i
 ![Territory Tree](img/territory-tree.png)
 
 
+To add more territories to an existing tree, click on "Add Child"
+
+![Territory Tree](img/territory-tree-1.png)

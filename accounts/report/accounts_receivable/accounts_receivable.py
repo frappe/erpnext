@@ -141,13 +141,13 @@ class AccountsReceivableReport(object):
 def execute(filters=None):
 	return AccountsReceivableReport(filters).run()
 	
-def get_ageing_data(age_as_on, entry_date, oustanding_amount):
+def get_ageing_data(age_as_on, entry_date, outstanding_amount):
 	# [0-30, 30-60, 60-90, 90-above]
 	outstanding_range = [0.0, 0.0, 0.0, 0.0]
 	if not (age_as_on and entry_date):
 		return [0] + outstanding_range
 		
-	age = (age_as_on - getdate(entry_date)).days or 0
+	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
 	for i, days in enumerate([30, 60, 90]):
 		if age <= days:
@@ -155,6 +155,6 @@ def get_ageing_data(age_as_on, entry_date, oustanding_amount):
 			break
 	
 	if index is None: index = 3
-	outstanding_range[index] = oustanding_amount
+	outstanding_range[index] = outstanding_amount
 	
 	return [age] + outstanding_range

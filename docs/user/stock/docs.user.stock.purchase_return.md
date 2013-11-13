@@ -9,9 +9,25 @@ ERPNext has an option to account for products that are returned to the supplier.
 > Stock > Stock Entry > New Stock Entry
 
 
-![Purchase Return](img/purchase-return.png)
+
+#### Step 1: Select Purpose as Purchase Return.
+#### Step 2: Enter Purchase Return No.
 
 
+![Purchase Return](img/purchase-return-1.png)
+
+<br>
+
+
+#### Step 3: Enter Item Details
+#### Step 4: Update Warehouse Details
+
+
+![Purchase Return](img/purchase-return-1.png)
+
+#### Step 5: Provide Supplier Details
+
+![Purchase Return](img/purchase-return-3.png)
 
 
 - To select Purchase Return go to Stock Entry.
@@ -21,3 +37,8 @@ ERPNext has an option to account for products that are returned to the supplier.
 - Provide Supplier Information.
 - Save the document.
 
+#### Debit Note
+
+Once the Stock Entry is submitted, you can click on Make Debit Note  button and a new Journal Voucher will be created pre-filled with the customer's account and Items' income account.
+
+![Purchase Return](img/purchase-return-4.png)

@@ -20,7 +20,7 @@ def execute():
 	from core.doctype.custom_script.custom_script import make_custom_server_script_file
 	for name, dt, script in webnotes.conn.sql("""select name, dt, script from `tabCustom Script`
 		where script_type='Server'"""):
-			if script.strip():
+			if script and script.strip():
 				try:
 					script = indent_using_tabs(script)
 					make_custom_server_script_file(dt, script)
