@@ -9,9 +9,9 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 	});
 	new erpnext.SalesAnalytics(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Selling")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
@@ -88,7 +88,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", fieldname: "treetype", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
+		{fieldtype:"Select", fieldname: "tree_type", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
 			"Item Group", "Item", "Territory"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
@@ -103,8 +103,8 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		{fieldtype:"Date", fieldname: "to_date", label: wn._("To Date")},
 		{fieldtype:"Select", fieldname: "range", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", fieldname: "refresh", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", fieldname: "reset_filters", label: wn._("Reset Filters")}
+		{fieldtype:"Button", fieldname: "refresh", label: wn._("Refresh"), icon:"icon-refresh"},
+		{fieldtype:"Button", fieldname: "reset_filters", label: wn._("Reset Filters"), icon:"icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;

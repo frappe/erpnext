@@ -30,9 +30,9 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(wn._('Set as Lost'), 
-					cur_frm.cscript['Declare Order Lost']);
+					cur_frm.cscript['Declare Order Lost'], "icon-exclamation");
 			}
-			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
 		
 		if (this.frm.doc.docstatus===0) {

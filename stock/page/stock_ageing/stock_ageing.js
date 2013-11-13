@@ -11,9 +11,9 @@ wn.pages['stock-ageing'].onload = function(wrapper) {
 
 	new erpnext.StockAgeing(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Stock")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 wn.require("app/js/stock_grid_report.js");
@@ -59,7 +59,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: wn._("Plot By"), 
 			options: ["Average Age", "Earliest", "Latest"]},
 		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {

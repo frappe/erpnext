@@ -81,7 +81,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
-	cur_frm.add_custom_button(wn._('Chart of Accounts'), 
+	cur_frm.appframe.add_button(wn._('Chart of Accounts'), 
 		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
@@ -91,14 +91,14 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 		cur_frm.add_custom_button(wn._('Convert to Group'), 
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 			
-		cur_frm.add_custom_button(wn._('View Ledger'), function() {
+		cur_frm.appframe.add_button(wn._('View Ledger'), function() {
 			wn.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
 				"to_date": sys_defaults.year_end_date
 			};
 			wn.set_route("general-ledger");
-		});
+		}, "icon-table");
 	}
 }
 // Convert group to ledger

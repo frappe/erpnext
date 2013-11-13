@@ -27,7 +27,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
 					doc.per_billed);
 
-				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
 					cur_frm.add_custom_button(wn._('Make Delivery'), this.make_delivery_note);
@@ -50,11 +50,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order']);
+					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
 			} else {	
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
-				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order']);
+				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
 			}
 		}
 

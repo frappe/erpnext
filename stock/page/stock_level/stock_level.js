@@ -10,9 +10,9 @@ wn.pages['stock-level'].onload = function(wrapper) {
 	
 	new erpnext.StockLevel(wrapper);
 
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Stock")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart");
+	;
 }
 
 wn.require("app/js/stock_grid_report.js");
@@ -99,7 +99,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	

@@ -8,9 +8,9 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	
 	wrapper.appframe.add_module_icon("Selling")
 	
-	wrapper.appframe.add_button('Refresh', function() {  
+	wrapper.appframe.set_title_right('Refresh', function() {  
 			wrapper.make_tree();
-		}, 'icon-refresh');
+		});
 
 
 	$(wrapper)

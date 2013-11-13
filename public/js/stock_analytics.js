@@ -65,7 +65,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Date", label: wn._("To Date")},
 		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {

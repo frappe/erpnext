@@ -82,7 +82,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		}},
 		{fieldtype: "Check", label: wn._("Group by Ledger")},
 		{fieldtype: "Check", label: wn._("Group by Voucher")},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {

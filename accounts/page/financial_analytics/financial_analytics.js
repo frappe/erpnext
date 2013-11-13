@@ -10,10 +10,8 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 		single_column: true
 	});
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
-	
-	wrapper.appframe.add_home_breadcrumb()
 	wrapper.appframe.add_module_icon("Accounts")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
@@ -39,7 +37,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		{fieldtype:"Date", label: wn._("To Date")},
 		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_columns: function() {

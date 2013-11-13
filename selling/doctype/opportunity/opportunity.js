@@ -108,7 +108,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 		if(doc.status!=="Quotation") {
 			cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
 		}
-		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 	}
 	
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
