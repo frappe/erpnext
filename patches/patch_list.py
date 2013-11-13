@@ -212,7 +212,6 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Budget Control')",
 	"patches.september_2013.p03_update_stock_uom_in_sle",
 	"patches.september_2013.p03_move_website_to_framework",
-	"execute:webnotes.bean('Style Settings').save() #2013-09-19",
 	"execute:webnotes.conn.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'Accounts Manager') # 2013-09-24",
 	"patches.september_2013.p04_unsubmit_serial_nos",
 	"patches.september_2013.p05_fix_customer_in_pos",
@@ -239,4 +238,5 @@ patch_list = [
 	"patches.october_2013.p08_cleanup_after_item_price_module_change",
 	"patches.october_2013.p10_plugins_refactor",
 	"patches.1311.p01_cleanup",
+	"execute:webnotes.bean('Style Settings').save() #2013-11-13",
 ]
