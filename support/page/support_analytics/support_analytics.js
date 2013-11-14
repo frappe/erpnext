@@ -10,9 +10,9 @@ wn.pages['support-analytics'].onload = function(wrapper) {
 
 	new erpnext.SupportAnalytics(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Support")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
@@ -34,7 +34,7 @@ erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
 		{fieldtype:"Date", label: wn._("To Date")},
 		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 

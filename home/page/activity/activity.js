@@ -10,6 +10,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	wrapper.appframe.add_module_icon("Activity");
 	
 	var list = new wn.ui.Listing({
+		hide_refresh: true,
 		appframe: wrapper.appframe,
 		method: 'home.page.activity.activity.get_feed',
 		parent: $(wrapper).find(".layout-main"),
@@ -18,10 +19,12 @@ wn.pages['activity'].onload = function(wrapper) {
 		}
 	});
 	list.run();
+
+	wrapper.appframe.set_title_right("Refresh", function() { list.run(); });
 	
 	// Build Report Button
 	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
-		wrapper.appframe.add_button(wn._('Build Report'), function() {
+		wrapper.appframe.add_primary_action(wn._('Build Report'), function() {
 			wn.set_route('Report', "Feed");
 		}, 'icon-th')
 	}

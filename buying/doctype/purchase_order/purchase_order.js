@@ -24,20 +24,20 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				doc.per_billed);
 
 
-			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript['Send SMS']);
+			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript['Send SMS'], "icon-mobile-phone");
 			if(flt(doc.per_received, 2) < 100) 
 				cur_frm.add_custom_button(wn._('Make Purchase Receipt'), this.make_purchase_receipt);	
 			if(flt(doc.per_billed, 2) < 100) 
 				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_purchase_invoice);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) 
-				cur_frm.add_custom_button(wn._('Stop'), cur_frm.cscript['Stop Purchase Order']);
+				cur_frm.add_custom_button(wn._('Stop'), cur_frm.cscript['Stop Purchase Order'], "icon-exclamation");
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button(wn._('Unstop Purchase Order'), 
-				cur_frm.cscript['Unstop Purchase Order']);
+				cur_frm.cscript['Unstop Purchase Order'], "icon-check");
 	},
 		
 	make_purchase_receipt: function() {

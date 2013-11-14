@@ -27,9 +27,9 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 var cfn_set_fields = function(doc, dt, dn) {
 	if (doc.docstatus == 1) {
 		if (doc.status != 'Stopped' && doc.status != 'Completed')
-		cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Production Order']);
+		cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Production Order'], "icon-exclamation");
 		else if (doc.status == 'Stopped')
-			cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Production Order']);
+			cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Production Order'], "icon-check");
 
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
 			cur_frm.add_custom_button(wn._('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);

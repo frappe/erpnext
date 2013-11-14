@@ -3,14 +3,15 @@
 {% block javascript %}
 <script>
 	{% include "app/stock/doctype/item/templates/includes/product_page.js" %}
-
+	
 	$(function() {
 		if(window.logged_in && getCookie("system_user")==="yes") {
-			wn.require("lib/js/wn/website/editable.js");
-			wn.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
+			wn.has_permission("Item", "{{ name }}", "write", function(r) {
+				wn.require("lib/js/wn/website/editable.js");
+				wn.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
+			});
 		}
-	})
-
+	});
 </script>
 {% endblock %}
 

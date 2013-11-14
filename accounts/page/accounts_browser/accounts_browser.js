@@ -48,9 +48,9 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			'icon-plus');
 	}
 	
-	wrapper.appframe.add_button('Refresh', function() {  	
+	wrapper.appframe.set_title_right('Refresh', function() {  	
 			wrapper.$company_select.change();
-		}, 'icon-refresh');
+		});
 
 	// company-select
 	wrapper.$company_select = wrapper.appframe.add_select("Company", [])

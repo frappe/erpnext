@@ -12,9 +12,9 @@ wn.pages['stock-balance'].onload = function(wrapper) {
 	
 	new erpnext.StockBalance(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Stock")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.StockBalance = erpnext.StockAnalytics.extend({
@@ -70,7 +70,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		{fieldtype:"Date", label: wn._("From Date")},
 		{fieldtype:"Label", label: wn._("To")},
 		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	

@@ -86,8 +86,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		cur_frm.toggle_enable("exp_approver", (doc.owner==user && doc.approval_status=="Draft"));
 		cur_frm.toggle_enable("approval_status", (doc.exp_approver==user && doc.docstatus==0));
 	
-		if(!doc.__islocal && user!=doc.exp_approver && cur_frm.frm_head.appframe.buttons.Submit) 
-			cur_frm.frm_head.appframe.buttons.Submit.toggle(false);
+		if(!doc.__islocal && user!=doc.exp_approver) 
+			cur_frm.frm_head.appframe.set_title_right("");
 	
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();

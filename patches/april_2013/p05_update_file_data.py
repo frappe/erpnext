@@ -37,7 +37,7 @@ def update_file_list(doctype, singles):
 		except Exception, e:
 			print webnotes.getTraceback()
 			if (e.args and e.args[0]!=1054) or not e.args:
-				raise e
+				raise
 
 def update_for_doc(doctype, doc):
 	for filedata in doc.file_list.split("\n"):

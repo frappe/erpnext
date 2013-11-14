@@ -10,9 +10,9 @@ wn.pages['purchase-analytics'].onload = function(wrapper) {
 	
 	new erpnext.PurchaseAnalytics(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Buying")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
@@ -101,7 +101,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 		{fieldtype:"Date", label: wn._("To Date")},
 		{fieldtype:"Select", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	setup_filters: function() {

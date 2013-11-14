@@ -39,9 +39,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						this.make_purchase_order);
 				
 				cur_frm.add_custom_button(wn._('Stop Material Request'), 
-					cur_frm.cscript['Stop Material Request']);
+					cur_frm.cscript['Stop Material Request'], "icon-exclamation");
 			}
-			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 
 		} 
 		
@@ -63,7 +63,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button(wn._('Unstop Material Request'), 
-				cur_frm.cscript['Unstop Material Request']);
+				cur_frm.cscript['Unstop Material Request'], "icon-check");
 		
 	},
 	

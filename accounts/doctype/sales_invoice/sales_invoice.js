@@ -49,19 +49,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		cur_frm.dashboard.reset();
 
 		if(doc.docstatus==1) {
-			cur_frm.add_custom_button('View Ledger', function() {
+			cur_frm.appframe.add_button('View Ledger', function() {
 				wn.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
 				};
 				wn.set_route("general-ledger");
-			});
+			}, "icon-table");
 			
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
 			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -72,11 +72,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 				
 				if(!from_delivery_note)
-					cur_frm.add_custom_button(wn._('Make Delivery'), cur_frm.cscript['Make Delivery Note']);
+					cur_frm.appframe.add_primary_action(wn._('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
 			}
 
 			if(doc.outstanding_amount!=0)
-				cur_frm.add_custom_button(wn._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
+				cur_frm.appframe.add_primary_action(wn._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
 		}
 
 		// Show buttons only when pos view is active
@@ -87,7 +87,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.add_custom_button(wn._('From Sales Order'), 
+		this.$sales_order_btn = cur_frm.appframe.add_primary_action(wn._('From Sales Order'), 
 			function() {
 				wn.model.map_current_doc({
 					method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
@@ -104,7 +104,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.add_custom_button(wn._('From Delivery Note'), 
+		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(wn._('From Delivery Note'), 
 			function() {
 				wn.model.map_current_doc({
 					method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",

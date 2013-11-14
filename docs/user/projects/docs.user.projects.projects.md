@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Projects"
+	"_label": "Project"
 }
 ---
 

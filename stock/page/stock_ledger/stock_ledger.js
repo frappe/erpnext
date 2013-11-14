@@ -84,7 +84,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		{fieldtype:"Date", label: wn._("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
+		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: wn._("Reset Filters")}
 	],
 	

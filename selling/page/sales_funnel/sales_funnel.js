@@ -32,7 +32,7 @@ erpnext.SalesFunnel = Class.extend({
 			layout: $(wrapper).find(".layout-main"),
 			from_date: wrapper.appframe.add_date("From Date"),
 			to_date: wrapper.appframe.add_date("To Date"),
-			refresh_btn: wrapper.appframe.add_button("Refresh", 
+			refresh_btn: wrapper.appframe.set_title_right("Refresh", 
 				function() { me.get_data(); }, "icon-refresh"),
 		};
 		

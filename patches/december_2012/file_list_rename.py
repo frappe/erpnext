@@ -10,4 +10,4 @@ def execute():
 			webnotes.conn.sql("""update `tab%s` set file_list = 
 				replace(file_list, "-", "")""" % dt[0])
 		except Exception, e:
-			if e.args[0]!=1146: raise e
+			if e.args[0]!=1146: raise

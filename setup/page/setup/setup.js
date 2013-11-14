@@ -10,9 +10,9 @@ wn.pages['Setup'].onload = function(wrapper) {
 	});
 
 	wrapper.appframe.add_module_icon("Setup");
-	wrapper.appframe.add_button(wn._("Refresh"), function() {
+	wrapper.appframe.set_title_right(wn._("Refresh"), function() {
 		wn.pages.Setup.make(wrapper);
-	}, "icon-refresh");
+	});
 	
 	wn.pages.Setup.make(wrapper);
 	

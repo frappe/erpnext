@@ -1,6 +1,6 @@
 ---
 {
-	"_label": "Blog"
+	"_label": "Blog Post"
 }
 ---
 Blogs are a great way to share your thoughts about your business and keep your customers and readers updated of what you are up to.

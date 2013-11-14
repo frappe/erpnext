@@ -9,9 +9,9 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 	});
 	new erpnext.SalesAnalytics(wrapper);
 	
-	wrapper.appframe.add_home_breadcrumb()
+
 	wrapper.appframe.add_module_icon("Selling")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	
 }
 
 erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
@@ -88,23 +88,23 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
+		{fieldtype:"Select", fieldname: "tree_type", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
 			"Item Group", "Item", "Territory"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: wn._("Based On"), options:["Sales Invoice", 
+		{fieldtype:"Select", fieldname: "based_on", label: wn._("Based On"), options:["Sales Invoice", 
 			"Sales Order", "Delivery Note"]},
-		{fieldtype:"Select", label:  wn._("Value or Qty"), options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: wn._("Company"), link:"Company", 
+		{fieldtype:"Select", fieldname: "value_or_qty", label:  wn._("Value or Qty"), options:["Value", "Quantity"]},
+		{fieldtype:"Select", fieldname: "company", label: wn._("Company"), link:"Company", 
 			default_value: "Select Company..."},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Select", label: wn._("Range"), 
+		{fieldtype:"Date", fieldname: "from_date", label: wn._("From Date")},
+		{fieldtype:"Label", fieldname: "to", label: wn._("To")},
+		{fieldtype:"Date", fieldname: "to_date", label: wn._("To Date")},
+		{fieldtype:"Select", fieldname: "range", label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Button", fieldname: "refresh", label: wn._("Refresh"), icon:"icon-refresh"},
+		{fieldtype:"Button", fieldname: "reset_filters", label: wn._("Reset Filters"), icon:"icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;
