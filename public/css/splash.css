@@ -45,7 +45,7 @@
 .splash:after {
 	content: "erpnext";
 	font-size: 30px;
-	font-weight: 700;
+	font-weight: 300;
 	font-family: Helvetica, Arial, sans-serif;
 	position: relative;
 	top: -30px;
