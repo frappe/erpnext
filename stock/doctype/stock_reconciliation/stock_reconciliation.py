@@ -275,11 +275,11 @@ class DocType(StockController):
 				"posting_time": self.doc.posting_time
 			})
 			
-	def get_gl_entries_for_stock(self, warehouse_account=None):
+	def get_gl_entries(self, warehouse_account=None):
 		if not self.doc.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 			
-		return super(DocType, self).get_gl_entries_for_stock(warehouse_account, 		
+		return super(DocType, self).get_gl_entries(warehouse_account, 		
 			self.doc.expense_account, self.doc.cost_center)
 		
 			

@@ -3,7 +3,7 @@
 
 import webnotes
 import unittest, json
-from webnotes.utils import flt, cint
+from webnotes.utils import flt
 from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
 from accounts.utils import get_stock_and_account_difference
 from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
@@ -364,6 +364,7 @@ class TestSalesInvoice(unittest.TestCase):
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
+		# print gl_entries
 		
 		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
@@ -382,9 +383,6 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][1], gle.debit)
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 		
-		
-		
-		# cancel
 		si.cancel()
 		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
@@ -393,6 +391,62 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		self.assertFalse(get_stock_and_account_difference([stock_in_hand]))
 		
+		set_perpetual_inventory(0)
+		
+	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
+		self.clear_stock_account_balance()
+		set_perpetual_inventory()
+		webnotes.delete_doc("Account", "_Test Warehouse No Account - _TC")
+		
+		# insert purchase receipt
+		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
+			as pr_test_records
+		pr = webnotes.bean(copy=pr_test_records[0])
+		pr.doc.naming_series = "_T-Purchase Receipt-"
+		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
+		pr.run_method("calculate_taxes_and_totals")
+		pr.insert()
+		pr.submit()
+		
+		si_doclist = webnotes.copy_doclist(test_records[1])
+		si_doclist[0]["update_stock"] = 1
+		si_doclist[0]["posting_time"] = "12:05"
+		si_doclist[1]["warehouse"] = "_Test Warehouse No Account - _TC"
+
+		si = webnotes.bean(copy=si_doclist)
+		si.insert()
+		si.submit()
+		
+		# check stock ledger entries
+		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
+			si.doc.name, as_dict=1)[0]
+		self.assertTrue(sle)
+		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
+			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
+		
+		# check gl entries
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc, debit asc""", si.doc.name, as_dict=1)
+		self.assertTrue(gl_entries)
+		
+		expected_gl_entries = sorted([
+			[si.doc.debit_to, 630.0, 0.0],
+			[si_doclist[1]["income_account"], 0.0, 500.0],
+			[si_doclist[2]["account_head"], 0.0, 80.0],
+			[si_doclist[3]["account_head"], 0.0, 50.0],
+		])
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_gl_entries[i][0], gle.account)
+			self.assertEquals(expected_gl_entries[i][1], gle.debit)
+			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+				
+		si.cancel()
+		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+		
+		self.assertFalse(gle)
 		set_perpetual_inventory(0)
 		
 	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):	
@@ -599,7 +653,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si7, True)
 
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
-		from webnotes.utils import add_months, get_last_day, getdate
+		from webnotes.utils import add_months, get_last_day
 		from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
 		
 		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]

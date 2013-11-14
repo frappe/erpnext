@@ -294,11 +294,10 @@ class DocType(BuyingController):
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 		
-	def get_gl_entries_for_stock(self, warehouse_account=None):
+	def get_gl_entries(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		
-		gl_entries = super(DocType, self).get_gl_entries_for_stock(warehouse_account, 
-			against_stock_account)
+		gl_entries = super(DocType, self).get_gl_entries(warehouse_account, against_stock_account)
 		return gl_entries
 		
 	
