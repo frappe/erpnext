@@ -9,9 +9,6 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
-from setup.utils import get_company_currency
-
-get_value = webnotes.conn.get_value
 
 from utilities.transaction_base import TransactionBase
 
@@ -295,14 +292,12 @@ class DocType(TransactionBase):
 	def check_credit(self,obj,grand_total):
 		acc_head = webnotes.conn.sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
 		if acc_head:
-			tot_outstanding = 0
 			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
 				where account = %s""", acc_head[0][0])
-			if dbcr:
-				tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1])
+			tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1]) if dbcr else 0
 
 			exact_outstanding = flt(tot_outstanding) + flt(grand_total)
-			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
+			get_obj('Account',acc_head[0][0]).check_credit_limit(exact_outstanding)
 
 	def get_prevdoc_date(self, obj):
 		for d in getlist(obj.doclist, obj.fname):

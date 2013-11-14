@@ -16,7 +16,6 @@ class DocType:
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
 		self.validate_posting_date()
-		self.check_credit_limit()
 		self.check_pl_account()
 		self.validate_cost_center()
 
@@ -54,21 +53,6 @@ class DocType:
 	def validate_posting_date(self):
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
-
-	def check_credit_limit(self):
-		master_type, master_name = webnotes.conn.get_value("Account", 
-			self.doc.account, ["master_type", "master_name"])
-			
-		tot_outstanding = 0	#needed when there is no GL Entry in the system for that acc head
-		if (self.doc.voucher_type=='Journal Voucher' or self.doc.voucher_type=='Sales Invoice') \
-				and (master_type =='Customer' and master_name):
-			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
-				where account = %s""", self.doc.account)
-			if dbcr:
-				tot_outstanding = flt(dbcr[0][0]) - flt(dbcr[0][1]) + \
-					flt(self.doc.debit) - flt(self.doc.credit)
-			get_obj('Account',self.doc.account).check_credit_limit(self.doc.account, 
-				self.doc.company, tot_outstanding)
 
 	def check_pl_account(self):
 		if self.doc.is_opening=='Yes' and \
