@@ -58,7 +58,8 @@ def get_columns(filters):
 			
 			columns.append(label+":Float:120")
 
-	return columns + ["Total Target::120", "Total Achieved::120", "Total Variance::120"]
+	return columns + ["Total Target:Float:120", "Total Achieved:Float:120", 
+		"Total Variance:Float:120"]
 
 #Get sales person & item group details
 def get_salesperson_details(filters):
@@ -83,13 +84,20 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 	
-	return webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
+	item_details = webnotes.conn.sql("""select soi.item_code, soi.qty, soi.amount, so.transaction_date, 
 		st.sales_person, MONTHNAME(so.transaction_date) as month_name 
 		from `tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st 
 		where soi.parent=so.name and so.docstatus=1 and 
 		st.parent=so.name and so.transaction_date>=%s and 
 		so.transaction_date<=%s""" % ('%s', '%s'), 
 		(start_date, end_date), as_dict=1)
+
+	item_actual_details = {}
+	for d in item_details:
+		item_actual_details.setdefault(d.sales_person, {}).setdefault(\
+			get_item_group(d.item_code), []).append(d)
+
+	return item_actual_details
 
 def get_salesperson_item_month_map(filters):
 	import datetime
@@ -110,17 +118,15 @@ def get_salesperson_item_month_map(filters):
 			month_percentage = sd.distribution_id and \
 				tdd.get(sd.distribution_id, {}).get(month, 0) or 100.0/12
 			
-			for ad in achieved_details:
+			for ad in achieved_details.get(sd.name, {}).get(sd.item_group, []):
 				if (filters["target_on"] == "Quantity"):
-					tav_dict.target = flt(flt(sd.target_qty) * month_percentage/100, 2)
-					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
-						and ad.sales_person == sd.name:
+					tav_dict.target = flt(sd.target_qty) * month_percentage / 100
+					if ad.month_name == month:
 							tav_dict.achieved += ad.qty
 
 				if (filters["target_on"] == "Amount"):
-					tav_dict.target = flt(flt(sd.target_amount) * month_percentage/100, 2)
-					if ad.month_name == month and get_item_group(ad.item_code) == sd.item_group \
-						and ad.sales_person == sd.name:
+					tav_dict.target = flt(sd.target_amount) * month_percentage / 100
+					if ad.month_name == month:
 							tav_dict.achieved += ad.amount
 
 	return sim_map
