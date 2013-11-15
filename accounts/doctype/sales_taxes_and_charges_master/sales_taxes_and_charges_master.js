@@ -68,8 +68,11 @@ cur_frm.pformat.other_charges= function(doc){
 		// add rows
 		if(cl.length){
 			for(var i=0;i<cl.length;i++){
-				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
-					out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
+				if((convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate) 
+					|| cl[i].charge_type=="Discount Amount") {
+						amount = (cl[i].charge_type=="Discount Amount" ? "rate" : "tax_amount");
+						out += make_row(cl[i].description, convert_rate(cl[i][amount]), 0);
+					}
 			}
 		}
 

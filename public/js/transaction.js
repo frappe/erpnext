@@ -594,7 +594,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				}
 
 				// in tax.total, accumulate grand total for each item
-				tax.total += flt(tax.grand_total_for_current_item, precision("total", tax));
+				tax.total += tax.grand_total_for_current_item;
 			});
 		});
 	},
@@ -607,8 +607,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(tax.charge_type == "Actual") {
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
-			current_tax_amount = this.new_net_total ?
-				(flt(item.amount_for_tax / this.new_net_total, precision("amount", item)) * actual) :
+			current_tax_amount = this.net_total_after_flat_discount ?
+				((item.amount_for_tax / this.net_total_after_flat_discount) * actual) :
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
@@ -645,7 +645,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		});
 
 		delete this.total_flat_discount;
-		delete this.new_net_total;
+		delete this.net_total_after_flat_discount;
 	},
 
 	calculate_total_advance: function(parenttype, advance_parentfield) {

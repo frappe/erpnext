@@ -29,13 +29,25 @@ erpnext.POS = Class.extend({
 							</table>\
 						</div>\
 						<br>\
-						<div class="net-total-area" style="margin-left: 40%;">\
+						<div class="totals-area" style="margin-left: 40%;">\
 							<table class="table table-condensed">\
 								<tr>\
 									<td><b>Net Total</b></td>\
 									<td style="text-align: right;" class="net-total"></td>\
 								</tr>\
 							</table>\
+							<div class="flat-discount" style="display: none;">\
+								<table width="100%">\
+									<tr>\
+										<td width="50%"><b>Discount</b></td>\
+										<td style="text-align: right;" class="total-flat-discount"></td>\
+									</tr>\
+								</table>\
+							</div>\
+							<div class="discount-area">\
+								<button class="btn btn-link btn-sm add-flat-discount">\
+								<i class="icon-plus"></i> Add Flat Discount</button>\
+							</div>\
 							<div class="tax-table" style="display: none;">\
 								<table class="table table-condensed">\
 									<thead>\
@@ -48,11 +60,6 @@ erpnext.POS = Class.extend({
 									</tbody>\
 								</table>\
 							</div>\
-							<div class="discount-area">\
-								<button class="btn btn-link btn-sm flat-discount">\
-								<i class="icon-plus"></i> Add Flat Discount</button>\
-							</div>\
-							<br>\
 							<div class="grand-total-area">\
 								<table class="table table-condensed">\
 									<tr>\
@@ -109,7 +116,7 @@ erpnext.POS = Class.extend({
 			me.make_payment();
 		});
 
-		this.wrapper.find(".flat-discount").on("click", function() {
+		this.wrapper.find(".add-flat-discount").on("click", function() {
 			me.add_flat_discount();
 		});
 	},
@@ -313,6 +320,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
+		var total_flat_discount = 0.0;
 
 		// add items
 		var $items = me.wrapper.find("#cart tbody").empty();
@@ -354,19 +362,28 @@ erpnext.POS = Class.extend({
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			if (d.charge_type != "Discount Amount") {
+			if (d.charge_type == "Discount Amount") {
+				total_flat_discount += d.rate;
+			} else {
 				$(repl('<tr>\
-					<td>%(description)s (%(rate)s)</td>\
+					<td>%(description)s %(rate)s</td>\
 					<td style="text-align: right;">%(tax_amount)s</td>\
 				<tr>', {
 					description: d.description,
-					rate: ((d.charge_type == "Actual" || d.charge_type == "Discount Amount") 
-						? d.rate : (d.rate + "%")),
+					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
 					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
 						me.frm.doc.currency)
 				})).appendTo(".tax-table tbody");
 			}
 		});
+
+		$(this.wrapper).find(".flat-discount")
+			.toggle(flt(total_flat_discount) != 0.0 ? true : false);
+		
+		if (flt(total_flat_discount) != 0.0) {
+			this.wrapper.find(".total-flat-discount").text(
+				format_currency(total_flat_discount, me.frm.doc.currency));
+		}
 
 		// set totals
 		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total], 

@@ -388,7 +388,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_net_total: function() {
 		var me = this;
 		this.total_flat_discount = 0.0;
-		this.new_net_total = 0.0;
+		this.net_total_after_flat_discount = 0.0;
 		
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
 		$.each(this.frm.item_doclist, function(i, item) {
@@ -410,12 +410,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 			if (me.total_flat_discount != 0.0) {
 
-				var discount = flt(me.total_flat_discount * flt(item.amount / 
-					me.frm.doc.net_total, precision("amount", item)), precision("amount", item));
-				item.amount_for_tax = flt(item.amount - discount, precision("amount", item));
-				me.new_net_total += flt(item.amount_for_tax, precision("net_total"));
+				var discount = flt(me.total_flat_discount * (item.amount / 
+					me.frm.doc.net_total), precision("amount", item));
+				item.amount_for_tax = item.amount - discount;
+				me.net_total_after_flat_discount += flt(item.amount_for_tax, precision("net_total"));
 			} else {
-				me.new_net_total += item.amount;
+				me.net_total_after_flat_discount += item.amount;
 			}
 		});
 	},
@@ -429,15 +429,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				precision("grand_total"));
 		}
 		else
-			this.frm.doc.grand_total = flt(this.new_net_total, precision("grand_total"));
+			this.frm.doc.grand_total = flt(this.net_total_after_flat_discount, precision("grand_total"));
 		
 		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
 			precision("grand_total_export"));
 			
-		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.new_net_total, 
+		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.net_total_after_flat_discount, 
 			precision("other_charges_total"));
 		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export - 
-			(this.new_net_total / this.frm.doc.conversion_rate),
+			(this.net_total_after_flat_discount / this.frm.doc.conversion_rate),
 			precision("other_charges_total_export"));
 			
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);

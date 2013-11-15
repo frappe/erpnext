@@ -115,7 +115,7 @@ class BuyingController(StockController):
 			
 	def calculate_net_total(self):
 		# temporary fields
-		self.new_net_total = self.total_flat_discount = 0.0
+		self.net_total_after_flat_discount = self.total_flat_discount = 0.0
 
 		self.doc.net_total = self.doc.net_total_import = 0.0
 
@@ -124,7 +124,7 @@ class BuyingController(StockController):
 			self.doc.net_total += item.amount
 			self.doc.net_total_import += item.import_amount
 		
-		self.new_net_total = self.doc.net_total
+		self.net_total_after_flat_discount = self.doc.net_total
 		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
 
 	def calculate_totals(self):
