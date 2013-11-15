@@ -241,4 +241,8 @@ patch_list = [
 	"execute:webnotes.reload_doc('website', 'doctype', 'table_of_contents') #2013-11-13",
 	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-11-13",
 	"execute:webnotes.bean('Style Settings').save() #2013-11-13",
+	"execute:webnotes.reload_doc('home', 'doctype', 'feed') #2013-11-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'defaultvalue') #2013-11-15",
+	"execute:webnotes.reload_doc('core', 'doctype', 'comment') #2013-11-15",
+	"patches.1311.p02_index_singles",
 ]
