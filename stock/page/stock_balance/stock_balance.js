@@ -22,7 +22,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		this._super(wrapper, {
 			title: wn._("Stock Balance"),
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
-				"Stock Entry", "Project"],
+				"Stock Entry", "Project", "Serial No"],
 		});
 	},
 	setup_columns: function() {

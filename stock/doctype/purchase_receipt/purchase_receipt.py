@@ -284,11 +284,13 @@ class DocType(BuyingController):
 				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
-	def get_gl_entries_for_stock(self, warehouse_account=None):
+	def get_rate(self,arg):
+		return get_obj('Purchase Common').get_rate(arg,self)
+		
+	def get_gl_entries(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		
-		gl_entries = super(DocType, self).get_gl_entries_for_stock(warehouse_account, 
-			against_stock_account)
+		gl_entries = super(DocType, self).get_gl_entries(warehouse_account, against_stock_account)
 		return gl_entries
 		
 	

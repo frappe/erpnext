@@ -496,16 +496,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
 		var conversion_rate_label = wn.meta.get_label(this.frm.doc.doctype, "conversion_rate", 
 			this.frm.doc.name);
-		
-		if(this.frm.doc.conversion_rate == 0) {
-			wn.throw(wn._(conversion_rate_label) + " " + wn._("cannot be 0"));
-		}
-		
 		var company_currency = this.get_company_currency();
 		
 		if(!this.frm.doc.conversion_rate) {
-			wn.throw(wn._("Please enter valid") + " " + wn._(conversion_rate_label) + 
-				" 1 " + this.frm.doc.currency + " = [?] " + company_currency);
+			wn.throw(repl('%(conversion_rate_label)s' + 
+				wn._(' is mandatory. Maybe Currency Exchange record is not created for ') + 
+				'%(from_currency)s' + wn._(" to ") + '%(to_currency)s', 
+				{
+					"conversion_rate_label": conversion_rate_label,
+					"from_currency": this.frm.doc.currency,
+					"to_currency": company_currency
+				}));
 		}
 	},
 	

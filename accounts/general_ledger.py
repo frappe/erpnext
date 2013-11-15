@@ -3,9 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt, cstr, now
-from webnotes.model.doc import Document
-from webnotes import msgprint, _
+from webnotes.utils import flt, cstr
+from webnotes import _
 from accounts.utils import validate_expense_against_budget
 
 

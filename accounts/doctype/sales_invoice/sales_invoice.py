@@ -91,6 +91,7 @@ class DocType(SellingController):
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+		self.check_credit_limit(self.doc.debit_to)
 
 		if not cint(self.doc.is_pos) == 1:
 			self.update_against_document_in_jv()
@@ -506,32 +507,39 @@ class DocType(SellingController):
 		
 		self.make_sl_entries(sl_entries)
 		
-	def make_gl_entries(self):
-		from accounts.general_ledger import make_gl_entries, merge_similar_entries
+	def make_gl_entries(self, update_gl_entries_after=True):
+		gl_entries = self.get_gl_entries()
+		
+		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
+			
+			update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account \
+				and 'No' or 'Yes'
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
+				update_outstanding=update_outstanding, merge_entries=False)
+			
+			if update_gl_entries_after and cint(self.doc.update_stock) \
+				and cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+					self.update_gl_entries_after()
+				
+	def get_gl_entries(self, warehouse_account=None):
+		from accounts.general_ledger import merge_similar_entries
 		
 		gl_entries = []
 		
 		self.make_customer_gl_entry(gl_entries)
-	
+		
 		self.make_tax_gl_entries(gl_entries)
 		
 		self.make_item_gl_entries(gl_entries)
 		
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
-						
+		
 		self.make_pos_gl_entries(gl_entries)
 		
-		update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account and 'No' or 'Yes'
+		return gl_entries
 		
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
-				update_outstanding=update_outstanding, merge_entries=False)
-				
-			if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
-					and cint(self.doc.update_stock):
-				self.update_gl_entries_after()
-				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
 			gl_entries.append(
@@ -575,7 +583,7 @@ class DocType(SellingController):
 		# expense account gl entries
 		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.doc.update_stock):
-			gl_entries += self.get_gl_entries_for_stock()
+			gl_entries += super(DocType, self).get_gl_entries()
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:

@@ -247,14 +247,14 @@ class SellingController(StockController):
 		customer_account = webnotes.conn.get_value("Account", {"company": self.doc.company, 
 			"master_name": self.doc.customer}, "name")
 		if customer_account:
-			total_outstanding = 0
 			total_outstanding = webnotes.conn.sql("""select 
 				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
-				from `tabGL Entry` where account = %s""", customer_account)[0][0]
+				from `tabGL Entry` where account = %s""", customer_account)
+			total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 			
 			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
 			webnotes.bean('Account', customer_account).run_method("check_credit_limit", 
-				customer_account, self.doc.company, outstanding_including_current)
+				outstanding_including_current)
 				
 	def validate_max_discount(self):
 		for d in self.doclist.get({"parentfield": self.fname}):

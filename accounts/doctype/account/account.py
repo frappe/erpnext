@@ -30,6 +30,7 @@ class DocType:
 		self.validate_duplicate_account()
 		self.validate_root_details()
 		self.validate_mandatory()
+		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
 	
 		if not self.doc.parent_account:
@@ -165,24 +166,24 @@ class DocType:
 				in webnotes.user.get_roles():
 			return 1
 			
-	def check_credit_limit(self, account, company, tot_outstanding):
+	def check_credit_limit(self, total_outstanding):
 		# Get credit limit
 		credit_limit_from = 'Customer'
 
 		cr_limit = webnotes.conn.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
-			where t2.name=%s and t1.name = t2.master_name""", account)
+			where t2.name=%s and t1.name = t2.master_name""", self.doc.name)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
-			credit_limit = webnotes.conn.get_value('Company', company, 'credit_limit')
-			credit_limit_from = 'global settings in the Company'
+			credit_limit = webnotes.conn.get_value('Company', self.doc.company, 'credit_limit')
+			credit_limit_from = 'Company'
 		
 		# If outstanding greater than credit limit and not authorized person raise exception
-		if credit_limit > 0 and flt(tot_outstanding) > credit_limit \
+		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
 				and not self.get_authorized_user():
 			msgprint("""Total Outstanding amount (%s) for <b>%s</b> can not be \
 				greater than credit limit (%s). To change your credit limit settings, \
-				please update the <b>%s</b>""" % (fmt_money(tot_outstanding), 
-				account, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
+				please update in the <b>%s</b> master""" % (fmt_money(total_outstanding), 
+				self.doc.name, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
 			
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""
