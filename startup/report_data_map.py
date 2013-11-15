@@ -88,6 +88,11 @@ data_map = {
 		},
 		"force_index": "posting_sort_index"
 	},
+	"Serial No": {
+		"columns": ["name", "purchase_rate as incoming_rate"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name"
+	},
 	"Stock Entry": {
 		"columns": ["name", "purpose"],
 		"conditions": ["docstatus=1"],
