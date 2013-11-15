@@ -66,13 +66,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		// Show POS button only if it is enabled from features setup
 		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
-			this.pos_btn();
+			this.make_pos_btn();
 	},
 
-	pos_btn: function() {
-		if(this.$pos_btn) 
-			this.$pos_btn.remove();
-
+	make_pos_btn: function() {
 		if(!this.pos_active) {
 			var btn_label = wn._("POS View"),
 				icon = "icon-desktop";
@@ -81,10 +78,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				icon = "icon-file-text";
 		}
 		var me = this;
-
-		this.$pos_btn = this.frm.add_custom_button(btn_label, function() {
+		
+		this.$pos_btn = this.frm.appframe.add_button(btn_label, function() {
 			me.toggle_pos();
-			me.pos_btn();
 		}, icon);
 	},
 

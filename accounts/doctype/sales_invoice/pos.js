@@ -6,7 +6,7 @@ erpnext.POS = Class.extend({
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.wrapper.html('<div class="container">\
-			<div class="row" style="margin: -13px 0px 10px -30px; border-bottom: 3px solid #c7c7c7;">\
+			<div class="row" style="margin: -9px 0px 10px -30px; border-bottom: 1px solid #c7c7c7;">\
 				<div class="party-area col-sm-3 col-xs-6"></div>\
 				<div class="barcode-area col-sm-3 col-xs-6"></div>\
 				<div class="search-area col-sm-3 col-xs-6"></div>\
