@@ -246,4 +246,5 @@ patch_list = [
 	"execute:webnotes.reload_doc('core', 'doctype', 'comment') #2013-11-15",
 	"patches.1311.p02_index_singles",
 	"patches.1311.p01_make_gl_entries_for_si",
+    "patches.1311.p03_update_reqd_report_fields",
 ]
