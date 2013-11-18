@@ -6,7 +6,6 @@ from core.doctype.notification_count.notification_count import clear_doctype_not
 from stock.doctype.material_request.material_request import update_completed_qty
 
 def on_method(bean, method):
-	print method
 	if method in ("on_update", "on_submit"):
 		update_feed(bean.controller, method)
 	
