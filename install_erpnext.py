@@ -9,21 +9,26 @@ import argparse
 is_redhat = is_debian = None
 root_password = None
 
-requirements = [ 
-	"chardet",
-	"cssmin",
-	"dropbox",
-	"google-api-python-client ",
-	"jinja2",
-	"markdown2",
-	"MySQL-python",
-	"pygeoip",
-	"python-dateutil",
-	"python-memcached",
-	"pytz==2013b",
-	"requests",
-	"termcolor",
-	"Werkzeug"
+requirements = [
+	"chardet", 
+	"cssmin", 
+	"dropbox", 
+	"google-api-python-client", 
+	"gunicorn", 
+	"httplib2", 
+	"jinja2", 
+	"markdown2", 
+	"markupsafe", 
+	"mysql-python", 
+	"pygeoip", 
+	"python-dateutil", 
+	"python-memcached", 
+	"pytz==2013d", 
+	"requests", 
+	"six", 
+	"slugify", 
+	"termcolor", 
+	"werkzeug"
 ]
 
 def install(install_path):
@@ -279,8 +284,8 @@ def create_user(username, password):
 
 def setup_cron(install_path):
 	erpnext_cron_entries = [
-		"*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> erpnext-sch.log 2>&1" % install_path,
-		"0 */6 * * * cd %s && python lib/wnf.py --backup >> erpnext-backup.log 2>&1" % install_path
+		"*/3 * * * * cd %s && python2.7 lib/wnf.py --run_scheduler >> erpnext-sch.log 2>&1" % install_path,
+		"0 */6 * * * cd %s && python2.7 lib/wnf.py --backup >> erpnext-backup.log 2>&1" % install_path
 		]
 	for row in erpnext_cron_entries:
 		try:
