@@ -21,7 +21,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand"],
+			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", "Serial No"],
 		})
 	},
 

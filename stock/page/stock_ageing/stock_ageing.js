@@ -25,7 +25,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Item Group", "Brand"],
+			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Item Group", "Brand", "Serial No"],
 		})
 	},
 	setup_columns: function() {
@@ -175,7 +175,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			grid: { hoverable: true, clickable: true },
 			xaxis: {  
 				ticks: $.map(me.data, function(item, idx) { return [[idx+1, item.name]] }),
-				max: 20
+				max: 15
 			},
 			series: { downsample: { threshold: 1000 } }
 		}
