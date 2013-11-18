@@ -3,11 +3,12 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 items = [
 	{
 		"type": "Section",
-		"title": "Organization",
+		"title": _("Organization"),
 		"icon": "icon-building"
 	},
 	{"doctype":"Company"}, 
@@ -15,7 +16,7 @@ items = [
 	{"doctype":"Currency", "filter": {"enabled": 1}},
 	{
 		"type": "Section",
-		"title": "Users and Permissions",
+		"title": _("Users and Permissions"),
 		"icon": "icon-user"
 	},
 	{ 
@@ -24,9 +25,9 @@ items = [
 	{ 
 		"doctype":"Role",
 	}, 
-	{ "title": "Permission Manager", 
+	{ "title": _("Permission Manager"), 
 		"route": "permission-manager", "type": "Link", "icon": "icon-shield" },
-	{ "title": "User Properties", 
+	{ "title": _("User Properties"), 
 		"route": "user-properties", "type": "Link", "icon": "icon-user" },
 	{
 		"type": "Section",
