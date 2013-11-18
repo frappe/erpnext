@@ -112,9 +112,11 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 	get_serialized_buying_rates: function() {
 		var serialized_buying_rates = {};
 		
-		$.each(wn.report_dump.data["Serial No"], function(i, sn) {
-			serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
-		});
+		if (wn.report_dump.data["Serial No"]) {
+			$.each(wn.report_dump.data["Serial No"], function(i, sn) {
+				serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
+			});
+		}
 		
 		return serialized_buying_rates;
 	},
