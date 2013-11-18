@@ -64,6 +64,9 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 	webnotes.local.message_title = "Dropbox Approval"
 	webnotes.local.message = "<h3>%s</h3><p>Please close this window.</p>" % message
 	
+	if allowed:
+		webnotes.local.message_success = True
+	
 	webnotes.conn.commit()
 	webnotes.response['type'] = 'page'
 	webnotes.response['page_name'] = 'message.html'
@@ -109,9 +112,9 @@ def backup_to_dropbox():
 		if not found:
 			try:
 				upload_file_to_dropbox(filepath, "/files", dropbox_client)
-			except Exception, e:
+			except Exception:
 				did_not_upload.append(filename)
-				error_log.append(cstr(e))
+				error_log.append(webnotes.getTraceback())
 	
 	webnotes.connect()
 	return did_not_upload, list(set(error_log))

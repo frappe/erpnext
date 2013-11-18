@@ -39,6 +39,10 @@ def take_backups_dropbox():
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
 		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
 		webnotes.errprint(error_message)
+		
+		if not webnotes.conn:
+			webnotes.connect()
+			
 		send_email(False, "Dropbox", error_message)
 
 #backup to gdrive 
