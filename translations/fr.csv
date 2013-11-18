@@ -1683,7 +1683,7 @@ Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,La fusi
 "Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account","La fusion n&#39;est possible que si à la suite \ propriétés sont les mêmes dans les deux dossiers. Groupe ou Ledger, débit ou de crédit, est le compte PL"
 Message,Message
 Message Parameter,Paramètre message
-Message greater than 160 character will be splitted into multiple mesage,Un message de plus de 160 caractères sera découpé en plusieurs mesage
+Messages greater than 160 characters will be split into multiple messages,Un message de plus de 160 caractères sera découpé en plusieurs mesage
 Messages,Messages
 Method,Méthode
 Middle Income,Revenu intermédiaire

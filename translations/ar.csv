@@ -1683,7 +1683,7 @@ Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,دمج 
 "Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account",دمج غير ممكن إلا إذا عقب \ الخصائص هي نفسها في كل السجلات. مجموعة أو ليدجر، الخصم أو الائتمان، هل الحساب PL
 Message,رسالة
 Message Parameter,رسالة معلمة
-Message greater than 160 character will be splitted into multiple mesage,سيتم انقسم رسالة أكبر من 160 حرف في mesage متعددة
+Messages greater than 160 characters will be split into multiple messages,سيتم انقسم رسالة أكبر من 160 حرف في mesage متعددة
 Messages,رسائل
 Method,طريقة
 Middle Income,المتوسطة الدخل

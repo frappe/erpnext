@@ -10,19 +10,20 @@ is_redhat = is_debian = None
 root_password = None
 
 requirements = [ 
-	"MySQL-python",
-	"pytz==2013b",
-	"python-dateutil",
+	"chardet",
+	"cssmin",
+	"dropbox",
+	"google-api-python-client ",
 	"jinja2",
 	"markdown2",
-	"termcolor",
+	"MySQL-python",
+	"pygeoip",
+	"python-dateutil",
 	"python-memcached",
+	"pytz==2013b",
 	"requests",
-	"chardet",
-	"dropbox",
-	"Werkzeug",
-	"google-api-python-client ",
-	"pygeoip"
+	"termcolor",
+	"Werkzeug"
 ]
 
 def install(install_path):
@@ -277,17 +278,17 @@ def create_user(username, password):
 	return pwd.getpwnam(username).pw_uid
 
 def setup_cron(install_path):
-        erpnext_cron_entries = [
-                "*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> erpnext-sch.log 2>&1" % install_path,
-                "0 */6 * * * cd %s && python lib/wnf.py --backup >> erpnext-backup.log 2>&1" % install_path
-                ]
-        for row in erpnext_cron_entries:
-                try:
-                        existing_cron = exec_in_shell("crontab -l")
-                        if row not in existing_cron:
-                                exec_in_shell('{ crontab -l; echo "%s"; } | crontab' % row)
-                except:
-                        exec_in_shell('echo "%s" | crontab' % row)
+	erpnext_cron_entries = [
+		"*/3 * * * * cd %s && python lib/wnf.py --run_scheduler >> erpnext-sch.log 2>&1" % install_path,
+		"0 */6 * * * cd %s && python lib/wnf.py --backup >> erpnext-backup.log 2>&1" % install_path
+		]
+	for row in erpnext_cron_entries:
+		try:
+			existing_cron = exec_in_shell("crontab -l")
+			if row not in existing_cron:
+				exec_in_shell('{ crontab -l; echo "%s"; } | crontab' % row)
+		except:
+			exec_in_shell('echo "%s" | crontab' % row)
 
 if __name__ == "__main__":
 	args = parse_args()

@@ -1683,7 +1683,7 @@ Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,Спа�
 "Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account","Спајање је могуће само ако је после \ својства су иста у оба записа. Група или Леџер, дебитна или кредитна, ПЛ је налог"
 Message,Порука
 Message Parameter,Порука Параметар
-Message greater than 160 character will be splitted into multiple mesage,Порука већи од 160 карактера ће бити подељен на више Упис
+Messages greater than 160 characters will be split into multiple messages,Порука већи од 160 карактера ће бити подељен на више Упис
 Messages,Поруке
 Method,Метод
 Middle Income,Средњи приход
