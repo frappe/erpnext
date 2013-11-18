@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt
-from webnotes.model.bean import getlist
+from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 

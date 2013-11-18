@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint
-import MySQLdb
 
 def execute():
 	webnotes.reload_doc("stock", "doctype", "price_list")
@@ -20,7 +19,7 @@ def execute():
 		
 			buying_or_selling = "Selling" if selling else "Buying"
 			webnotes.conn.set_value("Price List", price_list, "buying_or_selling", buying_or_selling)
-	except MySQLdb.OperationalError, e:
+	except webnotes.SQLError, e:
 		if e.args[0] == 1054:
 			webnotes.conn.sql("""update `tabPrice List` set buying_or_selling='Selling' 
 				where ifnull(buying_or_selling, '')='' """)
