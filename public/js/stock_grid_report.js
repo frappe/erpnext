@@ -14,7 +14,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 		// value
 		if(sl.qty > 0) {
 			// incoming - rate is given
-			var rate = sl.incoming_rate;	
+			var rate = sl.incoming_rate;
 			var add_qty = sl.qty;
 			if(wh.balance_qty < 0) {
 				// negative valuation
@@ -34,11 +34,14 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			if(add_qty)
 				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);				
 		} else {
+			// called everytime for maintaining fifo stack
+			var fifo_value_diff = this.get_fifo_value_diff(wh, sl);
+
 			// outgoing
 			if(sl.serial_no) {
 				var value_diff = -1 * this.get_serialized_value_diff(sl);
 			} else if(is_fifo) {
-				var value_diff = this.get_fifo_value_diff(wh, sl);
+				var value_diff = fifo_value_diff;
 			} else {
 				// average rate for weighted average
 				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 : 
@@ -84,11 +87,6 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 				qty = qty - batch[0];
 			}
 		}
-		if(qty) {
-			// msgprint("Negative values not allowed for FIFO valuation!\
-			// Item " + sl.item_code.bold() + " on " + dateutil.str_to_user(sl.posting_datetime).bold() +
-			// " becomes negative. Values computed will not be accurate.");
-		}
 	
 		// reset the updated stack
 		wh.fifo_stack = fifo_stack.reverse();
@@ -112,9 +110,11 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 	get_serialized_buying_rates: function() {
 		var serialized_buying_rates = {};
 		
-		$.each(wn.report_dump.data["Serial No"], function(i, sn) {
-			serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
-		});
+		if (wn.report_dump.data["Serial No"]) {
+			$.each(wn.report_dump.data["Serial No"], function(i, sn) {
+				serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
+			});
+		}
 		
 		return serialized_buying_rates;
 	},
