@@ -112,7 +112,7 @@
   "width": "50%"
  }, 
  {
-  "description": "Message greater than 160 character will be splitted into multiple mesage", 
+  "description": "Message greater than 160 character will be split into multiple mesage", 
   "doctype": "DocField", 
   "fieldname": "message", 
   "fieldtype": "Text", 
