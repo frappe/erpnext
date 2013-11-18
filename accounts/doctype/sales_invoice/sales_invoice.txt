@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:11:36", 
+  "modified": "2013-11-18 15:16:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -179,12 +179,11 @@
   "search_index": 1
  }, 
  {
-  "description": "Enter the date by which payments from customer is expected against this invoice.", 
   "doctype": "DocField", 
   "fieldname": "due_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
-  "label": "Due Date", 
+  "label": "Payment Due Date", 
   "no_copy": 1, 
   "oldfieldname": "due_date", 
   "oldfieldtype": "Date", 
@@ -821,7 +820,6 @@
   "search_index": 1
  }, 
  {
-  "description": "Track this Sales Invoice against any Project", 
   "doctype": "DocField", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
