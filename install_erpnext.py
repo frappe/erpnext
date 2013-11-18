@@ -10,19 +10,20 @@ is_redhat = is_debian = None
 root_password = None
 
 requirements = [ 
-	"MySQL-python",
-	"pytz==2013b",
-	"python-dateutil",
-	"jinja2",
-	"markdown2",
-	"termcolor",
-	"python-memcached",
-	"requests",
-	"chardet",
-	"dropbox",
-	"Werkzeug",
-	"google-api-python-client ",
-	"pygeoip"
+        "chardet",
+        "cssmin",
+        "dropbox",
+        "google-api-python-client ",
+        "jinja2",
+        "markdown2",
+        "MySQL-python",
+        "pygeoip",
+        "python-dateutil",
+        "python-memcached",
+        "pytz==2013b",
+        "requests",
+        "termcolor",
+        "Werkzeug"
 ]
 
 def install(install_path):
