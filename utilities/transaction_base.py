@@ -120,6 +120,8 @@ class TransactionBase(StatusUpdater):
 		out["supplier_name"] = supplier.supplier_name
 		if supplier.default_currency:
 			out["currency"] = supplier.default_currency
+		if supplier.default_price_list:
+			out["buying_price_list"] = supplier.default_price_list
 		
 		return out
 		

@@ -110,12 +110,18 @@ cur_frm.cscript.make_contact = function() {
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 	return{
 		filters:{'is_group': 'No'}
-	}	
+	}
 }
 
 
 cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
 	return{
 		query:"controllers.queries.lead_query"
+	}
+}
+
+cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{'buying_or_selling': "Selling"}
 	}
 }
