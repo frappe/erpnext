@@ -92,3 +92,9 @@ cur_frm.cscript.make_contact = function() {
 	}
 	cur_frm.contact_list.run();
 }
+
+cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{'buying_or_selling': "Buying"}
+	}
+}
