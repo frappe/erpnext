@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, filter_strip_join
-from website.webutils import WebsiteGenerator
-
+from webnotes.webutils import WebsiteGenerator, clear_cache
 
 class DocType(WebsiteGenerator):
 	def __init__(self, doc, doclist=None):
@@ -17,7 +16,7 @@ class DocType(WebsiteGenerator):
 			self.doc.partner_website = "http://" + self.doc.partner_website
 
 	def on_update(self):
-		WebsiteGenerator.on_update()
+		WebsiteGenerator.on_update(self)
 		if self.doc.page_name:
 			clear_cache("partners")
 		
