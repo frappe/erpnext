@@ -247,5 +247,7 @@ patch_list = [
 	"patches.1311.p02_index_singles",
 	"patches.1311.p01_make_gl_entries_for_si",
     "patches.1311.p03_update_reqd_report_fields",
+	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap_config') #2013-11-20",
+	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap') #2013-11-20",
     "execute:webnotes.get_module('website.doctype.website_sitemap_config.website_sitemap_config').rebuild_website_sitemap_config()",
 ]
