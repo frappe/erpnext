@@ -30,6 +30,10 @@ def execute_daily():
 	from core.doctype.event.event import send_event_digest
 	run_fn(send_event_digest)
 	
+	# clear daily event notifications
+	from core.doctype.notification_count.notification_count import delete_notification_count_for
+	delete_notification_count_for("Event")
+	
 	# email digest
 	from setup.doctype.email_digest.email_digest import send
 	run_fn(send)

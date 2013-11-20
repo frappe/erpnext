@@ -1683,7 +1683,7 @@ Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,वि�
 "Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account","\ गुण दोनों रिकॉर्ड में वही कर रहे हैं निम्नलिखित अगर मर्ज ही संभव है. समूह या लेजर, डेबिट या क्रेडिट, पीएल खाता है"
 Message,संदेश
 Message Parameter,संदेश पैरामीटर
-Message greater than 160 character will be splitted into multiple mesage,160 चरित्र से अधिक संदेश कई mesage में splitted जाएगा
+Messages greater than 160 characters will be split into multiple messages,160 चरित्र से अधिक संदेश कई mesage में split जाएगा
 Messages,संदेश
 Method,विधि
 Middle Income,मध्य आय

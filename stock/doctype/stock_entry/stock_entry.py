@@ -475,7 +475,7 @@ class DocType(StockController):
 					self.doc.from_warehouse = ""
 					
 				item = webnotes.conn.sql("""select name, item_name, description, 
-					uom, purchase_account, cost_center from `tabItem` 
+					stock_uom, purchase_account, cost_center from `tabItem` 
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
@@ -483,7 +483,7 @@ class DocType(StockController):
 						"qty": self.doc.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],
-						"stock_uom": item[0]["uom"],
+						"stock_uom": item[0]["stock_uom"],
 						"from_warehouse": "",
 						"expense_account": item[0].purchase_account,
 						"cost_center": item[0].cost_center,

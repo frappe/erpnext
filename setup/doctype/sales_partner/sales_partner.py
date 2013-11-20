@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, filter_strip_join
+from webnotes.webutils import WebsiteGenerator, clear_cache
 
-
-class DocType:
+class DocType(WebsiteGenerator):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
@@ -16,13 +16,8 @@ class DocType:
 			self.doc.partner_website = "http://" + self.doc.partner_website
 
 	def on_update(self):
-		if cint(self.doc.show_in_website):
-			from webnotes.webutils import update_page_name
-			update_page_name(self.doc, self.doc.partner_name)
-		
+		WebsiteGenerator.on_update(self)
 		if self.doc.page_name:
-			from webnotes.webutils import clear_cache
-			clear_cache(self.doc.page_name)
 			clear_cache("partners")
 		
 	def get_contacts(self,nm):

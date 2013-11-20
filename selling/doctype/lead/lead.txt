@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-11-06 11:27:57", 
+  "modified": "2013-11-18 15:12:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -73,13 +73,12 @@
   "search_index": 1
  }, 
  {
-  "description": "Name of organization from where lead has come", 
   "doctype": "DocField", 
   "fieldname": "company_name", 
   "fieldtype": "Data", 
   "in_filter": 1, 
   "in_list_view": 1, 
-  "label": "Company Name", 
+  "label": "Organization Name", 
   "oldfieldname": "company_name", 
   "oldfieldtype": "Data", 
   "reqd": 0, 
@@ -116,7 +115,6 @@
   "search_index": 1
  }, 
  {
-  "description": "Source of the lead. If via a campaign, select \"Campaign\"", 
   "doctype": "DocField", 
   "fieldname": "source", 
   "fieldtype": "Select", 
@@ -181,7 +179,6 @@
  }, 
  {
   "allow_on_submit": 0, 
-  "description": "Your sales person who will contact the lead in future", 
   "doctype": "DocField", 
   "fieldname": "contact_by", 
   "fieldtype": "Link", 
@@ -197,7 +194,7 @@
  }, 
  {
   "allow_on_submit": 0, 
-  "description": "Your sales person will get a reminder on this date to contact the lead", 
+  "description": "Add to calendar on this date", 
   "doctype": "DocField", 
   "fieldname": "contact_date", 
   "fieldtype": "Date", 

@@ -11,7 +11,7 @@ from controllers.accounts_controller import AccountsController
 from accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
-	def make_gl_entries(self):
+	def make_gl_entries(self, update_gl_entries_after=True):
 		if self.doc.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
 			
@@ -19,12 +19,13 @@ class StockController(AccountsController):
 			warehouse_account = self.get_warehouse_account()
 		
 			if self.doc.docstatus==1:
-				gl_entries = self.get_gl_entries_for_stock(warehouse_account)
+				gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries)
 
-			self.update_gl_entries_after(warehouse_account)
+			if update_gl_entries_after:
+				self.update_gl_entries_after(warehouse_account)
 	
-	def get_gl_entries_for_stock(self, warehouse_account=None, default_expense_account=None,
+	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
 		from accounts.general_ledger import process_gl_map
 		if not warehouse_account:
@@ -99,12 +100,10 @@ class StockController(AccountsController):
 		gle = self.get_voucherwise_gl_entries(future_stock_vouchers)
 		if not warehouse_account:
 			warehouse_account = self.get_warehouse_account()
-		
 		for voucher_type, voucher_no in future_stock_vouchers:
 			existing_gle = gle.get((voucher_type, voucher_no), [])
 			voucher_obj = webnotes.get_obj(voucher_type, voucher_no)
-			expected_gle = voucher_obj.get_gl_entries_for_stock(warehouse_account)
-			
+			expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 			if expected_gle:
 				matched = True
 				if existing_gle:
@@ -121,7 +120,7 @@ class StockController(AccountsController):
 									
 				if not matched:
 					self.delete_gl_entries(voucher_type, voucher_no)
-					make_gl_entries(expected_gle)
+					voucher_obj.make_gl_entries(update_gl_entries_after=False)
 			else:
 				self.delete_gl_entries(voucher_type, voucher_no)
 				

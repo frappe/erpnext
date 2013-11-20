@@ -23,5 +23,10 @@ test_records = [
 		"doctype": "Warehouse User",
 		"parentfield": "warehouse_users",
 		"user": "test2@example.com"
-	}]	
+	}],
+	[{
+		"doctype": "Warehouse",
+		"warehouse_name": "_Test Warehouse No Account",
+		"company": "_Test Company",
+	}],
 ]

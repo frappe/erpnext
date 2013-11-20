@@ -56,6 +56,12 @@ def get_unread_messages():
 		AND ifnull(docstatus,0)=0
 		""", webnotes.user.name)[0][0]
 
+for_module_doctypes = {
+	"ToDo": "To Do",
+	"Event": "Calendar",
+	"Comment": "Messages"
+}
+
 for_module = {
 	"To Do": get_things_todo,
 	"Calendar": get_todays_events,

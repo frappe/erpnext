@@ -13,17 +13,18 @@
 	<script>
 		// redirect to product search page
 		$(document).ready(function() {
-			$('.dropdown-toggle').dropdown()
+			$('.dropdown-toggle').dropdown();
 			$("#btn-product-search").click(function() {
 				var txt = $("#product-search").val();
 				if(txt) {
-					window.location.href="product_search.html?q=" + txt;
+					window.location.href="product_search?q=" + txt;
 				}
 				return false;
 			});
 			$("#product-search").keypress(function(e) {
-				if(e.which==13) $("#product-search-btn").click();
-			})
-		})
+				if(e.which==13) $("#btn-product-search").click();
+			});
+			$(".form-search").on("submit", function() { return false; });
+		});
 	</script>
 </div>

@@ -120,6 +120,8 @@ class TransactionBase(StatusUpdater):
 		out["supplier_name"] = supplier.supplier_name
 		if supplier.default_currency:
 			out["currency"] = supplier.default_currency
+		if supplier.default_price_list:
+			out["buying_price_list"] = supplier.default_price_list
 		
 		return out
 		
@@ -426,15 +428,15 @@ def get_address_territory(address_doc):
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
 
-	if conversion_rate == 0:
-		msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
-	
 	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
-	
+
 	if not conversion_rate:
-		msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
-			+ ("1 %s = [?] %s" % (currency, company_currency)),
-			raise_exception=True)
+		msgprint(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \
+			record is not created for %(from_currency)s to %(to_currency)s') % {
+				"conversion_rate_label": conversion_rate_label,
+				"from_currency": currency,
+				"to_currency": company_currency
+		}, raise_exception=True)
 			
 def validate_item_fetch(args, item):
 	from stock.utils import validate_end_of_life

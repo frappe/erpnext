@@ -29,7 +29,7 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 					"to_date": me.frm.doc.posting_date,
 				};
 				wn.set_route("general-ledger");
-			});
+			}, "icon-table");
 		}
 	},
 

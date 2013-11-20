@@ -44,6 +44,7 @@ class DocType(AccountsController):
 			self.check_credit_days()
 		self.check_account_against_entries()
 		self.make_gl_entries()
+		self.check_credit_limit()
 
 	def on_cancel(self):
 		from accounts.utils import remove_against_link_from_jv
@@ -259,6 +260,13 @@ class DocType(AccountsController):
 				)
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
+			
+	def check_credit_limit(self):
+		for d in self.doclist.get({"parentfield": "entries"}):
+			master_type, master_name = webnotes.conn.get_value("Account", d.account, 
+				["master_type", "master_name"])
+			if master_type == "Customer" and master_name:
+				super(DocType, self).check_credit_limit(d.account)
 
 	def get_balance(self):
 		if not getlist(self.doclist,'entries'):

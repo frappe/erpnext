@@ -55,7 +55,7 @@ wn.pages.Setup.make = function(wrapper) {
 						<a class="data-link">%(title)s</a></b>\
 					</div>', {
 						count: item.count,
-						title: wn._(item.title || item.doctype),
+						title: item.title || wn._(item.doctype),
 						icon: wn.boot.doctype_icons[item.doctype]
 					}))
 				.appendTo(row);

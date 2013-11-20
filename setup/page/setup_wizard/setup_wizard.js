@@ -180,6 +180,34 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate (%)", placeholder:"e.g. 5"},
 				],
 			},
+
+			// Customers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Customers"),
+				"help": wn._("List a few of your customers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"customer_1", label:"Customer 1", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_1", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_2", label:"Customer 2", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_2", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_3", label:"Customer 3", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_3", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_4", label:"Customer 4", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_4", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"customer_5", label:"Customer 5", placeholder:"Customer Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"customer_contact_5", label:"", placeholder:"Contact Name"},
+				],
+			},
 			
 			// Items to Sell
 			{
@@ -234,6 +262,34 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				],
 			},
 
+			// Suppliers
+			{
+				icon: "icon-group",
+				"title": wn._("Your Suppliers"),
+				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
+				"fields": [
+					{fieldtype:"Data", fieldname:"supplier_1", label:"Supplier 1", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_1", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_2", label:"Supplier 2", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_2", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_3", label:"Supplier 3", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_3", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_4", label:"Supplier 4", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_4", label:"", placeholder:"Contact Name"},
+					{fieldtype:"Section Break"},
+					{fieldtype:"Data", fieldname:"supplier_5", label:"Supplier 5", placeholder:"Supplier Name"},
+					{fieldtype:"Column Break"},
+					{fieldtype:"Data", fieldname:"supplier_contact_5", label:"", placeholder:"Contact Name"},
+				],
+			},
+
 			// Items to Buy
 			{
 				icon: "icon-barcode",
@@ -281,62 +337,6 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Select", fieldname:"item_buy_uom_5", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
 				],
 			},
-
-			// Customers
-			{
-				icon: "icon-group",
-				"title": wn._("Your Customers"),
-				"help": wn._("List a few of your customers. They could be organizations or individuals."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"customer_1", label:"Customer 1", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_1", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_2", label:"Customer 2", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_2", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_3", label:"Customer 3", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_3", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_4", label:"Customer 4", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_4", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_5", label:"Customer 5", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_5", label:"", placeholder:"Contact Name"},
-				],
-			},
-
-			// Suppliers
-			{
-				icon: "icon-group",
-				"title": wn._("Your Suppliers"),
-				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"supplier_1", label:"Supplier 1", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_1", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_2", label:"Supplier 2", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_2", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_3", label:"Supplier 3", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_3", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_4", label:"Supplier 4", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_4", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_5", label:"Supplier 5", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_5", label:"", placeholder:"Contact Name"},
-				],
-			}
 
 		]
 		

@@ -3,10 +3,6 @@
 
 wn.require('app/setup/doctype/contact_control/contact_control.js');
 
-cur_frm.cscript.onload = function(doc,dt,dn){
-	
-}
-
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.make_dashboard(doc);
 	erpnext.hide_naming_series();
@@ -32,7 +28,8 @@ cur_frm.cscript.make_dashboard = function(doc) {
 	cur_frm.dashboard.reset();
 	if(doc.__islocal) 
 		return;
-	cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
+	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
+		cur_frm.dashboard.set_headline('<span class="text-muted">Loading...</span>')
 	
 	cur_frm.dashboard.add_doctype_badge("Supplier Quotation", "supplier");
 	cur_frm.dashboard.add_doctype_badge("Purchase Order", "supplier");
@@ -46,12 +43,14 @@ cur_frm.cscript.make_dashboard = function(doc) {
 			supplier: cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.dashboard.set_headline(
-				wn._("Total Billing This Year: ") + "<b>" 
-				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
-				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
-				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
-				+ '</b></span>');
+			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
+				cur_frm.dashboard.set_headline(
+					wn._("Total Billing This Year: ") + "<b>" 
+					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+					+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+					+ '</b></span>');
+			}
 			cur_frm.dashboard.set_badge_count(r.message);
 		}
 	})
@@ -92,4 +91,10 @@ cur_frm.cscript.make_contact = function() {
 		// note: render_contact_row is defined in contact_control.js
 	}
 	cur_frm.contact_list.run();
+}
+
+cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{'buying_or_selling': "Buying"}
+	}
 }

@@ -41,7 +41,8 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.reset(doc);
 	if(doc.__islocal) 
 		return;
-	cur_frm.dashboard.set_headline('<span class="text-muted">'+ wn._('Loading...')+ '</span>')
+	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
+		cur_frm.dashboard.set_headline('<span class="text-muted">'+ wn._('Loading...')+ '</span>')
 	
 	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
 	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
@@ -56,12 +57,14 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 			customer: cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.dashboard.set_headline(
-				wn._("Total Billing This Year: ") + "<b>" 
-				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
-				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
-				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
-				+ '</b></span>');
+			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
+				cur_frm.dashboard.set_headline(
+					wn._("Total Billing This Year: ") + "<b>" 
+					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+					+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+					+ '</b></span>');
+			}
 			cur_frm.dashboard.set_badge_count(r.message);
 		}
 	})
@@ -107,12 +110,18 @@ cur_frm.cscript.make_contact = function() {
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 	return{
 		filters:{'is_group': 'No'}
-	}	
+	}
 }
 
 
 cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
 	return{
 		query:"controllers.queries.lead_query"
+	}
+}
+
+cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{'buying_or_selling': "Selling"}
 	}
 }

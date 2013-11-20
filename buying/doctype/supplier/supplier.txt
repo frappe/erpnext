@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:01:43", 
+  "modified": "2013-11-19 11:31:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -152,6 +152,13 @@
   "options": "Company", 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List"
  }, 
  {
   "doctype": "DocField", 

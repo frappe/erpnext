@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-import MySQLdb
 
 def execute():
 	webnotes.reload_doc("core", "doctype", "communication")
@@ -17,6 +16,6 @@ def execute():
 				set parenttype=%s, parentfield='communications', 
 				parent=`%s` 
 				where ifnull(`%s`, '')!=''""" % ("%s", fieldname, fieldname), doctype)
-		except MySQLdb.OperationalError, e:
+		except webnotes.SQLError, e:
 			if e.args[0] != 1054:
 				raise

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt
-from webnotes.model.bean import getlist
+from webnotes.model.utils import getlist
 from webnotes import msgprint, _
 
 from buying.utils import get_last_purchase_details

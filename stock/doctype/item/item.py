@@ -8,12 +8,13 @@ from webnotes.utils import cstr, flt, cint
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
+from webnotes.webutils import WebsiteGenerator
 
 from webnotes.model.controller import DocListController
 
 class WarehouseNotSet(Exception): pass
 
-class DocType(DocListController):
+class DocType(DocListController, WebsiteGenerator):
 	def onload(self):
 		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
 	
@@ -212,34 +213,21 @@ class DocType(DocListController):
 				self.doc.name, raise_exception=1)
 
 	def update_website(self):
-		def _invalidate_cache():
-			from selling.utils.product import invalidate_cache_for
-			
-			invalidate_cache_for(self.doc.item_group)
+		from selling.utils.product import invalidate_cache_for
+		invalidate_cache_for(self.doc.item_group)
+		[invalidate_cache_for(d.item_group) for d in \
+			self.doclist.get({"doctype":"Website Item Group"})]
 
-			[invalidate_cache_for(d.item_group) for d in \
-				self.doclist.get({"doctype":"Website Item Group"})]
+		WebsiteGenerator.on_update(self)
+
+	def get_page_title(self):
+		if self.doc.name==self.doc.item_name:
+			page_name_from = self.doc.name
+		else:
+			page_name_from = self.doc.name + " " + self.doc.item_name
 		
-		if self.doc.show_in_website:
-			from webnotes.webutils import update_page_name
-			if self.doc.name==self.doc.item_name:
-				page_name_from = self.doc.name
-			else:
-				page_name_from = self.doc.name + " " + self.doc.item_name
-
-			update_page_name(self.doc, page_name_from)
-			
-			_invalidate_cache()
+		return page_name_from
 		
-		elif self.doc.page_name:
-			# if unchecked show in website
-			from webnotes.webutils import delete_page_cache
-			delete_page_cache(self.doc.page_name)
-			
-			_invalidate_cache()
-			
-			webnotes.conn.set(self.doc, "page_name", None)
-
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
 
@@ -263,10 +251,7 @@ class DocType(DocListController):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
-
-		if self.doc.page_name:
-			from webnotes.webutils import clear_cache
-			clear_cache(self.doc.page_name)
+		WebsiteGenerator.on_trash(self)
 
 	def on_rename(self, newdn, olddn, merge=False):
 		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
