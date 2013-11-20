@@ -6,7 +6,7 @@ import webnotes
 
 from webnotes.utils import cint, getdate, cstr, flt, add_days
 import datetime
-from webnotes import msgprint, _, ValidationError
+from webnotes import _, ValidationError
 
 from controllers.stock_controller import StockController
 
@@ -158,11 +158,12 @@ class DocType(StockController):
 			webnotes.throw(_("Cannot delete Serial No in warehouse. \
 				First remove from warehouse, then delete.") + ": " + self.doc.name)
 	
-	def on_rename(self, new, old, merge=False):
-		"""rename serial_no text fields"""
+	def before_rename(self, old, new, merge=False):
 		if merge:
-			msgprint(_("Sorry. Serial Nos. cannot be merged"), raise_exception=True)
-		
+			webnotes.throw(_("Sorry, Serial Nos cannot be merged"))
+			
+	def after_rename(self, old, new, merge=False):
+		"""rename serial_no text fields"""
 		for dt in webnotes.conn.sql("""select parent from tabDocField 
 			where fieldname='serial_no' and fieldtype='Text'"""):
 			

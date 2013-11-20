@@ -149,29 +149,21 @@ class DocType(TransactionBase):
 		self.delete_supplier_contact()
 		self.delete_supplier_account()
 		
-	def on_rename(self, new, old, merge=False):
+	def after_rename(self, old, new, merge=False):
 		#update supplier_name if not naming series
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Supplier Name':
-			update_fields = [
-			('Supplier', 'name'),
-			('Address', 'supplier'),
-			('Contact', 'supplier'),
-			('Purchase Invoice', 'supplier'),
-			('Purchase Order', 'supplier'),
-			('Purchase Receipt', 'supplier'),
-			('Serial No', 'supplier')]
-			for rec in update_fields:
-				sql("update `tab%s` set supplier_name = %s where `%s` = %s" % \
-					(rec[0], '%s', rec[1], '%s'), (new, old))
+			webnotes.conn.set(self.doc, "supplier_name", new)
 				
 		for account in webnotes.conn.sql("""select name, account_name from 
 			tabAccount where master_name=%s and master_type='Supplier'""", old, as_dict=1):
 			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new, merge=merge)
+				merge_account = True if merge and webnotes.conn.get_value("Account", 
+					{"master_name": new, "master_type": "Supplier"}) else False
+				webnotes.rename_doc("Account", account.name, new, merge=merge_account)
 
 		#update master_name in doctype account
 		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
-			master_type = 'Supplier' where master_name = %s""" , (new,old))
+			master_type = 'Supplier' where master_name = %s""" , (new, old))
 
 @webnotes.whitelist()
 def get_dashboard_info(supplier):

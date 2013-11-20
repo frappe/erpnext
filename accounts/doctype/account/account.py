@@ -193,40 +193,39 @@ class DocType:
 			
 		if self.check_gle_exists():
 			msgprint("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
-				Journal Voucher) can not be trashed""", raise_exception=1)
+				Journal Voucher) can not be deleted""", raise_exception=1)
 		if self.check_if_child_exists():
-			msgprint("Child account exists for this account. You can not trash this account.",
+			msgprint("Child account exists for this account. You can not delete this account.",
 			 	raise_exception=1)
 
 	def on_trash(self): 
 		self.validate_trash()
 		self.update_nsm_model()
-
-	def on_rename(self, new, old, merge=False):
-		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
-		parts = new.split(" - ")	
-
-		if parts[-1].lower() != company_abbr.lower():
-			parts.append(company_abbr)
 		
-		# rename account name
-		new_account_name = " - ".join(parts[:-1])
-		sql("update `tabAccount` set account_name = %s where name = %s", (new_account_name, old))
+	def before_rename(self, old, new, merge=False):
+		# Add company abbr if not provided
+		from setup.doctype.company.company import get_name_with_abbr
+		new_account = get_name_with_abbr(new, self.doc.company)
 		
+		# Validate properties before merging
 		if merge:
-			new_name = " - ".join(parts)
-			val = list(webnotes.conn.get_value("Account", new_name, 
+			val = list(webnotes.conn.get_value("Account", new_account, 
 				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
 			
 			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account]:
-				msgprint(_("""Merging is only possible if following \
+				webnotes.throw(_("""Merging is only possible if following \
 					properties are same in both records.
-					Group or Ledger, Debit or Credit, Is PL Account"""), raise_exception=1)
+					Group or Ledger, Debit or Credit, Is PL Account"""))
+					
+		return new_account
 
+	def after_rename(self, old, new, merge=False):
+		if not merge:
+			webnotes.conn.set_value("Account", new, "account_name", 
+				" - ".join(new.split(" - ")[:-1]))
+		else:
 			from webnotes.utils.nestedset import rebuild_tree
 			rebuild_tree("Account", "parent_account")
-
-		return " - ".join(parts)
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
 	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""

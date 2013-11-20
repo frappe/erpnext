@@ -303,18 +303,17 @@ class DocType:
 			where doctype='Global Defaults' and field='default_company' 
 			and value=%s""", self.doc.name)
 			
-	def on_rename(self,newdn,olddn, merge=False):
+	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
-			msgprint(_("Sorry. Companies cannot be merged"), raise_exception=True)
-		
-		webnotes.conn.sql("""update `tabCompany` set company_name=%s
-			where name=%s""", (newdn, olddn))
-		
-		webnotes.conn.sql("""update `tabSingles` set value=%s
-			where doctype='Global Defaults' and field='default_company' 
-			and value=%s""", (newdn, olddn))
-		
-		webnotes.defaults.clear_default("company", value=olddn)
+			webnotes.throw(_("Sorry, companies cannot be merged"))
+	
+	def after_rename(self, olddn, newdn, merge=False):
+		webnotes.conn.set(self.doc, "company_name", newdn)
+
+		webnotes.conn.sql("""update `tabDefaultValue` set defvalue=%s 
+			where defkey='Company' and defvalue=%s""", (newdn, olddn))
+
+		webnotes.defaults.clear_cache()
 
 @webnotes.whitelist()
 def replace_abbr(company, old, new):
@@ -330,3 +329,12 @@ def replace_abbr(company, old, new):
 	for dt in ["Account", "Cost Center", "Warehouse"]:
 		_rename_record(dt)
 		webnotes.conn.commit()
+		
+def get_name_with_abbr(name, company):
+	company_abbr = webnotes.conn.get_value("Company", company, "abbr")		
+	parts = name.split(" - ")
+
+	if parts[-1].lower() != company_abbr.lower():
+		parts.append(company_abbr)
+			
+	return " - ".join(parts)
