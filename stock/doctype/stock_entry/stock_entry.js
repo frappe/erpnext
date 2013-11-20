@@ -372,7 +372,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_items = function(doc) {
 	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
 	if (!cl.length) {
-		alert(wn._("Item table can not be blank"));
+		msgprint(wn._("Item table can not be blank"));
 		validated = false;
 	}
 }

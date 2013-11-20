@@ -409,7 +409,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			item.amount_for_tax = item.amount;
 
 			if (me.total_flat_discount != 0.0) {
-
 				var discount = flt(me.total_flat_discount * (item.amount / 
 					me.frm.doc.net_total), precision("amount", item));
 				item.amount_for_tax = item.amount - discount;
