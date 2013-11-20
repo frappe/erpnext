@@ -240,7 +240,6 @@ patch_list = [
 	"patches.1311.p01_cleanup",
 	"execute:webnotes.reload_doc('website', 'doctype', 'table_of_contents') #2013-11-13",
 	"execute:webnotes.reload_doc('website', 'doctype', 'web_page') #2013-11-13",
-	"execute:webnotes.bean('Style Settings').save() #2013-11-13",
 	"execute:webnotes.reload_doc('home', 'doctype', 'feed') #2013-11-15",
 	"execute:webnotes.reload_doc('core', 'doctype', 'defaultvalue') #2013-11-15",
 	"execute:webnotes.reload_doc('core', 'doctype', 'comment') #2013-11-15",
@@ -249,5 +248,6 @@ patch_list = [
     "patches.1311.p03_update_reqd_report_fields",
 	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap_config') #2013-11-20",
 	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap') #2013-11-20",
+	"execute:webnotes.bean('Style Settings').save() #2013-11-20",
     "execute:webnotes.get_module('website.doctype.website_sitemap_config.website_sitemap_config').rebuild_website_sitemap_config()",
 ]
