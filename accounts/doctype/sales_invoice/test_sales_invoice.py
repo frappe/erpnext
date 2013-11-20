@@ -89,7 +89,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_sales_invoice_discount_amount_base_currency(self):
 		si = webnotes.bean(copy=test_records[4])
-		si.run_method("calculate_taxes_and_totals")
 		si.insert()
 		
 		expected_values = {
@@ -116,17 +115,17 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Shipping Charges - _TC": [0, 519407.99],
-			"_Test Account Customs Duty - _TC": [1000, 520407.99],
-			"_Test Account Excise Duty - _TC": [25970.399999999998, 546378.39]
+			"_Test Account Shipping Charges - _TC": [0, 519408.0],
+			"_Test Account Customs Duty - _TC": [1000, 520408.0],
+			"_Test Account Excise Duty - _TC": [25970.40, 546378.40]
 		}
 		
 		for d in si.doclist.get({"parentfield": "other_charges"}):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
-		self.assertEquals(si.doc.grand_total, 546378.39)
-		self.assertEquals(si.doc.grand_total_export, 546378.39)
+		self.assertEquals(si.doc.grand_total, 546378.40)
+		self.assertEquals(si.doc.grand_total_export, 546378.40)
 		
 	def test_sales_invoice_calculation_export_currency(self):
 		si = webnotes.bean(copy=test_records[2])
@@ -214,16 +213,16 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Shipping Charges - _TC": [0, 519407.99],
-			"_Test Account Customs Duty - _TC": [1000, 520407.99],
-			"_Test Account Excise Duty - _TC": [25970.399999999998, 546378.39],
+			"_Test Account Shipping Charges - _TC": [0, 519408.0],
+			"_Test Account Customs Duty - _TC": [1000, 520408.0],
+			"_Test Account Excise Duty - _TC": [25970.40, 546378.40],
 		}
 		
 		for d in si.doclist.get({"parentfield": "other_charges"}):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
-		self.assertEquals(si.doc.grand_total, 546378.39)
+		self.assertEquals(si.doc.grand_total, 546378.40)
 		self.assertEquals(si.doc.grand_total_export, 8537.16)
 				
 	def test_inclusive_rate_validations(self):

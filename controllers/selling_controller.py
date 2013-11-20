@@ -190,12 +190,18 @@ class SellingController(StockController):
 				self.total_flat_discount += flt(tax.rate, self.precision("rate", tax))
 
 		# Calculate amount for tax for each item
-		for item in self.item_doclist:
+		adjusted_discount = self.total_flat_discount
+		for i, item in enumerate(self.item_doclist):
 			item.amount_for_tax = item.amount
 
 			if self.total_flat_discount != 0.0:
 				discount = flt(self.total_flat_discount * (item.amount / self.doc.net_total), 
 					self.precision("amount", item))
+				adjusted_discount -= discount
+				
+				if i==len(self.item_doclist) - 1:
+					discount += adjusted_discount
+
 				item.amount_for_tax = item.amount - discount
 				self.net_total_after_flat_discount += flt(item.amount_for_tax, 
 					self.precision("net_total"))

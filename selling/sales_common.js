@@ -405,12 +405,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 
 		// Calculate amount for tax for each item
+		var adjusted_discount = me.total_flat_discount;
 		$.each(this.frm.item_doclist, function(i, item) {
 			item.amount_for_tax = item.amount;
 
 			if (me.total_flat_discount != 0.0) {
 				var discount = flt(me.total_flat_discount * (item.amount / 
 					me.frm.doc.net_total), precision("amount", item));
+				adjusted_discount -= discount;
+				
+				if (i == me.frm.item_doclist.length - 1)
+					discount += adjusted_discount;
+
 				item.amount_for_tax = item.amount - discount;
 				me.net_total_after_flat_discount += flt(item.amount_for_tax, precision("net_total"));
 			} else {
