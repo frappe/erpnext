@@ -73,10 +73,10 @@ def get_costcenter_target_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation \
+	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
-			target_details.setdefault(d.name, {}).setdefault(d.month, d.percentage_allocation)
+			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details
 
@@ -113,10 +113,11 @@ def get_costcenter_account_month_map(filters):
 				}))
 
 			tav_dict = cam_map[ccd.name][ccd.account][month]
-			month_percentage = ccd.distribution_id and \
-				tdd.get(ccd.distribution_id, {}).get(month, 0) or 100.0/12
+
+			month_percentage = tdd.get(ccd.distribution_id, {}).get(month, 0) \
+				if ccd.distribution_id else 100.0/12
 				
-			tav_dict.target = flt(ccd.budget_allocated) * month_percentage /100
+			tav_dict.target = flt(ccd.budget_allocated) * month_percentage / 100
 			
 			for ad in actual_details.get(ccd.name, {}).get(ccd.account, []):
 				if ad.month_name == month:
