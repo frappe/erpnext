@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -19,12 +19,13 @@ class AccountsReceivableReport(object):
 		
 	def get_columns(self):
 		return [
-			"Posting Date:Date:80", "Account:Link/Account:150", "Customer::150", 
-			"Voucher Type::110", "Voucher No::120", "Remarks::150", 
-			"Due Date:Date:80", "Territory:Link/Territory:80", 
+			"Posting Date:Date:80", "Account:Link/Account:150",
+			"Voucher Type::110", "Voucher No::120", "::30",
+			"Due Date:Date:80",  
 			"Invoiced Amount:Currency:100", "Payment Received:Currency:100", 
 			"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100",
-			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100"
+			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100",
+			"Customer:Link/Customer:200", "Territory:Link/Territory:80", "Remarks::200"
 		]
 		
 	def get_data(self):
@@ -37,14 +38,20 @@ class AccountsReceivableReport(object):
 					due_date = self.get_due_date(gle)
 					invoiced_amount = gle.debit if (gle.debit > 0) else 0
 					payment_received = invoiced_amount - outstanding_amount
-					row = [gle.posting_date, gle.account, self.get_customer(gle.account),
-						gle.voucher_type, gle.voucher_no, gle.remarks, due_date,
-						self.get_territory(gle.account), invoiced_amount, payment_received,
+					row = [gle.posting_date, gle.account,
+						gle.voucher_type, gle.voucher_no, due_date,
+						invoiced_amount, payment_received,
 						outstanding_amount]
 					entry_date = due_date if self.filters.ageing_based_on=="Due Date" \
 						else gle.posting_date
 					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount)
+					row += [self.get_customer(gle.account), self.get_territory(gle.account), gle.remarks]
 					data.append(row)
+		
+		for i in range(0,len(data)):
+			data[i].insert(4, """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
+				% ("/".join(["#Form", data[i][2], data[i][3]]),))
+		
 		return data
 				
 	def get_entries_after(self, report_date):
