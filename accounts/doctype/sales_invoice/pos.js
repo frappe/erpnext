@@ -86,6 +86,20 @@ erpnext.POS = Class.extend({
 				</div>\
 			</div></div>');
 		
+		this.check_transaction_type();
+		this.make();
+
+		var me = this;
+		$(this.frm.wrapper).on("refresh-fields", function() {
+			me.refresh();
+		});
+
+		this.call_function("delete-items", function() {me.remove_selected_item();});
+		this.call_function("make-payment", function() {me.make_payment();});
+		this.call_function("add-flat-discount", function() {me.add_flat_discount();});
+	},
+	check_transaction_type: function() {
+		// Check whether the transaction is "Sales" or "Purchase"
 		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
 			this.party = "Customer";
 			this.price_list = this.frm.doc.selling_price_list;
@@ -100,25 +114,9 @@ erpnext.POS = Class.extend({
 			this.net_total = "net_total_import";
 			this.grand_total = "grand_total_import";
 		}
-		
-		this.make();
-
-		var me = this;
-		$(this.frm.wrapper).on("refresh-fields", function() {
-			me.refresh();
-		});
-
-		this.wrapper.find(".delete-items").on("click", function() {
-			me.remove_selected_item();
-		});
-
-		this.wrapper.find(".make-payment").on("click", function() {
-			me.make_payment();
-		});
-
-		this.wrapper.find(".add-flat-discount").on("click", function() {
-			me.add_flat_discount();
-		});
+	},
+	call_function: function(class_name, fn, event_name) {
+		this.wrapper.find("." + class_name).on(event_name || "click", fn);
 	},
 	make: function() {
 		this.make_party();
@@ -219,26 +217,28 @@ erpnext.POS = Class.extend({
 			callback: function(r) {
 				var $wrap = me.wrapper.find(".item-list");
 				me.wrapper.find(".item-list").empty();
-				$.each(r.message, function(index, obj) {
-					if (obj.image)
-						image = '<img src="' + obj.image + '" class="img-responsive" \
-								style="border:1px solid #eee; max-height: 140px;">';
-					else
-						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
+				if (r.message) {
+					$.each(r.message, function(index, obj) {
+						if (obj.image)
+							image = '<img src="' + obj.image + '" class="img-responsive" \
+									style="border:1px solid #eee; max-height: 140px;">';
+						else
+							image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
-					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
-								<div class="small">%(item_code)s</div>\
-								<div class="small">%(item_name)s</div>\
-								<div class="small">%(item_price)s</div>\
-							</div>', 
-						{
-							item_code: obj.name,
-							item_price: format_currency(obj.ref_rate, obj.currency),
-							item_name: obj.name===obj.item_name ? "" : obj.item_name,
-							item_image: image
-						})).appendTo($wrap);
-				});
+						$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
+									<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
+									<div class="small">%(item_code)s</div>\
+									<div class="small">%(item_name)s</div>\
+									<div class="small">%(item_price)s</div>\
+								</div>', 
+							{
+								item_code: obj.name,
+								item_price: format_currency(obj.ref_rate, obj.currency),
+								item_name: obj.name===obj.item_name ? "" : obj.item_name,
+								item_image: image
+							})).appendTo($wrap);
+					});
+				}
 
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
