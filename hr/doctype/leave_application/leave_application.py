@@ -281,7 +281,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 			"from_date": d.from_date,
 			"to_date": d.to_date,
 			"status": d.status,
-			"title": _("Leave by") + " " +  cstr(d.employee_name) + \
+			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 			"docstatus": d.docstatus
 		}
