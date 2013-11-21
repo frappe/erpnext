@@ -27,6 +27,11 @@ cur_frm.pformat.purchase_tax_details= function(doc){
     var new_val = flt(val)/flt(doc.conversion_rate);
     return new_val;
   }
+  
+  function print_hide(fieldname) {
+	var doc_field = wn.meta.get_docfield(doc.doctype, fieldname, doc.name);
+	return doc_field.print_hide;
+  }
 
   var cl = getchildren('Purchase Taxes and Charges',doc.name,'purchase_tax_details');
 
