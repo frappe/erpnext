@@ -73,7 +73,7 @@ def get_target_distribution_details(filters):
 	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
-			target_details.setdefault(d.name, {}).setdefault(d.month, d.percentage_allocation)
+			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details
 
@@ -113,8 +113,8 @@ def get_territory_item_month_map(filters):
 				}))
 
 			tav_dict = tim_map[td.name][td.item_group][month]
-			month_percentage = td.distribution_id and \
-				tdd.get(td.distribution_id, {}).get(month, 0) or 100.0/12
+			month_percentage = tdd.get(td.distribution_id, {}).get(month, 0) \
+				if td.distribution_id else 100.0/12
 
 			for ad in achieved_details.get(td.name, {}).get(td.item_group, []):
 				if (filters["target_on"] == "Quantity"):

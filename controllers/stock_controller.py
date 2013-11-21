@@ -48,7 +48,7 @@ class StockController(AccountsController):
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock",
-							"debit": sle.stock_value_difference
+							"debit": flt(sle.stock_value_difference, 2)
 						}))
 
 						# to target warehouse / expense account
@@ -57,7 +57,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse],
 							"cost_center": detail.cost_center,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock",
-							"credit": sle.stock_value_difference
+							"credit": flt(sle.stock_value_difference, 2)
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
