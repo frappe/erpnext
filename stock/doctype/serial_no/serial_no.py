@@ -74,23 +74,16 @@ class DocType(StockController):
 		self.doc.item_name = item.item_name
 		self.doc.brand = item.brand
 		self.doc.warranty_period = item.warranty_period
-				
-	def set_status(self):
-		last_sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-			where (serial_no like %s or serial_no like %s or serial_no=%s) 
-			and item_code=%s and ifnull(is_cancelled, 'No')='No' 
-			order by name desc limit 1""", 
-			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
-				self.doc.item_code), as_dict=1)
 		
+	def set_status(self, last_sle):
 		if last_sle:
-			if last_sle[0].voucher_type == "Stock Entry":
-				document_type = webnotes.conn.get_value("Stock Entry", last_sle[0].voucher_no, 
+			if last_sle.voucher_type == "Stock Entry":
+				document_type = webnotes.conn.get_value("Stock Entry", last_sle.voucher_no, 
 					"purpose")
 			else:
-				document_type = last_sle[0].voucher_type
+				document_type = last_sle.voucher_type
 
-			if last_sle[0].actual_qty > 0:
+			if last_sle.actual_qty > 0:
 				if document_type == "Sales Return":
 					self.doc.status = "Sales Returned"
 				else:
@@ -98,59 +91,73 @@ class DocType(StockController):
 			else:
 				if document_type == "Purchase Return":
 					self.doc.status = "Purchase Returned"
-				elif last_sle[0].voucher_type in ("Delivery Note", "Sales Invoice"):
+				elif last_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 					self.doc.status = "Delivered"
 				else:
 					self.doc.status = "Not Available"
 		
-	def set_purchase_details(self):
-		purchase_sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-			where (serial_no like %s or serial_no like %s or serial_no=%s) 
-			and item_code=%s and actual_qty > 0 
-			and ifnull(is_cancelled, 'No')='No' order by name asc limit 1""", 
-			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
-				 self.doc.item_code), as_dict=1)
-
+	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:
-			self.doc.purchase_document_type = purchase_sle[0].voucher_type
-			self.doc.purchase_document_no = purchase_sle[0].voucher_no
-			self.doc.purchase_date = purchase_sle[0].posting_date
-			self.doc.purchase_time = purchase_sle[0].posting_time
-			self.doc.purchase_rate = purchase_sle[0].incoming_rate
-			if purchase_sle[0].voucher_type == "Purchase Receipt":
+			self.doc.purchase_document_type = purchase_sle.voucher_type
+			self.doc.purchase_document_no = purchase_sle.voucher_no
+			self.doc.purchase_date = purchase_sle.posting_date
+			self.doc.purchase_time = purchase_sle.posting_time
+			self.doc.purchase_rate = purchase_sle.incoming_rate
+			if purchase_sle.voucher_type == "Purchase Receipt":
 				self.doc.supplier, self.doc.supplier_name = \
-					webnotes.conn.get_value("Purchase Receipt", purchase_sle[0].voucher_no, 
+					webnotes.conn.get_value("Purchase Receipt", purchase_sle.voucher_no, 
 						["supplier", "supplier_name"])
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no", 
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
 					self.doc.fields[fieldname] = None
 				
-	def set_sales_details(self):
-		delivery_sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-			where (serial_no like %s or serial_no like %s or serial_no=%s)
-			and item_code=%s and actual_qty<0 
-			and voucher_type in ('Delivery Note', 'Sales Invoice')
-			and ifnull(is_cancelled, 'No')='No' order by name desc limit 1""", 
-			("%%%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name), self.doc.name, 
-				 self.doc.item_code), as_dict=1)
+	def set_sales_details(self, delivery_sle):
 		if delivery_sle:
-			self.doc.delivery_document_type = delivery_sle[0].voucher_type
-			self.doc.delivery_document_no = delivery_sle[0].voucher_no
-			self.doc.delivery_date = delivery_sle[0].posting_date
-			self.doc.delivery_time = delivery_sle[0].posting_time
+			self.doc.delivery_document_type = delivery_sle.voucher_type
+			self.doc.delivery_document_no = delivery_sle.voucher_no
+			self.doc.delivery_date = delivery_sle.posting_date
+			self.doc.delivery_time = delivery_sle.posting_time
 			self.doc.customer, self.doc.customer_name = \
-				webnotes.conn.get_value(delivery_sle[0].voucher_type, delivery_sle[0].voucher_no, 
+				webnotes.conn.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no, 
 					["customer", "customer_name"])
 			if self.doc.warranty_period:
-				self.doc.warranty_expiry_date	= add_days(cstr(delivery_sle[0].posting_date), 
+				self.doc.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date), 
 					cint(self.doc.warranty_period))
 		else:
 			for fieldname in ("delivery_document_type", "delivery_document_no", 
 				"delivery_date", "delivery_time", "customer", "customer_name", 
 				"warranty_expiry_date"):
-					self.doc.fields[fieldname] = None		
+					self.doc.fields[fieldname] = None
+					
+	def get_last_sle(self):
+		entries = {}
 		
+		for sle in self.get_stock_ledger_entries():
+			if self.doc.name in sle.serial_no.split("\n"):
+				if not entries.get("last_sle"):
+					entries["last_sle"] = sle
+					
+				if not entries.get("purchase_sle") and sle.actual_qty > 0:
+					entries["purchase_sle"] = sle
+				elif not entries.get("delivery_sle") and sle.actual_qty < 0 \
+						and sle.voucher_type in ('Delivery Note', 'Sales Invoice'):
+					entries["delivery_sle"] = sle
+				
+				if entries.get("last_sle") and entries.get("purchase_sle") \
+						and entries.get("delivery_sle"):
+					break
+				
+		return entries
+		
+	def get_stock_ledger_entries(self):
+		return webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+			where (serial_no like %s or serial_no like %s or serial_no like %s or serial_no=%s)
+			and item_code=%s and ifnull(is_cancelled, 'No')='No' 
+			order by name desc""", 
+			("%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name+"\n"), 
+				"%%%s" % ("\n"+self.doc.name), self.doc.name, self.doc.item_code), as_dict=1)		
+	
 	def on_trash(self):
 		if self.doc.status == 'Delivered':
 			webnotes.throw(_("Delivered Serial No ") + self.doc.name + _(" can not be deleted"))
@@ -177,9 +184,10 @@ class DocType(StockController):
 	
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
-			self.set_status()
-			self.set_purchase_details()
-			self.set_sales_details()
+			last_sle = self.get_last_sle()
+			self.set_status(last_sle.get("last_sle"))
+			self.set_purchase_details(last_sle.get("purchase_sle"))
+			self.set_sales_details(last_sle.get("delivery_sle"))
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
@@ -227,12 +235,12 @@ def validate_serial_no(sle, item_det):
 					# transfer out
 					webnotes.throw(_("Serial No must exist to transfer out.") + \
 						": " + serial_no, SerialNoNotExistsError)
-		elif not item_det.serial_no_series:
+		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			webnotes.throw(_("Serial Number Required for Serialized Item" + ": " 
 				+ sle.item_code), SerialNoRequiredError)
 				
 def update_serial_nos(sle, item_det):
-	if not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
+	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
 		from webnotes.model.doc import make_autoname
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
