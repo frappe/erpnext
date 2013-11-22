@@ -3,7 +3,7 @@
 {% block content %}
 {% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
 {% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
-<div class="col-md-12">
+<div class="container content">
 	{% if slideshow %}<!-- slideshow -->
 	{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
 	{% endif %}
@@ -13,7 +13,7 @@
 	<h3>{{ name }}</h3>
 	{% endif %}
 </div>
-<div class="col-md-12">
+<div class="container content">
 	{% if sub_groups %}
 	<hr />
 	<div class="row">
