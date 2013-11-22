@@ -80,7 +80,7 @@ class DocType:
 				# update in home page in settings
 				website_settings = webnotes.bean("Website Settings", "Website Settings")
 				website_settings.doc.home_page = webpage.doc.name
-				website_settings.doc.brand_html = "<span>{}</span>".format(self.doc.name)
+				website_settings.doc.brand_html = self.doc.name
 				website_settings.doc.copyright = self.doc.name
 				website_settings.doclist.append({
 					"doctype": "Top Bar Item",
