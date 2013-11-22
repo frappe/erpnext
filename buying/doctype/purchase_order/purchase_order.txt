@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-09-12 18:34:54", 
+  "modified": "2013-11-22 17:15:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -269,7 +269,7 @@
   "oldfieldname": "net_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1
  }, 
  {
@@ -382,7 +382,7 @@
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1, 
   "report_hide": 0
  }, 
@@ -393,7 +393,7 @@
   "label": "In Words", 
   "oldfieldname": "in_words_import", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1
  }, 
  {
