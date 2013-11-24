@@ -134,7 +134,7 @@ class DocType(StockController):
 		entries = {}
 		
 		for sle in self.get_stock_ledger_entries():
-			if self.doc.name in sle.serial_no.split("\n"):
+			if self.doc.name in get_serial_nos(sle.serial_no):
 				if not entries.get("last_sle"):
 					entries["last_sle"] = sle
 					
@@ -152,11 +152,8 @@ class DocType(StockController):
 		
 	def get_stock_ledger_entries(self):
 		return webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
-			where (serial_no like %s or serial_no like %s or serial_no like %s or serial_no=%s)
-			and item_code=%s and ifnull(is_cancelled, 'No')='No' 
-			order by name desc""", 
-			("%s%%" % (self.doc.name+"\n"), "%%%s%%" % ("\n"+self.doc.name+"\n"), 
-				"%%%s" % ("\n"+self.doc.name), self.doc.name, self.doc.item_code), as_dict=1)		
+			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No' 
+			order by name desc""", ("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1)		
 	
 	def on_trash(self):
 		if self.doc.status == 'Delivered':
