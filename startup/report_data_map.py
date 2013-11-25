@@ -12,8 +12,7 @@ data_map = {
 		"conditions": ["docstatus < 2"]
 	},
 	"Fiscal Year": {
-		"columns": ["name", "year_start_date", 
-			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"],
+		"columns": ["name", "year_start_date", "year_end_date"],
 		"conditions": ["docstatus < 2"],
 	},
 

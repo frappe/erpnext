@@ -45,11 +45,8 @@ class DocType:
 			raise Exception
 
 	def get_fy_start_end_dates(self):
-		return webnotes.conn.sql("""select year_start_date, 
-			subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
-				as year_end_date
-			from `tabFiscal Year`
-			where name=%s""", (self.doc.fiscal_year,))[0]
+		return webnotes.conn.sql("""select year_start_date, year_end_date
+			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year,))[0]
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
 		from webnotes.utils import getdate

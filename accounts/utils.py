@@ -24,14 +24,10 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	if fiscal_year:
 		cond = "name = '%s'" % fiscal_year
 	else:
-		cond = "'%s' >= year_start_date and '%s' < adddate(year_start_date, interval 1 year)" % \
+		cond = "'%s' >= year_start_date and '%s' <= year_end_date" % \
 			(date, date)
-	fy = webnotes.conn.sql("""select name, year_start_date, 
-		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
-			as year_end_date
-		from `tabFiscal Year`
-		where %s
-		order by year_start_date desc""" % cond)
+	fy = webnotes.conn.sql("""select name, year_start_date, year_end_date
+		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
 	
 	if not fy:
 		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
