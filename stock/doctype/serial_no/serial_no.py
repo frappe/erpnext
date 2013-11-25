@@ -235,12 +235,12 @@ def validate_serial_no(sle, item_det):
 					# transfer out
 					webnotes.throw(_("Serial No must exist to transfer out.") + \
 						": " + serial_no, SerialNoNotExistsError)
-		elif not item_det.serial_no_series:
+		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			webnotes.throw(_("Serial Number Required for Serialized Item" + ": " 
 				+ sle.item_code), SerialNoRequiredError)
 				
 def update_serial_nos(sle, item_det):
-	if not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
+	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
 		from webnotes.model.doc import make_autoname
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):

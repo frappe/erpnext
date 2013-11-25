@@ -114,14 +114,19 @@ class BuyingController(StockController):
 			self._set_in_company_currency(item, "import_amount", "amount")
 			
 	def calculate_net_total(self):
+		# temporary fields
+		self.net_total_after_flat_discount = self.total_flat_discount = 0.0
+
 		self.doc.net_total = self.doc.net_total_import = 0.0
 
 		for item in self.item_doclist:
+			item.amount_for_tax = item.amount
 			self.doc.net_total += item.amount
 			self.doc.net_total_import += item.import_amount
-			
-		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
 		
+		self.net_total_after_flat_discount = self.doc.net_total
+		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
+
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.tax_doclist and \
 			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))

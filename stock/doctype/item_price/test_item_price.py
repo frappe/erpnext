@@ -19,5 +19,29 @@ test_records = [
 			"item_code": "_Test Item",
 			"ref_rate": 100
 		}
-	]
+	],
+	[
+		{
+			"doctype": "Item Price",
+			"price_list": "_Test Price List Rest of the World",
+			"item_code": "_Test Item 2",
+			"ref_rate": 123
+		}
+	],
+	[
+		{
+			"doctype": "Item Price",
+			"price_list": "_Test Price List Rest of the World",
+			"item_code": "_Test Item Home Desktop 100",
+			"ref_rate": 25
+		}
+	],
+	[
+		{
+			"doctype": "Item Price",
+			"price_list": "_Test Price List Rest of the World",
+			"item_code": "_Test Item Home Desktop 200",
+			"ref_rate": 7999
+		}
+	],
 ]

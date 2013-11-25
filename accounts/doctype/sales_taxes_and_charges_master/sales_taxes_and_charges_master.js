@@ -67,8 +67,11 @@ cur_frm.pformat.other_charges= function(doc){
 		// add rows
 		if(cl.length){
 			for(var i=0;i<cl.length;i++){
-				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
-					out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
+				if((convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate) 
+					|| cl[i].charge_type=="Discount Amount") {
+						amount = (cl[i].charge_type=="Discount Amount" ? "rate" : "tax_amount");
+						out += make_row(cl[i].description, convert_rate(cl[i][amount]), 0);
+					}
 			}
 		}
 
@@ -94,12 +97,23 @@ cur_frm.pformat.other_charges= function(doc){
 
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-		alert(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
-		d.charge_type = '';
+	
+	if(d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') {
+		var msg = wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total'");
+		if (d.idx == 1) {
+			msgprint(msg + wn._(" for first row"));
+			d.charge_type = '';
+		} else if(d.idx > 1) {
+			var tax_doclist = wn.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name,
+				{parentfield: cur_frm.cscript.other_fname});
+
+			if (tax_doclist[d.row_id - 1].charge_type == 'Discount Amount') {
+				msgprint(msg + wn._(" if previous row Charge Type is 'Discount Amount'"));
+				d.charge_type = '';
+			}
+		}
+		refresh_field('charge_type', d.name, 'other_charges');
 	}
-	validated = false;
-	refresh_field('charge_type',d.name,'other_charges');
 	cur_frm.cscript.row_id(doc, cdt, cdn);
 	cur_frm.cscript.rate(doc, cdt, cdn);
 	cur_frm.cscript.tax_amount(doc, cdt, cdn);
@@ -108,21 +122,38 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.row_id){
-		alert(wn._("Please select Charge Type first"));
+		msgprint(wn._("Please select Charge Type first"));
 		d.row_id = '';
 	}
-	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-		alert(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
+	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'Discount Amount') && d.row_id) {
+		msgprint(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id){
 		if(d.row_id >= d.idx){
-			alert(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
+			msgprint(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
 			d.row_id = '';
 		}
 	}
-	validated = false;
-	refresh_field('row_id',d.name,'other_charges');
+	refresh_field('row_id', d.name, 'other_charges');
+}
+
+cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	
+	if(d.charge_type == 'Discount Amount' || d.charge_type == 'Actual') {
+		var msg = repl(wn._("For row") + " # %(idx)s [%(doctype)s]: " + 
+			"%(charge_type_label)s = \"%(charge_type)s\" " +
+			wn._("cannot be included in Basic Rate"), {
+				idx: d.idx,
+				doctype: d.doctype,
+				charge_type_label: wn.meta.get_label(d.doctype, "charge_type", d.name),
+				charge_type: d.charge_type
+			});
+		msgprint(msg);
+	}
+	d.included_in_print_rate = 0;
+	refresh_field("included_in_print_rate", d.name, "other_charges");
 }
 
 /*---------------------- Get rate if account_head has account_type as TAX or CHARGEABLE-------------------------------------*/
@@ -148,23 +179,21 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.rate) {
-		alert(wn._("Please select Charge Type first"));
+		msgprint(wn._("Please select Charge Type first"));
 		d.rate = '';
 	}
-	validated = false;
-	refresh_field('rate',d.name,'other_charges');
+	refresh_field('rate', d.name, 'other_charges');
 }
 
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.tax_amount){
-		alert(wn._("Please select Charge Type first"));
+		msgprint(wn._("Please select Charge Type first"));
 		d.tax_amount = '';
 	}
 	else if(d.charge_type && d.tax_amount) {
-		alert(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
+		msgprint(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
 		d.tax_amount = '';
 	}
-	validated = false;
-	refresh_field('tax_amount',d.name,'other_charges');
+	refresh_field('tax_amount', d.name, 'other_charges');
 };

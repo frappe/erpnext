@@ -29,13 +29,25 @@ erpnext.POS = Class.extend({
 							</table>\
 						</div>\
 						<br>\
-						<div class="net-total-area" style="margin-left: 40%;">\
+						<div class="totals-area" style="margin-left: 40%;">\
 							<table class="table table-condensed">\
 								<tr>\
 									<td><b>Net Total</b></td>\
 									<td style="text-align: right;" class="net-total"></td>\
 								</tr>\
 							</table>\
+							<div class="flat-discount" style="display: none;">\
+								<table width="100%">\
+									<tr>\
+										<td width="50%"><b>Discount</b></td>\
+										<td style="text-align: right;" class="total-flat-discount"></td>\
+									</tr>\
+								</table>\
+							</div>\
+							<div class="discount-area">\
+								<button class="btn btn-link btn-sm add-flat-discount">\
+								<i class="icon-plus"></i> Add Flat Discount</button>\
+							</div>\
 							<div class="tax-table" style="display: none;">\
 								<table class="table table-condensed">\
 									<thead>\
@@ -48,13 +60,15 @@ erpnext.POS = Class.extend({
 									</tbody>\
 								</table>\
 							</div>\
-							<table class="table table-condensed">\
-								<tr>\
-									<td style="vertical-align: middle;"><b>Grand Total</b></td>\
-									<td style="text-align: right; font-size: 200%; \
-										font-size: bold;" class="grand-total"></td>\
-								</tr>\
-							</table>\
+							<div class="grand-total-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td style="vertical-align: middle;"><b>Grand Total</b></td>\
+										<td style="text-align: right; font-size: 200%; \
+											font-size: bold;" class="grand-total"></td>\
+									</tr>\
+								</table>\
+							</div>\
 						</div>\
 					</div>\
 					<br><br>\
@@ -72,17 +86,7 @@ erpnext.POS = Class.extend({
 				</div>\
 			</div></div>');
 		
-		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
-			this.party = "Customer";
-			this.price_list = this.frm.doc.selling_price_list;
-			this.sales_or_purchase = "Sales";
-		}
-		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
-			this.party = "Supplier";
-			this.price_list = this.frm.doc.buying_price_list;
-			this.sales_or_purchase = "Purchase";
-		}
-		
+		this.check_transaction_type();
 		this.make();
 
 		var me = this;
@@ -90,13 +94,29 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
-		this.wrapper.find(".delete-items").on("click", function() {
-			me.remove_selected_item();
-		});
-
-		this.wrapper.find(".make-payment").on("click", function() {
-			me.make_payment();
-		});
+		this.call_function("delete-items", function() {me.remove_selected_item();});
+		this.call_function("make-payment", function() {me.make_payment();});
+		this.call_function("add-flat-discount", function() {me.add_flat_discount();});
+	},
+	check_transaction_type: function() {
+		// Check whether the transaction is "Sales" or "Purchase"
+		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
+			this.party = "Customer";
+			this.price_list = this.frm.doc.selling_price_list;
+			this.sales_or_purchase = "Sales";
+			this.net_total = "net_total_export";
+			this.grand_total = "grand_total_export";
+		}
+		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
+			this.party = "Supplier";
+			this.price_list = this.frm.doc.buying_price_list;
+			this.sales_or_purchase = "Purchase";
+			this.net_total = "net_total_import";
+			this.grand_total = "grand_total_import";
+		}
+	},
+	call_function: function(class_name, fn, event_name) {
+		this.wrapper.find("." + class_name).on(event_name || "click", fn);
 	},
 	make: function() {
 		this.make_party();
@@ -148,19 +168,20 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.search = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Link",
-				"options": "Item",
+				"fieldtype": "Data",
 				"label": "Item",
 				"fieldname": "pos_item",
-				"placeholder": "Item"
+				"placeholder": "Search Item"
 			},
 			parent: this.wrapper.find(".search-area"),
 			only_input: true,
 		});
 		this.search.make_input();
-		this.search.$input.on("change", function() {
+		this.search.$input.on("keypress", function() {
 			if(!me.search.autocomplete_open)
-				me.make_item_list();
+				if(me.item_timeout)
+					clearTimeout(me.item_timeout);
+				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
 	make_barcode: function() {
@@ -184,6 +205,7 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		me.item_timeout = null;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_items',
 			args: {
@@ -195,26 +217,28 @@ erpnext.POS = Class.extend({
 			callback: function(r) {
 				var $wrap = me.wrapper.find(".item-list");
 				me.wrapper.find(".item-list").empty();
-				$.each(r.message, function(index, obj) {
-					if (obj.image)
-						image = '<img src="' + obj.image + '" class="img-responsive" \
-								style="border:1px solid #eee; max-height: 140px;">';
-					else
-						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
+				if (r.message) {
+					$.each(r.message, function(index, obj) {
+						if (obj.image)
+							image = '<img src="' + obj.image + '" class="img-responsive" \
+									style="border:1px solid #eee; max-height: 140px;">';
+						else
+							image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
-					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
-								<div class="small">%(item_code)s</div>\
-								<div class="small">%(item_name)s</div>\
-								<div class="small">%(item_price)s</div>\
-							</div>', 
-						{
-							item_code: obj.name,
-							item_price: format_currency(obj.ref_rate, obj.currency),
-							item_name: obj.name===obj.item_name ? "" : obj.item_name,
-							item_image: image
-						})).appendTo($wrap);
-				});
+						$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
+									<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
+									<div class="small">%(item_code)s</div>\
+									<div class="small">%(item_name)s</div>\
+									<div class="small">%(item_price)s</div>\
+								</div>', 
+							{
+								item_code: obj.name,
+								item_price: format_currency(obj.ref_rate, obj.currency),
+								item_name: obj.name===obj.item_name ? "" : obj.item_name,
+								item_image: image
+							})).appendTo($wrap);
+					});
+				}
 
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
@@ -269,15 +293,22 @@ erpnext.POS = Class.extend({
 			me.frm.script_manager.trigger("item_code", child.doctype, child.name);
 		}
 		me.refresh();
+		
+		// Clear Item Box and remake item list
+		if (this.search.$input.val()) {
+			this.search.set_input("");
+			this.make_item_list();
+		}
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
-				if (qty == 0)
+				if (qty == 0) {
 					wn.model.clear_doc(d.doctype, d.name);
-				else {
+					me.refresh_grid();
+				} else {
 					d.qty = qty;
 					me.frm.script_manager.trigger("qty", d.doctype, d.name);
 				}
@@ -289,6 +320,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
+		var total_flat_discount = 0.0;
 
 		// add items
 		var $items = me.wrapper.find("#cart tbody").empty();
@@ -325,34 +357,39 @@ erpnext.POS = Class.extend({
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length) ? true : false)
+			.toggle((taxes && taxes.length && 
+				flt(me.frm.doc.other_charges_total_export) != 0.0) ? true : false)
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			$(repl('<tr>\
-				<td>%(description)s (%(rate)s%)</td>\
-				<td style="text-align: right;">%(tax_amount)s</td>\
-			<tr>', {
-				description: d.description,
-				rate: d.rate,
-				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
-					me.frm.doc.currency)
-			})).appendTo(".tax-table tbody");
+			if (d.charge_type == "Discount Amount") {
+				total_flat_discount += d.rate;
+			} else {
+				$(repl('<tr>\
+					<td>%(description)s %(rate)s</td>\
+					<td style="text-align: right;">%(tax_amount)s</td>\
+				<tr>', {
+					description: d.description,
+					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
+					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+						me.frm.doc.currency)
+				})).appendTo(".tax-table tbody");
+			}
 		});
 
+		$(this.wrapper).find(".flat-discount")
+			.toggle(flt(total_flat_discount) != 0.0 ? true : false);
+		
+		if (flt(total_flat_discount) != 0.0) {
+			this.wrapper.find(".total-flat-discount").text(
+				format_currency(total_flat_discount, me.frm.doc.currency));
+		}
+
 		// set totals
-		if (this.sales_or_purchase == "Sales") {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
-				me.frm.doc.currency));
-		}
-		else {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_import, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_import, 
-				me.frm.doc.currency));
-		}
+		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total], 
+			me.frm.doc.currency));
+		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total], 
+			me.frm.doc.currency));
 
 		// if form is local then only run all these functions
 		if (this.frm.doc.docstatus===0) {
@@ -455,9 +492,12 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
+		this.refresh_grid();
+	},
+	refresh_grid: function() {
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
-		me.refresh();
+		this.refresh();
 	},
 	make_payment: function() {
 		var me = this;
@@ -489,8 +529,6 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
-					me.barcode.$input.focus();
-					
 					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
@@ -504,5 +542,39 @@ erpnext.POS = Class.extend({
 				}
 			});
 		}
+	},
+	add_flat_discount: function() {
+		var me = this;
+		// show discount wizard
+		var dialog = new wn.ui.Dialog({
+			title: 'Flat Discount', 
+			fields: [
+				{fieldtype:'Data', fieldname:'charge_type', label:'Type', reqd:1, 
+					default:'Discount Amount'},
+				{fieldtype:'Link', fieldname:'account_head', label:'Account Head', reqd: 1, 
+					options:'Account'},
+				{fieldtype:'Link', fieldname:'cost_center', label:'Cost Center', reqd: 1, 
+					options:'Cost Center'},
+				{fieldtype:'Text', fieldname:'description', label:'Description', reqd:1},
+				{fieldtype:'Data', fieldname:'rate', label:'Rate', reqd:1},
+				{fieldtype:'Button', fieldname:'add', label:'Add'}
+			]
+		});
+		dialog.show();
+		dialog.get_input("charge_type").prop("disabled", true);
+		
+		dialog.fields_dict.add.input.onclick = function() {
+			var tax = wn.model.add_child(me.frm.doc, "Sales Taxes and Charges", 
+				me.frm.cscript.other_fname);
+
+			tax.charge_type = dialog.get_values().charge_type;
+			me.frm.script_manager.trigger("charge_type", tax.doctype, tax.name);
+			tax.account_head = dialog.get_values().account_head;
+			tax.cost_center = dialog.get_values().cost_center;
+			tax.description = dialog.get_values().description;
+			tax.rate = dialog.get_values().rate;
+			dialog.hide();
+			me.refresh();
+		};
 	},
 });

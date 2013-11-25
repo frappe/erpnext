@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-24 11:39:32", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:21", 
+  "modified": "2013-10-29 16:31:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,7 +34,7 @@
   "label": "Type", 
   "oldfieldname": "charge_type", 
   "oldfieldtype": "Select", 
-  "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total", 
+  "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nDiscount Amount", 
   "reqd": 1
  }, 
  {

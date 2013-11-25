@@ -203,8 +203,8 @@ class AccountsController(TransactionBase):
 				}, raise_exception=True)
 		
 		if cint(tax.included_in_print_rate):
-			if tax.charge_type == "Actual":
-				# inclusive tax cannot be of type Actual
+			if tax.charge_type in ("Actual", "Discount Amount"):
+				# inclusive tax cannot be of type Actual or Discount Amount
 				msgprint((_("Row") 
 					+ " # %(idx)s [%(doctype)s]: %(charge_type_label)s = \"%(charge_type)s\" " 
 					+ "cannot be included in Item's rate") % {
@@ -224,23 +224,35 @@ class AccountsController(TransactionBase):
 				_on_previous_row_error("1 - %d" % (tax.row_id,))
 				
 	def calculate_taxes(self):
-		for item in self.item_doclist:
+		# maintain actual tax rate based on idx
+		actual_tax_dict = dict([[tax.idx, tax.rate] for tax in self.tax_doclist 
+			if tax.charge_type == "Actual"])
+
+		for n, item in enumerate(self.item_doclist):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 
 			for i, tax in enumerate(self.tax_doclist):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+
+				# Adjust divisional loss to the last item
+				if tax.charge_type == "Actual":
+					actual_tax_dict[tax.idx] -= current_tax_amount;
+					if n == len(self.item_doclist) - 1:
+						current_tax_amount += actual_tax_dict[tax.idx]
 				
 				if hasattr(self, "set_item_tax_amount"):
 					self.set_item_tax_amount(item, tax, current_tax_amount)
 
+				# commented because it is covered in divisional loss adjustment
+
 				# case when net total is 0 but there is an actual type charge
 				# in this case add the actual amount to tax.tax_amount
 				# and tax.grand_total_for_current_item for the first such iteration
-				if tax.charge_type=="Actual" and \
-						not (current_tax_amount or self.doc.net_total or tax.tax_amount):
-					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
-					current_tax_amount += zero_net_total_adjustment
+				# if tax.charge_type=="Actual" and \
+				# 		not (current_tax_amount or self.doc.net_total or tax.tax_amount):
+				# 	zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
+				# 	current_tax_amount += zero_net_total_adjustment
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
@@ -260,9 +272,8 @@ class AccountsController(TransactionBase):
 				# note: grand_total_for_current_item contains the contribution of 
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.amount +
+					tax.grand_total_for_current_item = flt(item.amount_for_tax +
 						current_tax_amount, self.precision("total", tax))
-						
 				else:
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item +
@@ -270,6 +281,11 @@ class AccountsController(TransactionBase):
 				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
+
+				# round off tax_amount and total tax in last iteration
+				if n == len(self.item_doclist) - 1:
+					tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
+					tax.total = flt(tax.total, self.precision("total", tax))
 				
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -278,11 +294,11 @@ class AccountsController(TransactionBase):
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
-			current_tax_amount = (self.doc.net_total
-				and ((item.amount / self.doc.net_total) * actual)
+			current_tax_amount = (self.net_total_after_flat_discount
+				and ((item.amount_for_tax / self.net_total_after_flat_discount) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.amount
+			current_tax_amount = (tax_rate / 100.0) * item.amount_for_tax
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item
@@ -321,6 +337,13 @@ class AccountsController(TransactionBase):
 					del tax.fields[fieldname]
 			
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
+
+		for item in self.item_doclist:
+			if "amount_for_tax" in item.fields:
+				del item.fields["amount_for_tax"]
+
+		del self.total_flat_discount
+		del self.net_total_after_flat_discount
 			
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""

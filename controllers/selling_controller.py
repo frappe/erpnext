@@ -175,6 +175,7 @@ class SellingController(StockController):
 			self._set_in_company_currency(item, "export_amount", "amount")
 			
 	def calculate_net_total(self):
+		self.total_flat_discount = self.net_total_after_flat_discount = 0.0
 		self.doc.net_total = self.doc.net_total_export = 0.0
 
 		for item in self.item_doclist:
@@ -182,16 +183,48 @@ class SellingController(StockController):
 			self.doc.net_total_export += item.export_amount
 		
 		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
+
+		# Calculate total discount amount from tax doclist
+		for tax in self.tax_doclist:
+			if tax.charge_type == "Discount Amount":
+				self.total_flat_discount += flt(tax.rate, self.precision("rate", tax))
+
+		# Calculate amount for tax for each item
+		adjusted_discount = self.total_flat_discount
+		for i, item in enumerate(self.item_doclist):
+			item.amount_for_tax = item.amount
+
+			if self.total_flat_discount != 0.0:
+				discount = flt(self.total_flat_discount * (item.amount / self.doc.net_total), 
+					self.precision("amount", item))
+				adjusted_discount -= discount
+				
+				if i==len(self.item_doclist) - 1:
+					discount += adjusted_discount
+
+				item.amount_for_tax = item.amount - discount
+				self.net_total_after_flat_discount += flt(item.amount_for_tax, 
+					self.precision("net_total"))
+			else:
+				self.net_total_after_flat_discount += item.amount
 				
 	def calculate_totals(self):
-		self.doc.grand_total = flt(self.tax_doclist and \
-			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
+		tax_count = len(self.tax_doclist)
+		
+		if tax_count:
+			self.doc.grand_total = flt(self.tax_doclist[tax_count - 1].total, 
+				self.precision("grand_total"))
+		else:
+			self.doc.grand_total = flt(self.net_total_after_flat_discount, 
+				self.precision("grand_total"))
+
 		self.doc.grand_total_export = flt(self.doc.grand_total / self.doc.conversion_rate, 
 			self.precision("grand_total_export"))
 			
-		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
+		self.doc.other_charges_total = flt(self.doc.grand_total - self.net_total_after_flat_discount,
 			self.precision("other_charges_total"))
-		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
+		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - 
+			(self.net_total_after_flat_discount / self.doc.conversion_rate),
 			self.precision("other_charges_total_export"))
 		
 		self.doc.rounded_total = _round(self.doc.grand_total)

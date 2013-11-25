@@ -84,7 +84,7 @@ class TransactionBase(StatusUpdater):
 			self.doc.selling_price_list
 			
 		for fieldname, val in customer_defaults.items():
-			if self.meta.get_field(fieldname):
+			if self.meta.get_field(fieldname) and val:
 				self.doc.fields[fieldname] = val
 			
 		if self.meta.get_field("sales_team") and self.doc.customer:

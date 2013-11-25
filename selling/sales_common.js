@@ -311,18 +311,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 		$.each(this.frm.item_doclist, function(i, item) {
+			// Calculate export amount in float with precision as per qty
 			wn.model.round_floats_in(item);
 			item.export_amount = flt(item.export_rate * item.qty, precision("export_amount", item));
 			
+			// Set temporary fields in company currency
 			me._set_in_company_currency(item, "ref_rate", "base_ref_rate");
 			me._set_in_company_currency(item, "export_rate", "basic_rate");
 			me._set_in_company_currency(item, "export_amount", "amount");
 		});
-		
 	},
 	
 	determine_exclusive_rate: function() {
 		var me = this;
+
 		$.each(me.frm.item_doclist, function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
@@ -385,7 +387,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_net_total: function() {
 		var me = this;
-
+		this.total_flat_discount = 0.0;
+		this.net_total_after_flat_discount = 0.0;
+		
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
 		$.each(this.frm.item_doclist, function(i, item) {
 			me.frm.doc.net_total += item.amount;
@@ -393,20 +397,52 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		});
 		
 		wn.model.round_floats_in(this.frm.doc, ["net_total", "net_total_export"]);
+
+		// Calculate total discount amount from tax doclist
+		$.each(me.frm.tax_doclist, function(i, tax) {
+			if(tax.charge_type == "Discount Amount")
+				me.total_flat_discount += flt(tax.rate, precision("rate", tax));
+		});
+
+		// Calculate amount for tax for each item
+		var adjusted_discount = me.total_flat_discount;
+		$.each(this.frm.item_doclist, function(i, item) {
+			item.amount_for_tax = item.amount;
+
+			if (me.total_flat_discount != 0.0) {
+				var discount = flt(me.total_flat_discount * (item.amount / 
+					me.frm.doc.net_total), precision("amount", item));
+				adjusted_discount -= discount;
+				
+				if (i == me.frm.item_doclist.length - 1)
+					discount += adjusted_discount;
+
+				item.amount_for_tax = item.amount - discount;
+				me.net_total_after_flat_discount += flt(item.amount_for_tax, precision("net_total"));
+			} else {
+				me.net_total_after_flat_discount += item.amount;
+			}
+		});
 	},
 	
 	calculate_totals: function() {
+		var me = this;
 		var tax_count = this.frm.tax_doclist.length;
-		this.frm.doc.grand_total = flt(
-			tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
-			precision("grand_total"));
+		
+		if (tax_count) {
+			this.frm.doc.grand_total = flt(this.frm.tax_doclist[tax_count - 1].total, 
+				precision("grand_total"));
+		}
+		else
+			this.frm.doc.grand_total = flt(this.net_total_after_flat_discount, precision("grand_total"));
+		
 		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
 			precision("grand_total_export"));
 			
-		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
+		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.net_total_after_flat_discount, 
 			precision("other_charges_total"));
-		this.frm.doc.other_charges_total_export = flt(
-			this.frm.doc.grand_total_export - this.frm.doc.net_total_export,
+		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export - 
+			(this.net_total_after_flat_discount / this.frm.doc.conversion_rate),
 			precision("other_charges_total_export"));
 			
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
