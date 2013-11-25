@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:20:14", 
+  "modified": "2013-11-25 11:36:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -429,7 +429,8 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication"
+  "options": "Communication", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm", 
