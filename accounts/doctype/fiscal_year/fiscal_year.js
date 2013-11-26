@@ -21,16 +21,8 @@ $.extend(cur_frm.cscript, {
 	year_start_date: function(doc, dt, dn) {
 		var me = this;
 
-		wn.call({
-			method: 'controllers.trends.get_period_date_ranges',
-			args: {
-				period: "Yearly",
-				year_start_date: this.frm.doc.year_start_date
-			},
-			callback: function(r) {
-				if (!r.exc)
-					me.frm.set_value("year_end_date", r.message[0][1])
-			}
-		});
+		year_end_date = 
+			wn.datetime.add_days(wn.datetime.add_months(this.frm.doc.year_start_date, 12), -1);
+		this.frm.set_value("year_end_date", year_end_date);
 	},
 });
