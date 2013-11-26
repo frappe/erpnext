@@ -24,9 +24,10 @@ class DocType:
 		year_start_end_dates = webnotes.conn.sql("""select year_start_date, year_end_date 
 			from `tabFiscal Year` where name=%s""", (self.doc.name))
 
-		if getdate(self.doc.year_start_date) != year_start_end_dates[0][0] or getdate(self.doc.year_end_date) != year_start_end_dates[0][1]:
-			webnotes.throw(_("Cannot change Year Start Date and Year End Date \
-				once the Fiscal Year is saved."))
+		if year_start_end_dates:
+			if getdate(self.doc.year_start_date) != year_start_end_dates[0][0] or getdate(self.doc.year_end_date) != year_start_end_dates[0][1]:
+				webnotes.throw(_("Cannot change Year Start Date and Year End Date \
+					once the Fiscal Year is saved."))
 
 	def on_update(self):
 		# validate year start date and year end date
