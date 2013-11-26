@@ -73,7 +73,8 @@ class DocType:
 		if warehouse_account:
 			webnotes.delete_doc("Account", warehouse_account)
 				
-		if sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", self.doc.name):
+		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
+				where warehouse = %s""", self.doc.name):
 			msgprint("""Warehouse can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
 			
@@ -88,7 +89,8 @@ class DocType:
 				
 			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
-		self.rename_account(olddn, new_warehouse, merge)
+		from accounts.utils import rename_account_for
+		rename_account_for("Warehouse", olddn, new_warehouse, merge)
 
 		return new_warehouse
 
@@ -110,20 +112,3 @@ class DocType:
 		webnotes.conn.set_default("allow_negative_stock", 
 			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
 		webnotes.conn.auto_commit_on_many_writes = 0
-			
-	def rename_account(self, olddn, newdn, merge):
-		old_account = webnotes.conn.get_value("Account", 
-			{"account_type": "Warehouse", "master_name": olddn})
-		if old_account:
-			new_account = None
-			if not merge:
-				if old_account == olddn:
-					new_account = webnotes.rename_doc("Account", olddn, newdn)
-			else:
-				existing_new_account = webnotes.conn.get_value("Account", 
-					{"account_type": "Warehouse", "master_name": newdn})
-				new_account = webnotes.rename_doc("Account", old_account, 
-					existing_new_account or newdn, merge=True if existing_new_account else False)
-
-			if new_account:
-				webnotes.conn.set_value("Account", new_account, "master_name", newdn)

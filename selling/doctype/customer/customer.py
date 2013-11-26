@@ -143,21 +143,13 @@ class DocType(TransactionBase):
 		if self.doc.lead_name:
 			webnotes.conn.sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
-	def after_rename(self, old, new, merge=False):
-		#update customer_name if not naming series
+	def before_rename(self, olddn, newdn, merge=False):
+		from accounts.utils import rename_account_for
+		rename_account_for("Customer", olddn, newdn, merge)
+			
+	def after_rename(self, olddn, newdn, merge=False):
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			webnotes.conn.set(self.doc, "customer_name", new)
-		
-		for account in webnotes.conn.sql("""select name, account_name from 
-			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
-			if account.account_name != new:
-				merge_account = True if merge and webnotes.conn.get_value("Account", 
-					{"master_name": new, "master_type": "Customer"}) else False
-				webnotes.rename_doc("Account", account.name, new, merge=merge_account)
-
-		#update master_name in account record
-		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
-			master_type = 'Customer' where master_name = %s""", (new, old))
+			webnotes.conn.set(self.doc, "customer_name", newdn)
 
 @webnotes.whitelist()
 def get_dashboard_info(customer):
