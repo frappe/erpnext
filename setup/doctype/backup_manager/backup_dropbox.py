@@ -13,7 +13,7 @@
 from __future__ import unicode_literals
 import os
 import webnotes
-from webnotes.utils import get_request_site_address, get_base_path, cstr
+from webnotes.utils import get_request_site_address, cstr
 from webnotes import _
 
 from backup_manager import ignore_list
@@ -75,6 +75,7 @@ def backup_to_dropbox():
 	from dropbox import client, session
 	from conf import dropbox_access_key, dropbox_secret_key
 	from webnotes.utils.backups import new_backup
+	from webnotes.utils import get_files_path, get_backups_path
 	if not webnotes.conn:
 		webnotes.connect()
 
@@ -87,8 +88,7 @@ def backup_to_dropbox():
 
 	# upload database
 	backup = new_backup()
-	filename = os.path.join(get_base_path(), "public", "backups", 
-		os.path.basename(backup.backup_path_db))
+	filename = os.path.join(get_backups_path(), os.path.basename(backup.backup_path_db))
 	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
 	webnotes.conn.close()
@@ -97,7 +97,7 @@ def backup_to_dropbox():
 	# upload files to files folder
 	did_not_upload = []
 	error_log = []
-	path = os.path.join(get_base_path(), "public", "files")
+	path = get_files_path()
 	for filename in os.listdir(path):
 		filename = cstr(filename)
 		if filename in ignore_list:
