@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-23 19:57:17", 
   "docstatus": 0, 
-  "modified": "2013-07-22 15:23:10", 
+  "modified": "2013-11-26 17:34:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -74,6 +74,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_cost_center", 
   "fieldtype": "Link", 
+  "ignore_restriction": 1, 
   "label": "Parent Cost Center", 
   "oldfieldname": "parent_cost_center", 
   "oldfieldtype": "Link", 
@@ -171,6 +172,7 @@
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "ignore_restriction": 1, 
   "label": "old_parent", 
   "no_copy": 1, 
   "oldfieldname": "old_parent", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-11-03 11:19:10", 
+  "modified": "2013-11-26 16:36:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -415,6 +415,7 @@
   "doctype": "DocField", 
   "fieldname": "reports_to", 
   "fieldtype": "Link", 
+  "ignore_restriction": 1, 
   "label": "Reports to", 
   "oldfieldname": "reports_to", 
   "oldfieldtype": "Link", 
@@ -749,7 +750,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "employee", 
   "role": "Employee", 
   "write": 0
  }, 
@@ -757,7 +757,6 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "company", 
   "role": "HR User", 
   "write": 1
  }, 

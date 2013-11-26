@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-11-02 19:41:37", 
+  "modified": "2013-11-26 17:36:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -71,6 +71,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_item_group", 
   "fieldtype": "Link", 
+  "ignore_restriction": 1, 
   "label": "Parent Item Group", 
   "no_copy": 0, 
   "oldfieldname": "parent_item_group", 
@@ -166,6 +167,7 @@
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "ignore_restriction": 1, 
   "label": "old_parent", 
   "no_copy": 1, 
   "oldfieldname": "old_parent", 

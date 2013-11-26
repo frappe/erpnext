@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-11-02 16:59:08", 
+  "modified": "2013-11-26 17:36:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -68,6 +68,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_territory", 
   "fieldtype": "Link", 
+  "ignore_restriction": 1, 
   "label": "Parent Territory", 
   "oldfieldname": "parent_territory", 
   "oldfieldtype": "Link", 
@@ -136,6 +137,7 @@
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "ignore_restriction": 1, 
   "label": "old_parent", 
   "no_copy": 1, 
   "oldfieldname": "old_parent", 

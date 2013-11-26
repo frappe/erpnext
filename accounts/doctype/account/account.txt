@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-09-24 11:22:18", 
+  "modified": "2013-11-26 17:35:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -138,6 +138,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_account", 
   "fieldtype": "Link", 
+  "ignore_restriction": 1, 
   "label": "Parent Account", 
   "oldfieldname": "parent_account", 
   "oldfieldtype": "Link", 
@@ -154,7 +155,6 @@
   "oldfieldname": "account_type", 
   "oldfieldtype": "Select", 
   "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable\nWarehouse", 
-  "permlevel": 0, 
   "search_index": 0
  }, 
  {

@@ -254,6 +254,7 @@ patch_list = [
 	"patches.1311.p04_update_comments",
 	"patches.1311.p05_website_brand_html",
 	"patches.1311.p06_fix_report_columns",
+	"patches.1311.p06_update_user_properties",
 	"execute:webnotes.delete_doc('DocType', 'Documentation Tool')",
 	"execute:webnotes.delete_doc('Report', 'Stock Ledger') #2013-11-29",
 	"patches.1312.p01_delete_old_stock_reports",
