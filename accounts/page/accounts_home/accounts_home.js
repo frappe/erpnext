@@ -90,11 +90,6 @@ wn.module_page["Accounts"] = [
 				"doctype": "Period Closing Voucher",
 				description: wn._("Close Balance Sheet and book Profit or Loss.")
 			},
-			{
-				"page":"voucher-import-tool",
-				"label": wn._("Voucher Import Tool"),
-				"description": wn._("Import accounting entries from CSV.")
-			},		
 		]
 	},
 	{
