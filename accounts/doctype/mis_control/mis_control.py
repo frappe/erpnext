@@ -3,16 +3,9 @@
 
 from __future__ import unicode_literals
 import webnotes
-
-from webnotes.utils import cint, cstr, flt, get_first_day, get_last_day, has_common
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes import session, msgprint
-
+from webnotes.utils import flt, get_first_day, get_last_day, has_common
 import webnotes.defaults
-
-
-from accounts.utils import get_balance_on, get_fiscal_year
+from accounts.utils import get_balance_on
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -30,15 +23,12 @@ class DocType:
 		self.flag = 0
 		
 	# Get defaults on load of MIS, MIS - Comparison Report and Financial statements
-	# ----------------------------------------------------
 	def get_comp(self):
 		ret = {}
 		type = []
-		comp = []
-		# ------ get period -----------
+
 		ret['period'] = ['Annual','Half Yearly','Quarterly','Monthly']
 		
-		# ---- get companies ---------
 		from accounts.page.accounts_browser.accounts_browser import get_companies
 		ret['company'] = get_companies()
 
@@ -58,7 +48,7 @@ class DocType:
 		for i in range(0,fiscal_start_month-1): mon.append(month_list[i])
 		ret['month'] = mon
 
-		# ------------------------ get MIS Type on basis of roles of session user ------------------------------------------
+		# get MIS Type on basis of roles of session user
 		self.roles = webnotes.user.get_roles()
 		if has_common(self.roles, ['Sales Manager']):
 			type.append('Sales')
@@ -66,101 +56,7 @@ class DocType:
 			type.append('Purchase')
 		ret['type'] = type
 		return ret
-		
-	# Gets Transactions type and Group By options based on module
-	#------------------------------------------------------------------
-	def get_trans_group(self,module):
-		ret = {}
-		st,group = [],[]
-		if module == 'Sales':
-			st = ['Quotation','Sales Order','Delivery Note','Sales Invoice']
-			group = ['Item','Item Group','Customer','Customer Group','Cost Center']
-		elif module == 'Purchase':
-			st = ['Purchase Order','Purchase Receipt','Purchase Invoice']
-			group = ['Item','Item Group','Supplier','Supplier Type']
-		
-		ret['stmt_type'] = st
-		ret['group_by'] = group
-		
-		return ret
 
-	# Get Days based on month (for MIS Comparison Report)
-	# --------------------------------------------------------
-	def get_days(self,month):
-		days = []
-		ret = {}
-		if month == 'Jan' or month == 'Mar' or month == 'May' or month == 'Jul' or month == 'Aug' or month == 'Oct' or month == 'Dec':
-			for i in range(1,32):
-				days.append(i)
-		elif month == 'Apr' or month == 'Jun' or month == 'Sep' or month == 'Nov':
-			for i in range(1,31):
-				days.append(i)
-		elif month == 'Feb':
-			for i in range(1,29):
-				days.append(i)
-		ret['days'] = days
-		return ret
-	
-	# Get from date and to date based on fiscal year (for in summary - comparison report)
-	# -----------------------------------------------------------------------------------------------------
-	def dates(self,fiscal_year,from_date,to_date):
-		import datetime
-		ret = ''
-		start_date = cstr(webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name = %s",fiscal_year)[0][0])
-		st_mon = cint(from_date.split('-')[1])
-		ed_mon = cint(to_date.split('-')[1])
-		st_day = cint(from_date.split('-')[2])
-		ed_day = cint(to_date.split('-')[2])
-		fiscal_start_month = cint(start_date.split('-')[1])
-		next_fiscal_year = cint(start_date.split('-')[0]) + 1
-		current_year = ''
-		next_year = ''
-		
-		#CASE - 1 : Jan - Mar (Valid)
-		if st_mon < fiscal_start_month and ed_mon < fiscal_start_month:
-			current_year = cint(start_date.split('-')[0]) + 1
-			next_year	= cint(start_date.split('-')[0]) + 1
-		
-		# Case - 2 : Apr - Dec (Valid)
-		elif st_mon >= fiscal_start_month and ed_mon <= 12 and ed_mon >= fiscal_start_month:
-			current_year = cint(start_date.split('-')[0])
-			next_year	= cint(start_date.split('-')[0])
-
-		# Case 3 : Jan - May (Invalid)
-		elif st_mon < fiscal_start_month and ed_mon >= fiscal_start_month:
-			current_year = cint(start_date.split('-')[0]) + 1
-			next_year	= cint(start_date.split('-')[0]) + 2
-	
-		# check whether from date is within fiscal year
-		if datetime.date(current_year, st_mon, st_day) >= datetime.date(cint(start_date.split('-')[0]), cint(start_date.split('-')[1]), cint(start_date.split('-')[2])) and datetime.date(cint(current_year), cint(st_mon), cint(st_day)) < datetime.date((cint(start_date.split('-')[0])+1), cint(start_date.split('-')[1]), cint(start_date.split('-')[2])):
-			begin_date = cstr(current_year)+"-"+cstr(st_mon)+"-"+cstr(st_day)
-		else:
-			msgprint("Please enter appropriate from date.")
-			raise Exception
-		# check whether to date is within fiscal year
-		if datetime.date(next_year, ed_mon, ed_day) >= datetime.date(cint(start_date.split('-')[0]), cint(start_date.split('-')[1]), cint(start_date.split('-')[2])) and datetime.date(cint(next_year), cint(ed_mon), cint(ed_day)) < datetime.date(cint(start_date.split('-')[0])+1, cint(start_date.split('-')[1]), cint(start_date.split('-')[2])):
-			end_date = cstr(next_year)+"-"+cstr(ed_mon)+"-"+cstr(ed_day)
-		else:
-			msgprint("Please enter appropriate to date.")
-			raise Exception
-		ret = begin_date+'~~~'+end_date
-		return ret
-
-	# Get MIS Totals
-	# ---------------
-	def get_totals(self, args):
-		args = eval(args)
-		#msgprint(args)
-		totals = webnotes.conn.sql("SELECT %s FROM %s WHERE %s %s %s %s" %(cstr(args['query_val']), cstr(args['tables']), cstr(args['company']), cstr(args['cond']), cstr(args['add_cond']), cstr(args['fil_cond'])), as_dict = 1)[0]
-		#msgprint(totals)
-		tot_keys = totals.keys()
-		# return in flt because JSON doesn't accept Decimal
-		for d in tot_keys:
-			totals[d] = flt(totals[d])
-		return totals
-
-	# Get Statement
-	# -------------
 	
 	def get_statement(self, arg): 
 		self.return_data = []		
@@ -176,13 +72,9 @@ class DocType:
 		if arg['statement'] == 'Balance Sheet': pl = 'No'
 		if arg['statement'] == 'Profit & Loss': pl = 'Yes'
 		self.get_children('',0,pl,arg['company'], arg['year'])
-				
-		#self.balance_pl_statement(acct, arg['statement'])
-		#msgprint(self.return_data)
-		return self.return_data
 		
-	# Get Children
-	# ------------
+		return self.return_data
+
 	def get_children(self, parent_account, level, pl, company, fy):
 		cl = webnotes.conn.sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
 		level0_diff = [0 for p in self.period_list]
@@ -208,7 +100,6 @@ class DocType:
 					self.get_children(c[1], level+1, pl, company, fy)
 					
 				# make totals - for top level
-				# ---------------------------
 				if level==0:
 					# add rows for profit / loss in B/S
 					if pl=='No':
@@ -230,13 +121,8 @@ class DocType:
 								level0_diff[i] = flt(totals[i]) + level0_diff[i]
 						else:
 							self.return_data.append([4, 'Total '+c[0]] + totals)
-	
-	# Define Periods
-	# --------------
-	
-	def define_periods(self, year, period):
-		
-		# get year start date		
+
+	def define_periods(self, year, period):	
 		ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name=%s", year)
 		ysd = ysd and ysd[0][0] or ''
 
