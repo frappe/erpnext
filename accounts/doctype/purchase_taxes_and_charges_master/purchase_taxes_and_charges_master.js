@@ -14,6 +14,19 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
    cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
 }
 
+// For customizing print
+cur_frm.pformat.net_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.grand_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.in_words_import = function(doc) {
+	return '';
+}
+
 cur_frm.pformat.purchase_tax_details= function(doc){
  
   //function to make row of table
@@ -42,9 +55,9 @@ cur_frm.pformat.purchase_tax_details= function(doc){
 		<tr><td style="width: 60%"></td><td>';
   
   // main table
-  out +='<table class="noborder" style="width:100%">'
-  if(!print_hide('net_total')) {
-	out += make_row('Net Total', convert_rate(doc.net_total), 1);
+  out +='<table class="noborder" style="width:100%">';
+  if(!print_hide('net_total_import')) {
+	out += make_row('Net Total', doc.net_total_import, 1);
   }
   
   // add rows
