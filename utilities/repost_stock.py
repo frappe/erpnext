@@ -7,18 +7,24 @@ import webnotes
 from webnotes.utils import flt
 
 
-def repost():
+def repost(allow_negative_stock=False):
 	"""
 	Repost everything!
 	"""
 	webnotes.conn.auto_commit_on_many_writes = 1
 	
+	if allow_negative_stock:
+		webnotes.conn.set_default("allow_negative_stock", 1)
+	
 	for d in webnotes.conn.sql("""select distinct item_code, warehouse from 
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			repost_stock(d[0], d[1])
-		
+			repost_stock(d[0], d[1], allow_negative_stock)
+			
+	if allow_negative_stock:
+		webnotes.conn.set_default("allow_negative_stock", 
+			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
 	webnotes.conn.auto_commit_on_many_writes = 0
 
 def repost_stock(item_code, warehouse):
@@ -38,7 +44,7 @@ def repost_actual_qty(item_code, warehouse):
 		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
 	except:
 		pass
-
+	
 def get_reserved_qty(item_code, warehouse):
 	reserved_qty = webnotes.conn.sql("""
 		select 

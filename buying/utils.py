@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
-from webnotes.utils import getdate, flt, add_days
+from webnotes.utils import getdate, flt, add_days, cstr
 import json
 
 @webnotes.whitelist()
@@ -94,7 +94,6 @@ def _get_price_list_rate(args, item_bean, meta):
 			(args.buying_price_list, args.item_code), as_dict=1)
 		
 		if price_list_rate:
-			from utilities.transaction_base import validate_currency
 			validate_currency(args, item_bean.doc, meta)
 				
 			out.import_ref_rate = flt(price_list_rate[0].ref_rate) * \
@@ -132,7 +131,7 @@ def _validate_item_details(args, item):
 			_("Please select a sub-contracted item or do not sub-contract the transaction."), 
 			raise_exception=True)
 
-def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
+def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
 	last_purchase_order = webnotes.conn.sql("""\
@@ -143,7 +142,7 @@ def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and 
 			po.name = po_item.parent
 		order by po.transaction_date desc, po.name desc
-		limit 1""", (item_code, doc_name), as_dict=1)
+		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
 	# get last purchase receipt item details		
 	last_purchase_receipt = webnotes.conn.sql("""\
@@ -154,7 +153,7 @@ def get_last_purchase_details(item_code, doc_name, conversion_rate=1.0):
 		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
 			pr.name = pr_item.parent
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
-		limit 1""", (item_code, doc_name), as_dict=1)
+		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date \
 		or "1900-01-01")

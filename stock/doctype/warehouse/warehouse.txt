@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-10-28 16:42:07", 
+  "modified": "2013-11-19 12:12:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -20,7 +20,8 @@
   "name": "__common__", 
   "parent": "Warehouse", 
   "parentfield": "fields", 
-  "parenttype": "DocType"
+  "parenttype": "DocType", 
+  "permlevel": 0
  }, 
  {
   "doctype": "DocPerm", 
@@ -42,7 +43,6 @@
   "fieldtype": "Section Break", 
   "label": "Warehouse Detail", 
   "oldfieldtype": "Section Break", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -52,7 +52,6 @@
   "label": "Warehouse Name", 
   "oldfieldname": "warehouse_name", 
   "oldfieldtype": "Data", 
-  "permlevel": 0, 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -65,7 +64,6 @@
   "oldfieldname": "company", 
   "oldfieldtype": "Link", 
   "options": "Company", 
-  "permlevel": 0, 
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 1
@@ -95,7 +93,6 @@
   "fieldtype": "Table", 
   "label": "Warehouse Users", 
   "options": "Warehouse User", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -104,7 +101,6 @@
   "fieldname": "warehouse_contact_info", 
   "fieldtype": "Section Break", 
   "label": "Warehouse Contact Info", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -115,7 +111,6 @@
   "label": "Email Id", 
   "oldfieldname": "email_id", 
   "oldfieldtype": "Data", 
-  "permlevel": 0, 
   "print_hide": 0, 
   "read_only": 0
  }, 
@@ -127,7 +122,6 @@
   "oldfieldname": "phone_no", 
   "oldfieldtype": "Int", 
   "options": "Phone", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -138,7 +132,6 @@
   "oldfieldname": "mobile_no", 
   "oldfieldtype": "Int", 
   "options": "Phone", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -146,7 +139,6 @@
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -156,7 +148,6 @@
   "label": "Address Line 1", 
   "oldfieldname": "address_line_1", 
   "oldfieldtype": "Data", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -166,7 +157,6 @@
   "label": "Address Line 2", 
   "oldfieldname": "address_line_2", 
   "oldfieldtype": "Data", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -177,7 +167,6 @@
   "label": "City", 
   "oldfieldname": "city", 
   "oldfieldtype": "Data", 
-  "permlevel": 0, 
   "read_only": 0, 
   "reqd": 0
  }, 
@@ -189,7 +178,6 @@
   "oldfieldname": "state", 
   "oldfieldtype": "Select", 
   "options": "Suggest", 
-  "permlevel": 0, 
   "read_only": 0
  }, 
  {
@@ -199,33 +187,6 @@
   "label": "PIN", 
   "oldfieldname": "pin", 
   "oldfieldtype": "Int", 
-  "permlevel": 0, 
-  "read_only": 0
- }, 
- {
-  "description": "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge Into\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.", 
-  "doctype": "DocField", 
-  "fieldname": "merge_warehouses_section", 
-  "fieldtype": "Section Break", 
-  "label": "Merge Warehouses", 
-  "permlevel": 2, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "merge_with", 
-  "fieldtype": "Link", 
-  "label": "Merge Into", 
-  "options": "Warehouse", 
-  "permlevel": 2, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "merge", 
-  "fieldtype": "Button", 
-  "label": "Merge", 
-  "permlevel": 2, 
   "read_only": 0
  }, 
  {

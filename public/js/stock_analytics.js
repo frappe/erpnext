@@ -11,7 +11,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", 
-				"Fiscal Year"],
+				"Fiscal Year", "Serial No"],
 			tree_grid: {
 				show: true, 
 				parent_field: "parent_item_group", 
