@@ -249,7 +249,8 @@ patch_list = [
 	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap_config') #2013-11-20",
 	"execute:webnotes.reload_doc('website', 'doctype', 'website_sitemap') #2013-11-20",
 	"execute:webnotes.bean('Style Settings').save() #2013-11-20",
-	"execute:webnotes.get_module('website.doctype.website_sitemap_config.website_sitemap_config').rebuild_website_sitemap_config()",
+    "execute:webnotes.get_module('website.doctype.website_sitemap_config.website_sitemap_config').rebuild_website_sitemap_config()",
+    "patches.1311.p04_update_year_end_date_of_fiscal_year",
 	"patches.1311.p04_update_comments",
 	"patches.1311.p05_website_brand_html",
 ]

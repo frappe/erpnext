@@ -72,18 +72,12 @@ def update_profile_name(args):
 	add_all_roles_to(args.get("name"))
 	
 def create_fiscal_year_and_company(args):
-	curr_fiscal_year, fy_start_date, fy_abbr = get_fy_details(args.get('fy_start'), True)
+	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
 	webnotes.bean([{
 		"doctype":"Fiscal Year",
 		'year': curr_fiscal_year,
-		'year_start_date': fy_start_date
-	}]).insert()
-
-	curr_fiscal_year, fy_start_date, fy_abbr = get_fy_details(args.get('fy_start'))
-	webnotes.bean([{
-		"doctype":"Fiscal Year",
-		'year': curr_fiscal_year,
-		'year_start_date': fy_start_date,
+		'year_start_date': args.get('fy_start_date'),
+		'year_end_date': args.get('fy_end_date'),
 	}]).insert()
 
 	
@@ -196,25 +190,13 @@ def create_email_digest():
 		
 			edigest.insert()
 		
-def get_fy_details(fy_start, last_year=False):
-	st = {'1st Jan':'01-01','1st Apr':'04-01','1st Jul':'07-01', '1st Oct': '10-01'}
-	if cint(getdate(nowdate()).month) < cint((st[fy_start].split('-'))[0]):
-		curr_year = getdate(nowdate()).year - 1
+def get_fy_details(fy_start_date, fy_end_date):
+	start_year = getdate(fy_start_date).year
+	if start_year == getdate(fy_end_date).year:
+		fy = cstr(start_year)
 	else:
-		curr_year = getdate(nowdate()).year
-	
-	if last_year:
-		curr_year = curr_year - 1
-	
-	stdt = cstr(curr_year)+'-'+cstr(st[fy_start])
-
-	if(fy_start == '1st Jan'):
-		fy = cstr(curr_year)
-		abbr = cstr(fy)[-2:]
-	else:
-		fy = cstr(curr_year) + '-' + cstr(curr_year+1)
-		abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
-	return fy, stdt, abbr
+		fy = cstr(start_year) + '-' + cstr(start_year + 1)
+	return fy
 
 def create_taxes(args):
 	for i in xrange(1,6):

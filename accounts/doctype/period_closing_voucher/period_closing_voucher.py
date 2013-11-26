@@ -34,7 +34,7 @@ class DocType(AccountsController):
 
 	def validate_posting_date(self):
 		from accounts.utils import get_fiscal_year
-		self.year_start_date = get_fiscal_year(self.doc.posting_date)[1]
+		self.year_start_date = get_fiscal_year(self.doc.posting_date, self.doc.fiscal_year)[1]
 
 		pce = webnotes.conn.sql("""select name from `tabPeriod Closing Voucher`
 			where posting_date > %s and fiscal_year = %s and docstatus = 1""", 

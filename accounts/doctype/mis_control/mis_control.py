@@ -254,7 +254,6 @@ class DocType:
 			for i in range(4):
 				pn = 'Q'+str(i+1)
 				self.period_list.append(pn)
-			
 				self.period_start_date[pn] = get_first_day(ysd,0,i*3)
 				self.period_end_date[pn] = get_last_day(get_first_day(ysd,0,((i+1)*3)-1))	
 
