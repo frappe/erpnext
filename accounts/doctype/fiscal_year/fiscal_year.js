@@ -11,9 +11,6 @@ $.extend(cur_frm.cscript, {
 			this.frm.add_custom_button(wn._("Set as Default"), this.frm.cscript.set_as_default);
 			this.frm.set_intro(wn._("To set this Fiscal Year as Default, click on 'Set as Default'"));
 		} else this.frm.set_intro("");
-
-		if (doc.__islocal && this.frm.doc.year_start_date)
-			this.frm.script_manager.trigger("year_start_date", dt, dn);
 	},
 	set_as_default: function() {
 		return wn.call({

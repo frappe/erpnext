@@ -27,8 +27,6 @@ class DocType:
 			webnotes.throw(_("Year Start Date should not be greater than Year End Date"))
 
 		if (getdate(self.doc.year_end_date) - getdate(self.doc.year_start_date)).days > 366:
-			webnotes.throw([getdate(self.doc.year_end_date), getdate(self.doc.year_start_date)])
-			webnotes.throw((getdate(self.doc.year_end_date) - getdate(self.doc.year_start_date)).days)
 			webnotes.throw(_("Year Start Date and Year End Date are not within Fiscal Year."))
 
 		year_start_end_dates = webnotes.conn.sql("""select name, year_start_date, year_end_date 
