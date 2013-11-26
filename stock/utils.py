@@ -299,6 +299,8 @@ def create_material_request(material_requests):
 	mr_list = []
 	defaults = webnotes.defaults.get_defaults()
 	exceptions_list = []
+	from accounts.utils import get_fiscal_year
+	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -309,7 +311,7 @@ def create_material_request(material_requests):
 				mr = [{
 					"doctype": "Material Request",
 					"company": company,
-					"fiscal_year": defaults.fiscal_year,
+					"fiscal_year": current_fiscal_year,
 					"transaction_date": nowdate(),
 					"material_request_type": request_type
 				}]
