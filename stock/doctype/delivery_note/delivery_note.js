@@ -129,7 +129,9 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 var set_print_hide= function(doc, cdt, cdn){
 	var dn_fields = wn.meta.docfield_map['Delivery Note'];
 	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];
-	
+	var dn_fields_copy = dn_fields;
+	var dn_item_fields_copy = dn_item_fields;
+
 	if (doc.print_without_amount) {
 		dn_fields['currency'].print_hide = 1;
 		dn_item_fields['export_rate'].print_hide = 1;
@@ -137,9 +139,12 @@ var set_print_hide= function(doc, cdt, cdn){
 		dn_item_fields['ref_rate'].print_hide = 1;
 		dn_item_fields['export_amount'].print_hide = 1;
 	} else {
-		dn_fields['currency'].print_hide = 0;
-		dn_item_fields['export_rate'].print_hide = 0;
-		dn_item_fields['export_amount'].print_hide = 0;
+		if (dn_fields_copy['currency'].print_hide != 1)
+			dn_fields['currency'].print_hide = 0;
+		if (dn_item_fields_copy['export_rate'].print_hide != 1)
+			dn_item_fields['export_rate'].print_hide = 0;
+		if (dn_item_fields_copy['export_amount'].print_hide != 1)
+			dn_item_fields['export_amount'].print_hide = 0;
 	}
 }
 
