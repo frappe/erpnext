@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-11-25 11:35:58", 
+  "modified": "2013-11-27 17:57:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -72,6 +72,7 @@
   "reqd": 1
  }, 
  {
+  "default": "Customer", 
   "doctype": "DocField", 
   "fieldname": "quotation_to", 
   "fieldtype": "Select", 
