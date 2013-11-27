@@ -254,4 +254,5 @@ patch_list = [
 	"patches.1311.p04_update_comments",
 	"patches.1311.p05_website_brand_html",
 	"patches.1311.p06_fix_report_columns",
+	"execute:webnotes.delete_doc('DocType', 'Documentation Tool')",
 ]
