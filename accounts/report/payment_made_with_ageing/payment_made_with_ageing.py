@@ -21,7 +21,7 @@ def execute(filters=None):
 			d.debit, d.credit, d.cheque_no, d.cheque_date, d.remark]
 			
 		if d.against_voucher:
-			row += get_ageing_data(against_voucher_date, d.posting_date, d.debit or -1*d.credit)
+			row += get_ageing_data(d.posting_date, against_voucher_date, d.debit or -1*d.credit)
 		else:
 			row += ["", "", "", "", ""]
 			
