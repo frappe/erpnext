@@ -380,7 +380,8 @@ def complete_setup():
 	setup_account({
 		"first_name": "Test",
 		"last_name": "User",
-		"fy_start": "1st Jan",
+		"fy_start_date": "2013-01-01",
+		"fy_end_date": "2013-12-31",
 		"industry": "Manufacturing",
 		"company_name": company,
 		"company_abbr": company_abbr,
