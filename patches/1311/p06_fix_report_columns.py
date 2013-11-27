@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr
 import json
 
 def execute():
@@ -24,12 +23,12 @@ def execute():
 	for value, key in columns:
 		new_columns = []
 		column_doctype = key.split(':')[-1]
-		for child_doctype in doctypes_child_tables_map.get(column_doctype):
-			for field, field_doctype in json.loads(value):
-				if field_doctype == child_doctype:
-					new_columns.append([field, field_doctype])
+		for field, field_doctype in json.loads(value):
+			if field_doctype in doctypes_child_tables_map.get(column_doctype):
+				new_columns.append([field, field_doctype])
 
 		if new_columns:
-			defkey = "_list_settings:" + column_doctype
 			webnotes.conn.sql("""update `tabDefaultValue` set defvalue=%s 
-				where defkey=%s""" % ('%s', '%s'), (json.dumps(new_columns), defkey))
+				where defkey=%s""" % ('%s', '%s'), (json.dumps(new_columns), key))
+		else:
+			webnotes.conn.sql("""delete from `tabDefaultValue` where defkey=%s""", key)
