@@ -29,7 +29,7 @@ erpnext.POS = Class.extend({
 							</table>\
 						</div>\
 						<br>\
-						<div class="net-total-area" style="margin-left: 40%;">\
+						<div class="totals-area" style="margin-left: 40%;">\
 							<table class="table table-condensed">\
 								<tr>\
 									<td><b>Net Total</b></td>\
@@ -48,13 +48,15 @@ erpnext.POS = Class.extend({
 									</tbody>\
 								</table>\
 							</div>\
-							<table class="table table-condensed">\
-								<tr>\
-									<td style="vertical-align: middle;"><b>Grand Total</b></td>\
-									<td style="text-align: right; font-size: 200%; \
-										font-size: bold;" class="grand-total"></td>\
-								</tr>\
-							</table>\
+							<div class="grand-total-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td style="vertical-align: middle;"><b>Grand Total</b></td>\
+										<td style="text-align: right; font-size: 200%; \
+											font-size: bold;" class="grand-total"></td>\
+									</tr>\
+								</table>\
+							</div>\
 						</div>\
 					</div>\
 					<br><br>\
@@ -72,17 +74,7 @@ erpnext.POS = Class.extend({
 				</div>\
 			</div></div>');
 		
-		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
-			this.party = "Customer";
-			this.price_list = this.frm.doc.selling_price_list;
-			this.sales_or_purchase = "Sales";
-		}
-		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
-			this.party = "Supplier";
-			this.price_list = this.frm.doc.buying_price_list;
-			this.sales_or_purchase = "Purchase";
-		}
-		
+		this.check_transaction_type();
 		this.make();
 
 		var me = this;
@@ -90,13 +82,33 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
-		this.wrapper.find(".delete-items").on("click", function() {
-			me.remove_selected_item();
-		});
+		this.call_function("delete-items", function() {me.remove_selected_item();});
+		this.call_function("make-payment", function() {me.make_payment();});
+	},
+	check_transaction_type: function() {
+		var me = this;
 
-		this.wrapper.find(".make-payment").on("click", function() {
-			me.make_payment();
-		});
+		// Check whether the transaction is "Sales" or "Purchase"
+		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
+			this.set_transaction_defaults("Customer", "export");
+		}
+		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
+			this.set_transaction_defaults("Supplier", "import");
+		}
+	},
+	set_transaction_defaults: function(party, export_or_import) {
+		var me = this;
+		this.party = party;
+		this.price_list = (party == "Customer" ? 
+			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list);
+		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
+		this.net_total = "net_total_" + export_or_import;
+		this.grand_total = "grand_total_" + export_or_import;
+		this.amount = export_or_import + "_amount";
+		this.rate = export_or_import + "_rate";
+	},
+	call_function: function(class_name, fn, event_name) {
+		this.wrapper.find("." + class_name).on(event_name || "click", fn);
 	},
 	make: function() {
 		this.make_party();
@@ -148,19 +160,20 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.search = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Link",
-				"options": "Item",
+				"fieldtype": "Data",
 				"label": "Item",
 				"fieldname": "pos_item",
-				"placeholder": "Item"
+				"placeholder": "Search Item"
 			},
 			parent: this.wrapper.find(".search-area"),
 			only_input: true,
 		});
 		this.search.make_input();
-		this.search.$input.on("change", function() {
+		this.search.$input.on("keypress", function() {
 			if(!me.search.autocomplete_open)
-				me.make_item_list();
+				if(me.item_timeout)
+					clearTimeout(me.item_timeout);
+				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
 	make_barcode: function() {
@@ -184,6 +197,7 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		me.item_timeout = null;
 		wn.call({
 			method: 'accounts.doctype.sales_invoice.pos.get_items',
 			args: {
@@ -195,26 +209,28 @@ erpnext.POS = Class.extend({
 			callback: function(r) {
 				var $wrap = me.wrapper.find(".item-list");
 				me.wrapper.find(".item-list").empty();
-				$.each(r.message, function(index, obj) {
-					if (obj.image)
-						image = '<img src="' + obj.image + '" class="img-responsive" \
-								style="border:1px solid #eee; max-height: 140px;">';
-					else
-						image = '<div class="missing-image"><i class="icon-camera"></i></div>';
+				if (r.message) {
+					$.each(r.message, function(index, obj) {
+						if (obj.image)
+							image = '<img src="' + obj.image + '" class="img-responsive" \
+									style="border:1px solid #eee; max-height: 140px;">';
+						else
+							image = '<div class="missing-image"><i class="icon-camera"></i></div>';
 
-					$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-								<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
-								<div class="small">%(item_code)s</div>\
-								<div class="small">%(item_name)s</div>\
-								<div class="small">%(item_price)s</div>\
-							</div>', 
-						{
-							item_code: obj.name,
-							item_price: format_currency(obj.ref_rate, obj.currency),
-							item_name: obj.name===obj.item_name ? "" : obj.item_name,
-							item_image: image
-						})).appendTo($wrap);
-				});
+						$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
+									<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
+									<div class="small">%(item_code)s</div>\
+									<div class="small">%(item_name)s</div>\
+									<div class="small">%(item_price)s</div>\
+								</div>', 
+							{
+								item_code: obj.name,
+								item_price: format_currency(obj.ref_rate, obj.currency),
+								item_name: obj.name===obj.item_name ? "" : obj.item_name,
+								item_image: image
+							})).appendTo($wrap);
+					});
+				}
 
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
@@ -259,25 +275,42 @@ erpnext.POS = Class.extend({
 		
 		// if item not found then add new item
 		if (!caught) {
-			var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
-				this.frm.cscript.fname);
-			child.item_code = item_code;
-
-			if (serial_no)
-				child.serial_no = serial_no;
-
-			me.frm.script_manager.trigger("item_code", child.doctype, child.name);
+			this.add_new_item_to_grid(item_code, serial_no);
 		}
-		me.refresh();
+
+		this.refresh();
+		this.refresh_search_box();
+	},
+	add_new_item_to_grid: function(item_code, serial_no) {
+		var me = this;
+
+		var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+			this.frm.cscript.fname);
+		child.item_code = item_code;
+
+		if (serial_no)
+			child.serial_no = serial_no;
+
+		this.frm.script_manager.trigger("item_code", child.doctype, child.name);
+	},
+	refresh_search_box: function() {
+		var me = this;
+
+		// Clear Item Box and remake item list
+		if (this.search.$input.val()) {
+			this.search.set_input("");
+			this.make_item_list();
+		}
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
-				if (qty == 0)
+				if (qty == 0) {
 					wn.model.clear_doc(d.doctype, d.name);
-				else {
+					me.refresh_grid();
+				} else {
 					d.qty = qty;
 					me.frm.script_manager.trigger("qty", d.doctype, d.name);
 				}
@@ -289,21 +322,33 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
+		this.total_flat_discount = 0.0;
 
-		// add items
-		var $items = me.wrapper.find("#cart tbody").empty();
+		this.show_items_in_item_cart();
+		this.show_taxes();
+		this.set_totals();
+
+		// if form is local then only run all these functions
+		if (this.frm.doc.docstatus===0) {
+			this.call_when_local();
+		}
+
+		this.disable_text_box_and_button();
+		this.make_payment_button();
+
+		// If quotation to is not Customer then remove party
+		if (this.frm.doctype == "Quotation") {
+			this.party_field.$wrapper.remove();
+			if (this.frm.doc.quotation_to == "Customer")
+				this.make_party();
+		}
+	},
+	show_items_in_item_cart: function() {
+		var me = this;
+		var $items = this.wrapper.find("#cart tbody").empty();
 
 		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
-
-			if (me.sales_or_purchase == "Sales") {
-				item_amount = d.export_amount;
-				rate = d.export_rate;
-			}
-			else {
-				item_amount = d.import_amount;
-				rate = d.import_rate;
-			}
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
@@ -315,76 +360,73 @@ erpnext.POS = Class.extend({
 					item_code: d.item_code,
 					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
 					qty: d.qty,
-					rate: format_currency(rate, me.frm.doc.currency),
-					amount: format_currency(item_amount, me.frm.doc.currency)
+					rate: format_currency(d[me.rate], me.frm.doc.currency),
+					amount: format_currency(d[me.amount], me.frm.doc.currency)
 				}
 			)).appendTo($items);
 		});
-
-		// taxes
+	},
+	show_taxes: function() {
+		var me = this;
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length) ? true : false)
+			.toggle((taxes && taxes.length && 
+				flt(me.frm.doc.other_charges_total_export || 
+					me.frm.doc.other_charges_added_import) != 0.0) ? true : false)
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			$(repl('<tr>\
-				<td>%(description)s (%(rate)s%)</td>\
-				<td style="text-align: right;">%(tax_amount)s</td>\
-			<tr>', {
-				description: d.description,
-				rate: d.rate,
-				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
-					me.frm.doc.currency)
-			})).appendTo(".tax-table tbody");
+			if (d.charge_type == "Discount Amount") {
+				me.total_flat_discount += flt(d.rate);
+			} else {
+				$(repl('<tr>\
+					<td>%(description)s %(rate)s</td>\
+					<td style="text-align: right;">%(tax_amount)s</td>\
+				<tr>', {
+					description: d.description,
+					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
+					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+						me.frm.doc.currency)
+				})).appendTo(".tax-table tbody");
+			}
+		});
+	},
+	set_totals: function() {
+		var me = this;
+		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total], 
+			me.frm.doc.currency));
+		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total], 
+			me.frm.doc.currency));
+	},
+	call_when_local: function() {
+		var me = this;
+
+		// append quantity to the respective item after change from input box
+		$(this.wrapper).find("input.qty").on("change", function() {
+			var item_code = $(this).closest("tr")[0].id;
+			me.update_qty(item_code, $(this).val());
 		});
 
-		// set totals
-		if (this.sales_or_purchase == "Sales") {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_export, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_export, 
-				me.frm.doc.currency));
-		}
-		else {
-			this.wrapper.find(".net-total").text(format_currency(this.frm.doc.net_total_import, 
-				me.frm.doc.currency));
-			this.wrapper.find(".grand-total").text(format_currency(this.frm.doc.grand_total_import, 
-				me.frm.doc.currency));
-		}
-
-		// if form is local then only run all these functions
-		if (this.frm.doc.docstatus===0) {
-			$(this.wrapper).find("input.qty").on("focus", function() {
-				$(this).select();
-			});
-
-			// append quantity to the respective item after change from input box
-			$(this.wrapper).find("input.qty").on("change", function() {
-				var item_code = $(this).closest("tr")[0].id;
-				me.update_qty(item_code, $(this).val());
-			});
-
-			// on td click toggle the highlighting of row
-			$(this.wrapper).find("#cart tbody tr td").on("click", function() {
-				var row = $(this).closest("tr");
-				if (row.attr("data-selected") == "false") {
-					row.attr("class", "warning");
-					row.attr("data-selected", "true");
-				}
-				else {
-					row.prop("class", null);
-					row.attr("data-selected", "false");
-				}
-				me.refresh_delete_btn();
-				
-			});
-
+		// on td click toggle the highlighting of row
+		$(this.wrapper).find("#cart tbody tr td").on("click", function() {
+			var row = $(this).closest("tr");
+			if (row.attr("data-selected") == "false") {
+				row.attr("class", "warning");
+				row.attr("data-selected", "true");
+			}
+			else {
+				row.prop("class", null);
+				row.attr("data-selected", "false");
+			}
 			me.refresh_delete_btn();
-			this.barcode.$input.focus();
-		}
+		});
 
+		me.refresh_delete_btn();
+		this.barcode.$input.focus();
+	},
+	disable_text_box_and_button: function() {
+		var me = this;
 		// if form is submitted & cancelled then disable all input box & buttons
 		if (this.frm.doc.docstatus>=1) {
 			$(this.wrapper).find('input, button').each(function () {
@@ -399,17 +441,12 @@ erpnext.POS = Class.extend({
 			});
 			$(this.wrapper).find(".make-payment").show();
 		}
-
+	},
+	make_payment_button: function() {
+		var me = this;
 		// Show Make Payment button only in Sales Invoice
 		if (this.frm.doctype != "Sales Invoice")
 			$(this.wrapper).find(".make-payment").hide();
-
-		// If quotation to is not Customer then remove party
-		if (this.frm.doctype == "Quotation") {
-			this.party_field.$wrapper.remove();
-			if (this.frm.doc.quotation_to == "Customer")
-				this.make_party();
-		}
 	},
 	refresh_delete_btn: function() {
 		$(this.wrapper).find(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
@@ -455,9 +492,12 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
+		this.refresh_grid();
+	},
+	refresh_grid: function() {
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
-		me.refresh();
+		this.refresh();
 	},
 	make_payment: function() {
 		var me = this;
@@ -489,8 +529,6 @@ erpnext.POS = Class.extend({
 						"total_amount": $(".grand-total").text()
 					});
 					dialog.show();
-					me.barcode.$input.focus();
-					
 					dialog.get_input("total_amount").prop("disabled", true);
 					
 					dialog.fields_dict.pay.input.onclick = function() {
