@@ -322,7 +322,6 @@ erpnext.POS = Class.extend({
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
-		this.total_flat_discount = 0.0;
 
 		this.show_items_in_item_cart();
 		this.show_taxes();
@@ -377,19 +376,15 @@ erpnext.POS = Class.extend({
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			if (d.charge_type == "Discount Amount") {
-				me.total_flat_discount += flt(d.rate);
-			} else {
-				$(repl('<tr>\
-					<td>%(description)s %(rate)s</td>\
-					<td style="text-align: right;">%(tax_amount)s</td>\
-				<tr>', {
-					description: d.description,
-					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
-					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
-						me.frm.doc.currency)
-				})).appendTo(".tax-table tbody");
-			}
+			$(repl('<tr>\
+				<td>%(description)s %(rate)s</td>\
+				<td style="text-align: right;">%(tax_amount)s</td>\
+			<tr>', {
+				description: d.description,
+				rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
+				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+					me.frm.doc.currency)
+			})).appendTo(".tax-table tbody");
 		});
 	},
 	set_totals: function() {
