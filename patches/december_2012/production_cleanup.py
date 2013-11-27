@@ -10,9 +10,8 @@ def execute():
 	rebuild_exploded_bom()
 	
 def delete_doctypes():
-	from webnotes.model import delete_doc
-	delete_doc("DocType", "Production Control")
-	delete_doc("DocType", "BOM Control")
+	webnotes.delete_doc("DocType", "Production Control")
+	webnotes.delete_doc("DocType", "BOM Control")
 	
 	
 def rename_module():
