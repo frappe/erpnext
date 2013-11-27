@@ -184,12 +184,6 @@ class DocType(StockController):
 			self.set_status(last_sle.get("last_sle"))
 			self.set_purchase_details(last_sle.get("purchase_sle"))
 			self.set_sales_details(last_sle.get("delivery_sle"))
-
-	def on_stock_ledger_entry(self):
-		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
-			self.set_status()
-			self.set_purchase_details()
-			self.set_sales_details()
 			
 	def on_communication(self):
 		return
