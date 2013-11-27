@@ -24,7 +24,7 @@ def update_user_properties():
 				parent not in ('__global', 'Control Panel')""", (df[0].options, d.defkey))
 				
 	# remove duplicate restrictions (if they exist)
-	for d in webnotes.conn.sql("""select parent, defkey, substr(defvalue,0,10), 
+	for d in webnotes.conn.sql("""select parent, defkey, defvalue, 
 		count(*) as cnt from tabDefaultValue 
 		where parent not in ('__global', 'Control Panel') 
 		group by parent, defkey, defvalue""", as_dict=1):

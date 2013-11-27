@@ -43,11 +43,14 @@ class DocType:
 			self.update_profile()
 				
 	def update_user_default(self):
+		from webnotes.defaults import get_restrictions
 		if not "HR User" in webnotes.local.user.get_roles():
-			webnotes.conn.set_default("Employee", self.doc.name, self.doc.user_id, "Restriction")
+			if not self.doc.user_id in get_restrictions().get("Employee", []):
+				webnotes.conn.set_default("Employee", self.doc.name, self.doc.user_id, "Restriction")
 
 		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
 		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
+		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
 		self.set_default_leave_approver()
 	
 	def set_default_leave_approver(self):
