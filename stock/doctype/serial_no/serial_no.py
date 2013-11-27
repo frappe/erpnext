@@ -132,14 +132,15 @@ class DocType(StockController):
 	def get_last_sle(self):
 		entries = {}
 		sle_dict = self.get_stock_ledger_entries()
-		if sle_dict.get("incoming", []):
-			entries["purchase_sle"] = sle_dict["incoming"][0]
+		if sle_dict:
+			if sle_dict.get("incoming", []):
+				entries["purchase_sle"] = sle_dict["incoming"][0]
 		
-		if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
-			entries["last_sle"] = sle_dict["incoming"][0]
-		else:
-			entries["last_sle"] = sle_dict["outgoing"][0]
-			entries["delivery_sle"] = sle_dict["outgoing"][0]
+			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
+				entries["last_sle"] = sle_dict["incoming"][0]
+			else:
+				entries["last_sle"] = sle_dict["outgoing"][0]
+				entries["delivery_sle"] = sle_dict["outgoing"][0]
 				
 		return entries
 		
@@ -184,9 +185,10 @@ class DocType(StockController):
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
 			last_sle = self.get_last_sle()
-			self.set_status(last_sle.get("last_sle"))
-			self.set_purchase_details(last_sle.get("purchase_sle"))
-			self.set_sales_details(last_sle.get("delivery_sle"))
+			if last_sle:
+				self.set_status(last_sle.get("last_sle"))
+				self.set_purchase_details(last_sle.get("purchase_sle"))
+				self.set_sales_details(last_sle.get("delivery_sle"))
 			
 	def on_communication(self):
 		return
