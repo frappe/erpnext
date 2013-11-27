@@ -128,32 +128,35 @@ class DocType(StockController):
 				"delivery_date", "delivery_time", "customer", "customer_name", 
 				"warranty_expiry_date"):
 					self.doc.fields[fieldname] = None
-					
+							
 	def get_last_sle(self):
 		entries = {}
+		sle_dict = self.get_stock_ledger_entries()
+		if sle_dict.get("incoming", []):
+			entries["purchase_sle"] = sle_dict["incoming"][0]
 		
-		for sle in self.get_stock_ledger_entries():
-			if self.doc.name in get_serial_nos(sle.serial_no):
-				if not entries.get("last_sle"):
-					entries["last_sle"] = sle
-					
-				if not entries.get("purchase_sle") and sle.actual_qty > 0:
-					entries["purchase_sle"] = sle
-				elif not entries.get("delivery_sle") and sle.actual_qty < 0 \
-						and sle.voucher_type in ('Delivery Note', 'Sales Invoice'):
-					entries["delivery_sle"] = sle
-				
-				if entries.get("last_sle") and entries.get("purchase_sle") \
-						and entries.get("delivery_sle"):
-					break
+		if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
+			entries["last_sle"] = sle_dict["incoming"][0]
+		else:
+			entries["last_sle"] = sle_dict["outgoing"][0]
+			entries["delivery_sle"] = sle_dict["outgoing"][0]
 				
 		return entries
 		
 	def get_stock_ledger_entries(self):
-		return webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+		sle_dict = {}
+		for sle in webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No' 
-			order by name desc""", ("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1)		
-	
+			order by posting_date desc, posting_time desc, name desc""", 
+			("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1):
+				if self.doc.name in get_serial_nos(sle.serial_no):
+					if sle.actual_qty > 0:
+						sle_dict.setdefault("incoming", []).append(sle)
+					else:
+						sle_dict.setdefault("outgoing", []).append(sle)
+					
+		return sle_dict
+					
 	def on_trash(self):
 		if self.doc.status == 'Delivered':
 			webnotes.throw(_("Delivered Serial No ") + self.doc.name + _(" can not be deleted"))
