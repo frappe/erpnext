@@ -151,8 +151,7 @@ class DocType(TransactionBase):
 		acc = webnotes.conn.sql("select name from `tabAccount` where master_type = 'Supplier' \
 			and master_name = %s and docstatus < 2", self.doc.name)
 		if acc:
-			from webnotes.model import delete_doc
-			delete_doc('Account', acc[0][0])
+			webnotes.delete_doc('Account', acc[0][0])
 			
 	def on_trash(self):
 		self.delete_supplier_address()
