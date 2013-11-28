@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-11-22 12:30:07", 
+  "modified": "2013-11-28 11:54:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,10 +57,11 @@
   "label": "Outgoing Mail Server"
  }, 
  {
+  "description": "<a href=\"https://en.wikipedia.org/wiki/Transport_Layer_Security\" target=\"_blank\">[?]</a>", 
   "doctype": "DocField", 
   "fieldname": "use_ssl", 
   "fieldtype": "Check", 
-  "label": "Use SSL"
+  "label": "Use TLS"
  }, 
  {
   "description": "If non standard port (e.g. 587)", 
