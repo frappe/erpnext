@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-11-29 10:58:23", 
+  "docstatus": 0, 
+  "modified": "2013-11-29 12:26:49", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report_name": "Item-wise Consumption", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Consumption"
+ }
+]

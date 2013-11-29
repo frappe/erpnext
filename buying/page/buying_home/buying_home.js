@@ -155,6 +155,11 @@ wn.module_page["Buying"] = [
 				route: "query-report/Supplier Addresses and Contacts",
 				doctype: "Supplier"
 			},
+			{
+				"label":wn._("Item-Wise Consumption"),
+				route: "query-report/Item-wise Consumption",
+				doctype: "Stock Ledger Entry"
+			}
 		]
 	}
 ]
