@@ -207,6 +207,7 @@ class DocType(DocListController, WebsiteGenerator):
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
+		# causes problem with tree build
 		if webnotes.conn.exists("Item Group", self.doc.name):
 			webnotes.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
