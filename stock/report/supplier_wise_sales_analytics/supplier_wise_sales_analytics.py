@@ -14,6 +14,7 @@ def execute(filters=None):
 
 	for item_code, suppliers in supplier_details.items():
 		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
+		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
 			for cd in consumed_details.get(item_code):
 				
@@ -26,9 +27,12 @@ def execute(filters=None):
 						consumed_amount += abs(flt(cd.stock_value_difference))
 
 			if consumed_qty or consumed_amount or delivered_qty or delivered_amount:
+				total_qty += delivered_qty + consumed_qty
+				total_amount += delivered_amount + consumed_amount
+
 				row = [cd.item_code, cd.item_name, cd.description, cd.stock_uom, \
 					consumed_qty, consumed_amount, delivered_qty, delivered_amount, \
-					list(set(suppliers))]
+					total_qty, total_amount, list(set(suppliers))]
 				data.append(row)
 
 	return columns, data
@@ -36,9 +40,12 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 	
-	columns = ["Item:Link/Item:100"] + ["Item Name::100"] + ["Description::150"] + \
-	["UOM:Link/UOM:70"] + ["Consumed Qty:Float:110"] + ["Consumed Amount:Currency:130"] + \
-	["Delivered Qty:Float:100"] + ["Delivered Amount:Currency:130"] + ["Supplier(s)::250"]
+	columns = ["Item:Link/Item:100"] + ["Item Name::100"] + \
+	["Description::150"] + ["UOM:Link/UOM:90"] + \
+	["Consumed Qty:Float:110"] + ["Consumed Amount:Currency:130"] + \
+	["Delivered Qty:Float:110"] + ["Delivered Amount:Currency:130"] + \
+	["Total Qty:Float:110"] + ["Total Amount:Currency:130"] + \
+	["Supplier(s)::250"]
 
 	return columns
 
@@ -57,7 +64,8 @@ def get_consumed_details(filters):
 	consumed_details = {}
 
 	for d in webnotes.conn.sql("""select sle.item_code, i.item_name, i.description, 
-		i.stock_uom, sle.actual_qty, sle.stock_value_difference, sle.voucher_no 
+		i.stock_uom, sle.actual_qty, sle.stock_value_difference, 
+		sle.voucher_no, sle.voucher_type
 		from `tabStock Ledger Entry` sle, `tabItem` i 
 		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
 			consumed_details.setdefault(d.item_code, []).append(d)
