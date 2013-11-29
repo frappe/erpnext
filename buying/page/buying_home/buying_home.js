@@ -155,6 +155,11 @@ wn.module_page["Buying"] = [
 				route: "query-report/Supplier Addresses and Contacts",
 				doctype: "Supplier"
 			},
+			{
+				"label":wn._("Supplier-Wise Sales Analytics"),
+				route: "query-report/Supplier-Wise Sales Analytics",
+				doctype: "Stock Ledger Entry"
+			}
 		]
 	}
 ]
