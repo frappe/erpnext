@@ -1,0 +1,3754 @@
+ (Half Day),（半天）
+ .You can not assign / modify / remove Master Name,你不能指派/修改/删除主名称
+ Quantity should be greater than 0.,量应大于0。
+ View,视图
+ after this transaction.,本次交易后。
+ against sales order,对销售订单
+ against same operation,针对相同的操作
+ already marked,已标记
+ and year: ,和年份：
+ as it is stock Item or packing item,因为它是现货产品或包装物品
+ at warehouse: ,在仓库：
+ budget ,预算
+ by Role ,按角色
+ can not be created/modified against stopped Sales Order ,不能创建/修改对停止销售订单
+ can not be made.,不能进行。
+ can not be marked as a ledger as it has existing child,不能被标记为总账，因为它已经存在的子
+ can not be received twice,不能被接受两次
+ can only be debited/credited through Stock transactions,只能借记/贷记通过股票的交易
+ does not belong to ,不属于
+ does not belong to Warehouse,不属于仓库
+ does not belong to the company,不属于该公司
+ for account ,帐户
+ has already been submitted.,已经提交。
+ is a frozen account. ,是冷冻的帐户。
+ is a frozen account. \				Either make the account active or assign role in Accounts Settings \				who can create / modify entries against this account,是冷冻的帐户。 \要么使该帐户活动或在指定账户设置角色\谁可以创建/修改词条对这个帐号
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item",小于等于零时在系统中，\估值比率是强制性的资料
+ is mandatory,是强制性的
+ is mandatory for GL Entry,是强制性的GL报名
+ is mandatory. Maybe Currency Exchange record is not created for ,是强制性的。也许外币兑换记录没有建立
+ is not set,没有设置
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,现在是默认的财政年度。 \请刷新您的浏览器，以使更改生效。
+ is present in one or many Active BOMs,存在于一个或多个活跃的BOM
+ not active or does not exists in the system,不活跃或不存在于系统中
+ not submitted,未提交
+ or the BOM is cancelled or inactive,或物料清单被取消或不活动
+ should be 'Yes'. As Item: ,应该是&#39;是&#39;。作为项目：
+ to ,至
+ will be ,将
+ will be over-billed against mentioned ,将过嘴对着提到的
+ will exceed by ,将超过
+"""Company History""",“公司历史”
+"""Team Members"" or ""Management""",“团队成员”或“管理”
+%  Delivered,％交付
+% Amount Billed,（％）金额帐单
+% Billed,％帐单
+% Completed,％已完成
+% Delivered,％交付
+% Installed,％安装
+% Received,收到％
+% of materials billed against this Purchase Order.,％的材料嘴对这种采购订单。
+% of materials billed against this Sales Order,％的嘴对这种销售订单物料
+% of materials delivered against this Delivery Note,％的交付对本送货单材料
+% of materials delivered against this Sales Order,％的交付对这个销售订单物料
+% of materials ordered against this Material Request,％的下令对这种材料申请材料
+% of materials received against this Purchase Order,％的材料收到反对这个采购订单
+%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \			record is not created for %(from_currency)s to %(to_currency)s,％（conversion_rate_label）s是强制性的。也许外币兑换\记录没有创建％（from_currency）s到％（to_currency）■
+' in Company: ,“在公司名称：
+'To Case No.' cannot be less than 'From Case No.',“要案件编号”不能少于&#39;从案号“
+(Total) Net Weight value. Make sure that Net Weight of each item is,（总）净重值。确保每个项目的净重是
+* Will be calculated in the transaction.,*将被计算在该交易。
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",**预算分配**可以帮助你发布你的预算横跨个月，如果你有季节性你business.To使用这种分配分配预算，设置这个**预算分配**的**成本中心**
+**Currency** Master,*货币**大师
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**财政年度**代表财政年度。所有的会计分录和其他重大交易进行跟踪打击**财政年度**。
+. Max allowed ,。最大允许的
+. Outstanding cannot be less than zero. \			 	Please match exact outstanding.,。杰出不能小于零。 \请精确匹配突出。
+. Please set status of the employee as 'Left',。请将雇员的地位，“左”
+. You can not mark his attendance as 'Present',。你不能纪念他的出席情况“出席”
+"000 is black, fff is white",000是黑色的，FFF是白色的
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1货币= [？] FractionFor如1美元= 100美分
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1。为了保持客户明智的项目代码，并使其搜索根据自己的代码中使用这个选项
+12px,12px的
+13px,13px的
+14px,14px的
+15px,15px的
+16px,16px的
+2 days ago,3天前
+: Duplicate row from same ,：从相同的重复行
+: Mandatory for a Recurring Invoice.,：强制性的经常性发票。
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">添加/编辑</a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">添加/编辑</a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">添加/编辑</a>"
+"<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[?]</a>","<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[？]</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">命名选项</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>取消</b>允许你通过取消他们和修改他们改变提交的文件。
+A Customer exists with same name,一位顾客存在具有相同名称
+A Lead with this email id should exist,与此电子邮件id一个铅应该存在
+"A Product or a Service that is bought, sold or kept in stock.",A产品或者是买入，卖出或持有的股票服务。
+A Supplier exists with same name,A供应商存在具有相同名称
+A condition for a Shipping Rule,对于送货规则的条件
+A logical Warehouse against which stock entries are made.,一个合乎逻辑的仓库抵销股票条目进行。
+A new popup will open that will ask you to select further conditions.,一个新的弹出窗口将打开，将要求您选择其他条件。
+A symbol for this currency. For e.g. $,符号的这种货币。对于如$
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,第三方分销商/经销商/代理商/分支机构/经销商谁销售公司产品的佣金。
+A user can have multiple values for a property.,一个用户可以有一个属性的多个值。
+A+,A +
+A-,A-
+AB+,AB +
+AB-,AB-
+AMC Expiry Date,AMC到期时间
+AMC expiry date and maintenance status mismatched,AMC的到期日及维护状态不匹配
+ATT,ATT
+Abbr,缩写
+About,关于
+About ERPNext,关于ERPNext
+About Us Settings,关于我们设置
+About Us Team Member,关于我们团队成员
+Above Value,上述值
+Absent,缺席
+Acceptance Criteria,验收标准
+Accepted,接受
+Accepted Quantity,接受数量
+Accepted Warehouse,接受仓库
+Account,帐户
+Account Balance,账户余额
+Account Details,帐户明细
+Account Head,帐户头
+Account Id,帐户ID
+Account Name,帐户名称
+Account Type,账户类型
+Account expires on,帐户到期
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,账户仓库（永续盘存）将在该帐户下创建。
+Account for this ,占本
+Accounting,会计
+Accounting Entries are not allowed against groups.,会计分录是不允许反对团体。
+"Accounting Entries can be made against leaf nodes, called",会计分录可以对叶节点进行，称为
+Accounting Ledger,总账会计
+Accounting Year.,会计年度。
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",会计分录冻结截至目前为止，没有人可以做/修改除以下指定角色条目。
+Accounting journal entries.,会计记账分录。
+Accounts,账户
+Accounts Frozen Upto,账户被冻结到...为止
+Accounts Payable,应付帐款
+Accounts Receivable,应收帐款
+Accounts Settings,账户设置
+Action,行动
+Actions,操作
+Active,活跃
+Active: Will extract emails from ,主动：请问从邮件中提取
+Activity,活动
+Activity Log,活动日志
+Activity Type,活动类型
+Actual,实际
+Actual Budget,实际预算
+Actual Completion Date,实际完成日期
+Actual Date,实际日期
+Actual End Date,实际结束日期
+Actual Invoice Date,实际发票日期
+Actual Posting Date,实际发布日期
+Actual Qty,实际数量
+Actual Qty (at source/target),实际的数量（在源/目标）
+Actual Qty After Transaction,实际数量交易后
+Actual Qty: Quantity available in the warehouse.,实际的数量：在仓库可用数量。
+Actual Quantity,实际数量
+Actual Start Date,实际开始日期
+Add,加
+Add / Edit Taxes and Charges,添加/编辑税金及费用
+Add A New Rule,添加新的规则
+Add A Property,添加属性
+Add Attachments,添加附件
+Add Bookmark,添加书签
+Add CSS,添加CSS
+Add Child,添加子
+Add Column,添加列
+Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.,添加谷歌Analytics（分析）ID：例如。 UA-89XXX57-1。请搜索在谷歌Analytics（分析）帮助以获取更多信息。
+Add Message,发表留言
+Add New Permission Rule,添加新的权限规则
+Add Reply,添加回复
+Add Serial No,添加序列号
+Add Taxes,加税
+Add Taxes and Charges,增加税收和收费
+Add Total Row,添加总计行
+Add a banner to the site. (small banners are usually good),添加一个横幅挂在了网站上。 （小横幅通常是很好的）
+Add attachment,添加附件
+Add code as &lt;script&gt;,添加代码为&lt;SCRIPT&gt;
+Add new row,添加新行
+Add or Deduct,添加或扣除
+Add rows to set annual budgets on Accounts.,添加行上的帐户设置年度预算。
+"Add the name of <a href=""http://google.com/webfonts"" target=""_blank"">Google Web Font</a> e.g. ""Open Sans""","新增的名称<a href=""http://google.com/webfonts"" target=""_blank"">谷歌网页字体</a> ，例如“开放三世”"
+Add to To Do,添加到待办事项
+Add to To Do List of,添加到待办事项列表
+Add to calendar on this date,添加到日历在此日期
+Add/Remove Recipients,添加/删除收件人
+Additional Info,附加信息
+Address,地址
+Address & Contact,地址及联系方式
+Address & Contacts,地址及联系方式
+Address Desc,地址倒序
+Address Details,详细地址
+Address HTML,地址HTML
+Address Line 1,地址行1
+Address Line 2,地址行2
+Address Title,地址名称
+Address Type,地址类型
+Address and other legal information you may want to put in the footer.,地址和其他法律信息，你可能要放在页脚。
+Address to be displayed on the Contact Page,地址作为联系页面上显示
+Adds a custom field to a DocType,添加一个自定义字段，以一个DOCTYPE
+Adds a custom script (client or server) to a DocType,添加一个自定义脚本（客户端或服务器），以一个DOCTYPE
+Advance Amount,提前量
+Advance amount,提前量
+Advanced Settings,高级设置
+Advances,进展
+Advertisement,广告
+After Sale Installations,销售后安装
+Against,针对
+Against Account,针对帐户
+Against Docname,可采用DocName反对
+Against Doctype,针对文档类型
+Against Document Detail No,对文件详细说明暂无
+Against Document No,对文件无
+Against Expense Account,对费用帐户
+Against Income Account,对收入账户
+Against Journal Voucher,对日记帐凭证
+Against Purchase Invoice,对采购发票
+Against Sales Invoice,对销售发票
+Against Sales Order,对销售订单
+Against Voucher,反对券
+Against Voucher Type,对凭证类型
+Ageing Based On,老龄化基于
+Agent,代理人
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials",总组**项目**到另一个**项目**。如果你是捆绑一定的**项目**成一个包，你保持包装的**项目的股票**，而不是总**项目**这是有用的。包**项目**将有“是库存项目”为“否”和“是销售项目”为“是”，例如：如果你是卖笔记本电脑和背包分开，并有一个特殊的价格，如果客户购买两个，那么笔记本电脑+背包将是一个新的销售BOM Item.Note：物料BOM =比尔
+Aging Date,老化时间
+All Addresses.,所有地址。
+All Contact,所有联系
+All Contacts.,所有联系人。
+All Customer Contact,所有的客户联系
+All Day,全日
+All Employee (Active),所有员工（活动）
+All Lead (Open),所有铅（开放）
+All Products or Services.,所有的产品或服务。
+All Sales Partner Contact,所有的销售合作伙伴联系
+All Sales Person,所有的销售人员
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,所有销售交易，可以用来标记针对多个销售** **的人，这样你可以设置和监控目标。
+All Supplier Contact,所有供应商联系
+All Supplier Types,所有供应商类型
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",在所有可像货币，转换率，进出口总额，出口总计出口等相关领域<br>送货单，POS机，报价单，销售发票，销售订单等。
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.",在所有可像货币，转换率，总进口，进口总计进口等相关领域<br>外购入库单，供应商报价单，采购发票，采购订单等。
+"All possible Workflow States and roles of the workflow. <br>Docstatus Options: 0 is""Saved"", 1 is ""Submitted"" and 2 is ""Cancelled""",所有可能的工作流程状态和工作流的角色。 <br> Docstatus选项：0是“保存”，1“已提交”和2“取消”
+Allocate,分配
+Allocate leaves for the year.,分配叶子的一年。
+Allocated Amount,分配金额
+Allocated Budget,分配预算
+Allocated amount,分配量
+Allow Attach,允许连接
+Allow Bill of Materials,材料让比尔
+Allow Dropbox Access,让Dropbox的访问
+Allow For Users,允许用户
+Allow Google Drive Access,允许谷歌驱动器访问
+Allow Import,允许进口
+Allow Import via Data Import Tool,允许通过数据导入工具导入
+Allow Negative Balance,允许负平衡
+Allow Negative Stock,允许负库存
+Allow Production Order,让生产订单
+Allow Rename,允许重新命名
+Allow User,允许用户
+Allow Users,允许用户
+Allow on Submit,允许在提交
+Allow the following users to approve Leave Applications for block days.,允许以下用户批准许可申请的区块天。
+Allow user to edit Price List Rate in transactions,允许用户编辑价目表率的交易
+Allow user to login only after this hour (0-24),允许用户仅这一小时后登陆（0-24）
+Allow user to login only before this hour (0-24),允许用户仅在此之前登录小时（0-24）
+Allowance Percent,津贴百分比
+Allowed,宠物
+Allowed Role to Edit Entries Before Frozen Date,宠物角色来编辑文章前冷冻日期
+Already Registered,已注册
+Always use above Login Id as sender,请务必使用上述登录ID作为发件人
+Amend,修改
+Amended From,从修订
+Amount,量
+Amount (Company Currency),金额（公司货币）
+Amount <=,量&lt;=
+Amount >=,金额&gt; =
+Amount to Bill,帐单数额
+"An active Salary Structure already exists. \						If you want to create new one, please ensure that no active \						Salary Structure exists for this Employee. \						Go to the active Salary Structure and set \",一个积极的薪酬结构已经存在。 \如果你想创建新的，请确保没有主动\薪酬结构存在此员工。 \进入活跃薪酬结构和设置\
+"An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a>]","一个图标文件，扩展名为。ico。应该是16×16像素。使用的favicon生成器生成。 [ <a href=""http://favicon-generator.org/"" target=""_blank"">网站图标- generator.org</a> ]"
+Analytics,Analytics（分析）
+Another Period Closing Entry,另一个期末入口
+Another Salary Structure '%s' is active for employee '%s'. 				Please make its status 'Inactive' to proceed.,另一种薪酬结构&#39;％s&#39;的活跃员工&#39;％s&#39;的。请其状态“无效”继续。
+"Any other comments, noteworthy effort that should go in the records.",任何其他意见，值得注意的努力，应该在记录中。
+Applicable Holiday List,适用假期表
+Applicable Territory,适用领地
+Applicable To (Designation),适用于（指定）
+Applicable To (Employee),适用于（员工）
+Applicable To (Role),适用于（角色）
+Applicable To (User),适用于（用户）
+Applicant Name,申请人名称
+Applicant for a Job,申请人的工作
+Applicant for a Job.,申请人的工作。
+Applications for leave.,申请许可。
+Applies to Company,适用于公司
+Apply / Approve Leaves,申请/审批叶
+Appraisal,评价
+Appraisal Goal,考核目标
+Appraisal Goals,考核目标
+Appraisal Template,评估模板
+Appraisal Template Goal,考核目标模板
+Appraisal Template Title,评估模板标题
+Approval Status,审批状态
+Approved,批准
+Approver,赞同者
+Approving Role,审批角色
+Approving User,批准用户
+Are you sure you want to STOP ,您确定要停止
+Are you sure you want to UNSTOP ,您确定要UNSTOP
+Are you sure you want to delete the attachment?,您确定要删除的附件？
+Arial,宋体
+Arrear Amount,欠款金额
+"As a best practice, do not assign the same set of permission rule to different Roles instead set multiple Roles to the User",作为最佳实践，不要在同一组的权限规则分配给不同的角色，而不是设置多个角色的用户
+As existing qty for item: ,至于项目现有数量：
+As per Stock UOM,按库存计量单位
+"As there are existing stock transactions for this \							item, you can not change the values of 'Has Serial No', \							'Is Stock Item' and 'Valuation Method'",由于有现有的股票交易这个\项目，你不能改变的&#39;有序列号“的价值观，\&#39;是库存项目”和“评估方法”
+Ascending,升序
+Assign To,分配给
+Assigned By,通过分配
+Assigned To,分配给
+Atleast one warehouse is mandatory,ATLEAST一间仓库是强制性的
+Attach Document Print,附加文档打印
+Attach as web link,附加为网站链接
+Attached To DocType,附着的DocType
+Attached To Name,单身者姓名
+Attachments,附件
+Attendance,护理
+Attendance Date,考勤日期
+Attendance Details,考勤详情
+Attendance From Date,考勤起始日期
+Attendance From Date and Attendance To Date is mandatory,考勤起始日期和出席的日期，是强制性的
+Attendance To Date,出席会议日期
+Attendance can not be marked for future dates,考勤不能标记为未来的日期
+Attendance for the employee: ,出席的员工：
+Attendance record.,考勤记录。
+Attributions,归属
+Authorization Control,授权控制
+Authorization Rule,授权规则
+Auto Accounting For Stock Settings,汽车占股票设置
+Auto Email Id,自动电子邮件Id
+Auto Material Request,汽车材料要求
+Auto Name,自动名称
+Auto generated,自动生成
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,自动加注材料要求，如果数量低于再订购水平在一个仓库
+Automatically extract Leads from a mail box e.g.,从一个信箱，例如自动提取信息
+Automatically updated via Stock Entry of type Manufacture/Repack,通过股票输入型制造/重新包装的自动更新
+Autoreply when a new mail is received,在接收到新邮件时自动回复
+Available,可用的
+Available Qty at Warehouse,有货数量在仓库
+Available Stock for Packing Items,可用库存包装项目
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet",可在物料清单，送货单，采购发票，生产订单，采购订单，采购入库单，销售发票，销售订单，股票入门，时间表
+Avatar,阿凡达
+Average Age,平均年龄
+Average Commission Rate,平均佣金率
+Average Discount,平均折扣
+B+,B +
+B-,B-
+BILL,条例草案
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,BOM表详细说明暂无
+BOM Explosion Item,BOM爆炸物品
+BOM Item,BOM项目
+BOM No,BOM无
+BOM No. for a Finished Good Item,BOM编号为成品产品
+BOM Operation,BOM的操作
+BOM Operations,BOM的操作
+BOM Replace Tool,BOM替换工具
+BOM replaced,BOM取代
+Background Color,背景颜色
+Background Image,背景图片
+Backup Manager,备份管理器
+Backup Right Now,备份即刻
+Backups will be uploaded to,备份将被上传到
+Balance Qty,余额数量
+Balance Value,平衡值
+"Balances of Accounts of type ""Bank or Cash""",键入“银行或现金”的账户余额
+Bank,银行
+Bank A/C No.,银行A / C号
+Bank Account,银行帐户
+Bank Account No.,银行账号
+Bank Accounts,银行账户
+Bank Clearance Summary,银行结算摘要
+Bank Name,银行名称
+Bank Reconciliation,银行对帐
+Bank Reconciliation Detail,银行对帐详细
+Bank Reconciliation Statement,银行对帐表
+Bank Voucher,银行券
+Bank or Cash,银行或现金
+Bank/Cash Balance,银行/现金结余
+Banner,旗帜
+Banner HTML,横幅的HTML
+Banner Image,横幅图片
+Banner is above the Top Menu Bar.,旗帜就是上面的顶部菜单栏。
+Barcode,条码
+Based On,基于
+Basic Info,基本信息
+Basic Information,基本信息
+Basic Rate,基础速率
+Basic Rate (Company Currency),基本速率（公司货币）
+Batch,批量
+Batch (lot) of an Item.,一批该产品的（很多）。
+Batch Finished Date,批完成日期
+Batch ID,批次ID
+Batch No,批号
+Batch Started Date,批处理开始日期
+Batch Time Logs for Billing.,批处理的时间记录进行计费。
+Batch Time Logs for billing.,批处理的时间记录进行计费。
+Batch-Wise Balance History,间歇式平衡历史
+Batched for Billing,批量计费
+"Before proceeding, please create Customer from Lead",在继续操作之前，请从铅创建客户
+Begin this page with a slideshow of images,开始这个页面图像的幻灯片
+Belongs to,属于
+Better Prospects,更好的前景
+Bill Date,比尔日期
+Bill No,汇票否
+Bill of Material to be considered for manufacturing,物料清单被视为制造
+Bill of Materials,材料清单
+Bill of Materials (BOM),材料清单（BOM）
+Billable,计费
+Billed,计费
+Billed Amount,账单金额
+Billed Amt,已结算额
+Billing,计费
+Billing Address,帐单地址
+Billing Address Name,帐单地址名称
+Billing Status,计费状态
+Bills raised by Suppliers.,由供应商提出的法案。
+Bills raised to Customers.,提高对客户的账单。
+Bin,箱子
+Bio,生物
+Birth Date,出生日期
+Birthday,生日
+Block Date,座日期
+Block Days,天座
+Block Holidays on important days.,块上重要的日子假期。
+Block leave applications by department.,按部门封锁许可申请。
+Blog Category,博客分类
+Blog Intro,博客介绍
+Blog Introduction,博客简介
+Blog Post,博客公告
+Blog Settings,博客设置
+Blog Subscriber,博客用户
+Blog Title,博客标题
+Blogger,博客
+Blood Group,血型
+Bookmarks,书签
+Both Income and Expense balances are zero. \				No Need to make Period Closing Entry.,收入和支出结余为零。 \没有必要让时间截止报名。
+Both Warehouse must belong to same Company,这两个仓库必须属于同一个公司
+Branch,支
+Brand,牌
+Brand HTML,品牌的HTML
+Brand Name,商标名称
+"Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px",品牌是什么出现在工具栏的右上角。如果它是一个形象，确保它的身体透明背景，并使用&lt;img /&gt;标签。保持大小为200px x 30像素
+Brand master.,品牌大师。
+Brands,品牌
+Breakdown,击穿
+Budget,预算
+Budget Allocated,分配的预算
+Budget Detail,预算案详情
+Budget Details,预算案详情
+Budget Distribution,预算分配
+Budget Distribution Detail,预算分配明细
+Budget Distribution Details,预算分配详情
+Budget Variance Report,预算差异报告
+Build Modules,构建模块
+Build Pages,构建页面
+Build Report,建立举报
+Build Server API,建立服务器API
+Build Sitemap,建立网站地图
+Bulk Email,大量电子邮件
+Bulk Email records.,大量电子邮件记录。
+Bulk Rename,批量重命名
+Bummer! There are more holidays than working days this month.,坏消息！还有比这个月工作日更多的假期。
+Bundle items at time of sale.,捆绑项目在销售时。
+Button,钮
+Buyer of Goods and Services.,采购货物和服务。
+Buying,求购
+Buying Amount,客户买入金额
+Buying Settings,求购设置
+By,通过
+C-FORM/,C-FORM /
+C-Form,C-表
+C-Form Applicable,C-表格适用
+C-Form Invoice Detail,C-形式发票详细信息
+C-Form No,C-表格编号
+C-Form records,C-往绩纪录
+CI/2010-2011/,CI/2010-2011 /
+COMM-,COMM-
+CSS,CSS
+CUST,CUST
+CUSTMUM,CUSTMUM
+Calculate Based On,计算的基础上
+Calculate Total Score,计算总分
+Calendar,日历
+Calendar Events,日历事件
+Call,通话
+Campaign,运动
+Campaign Name,活动名称
+Can only be exported by users with role 'Report Manager',只能由用户与角色“报表管理器”导出
+Cancel,取消
+Cancel permission also allows the user to delete a document (if it is not linked to any other document).,取消许可还允许用户删除一个文件（如果它不与任何其他文件）。
+Cancelled,注销
+Cancelling this Stock Reconciliation will nullify its effect.,取消这个股票和解将抵消其影响。
+Cannot ,不能
+Cannot Cancel Opportunity as Quotation Exists,无法取消的机遇，报价存在
+Cannot Update: Incorrect / Expired Link.,无法更新：不正确的/过期的链接。
+Cannot Update: Incorrect Password,无法更新：不正确的密码
+Cannot approve leave as you are not authorized to approve leaves on Block Dates.,因为你无权批准树叶座日期不能批准休假。
+Cannot change Year Start Date and Year End Date \					once the Fiscal Year is saved.,不能改变年开学日期，一旦财政年度保存年度日期\。
+Cannot change from,不能改变
+Cannot continue.,无法继续。
+"Cannot declare as lost, because Quotation has been made.",不能声明为丢失，因为报价已经取得进展。
+"Cannot delete Serial No in warehouse. \				First remove from warehouse, then delete.",无法删除序列号的仓库。 \首先从仓库中取出，然后将其删除。
+Cannot edit standard fields,不能编辑标准字段
+Cannot map because following condition fails: ,无法对应，因为以下条件失败：
+Cannot set as Lost as Sales Order is made.,不能设置为失落的销售订单而成。
+"Cannot update a non-exiting record, try inserting.",无法更新非退出记录，请尝试插入。
+Capacity,容量
+Capacity Units,容量单位
+Carry Forward,发扬
+Carry Forwarded Leaves,进行转发叶
+Case No. cannot be 0,案号不能为0
+Cash,现金
+Cash Voucher,现金券
+Cash/Bank Account,现金/银行账户
+Category,类别
+Category Name,分类名称
+Cell Number,手机号码
+Center,中心
+"Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.",某些文件不应该改变最后一次，像发票为例。对这些文件的最后状态被称为<b>提交</b> 。您可以限制哪些角色可以提交。
+Change UOM for an Item.,更改为计量单位的商品。
+Change the starting / current sequence number of an existing series.,更改现有系列的开始/当前的序列号。
+Channel Partner,渠道合作伙伴
+Charge,收费
+Chargeable,收费
+Chart of Accounts,科目表
+Chart of Cost Centers,成本中心的图
+Chat,聊天
+Check,查
+Check / Uncheck roles assigned to the Profile. Click on the Role to find out what permissions that Role has.,查看/取消选中分配给个人的角色。点击角色，找出哪些权限的角色了。
+Check all the items below that you want to send in this digest.,检查下面要发送此摘要中的所有项目。
+Check how the newsletter looks in an email by sending it to your email.,如何检查的通讯通过其发送到您的邮箱中查找电子邮件。
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date",检查经常性发票，取消，停止经常性或将适当的结束日期
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",检查是否需要自动周期性发票。提交任何销售发票后，经常性部分可见。
+Check if you want to send salary slip in mail to each employee while submitting salary slip,检查您要发送工资单邮件给每个员工，同时提交工资单
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,如果要强制用户在保存之前选择了一系列检查。将不会有默认的，如果你检查这个。
+Check this if you want to send emails as this id only (in case of restriction by your email provider).,如果您要发送的邮件，因为这ID只（如果限制您的电子邮件提供商）进行检查。
+Check this if you want to show in website,检查这一点，如果你想在显示网页
+Check this to disallow fractions. (for Nos),选中此选项禁止分数。 （对于NOS）
+Check this to make this the default letter head in all prints,勾选这个来让这个默认的信头中的所有打印
+Check this to pull emails from your mailbox,检查这从你的邮箱的邮件拉
+Check to activate,检查启动
+Check to make Shipping Address,检查并送货地址
+Check to make primary address,检查以主地址
+Checked,检查
+Cheque,支票
+Cheque Date,支票日期
+Cheque Number,支票号码
+Child Tables are shown as a Grid in other DocTypes.,子表中显示为其他文档类型的Grid。
+City,城市
+City/Town,市/镇
+Claim Amount,索赔金额
+Claims for company expense.,索赔费用由公司负责。
+Class / Percentage,类/百分比
+Classic,经典
+Classification of Customers by region,客户按地区分类
+Clear Cache & Refresh,清除缓存和刷新
+Clear Table,明确表
+Clearance Date,清拆日期
+Click here to buy subscription.,点击这里购买订阅。
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,单击“制作销售发票”按钮来创建一个新的销售发票。
+Click on a link to get options to expand get options ,点击一个链接以获取股权以扩大获取选项
+Click on button in the 'Condition' column and select the option 'User is the creator of the document',点击在“条件”列按钮，并选择选项“用户是文件的创建者”
+Click on row to edit.,单击要编辑的行。
+Click to Expand / Collapse,点击展开/折叠
+Client,客户
+Close,关闭
+Close Balance Sheet and book Profit or Loss.,关闭资产负债表和账面利润或亏损。
+Closed,关闭
+Closing (Cr),关闭（CR）
+Closing (Dr),关闭（博士）
+Closing Account Head,关闭帐户头
+Closing Date,截止日期
+Closing Fiscal Year,截止会计年度
+Closing Qty,期末库存
+Closing Value,收盘值
+CoA Help,辅酶帮助
+Code,码
+Cold Calling,自荐
+Color,颜色
+Column Break,分栏符
+Comma separated list of email addresses,逗号分隔的电子邮件地址列表
+Comment,评论
+Comment By,评论人
+Comment By Fullname,评论人全名
+Comment Date,评论日期
+Comment Docname,可采用DocName评论
+Comment Doctype,注释文档类型
+Comment Time,评论时间
+Comments,评论
+Commission Rate,佣金率
+Commission Rate (%),佣金率（％）
+Commission partners and targets,委员会的合作伙伴和目标
+Commit Log,提交日志
+Communication,通讯
+Communication HTML,沟通的HTML
+Communication History,通信历史记录
+Communication Medium,通信介质
+Communication log.,通信日志。
+Communications,通讯
+Company,公司
+Company Abbreviation,公司缩写
+Company Details,公司详细信息
+Company Email,企业邮箱
+Company History,公司历史
+Company Info,公司信息
+Company Introduction,公司简介
+Company Master.,公司硕士学位。
+Company Name,公司名称
+Company Settings,公司设置
+Company branches.,公司分支机构。
+Company departments.,公司各部门。
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,公司注册号码，供大家参考。例如：增值税注册号码等
+Company registration numbers for your reference. Tax numbers etc.,公司注册号码，供大家参考。税务号码等
+Complaint,抱怨
+Complete,完整
+Complete By,完成
+Completed,已完成
+Completed Production Orders,完成生产订单
+Completed Qty,完成数量
+Completion Date,完成日期
+Completion Status,完成状态
+Condition Field,条件字段
+Confirmation Date,确认日期
+Confirmed orders from Customers.,确认订单的客户。
+Consider Tax or Charge for,考虑税收或收费
+Considered as Opening Balance,视为期初余额
+Considered as an Opening Balance,视为期初余额
+Consultant,顾问
+Consumable Cost,耗材成本
+Consumable cost per hour,每小时可消耗成本
+Consumed Qty,消耗的数量
+Contact,联系
+Contact Control,接触控制
+Contact Desc,联系倒序
+Contact Details,联系方式
+Contact Email,联络电邮
+Contact HTML,联系HTML
+Contact Info,联系方式
+Contact Mobile No,联系手机号码
+Contact Name,联系人姓名
+Contact No.,联络电话
+Contact Person,联系人
+Contact Type,触点类型：
+Contact Us Settings,联系我们设置
+"Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.",联系人选项，如“销售查询，支持查询”等每一个新行或以逗号分隔。
+Content,内容
+Content Type,内容类型
+Content in markdown format that appears on the main side of your page,在降价格式的内容，在页面的主侧出现
+Contra Voucher,魂斗罗券
+Contract End Date,合同结束日期
+Contribution (%),贡献（％）
+Contribution to Net Total,贡献合计净
+Control Panel,控制面板
+Controller,调节器
+Conversion Factor,转换因子
+Conversion Factor of UOM: %s should be equal to 1. 						As UOM: %s is Stock UOM of Item: %s.,计量单位的换算系数：％s应该是等于1。由于计量单位：％s是股票UOM货号：％s的。
+Convert into Recurring Invoice,转换成周期性发票
+Convert to Group,转换为集团
+Convert to Ledger,转换到总帐
+Converted,转换
+Copy,复制
+Copy From Item Group,复制从项目组
+Copyright,版权
+Core,核心
+Cost Center,成本中心
+Cost Center Details,成本中心详情
+Cost Center Name,成本中心名称
+Cost Center must be specified for PL Account: ,成本中心必须为特等账户指定：
+Costing,成本核算
+Count,算
+Country,国家
+Country Name,国家名称
+"Country, Timezone and Currency",国家，时区和货币
+Create,创建
+Create Bank Voucher for the total salary paid for the above selected criteria,创建银行券为支付上述选择的标准工资总额
+Create Customer,创建客户
+Create Material Requests,创建材料要求
+Create New,创建新
+Create Opportunity,创造机会
+Create Production Orders,创建生产订单
+Create Quotation,创建报价
+Create Receiver List,创建接收器列表
+Create Salary Slip,建立工资单
+Create Stock Ledger Entries when you submit a Sales Invoice,创建库存总帐条目当您提交销售发票
+Create and Send Newsletters,创建和发送简讯
+Created Account Head: ,创建帐户头：
+Created By,创建人
+Created Customer Issue,创建客户问题
+Created Group ,创建群组
+Created Opportunity,创造机会
+Created Support Ticket,创建支持票
+Creates salary slip for above mentioned criteria.,建立工资单上面提到的标准。
+Creation Date,创建日期
+Creation Document No,文档创建无
+Creation Document Type,创建文件类型
+Creation Time,创作时间
+Credentials,证书
+Credit,信用
+Credit Amt,信用额
+Credit Card Voucher,信用卡券
+Credit Controller,信用控制器
+Credit Days,信贷天
+Credit Limit,信用额度
+Credit Note,信用票据
+Credit To,信贷
+Credited account (Customer) is not matching with Sales Invoice,存入帐户（客户）不与销售发票匹配
+Cross Listing of Item in multiple groups,项目的多组交叉上市
+Currency,货币
+Currency Exchange,外币兑换
+Currency Format,货币格式
+Currency Name,货币名称
+Currency Settings,货币设置
+Currency and Price List,货币和价格表
+Currency is missing for Price List,货币是缺少价格表
+Current Address,当前地址
+Current Address Is,当前地址是
+Current BOM,当前BOM表
+Current Fiscal Year,当前会计年度
+Current Stock,当前库存
+Current Stock UOM,目前的库存计量单位
+Current Value,当前值
+Current status,现状
+Custom,习俗
+Custom Autoreply Message,自定义自动回复消息
+Custom CSS,自定义CSS
+Custom Field,自定义字段
+Custom Message,自定义消息
+Custom Reports,自定义报告
+Custom Script,自定义脚本
+Custom Startup Code,自定义启动代码
+Custom?,自定义？
+Customer,顾客
+Customer (Receivable) Account,客户（应收）帐
+Customer / Item Name,客户/项目名称
+Customer / Lead Address,客户/铅地址
+Customer Account,客户帐户
+Customer Account Head,客户帐户头
+Customer Acquisition and Loyalty,客户获得和忠诚度
+Customer Address,客户地址
+Customer Addresses And Contacts,客户的地址和联系方式
+Customer Code,客户代码
+Customer Codes,客户代码
+Customer Details,客户详细信息
+Customer Discount,客户折扣
+Customer Discounts,客户折扣
+Customer Feedback,客户反馈
+Customer Group,集团客户
+Customer Group / Customer,集团客户/客户
+Customer Group Name,客户群组名称
+Customer Intro,客户简介
+Customer Issue,客户问题
+Customer Issue against Serial No.,客户对发行序列号
+Customer Name,客户名称
+Customer Naming By,客户通过命名
+Customer classification tree.,客户分类树。
+Customer database.,客户数据库。
+Customer's Item Code,客户的产品编号
+Customer's Purchase Order Date,客户的采购订单日期
+Customer's Purchase Order No,客户的采购订单号
+Customer's Purchase Order Number,客户的采购订单编号
+Customer's Vendor,客户的供应商
+Customers Not Buying Since Long Time,客户不买，因为很长时间
+Customers Not Buying Since Long Time ,客户不买，因为很长时间
+Customerwise Discount,Customerwise折扣
+Customization,定制
+Customize,定制
+Customize Form,自定义表单
+Customize Form Field,自定义表单域
+"Customize Label, Print Hide, Default etc.",自定义标签，打印隐藏，默认值等。
+Customize the Notification,自定义通知
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,自定义去作为邮件的一部分的介绍文字。每笔交易都有一个单独的介绍性文字。
+DN,DN
+DN Detail,DN详细
+Daily,每日
+Daily Event Digest is sent for Calendar Events where reminders are set.,每日赛事精华被送往何处​​提醒设置日历事件。
+Daily Time Log Summary,每日时间记录汇总
+Danger,危险
+Data,数据
+Data Import,数据导入
+Database Folder ID,数据库文件夹的ID
+Database of potential customers.,数据库的潜在客户。
+Date,日期
+Date Format,日期格式
+Date Of Retirement,日退休
+Date and Number Settings,日期和编号设置
+Date is repeated,日期重复
+Date must be in format,日期格式必须是
+Date of Birth,出生日期
+Date of Issue,发行日期
+Date of Joining,加入日期
+Date on which lorry started from supplier warehouse,日期从供应商的仓库上货车开始
+Date on which lorry started from your warehouse,日期从仓库上货车开始
+Dates,日期
+Datetime,日期时间
+Days Since Last Order,天自上次订购
+Days for which Holidays are blocked for this department.,天的假期被封锁这个部门。
+Dealer,零售商
+Dear,亲爱
+Debit,借方
+Debit Amt,借记额
+Debit Note,缴费单
+Debit To,借记
+Debit and Credit not equal for this voucher: Diff (Debit) is ,借记和信用为这个券不等于：差异（借记）是
+Debit or Credit,借记卡或信用卡
+Debited account (Supplier) is not matching with \					Purchase Invoice,借记账户（供应商）不与\采购发票匹配
+Deduct,扣除
+Deduction,扣除
+Deduction Type,扣类型
+Deduction1,Deduction1
+Deductions,扣除
+Default,默认
+Default Account,默认帐户
+Default BOM,默认的BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,默认银行/现金帐户将被自动在POS机发票时选择此模式更新。
+Default Bank Account,默认银行账户
+Default Buying Price List,默认情况下采购价格表
+Default Cash Account,默认的现金账户
+Default Company,默认公司
+Default Cost Center,默认的成本中心
+Default Cost Center for tracking expense for this item.,默认的成本中心跟踪支出为这个项目。
+Default Currency,默认货币
+Default Customer Group,默认用户组
+Default Expense Account,默认费用帐户
+Default Home Page,默认主页
+Default Home Pages,默认主页
+Default Income Account,默认情况下收入账户
+Default Item Group,默认项目组
+Default Price List,默认价格表
+Default Print Format,默认打印格式
+Default Purchase Account in which cost of the item will be debited.,默认帐户购买该项目的成本将被扣除。
+Default Settings,默认设置
+Default Source Warehouse,默认信号源仓库
+Default Stock UOM,默认的库存计量单位
+Default Supplier,默认的供应商
+Default Supplier Type,默认的供应商类别
+Default Target Warehouse,默认目标仓库
+Default Territory,默认领地
+Default UOM updated in item ,在项目的默认计量单位更新
+Default Unit of Measure,缺省的计量单位
+"Default Unit of Measure can not be changed directly \					because you have already made some transaction(s) with another UOM.\n \					To change default UOM, use 'UOM Replace Utility' tool under Stock module.",缺省的计量单位，不能直接更改\，因为你已经做了一些交易（S）与另一个计量单位。\ N \要更改默认的度量单位，使用“计量单位替换工具”下的库存模块的工具。
+Default Valuation Method,默认的估值方法
+Default Value,默认值
+Default Warehouse,默认仓库
+Default Warehouse is mandatory for Stock Item.,默认仓库是强制性的股票项目。
+Default settings for Shopping Cart,对于购物车默认设置
+"Default: ""Contact Us""",默认：“联系我们”
+DefaultValue,默认值
+Defaults,默认
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","定义预算这个成本中心。要设置预算行动，见<a href=""#!List/Company"">公司主</a>"
+Defines actions on states and the next step and allowed roles.,定义了国家行动和下一步和允许的角色。
+Defines workflow states and rules for a document.,定义了文档工作流状态和规则。
+Delete,删除
+Delete Row,删除行
+Delivered,交付
+Delivered Items To Be Billed,交付项目要被收取
+Delivered Qty,交付数量
+Delivered Serial No ,交付序列号
+Delivery Date,交货日期
+Delivery Details,交货细节
+Delivery Document No,交货证明文件号码
+Delivery Document Type,交付文件类型
+Delivery Note,送货单
+Delivery Note Item,送货单项目
+Delivery Note Items,送货单项目
+Delivery Note Message,送货单留言
+Delivery Note No,送货单号
+Delivery Note Required,要求送货单
+Delivery Note Trends,送货单趋势
+Delivery Status,交货状态
+Delivery Time,交货时间
+Delivery To,为了交付
+Department,部门
+Depends On,取决于
+Depends on LWP,依赖于LWP
+Descending,降
+Description,描述
+Description HTML,说明HTML
+"Description for listing page, in plain text, only a couple of lines. (max 140 characters)",说明列表页面，在纯文本中，只有几行。 （最多140个字符）
+Description for page header.,描述页面标题。
+Description of a Job Opening,空缺职位说明
+Designation,指定
+Desktop,桌面
+Detailed Breakup of the totals,总计详细分手
+Details,详细信息
+Did not add.,没加。
+Did not cancel,没有取消
+Did not save,没救了
+Difference,差异
+Difference Account,差异帐户
+"Different ""States"" this document can exist in. Like ""Open"", ""Pending Approval"" etc.",不同的“国家”这个文件可以存在。像“打开”，“待批准”等。
+Different UOM for items will lead to incorrect,不同计量单位的项目会导致不正确的
+Disable Customer Signup link in Login page,禁止在登录页面客户注册链接
+Disable Rounded Total,禁用圆角总
+Disable Signup,禁止注册
+Disabled,残
+Discount  %,折扣％
+Discount %,折扣％
+Discount (%),折让（％）
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice",折扣场将在采购订单，采购入库单，采购发票
+Discount(%),折让（％）
+Display Settings,显示设置
+Display all the individual items delivered with the main items,显示所有交付使用的主要项目的单个项目
+Distinct unit of an Item,该产品的独特单位
+Distribute transport overhead across items.,分布到项目的传输开销。
+Distribution,分配
+Distribution Id,分配标识
+Distribution Name,分配名称
+Distributor,经销商
+Divorced,离婚
+Do Not Contact,不要联系
+Do not show any symbol like $ etc next to currencies.,不要显示，如$等任何符号旁边货币。
+Do really want to unstop production order: ,难道真的要unstop生产订单：
+Do you really want to STOP this Material Request?,你真的要停止这种材料要求？
+Do you really want to UNSTOP this Material Request?,难道你真的想要UNSTOP此材料要求？
+Do you really want to stop production order: ,你真的要停止生产订单：
+Doc Name,文件名称
+Doc Status,文件状态
+Doc Type,文件类型
+DocField,DocField
+DocPerm,DocPerm
+DocType,的DocType
+DocType Details,的DocType详情
+DocType can not be merged,DocType文档类型不能合并
+DocType is a Table / Form in the application.,的DocType是一个表/表格中的应用。
+DocType on which this Workflow is applicable.,DocType文档类型上这个工作流是适用的。
+DocType or Field,的DocType或现场
+Docname,可采用DocName
+Document,文件
+Document Description,文档说明
+Document Status transition from ,从文档状态过渡
+Document Type,文件类型
+Document Types,文档类型
+Document is only editable by users of role,文件只有通过编辑角色的用户
+Documentation,文档
+Documentation Generator Console,文档生成器控制台
+Documentation Tool,文档工具
+Documents,文件
+Domain,域
+Don't send Employee Birthday Reminders,不要送员工生日提醒
+Download Backup,下载备份
+Download Materials Required,下载所需材料
+Download Reconcilation Data,下载Reconcilation数据
+Download Template,下载模板
+Download a report containing all raw materials with their latest inventory status,下载一个包含所有原料一份报告，他们最新的库存状态
+"Download the Template, fill appropriate data and \					attach the modified file.",下载模板，填写相应的数据和\附上修改后的文件。
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records",下载模板，填写相应的数据，并附加修饰file.All日期和员工组合在选定的期限会在模板中，与现有的考勤记录
+Draft,草案
+Drafts,草稿箱
+Drag to sort columns,拖动进行排序的列
+Dropbox,Dropbox的
+Dropbox Access Allowed,Dropbox的允许访问
+Dropbox Access Key,Dropbox的访问键
+Dropbox Access Secret,Dropbox的访问秘密
+Due Date,到期日
+Duplicate Item,重复项目
+EMP/,EMP /
+ERPNext Setup,ERPNext设置
+ERPNext Setup Guide,ERPNext安装指南
+"ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd.\		to provide an integrated tool to manage most processes in a small organization.\		For more information about Web Notes, or to buy hosting servies, go to ",ERPNext是一个开源的基于Web的ERP系统通过网络注技术私人有限公司\下，提供一个集成的工具来管理一个小型组织大多数进程。\有关Web注释的详细信息，或者购买主机楝，去
+ESIC CARD No,ESIC卡无
+ESIC No.,ESIC号
+Earliest,最早
+Earning,盈利
+Earning & Deduction,收入及扣除
+Earning Type,收入类型
+Earning1,Earning1
+Edit,编辑
+Editable,编辑
+Educational Qualification,学历
+Educational Qualification Details,学历详情
+Eg. smsgateway.com/api/send_sms.cgi,例如：。 smsgateway.com / API / send_sms.cgi
+Electricity Cost,电力成本
+Electricity cost per hour,每小时电费
+Email,电子邮件
+Email Digest,电子邮件摘要
+Email Digest Settings,电子邮件摘要设置
+Email Digest: ,电子邮件摘要：
+Email Host,电子邮件主机
+Email Id,电子邮件Id
+"Email Id must be unique, already exists for: ",电子邮件ID必须是唯一的，已经存在：
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",电子邮件Id其中一个应聘者的电子邮件，例如“jobs@example.com”
+Email Id where users will send support request e.g. support@example.com,电子邮件Id，用户将发送支持请求，例如support@example.com
+Email Login,邮箱登录
+Email Password,电子邮件密码
+Email Sent,邮件发送
+Email Sent?,邮件发送？
+Email Settings,电子邮件设置
+Email Settings for Outgoing and Incoming Emails.,电子邮件设置传出和传入的电子邮件。
+Email Signature,电子邮件签名
+Email Use SSL,电子邮件使用SSL
+"Email addresses, separted by commas",电子邮件地址，以逗号separted
+Email ids separated by commas.,电子邮件ID，用逗号分隔。
+"Email settings for jobs email id ""jobs@example.com""",电子邮件设置工作电子邮件ID“jobs@example.com”
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",电子邮件设置，以销售电子邮件ID，例如“sales@example.com”提取信息
+Email...,电子邮件...
+Emergency Contact,紧急联络人
+Emergency Contact Details,紧急联系方式
+Emergency Phone,紧急电话
+Employee,雇员
+Employee Birthday,员工生日
+Employee Designation.,员工名称。
+Employee Details,员工详细信息
+Employee Education,员工教育
+Employee External Work History,员工对外工作历史
+Employee Information,雇员资料
+Employee Internal Work History,员工内部工作经历
+Employee Internal Work Historys,员工内部工作Historys
+Employee Leave Approver,员工请假审批
+Employee Leave Balance,员工休假余额
+Employee Name,员工姓名
+Employee Number,员工人数
+Employee Records to be created by,员工纪录的创造者
+Employee Settings,员工设置
+Employee Setup,员工设置
+Employee Type,员工类型
+Employee grades,员工成绩
+Employee record is created using selected field. ,使用所选字段创建员工记录。
+Employee records.,员工记录。
+Employee: ,员工人数：
+Employees Email Id,员工的电子邮件ID
+Employment Details,就业信息
+Employment Type,就业类型
+Enable / Disable Email Notifications,启用/禁用电子邮件通知
+Enable Comments,启用评论
+Enable Shopping Cart,启用的购物车
+Enabled,启用
+Encashment Date,兑现日期
+End Date,结束日期
+End date of current invoice's period,当前发票的期限的最后一天
+End of Life,寿命结束
+Ends on,结束于
+Enter Form Type,输入表单类型
+Enter Row,输入行
+Enter Verification Code,输入验证码
+Enter campaign name if the source of lead is campaign.,输入活动名称，如果铅的来源是运动。
+"Enter default value fields (keys) and values. If you add multiple values for a field, the first one will be picked. These defaults are also used to set ""match"" permission rules. To see list of fields, go to <a href=""#Form/Customize Form/Customize Form"">Customize Form</a>.","输入默认值字段（键）和值。如果你对一个字段中添加多个值，则第一个将有所回升。这些默认值也可用来设置“匹配”的权限规则。要查看字段的列表，请访问<a href=""#Form/Customize Form/Customize Form"">自定义表单</a> 。"
+Enter department to which this Contact belongs,输入部门的这种联系是属于
+Enter designation of this Contact,输入该联系人指定
+"Enter email id separated by commas, invoice will be mailed automatically on particular date",输入电子邮件ID用逗号隔开，发票会自动在特定的日期邮寄
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,输入您想要提高生产订单或下载的原材料进行分析的项目和计划数量。
+Enter name of campaign if source of enquiry is campaign,输入活动的名称，如果查询来源是运动
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)",在这里输入静态URL参数（如称发件人= ERPNext，用户名= ERPNext，密码= 1234等）
+Enter the company name under which Account Head will be created for this Supplier,输入据此帐户总的公司名称将用于此供应商建立
+Enter url parameter for message,输入url参数的消息
+Enter url parameter for receiver nos,输入URL参数的接收器号
+Entries,项
+Entries are not allowed against this Fiscal Year if the year is closed.,参赛作品不得对本财年，如果当年被关闭。
+Equals,等号
+Error,错误
+Error for,错误
+Error: Document has been modified after you have opened it,错误：你已经打开了它之后，文件已被修改
+Estimated Material Cost,预计材料成本
+Event,事件
+Event End must be after Start,活动结束必须开始后，
+Event Individuals,个人事件
+Event Role,事件角色
+Event Roles,事件角色
+Event Type,事件类型
+Event User,事件用户
+Events In Today's Calendar,活动在今天的日历
+Every Day,天天
+Every Month,每月
+Every Week,每一周
+Every Year,每年
+Everyone can read,每个人都可以阅读
+Example:,例如：
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",例如：ABCD＃＃＃＃＃如果串联设置和序列号没有在交易中提到，然后自动序列号将基于该系列被创建。如果你总是想明确提到串行NOS为​​这个项目。留空。
+Exchange Rate,汇率
+Excise Page Number,消费页码
+Excise Voucher,消费券
+Exemption Limit,免税限额
+Exhibition,展览
+Existing Customer,现有客户
+Exit,出口
+Exit Interview Details,退出面试细节
+Expected,预期
+Expected Delivery Date,预计交货日期
+Expected End Date,预计结束日期
+Expected Start Date,预计开始日期
+Expense Account,费用帐户
+Expense Account is mandatory,费用帐户是必需的
+Expense Claim,报销
+Expense Claim Approved,报销批准
+Expense Claim Approved Message,报销批准的消息
+Expense Claim Detail,报销详情
+Expense Claim Details,报销详情
+Expense Claim Rejected,费用索赔被拒绝
+Expense Claim Rejected Message,报销拒绝消息
+Expense Claim Type,费用报销型
+Expense Date,牺牲日期
+Expense Details,费用详情
+Expense Head,总支出
+Expense account is mandatory for item,交际费是强制性的项目
+Expense/Difference account is mandatory for item: ,费用/差异帐户是强制性的项目：
+Expenses Booked,支出预订
+Expenses Included In Valuation,支出计入估值
+Expenses booked for the digest period,预订了消化期间费用
+Expiry Date,到期时间
+Export,出口
+Exports,出口
+External,外部
+Extract Emails,提取电子邮件
+FCFS Rate,FCFS率
+FIFO,FIFO
+Facebook Share,Facebook分享
+Failed: ,失败：
+Family Background,家庭背景
+FavIcon,网站图标
+Fax,传真
+Features Setup,功能设置
+Feed,饲料
+Feed Type,饲料类型
+Feedback,反馈
+Female,女
+Fetch exploded BOM (including sub-assemblies),取爆炸BOM（包括子组件）
+Field Description,字段说明
+Field Name,字段名称
+Field Type,字段类型
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order",在送货单，报价单，销售发票，销售订单可用字段
+"Field that represents the Workflow State of the transaction (if field is not present, a new hidden Custom Field will be created)",现场，代表交易的工作流状态（如果域不存在，一个新的隐藏的自定义字段将被创建）
+Fieldname,字段名
+Fields,领域
+"Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box",字段用逗号（，）分隔将被纳入<br /> <b>搜索</b>的搜索对话框列表
+File,文件
+File Data,文件数据
+File Name,文件名
+File Size,文件大小
+File URL,文件的URL
+File size exceeded the maximum allowed size,文件大小超过了允许的最大尺寸
+Files Folder ID,文件夹的ID
+Fill the form and save it,填写表格，并将其保存
+Filter,过滤器
+Filter By Amount,过滤器以交易金额计算
+Filter By Date,筛选通过日期
+Filter based on customer,过滤器可根据客户
+Filter based on item,根据项目筛选
+Financial Analytics,财务分析
+Financial Statements,财务报表附注
+Finder,发现者
+Finished Goods,成品
+First Name,名字
+First Responded On,首先作出回应
+Fiscal Year,财政年度
+Fixed Asset Account,固定资产帐户
+Float,浮动
+Float Precision,float精度
+Follow via Email,通过电子邮件跟随
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",下表将显示值，如果项目有子 - 签约。这些值将被从子的“材料清单”的主人进账 - 已签约的项目。
+Font (Heading),字体（标题）
+Font (Text),字体（文字）
+Font Size (Text),字体大小（文本）
+Fonts,字体
+Footer,页脚
+Footer Items,页脚项目
+For All Users,对于所有用户
+For Company,对于公司
+For DocType,为的DocType
+For Employee,对于员工
+For Employee Name,对于员工姓名
+"For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma",对于链接，进入文档类型为rangeFor选择，进入选项列表以逗号分隔
+For Production,对于生产
+For Reference Only.,仅供参考。
+For Sales Invoice,对于销售发票
+For Server Side Print Formats,对于服务器端打印的格式
+For UOM,对于计量单位
+For Warehouse,对于仓库
+"For comparative filters, start with",对于比较器，开始
+"For e.g. 2012, 2012-13",对于例如2012，2012-13
+For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,例如，如果你取消及修订“INV004”它将成为一个新的文档&#39;INV004-1&#39;。这可以帮助您跟踪每一项修正案。
+For example: You want to restrict users to transactions marked with a certain property called 'Territory',例如：你想限制用户到标有某种属性叫做&#39;领地&#39;交易
+For opening balance entry account can not be a PL account,对于期初余额进入帐户不能是一个PL帐户
+For ranges,对于范围
+For reference,供参考
+For reference only.,仅供参考。
+For row,对于行
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",为方便客户，这些代码可以在打印格式，如发票和送货单使用
+Form,表格
+Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,格式：HH：一小时期满组为01:00毫米的例子。最大到期将是72小时。默认值为24小时
+Forum,论坛
+Forward To Email Address,转发到邮件地址
+Fraction,分数
+Fraction Units,部分单位
+Freeze Stock Entries,冻结库存条目
+Friday,星期五
+From,从
+From Bill of Materials,从材料清单
+From Company,从公司
+From Currency,从货币
+From Currency and To Currency cannot be same,从货币和货币不能相同
+From Customer,从客户
+From Date,从日期
+From Date must be before To Date,从日期必须是之前日期
+From Delivery Note,从送货单
+From Employee,从员工
+From Lead,从铅
+From Opportunity,从机会
+From Package No.,从包号
+From Purchase Order,从采购订单
+From Purchase Receipt,从采购入库单
+From Quotation,从报价
+From Sales Order,从销售订单
+From Time,从时间
+From Value,从价值
+From Value should be less than To Value,从数值应小于To值
+Frozen,冻结的
+Frozen Accounts Modifier,冻结帐户修改
+Fulfilled,适合
+Full Name,全名
+Fully Completed,全面完成
+"Further accounts can be made under Groups,",进一步帐户可以根据组进行，
+Further nodes can be only created under 'Group' type nodes,此外节点可以在&#39;集团&#39;类型的节点上创建
+GL Entry,GL报名
+GL Entry: Debit or Credit amount is mandatory for ,GL录入：借方或贷方金额是强制性的
+GRN,GRN
+Gantt Chart,甘特图
+Gantt chart of all tasks.,[甘特图表所有作业。
+Gender,性别
+General,一般
+General Ledger,总帐
+General Ledger: ,总帐：
+Generate Description HTML,生成的HTML说明
+Generate Material Requests (MRP) and Production Orders.,生成材料要求（MRP）和生产订单。
+Generate Salary Slips,生成工资条
+Generate Schedule,生成时间表
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",生成装箱单的包交付。用于通知包号，包装内容和它的重量。
+Generates HTML to include selected image in the description,生成HTML，包括所选图像的描述
+Generator,发电机
+Georgia,格鲁吉亚
+Get,得到
+Get Advances Paid,获取有偿进展
+Get Advances Received,取得进展收稿
+Get Current Stock,获取当前库存
+Get From ,得到
+Get Items,找项目
+Get Items From Sales Orders,获取项目从销售订单
+Get Items from BOM,获取项目从物料清单
+Get Last Purchase Rate,获取最新预订价
+Get Non Reconciled Entries,获取非对帐项目
+Get Outstanding Invoices,获取未付发票
+Get Sales Orders,获取销售订单
+Get Specification Details,获取详细规格
+Get Stock and Rate,获取股票和速率
+Get Template,获取模板
+Get Terms and Conditions,获取条款和条件
+Get Weekly Off Dates,获取每周关闭日期
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.",获取估值率和可用库存在上提到过账日期 - 时间源/目标仓库。如果序列化的项目，请输入序列号后，按下此按钮。
+GitHub Issues,GitHub的问题
+Global Defaults,全球默认值
+Global Settings / Default Values,全局设置/默认值
+Go to Setup > <a href='#user-properties'>User Properties</a> to set \			'territory' for diffent Users.,进入设置&gt; <a href='#user-properties'>用户属性</a>设置\&#39;领土&#39;的diffent用户。
+Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts),转至相应的组（通常申请基金&gt;货币资产的&gt;银行账户）
+Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties),转至相应的组（通常资金来源&gt;流动负债&gt;税和关税）
+Goal,目标
+Goals,目标
+Goods received from Suppliers.,从供应商收到货。
+Google Analytics ID,谷歌Analytics（分析）的ID
+Google Drive,谷歌驱动器
+Google Drive Access Allowed,谷歌驱动器允许访问
+Google Plus One,谷歌加一
+Google Web Font (Heading),谷歌网页字体（标题）
+Google Web Font (Text),谷歌网页字体（文字）
+Grade,等级
+Graduate,毕业生
+Grand Total,累计
+Grand Total (Company Currency),总计（公司货币）
+Gratuity LIC ID,酬金LIC ID
+Greater or equals,大于或等于
+Greater than,大于
+"Grid """,电网“
+Gross Margin %,毛利率％
+Gross Margin Value,毛利率价值
+Gross Pay,工资总额
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,工资总额+欠费金额+兑现金额 - 扣除项目金额
+Gross Profit,毛利
+Gross Profit (%),毛利率（％）
+Gross Weight,毛重
+Gross Weight UOM,毛重计量单位
+Group,组
+Group By,分组依据
+Group by Ledger,集团以总帐
+Group by Voucher,集团透过券
+Group or Ledger,集团或Ledger
+Groups,组
+HR,人力资源
+HR Settings,人力资源设置
+HTML,HTML
+HTML / Banner that will show on the top of product list.,HTML /横幅，将显示在产品列表的顶部。
+Half Day,半天
+Half Yearly,半年度
+Half-yearly,每半年一次
+Happy Birthday!,祝你生日快乐！
+Has Batch No,有批号
+Has Child Node,有子节点
+Has Serial No,有序列号
+Header,头
+Heading,标题
+Heading Text As,标题文字作为
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,头（或组）对其中的会计分录是由与平衡得以维持。
+Health Concerns,健康问题
+Health Details,健康细节
+Held On,举行
+Help,帮助
+Help HTML,HTML帮助
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")",说明：要链接到另一个记录在系统中，使用“＃表单/注意/ [注名]”的链接网址。 （不使用的“http://”）
+Helvetica Neue,Helvetica Neue字体
+"Here you can maintain family details like name and occupation of parent, spouse and children",在这里，您可以维系家庭的详细信息，如姓名的父母，配偶和子女及职业
+"Here you can maintain height, weight, allergies, medical concerns etc",在这里，你可以保持身高，体重，过敏，医疗问题等
+Hey! All these items have already been invoiced.,嘿！所有这些项目已开具发票。
+Hey! There should remain at least one System Manager,嘿！应该保持至少一个系统管理器
+Hidden,隐
+Hide Actions,隐藏操作
+Hide Copy,隐藏副本
+Hide Currency Symbol,隐藏货币符号
+Hide Email,隐藏电子邮件
+Hide Heading,隐藏标题
+Hide Print,隐藏打印
+Hide Toolbar,隐藏工具栏
+High,高
+Highlight,突出
+History,历史
+History In Company,历史在公司
+Hold,持有
+Holiday,节日
+Holiday List,假日列表
+Holiday List Name,假日列表名称
+Holidays,假期
+Home,家
+Home Page,首页
+Home Page is Products,首页产品是
+Home Pages,主页
+Host,主持人
+"Host, Email and Password required if emails are to be pulled",主机，电子邮件和密码必需的，如果邮件是被拉到
+Hour Rate,小时率
+Hour Rate Labour,小时劳动率
+Hours,小时
+How frequently?,多久？
+"How should this currency be formatted? If not set, will use system defaults",应如何货币进行格式化？如果没有设置，将使用系统默认
+Human Resource,人力资源
+Human Resources,人力资源
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,华友世纪！在天在你申请许可\与节假日（S）相吻合。你不需要申请许可。
+I,我
+ID (name) of the entity whose property is to be set,其属性是要设置的实体的ID（名称）
+IDT,IDT
+II,二
+III,三
+IN,在
+INV,投资
+INV/10-11/,INV/10-11 /
+ITEM,项目
+IV,四
+Icon,图标
+Icon will appear on the button,图标将显示在按钮上
+Identification of the package for the delivery (for print),包送货上门鉴定（用于打印）
+If Income or Expense,如果收入或支出
+If Monthly Budget Exceeded,如果每月超出预算
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order",如果销售BOM定义，该包的实际BOM在送货单和销售订单显示为table.Available
+"If Supplier Part Number exists for given Item, it gets stored here",如果供应商零件编号存在给定的项目，它被存放在这里
+If Yearly Budget Exceeded,如果年度预算超出
+"If a User does not have access at Level 0, then higher levels are meaningless",如果用户无权访问级别为0级，那么更高的水平是没有意义的
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.",如果选中，则BOM的子装配项目将被视为获取原料。否则，所有的子组件件，将被视为一个原料。
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",如果选中，则总数。工作日将包括节假日，这将缩短每天的工资的价值
+"If checked, all other workflows become inactive.",如果选中，所有其他的工作流程变得无效。
+"If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.",如果选中，则带有附加的HTML格式的电子邮件会被添加到电子邮件正文的一部分，以及作为附件。如果只作为附件发送，请取消勾选此。
+"If checked, the Home page will be the default Item Group for the website.",如果选中，主页将是默认的项目组的网站上。
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",如果选中，纳税额将被视为已包括在打印速度/打印量
+"If disable, 'Rounded Total' field will not be visible in any transaction",如果禁用，“圆角总计”字段将不可见的任何交易
+"If enabled, the system will post accounting entries for inventory automatically.",如果启用，系统将自动为发布库存会计分录。
+"If image is selected, color will be ignored (attach first)",如果图像被选中，颜色将被忽略（先附上）
+If more than one package of the same type (for print),如果不止一个包相同类型的（用于打印）
+"If no change in either Quantity or Valuation Rate, leave the cell blank.",如果在任一数量或估价率没有变化，离开细胞的空白。
+If non standard port (e.g. 587),如果非标准端口（如587）
+If not applicable please enter: NA,如果不适用，请输入：不适用
+"If not checked, the list will have to be added to each Department where it has to be applied.",如果未选中，则列表将被添加到每个部门，在那里它被应用。
+"If not, create a",如果没有，请创建一个
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.",如果设置，数据输入只允许指定的用户。否则，条目允许具备必要权限的所有用户。
+"If specified, send the newsletter using this email address",如果指定了，使用这个电子邮件地址发送电子报
+"If the 'territory' Link Field exists, it will give you an option to select it",如果&#39;领土&#39;链接字段存在，它会给你一个选项，选择它
+"If the account is frozen, entries are allowed to restricted users.",如果帐户被冻结，条目被允许受限制的用户。
+"If these instructions where not helpful, please add in your suggestions at <a href='https://github.com/webnotes/wnframework/issues'>GitHub Issues</a>",如果这些指令，其中没有帮助，请在您的建议添加<a href='https://github.com/webnotes/wnframework/issues'>GitHub的问题</a>
+"If this Account represents a Customer, Supplier or Employee, set it here.",如果该帐户代表一个客户，供应商或员工，在这里设置。
+If you follow Quality Inspection<br>Enables item QA Required and QA No in Purchase Receipt,如果你遵循质量检验<br>使项目所需的质量保证和质量保证在没有采购入库单
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,如果你有销售团队和销售合作伙伴（渠道合作伙伴），他们可以被标记，并维持其在销售贡献活动
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.",如果您在购置税和费法师创建一个标准的模板，选择一个，然后点击下面的按钮。
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.",如果你已经在销售税金及费用法师创建一个标准的模板，选择一个，然后点击下面的按钮。
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page",如果你有很长的打印格式，这个功能可以被用来分割要打印多个页面，每个页面上的所有页眉和页脚的页
+If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,如果您在制造业活动涉及<br>使<b>产品制造</b>
+"If you set this, this Item will come in a drop-down under the selected parent.",如果你设置这个，这个项目会在一个下拉菜单中选定父下。
+Ignore,忽略
+Ignored: ,忽略：
+Image,图像
+Image Link,图片链接
+Image View,图像查看
+Implementation Partner,实施合作伙伴
+Import,进口
+Import Attendance,进口出席
+Import Failed!,导入失败！
+Import Log,导入日志
+Import Successful!,导入成功！
+Imports,进口
+In,在
+In Dialog,在对话框
+In Filter,在过滤器
+In Hours,以小时为单位
+In List View,在列表视图
+In Process,在过程
+In Qty,在数量
+In Report Filter,在报表筛选
+In Row,在排
+In Value,在价值
+In Words,中字
+In Words (Company Currency),在字（公司货币）
+In Words (Export) will be visible once you save the Delivery Note.,在字（出口）将是可见的，一旦你保存送货单。
+In Words will be visible once you save the Delivery Note.,在词将是可见的，一旦你保存送货单。
+In Words will be visible once you save the Purchase Invoice.,在词将是可见的，一旦你保存购买发票。
+In Words will be visible once you save the Purchase Order.,在词将是可见的，一旦你保存采购订单。
+In Words will be visible once you save the Purchase Receipt.,在词将是可见的，一旦你保存购买收据。
+In Words will be visible once you save the Quotation.,在词将是可见的，一旦你保存报价。
+In Words will be visible once you save the Sales Invoice.,在词将是可见的，一旦你保存销售发票。
+In Words will be visible once you save the Sales Order.,在词将是可见的，一旦你保存销售订单。
+In response to,响应于
+"In the Permission Manager, click on the button in the 'Condition' column for the Role you want to restrict.",在权限管理器中，单击在“状态”列中的按钮为要限制的作用。
+Incentives,奖励
+Incharge,Incharge
+Incharge Name,Incharge名称
+Include holidays in Total no. of Working Days,包括节假日的总数。工作日
+Income / Expense,收入/支出
+Income Account,收入账户
+Income Booked,收入预订
+Income Year to Date,收入年初至今
+Income booked for the digest period,收入入账的消化期
+Incoming,来
+Incoming / Support Mail Setting,来电/支持邮件设置
+Incoming Rate,传入速率
+Incoming quality inspection.,来料质量检验。
+Index,指数
+Indicates that the package is a part of this delivery,表示该包是这个传递的一部分
+Individual,个人
+Individuals,个人
+Industry,行业
+Industry Type,行业类型
+Info,信息
+Insert After,插入后
+Insert Below,下面插入
+Insert Code,插入代码
+Insert Row,插入行
+Insert Style,插入式
+Inspected By,视察
+Inspection Criteria,检验标准
+Inspection Required,需要检验
+Inspection Type,检验类型
+Installation Date,安装日期
+Installation Note,安装注意事项
+Installation Note Item,安装注意项
+Installation Status,安装状态
+Installation Time,安装时间
+Installation record for a Serial No.,对于一个序列号安装记录
+Installed Qty,安装数量
+Instructions,说明
+Int,诠释
+Integrations,集成
+Interested,有兴趣
+Internal,内部
+Introduce your company to the website visitor.,介绍贵公司的网站访客。
+Introduction,介绍
+Introductory information for the Contact Us Page,介绍信息的联系我们页面
+Invalid Barcode,无效的条码
+Invalid Delivery Note. Delivery Note should exist and should be in 				draft state. Please rectify and try again.,无效的送货单。送货单应该存在，应该是在草稿状态。请纠正，然后再试一次。
+Invalid Email,无效的电子邮件
+Invalid Email Address,无效的电子邮件地址
+Invalid Leave Approver,无效休假审批
+Invalid quantity specified for item ,为项目指定了无效的数量
+Inventory,库存
+Inverse,逆
+Invoice Date,发票日期
+Invoice Details,发票明细
+Invoice No,发票号码
+Invoice Period From Date,发票日期开始日期
+Invoice Period To Date,发票日期终止日期
+Invoiced Amount (Exculsive Tax),发票金额（Exculsive税）
+Is Active,为活跃
+Is Advance,为进
+Is Asset Item,是资产项目
+Is Cancelled,被注销
+Is Carry Forward,是弘扬
+Is Child Table,是子表
+Is Default,是默认
+Is Encash,为兑现
+Is LWP,是LWP
+Is Mandatory Field,是必须填写
+Is Opening,是开幕
+Is Opening Entry,是开放报名
+Is PL Account,是PL账户
+Is POS,是POS机
+Is Primary Contact,是主要联络人
+Is Purchase Item,是购买项目
+Is Sales Item,是销售项目
+Is Service Item,是服务项目
+Is Single,单人
+Is Standard,为标准
+Is Stock Item,是库存项目
+Is Sub Contracted Item,是次签约项目
+Is Subcontracted,转包
+Is Submittable,是Submittable
+Is this Tax included in Basic Rate?,包括在基本速率此税？
+Issue,问题
+Issue Date,发行日期
+Issue Details,问题详情
+Issued Items Against Production Order,发出对项目生产订单
+It can also be used to create opening stock entries and to fix stock value.,它也可以用来创建期初存货项目和解决股票价值。
+It is needed to fetch Item Details.,这是需要获取产品的详细信息。
+Item,项目
+Item Advanced,项目高级
+Item Barcode,商品条码
+Item Batch Nos,项目批NOS
+Item Classification,产品分类
+Item Code,产品编号
+Item Code (item_code) is mandatory because Item naming is not sequential.,产品编码（item_code）是强制性的，因为产品的命名是不连续的。
+Item Code and Warehouse should already exist.,产品编号和仓库应该已经存在。
+Item Code cannot be changed for Serial No.,产品编号不能为序列号改变
+Item Customer Detail,项目客户详细
+Item Description,项目说明
+Item Desription,项目Desription
+Item Details,产品详细信息
+Item Group,项目组
+Item Group Name,项目组名称
+Item Groups in Details,在详细信息产品组
+Item Image (if not slideshow),产品图片（如果不是幻灯片）
+Item Name,项目名称
+Item Naming By,产品命名规则
+Item Price,商品价格
+Item Prices,产品价格
+Item Quality Inspection Parameter,产品质量检验参数
+Item Reorder,项目重新排序
+Item Serial No,产品序列号
+Item Serial Nos,产品序列号
+Item Shortage Report,商品短缺报告
+Item Supplier,产品供应商
+Item Supplier Details,产品供应商详细信息
+Item Tax,产品税
+Item Tax Amount,项目税额
+Item Tax Rate,项目税率
+Item Tax1,项目Tax1
+Item To Manufacture,产品制造
+Item UOM,项目计量单位
+Item Website Specification,项目网站规格
+Item Website Specifications,项目网站产品规格
+Item Wise Tax Detail ,项目智者税制明细
+Item classification.,项目分类。
+Item is neither Sales nor Service Item,项目既不是销售，也不服务项目
+Item must have 'Has Serial No' as 'Yes',项目必须有&#39;有序列号&#39;为&#39;是&#39;
+Item table can not be blank,项目表不能为空
+Item to be manufactured or repacked,产品被制造或重新包装
+Item will be saved by this name in the data base.,项目将通过此名称在数据库中保存。
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.",当选择序号项目，担保，资产管理公司（常年维护保养合同）的详细信息将自动获取。
+Item-wise Last Purchase Rate,项目明智的最后付款价
+Item-wise Price List Rate,项目明智的价目表率
+Item-wise Purchase History,项目明智的购买历史
+Item-wise Purchase Register,项目明智的购买登记
+Item-wise Sales History,项目明智的销售历史
+Item-wise Sales Register,项目明智的销售登记
+Items,项目
+Items To Be Requested,项目要请求
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",这是“缺货”的项目被要求考虑根据预计数量和最小起订量为所有仓库
+Items which do not exist in Item master can also be entered on customer's request,不中主项存在的项目也可以根据客户的要求进入
+Itemwise Discount,Itemwise折扣
+Itemwise Recommended Reorder Level,Itemwise推荐级别重新排序
+JSON,JSON
+JV,合资公司
+JavaScript Format: wn.query_reports['REPORTNAME'] = {},JavaScript的格式：wn.query_reports [&#39;REPORTNAME&#39;] = {}
+Javascript,使用Javascript
+Job Applicant,求职者
+Job Opening,招聘开幕
+Job Profile,工作简介
+Job Title,职位
+"Job profile, qualifications required etc.",所需的工作概况，学历等。
+Jobs Email Settings,乔布斯邮件设置
+Journal Entries,日记帐分录
+Journal Entry,日记帐分录
+Journal Voucher,期刊券
+Journal Voucher Detail,日记帐凭证详细信息
+Journal Voucher Detail No,日记帐凭证详细说明暂无
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",保持销售计划的轨道。跟踪信息，报价，销售订单等从竞选衡量投资回报。
+Keep a track of all communications,保持跟踪所有通信
+Keep a track of communication related to this enquiry which will help for future reference.,保持跟踪的沟通与此相关的调查，这将有助于以供将来参考。
+Key,关键
+Key Performance Area,关键绩效区
+Key Responsibility Area,关键责任区
+LEAD,铅
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,铅/孟买/
+LR Date,LR日期
+LR No,LR无
+Label,标签
+Label Help,标签说明
+Lacs,紫胶
+Landed Cost Item,到岸成本项目
+Landed Cost Items,到岸成本项目
+Landed Cost Purchase Receipt,到岸成本外购入库单
+Landed Cost Purchase Receipts,到岸成本外购入库单
+Landed Cost Wizard,到岸成本向导
+Landing Page,着陆页
+Language,语
+Language preference for user interface (only if available).,语言首选项的用户界面（仅如果有的话）。
+Last IP,最后一个IP
+Last Login,上次登录
+Last Name,姓
+Last Purchase Rate,最后预订价
+Last updated by,最后更新由
+Lastmod,LASTMOD
+Latest,最新
+Latest Updates,最新更新
+Lato,拉托
+Lead,铅
+Lead Details,铅详情
+Lead Id,铅标识
+Lead Name,铅名称
+Lead Owner,铅所有者
+Lead Source,铅源
+Lead Status,铅状态
+Lead Time Date,交货时间日期
+Lead Time Days,交货期天
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,交货期天是天由该项目预计将在您的仓库的数量。这天是在申请材料中取出，当你选择这个项目。
+Lead Type,引线型
+Leave Allocation,离开分配
+Leave Allocation Tool,离开配置工具
+Leave Application,离开应用
+Leave Approver,离开审批
+Leave Approver can be one of,离开审批者可以是一个
+Leave Approvers,离开审批
+Leave Balance Before Application,离开平衡应用前
+Leave Block List,离开块列表
+Leave Block List Allow,离开阻止列表允许
+Leave Block List Allowed,离开封锁清单宠物
+Leave Block List Date,留座日期表
+Leave Block List Dates,留座日期表
+Leave Block List Name,离开块列表名称
+Leave Blocked,离开封锁
+Leave Control Panel,离开控制面板
+Leave Encashed?,离开兑现？
+Leave Encashment Amount,假期兑现金额
+Leave Setup,离开设定
+Leave Type,离开类型
+Leave Type Name,离开类型名称
+Leave Without Pay,无薪假
+Leave allocations.,离开分配。
+Leave application has been approved.,休假申请已被批准。
+Leave application has been rejected.,休假申请已被拒绝。
+Leave blank if considered for all branches,离开，如果考虑所有分支空白
+Leave blank if considered for all departments,离开，如果考虑各部门的空白
+Leave blank if considered for all designations,离开，如果考虑所有指定空白
+Leave blank if considered for all employee types,离开，如果考虑所有的员工类型空白
+Leave blank if considered for all grades,离开，如果考虑所有级别空白
+Leave blank to repeat always,留空将总是重复
+"Leave can be approved by users with Role, ""Leave Approver""",离开可以通过用户与角色的批准，“给审批”
+Ledger,莱杰
+Ledgers,总帐
+Left,左
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,法人/附属账户与一个单独的表属于该组织。
+Less or equals,小于或等于
+Less than,小于
+Letter Head,信头
+Letter Head Image,信头图片
+Letter Head Name,信头名
+Letter Head in HTML,信头中的HTML
+Level,级别
+"Level 0 is for document level permissions, higher levels for field level permissions.",0级是文件级权限，更高层次字段级权限。
+Lft,LFT
+Like,喜欢
+Link,链接
+Link Name,链接名称
+Link to other pages in the side bar and next section,链接到侧栏和下一节其他页面
+Link to the page you want to open,链接到你想打开的网页
+Linked In Share,反向链接分享
+Linked With,挂具
+List,表
+List a few of your customers. They could be organizations or individuals.,列出一些你的客户。他们可以是组织或个人。
+List a few of your suppliers. They could be organizations or individuals.,列出一些你的供应商。他们可以是组织或个人。
+"List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them.",列出你从你的供应商或供应商买几个产品或服务。如果这些是与您的产品，那么就不要添加它们。
+List items that form the package.,形成包列表项。
+List of holidays.,假期表。
+List of patches executed,执行补丁列表
+List of users who can edit a particular Note,谁可以编辑特定票据的用户列表
+List this Item in multiple groups on the website.,列出这个项目在网站上多个组。
+"List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start.",列出您的产品或服务，你卖你的客户。确保当你开始检查项目组，测量及其他物业单位。
+"List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later.",列出你的头税（如增值税，消费税）（截至3）和它们的标准费率。这将创建一个标准的模板，您可以编辑和更多的稍后添加。
+Live Chat,即时聊天
+Loading,载入中
+Loading Report,加载报表
+Loading...,载入中...
+Log,登录
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.",通过对用户的任务，可用于跟踪时间，计费进行活动的日志。
+Log of Scheduler Errors,调度程序错误日志
+Login After,登录后
+Login Before,登录前
+Login Id,登录ID
+Login with your new User ID,与你的新的用户ID登录
+Logo,标志
+Logo and Letter Heads,标志和信头
+Logout,注销
+Long Text,长文本
+Lost,丢失
+Lost Reason,失落的原因
+Low,低
+Lower Income,较低的收入
+Lucida Grande,龙力大
+MIS Control,MIS控制
+MREQ-,MREQ  -
+MTN Details,MTN详情
+Mail Footer,邮件页脚
+Mail Password,邮件密码
+Mail Port,邮件端口
+Mail Server,邮件服务器
+Main Reports,主报告
+Main Section,主科
+Maintain Same Rate Throughout Sales Cycle,保持同样的速度在整个销售周期
+Maintain same rate throughout purchase cycle,在整个采购周期保持同样的速度
+Maintenance,保养
+Maintenance Date,维修日期
+Maintenance Details,保养细节
+Maintenance Schedule,维护计划
+Maintenance Schedule Detail,维护计划细节
+Maintenance Schedule Item,维护计划项目
+Maintenance Schedules,保养时间表
+Maintenance Status,维修状态
+Maintenance Time,维护时间
+Maintenance Type,维护型
+Maintenance Visit,维护访问
+Maintenance Visit Purpose,维护访问目的
+Major/Optional Subjects,大/选修课
+Make ,使
+Make Accounting Entry For Every Stock Movement,做会计分录为每股份转移
+Make Bank Voucher,使银行券
+Make Credit Note,使信贷注
+Make Debit Note,让缴费单
+Make Delivery,使交货
+Make Difference Entry,使不同入口
+Make Excise Invoice,使消费税发票
+Make Installation Note,使安装注意事项
+Make Invoice,使发票
+Make Maint. Schedule,让MAINT。时间表
+Make Maint. Visit,让MAINT。访问
+Make Packing Slip,使装箱单
+Make Payment Entry,使付款输入
+Make Purchase Invoice,做出购买发票
+Make Purchase Order,做采购订单
+Make Salary Slip,使工资单
+Make Salary Structure,使薪酬结构
+Make Sales Invoice,做销售发票
+Make Sales Order,使销售订单
+Make Supplier Quotation,让供应商报价
+Make Time Log Batch,做时间记录批
+Make a new,创建一个新的
+Make sure that the transactions you want to restrict have a Link field 'territory' that maps to a 'Territory' master.,请确保您要限制的交易有一个链接字段&#39;领土&#39;映射到一个&#39;领地&#39;师父。
+Male,男性
+Manage 3rd Party Backups,管理第三方备份
+Manage cost of operations,管理运营成本
+Manage exchange rates for currency conversion,管理汇率货币兑换
+Mandatory,强制性
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",如果股票的强制性项目为“是”。也是默认仓库，保留数量从销售订单设置。
+Manufacture against Sales Order,对制造销售订单
+Manufacture/Repack,制造/重新包装
+Manufactured Qty,生产数量
+Manufactured quantity will be updated in this warehouse,生产量将在这个仓库进行更新
+Manufacturer,生产厂家
+Manufacturer Part Number,制造商零件编号
+Manufacturing,制造业
+Manufacturing Quantity,生产数量
+Margin,余量
+Marital Status,婚姻状况
+Market Segment,市场分类
+Married,已婚
+Mass Mailing,邮件群发
+Master,主
+Master Data,主数据
+Master Name,主名称
+Master Name is mandatory if account type is Warehouse,主名称是强制性的，如果帐户类型为仓库
+Master Type,硕士
+Masters,大师
+Match,比赛
+Match non-linked Invoices and Payments.,匹配非联的发票和付款。
+Material Issue,材料问题
+Material Receipt,材料收据
+Material Request,材料要求
+Material Request Detail No,材料要求详细说明暂无
+Material Request For Warehouse,申请材料仓库
+Material Request Item,材料要求项
+Material Request Items,材料要求项
+Material Request No,材料请求无
+Material Request Type,材料请求类型
+Material Request used to make this Stock Entry,材料要求用来做这个股票输入
+Material Requests for which Supplier Quotations are not created,对于没有被创建供应商报价的材料要求
+Material Requirement,物料需求
+Material Transfer,材料转让
+Materials,物料
+Materials Required (Exploded),所需材料（分解）
+Max 500 rows only.,最大500行而已。
+Max Attachments,最大附件
+Max Days Leave Allowed,最大天假宠物
+Max Discount (%),最大折让（％）
+"Meaning of Submit, Cancel, Amend",的含义提交，取消，修改
+Medium,中
+"Menu items in the Top Bar. For setting the color of the Top Bar, go to <a href=""#Form/Style Settings"">Style Settings</a>","在顶栏菜单项。设置最上面一栏的颜色，去<a href=""#Form/Style Settings"">样式设置</a>"
+Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,合并是唯一可能的组到组或分类帐到总帐
+"Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account",合并是唯一可能的，如果下面的\属性是相同的两个记录。集团或Ledger，借方或贷方，是特等帐户
+Message,信息
+Message Parameter,消息参数
+Message Sent,发送消息
+Message greater than 160 character will be splitted into multiple mesage,消息大于160字符将被分裂成多个mesage
+Messages,消息
+Method,方法
+Middle Income,中等收入
+Middle Name (Optional),中间名（可选）
+Milestone,里程碑
+Milestone Date,里程碑日期
+Milestones,里程碑
+Milestones will be added as Events in the Calendar,里程碑将被添加为日历事件
+Millions,百万
+Min Order Qty,最小订货量
+Minimum Order Qty,最低起订量
+Misc,杂项
+Misc Details,其它详细信息
+Miscellaneous,杂项
+Miscelleneous,Miscelleneous
+Missing Currency Exchange Rates for,缺少货币汇率
+Missing Values Required,所需遗漏值
+Mobile No,手机号码
+Mobile No.,手机号码
+Mode of Payment,付款方式
+Modern,现代
+Modified Amount,修改金额
+Modified by,改性
+Module,模
+Module Def,模块高清
+Module Name,模块名称
+Modules,模块
+Monday,星期一
+Month,月
+Monthly,每月一次
+Monthly Attendance Sheet,每月考勤表
+Monthly Earning & Deduction,每月入息和扣除
+Monthly Salary Register,月薪注册
+Monthly salary statement.,月薪声明。
+Monthly salary template.,月薪模板。
+More,更多
+More Details,更多详情
+More Info,更多信息
+More content for the bottom of the page.,更多的内容的页面的底部。
+Moving Average,移动平均线
+Moving Average Rate,移动平均房价
+Mr,先生
+Ms,女士
+Multiple Item prices.,多个项目的价格。
+Multiple Price list.,多重价格清单。
+Must be Whole Number,必须是整数
+Must have report permission to access this report.,必须具有报告权限访问此报告。
+Must specify a Query to run,必须指定一个查询运行
+My Settings,我的设置
+NL-,NL-
+Name,名称
+Name Case,案例名称
+Name Exists,名称存在
+Name and Description,名称和说明
+Name and Employee ID,姓名和雇员ID
+Name is required,名称是必需的
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers,",新帐户的名称。注：请不要创建帐户客户和供应商，
+Name of person or organization that this address belongs to.,的人或组织该地址所属的命名。
+Name of the Budget Distribution,在预算分配的名称
+Naming Series,命名系列
+Naming Series mandatory,命名系列强制性
+Negative balance is not allowed for account ,负平衡是不允许的帐户
+Net Pay,净收费
+Net Pay (in words) will be visible once you save the Salary Slip.,净收费（字）将会看到，一旦你保存工资单。
+Net Total,总净
+Net Total (Company Currency),总净值（公司货币）
+Net Weight,净重
+Net Weight UOM,净重计量单位
+Net Weight of each Item,每个项目的净重
+Net pay can not be negative,净工资不能为负
+Never,从来没有
+New,新
+New ,新
+New Account,新帐号
+New Account Name,新帐号名称
+New BOM,新的物料清单
+New Communications,新通讯
+New Company,新公司
+New Cost Center,新的成本中心
+New Cost Center Name,新的成本中心名称
+New Delivery Notes,新交付票据
+New Enquiries,新的查询
+New Leads,新信息
+New Leave Application,新假期申请
+New Leaves Allocated,分配新叶
+New Leaves Allocated (In Days),分配（天）新叶
+New Material Requests,新材料的要求
+New Password,新密码
+New Projects,新项目
+New Purchase Orders,新的采购订单
+New Purchase Receipts,新的购买收据
+New Quotations,新语录
+New Record,新记录
+New Sales Orders,新的销售订单
+New Serial No cannot have Warehouse. Warehouse must be \				set by Stock Entry or Purchase Receipt,新的序列号不能有仓库。仓库必须由股票输入或外购入库单进行\设置
+New Stock Entries,新货条目
+New Stock UOM,新的库存计量单位
+New Supplier Quotations,新供应商报价
+New Support Tickets,新的客服支援回报单
+New Workplace,职场新人
+New value to be set,新的值被设置
+Newsletter,通讯
+Newsletter Content,通讯内容
+Newsletter Status,通讯状态
+"Newsletters to contacts, leads.",通讯，联系人，线索。
+Next Communcation On,下一步通信电子在
+Next Contact By,接着联系到
+Next Contact Date,下一步联络日期
+Next Date,下一个日期
+Next State,下一状态
+Next actions,下一步行动
+Next email will be sent on:,接下来的电子邮件将被发送：
+No,无
+No Action,无动作
+No Cache,无缓存
+No Communication tagged with this ,无标签的通信与此
+No Copy,没有复制
+No Customer Accounts found.,没有客户帐户发现。
+No Customer Accounts found. Customer Accounts are identified based on \			'Master Type' value in account record.,没有客户帐户发现。客户帐户的基础上确定的帐户记录\&#39;硕士&#39;的值。
+No Item found with ,序号项目与发现
+No Items to Pack,无项目包
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.,没有请假审批。请指定&#39;休假审批的角色，以ATLEAST一个用户。
+No Permission,无权限
+No Permission to ,没有权限
+No Permissions set for this criteria.,没有权限设置此标准。
+No Report Loaded. Please use query-report/[Report Name] to run a report.,无报告加载。请使用查询报告/ [报告名称]运行报告。
+No Sitemap,没有网站地图
+No Supplier Accounts found. Supplier Accounts are identified based on \			'Master Type' value in account record.,没有供应商帐户发现。供应商账户的基础上确定的帐户记录\&#39;硕士&#39;的值。
+No User Properties found.,没有用户属性中找到。
+No accounting entries for following warehouses,没有对下述仓库会计分录
+No addresses created,没有发起任何地址
+No contacts created,没有发起任何接触
+No default BOM exists for item: ,没有默认的BOM存在项目：
+No further records,没有进一步的记录
+No of Requested SMS,无的请求短信
+No of Sent SMS,没有发送短信
+No of Visits,没有访问量的
+No one,没有人
+No permission to edit,无权限进行编辑
+No permission to write / remove.,没有权限写入/删除。
+No record found,没有资料
+No records tagged.,没有记录标记。
+No salary slip found for month: ,没有工资单上发现的一个月：
+None,无
+None: End of Workflow,无：结束的工作流程
+Not,不
+Not Active,不活跃
+Not Applicable,不适用
+Not Available,不可用
+Not Billed,不发单
+Not Delivered,未交付
+Not Found,未找到
+Not Linked to any record.,不链接到任何记录。
+Not Permitted,不允许
+Not Set,没有设置
+Not allowed entry in Warehouse,在仓库不准入境
+Not allowed for: ,不允许：
+Not equals,不等于
+Note,注
+Note User,注意用户
+Note is a free page where users can share documents / notes,Note是一款免费的网页，用户可以共享文件/笔记
+Note:,注意：
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.",注意：备份和文件不会从Dropbox的删除，你将不得不手动删除它们。
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.",注意：备份和文件不能从谷歌驱动器中删除，你将不得不手动删除它们。
+Note: Email will not be sent to disabled users,注：电子邮件将不会被发送到用户禁用
+"Note: For best results, images must be of the same size and width must be greater than height.",注意：为达到最佳效果，图象必须具有相同的尺寸和宽度必须大于高度。
+Note: Other permission rules may also apply,注：其它权限规则也可申请
+Note: maximum attachment size = 1mb,注：附件大小上限= 1MB
+Notes,笔记
+Notes:,注意事项：
+Nothing to show,没有显示
+Nothing to show for this selection,没什么可显示该选择
+Notice (days),通告（天）
+Notification Control,通知控制
+Notification Count,通知计数
+Notification Email Address,通知电子邮件地址
+Notify By Email,通知通过电子邮件
+Notify by Email on creation of automatic Material Request,在创建自动材料通知要求通过电子邮件
+Number Format,数字格式
+O+,O +
+O-,O-
+OPPT,OPPT
+Offer Date,要约日期
+Office,办公室
+Old Parent,老家长
+On,上
+On Net Total,在总净
+On Previous Row Amount,在上一行金额
+On Previous Row Total,在上一行共
+"Once you have set this, the users will only be able access documents with that property.",一旦你设置这个，用户将只能访问文档与该属性。
+Only Administrator allowed to create Query / Script Reports,只有管​​理员可以创建查询/报告的脚本
+Only Administrator can save a standard report. Please rename and save.,只有管​​理员可以保存一个标准的报告。请重新命名并保存。
+Only Allow Edit For,只允许编辑
+"Only Serial Nos with status ""Available"" can be delivered.",只有串行NOS与状态“可用”可交付使用。
+Only Stock Items are allowed for Stock Entry,只股票项目所允许的股票输入
+Only System Manager can create / edit reports,只有系统管理员可以创建/编辑报道
+Only leaf nodes are allowed in transaction,只有叶节点中允许交易
+Open,开
+Open Count,打开计数
+Open Production Orders,清生产订单
+Open Sans,开放三世
+Open Tickets,开放门票
+Opening,开盘
+Opening (Cr),开幕（CR）
+Opening (Dr),开幕（博士）
+Opening Accounting Entries,开幕会计分录
+Opening Accounts and Stock,开户和股票
+Opening Date,开幕日期
+Opening Date and Closing Date should be within same Fiscal Year,开幕日期和截止日期应在同一会计年度
+Opening Date should be before Closing Date,开幕日期应该是截止日期之前
+Opening Entry,开放报名
+Opening Qty,开放数量
+Opening Time,开放时间
+Opening Value,开度值
+Opening for a Job.,开放的工作。
+Operating Cost,营业成本
+Operation Description,操作说明
+Operation No,操作无
+Operation Time (mins),操作时间（分钟）
+Operations,操作
+Opportunity,机会
+Opportunity Date,日期机会
+Opportunity From,从机会
+Opportunity Item,项目的机会
+Opportunity Items,项目的机会
+Opportunity Lost,失去的机会
+Opportunity Type,机会型
+Optional. This setting will be used to filter in various transactions.,可选。此设置将被应用于各种交易进行过滤。
+Options,选项
+Options Help,选项​​帮助
+Order Type,订单类型
+Ordered,订购
+Ordered Items To Be Billed,订购物品被标榜
+Ordered Items To Be Delivered,订购项目交付
+Ordered Qty,订购数量
+"Ordered Qty: Quantity ordered for purchase, but not received.",订购数量：订购数量的报价，但没有收到。
+Ordered Quantity,订购数量
+Orders released for production.,发布生产订单。
+Org History,组织历史
+Org History Heading,组织历史航向
+Organization,组织
+Organization Name,组织名称
+Organization Profile,组织简介
+Original Message,原始消息
+Other,其他
+Other Details,其他详细信息
+Out,出
+Out Qty,输出数量
+Out Value,出价值
+Out of AMC,出资产管理公司
+Out of Warranty,超出保修期
+Outgoing,传出
+Outgoing Email Settings,传出电子邮件设置
+Outgoing Mail Server,发送邮件服务器
+Outgoing Mails,传出邮件
+Outstanding Amount,未偿还的金额
+Outstanding for Voucher ,杰出的优惠券
+Overhead,开销
+Overheads,费用
+Overview,概观
+Owned,资
+Owner,业主
+PAN Number,潘号码
+PF No.,PF号
+PF Number,PF数
+PI/2011/,PI/2011 /
+PIN,密码
+PL or BS,PL或BS
+PO,PO
+PO Date,PO日期
+PO No,订单号码
+POP3 Mail Server,POP3邮件服务器
+POP3 Mail Server (e.g. pop.gmail.com),POP3邮件服务器（如：pop.gmail.com）
+POP3 Mail Settings,POP3邮件设定
+POP3 mail server (e.g. pop.gmail.com),POP3邮件服务器（如：pop.gmail.com）
+POP3 server e.g. (pop.gmail.com),POP3服务器如（pop.gmail.com）
+POS Setting,POS机设置
+POS View,POS机查看
+PR Detail,PR详细
+PR Posting Date,公关寄发日期
+PRO,PRO
+PS,PS
+Package Item Details,包装物品详情
+Package Items,包装产品
+Package Weight Details,包装重量详情
+Packed Item,盒装产品
+Packing Details,装箱明细
+Packing Detials,包装往绩详情
+Packing List,包装清单
+Packing Slip,装箱单
+Packing Slip Item,装箱单项目
+Packing Slip Items,装箱单项目
+Packing Slip(s) Cancelled,装箱单（S）已注销
+Page,页面
+Page Background,页面背景
+Page Border,页面边框
+Page Break,分页符
+Page HTML,页面的HTML
+Page Headings,页面标题
+Page Links,网页链接
+Page Name,网页名称
+Page Name Field,页面名称字段
+Page Role,第角色
+Page Text,页面文字
+Page already exists,页面已经存在
+Page content,页面内容
+Page not found,找不到网页
+Page or Generator,页或生成
+Page to show on the website,页面显示在网站上
+"Page url name (auto-generated) (add "".html"")",页面的URL名称（自动生成）（加上“。的HTML”）
+Paid,支付
+Paid Amount,支付的金额
+Parameter,参数
+Parent Account,父帐户
+Parent Cost Center,父成本中心
+Parent Customer Group,母公司集团客户
+Parent Detail docname,家长可采用DocName细节
+Parent Item,父项目
+Parent Item Group,父项目组
+Parent Label,父标签
+Parent Sales Person,母公司销售人员
+Parent Territory,家长领地
+Parent is required.,家长是必需的。
+Parenttype,Parenttype
+Partially Billed,部分帐单
+Partially Completed,部分完成
+Partially Delivered,部分交付
+Participants,参与者
+Partly Billed,天色帐单
+Partly Delivered,部分交付
+Partner Target Detail,合作伙伴目标详细信息
+Partner Type,合作伙伴类型
+Partner's Website,合作伙伴的网站
+Passive,被动
+Passport Number,护照号码
+Password,密码
+Password Expires in (days),在（天）密码过期
+Password Updated,密码更新
+Patch,补丁
+Patch Log,补丁日志
+Pay To / Recd From,支付/ RECD从
+Payables,应付账款
+Payables Group,集团的应付款项
+Payment Collection With Ageing,代收货款随着老龄化
+Payment Days,金天
+Payment Due Date,付款到期日
+Payment Entries,付款项
+Payment Entry has been modified after you pulled it. 			Please pull it again.,付款输入已修改你拉后。请重新拉。
+Payment Made With Ageing,支付MADE WITH老龄化
+Payment Reconciliation,付款对账
+Payment cannot be made for empty cart,付款方式不能为空购物车制造
+Payment to Invoice Matching Tool,付款发票匹配工具
+Payment to Invoice Matching Tool Detail,付款发票匹配工具详细介绍
+Payments,付款
+Payments Made,支付的款项
+Payments Received,收到付款
+Payments made during the digest period,在消化期间支付的款项
+Payments received during the digest period,在消化期间收到付款
+Payroll Settings,薪资设置
+Payroll Setup,薪资设定
+Pending,有待
+Pending Amount,待审核金额
+Pending Review,待审核
+Pending SO Items For Purchase Request,待处理的SO项目对于采购申请
+Percent,百分之
+Percent Complete,完成百分比
+Percentage Allocation,百分比分配
+Percentage Allocation should be equal to ,百分比分配应等于
+Percentage variation in quantity to be allowed while receiving or delivering this item.,同时接收或传送资料被允许在数量上的变化百分比。
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,百分比你被允许接收或传递更多针对订购的数量。例如：如果您订购100个单位。和你的津贴是10％，那么你被允许接收110个单位。
+Performance appraisal.,绩效考核。
+Period,期
+Period Closing Voucher,期末券
+Periodicity,周期性
+Perm Level,权限等级
+Permanent Address,永久地址
+Permanent Address Is,永久地址
+Permission,允许
+Permission Level,权限级别
+Permission Levels,权限级别
+Permission Manager,权限管理
+Permission Rules,权限规则
+Permissions,权限
+Permissions Settings,权限设置
+Permissions are automatically translated to Standard Reports and Searches,权限会自动转换为标准报表和搜索
+"Permissions are set on Roles and Document Types (called DocTypes) by restricting read, edit, make new, submit, cancel, amend and report rights.",权限是通过限制读取，编辑，做出新的，提交，取消，修改和报告权的角色和文件类型（称为文档类型）设置。
+Permissions at higher levels are 'Field Level' permissions. All Fields have a 'Permission Level' set against them and the rules defined at that permissions apply to the field. This is useful incase you want to hide or make certain field read-only.,在更高级别的权限是“现场级”的权限。所有栏位有一个“权限级别”设置对他们和那个权限应用到该字段中定义的规则。柜面你想要隐藏或使某些领域只读这是有用的。
+"Permissions at level 0 are 'Document Level' permissions, i.e. they are primary for access to the document.",在0级权限是“文件级”的权限，也就是说，它们是主要用于访问文件。
+Permissions translate to Users based on what Role they are assigned,权限转化为基于什么样的角色，他们被分配用户
+Person,人
+Personal,个人
+Personal Details,个人资料
+Personal Email,个人电子邮件
+Phone,电话
+Phone No,电话号码
+Phone No.,电话号码
+Pick Columns,摘列
+Pincode,PIN代码
+Place of Issue,签发地点
+Plan for maintenance visits.,规划维护访问。
+Planned Qty,计划数量
+"Planned Qty: Quantity, for which, Production Order has been raised,",计划数量：数量，为此，生产订单已经提高，
+Planned Quantity,计划数量
+Plant,厂
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,请输入缩写或简称恰当，因为它会被添加为后缀的所有帐户头。
+Please Select Company under which you want to create account head,请选择公司要在其下创建账户头
+Please attach a file first.,请附上文件第一。
+Please attach a file or set a URL,请附上一个文件或设置一个URL
+Please change the value,请更改该值
+Please check,请检查
+Please create new account from Chart of Accounts.,请从科目表创建新帐户。
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,请不要用于客户及供应商建立的帐户（总帐）。他们直接从客户/供应商创造的主人。
+Please enter Cost Center,请输入成本中心
+Please enter Default Unit of Measure,请输入缺省的计量单位
+Please enter Delivery Note No or Sales Invoice No to proceed,请输入送货单号或销售发票号码进行
+Please enter Employee Id of this sales parson,请输入本销售牧师的员工标识
+Please enter Expense Account,请输入您的费用帐户
+Please enter Item Code to get batch no,请输入产品编号，以获得批号
+Please enter Item Code.,请输入产品编号。
+Please enter Production Item first,请先输入生产项目
+Please enter Purchase Receipt No to proceed,请输入外购入库单没有进行
+Please enter Reserved Warehouse for item ,请输入预留仓库的项目
+Please enter account group under which account \					for warehouse ,请输入下占\仓库帐户组
+Please enter company first,请先输入公司
+Please enter company name first,请先输入公司名称
+Please install dropbox python module,请安装Dropbox的Python模块
+Please make sure that there are no empty columns in the file.,请确保没有空列在文件中。
+Please mention default value for ',请提及默认值&#39;
+Please reduce qty.,请减少数量。
+Please refresh to get the latest document.,请刷新以获得最新的文档。
+Please save the Newsletter before sending.,请发送之前保存的通讯。
+Please select Bank Account,请选择银行帐户
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,请选择结转，如果你还需要包括上一会计年度的资产负债叶本财年
+Please select Date on which you want to run the report,请选择您要运行报告日期
+Please select Price List,请选择价格表
+Please select Time Logs.,请选择时间记录。
+Please select a,请选择一个
+Please select a csv file,请选择一个csv文件
+Please select a file or url,请选择一个文件或URL
+Please select a service item or change the order type to Sales.,请选择服务项目，或更改订单类型销售。
+Please select a sub-contracted item or do not sub-contract the transaction.,请选择一个分包项目或不分包交易。
+Please select a valid csv file with data.,请选择与数据的有效csv文件。
+"Please select an ""Image"" first",请选择“图像”第一
+Please select month and year,请选择年份和月份
+Please select options and click on Create,请选择选项并点击Create
+Please select the document type first,请选择文档类型第一
+Please select: ,请选择：
+Please set Dropbox access keys in,请设置Dropbox的访问键
+Please set Google Drive access keys in,请设置谷歌驱动器的访问键
+Please setup Employee Naming System in Human Resource > HR Settings,请设置员工命名系统中的人力资源&gt;人力资源设置
+Please setup your chart of accounts before you start Accounting Entries,请设置您的会计科目表你开始会计分录前
+Please specify,请注明
+Please specify Company,请注明公司
+Please specify Company to proceed,请注明公司进行
+Please specify Default Currency in Company Master \			and Global Defaults,请在公司主\和全球默认指定默认货币
+Please specify a,请指定一个
+Please specify a Price List which is valid for Territory,请指定一个价格表，有效期为领地
+Please specify a valid,请指定一个有效
+Please specify a valid 'From Case No.',请指定一个有效的“从案号”
+Please specify currency in Company,请公司指定的货币
+Please submit to update Leave Balance.,请提交更新休假余额。
+Please write something,请写东西
+Please write something in subject and message!,请写东西的主题和消息！
+Plot,情节
+Plot By,阴谋
+Plugin,插件
+Point of Sale,销售点
+Point-of-Sale Setting,销售点的设置
+Post Graduate,研究生
+Post Publicly,公开发布
+Post Topic,发表帖子
+Postal,邮政
+Posting Date,发布日期
+Posting Date Time cannot be before,发文日期时间不能前
+Posting Time,发布时间
+Posts,帖子
+Potential Sales Deal,潜在的销售新政
+Potential opportunities for selling.,潜在的机会卖。
+"Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3",精度浮点字段（数量，折扣，百分比等）。花车将四舍五入到指定的小数。默认值= 3
+Preferred Billing Address,首选帐单地址
+Preferred Shipping Address,首选送货地址
+Prefix,字首
+Present,现
+Prevdoc DocType,Prevdoc的DocType
+Prevdoc Doctype,Prevdoc文档类型
+Previous Work Experience,以前的工作经验
+Price List,价格表
+Price List Country,价格表国家
+Price List Currency,价格表货币
+Price List Exchange Rate,价目表汇率
+Price List Master,价格表主
+Price List Name,价格列表名称
+Price List Rate,价格列表费率
+Price List Rate (Company Currency),价格列表费率（公司货币）
+Primary,初级
+Print,打印
+Print Format,打印格式
+Print Format Style,打印格式样式
+Print Format Type,打印格式类型
+Print Heading,打印标题
+Print Hide,打印隐藏
+Print Width,打印宽度
+Print Without Amount,打印量不
+Print...,打印...
+Printing,印花
+Priority,优先
+Private,私人
+Process Payroll,处理工资
+Produced,生产
+Produced Quantity,生产的产品数量
+Product Enquiry,产品查询
+Production Order,生产订单
+Production Order must be submitted,生产订单必须提交
+Production Orders,生产订单
+Production Orders in Progress,在建生产订单
+Production Plan Item,生产计划项目
+Production Plan Items,生产计划项目
+Production Plan Sales Order,生产计划销售订单
+Production Plan Sales Orders,生产计划销售订单
+Production Planning (MRP),生产计划（MRP）
+Production Planning Tool,生产规划工具
+Products or Services You Buy,产品或服务您选购
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.",产品将重量年龄在默认搜索排序。更多的重量，年龄，更高的产品会出现在列表中。
+Profile,轮廓
+Profile Defaults,简介默认
+Profile Represents a User in the system.,资料表示系统中的一个用户。
+Profile of a Blogger,是Blogger的个人资料
+Project,项目
+Project Costing,项目成本核算
+Project Details,项目详情
+Project Milestone,项目里程碑
+Project Milestones,项目里程碑
+Project Name,项目名称
+Project Start Date,项目开始日期
+Project Type,项目类型
+Project Value,项目价值
+Project activity / task.,项目活动/任务。
+Project master.,项目主。
+Project will get saved and will be searchable with project name given,项目将得到保存，并会搜索与项目名称定
+Project wise Stock Tracking,项目明智的库存跟踪
+Project wise Stock Tracking ,项目明智的库存跟踪
+Projected,预计
+Projected Qty,预计数量
+Projects,项目
+Prompt for Email on Submission of,提示电子邮件的提交
+Properties,属性
+Property,属性
+Property Setter,属性setter
+Property Setter overrides a standard DocType or Field property,属性setter覆盖一个标准的DocType或Field属性
+Property Type,物业类型
+Provide email id registered in company,提供的电子邮件ID在公司注册
+Public,公
+Published,发布时间
+Published On,发表于
+Pull Emails from the Inbox and attach them as Communication records (for known contacts).,从收件箱拉电子邮件，并将它们附加的通信记录（称为触点）。
+Pull Payment Entries,拉付款项
+Pull sales orders (pending to deliver) based on the above criteria,基于上述标准拉销售订单（待定提供）
+Purchase,采购
+Purchase / Manufacture Details,采购/制造详细信息
+Purchase Analytics,购买Analytics（分析）
+Purchase Common,购买普通
+Purchase Details,购买详情
+Purchase Discounts,购买折扣
+Purchase In Transit,购买运输
+Purchase Invoice,购买发票
+Purchase Invoice Advance,购买发票提前
+Purchase Invoice Advances,采购发票进展
+Purchase Invoice Item,采购发票项目
+Purchase Invoice Trends,购买发票趋势
+Purchase Order,采购订单
+Purchase Order Date,采购订单日期
+Purchase Order Item,采购订单项目
+Purchase Order Item No,采购订单编号
+Purchase Order Item Supplied,采购订单项目提供
+Purchase Order Items,采购订单项目
+Purchase Order Items Supplied,采购订单项目提供
+Purchase Order Items To Be Billed,采购订单的项目被标榜
+Purchase Order Items To Be Received,采购订单项目可收
+Purchase Order Message,采购订单的消息
+Purchase Order Required,购货订单要求
+Purchase Order Trends,采购订单趋势
+Purchase Orders given to Suppliers.,购买给供应商的订单。
+Purchase Receipt,外购入库单
+Purchase Receipt Item,采购入库项目
+Purchase Receipt Item Supplied,采购入库项目提供
+Purchase Receipt Item Supplieds,采购入库项目Supplieds
+Purchase Receipt Items,采购入库项目
+Purchase Receipt Message,外购入库单信息
+Purchase Receipt No,购买收据号码
+Purchase Receipt Required,外购入库单要求
+Purchase Receipt Trends,购买收据趋势
+Purchase Register,购买注册
+Purchase Return,采购退货
+Purchase Returned,进货退出
+Purchase Taxes and Charges,购置税和费
+Purchase Taxes and Charges Master,购置税及收费硕士
+Purpose,目的
+Purpose must be one of ,目的必须是一个
+Python Module Name,Python的模块名称
+QA Inspection,质素保证视学
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,数量
+Qty Consumed Per Unit,数量消耗每单位
+Qty To Manufacture,数量制造
+Qty as per Stock UOM,数量按库存计量单位
+Qty to Deliver,数量交付
+Qty to Order,数量订购
+Qty to Receive,数量来接收
+Qty to Transfer,数量转移到
+Qualification,合格
+Quality,质量
+Quality Inspection,质量检验
+Quality Inspection Parameters,质量检验参数
+Quality Inspection Reading,质量检验阅读
+Quality Inspection Readings,质量检验读物
+Quantity,数量
+Quantity Requested for Purchase,需求数量的购买
+Quantity and Rate,数量和速率
+Quantity and Warehouse,数量和仓库
+Quantity cannot be a fraction.,量不能是一小部分。
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,制造/从原材料数量给予重新包装后获得的项目数量
+Quantity should be equal to Manufacturing Quantity. ,数量应等于生产数量。
+Quarter,季
+Quarterly,季刊
+Query,询问
+Query Options,查询选项
+Query Report,查询报表
+Query must be a SELECT,查询必须是一个SELECT
+Quick Help,快速帮助
+Quick Help for Setting Permissions,快速帮助设置权限
+Quick Help for User Properties,快速帮助用户属性
+Quotation,行情
+Quotation Date,报价日期
+Quotation Item,产品报价
+Quotation Items,报价产品
+Quotation Lost Reason,报价遗失原因
+Quotation Message,报价信息
+Quotation Series,系列报价
+Quotation To,报价要
+Quotation Trend,行情走势
+Quotation Trends,报价趋势
+Quotation is cancelled.,报价将被取消。
+Quotations received from Suppliers.,从供应商收到的报价。
+Quotes to Leads or Customers.,行情到引线或客户。
+Raise Material Request when stock reaches re-order level,提高材料时，申请股票达到再订购水平
+Raised By,提出
+Raised By (Email),提出（电子邮件）
+Random,随机
+Range,范围
+Rate,率
+Rate ,率
+Rate (Company Currency),率（公司货币）
+Rate Of Materials Based On,率材料的基础上
+Rate and Amount,率及金额
+Rate at which Customer Currency is converted to customer's base currency,速率客户货币转换成客户的基础货币
+Rate at which Price list currency is converted to company's base currency,速率价目表货币转换为公司的基础货币
+Rate at which Price list currency is converted to customer's base currency,速率价目表货币转换成客户的基础货币
+Rate at which customer's currency is converted to company's base currency,速率客户的货币转换为公司的基础货币
+Rate at which supplier's currency is converted to company's base currency,速率供应商的货币转换为公司的基础货币
+Rate at which this tax is applied,速率此税适用
+Raw Material Item Code,原料产品编号
+Raw Materials Supplied,提供原料
+Raw Materials Supplied Cost,原料提供成本
+Re-Order Level,再订购水平
+Re-Order Qty,重新订购数量
+Re-order,重新排序
+Re-order Level,再订购水平
+Re-order Qty,再订购数量
+Read,阅读
+Read Only,只读
+Reading 1,阅读1
+Reading 10,阅读10
+Reading 2,阅读2
+Reading 3,阅读3
+Reading 4,4阅读
+Reading 5,阅读5
+Reading 6,6阅读
+Reading 7,7阅读
+Reading 8,阅读8
+Reading 9,9阅读
+Reason,原因
+Reason for Leaving,离职原因
+Reason for Resignation,原因辞职
+Reason for losing,原因丢失
+Recd Quantity,RECD数量
+Receivable / Payable account will be identified based on the field Master Type,应收/应付帐款的帐户将基于字段硕士识别
+Receivables,应收账款
+Receivables / Payables,应收/应付账款
+Receivables Group,应收账款集团
+Received,收到
+Received Date,收稿日期
+Received Items To Be Billed,收到的项目要被收取
+Received Qty,收到数量
+Received and Accepted,收到并接受
+Receiver List,接收器列表
+Receiver Parameter,接收机参数
+Recipient,接受者
+Recipients,受助人
+Reconciliation Data,数据对账
+Reconciliation HTML,和解的HTML
+Reconciliation JSON,JSON对账
+Record item movement.,记录项目的运动。
+Recurring Id,经常性标识
+Recurring Invoice,经常性发票
+Recurring Type,经常性类型
+Reduce Deduction for Leave Without Pay (LWP),减少扣除停薪留职（LWP）
+Reduce Earning for Leave Without Pay (LWP),降低盈利停薪留职（LWP）
+Ref Code,参考代码
+Ref DocType,参考的DocType
+Ref Name,楼盘名称
+Ref SQ,参考SQ
+Ref Type,楼盘类型
+Reference,参考
+Reference Date,参考日期
+Reference DocName,可采用DocName参考
+Reference DocType,参考的DocType
+Reference Name,参考名称
+Reference Number,参考号码
+Reference Type,参考类型
+Refresh,刷新
+Refreshing....,清爽....
+Registered but disabled.,注册但被禁用。
+Registration Details,报名详情
+Registration Details Emailed.,报名资料通过电子邮件发送。
+Registration Info,注册信息
+Rejected,拒绝
+Rejected Quantity,拒绝数量
+Rejected Serial No,拒绝序列号
+Rejected Warehouse,拒绝仓库
+Rejected Warehouse is mandatory against regected item,拒绝仓库是必须反对regected项目
+Relation,关系
+Relieving Date,解除日期
+Relieving Date of employee is ,减轻员工的日期是
+Remark,备注
+Remarks,备注
+Remove Bookmark,删除书签
+Rename,重命名
+Rename Log,重命名日志
+Rename Tool,重命名工具
+Rename...,重命名...
+Rent Cost,租金成本
+Rent per hour,每小时租
+Rented,租
+Repeat On,重复开
+Repeat Till,重复直到
+Repeat on Day of Month,重复上月的日
+Repeat this Event,重复此事件
+Replace,更换
+Replace Item / BOM in all BOMs,更换项目/物料清单中的所有材料明细表
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM",在它被使用的所有其他的BOM替换特定的物料清单。它会取代旧的BOM链接，更新成本，并重新生成“物料清单爆炸物品”表按照新的物料清单
+Replied,回答
+Report,报告
+Report Builder,报表生成器
+Report Builder reports are managed directly by the report builder. Nothing to do.,报表生成器报表直接由报表生成器来管理。无事可做。
+Report Date,报告日期
+Report Hide,报告隐藏
+Report Name,报告名称
+Report Type,报告类型
+Report issues at,在报告问题
+Report was not saved (there were errors),报告没有被保存（有错误）
+Reports,报告
+Reports to,报告以
+Represents the states allowed in one document and role assigned to change the state.,代表一个文档，并分配到改变国家角色允许的状态。
+Reqd,REQD
+Reqd By Date,REQD按日期
+Request Type,请求类型
+Request for Information,索取资料
+Request for purchase.,请求您的报价。
+Requested,要求
+Requested For,对于要求
+Requested Items To Be Ordered,要求项目要订购
+Requested Items To Be Transferred,要求要传输的项目
+Requested Qty,请求数量
+"Requested Qty: Quantity requested for purchase, but not ordered.",要求的数量：数量要求的报价，但没有下令。
+Requests for items.,请求的项目。
+Required By,必选
+Required Date,所需时间
+Required Qty,所需数量
+Required only for sample item.,只对样品项目所需。
+Required raw materials issued to the supplier for producing a sub - contracted item.,发给供应商，生产子所需的原材料 - 承包项目。
+Reseller,经销商
+Reserved,保留的
+Reserved Qty,保留数量
+"Reserved Qty: Quantity ordered for sale, but not delivered.",版权所有数量：订购数量出售，但未交付。
+Reserved Quantity,保留数量
+Reserved Warehouse,保留仓库
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,在销售订单/成品仓库保留仓库
+Reserved Warehouse is missing in Sales Order,保留仓库在销售订单失踪
+Reset Filters,重设过滤器
+Reset Password Key,重设密码钥匙
+Resignation Letter Date,辞职信日期
+Resolution,决议
+Resolution Date,决议日期
+Resolution Details,详细解析
+Resolved By,议决
+Restrict IP,限制IP
+Restrict user from this IP address only. Multiple IP addresses can be added by separating with commas. Also accepts partial IP addresses like (111.111.111),仅此IP地址限制用户。多个IP地址，可以通过用逗号分隔的补充。也接受像（111.111.111）部分的IP地址
+Restricting By User,通过限制用户
+Retail,零售
+Retailer,零售商
+Review Date,评论日期
+Rgt,RGT
+Right,右边
+Role,角色
+Role Allowed to edit frozen stock,角色可以编辑冻结股票
+Role Name,角色名称
+Role that is allowed to submit transactions that exceed credit limits set.,作用是允许提交超过设定信用额度交易的。
+Roles,角色
+Roles Assigned,角色分配
+Roles Assigned To User,角色分配给用户
+Roles HTML,角色的HTML
+Root ,根
+Root cannot have a parent cost center,根本不能有一个父成本中心
+Rounded Total,总圆角
+Rounded Total (Company Currency),圆润的总计（公司货币）
+Row,排
+Row ,排
+Row #,行＃
+Row # ,行＃
+Rules defining transition of state in the workflow.,规则定义的工作流状态的过渡。
+"Rules for how states are transitions, like next state and which role is allowed to change state etc.",规则的状态是如何过渡，就像下一个状态以及作用是允许改变状态等。
+Rules to calculate shipping amount for a sale,规则来计算销售运输量
+S.O. No.,SO号
+SMS,短信
+SMS Center,短信中心
+SMS Control,短信控制
+SMS Gateway URL,短信网关的URL
+SMS Log,短信日志
+SMS Parameter,短信参数
+SMS Sender Name,短信发送者名称
+SMS Settings,短信设置
+SMTP Server (e.g. smtp.gmail.com),SMTP服务器（如smtp.gmail.com）
+SO,SO
+SO Date,SO日期
+SO Pending Qty,SO待定数量
+SO Qty,SO数量
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,STE
+SUP,SUP
+SUPP,人联党
+SUPP/10-11/,SUPP/10-11 /
+Salary,薪水
+Salary Information,薪资信息
+Salary Manager,薪资管理
+Salary Mode,薪酬模式
+Salary Slip,工资单
+Salary Slip Deduction,工资单上扣除
+Salary Slip Earning,工资单盈利
+Salary Structure,薪酬结构
+Salary Structure Deduction,薪酬结构演绎
+Salary Structure Earning,薪酬结构盈利
+Salary Structure Earnings,薪酬结构盈利
+Salary breakup based on Earning and Deduction.,工资分手基于盈利和演绎。
+Salary components.,工资组成部分。
+Sales,销售
+Sales Analytics,销售分析
+Sales BOM,销售BOM
+Sales BOM Help,销售BOM帮助
+Sales BOM Item,销售BOM项目
+Sales BOM Items,销售BOM项目
+Sales Details,销售信息
+Sales Discounts,销售折扣
+Sales Email Settings,销售电子邮件设置
+Sales Extras,额外销售
+Sales Funnel,销售漏斗
+Sales Invoice,销售发票
+Sales Invoice Advance,销售发票提前
+Sales Invoice Item,销售发票项目
+Sales Invoice Items,销售发票项目
+Sales Invoice Message,销售发票信息
+Sales Invoice No,销售发票号码
+Sales Invoice Trends,销售发票趋势
+Sales Order,销售订单
+Sales Order Date,销售订单日期
+Sales Order Item,销售订单项目
+Sales Order Items,销售订单项目
+Sales Order Message,销售订单信息
+Sales Order No,销售订单号
+Sales Order Required,销售订单所需
+Sales Order Trend,销售订单趋势
+Sales Order Trends,销售订单趋势
+Sales Partner,销售合作伙伴
+Sales Partner Name,销售合作伙伴名称
+Sales Partner Target,销售目标的合作伙伴
+Sales Partners Commission,销售合作伙伴委员会
+Sales Person,销售人员
+Sales Person Incharge,销售人员Incharge
+Sales Person Name,销售人员的姓名
+Sales Person Target Variance (Item Group-Wise),销售人员目标方差（项目组明智）
+Sales Person Target Variance Item Group-Wise,销售人员目标差异项目组，智者
+Sales Person Targets,销售人员目标
+Sales Person-wise Transaction Summary,销售人员明智的交易汇总
+Sales Register,销售登记
+Sales Return,销售退货
+Sales Returned,销售退回
+Sales Taxes and Charges,销售税金及费用
+Sales Taxes and Charges Master,销售税金及收费硕士
+Sales Team,销售团队
+Sales Team Details,销售团队详细
+Sales Team1,销售TEAM1
+Sales and Purchase,买卖
+Sales campaigns,销售活动
+Sales persons and targets,销售人员和目标
+Sales taxes template.,销售税模板。
+Sales territories.,销售地区。
+Salutation,招呼
+Same Serial No,同样的序列号
+Same file has already been attached to the record,相同的文件已经被连接到记录
+Sample Size,样本大小
+Sanctioned Amount,制裁金额
+Saturday,星期六
+Save,节省
+Schedule,时间表
+Schedule Date,时间表日期
+Schedule Details,计划详细信息
+Scheduled,预定
+Scheduled Date,预定日期
+Scheduler Log,调度日志
+School/University,学校/大学
+Score (0-5),得分（0-5）
+Score Earned,获得得分
+Scrap %,废钢％
+Script,脚本
+Script Report,脚本报告
+Script Type,脚本类型
+Script to attach to all web pages.,脚本附加到所有的网页。
+Search,搜索
+Search Fields,搜索字段
+Seasonality for setting budgets.,季节性设定预算。
+Section Break,分节符
+Security Settings,安全设置
+"See ""Rate Of Materials Based On"" in Costing Section",见“率材料基于”在成本核算节
+Select,选择
+"Select ""Yes"" for sub - contracting items",选择“是”子 - 承包项目
+"Select ""Yes"" if this item is used for some internal purpose in your company.",选择“Yes”如果此项目被用于一些内部的目的在你的公司。
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.",选择“是”，如果此项目表示类似的培训，设计，咨询等一些工作
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",选择“是”，如果你保持这个项目的股票在你的库存。
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",选择“是”，如果您对供应原料给供应商，制造资料。
+Select All,全选
+Select Attachments,选择附件
+Select Budget Distribution to unevenly distribute targets across months.,选择预算分配跨个月呈不均衡分布的目标。
+"Select Budget Distribution, if you want to track based on seasonality.",选择预算分配，如果你要根据季节来跟踪。
+Select Digest Content,选择精华内容
+Select DocType,选择的DocType
+Select Document Type,选择文件类型
+Select Document Type or Role to start.,选择文件类型或角色开始。
+Select Items,选择项目
+Select Module,选择模块
+Select Print Format,选择打印格式
+Select Purchase Receipts,选择外购入库单
+Select Report Name,选择报告名称
+Select Role,选择角色
+Select Sales Orders,选择销售订单
+Select Sales Orders from which you want to create Production Orders.,要从创建生产订单选择销售订单。
+Select Time Logs and Submit to create a new Sales Invoice.,选择时间日志和提交创建一个新的销售发票。
+Select Transaction,选择交易
+Select Type,选择类型
+Select User or Property to start.,选择用户或物业开始。
+Select account head of the bank where cheque was deposited.,选取支票存入该银行账户的头。
+Select an image of approx width 150px with a transparent background for best results.,选择约宽150像素的透明背景以获得最佳效果的图像。
+Select company name first.,先选择公司名称。
+Select dates to create a new ,选择日期以创建一个新的
+Select or drag across time slots to create a new event.,选择或拖动整个时隙，以创建一个新的事件。
+"Select target = ""_blank"" to open in a new page.",选择目标=“_blank”在新页面中打开。
+Select template from which you want to get the Goals,选择您想要得到的目标模板
+Select the Employee for whom you are creating the Appraisal.,选择要为其创建的考核员工。
+Select the label after which you want to insert new field.,之后要插入新字段中选择的标签。
+Select the period when the invoice will be generated automatically,当选择发票会自动生成期间
+Select the relevant company name if you have multiple companies,选择相关的公司名称，如果您有多个公司
+Select the relevant company name if you have multiple companies.,如果您有多个公司选择相关的公司名称。
+Select who you want to send this newsletter to,选择您想要这份电子报发送给谁
+Select your home country and check the timezone and currency.,选择您的国家和检查时区和货币。
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.",选择“是”将允许这个项目出现在采购订单，采购入库单。
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note",选择“是”将允许这资料图在销售订单，送货单
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",选择“是”将允许您创建物料清单，显示原材料和产生制造这个项目的运营成本。
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",选择“是”将允许你做一个生产订单为这个项目。
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",选择“Yes”将提供一个独特的身份，以这个项目的每个实体可在序列号主观看。
+Selling,销售
+Selling Settings,销售设置
+Send,发送
+Send As Email,发送电​​子邮件
+Send Autoreply,发送自动回复
+Send Bulk SMS to Leads / Contacts,发送大量短信信息/联系我们
+Send Email,发送电​​子邮件
+Send From,从发送
+Send Me A Copy,给我发一份
+Send Notifications To,发送通知给
+Send Now,立即发送
+Send Print in Body and Attachment,发送打印的正文和附件
+Send SMS,发送短信
+Send To,发送到
+Send To Type,发送到输入
+Send an email reminder in the morning,发送电​​子邮件提醒，早上
+Send automatic emails to Contacts on Submitting transactions.,自动发送电子邮件到上提交事务联系。
+Send enquiries to this email address,发送咨询到这个邮箱地址
+Send mass SMS to your contacts,发送群发短信到您的联系人
+Send regular summary reports via Email.,通过电子邮件发送定期汇总报告。
+Send to this list,发送到这个列表
+Sender,寄件人
+Sender Name,发件人名称
+Sent,发送
+Sent Mail,发送邮件
+Sent On,在发送
+Sent Quotation,发送报价
+Sent or Received,发送或接收
+Separate production order will be created for each finished good item.,独立的生产订单将每个成品项目被创建。
+Serial No,序列号
+Serial No / Batch,序列号/批次
+Serial No Details,序列号信息
+Serial No Service Contract Expiry,序号服务合同到​​期
+Serial No Status,序列号状态
+Serial No Warranty Expiry,序列号保修到期
+Serial No created,创建序列号
+Serial No does not belong to Item,序列号不属于项目
+Serial No must exist to transfer out.,序列号必须存在转让出去。
+Serial No qty cannot be a fraction,序号数量不能是分数
+Serial No status must be 'Available' to Deliver,序列号状态必须为“有空”提供
+Serial Nos do not match with qty,序列号不匹配数量
+Serial Number Series,序列号系列
+Serialized Item: ',序列化的项目：&#39;
+Series,系列
+Series List for this Transaction,系列对表本交易
+Server,服务器
+Service Address,服务地址
+Services,服务
+Session Expired. Logging you out,会话过期。您的退出
+Session Expires in (time),会话过期的（时间）
+Session Expiry,会话过期
+Session Expiry in Hours e.g. 06:00,会话过期的时间，例如06:00
+Set Banner from Image,从图像设置横幅
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,设置这个领地项目组间的预算。您还可以包括季节性通过设置分发。
+Set Link,设置链接
+Set Login and Password if authentication is required.,如果需要身份验证设置登录名和密码。
+Set Password,设置密码
+Set Value,设定值
+Set as Default,设置为默认
+Set as Lost,设为失落
+Set prefix for numbering series on your transactions,为你的交易编号序列设置的前缀
+Set targets Item Group-wise for this Sales Person.,设定目标项目组间的这种销售人员。
+"Set your background color, font and image (tiled)",设置背景颜色，字体和图像（平铺）
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.",这里设置你的外发邮件的SMTP设置。所有生成的系统通知，电子邮件会从这个邮件服务器。如果你不知道，离开这个空白使用ERPNext服务器（邮件仍然会从您的电子邮件ID发送）或联系您的电子邮件提供商。
+Setting Account Type helps in selecting this Account in transactions.,设置帐户类型有助于在交易中选择该帐户。
+Setting up...,设置...
+Settings,设置
+Settings for Accounts,设置帐户
+Settings for Buying Module,设置购买模块
+Settings for Contact Us Page,设置联系我们页面
+Settings for Selling Module,设置销售模块
+Settings for Stock Module,设置库存模块
+Settings for the About Us Page,设置关于我们页面
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",设置从一个邮箱，例如“jobs@example.com”解压求职者
+Setup,设置
+Setup Already Complete!!,安装已经完成！
+Setup Complete!,设置完成！
+Setup Completed,安装完成
+Setup Series,设置系列
+Setup of Shopping Cart.,设置的购物车。
+Setup to pull emails from support email account,安装程序从支持的电子邮件帐户的邮件拉
+Share,共享
+Share With,分享
+Shipments to customers.,发货给客户。
+Shipping,航运
+Shipping Account,送货账户
+Shipping Address,送货地址
+Shipping Amount,航运量
+Shipping Rule,送货规则
+Shipping Rule Condition,送货规则条件
+Shipping Rule Conditions,送货规则条件
+Shipping Rule Label,送货规则标签
+Shipping Rules,送货规则
+Shop,店
+Shopping Cart,购物车
+Shopping Cart Price List,购物车价格表
+Shopping Cart Price Lists,购物车价目表
+Shopping Cart Settings,购物车设置
+Shopping Cart Shipping Rule,购物车运费规则
+Shopping Cart Shipping Rules,购物车运费规则
+Shopping Cart Taxes and Charges Master,购物车税收和收费硕士
+Shopping Cart Taxes and Charges Masters,购物车税收和收费硕士
+Short Bio,个人简介
+Short Name,简称
+Short biography for website and other publications.,短的传记的网站和其他出版物。
+Shortcut,捷径
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",显示“有货”或“无货”的基础上股票在这个仓库有。
+Show / Hide Features,显示/隐藏功能
+Show / Hide Modules,显示/隐藏模块
+Show Breadcrumbs,显示面包屑
+Show Details,显示详细信息
+Show In Website,显示在网站
+Show Print First,显示打印首
+Show Table of Contents,显示内容表格
+Show Tags,显示标签
+Show Title,显示标题
+Show a slideshow at the top of the page,显示幻灯片在页面顶部
+Show in Website,显示在网站
+Show rows with zero values,秀行与零值
+Show this slideshow at the top of the page,这显示在幻灯片页面顶部
+Showing only for,仅显示为
+Signature,签名
+Signature to be appended at the end of every email,签名在每封电子邮件的末尾追加
+Single,单
+Single Types have only one record no tables associated. Values are stored in tabSingles,单一类型只有一个记录关联的表。值被存储在tabSingles
+Single unit of an Item.,该产品的一个单元。
+Sit tight while your system is being setup. This may take a few moments.,稳坐在您的系统正在安装。这可能需要一些时间。
+Sitemap Domain,网站导航域名
+Slideshow,连续播放
+Slideshow Items,幻灯片项目
+Slideshow Name,幻灯片放映名称
+Slideshow like display for the website,像幻灯片显示的网站
+Small Text,小文
+Solid background color (default light gray),纯色背景色（默认浅灰色）
+Sorry we were unable to find what you were looking for.,对不起，我们无法找到您所期待的。
+Sorry you are not permitted to view this page.,对不起，您没有权限浏览这个页面。
+"Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency.",对不起！你不能改变公司的预设货币，因为有现有的交易反对。您将需要取消的交易，如果你想改变默认货币。
+"Sorry, Serial Nos cannot be merged",对不起，序列号无法合并
+"Sorry, companies cannot be merged",对不起，企业不能合并
+Sort By,排序
+Source,源
+Source Warehouse,源代码仓库
+Source and Target Warehouse cannot be same,源和目标仓库不能相同
+Spartan,斯巴达
+Special Characters,特殊字符
+Special Characters ,特殊字符
+Specification Details,详细规格
+Specify Exchange Rate to convert one currency into another,指定的汇率将一种货币兑换成另一种
+"Specify a list of Territories, for which, this Price List is valid",指定领土的名单，为此，本价格表是有效的
+"Specify a list of Territories, for which, this Shipping Rule is valid",新界指定一个列表，其中，该运费规则是有效的
+"Specify a list of Territories, for which, this Taxes Master is valid",新界指定一个列表，其中，该税金法师是有效的
+Specify conditions to calculate shipping amount,指定条件计算运输量
+Split Delivery Note into packages.,分裂送货单成包。
+Standard,标准
+Standard Rate,标准房价
+"Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.",标准条款和条件，可以添加到销售和Purchases.Examples：1。有效性offer.1的。付款方式（在前进，在信贷，部分提前等）.1。什么是多余的（或应付客户）.1。安全/使用warning.1。保修如果any.1。返回Policy.1。航运条款中，如果applicable.1。为解决纠纷，赔偿，责任，等1种方法。地址和公司联系。
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.10. Add or Deduct: Whether you want to add or deduct the tax.",可应用于所有采购交易标准税率模板。这个模板可以包含税元首，也像“送货”，“保险”等费用首脑名单，“处理”等你在这里定义＃＃＃＃NoteThe税率将标准税率对所有**项目** 。如果有**项目**有不同的利率，他们必须在**产品税加**表中**项目**大师。＃＃＃＃Columns1的说明。计算类型： - 这可以是在**网**总（即基本量的总和）。 -  **在上一行合计/金额**（对于累计税收或费用）。如果选择此选项，税收将作为前行的百分比（在税率表）量或总被应用。 -  **实际**（见上文）.2。账户头：总账下，这项税收将被booked3。成本中心：如果税/费这项收入（如运费）或支出它需要对成本Center.4预订。说明：税收的说明（将要在发票/报价印刷）.5。率：税务rate.6。金额：税务amount.7。总计：累计总该point.8。输入行：如果根据“上一行共”，您可以选择将被视为对本计算（默认值是前行）0.9基本的行数。考虑税收或支出：在本部分中，您可以指定，如果税务/充电仅适用于估值（总共不一部分），或只为总（不增加价值的项目）或both.10。添加或减去：无论你想添加或扣除的税款。
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",可应用于所有销售交易税的标准模板。这个模板可以包含税元首列表，还像“送货”其他支出/收入的头，“保险”，“处理”等你在这里定义＃＃＃＃NoteThe税率将标准税率对所有项目** **。如果有**项目**有不同的利率，他们必须在**产品税加**表中**项目**大师。＃＃＃＃Columns1的说明。计算类型： - 这可以是在**网**总（即基本量的总和）。 -  **在上一行合计/金额**（对于累计税收或费用）。如果选择此选项，税收将作为前行的百分比（在税率表）量或总被应用。 -  **实际**（见上文）.2。账户头：总账下，这项税收将被booked3。成本中心：如果税/费这项收入（如运费）或支出它需要对成本Center.4预订。说明：税收的说明（将要在发票/报价印刷）.5。率：税务rate.6。金额：税务amount.7。总计：累计总该point.8。输入行：如果根据“上一行共”，您可以选择将被视为对本计算（默认值是前行）0.9基本的行数。这是含税的基本价格：？如果您检查这一点，就意味着这个税不会显示在项目表中，但在你的主项表将被纳入基本速率。你想要给一个单位价格（包括所有税费）的价格为顾客这是有用的。
+Start,开始
+Start Date,开始日期
+Start Report For,启动年报
+Start date of current invoice's period,启动电流发票的日期内
+Starting up...,启动...
+Starts on,开始于
+Startup,启动
+State,态
+States,国家
+Static Parameters,静态参数
+Status,状态
+Status must be one of ,状态必须为之一
+Status should be Submitted,状态应提交
+Statutory info and other general information about your Supplier,法定的信息和你的供应商等一般资料
+Stock,股票
+Stock Adjustment Account,库存调整账户
+Stock Ageing,股票老龄化
+Stock Analytics,股票分析
+Stock Balance,库存余额
+Stock Entries already created for Production Order ,库存项目已为生产订单创建
+Stock Entry,股票入门
+Stock Entry Detail,股票入门详情
+Stock Frozen Upto,股票冻结到...为止
+Stock Ledger,库存总帐
+Stock Ledger Entry,库存总帐条目
+Stock Level,库存水平
+Stock Qty,库存数量
+Stock Queue (FIFO),股票队列（FIFO）
+Stock Received But Not Billed,库存接收，但不标榜
+Stock Reconcilation Data,股票Reconcilation数据
+Stock Reconcilation Template,股票Reconcilation模板
+Stock Reconciliation,库存对账
+"Stock Reconciliation can be used to update the stock on a particular date, ",库存调节可用于更新在某一特定日期的股票，
+Stock Settings,股票设置
+Stock UOM,库存计量单位
+Stock UOM Replace Utility,库存计量单位更换工具
+Stock Uom,库存计量单位
+Stock Value,股票价值
+Stock Value Difference,股票价值差异
+Stock transactions exist against warehouse ,股票交易针对仓库存在
+Stop,停止
+Stop Birthday Reminders,停止生日提醒
+Stop Material Request,停止材料要求
+Stop users from making Leave Applications on following days.,作出许可申请在随后的日子里阻止用户。
+Stop!,住手！
+Stopped,停止
+Structure cost centers for budgeting.,对预算编制结构成本中心。
+Structure of books of accounts.,的会计账簿结构。
+Style,风格
+Style Settings,样式设置
+"Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange",风格代表按钮的颜色：成功 - 绿色，危险 - 红，逆 - 黑色，而小学 - 深蓝色，信息 - 浅蓝，警告 - 橙
+"Sub-currency. For e.g. ""Cent""",子货币。对于如“美分”
+Sub-domain provided by erpnext.com,由erpnext.com提供的子域
+Subcontract,转包
+Subdomain,子域名
+Subject,主题
+Submit,提交
+Submit Salary Slip,提交工资单
+Submit all salary slips for the above selected criteria,提交所有工资单的上面选择标准
+Submit this Production Order for further processing.,提交此生产订单进行进一步的处理。
+Submitted,提交
+Submitted Record cannot be deleted,提交记录无法删除
+Subsidiary,副
+Success,成功
+Successful: ,成功：
+Suggestion,建议
+Suggestions,建议
+Sunday,星期天
+Supplier,提供者
+Supplier (Payable) Account,供应商（应付）帐
+Supplier (vendor) name as entered in supplier master,供应商（供应商）的名称在供应商主进入
+Supplier Account,供应商帐户
+Supplier Account Head,供应商帐户头
+Supplier Address,供应商地址
+Supplier Addresses And Contacts,供应商的地址和联系方式
+Supplier Addresses and Contacts,供应商的地址和联系方式
+Supplier Details,供应商详细信息
+Supplier Intro,供应商介绍
+Supplier Invoice Date,供应商发票日期
+Supplier Invoice No,供应商发票号码
+Supplier Name,供应商名称
+Supplier Naming By,供应商通过命名
+Supplier Part Number,供应商零件编号
+Supplier Quotation,供应商报价
+Supplier Quotation Item,供应商报价项目
+Supplier Reference,信用参考
+Supplier Shipment Date,供应商出货日期
+Supplier Shipment No,供应商出货无
+Supplier Type,供应商类型
+Supplier Type / Supplier,供应商类型/供应商
+Supplier Warehouse,供应商仓库
+Supplier Warehouse mandatory subcontracted purchase receipt,供应商仓库强制性分包购买收据
+Supplier classification.,供应商分类。
+Supplier database.,供应商数据库。
+Supplier of Goods or Services.,供应商的商品或服务。
+Supplier warehouse where you have issued raw materials for sub - contracting,供应商的仓库，你已发出原材料子 - 承包
+Support,支持
+Support Analtyics,支持Analtyics
+Support Analytics,支持Analytics（分析）
+Support Email,电子邮件支持
+Support Email Id,支持电子邮件Id
+Support Email Settings,支持电子邮件设置
+Support Password,支持密码
+Support Ticket,支持票
+Support queries from customers.,客户支持查询。
+Symbol,符号
+Sync Inbox,同步收件箱
+Sync Support Mails,同步支持邮件
+Sync with Dropbox,同步与Dropbox
+Sync with Google Drive,同步与谷歌驱动器
+System,系统
+System Administration,系统管理
+System Defaults,系统默认值
+System Scheduler Errors,系统调度错误
+System Settings,系统设置
+System User,系统用户
+"System User (login) ID. If set, it will become default for all HR forms.",系统用户（登录）的标识。如果设置，这将成为默认的所有人力资源的形式。
+System for managing Backups,系统管理备份
+System generated mails will be sent from this email id.,系统生成的邮件将被从这个电子邮件ID发送。
+TL-,TL-
+TLB-,TLB-
+Table,表
+Table for Item that will be shown in Web Site,表将在网站被显示项目
+Table of Contents,目录
+Tag,标签
+Tag Name,标签名称
+Tags,标签
+Tahoma,宋体
+Target,目标
+Target  Amount,目标金额
+Target Detail,目标详细信息
+Target Details,目标详细信息
+Target Details1,目标点评详情
+Target Distribution,目标分布
+Target On,目标在
+Target Qty,目标数量
+Target Warehouse,目标仓库
+Task,任务
+Task Details,任务详细信息
+Tax,税
+Tax Accounts,税收占
+Tax Calculation,计税
+Tax Category can not be 'Valuation' or 'Valuation and Total' 					as all items are non-stock items,税务类别不能为&#39;估值&#39;或&#39;估值及总，因为所有的项目都是非库存产品
+Tax Master,税务硕士
+Tax Rate,税率
+Tax Template for Purchase,对于购置税模板
+Tax Template for Sales,对于销售税模板
+Tax and other salary deductions.,税务及其他薪金中扣除。
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,从项目主税的细节表读取为字符串，并存储在这个field.Used的税费和费用
+Taxable,应课税
+Taxes,税
+Taxes and Charges,税收和收费
+Taxes and Charges Added,税费上架
+Taxes and Charges Added (Company Currency),税收和收费上架（公司货币）
+Taxes and Charges Calculation,税费计算
+Taxes and Charges Deducted,税收和费用扣除
+Taxes and Charges Deducted (Company Currency),税收和扣除（公司货币）
+Taxes and Charges Total,税费总计
+Taxes and Charges Total (Company Currency),营业税金及费用合计（公司货币）
+Team Members,团队成员
+Team Members Heading,小组成员标题
+Template Path,模板路径
+Template for employee performance appraisals.,模板员工绩效考核。
+Template of terms or contract.,模板条款或合同。
+Term Details,长期详情
+Terms,条款
+Terms and Conditions,条款和条件
+Terms and Conditions Content,条款及细则内容
+Terms and Conditions Details,条款及细则详情
+Terms and Conditions Template,条款及细则范本
+Terms and Conditions1,条款及条件1
+Terretory,Terretory
+Territory,领土
+Territory / Customer,区域/客户
+Territory Manager,区域经理
+Territory Name,地区名称
+Territory Target Variance (Item Group-Wise),境内目标方差（项目组明智）
+Territory Target Variance Item Group-Wise,境内目标差异项目组，智者
+Territory Targets,境内目标
+Test,测试
+Test Email Id,测试电子邮件Id
+Test Runner,测试运行
+Test the Newsletter,测试通讯
+Text,文本
+Text Align,文本对齐
+Text Editor,文本编辑器
+"The ""Web Page"" that is the website home page",在“网页”，也就是在网站首页
+The BOM which will be replaced,这将被替换的物料清单
+The First User: You,第一个用户：您
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",代表包装的项目。该项目必须有“是股票项目”为“否”和“是销售项目”为“是”
+The Organization,本组织
+"The account head under Liability, in which Profit/Loss will be booked",根据责任账号头，其中利润/亏损将被黄牌警告
+The date on which next invoice will be generated. It is generated on submit.,在其旁边的发票将生成的日期。它是在提交生成的。
+The date on which recurring invoice will be stop,在其经常性发票将被停止日期
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",这个月的日子，汽车发票将会产生如05，28等
+The first Leave Approver in the list will be set as the default Leave Approver,该列表中的第一个休假审批将被设置为默认请假审批
+The first user will become the System Manager (you can change that later).,第一个用户将成为系统管理器（您可以在以后更改）。
+The gross weight of the package. Usually net weight + packaging material weight. (for print),包的总重量。通常净重+包装材料的重量。 （用于打印）
+The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,您的公司/网站的，你想要显示在浏览器标题栏中的名称。所有页面都会有这样的前缀称号。
+The name of your company for which you are setting up this system.,您的公司要为其设立这个系统的名称。
+The net weight of this package. (calculated automatically as sum of net weight of items),净重这个包。 （当项目的净重量总和自动计算）
+The new BOM after replacement,更换后的新物料清单
+The rate at which Bill Currency is converted into company's base currency,在该条例草案的货币转换成公司的基础货币的比率
+"The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions",该系统提供了预先定义的角色，但你可以<a href='#List/Role'>添加新角色</a>设定更精细的权限
+The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID来跟踪所有的经常性发票。它是在提交生成的。
+Then By (optional),再由（可选）
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,有一个错误。一个可能的原因可能是因为您没有保存的形式。请联系support@erpnext.com如果问题仍然存在。
+There were errors.,有错误。
+These properties are Link Type fields from all Documents.,这些属性是由所有文件链接类型字段。
+"These properties can also be used to 'assign' a particular document, whose property matches with the User's property to a User. These can be set using the <a href='#permission-manager'>Permission Manager</a>",这些属性也可以用来&#39;分配&#39;一个特定的文件，其属性与用户的属性相匹配的用户。这些可以通过设置<a href='#permission-manager'>权限管理</a>
+These properties will appear as values in forms that contain them.,这些属性将显示为包含这些形式的值。
+These values will be automatically updated in transactions and also will be useful to restrict permissions for this user on transactions containing these values.,这些值将在交易中自动更新，也将是有益的权限限制在含有这些值交易这个用户。
+This ERPNext subscription,这ERPNext订阅
+This Leave Application is pending approval. Only the Leave Apporver can update status.,这个假期申请正在等待批准。只有离开Apporver可以更新状态。
+This Time Log Batch has been billed.,此时日志批量一直标榜。
+This Time Log Batch has been cancelled.,此时日志批次已被取消。
+This Time Log conflicts with,这个时间日志与冲突
+This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>myfieldeval:doc.myfield=='My Value'<br>eval:doc.age>18,此字段将显示只有这里定义的字段名有值或规则是真实的（例子）： <br> myfieldeval：doc.myfield ==&#39;我的价值“ <br> EVAL：doc.age&gt; 18
+This goes above the slideshow.,这正好幻灯片上面。
+This is PERMANENT action and you cannot undo. Continue?,这是永久性的行动，你不能撤消。要继续吗？
+This is a root account and cannot be edited.,这是一个root帐户，不能被编辑。
+This is permanent action and you cannot undo. Continue?,这是永久的行动，你不能撤消。要继续吗？
+This is the number of the last created transaction with this prefix,这就是以这个前缀的最后一个创建的事务数
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,此工具可帮助您更新或修复系统的数量和股票估值。它通常被用于同步系统值和实际存在于您的仓库。
+This will be used for setting rule in HR module,这将用于在人力资源模块的设置规则
+Thread HTML,主题HTML
+Thursday,星期四
+Time,时间
+Time Log,时间日志
+Time Log Batch,时间日志批
+Time Log Batch Detail,时间日志批量详情
+Time Log Batch Details,时间日志批量详情
+Time Log Batch status must be 'Submitted',时间日志批次状态必须是&#39;提交&#39;
+Time Log Status must be Submitted.,时间日志状态必须被提交。
+Time Log for tasks.,时间日志中的任务。
+Time Log is not billable,时间日志是不计费
+Time Log must have status 'Submitted',时间日志的状态必须为“已提交”
+Time Zone,时区
+Time Zones,时区
+Time and Budget,时间和预算
+Time at which items were delivered from warehouse,时间在哪个项目是从仓库运送
+Time at which materials were received,收到材料在哪个时间
+Title,标题
+Title / headline of your page,你的页面标题/标题
+Title Case,标题案例
+Title Prefix,标题前缀
+To,至
+To Currency,以货币
+To Date,至今
+To Date should be same as From Date for Half Day leave,日期应该是一样的起始日期为半天假
+To Discuss,为了讨论
+To Do,要不要
+To Do List,待办事项列表
+To Package No.,以包号
+To Pay,支付方式
+To Produce,以生产
+To Time,要时间
+To Value,To值
+To Warehouse,到仓库
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.",要添加子节点，探索树，然后单击要在其中添加更多节点的节点上。
+"To assign this issue, use the ""Assign"" button in the sidebar.",要分配这个问题，请使用“分配”按钮，在侧边栏。
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.",从您的接收邮件自动创建支持票，在此设置您的POP3设置。你必须非常创建一个单独的电子邮件ID为ERP系统，使所有电子邮件都将来自该邮件ID被同步到系统中。如果您不能确定，请联系您的电子邮件提供商。
+"To create / edit transactions against this account, you need role",要禁止该帐户创建/编辑事务，你需要角色
+To create a Bank Account:,要创建一个银行帐号：
+To create a Tax Account:,要创建一个纳税帐户：
+"To create an Account Head under a different company, select the company and save customer.",要创建一个帐户头在不同的公司，选择该公司，并保存客户。
+To enable <b>Point of Sale</b> features,为了使<b>销售点</b>功能
+To enable <b>Point of Sale</b> view,为了使<b>销售点</b>看法
+"To fetch items again, click on 'Get Items' button \						or update the Quantity manually.",再取物品，点击“获取信息”按钮\或手动更新的数量。
+"To format columns, give column labels in the query.",要格式化列，给列标签在查询中。
+"To further restrict permissions based on certain values in a document, use the 'Condition' settings.",为了进一步限制基于文档中的某些价值观的权限，使用&#39;条件&#39;的设置。
+To get Item Group in details table,为了让项目组在详细信息表
+"To merge, following properties must be same for both items",若要合并，以下属性必须为这两个项目是相同的
+"To report an issue, go to ",要报告问题，请至
+To restrict a User of a particular Role to documents that are explicitly assigned to them,要限制某一特定角色的用户来显式分配给他们的文件
+To restrict a User of a particular Role to documents that are only self-created.,要限制某一特定角色的用户到只有自己创建的文档。
+"To set this Fiscal Year as Default, click on 'Set as Default'",要设置这个财政年度为默认值，点击“设为默认”
+"To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.",要设置用户角色，只要进入<a href='#List/Profile'>设置&gt;用户</a> ，然后单击分配角色的用户。
+To track any installation or commissioning related work after sales,跟踪销售后的任何安装或调试相关工作
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",在以下文件跟踪品牌<br>送货单，Enuiry，材料要求，项目，采购订单，购买凭证，买方收据，报价单，销售发票，销售物料，销售订单，序列号
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,在基于其序列号的销售和采购文件跟踪的项目。这也可以用来跟踪商品的保修细节。
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,为了跟踪与批次号在销售和采购文件的项目<br> <b>首选行业：化工等</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,要使用条形码跟踪项目。您将能够通过扫描物品条码，进入交货单和销售发票的项目。
+ToDo,待办事项
+Tools,工具
+Top,顶部
+Top Bar,顶栏
+Top Bar Background,顶栏背景
+Top Bar Item,顶栏项目
+Top Bar Items,顶栏项目
+Top Bar Text,顶栏文本
+Total,总
+Total (sum of) points distribution for all goals should be 100.,总计（总和）点的分布对所有的目标应该是100。
+Total Advance,总垫款
+Total Amount,总金额
+Total Amount To Pay,支付总计
+Total Amount in Words,总金额词
+Total Billing This Year: ,总帐单今年：
+Total Claimed Amount,总索赔额
+Total Commission,总委员会
+Total Cost,总成本
+Total Credit,总积分
+Total Debit,总借记
+Total Deduction,扣除总额
+Total Earning,总盈利
+Total Experience,总经验
+Total Hours,总时数
+Total Hours (Expected),总时数（预期）
+Total Invoiced Amount,发票总金额
+Total Leave Days,总休假天数
+Total Leaves Allocated,分配的总叶
+Total Manufactured Qty can not be greater than Planned qty to manufacture,总计制造数量不能大于计划数量制造
+Total Operating Cost,总营运成本
+Total Points,总得分
+Total Raw Material Cost,原材料成本总额
+Total SMS Sent,共发送短信
+Total Sanctioned Amount,总被制裁金额
+Total Score (Out of 5),总分（满分5分）
+Total Tax (Company Currency),总税（公司货币）
+Total Taxes and Charges,总营业税金及费用
+Total Taxes and Charges (Company Currency),总税费和费用（公司货币）
+Total Working Days In The Month,总工作日的月份
+Total amount of invoices received from suppliers during the digest period,的过程中消化期间向供应商收取的发票总金额
+Total amount of invoices sent to the customer during the digest period,的过程中消化期间发送给客户的发票总金额
+Total in words,总字
+Total production order qty for item,总生产量的项目
+Totals,总计
+Track separate Income and Expense for product verticals or divisions.,跟踪单独的收入和支出进行产品垂直或部门。
+Track this Delivery Note against any Project,跟踪此送货单反对任何项目
+Track this Sales Order against any Project,跟踪对任何项目这个销售订单
+Transaction,交易
+Transaction Date,交易日期
+Transaction not allowed against stopped Production Order,交易不反对停止生产订单允许
+Transfer,转让
+Transfer Material,转印材料
+Transfer Raw Materials,转移原材料
+Transferred Qty,转让数量
+Transition Rules,过渡规则
+Transporter Info,转运信息
+Transporter Name,转运名称
+Transporter lorry number,转运货车数量
+Trash Reason,垃圾桶原因
+Tree Type,树类型
+Tree of item classification,项目分类树
+Trial Balance,试算表
+Tuesday,星期二
+Tweet will be shared via your user account (if specified),推文将通过您的用户帐户共享（如果指定）
+Twitter Share,Twitter分享
+Twitter Share via,Twitter分享通过
+Type,类型
+Type of document to rename.,的文件类型进行重命名。
+Type of employment master.,就业主人的类型。
+"Type of leaves like casual, sick etc.",叶似漫不经心，生病等类型
+Types of Expense Claim.,报销的类型。
+Types of activities for Time Sheets,活动的考勤表类型
+UOM,计量单位
+UOM Conversion Detail,计量单位换算详细
+UOM Conversion Details,计量单位换算详情
+UOM Conversion Factor,计量单位换算系数
+UOM Conversion Factor is mandatory,计量单位换算系数是强制性的
+UOM Name,计量单位名称
+UOM Replace Utility,计量单位更换工具
+UPPER CASE,大写
+UPPERCASE,大写
+URL,网址
+Unable to complete request: ,无法完成请求：
+Unable to load,无法加载
+Under AMC,在AMC
+Under Graduate,根据研究生
+Under Warranty,在保修期
+Unit of Measure,计量单位
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).",这资料（如公斤，单位，不，一对）的测量单位。
+Units/Hour,单位/小时
+Units/Shifts,单位/位移
+"Unknown file encoding. Tried utf-8, windows-1250, windows-1252.",未知文件编码。尝试UTF-8，windows-1250访问，windows-1252访问。
+Unmatched Amount,无与伦比的金额
+Unpaid,未付
+Unread Messages,未读消息
+Unscheduled,计划外
+Unstop,Unstop
+Unstop Material Request,Unstop材料要求
+Unsubscribed,退订
+Upcoming Events for Today,近期活动今日
+Update,更新
+Update Clearance Date,更新日期间隙
+Update Cost,更新成本
+Update Field,更新域
+Update Finished Goods,更新成品
+Update Landed Cost,更新到岸成本
+Update Numbering Series,更新编号系列
+Update Series,更新系列
+Update Series Number,更新序列号
+Update Stock,库存更新
+Update Stock should be checked.,更新库存应该进行检查。
+Update Value,更新值
+"Update allocated amount in the above table and then click ""Allocate"" button",更新量分配在上表中，然后单击“分配”按钮
+Update bank payment dates with journals.,更新与期刊银行付款日期。
+Updated,更新
+Updated Birthday Reminders,更新生日提醒
+Upload,上载
+Upload Attachment,上传附件
+Upload Attendance,上传出席
+Upload Backups to Dropbox,上传备份到Dropbox
+Upload Backups to Google Drive,上传备份到谷歌驱动器
+Upload HTML,上传HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,上传一个csv文件有两列：旧名称和新名称。最大500行。
+Upload a file,上传文件
+Upload and Import,上传和导入
+Upload attendance from a .csv file,从。csv文件上传考勤
+Upload stock balance via csv.,通过CSV上传库存余额。
+Upload your letter head and logo - you can edit them later.,上传你的信头和标志 - 你可以在以后对其进行编辑。
+Uploaded File Attachments,上传文件附件
+Uploading...,上载...
+Upper Income,高收入
+Urgent,急
+Use Multi-Level BOM,采用多级物料清单
+Use SSL,使用SSL
+Use TLS,使用TLS
+User,用户
+User Cannot Create,用户无法创建
+User Cannot Search,用户不能搜索
+User ID,用户ID
+User Image,用户图片
+User Name,用户名
+User Properties,用户属性
+User Remark,用户备注
+User Remark will be added to Auto Remark,用户备注将被添加到自动注
+User Tags,用户标签
+User Type,用户类型
+User must always select,用户必须始终选择
+User not allowed to delete.,用户不允许删除。
+User settings for Point-of-sale (POS),用户设置的销售点终端（POS）
+UserRole,的UserRole
+Username,用户名
+Users and Permissions,用户和权限
+Users who can approve a specific employee's leave applications,用户谁可以批准特定员工的休假申请
+Users with this role are allowed to create / modify accounting entry before frozen date,具有此角色的用户可以创建/修改冻结日期前会计分录
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,具有此角色的用户可以设置冻结帐户，并创建/修改对冻结账户的会计分录
+Utilities,公用事业
+Utility,效用
+Valid For Territories,适用于新界
+Valid Upto,到...为止有效
+Valid for Buying or Selling?,有效的买入或卖出？
+Valid for Territories,适用于新界
+Validate,验证
+Valuation,计价
+Valuation Method,估值方法
+Valuation Rate,估值率
+Valuation and Total,估值与总
+Value,值
+Value missing for,缺少值
+Value or Qty,价值或数量
+Vehicle Dispatch Date,车辆调度日期
+Vehicle No,车辆无
+Verdana,宋体
+Verified By,认证机构
+View,视图
+View Ledger,查看总帐
+View Now,立即观看
+Visit,访问
+Visit report for maintenance call.,访问报告维修电话。
+Voucher Detail No,券详细说明暂无
+Voucher ID,优惠券编号
+Voucher No,无凭证
+Voucher Type,凭证类型
+Voucher Type and Date,凭证类型和日期
+WIP Warehouse required before Submit,提交所需WIP仓库前
+Walk In,走在
+Warehouse,仓库
+Warehouse Contact Info,仓库联系方式
+Warehouse Detail,仓库的详细信息
+Warehouse Name,仓库名称
+Warehouse Type,仓库类型
+Warehouse User,仓库用户
+Warehouse Users,仓库用户
+Warehouse and Reference,仓库及参考
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,仓库只能通过股票输入/送货单/外购入库单变
+Warehouse cannot be changed for Serial No.,仓库不能为序​​列号改变
+Warehouse does not belong to company.,仓库不属于公司。
+Warehouse is missing in Purchase Order,仓库在采购订单失踪
+Warehouse where you are maintaining stock of rejected items,仓库你在哪里维护拒绝的项目库存
+Warehouse-Wise Stock Balance,仓库明智的股票结余
+Warehouse-wise Item Reorder,仓库明智的项目重新排序
+Warehouses,仓库
+Warn,警告
+Warning,警告
+Warning: Leave application contains following block dates,警告：离开应用程序包含以下模块日期
+Warning: Material Requested Qty is less than Minimum Order Qty,警告：材料要求的数量低于最低起订量
+Warranty / AMC Details,保修/ AMC详情
+Warranty / AMC Status,保修/ AMC状态
+Warranty Expiry Date,保证期到期日
+Warranty Period (Days),保修期限（天数）
+Warranty Period (in days),保修期限（天数）
+Warranty expiry date and maintenance status mismatched,保修期满日期及维护状态不匹配
+Web Page,网页
+Website,网站
+Website Description,网站简介
+Website Item Group,网站项目组
+Website Item Groups,网站项目组
+Website Script,网站脚本
+Website Settings,网站设置
+Website Sitemap,网站地图
+Website Sitemap Config,网站地图配置
+Website Slideshow,网站连续播放
+Website Slideshow Item,网站幻灯片项目
+Website User,网站用户
+Website Warehouse,网站仓库
+Wednesday,星期三
+Weekly,周刊
+Weekly Off,每周关闭
+Weight UOM,重量计量单位
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重被提及，\ n请别说“重量计量单位”太
+Weightage,权重
+Weightage (%),权重（％）
+Welcome Email Sent,欢迎发送电子邮件
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,欢迎来到ERPNext。在接下来的几分钟里，我们将帮助您设置您的ERPNext帐户。尝试并填写尽可能多的信息，你有，即使它需要多一点的时间。这将节省您大量的时间。祝你好运！
+What does it do?,它有什么作用？
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.",当任何选中的交易都是“已提交”，邮件弹出窗口自动打开，在该事务发送电子邮件到相关的“联系”，与交易作为附件。用户可能会或可能不会发送电子邮件。
+"When submitted, the system creates difference entries ",提交时，系统会创建差异的条目
+"When you <b>Amend</b> a document after cancel and save it, it will get a new number that is a version of the old number.",当您<b>修改</b>一个文件后，取消和保存，它会得到一个新的数字，是一个版本的旧号码。
+Where items are stored.,项目的存储位置。
+Where manufacturing operations are carried out.,凡制造业务进行。
+Widowed,寡
+Width,宽度
+Will be calculated automatically when you enter the details,当你输入详细信息将自动计算
+Will be updated after Sales Invoice is Submitted.,之后销售发票已提交将被更新。
+Will be updated when batched.,批处理时将被更新。
+Will be updated when billed.,计费时将被更新。
+Will be used in url (usually first name).,在URL（通常是第一个名字）将被使用。
+With Operations,随着运营
+With period closing entry,随着期末入门
+Work Details,作品详细信息
+Work Done,工作完成
+Work In Progress,工作进展
+Work-in-Progress Warehouse,工作在建仓库
+Workflow,工作流程
+Workflow Action,工作流操作
+Workflow Action Master,工作流操作主
+Workflow Action Name,工作流操作名称
+Workflow Document State,工作流文档状态
+Workflow Document States,工作流文档国
+Workflow Name,工作流名称
+Workflow State,工作流状态
+Workflow State Field,工作流状态字段
+Workflow Transition,工作流程转换
+Workflow Transitions,工作流程转换
+Workflow state represents the current state of a document.,工作流状态表示文档的当前状态。
+Workflow will start after saving.,保存后的工作流程将启动。
+Working,工作的
+Workstation,工作站
+Workstation Name,工作站名称
+Write,写
+Write Off Account,核销帐户
+Write Off Amount,核销金额
+Write Off Amount <=,核销金额&lt;=
+Write Off Based On,核销的基础上
+Write Off Cost Center,冲销成本中心
+Write Off Outstanding Amount,核销额（亿元）
+Write Off Voucher,核销券
+Write a Python file in the same folder where this is saved and return column and result.,写一个Python文件，在这个被保存在同一文件夹中，并返回列和结果。
+Write a SELECT query. Note result is not paged (all data is sent in one go).,写一个SELECT查询。注结果不分页（所有数据都一气呵成发送）。
+Write sitemap.xml,写的sitemap.xml
+Writers Introduction,作家简介
+Wrong Template: Unable to find head row.,错误的模板：找不到头排。
+Year,年
+Year Closed,年度关闭
+Year End Date,年结日
+Year Name,今年名称
+Year Start Date,今年开始日期
+Year Start Date and Year End Date are already \						set in Fiscal Year: ,年开学日期及年结日已\在财政年度设定：
+Year Start Date and Year End Date are not within Fiscal Year.,今年开始日期和年份结束日期是不是在会计年度。
+Year Start Date should not be greater than Year End Date,今年开始日期不应大于年度日期
+Year of Passing,路过的一年
+Yearly,每年
+Yes,是的
+Yesterday,昨天
+You are not allowed to reply to this ticket.,你不允许回复此票。
+You are not authorized to do/modify back dated entries before ,您无权做/修改之前追溯项目
+You are not authorized to set Frozen value,您无权设定值冻结
+You are the Leave Approver for this record. Please Update the 'Status' and Save,您是第休假审批此记录。请更新“状态”并保存
+You can enter any date manually,您可以手动输入任何日期
+You can enter the minimum quantity of this item to be ordered.,您可以输入资料到订购的最小数量。
+You can not change rate if BOM mentioned agianst any item,你不能改变速度，如果BOM中提到反对的任何项目
+You can not enter both Delivery Note No and Sales Invoice No. \					Please enter any one.,你不能同时输入送货单号及销售发票号\请输入任何一个。
+You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,您可以设置不同的“属性”，以用户设置的默认值，并基于各种形式的这些属性值的权限规则。
+You can start by selecting backup frequency and \					granting access for sync,您可以通过选择备份频率和\授予访问权限的同步启动
+You can submit this Stock Reconciliation.,您可以提交该股票对账。
+You can update either Quantity or Valuation Rate or both.,你可以更新数量或估值速率或两者兼而有之。
+You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,您可以使用<a href='#Form/Customize Form'>自定义表单</a>上栏位设定水平。
+You cannot give more than ,你不能给超过
+You have entered duplicate items. Please rectify and try again.,您输入重复的项目。请纠正，然后再试一次。
+You may need to update: ,你可能需要更新：
+You must ,你必须
+Your Customer's TAX registration numbers (if applicable) or any general information,你的客户的税务登记证号码（如适用）或任何股东信息
+Your Customers,您的客户
+Your ERPNext subscription will,您ERPNext订阅将
+Your Products or Services,您的产品或服务
+Your Suppliers,您的供应商
+"Your download is being built, this may take a few moments...",您的下载正在修建，这可能需要一些时间......
+Your sales person who will contact the customer in future,你的销售人员谁将会联系客户在未来
+Your sales person will get a reminder on this date to contact the customer,您的销售人员将获得在此日期提醒联系客户
+Your setup is complete. Refreshing...,你的设置就完成了。清爽...
+Your support email id - must be a valid email - this is where your emails will come!,您的支持电子邮件ID  - 必须是一个有效的电子邮件 - 这就是你的邮件会来！
+[Label]:[Field Type]/[Options]:[Width],[标签]：[字段类型] / [选项]：[宽]
+add your own CSS (careful!),添加您自己的CSS（careful!）
+adjust,调整
+align-center,对准中心
+align-justify,对齐对齐
+align-left,对齐左
+align-right,对齐，右
+already available in Price List,在价格表已经存在
+and,和
+"and create a new Account Ledger (by clicking on Add Child) of type ""Bank or Cash""",并创建一个新的帐户总帐型“银行或现金”的（通过点击添加子）
+"and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.",并创建一个新的帐户分类帐类型“税”（点击添加子），并且还提到了税率。
+are not allowed for,不允许使用
+are not allowed for ,不允许使用
+arrow-down,箭头向下
+arrow-left,箭头左
+arrow-right,箭头向右
+arrow-up,向上箭头
+assigned by,由分配
+asterisk,星号
+backward,落后
+ban-circle,禁令圈
+barcode,条形码
+bell,钟
+bold,胆大
+book,书
+bookmark,书签
+briefcase,公文包
+bullhorn,扩音器
+but entries can be made against Ledger,但项可以对总帐进行
+but is pending to be manufactured.,但是有待被制造。
+calendar,日历
+camera,相机
+cannot be greater than 100,不能大于100
+cannot be included in Item's rate,不能包含在项目的速度
+cannot start with,无法开始
+certificate,证书
+check,查
+chevron-down,雪佛龙跌
+chevron-left,人字形左
+chevron-right,雪佛龙 - 右
+chevron-up,雪佛龙达
+circle-arrow-down,圆圈箭头向下
+circle-arrow-left,圆圈箭头向左
+circle-arrow-right,圆圈箭头向右
+circle-arrow-up,圆圈箭头行动
+cog,COG
+comment,评论
+create a Custom Field of type Link (Profile) and then use the 'Condition' settings to map that field to the Permission rule.,创建类型链接（配置文件）的自定义字段，然后使用“条件”设置到该字段映射到权限规则。
+dd-mm-yyyy,日 - 月 - 年
+dd/mm/yyyy,日/月/年
+deactivate,关闭
+discount on Item Code,在产品编号的折扣
+does not belong to BOM: ,不属于BOM：
+does not have role 'Leave Approver',没有作用“休假审批&#39;
+download,下载
+download-alt,下载的Alt
+"e.g. Bank, Cash, Credit Card",例如：银行，现金，信用卡
+"e.g. Kg, Unit, Nos, m",如公斤，单位，NOS，M
+edit,编辑
+eg. Cheque Number,例如：。支票号码
+eject,喷射
+envelope,信封
+example: Next Day Shipping,例如：次日发货
+example: http://help.erpnext.com,例如：http://help.erpnext.com
+exclamation-sign,惊叹号标志
+eye-close,眼睛闭
+eye-open,眼开
+facetime-video,FaceTime的视频
+fast-backward,快退
+fast-forward,快进
+file,文件
+film,电影
+filter,过滤器
+fire,火
+flag,旗
+folder-close,文件夹闭
+folder-open,文件夹打开
+font,字形
+forward,向前
+fullscreen,全屏
+gift,礼物
+glass,玻璃
+globe,地球
+hand-down,用手向下
+hand-left,手左
+hand-right,手右
+hand-up,手机
+has been made after posting date,已发表日期之后
+have a common territory,有一个共同的领土
+hdd,硬盘
+headphones,头戴耳机
+heart,心脏
+home,家
+icon,图标
+in,在
+in the same UOM.,在相同的计量单位。
+inbox,收件箱
+indent-left,缩进左
+indent-right,缩进，右
+info-sign,信息符号
+is linked in,在链接
+is not allowed.,是不允许的。
+italic,斜体
+leaf,叶
+lft,LFT
+list,表
+list-alt,列表ALT
+lock,锁
+lowercase,小写
+magnet,磁铁
+map-marker,地图标记物
+minus,减
+minus-sign,减号
+mm-dd-yyyy,MM-DD-YYYY
+mm/dd/yyyy,月/日/年
+move,移动
+music,音乐
+must be a Liability account,必须是一个负债帐户
+must be one of,必须是1
+not a service item.,不是一个服务项目。
+not a sub-contracted item.,不是一个分包项目。
+not in,不
+not within Fiscal Year,不属于会计年度
+off,离
+ok,行
+ok-circle,OK-圈
+ok-sign,OK-迹象
+old_parent,old_parent
+or,或
+pause,暂停
+pencil,铅笔
+picture,图片
+plane,机
+play,玩
+play-circle,玩圈
+plus,加
+plus-sign,加号
+print,打印
+qrcode,QRcode的
+question-sign,问题符号
+random,随机
+refresh,刷新
+remove,清除
+remove-circle,删除圈
+remove-sign,删除符号
+repeat,重复
+resize-full,调整满
+resize-horizontal,调整大小，水平
+resize-small,调整大小小
+resize-vertical,调整垂直
+retweet,转推
+rgt,RGT
+road,道路
+screenshot,屏幕截图
+search,搜索
+share,共享
+share-alt,股份ALT
+shopping-cart,购物推车
+should be 100%,应为100％
+signal,信号
+star,明星
+star-empty,明星空
+step-backward,一步落后
+step-forward,步向前
+stop,停止
+subject,主题
+tag,标签
+tags,标签
+"target = ""_blank""",目标=“_blank”
+tasks,任务
+text-height,文字高度
+text-width,文字宽度
+th,日
+th-large,TH-大
+th-list,日列表
+they are created automatically from the Customer and Supplier master,它们从客户和供应商的主站自动创建
+thumbs-down,拇指向下
+thumbs-up,竖起大拇指
+time,时间
+tint,色彩
+to,至
+"to be included in Item's rate, it is required that: ",被包括在物品的速率，它是必需的：
+to set the given stock and valuation on this date.,设置给定的股票及估值对这个日期。
+trash,垃圾
+upload,上载
+user,用户
+user_image_show,user_image_show
+usually as per physical inventory.,通常按照实际库存。
+volume-down,容积式
+volume-off,体积过
+volume-up,容积式
+warning-sign,警告符号
+website page link,网站页面的链接
+which is greater than sales order qty ,这是大于销售订单数量
+wrench,扳手
+yyyy-mm-dd,年 - 月 - 日
+zoom-in,放大式
+zoom-out,拉远
