@@ -13,15 +13,22 @@ def execute(filters=None):
 	data = []
 
 	for item_code, suppliers in supplier_details.items():
-		consumed_qty = consumed_amount = 0.0
+		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
 		if consumed_details.get(item_code):
 			for cd in consumed_details.get(item_code):
-				if cd.voucher_no not in material_transfer_vouchers:
-					consumed_qty += abs(flt(cd.actual_qty))
-					consumed_amount += abs(flt(cd.stock_value_difference))
-			if consumed_qty or consumed_amount:
+				
+				if (cd.voucher_no not in material_transfer_vouchers):
+					if cd.voucher_type=="Delivery Note":
+						delivered_qty += abs(flt(cd.actual_qty))
+						delivered_amount += abs(flt(cd.stock_value_difference))
+					elif cd.voucher_type!="Delivery Note":
+						consumed_qty += abs(flt(cd.actual_qty))
+						consumed_amount += abs(flt(cd.stock_value_difference))
+
+			if consumed_qty or consumed_amount or delivered_qty or delivered_amount:
 				row = [cd.item_code, cd.item_name, cd.description, cd.stock_uom, \
-					consumed_qty, consumed_amount, list(set(suppliers))]
+					consumed_qty, consumed_amount, delivered_qty, delivered_amount, \
+					list(set(suppliers))]
 				data.append(row)
 
 	return columns, data
@@ -29,9 +36,9 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 	
-	columns = ["Item:Link/Item:100"] + ["Item Name::150"] + ["Description::150"] + \
-	["UOM:Link/UOM:100"] + ["Consumed Qty:Float:130"] + ["Consumed Amount:Currency:130"] + \
-	["Supplier(s)::250"]
+	columns = ["Item:Link/Item:100"] + ["Item Name::100"] + ["Description::150"] + \
+	["UOM:Link/UOM:70"] + ["Consumed Qty:Float:110"] + ["Consumed Amount:Currency:130"] + \
+	["Delivered Qty:Float:100"] + ["Delivered Amount:Currency:130"] + ["Supplier(s)::250"]
 
 	return columns
 
@@ -52,28 +59,27 @@ def get_consumed_details(filters):
 	for d in webnotes.conn.sql("""select sle.item_code, i.item_name, i.description, 
 		i.stock_uom, sle.actual_qty, sle.stock_value_difference, sle.voucher_no 
 		from `tabStock Ledger Entry` sle, `tabItem` i 
-		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1, debug=1):
+		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
 			consumed_details.setdefault(d.item_code, []).append(d)
 
 	return consumed_details
 
 def get_suppliers_details(filters):
 	item_supplier_map = {}
-	conditions = ""
-	values = []
-
-	if (filters.get('supplier')):
-		conditions = "and pr.supplier=%s"
-		values = [filters.get('supplier')]
+	supplier = filters.get('supplier')
 
 	for d in webnotes.conn.sql("""select pr.supplier, pri.item_code from 
 		`tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri 
 		where pr.name=pri.parent and pr.docstatus=1 and 
 		pri.item_code=(select name from `tabItem` where 
-			ifnull(is_stock_item, 'Yes')='Yes' and name=pri.item_code) %s""" % conditions, 
-			values, as_dict=1):
+			ifnull(is_stock_item, 'Yes')='Yes' and name=pri.item_code)""", as_dict=1):
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
-
+	
+	if supplier:
+		for item_code, suppliers in item_supplier_map.items():
+			if supplier not in suppliers:
+				del item_supplier_map[item_code]
+	
 	return item_supplier_map
 
 def get_material_transfer_vouchers():

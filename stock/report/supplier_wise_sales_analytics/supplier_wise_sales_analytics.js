@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Item-wise Consumption"] = {
+wn.query_reports["Supplier-Wise Sales Analytics"] = {
 	"filters": [
 		{
 			"fieldname":"supplier",

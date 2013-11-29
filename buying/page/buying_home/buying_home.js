@@ -156,8 +156,8 @@ wn.module_page["Buying"] = [
 				doctype: "Supplier"
 			},
 			{
-				"label":wn._("Item-Wise Consumption"),
-				route: "query-report/Item-wise Consumption",
+				"label":wn._("Supplier-Wise Sales Analytics"),
+				route: "query-report/Supplier-Wise Sales Analytics",
 				doctype: "Stock Ledger Entry"
 			}
 		]
