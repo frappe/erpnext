@@ -150,8 +150,9 @@ wn.module_page["Stock"] = [
 				"label": wn._("Stock Level")
 			},
 			{
-				"page":"stock-ageing",
-				"label": wn._("Stock Ageing")
+				"label":wn._("Stock Ageing"),
+				doctype: "Item",
+				route: "query-report/Stock Ageing"
 			},
 		]
 	},
