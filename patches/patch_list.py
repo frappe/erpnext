@@ -256,6 +256,5 @@ patch_list = [
 	"patches.1311.p06_fix_report_columns",
 	"execute:webnotes.delete_doc('DocType', 'Documentation Tool')",
 	"execute:webnotes.delete_doc('Report', 'Stock Ledger') #2013-11-29",
-	"execute:webnotes.delete_doc('Page', 'stock-ledger') #2013-12-04",
-	"execute:webnotes.delete_doc('Page', 'stock-ageing') #2013-12-04",
+	"patches.1312.p01_delete_old_stock_reports",
 ]
