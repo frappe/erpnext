@@ -444,6 +444,8 @@ class DocType(StockController):
 				if self.doc.production_order and self.doc.purpose == "Material Transfer":
 					item_dict = self.get_pending_raw_materials(pro_obj)
 				else:
+					if not self.doc.fg_completed_qty:
+						webnotes.throw(_("Manufacturing Quantity is mandatory"))
 					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
 					for item in item_dict.values():
 						if pro_obj:
@@ -479,7 +481,7 @@ class DocType(StockController):
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
-					item[0]["item"] : {
+					item[0]["name"] : {
 						"qty": self.doc.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],
