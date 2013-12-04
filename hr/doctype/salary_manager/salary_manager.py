@@ -3,16 +3,9 @@
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import cint, flt
-from webnotes.model import db_exists
-from webnotes.model.doc import Document
-from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-
-	
-
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -198,14 +191,12 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		com = webnotes.conn.sql("select default_bank_account from `tabCompany` where name = '%s'" % self.doc.company)
-		
-		if not com[0][0] or not com[0][1]:
+		default_bank_account = webnotes.conn.get_value("Company", self.doc.company, 
+			"default_bank_account")
+		if not default_bank_account:
 			msgprint("You can set Default Bank Account in Company master.")
 
-		ret = {
-			'def_bank_acc' : com and com[0][0] or '',
-			'def_sal_acc' : com and com[0][1] or '',
+		return {
+			'default_bank_account' : default_bank_account,
 			'amount' : amt
 		}
-		return ret
