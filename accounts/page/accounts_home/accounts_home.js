@@ -241,13 +241,8 @@ wn.module_page["Accounts"] = [
 				doctype: "Journal Voucher"
 			},
 			{
-				"label":wn._("Payment Collection With Ageing"),
-				route: "query-report/Payment Collection With Ageing",
-				doctype: "Journal Voucher"
-			},
-			{
-				"label":wn._("Payment Made With Ageing"),
-				route: "query-report/Payment Made With Ageing",
+				"label":wn._("Payment Period Based On Invoice Date"),
+				route: "query-report/Payment Period Based On Invoice Date",
 				doctype: "Journal Voucher"
 			},
 			{

@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-05-02 12:09:51", 
+  "creation": "2013-12-02 17:06:37", 
   "docstatus": 0, 
-  "modified": "2013-05-02 12:09:51", 
+  "modified": "2013-12-02 17:06:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -12,11 +12,11 @@
   "is_standard": "Yes", 
   "name": "__common__", 
   "ref_doctype": "Journal Voucher", 
-  "report_name": "Payment Collection With Ageing", 
+  "report_name": "Payment Period Based On Invoice Date", 
   "report_type": "Script Report"
  }, 
  {
   "doctype": "Report", 
-  "name": "Payment Collection With Ageing"
+  "name": "Payment Period Based On Invoice Date"
  }
 ]

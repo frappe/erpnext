@@ -38,7 +38,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// if document is POS then change default print format to "POS Invoice"
 		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1) {
 			locals.DocType[cur_frm.doctype].default_print_format = "POS Invoice";
-			cur_frm.setup_print();
+			cur_frm.setup_print_layout();
 		}
 	},
 	
