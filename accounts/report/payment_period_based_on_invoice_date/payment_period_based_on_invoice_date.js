@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Payment Made With Ageing"] = {
+wn.query_reports["Payment Period Based On Invoice Date"] = {
 	"filters": [
 		{
 			fieldname: "from_date",
@@ -16,8 +16,15 @@ wn.query_reports["Payment Made With Ageing"] = {
 			default: get_today()
 		},
 		{
+			fieldname:"payment_type",
+			label: wn._("Payment Type"),
+			fieldtype: "Select",
+			options: "Incoming\nOutgoing",
+			default: "Incoming"
+		},
+		{
 			fieldname:"account",
-			label: wn._("Supplier Account"),
+			label: wn._("Account"),
 			fieldtype: "Link",
 			options: "Account",
 			get_query: function() {
@@ -25,9 +32,7 @@ wn.query_reports["Payment Made With Ageing"] = {
 					query: "accounts.utils.get_account_list", 
 					filters: {
 						is_pl_account: "No",
-						debit_or_credit: "Credit",
-						company: wn.query_report.filters_by_name.company.get_value(),
-						master_type: "Supplier"
+						company: wn.query_report.filters_by_name.company.get_value()
 					}
 				}
 			}
