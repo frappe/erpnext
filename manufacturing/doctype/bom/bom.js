@@ -25,7 +25,7 @@ cur_frm.cscript.update_cost = function() {
 
 cur_frm.cscript.with_operations = function(doc) {
 	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation_no", doc.with_operations);
-	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.with_operations)
+	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.with_operations);
 }
 
 cur_frm.cscript.operation_no = function(doc, cdt, cdn) {

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:23:28", 
+  "modified": "2013-12-04 11:51:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -129,7 +129,6 @@
   "options": "Specify the operations, operating cost and give a unique Operation no to your operations."
  }, 
  {
-  "depends_on": "with_operations", 
   "doctype": "DocField", 
   "fieldname": "bom_operations", 
   "fieldtype": "Table", 
