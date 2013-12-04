@@ -6,6 +6,8 @@ def execute():
 	
 	webnotes.delete_doc('Page', 'stock-ledger')
 	webnotes.delete_doc('Page', 'stock-ageing')
+	webnotes.delete_doc('Page', 'stock-level')
 	
 	os.system("rm -rf app/stock/page/stock_ledger")
 	os.system("rm -rf app/stock/page/stock_ageing")
+	os.system("rm -rf app/stock/page/stock_level")
