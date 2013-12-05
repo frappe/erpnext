@@ -15,4 +15,5 @@ def execute():
 	
 	# reset property setters for series
 	for name in ("Stock Settings", "Selling Settings", "Buying Settings", "HR Settings"):
+		webnotes.reload_doc(name.split()[0], 'DocType', name)
 		webnotes.bean(name, name).save()
