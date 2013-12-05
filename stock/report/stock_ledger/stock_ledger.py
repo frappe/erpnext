@@ -3,37 +3,62 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 def execute(filters=None):
-	columns = ["Date:Datetime:95", "Item:Link/Item:100", "Item Name::100", 
+	columns = get_columns()
+	sl_entries = get_stock_ledger_entries(filters)
+	item_details = get_item_details(filters)
+	
+	data = []
+	for sle in sl_entries:
+		item_detail = item_details[sle.item_code]
+		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group, 
+			item_detail.brand, item_detail.description, sle.warehouse, item_detail.stock_uom, 
+			sle.actual_qty, sle.qty_after_transaction, sle.stock_value, sle.voucher_type, 
+			sle.voucher_no, sle.batch_no, sle.serial_no, sle.company])
+	
+	return columns, data
+	
+def get_columns():
+	return ["Date:Datetime:95", "Item:Link/Item:100", "Item Name::100", 
 		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100",
 		"Description::200", "Warehouse:Link/Warehouse:100",
 		"Stock UOM:Link/UOM:100", "Qty:Float:50", "Balance Qty:Float:80", 
 		"Balance Value:Currency:100", "Voucher Type::100", "Voucher #::100",
 		"Batch:Link/Batch:100", "Serial #:Link/Serial No:100", "Company:Link/Company:100"]
-
-	data = webnotes.conn.sql("""select concat_ws(" ", posting_date, posting_time),
-			item.name, item.item_name, item.item_group, brand, description, warehouse, sle.stock_uom,
-			actual_qty, qty_after_transaction, stock_value, voucher_type, voucher_no, 
-			batch_no, serial_no, company
-		from `tabStock Ledger Entry` sle,
-			(select name, item_name, description, stock_uom, brand, item_group
-				from `tabItem` {item_conditions}) item
-		where item_code = item.name and
-			company = %(company)s and
+	
+def get_stock_ledger_entries(filters):
+	if not filters.get("company"):
+		webnotes.throw(_("Company is mandatory"))
+	if not filters.get("from_date"):
+		webnotes.throw(_("From Date is mandatory"))
+	if not filters.get("to_date"):
+		webnotes.throw(_("To Date is mandatory"))
+		
+	return webnotes.conn.sql("""select concat_ws(" ", posting_date, posting_time) as date,
+			item_code, warehouse, actual_qty, qty_after_transaction, 
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
+		from `tabStock Ledger Entry`
+		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
-			order by posting_date desc, posting_time desc, sle.name desc"""\
-		.format(item_conditions=get_item_conditions(filters),
-			sle_conditions=get_sle_conditions(filters)),
-		filters)
+			order by posting_date desc, posting_time desc, name desc"""\
+		.format(sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
 
-	return columns, data
+def get_item_details(filters):
+	item_details = {}
+	for item in webnotes.conn.sql("""select name, item_name, description, item_group, 
+			brand, stock_uom from `tabItem` {item_conditions}"""\
+			.format(item_conditions=get_item_conditions(filters)), filters, as_dict=1):
+		item_details.setdefault(item.name, item)
+		
+	return item_details
 	
 def get_item_conditions(filters):
 	conditions = []
 	if filters.get("item_code"):
-		conditions.append("item_code=%(item_code)s")
+		conditions.append("name=%(item_code)s")
 	if filters.get("brand"):
 		conditions.append("brand=%(brand)s")
 	
