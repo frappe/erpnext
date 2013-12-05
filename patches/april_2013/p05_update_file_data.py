@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes, webnotes.utils, os
@@ -37,7 +37,7 @@ def update_file_list(doctype, singles):
 		except Exception, e:
 			print webnotes.getTraceback()
 			if (e.args and e.args[0]!=1054) or not e.args:
-				raise e
+				raise
 
 def update_for_doc(doctype, doc):
 	for filedata in doc.file_list.split("\n"):
@@ -52,7 +52,7 @@ def update_for_doc(doctype, doc):
 		
 		exists = True
 		if not (filename.startswith("http://") or filename.startswith("https://")):
-			if not os.path.exists(webnotes.utils.get_path("public", "files", filename)):
+			if not os.path.exists(webnotes.utils.get_site_path(webnotes.conf.files_path, filename)):
 				exists = False
 
 		if exists:

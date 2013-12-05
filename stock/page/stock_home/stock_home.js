@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt"
 
 wn.module_page["Stock"] = [
@@ -77,7 +77,12 @@ wn.module_page["Stock"] = [
 			{
 				"doctype":"Price List",
 				"label": wn._("Price List"),
-				"description": wn._("Multiple Item Prices")
+				"description": wn._("Multiple Price list.")
+			},
+			{
+				"doctype":"Item Price",
+				"label": wn._("Item Price"),
+				"description": wn._("Multiple Item prices.")
 			},
 			{
 				"doctype":"Quality Inspection",
@@ -133,7 +138,8 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				page: "stock-ledger"
+				doctype: "Delivery Note",
+				route: "query-report/Stock Ledger"
 			},
 			{
 				"label":wn._("Stock Balance"),
@@ -166,11 +172,6 @@ wn.module_page["Stock"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Stock Ledger"),
-				route: "Report/Stock Ledger Entry/Stock Ledger",
-				doctype: "Stock Ledger Entry"
-			},
-			{
 				"label":wn._("Ordered Items To Be Delivered"),
 				route: "query-report/Ordered Items To Be Delivered",
 				doctype: "Delivery Note"
@@ -202,8 +203,8 @@ wn.module_page["Stock"] = [
 			},
 			{
 				"label":wn._("Item-wise Price List Rate"),
-				route: "Report/Price List/Item-Wise Price List",
-				doctype: "Price List"
+				route: "Report/Item Price/Item-wise Price List Rate",
+				doctype: "Item Price"
 			},
 			{
 				"label":wn._("Purchase In Transit"),

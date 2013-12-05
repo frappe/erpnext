@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc,dt,dn){
@@ -15,7 +15,7 @@ cur_frm.cscript.to_date = function(doc, cdt, cdn) {
     function(r, rt) {
     var doc = locals[cdt][cdn];
     if (r.message) {
-      alert("To date cannot be before from date");
+      alert(wn._("To date cannot be before from date"));
       doc.to_date = '';
       refresh_field('to_date');
     }

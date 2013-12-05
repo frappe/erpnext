@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -62,7 +62,7 @@ test_records = [
 			"shipping_amount": 0.0
 		},
 		{
-			"doctype": "For Territory",
+			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory"
 		}

@@ -1,15 +1,30 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // 
 
 //--------- ONLOAD -------------
+wn.require("app/js/controllers/accounts.js");
+
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
    
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
    cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
+}
+
+// For customizing print
+cur_frm.pformat.net_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.grand_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.in_words_import = function(doc) {
+	return '';
 }
 
 cur_frm.pformat.purchase_tax_details= function(doc){
@@ -27,6 +42,11 @@ cur_frm.pformat.purchase_tax_details= function(doc){
     var new_val = flt(val)/flt(doc.conversion_rate);
     return new_val;
   }
+  
+  function print_hide(fieldname) {
+	var doc_field = wn.meta.get_docfield(doc.doctype, fieldname, doc.name);
+	return doc_field.print_hide;
+  }
 
   var cl = getchildren('Purchase Taxes and Charges',doc.name,'purchase_tax_details');
 
@@ -35,19 +55,22 @@ cur_frm.pformat.purchase_tax_details= function(doc){
 		<tr><td style="width: 60%"></td><td>';
   
   // main table
-  out +='<table class="noborder" style="width:100%">'
-		+make_row('Net Total',convert_rate(doc.net_total),1);
-
+  out +='<table class="noborder" style="width:100%">';
+  if(!print_hide('net_total_import')) {
+	out += make_row('Net Total', doc.net_total_import, 1);
+  }
+  
   // add rows
   if(cl.length){
     for(var i=0;i<cl.length;i++){
       out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
     }
   }
-  
-  // grand total
-  out +=make_row('Grand Total',doc.grand_total_import,1)
-  if(doc.in_words_import){
+	// grand total
+	if(!print_hide('grand_total_import')) {
+		out += make_row('Grand Total', doc.grand_total_import, 1);
+	}
+  if(doc.in_words_import && !print_hide('in_words_import')){
     out +='</table></td></tr>';
     out += '<tr><td colspan = "2">';
     out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
@@ -60,12 +83,12 @@ cur_frm.pformat.purchase_tax_details= function(doc){
 cur_frm.cscript.add_deduct_tax = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.category && d.add_deduct_tax){
-    alert("Please select Category first");
+    alert(wn._("Please select Category first"));
     d.add_deduct_tax = '';
   }
   else if(d.category != 'Total' && d.add_deduct_tax == 'Deduct') {
 	console.log([d.category, d.add_deduct_tax]);
-    msgprint("You cannot deduct when category is for 'Valuation' or 'Valuation and Total'");
+    msgprint(wn._("You cannot deduct when category is for 'Valuation' or 'Valuation and Total'"));
     d.add_deduct_tax = '';
   }
 
@@ -74,15 +97,15 @@ cur_frm.cscript.add_deduct_tax = function(doc, cdt, cdn) {
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.category && d.charge_type){
-    alert("Please select Category first");
+    alert(wn._("Please select Category first"));
     d.charge_type = '';
   }  
   else if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-    alert("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
+    alert(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
     d.charge_type = '';
   }
   else if((d.category == 'Valuation' || d.category == 'Valuation and Total') && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-    alert("You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total")
+    alert(wn._("You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total"))
     d.charge_type = '';
   }
   validated = false;
@@ -97,16 +120,16 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 cur_frm.cscript.row_id = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.row_id){
-    alert("Please select Charge Type first");
+    alert(wn._("Please select Charge Type first"));
     d.row_id = '';
   }
   else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-    alert("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'");
+    alert(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
     d.row_id = '';
   }
   else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id){
     if(d.row_id >= d.idx){
-      alert("You cannot Enter Row no. greater than or equal to current row no. for this Charge type");
+      alert(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
       d.row_id = '';
     }
   }
@@ -134,24 +157,10 @@ cur_frm.fields_dict['purchase_tax_details'].grid.get_field("cost_center").get_qu
   }
 }
 
-cur_frm.cscript.account_head = function(doc, cdt, cdn) {
-  var d = locals[cdt][cdn];
-  if(!d.charge_type && d.account_head){
-    alert("Please select Charge Type first");
-    validated = false;
-    d.account_head = '';
-  }
-  else if(d.account_head && d.charge_type) {
-    arg = "{'charge_type' : '" + d.charge_type + "', 'account_head' : '" + d.account_head + "'}";
-    return get_server_fields('get_rate', arg, 'purchase_tax_details', doc, cdt, cdn, 1);
-  }
-  refresh_field('account_head',d.name,'purchase_tax_details');
-}
-
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.rate) {
-    alert("Please select Charge Type first");
+    alert(wn._("Please select Charge Type first"));
     d.rate = '';
   }
   validated = false;
@@ -161,11 +170,11 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if(!d.charge_type && d.tax_amount){
-    alert("Please select Charge Type first");
+    alert(wn._("Please select Charge Type first"));
     d.tax_amount = '';
   }
   else if(d.charge_type && d.tax_amount) {
-    alert("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate");
+    alert(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
     d.tax_amount = '';
   }
   validated = false;

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -10,6 +10,6 @@ def execute():
 		webnotes.conn.sql("""alter table `tabStock Ledger Entry` add index posting_sort_index(posting_date, posting_time, name)""")
 		webnotes.conn.commit()
 	except Exception, e:
-		if e.args[0]!=1061: raise e
+		if e.args[0]!=1061: raise
 	webnotes.conn.begin()
 	

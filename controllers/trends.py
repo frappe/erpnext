@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -151,24 +151,32 @@ def get_period_wise_query(bet_dates, trans_date, query_details):
 				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
-def get_period_date_ranges(period, fiscal_year):
-  from dateutil.relativedelta import relativedelta
+@webnotes.whitelist(allow_guest=True)
+def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
+	from dateutil.relativedelta import relativedelta
 
-  year_start_date = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
-  increment = {
-    "Monthly": 1,
-    "Quarterly": 3,
-    "Half-Yearly": 6,
-    "Yearly": 12
-  }.get(period)
+	if not year_start_date:
+		year_start_date, year_end_date = webnotes.conn.get_value("Fiscal Year", 
+			fiscal_year, ["year_start_date", "year_end_date"])
 
-  period_date_ranges = []
-  for i in xrange(1, 13, increment): 
-    period_end_date = year_start_date + relativedelta(months=increment, days=-1)
-    period_date_ranges.append([year_start_date, period_end_date])
-    year_start_date = period_end_date + relativedelta(days=1)
+	increment = {
+		"Monthly": 1,
+		"Quarterly": 3,
+		"Half-Yearly": 6,
+		"Yearly": 12
+	}.get(period)
 
-  return period_date_ranges
+	period_date_ranges = []
+	for i in xrange(1, 13, increment):
+		period_end_date = getdate(year_start_date) + relativedelta(months=increment, days=-1)
+		if period_end_date > getdate(year_end_date):
+			period_end_date = year_end_date
+		period_date_ranges.append([year_start_date, period_end_date])
+		year_start_date = period_end_date + relativedelta(days=1)
+		if period_end_date == year_end_date:
+			break
+
+	return period_date_ranges
 
 def get_period_month_ranges(period, fiscal_year):
 	from dateutil.relativedelta import relativedelta

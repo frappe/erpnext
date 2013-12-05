@@ -1,9 +1,8 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
-sql = webnotes.conn.sql
 	
 from webnotes.utils import cint
 
@@ -53,7 +52,7 @@ class DocType:
 				inc_email.password = self.doc.support_password
 			except AttributeError, e:
 				webnotes.msgprint(err_msg)
-				raise e
+				raise
 
 			pop_mb = POP3Mailbox(inc_email)
 			
@@ -62,7 +61,7 @@ class DocType:
 			except _socket.error, e:
 				# Invalid mail server -- due to refusing connection
 				webnotes.msgprint('Invalid POP3 Mail Server. Please rectify and try again.')
-				raise e
+				raise
 			except poplib.error_proto, e:
 				webnotes.msgprint('Invalid User Name or Support Password. Please rectify and try again.')
-				raise e
+				raise

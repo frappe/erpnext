@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt"
 
 wn.module_page["Buying"] = [
@@ -67,8 +67,13 @@ wn.module_page["Buying"] = [
 			},
 			{
 				label: wn._("Price List"),
-				description: wn._("Mupltiple Item prices."),
+				description: wn._("Multiple Price list."),
 				doctype:"Price List"
+			},
+			{
+				label: wn._("Item Price"),
+				description: wn._("Multiple Item prices."),
+				doctype:"Item Price"
 			},
 			{
 				"doctype":"Supplier Type",
@@ -145,6 +150,16 @@ wn.module_page["Buying"] = [
 				route: "query-report/Purchase Order Trends",
 				doctype: "Purchase Order"
 			},
+			{
+				"label":wn._("Supplier Addresses And Contacts"),
+				route: "query-report/Supplier Addresses and Contacts",
+				doctype: "Supplier"
+			},
+			{
+				"label":wn._("Supplier-Wise Sales Analytics"),
+				route: "query-report/Supplier-Wise Sales Analytics",
+				doctype: "Stock Ledger Entry"
+			}
 		]
 	}
 ]

@@ -1,0 +1,170 @@
+[
+ {
+  "creation": "2013-02-22 01:28:00", 
+  "docstatus": 0, 
+  "modified": "2013-10-16 16:37:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Packed Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Packed Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parent_item", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Parent Item", 
+  "oldfieldname": "parent_item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parent_detail_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Parent Detail docname", 
+  "no_copy": 1, 
+  "oldfieldname": "parent_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "read_only": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Text", 
+  "label": "Serial No"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Data", 
+  "label": "Batch No"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "actual_qty", 
+  "fieldtype": "Float", 
+  "label": "Actual Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "actual_qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "projected_qty", 
+  "fieldtype": "Float", 
+  "label": "Projected Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "projected_qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_doctype", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Prevdoc DocType", 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "page_break", 
+  "fieldtype": "Check", 
+  "label": "Page Break", 
+  "oldfieldname": "page_break", 
+  "oldfieldtype": "Check", 
+  "read_only": 1
+ }
+]

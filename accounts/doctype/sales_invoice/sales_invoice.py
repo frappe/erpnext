@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -48,12 +48,7 @@ class DocType(SellingController):
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
-
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
-		sales_com_obj.validate_max_discount(self, 'entries')
+		self.check_stop_sales_order("sales_order")
 		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
@@ -83,7 +78,6 @@ class DocType(SellingController):
 	def on_submit(self):
 		if cint(self.doc.update_stock) == 1:			
 			self.update_stock_ledger()
-			self.update_serial_nos()
 		else:
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
@@ -97,6 +91,7 @@ class DocType(SellingController):
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+		self.check_credit_limit(self.doc.debit_to)
 
 		if not cint(self.doc.is_pos) == 1:
 			self.update_against_document_in_jv()
@@ -111,10 +106,8 @@ class DocType(SellingController):
 	def on_cancel(self):
 		if cint(self.doc.update_stock) == 1:
 			self.update_stock_ledger()
-			self.update_serial_nos(cancel = True)
 		
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
+		self.check_stop_sales_order("sales_order")
 		
 		from accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
@@ -258,25 +251,7 @@ class DocType(SellingController):
 			else:
 				due_date = self.doc.posting_date
 
-		return due_date
-
-	def get_barcode_details(self, barcode):
-		return get_obj('Sales Common').get_barcode_details(barcode)
-
-
-	def get_adj_percent(self, arg=''):
-		"""Fetch ref rate from item master as per selected price list"""
-		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_rate(self,arg):
-		"""Get tax rate if account type is tax"""
-		get_obj('Sales Common').get_rate(arg)
-		
-		
-	def get_comm_rate(self, sales_partner):
-		"""Get Commission rate of Sales Partner"""
-		return get_obj('Sales Common').get_comm_rate(sales_partner, self)	
+		return due_date	
 	
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
@@ -479,10 +454,6 @@ class DocType(SellingController):
 				w = ps[0][1]
 		return w
 
-	
-	def make_packing_list(self):
-		get_obj('Sales Common').make_packing_list(self,'entries')
-
 	def on_update(self):
 		if cint(self.doc.update_stock) == 1:
 			# Set default warehouse from pos setting
@@ -493,7 +464,8 @@ class DocType(SellingController):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
-			self.make_packing_list()
+			from stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self, 'entries')
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			
@@ -525,8 +497,7 @@ class DocType(SellingController):
 
 	def update_stock_ledger(self):
 		sl_entries = []
-		items = get_obj('Sales Common').get_item_list(self)
-		for d in items:
+		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
@@ -536,32 +507,39 @@ class DocType(SellingController):
 		
 		self.make_sl_entries(sl_entries)
 		
-	def make_gl_entries(self):
-		from accounts.general_ledger import make_gl_entries, merge_similar_entries
+	def make_gl_entries(self, update_gl_entries_after=True):
+		gl_entries = self.get_gl_entries()
+		
+		if gl_entries:
+			from accounts.general_ledger import make_gl_entries
+			
+			update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account \
+				and 'No' or 'Yes'
+			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
+				update_outstanding=update_outstanding, merge_entries=False)
+			
+			if update_gl_entries_after and cint(self.doc.update_stock) \
+				and cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+					self.update_gl_entries_after()
+				
+	def get_gl_entries(self, warehouse_account=None):
+		from accounts.general_ledger import merge_similar_entries
 		
 		gl_entries = []
 		
 		self.make_customer_gl_entry(gl_entries)
-	
+		
 		self.make_tax_gl_entries(gl_entries)
 		
 		self.make_item_gl_entries(gl_entries)
 		
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
-						
+		
 		self.make_pos_gl_entries(gl_entries)
 		
-		update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account and 'No' or 'Yes'
+		return gl_entries
 		
-		if gl_entries:
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
-				update_outstanding=update_outstanding, merge_entries=False)
-				
-			if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
-					and cint(self.doc.update_stock):
-				self.update_gl_entries_after()
-				
 	def make_customer_gl_entry(self, gl_entries):
 		if self.doc.grand_total:
 			gl_entries.append(
@@ -605,7 +583,7 @@ class DocType(SellingController):
 		# expense account gl entries
 		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.doc.update_stock):
-			gl_entries += self.get_gl_entries_for_stock()
+			gl_entries += super(DocType, self).get_gl_entries()
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.doc.is_pos) and self.doc.cash_bank_account and self.doc.paid_amount:
@@ -869,7 +847,6 @@ def send_notification(new_rv):
 		
 def notify_errors(inv, owner):
 	import webnotes
-	import website
 		
 	exception_msg = """
 		Dear User,
@@ -928,11 +905,16 @@ def get_bank_cash_account(mode_of_payment):
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
 
+	# income account can be any Credit account, 
+	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
-				and tabAccount.docstatus!=2 
+				and tabAccount.docstatus!=2
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
@@ -965,8 +947,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			"doctype": "Delivery Note Item", 
 			"field_map": {
 				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype",
+				"parent": "against_sales_invoice", 
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item

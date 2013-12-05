@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -29,6 +29,10 @@ def execute_daily():
 	# event reminders
 	from core.doctype.event.event import send_event_digest
 	run_fn(send_event_digest)
+	
+	# clear daily event notifications
+	from core.doctype.notification_count.notification_count import delete_notification_count_for
+	delete_notification_count_for("Event")
 	
 	# email digest
 	from setup.doctype.email_digest.email_digest import send

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 
 class OverProductionError(webnotes.ValidationError): pass
 
@@ -18,6 +17,9 @@ class DocType:
 		self.doclist = doclist
 
 	def validate(self):
+		if self.doc.docstatus == 0:
+			self.doc.status = "Draft"
+			
 		import utilities
 		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"In Process", "Completed", "Cancelled"])
@@ -31,7 +33,7 @@ class DocType:
 		
 	def validate_bom_no(self):
 		if self.doc.bom_no:
-			bom = sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
@@ -67,7 +69,7 @@ class DocType:
 			where parent = %s and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Packing Item` 
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
@@ -109,7 +111,7 @@ class DocType:
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = sql("""select name from `tabStock Entry` 
+		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
 			msgprint("""Submitted Stock Entry %s exists against this production order. 
@@ -131,16 +133,16 @@ class DocType:
 
 @webnotes.whitelist()	
 def get_item_details(item):
-	res = webnotes.conn.sql("""select stock_uom
+	res = webnotes.conn.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
-		and name=%s""", (item,), as_dict=1)
+		and name=%s""", item, as_dict=1)
 	
 	if not res:
 		return {}
 		
 	res = res[0]
 	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s 
-		and ifnull(is_default, 0)=1""", (item,))
+		and ifnull(is_default, 0)=1""", item)
 	if bom:
 		res.bom_no = bom[0][0]
 		
@@ -149,12 +151,6 @@ def get_item_details(item):
 @webnotes.whitelist()
 def make_stock_entry(production_order_id, purpose):
 	production_order = webnotes.bean("Production Order", production_order_id)
-	
-	# validate already existing
-	ste = webnotes.conn.get_value("Stock Entry",  {
-		"production_order":production_order_id,
-		"purpose": purpose
-	}, "name")
 		
 	stock_entry = webnotes.new_bean("Stock Entry")
 	stock_entry.doc.purpose = purpose

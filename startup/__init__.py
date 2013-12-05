@@ -27,11 +27,9 @@ profile_defaults = {
 	"Territory": "territory"
 }
 
-application_home_page = "desktop"
-
 # add startup propertes
 mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via 
-	<a style="color: #888" href="https://erpnext.com">ERPNext</a></div>"""
+	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
 	
 def get_monthly_bulk_mail_limit():
 	import webnotes

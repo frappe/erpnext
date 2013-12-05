@@ -2,12 +2,13 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-10-03 18:54:31", 
+  "modified": "2013-11-18 15:16:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
@@ -49,11 +50,10 @@
   "options": "icon-user"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -165,7 +165,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -180,12 +179,11 @@
   "search_index": 1
  }, 
  {
-  "description": "Enter the date by which payments from customer is expected against this invoice.", 
   "doctype": "DocField", 
   "fieldname": "due_date", 
   "fieldtype": "Date", 
   "in_filter": 1, 
-  "label": "Due Date", 
+  "label": "Payment Due Date", 
   "no_copy": 1, 
   "oldfieldname": "due_date", 
   "oldfieldtype": "Date", 
@@ -225,12 +223,11 @@
   "reqd": 1
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which Customer Currency is converted to customer's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Conversion Rate", 
+  "label": "Exchange Rate", 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
@@ -257,7 +254,6 @@
   "reqd": 1
  }, 
  {
-  "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -272,7 +268,7 @@
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Price List Currency Conversion Rate", 
+  "label": "Price List Exchange Rate", 
   "no_copy": 0, 
   "print_hide": 1, 
   "read_only": 0, 
@@ -323,7 +319,7 @@
   "fieldname": "packing_details", 
   "fieldtype": "Table", 
   "label": "Packing Details", 
-  "options": "Delivery Note Packing Item", 
+  "options": "Packed Item", 
   "print_hide": 1, 
   "read_only": 0
  }, 
@@ -379,7 +375,7 @@
   "doctype": "DocField", 
   "fieldname": "charge", 
   "fieldtype": "Link", 
-  "label": "Apply Taxes and Charges Master", 
+  "label": "Tax Master", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
@@ -395,7 +391,7 @@
   "doctype": "DocField", 
   "fieldname": "shipping_rule", 
   "fieldtype": "Link", 
-  "label": "Apply Shipping Rule", 
+  "label": "Shipping Rule", 
   "oldfieldtype": "Button", 
   "options": "Shipping Rule", 
   "print_hide": 1, 
@@ -722,7 +718,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -749,6 +745,7 @@
   "read_only": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -761,6 +758,7 @@
   "search_index": 0
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -822,7 +820,6 @@
   "search_index": 1
  }, 
  {
-  "description": "Track this Sales Invoice against any Project", 
   "doctype": "DocField", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
@@ -918,7 +915,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

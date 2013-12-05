@@ -1,0 +1,12 @@
+#page-setup-wizard .panel {
+	background-color: #fff;
+	position: fixed; top:0; left: 0; width:100%; height:100%;
+	overflow: auto;
+}
+
+#page-setup-wizard .panel-body {
+}
+
+#page-setup-wizard .col-md-6 .control-input .btn {
+	width: 100%;
+}

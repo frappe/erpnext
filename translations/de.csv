@@ -814,7 +814,7 @@ Delivery Note Item,Lieferscheinposition
 Delivery Note Items,Lieferscheinpositionen
 Delivery Note Message,Lieferschein Nachricht
 Delivery Note No,Lieferschein Nein
-Delivery Note Packing Item,Lieferschein Verpackung Artikel
+Packed Item,Lieferschein Verpackung Artikel
 Delivery Note Required,Lieferschein erforderlich
 Delivery Note Trends,Lieferschein Trends
 Delivery Status,Lieferstatus
@@ -1683,7 +1683,7 @@ Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,"Mergin
 "Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account","Merging ist nur möglich, wenn nach \ Eigenschaften sind in beiden Datensätzen gleich. Gruppen-oder Ledger, Debit-oder Kreditkarten, PL Konto"
 Message,Nachricht
 Message Parameter,Nachricht Parameter
-Message greater than 160 character will be splitted into multiple mesage,Größer als 160 Zeichen Nachricht in mehrere mesage aufgeteilt werden
+Messages greater than 160 characters will be split into multiple messages,Größer als 160 Zeichen Nachricht in mehrere mesage aufgeteilt werden
 Messages,Nachrichten
 Method,Verfahren
 Middle Income,Middle Income

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 
@@ -8,6 +8,9 @@ import webnotes
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
+		# clear GL Entries
+		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		
 		from accounts.doctype.journal_voucher.test_journal_voucher import test_records as jv_records
 		jv = webnotes.bean(copy=jv_records[2])
 		jv.insert()

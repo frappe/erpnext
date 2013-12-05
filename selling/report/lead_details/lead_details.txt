@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-10-22 11:58:16", 
+  "docstatus": 0, 
+  "modified": "2013-11-06 15:01:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "SELECT\n    `tabLead`.name as \"Lead Id:Link/Lead:120\",\n    `tabLead`.lead_name as \"Lead Name::120\",\n\t`tabLead`.company_name as \"Company Name::120\",\n\t`tabLead`.status as \"Status::120\",\n\tconcat_ws(', ', \n\t\ttrim(',' from `tabAddress`.address_line1), \n\t\ttrim(',' from tabAddress.address_line2), \n\t\ttabAddress.state, tabAddress.pincode, tabAddress.country\n\t) as 'Address::180',\n\t`tabLead`.phone as \"Phone::100\",\n\t`tabLead`.mobile_no as \"Mobile No::100\",\n\t`tabLead`.email_id as \"Email Id::120\",\n\t`tabLead`.lead_owner as \"Lead Owner::120\",\n\t`tabLead`.source as \"Source::120\",\n\t`tabLead`.territory as \"Territory::120\",\n    `tabLead`.owner as \"Owner:Link/Profile:120\"\nFROM\n\t`tabLead`\n\tleft join `tabAddress` on (\n\t\t`tabAddress`.lead=`tabLead`.name\n\t)\nWHERE\n\t`tabLead`.docstatus<2\nORDER BY\n\t`tabLead`.name asc", 
+  "ref_doctype": "Lead", 
+  "report_name": "Lead Details", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Lead Details"
+ }
+]

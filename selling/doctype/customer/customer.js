@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 wn.require('app/setup/doctype/contact_control/contact_control.js');
@@ -20,10 +20,7 @@ cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.setup_dashboard(doc);
-	if(sys_defaults.cust_master_name == 'Customer Name')
-		hide_field('naming_series');
-	else
-		unhide_field('naming_series');
+	erpnext.hide_naming_series();
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);
@@ -34,7 +31,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		cur_frm.cscript.make_contact(doc,dt,dn);
 
 		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"customer": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
 			doc: doc,
 		});
@@ -45,7 +41,8 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.reset(doc);
 	if(doc.__islocal) 
 		return;
-	cur_frm.dashboard.set_headline('<span class="text-muted">'+ wn._('Loading...')+ '</span>')
+	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
+		cur_frm.dashboard.set_headline('<span class="text-muted">'+ wn._('Loading...')+ '</span>')
 	
 	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
 	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
@@ -60,12 +57,14 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 			customer: cur_frm.doc.name
 		},
 		callback: function(r) {
-			cur_frm.dashboard.set_headline(
-				wn._("Total Billing This Year: ") + "<b>" 
-				+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
-				+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
-				+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
-				+ '</b></span>');
+			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
+				cur_frm.dashboard.set_headline(
+					wn._("Total Billing This Year: ") + "<b>" 
+					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
+					+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+					+ '</b></span>');
+			}
 			cur_frm.dashboard.set_badge_count(r.message);
 		}
 	})
@@ -81,7 +80,7 @@ cur_frm.cscript.make_address = function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
-			no_results_message: 'No addresses created',
+			no_results_message: wn._('No addresses created'),
 			render_row: cur_frm.cscript.render_address_row,
 		});
 		// note: render_address_row is defined in contact_control.js
@@ -111,12 +110,18 @@ cur_frm.cscript.make_contact = function() {
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 	return{
 		filters:{'is_group': 'No'}
-	}	
+	}
 }
 
 
 cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
 	return{
 		query:"controllers.queries.lead_query"
+	}
+}
+
+cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{'buying_or_selling': "Selling"}
 	}
 }

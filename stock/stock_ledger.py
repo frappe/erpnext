@@ -1,5 +1,6 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+from __future__ import unicode_literals
 
 import webnotes
 from webnotes import msgprint
@@ -9,6 +10,9 @@ import json
 
 # future reposting
 class NegativeStockError(webnotes.ValidationError): pass
+
+_exceptions = webnotes.local('stockledger_exceptions')
+# _exceptions = []
 
 def make_sl_entries(sl_entries, is_amended=None):
 	if sl_entries:
@@ -55,7 +59,6 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 	webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
-_exceptions = []
 def update_entries_after(args, verbose=1):
 	"""
 		update valution rate and qty after transaction 
@@ -68,8 +71,8 @@ def update_entries_after(args, verbose=1):
 			"posting_time": "12:00"
 		}
 	"""
-	global _exceptions
-	_exceptions = []
+	if not _exceptions:
+		webnotes.local.stockledger_exceptions = []
 	
 	previous_sle = get_sle_before_datetime(args)
 	
@@ -190,10 +193,12 @@ def validate_negative_stock(qty_after_transaction, sle):
 		will not consider cancelled entries
 	"""
 	diff = qty_after_transaction + flt(sle.actual_qty)
+
+	if not _exceptions:
+		webnotes.local.stockledger_exceptions = []
 	
 	if diff < 0 and abs(diff) > 0.0001:
 		# negative stock!
-		global _exceptions
 		exc = sle.copy().update({"diff": diff})
 		_exceptions.append(exc)
 		return False

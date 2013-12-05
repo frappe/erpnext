@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch("time_log", "activity_type", "activity_type");
@@ -25,7 +25,7 @@ $.extend(cur_frm.cscript, {
 		}[doc.status]);
 		
 		if(doc.status=="Submitted") {
-			cur_frm.add_custom_button("Make Sales Invoice", function() { cur_frm.cscript.make_invoice() }, 
+			cur_frm.add_custom_button(wn._("Make Sales Invoice"), function() { cur_frm.cscript.make_invoice() }, 
 				"icon-file-alt");
 		}
 	},

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 10:53:52", 
   "docstatus": 0, 
-  "modified": "2013-09-10 14:59:41", 
+  "modified": "2013-11-03 14:11:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,11 +55,10 @@
   "width": "50%"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -91,7 +90,6 @@
   "width": "50%"
  }, 
  {
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -448,7 +446,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

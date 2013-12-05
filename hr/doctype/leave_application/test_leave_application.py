@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -7,6 +7,9 @@ import unittest
 from hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 
 class TestLeaveApplication(unittest.TestCase):
+	def tearDown(self):
+		webnotes.set_user("Administrator")
+		
 	def _clear_roles(self):
 		webnotes.conn.sql("""delete from `tabUserRole` where parent in 
 			("test@example.com", "test1@example.com", "test2@example.com")""")
@@ -15,7 +18,8 @@ class TestLeaveApplication(unittest.TestCase):
 		webnotes.conn.sql("""delete from `tabLeave Application`""")
 		
 	def _add_employee_leave_approver(self, employee, leave_approver):
-		webnotes.session.user = "Administrator"
+		temp_session_user = webnotes.session.user
+		webnotes.set_user("Administrator")
 		employee = webnotes.bean("Employee", employee)
 		employee.doclist.append({
 			"doctype": "Employee Leave Approver",
@@ -23,6 +27,7 @@ class TestLeaveApplication(unittest.TestCase):
 			"leave_approver": leave_approver
 		})
 		employee.save()
+		webnotes.set_user(temp_session_user)
 	
 	def get_application(self, doclist):
 		application = webnotes.bean(copy=doclist)
@@ -31,7 +36,6 @@ class TestLeaveApplication(unittest.TestCase):
 		return application
 
 	def test_block_list(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		
 		from webnotes.profile import add_role
@@ -45,7 +49,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
-		webnotes.session.user = "test1@example.com"
+		webnotes.set_user("test1@example.com")
 
 		# clear other applications
 		webnotes.conn.sql("delete from `tabLeave Application`")
@@ -54,7 +58,6 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertTrue(application.insert())
 		
 	def test_overlap(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		self._clear_applications()
 		
@@ -62,7 +65,7 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test@example.com", "Employee")
 		add_role("test2@example.com", "Leave Approver")
 		
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
@@ -72,7 +75,6 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertRaises(OverlapError, application.insert)
 		
 	def test_global_block_list(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 
 		from webnotes.profile import add_role
@@ -87,10 +89,10 @@ class TestLeaveApplication(unittest.TestCase):
 		webnotes.conn.set_value("Employee", "_T-Employee-0002", "department", 
 			"_Test Department")
 		
-		webnotes.session.user = "test1@example.com"
+		webnotes.set_user("test1@example.com")
 		application.insert()
 		
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
@@ -98,7 +100,6 @@ class TestLeaveApplication(unittest.TestCase):
 			"applies_to_all_departments", 0)
 		
 	def test_leave_approval(self):
-		webnotes.session.user = "Administrator"
 		self._clear_roles()
 		
 		from webnotes.profile import add_role
@@ -115,13 +116,13 @@ class TestLeaveApplication(unittest.TestCase):
 		self._clear_applications()
 		
 		# create leave application as Employee
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test1@example.com"
 		application.insert()
 		
 		# submit leave application by Leave Approver
-		webnotes.session.user = "test1@example.com"
+		webnotes.set_user("test1@example.com")
 		application.doc.status = "Approved"
 		application.submit()
 		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,
@@ -138,7 +139,7 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		# TODO - add test2@example.com leave approver in employee's leave approvers list
 		application = self.get_application(test_records[1])
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		
 		application.doc.leave_approver = "test1@example.com"
 		self.assertRaises(InvalidLeaveApproverError, application.insert)
@@ -152,11 +153,11 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		# create leave application as employee
 		# but submit as invalid leave approver - should raise exception
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
-		webnotes.session.user = "test1@example.com"
+		webnotes.set_user("test1@example.com")
 		application.doc.status = "Approved"
 		
 		from webnotes.model.bean import BeanPermissionError
@@ -172,13 +173,13 @@ class TestLeaveApplication(unittest.TestCase):
 		original_department = webnotes.conn.get_value("Employee", "_T-Employee-0001", "department")
 		webnotes.conn.set_value("Employee", "_T-Employee-0001", "department", None)
 		
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
 
 		# change to valid leave approver and try to submit leave application
-		webnotes.session.user = "test2@example.com"
+		webnotes.set_user("test2@example.com")
 		application.doc.status = "Approved"
 		application.submit()
 		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,

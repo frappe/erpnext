@@ -1,5 +1,7 @@
 {
 	"app_name": "ERPNext",
+	"app_version": "3.0.0",
+	"requires_framework_version": "==3.0.0",
 	"base_template": "app/portal/templates/base.html",
 	"modules": {
 		"Selling": {

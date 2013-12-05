@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-08-28 19:15:04", 
+  "modified": "2013-11-02 14:24:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -80,7 +80,7 @@
   "fieldtype": "Select", 
   "label": "Domain", 
   "options": "Distribution\nManufacturing\nRetail\nServices", 
-  "reqd": 1
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -157,7 +157,6 @@
   "width": "50%"
  }, 
  {
-  "description": "To enable more currencies go to Setup > Currency", 
   "doctype": "DocField", 
   "fieldname": "default_currency", 
   "fieldtype": "Link", 

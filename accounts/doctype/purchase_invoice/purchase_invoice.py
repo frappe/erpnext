@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,7 +12,6 @@ from setup.utils import get_company_currency
 
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 	
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -64,18 +63,21 @@ class DocType(BuyingController):
 	def get_credit_to(self):
 		ret = {}
 		if self.doc.supplier:
-			acc_head = sql("""select name, credit_days from `tabAccount` 
+			acc_head = webnotes.conn.sql("""select name, credit_days from `tabAccount` 
 				where (name = %s or (master_name = %s and master_type = 'supplier')) 
 				and docstatus != 2 and company = %s""", 
 				(cstr(self.doc.supplier) + " - " + self.company_abbr, 
 				self.doc.supplier, self.doc.company))
-
+		
 			if acc_head and acc_head[0][0]:
 				ret['credit_to'] = acc_head[0][0]
 				if not self.doc.due_date:
-					ret['due_date'] = add_days(cstr(self.doc.posting_date), acc_head and cint(acc_head[0][1]) or 0)
+					ret['due_date'] = add_days(cstr(self.doc.posting_date), 
+						acc_head and cint(acc_head[0][1]) or 0)
 			elif not acc_head:
-				msgprint("%s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
+				msgprint("%s does not have an Account Head in %s. \
+					You must first create it from the Supplier Master" % \
+					(self.doc.supplier, self.doc.company))
 		return ret
 		
 	def set_supplier_defaults(self):
@@ -86,18 +88,10 @@ class DocType(BuyingController):
 		super(DocType, self).get_advances(self.doc.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
-	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
-
-	def get_rate1(self,acc):
-		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
-		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
-		return ret
-
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				valid_item = sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
+				valid_item = webnotes.conn.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
 				if valid_item[0][0] == 2:
 					msgprint("Item : '%s' is Inactive, you can restore it from Trash" %(d.item_code))
 					raise Exception
@@ -117,7 +111,7 @@ class DocType(BuyingController):
 	def validate_bill_no(self):
 		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
 				not in ['na', 'not applicable', 'none']:
-			b_no = sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
+			b_no = webnotes.conn.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
 				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
@@ -133,7 +127,7 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
+		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
 			self.doc.credit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.credit_to + "does not exist")
@@ -149,7 +143,7 @@ class DocType(BuyingController):
 	# ------------------------------------------------------------
 	def check_for_acc_head_of_supplier(self): 
 		if self.doc.supplier and self.doc.credit_to:
-			acc_head = sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
+			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
 				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
@@ -161,7 +155,7 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purhcase_order)
-				stopped = sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
+				stopped = webnotes.conn.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
 				if stopped:
 					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
 					raise Exception
@@ -261,11 +255,11 @@ class DocType(BuyingController):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order:
-				submitted = sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
+				submitted = webnotes.conn.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
 				if not submitted:
 					webnotes.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
 			if d.purchase_receipt:
-				submitted = sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
+				submitted = webnotes.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
 				if not submitted:
 					webnotes.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					
@@ -299,20 +293,14 @@ class DocType(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-
 		self.check_prev_docstatus()
 		
-		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype,self.doc.company, self.doc.grand_total)
-		
+		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+			self.doc.company, self.doc.grand_total)
 		
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
-				
 		self.update_against_document_in_jv()
-		
 		self.update_prevdoc_status()
 
 	def make_gl_entries(self):
@@ -335,7 +323,7 @@ class DocType(BuyingController):
 			)
 	
 		# tax table gl entries
-		valuation_tax = 0
+		valuation_tax = {}
 		for tax in self.doclist.get({"parentfield": "purchase_tax_details"}):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				gl_entries.append(
@@ -351,11 +339,18 @@ class DocType(BuyingController):
 			
 			# accumulate valuation tax
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
-				valuation_tax += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+				if auto_accounting_for_stock and not tax.cost_center:
+					webnotes.throw(_("Row %(row)s: Cost Center is mandatory \
+						if tax/charges category is Valuation or Valuation and Total" % 
+						{"row": tax.idx}))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
+		rounding_diff = 0.0
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
@@ -364,9 +359,13 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 					
-					valuation_amt = (flt(item.amount, self.precision("amount", item)) + 
+					valuation_amt = flt(flt(item.valuation_rate) * flt(item.qty) * \
+						flt(item.conversion_factor), self.precision("valuation_rate", item))
+					
+					rounding_diff += (flt(item.amount, self.precision("amount", item)) + 
 						flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
-						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)))
+						flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)) - 
+						valuation_amt)
 					
 					gl_entries.append(
 						self.get_gl_dict({
@@ -392,15 +391,25 @@ class DocType(BuyingController):
 		if stock_item_and_auto_accounting_for_stock and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.get_company_default("expenses_included_in_valuation"),
-					"cost_center": self.get_company_default("cost_center"),
-					"against": self.doc.credit_to,
-					"credit": valuation_tax,
-					"remarks": self.doc.remarks or "Accounting Entry for Stock"
-				})
-			)
+			expenses_included_in_valuation = \
+				self.get_company_default("expenses_included_in_valuation")
+				
+			if rounding_diff:
+				import operator
+				cost_center_with_max_value = max(valuation_tax.iteritems(), 
+					key=operator.itemgetter(1))[0]
+				valuation_tax[cost_center_with_max_value] -= flt(rounding_diff)
+			
+			for cost_center, amount in valuation_tax.items():
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": expenses_included_in_valuation,
+						"cost_center": cost_center,
+						"against": self.doc.credit_to,
+						"credit": amount,
+						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+					})
+				)
 		
 		# writeoff account includes petty difference in the invoice amount 
 		# and the amount that is paid
@@ -433,7 +442,7 @@ class DocType(BuyingController):
 	def update_raw_material_cost(self):
 		if self.sub_contracted_items:
 			for d in self.doclist.get({"parentfield": "entries"}):
-				rm_cost = webnotes.conn.sql(""" select raw_material_cost / quantity 
+				rm_cost = webnotes.conn.sql("""select raw_material_cost / quantity 
 					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
 					and is_active = 1 """, (d.item_code,))
 				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
@@ -447,12 +456,17 @@ class DocType(BuyingController):
 @webnotes.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond
-
+	
+	# expense account can be any Debit account, 
+	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
+	# Hence the first condition is an "OR"
 	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Debit" 
-					or tabAccount.account_type = "Expense Account") 
+					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2 
+				and ifnull(tabAccount.master_type, "")=""
+				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 

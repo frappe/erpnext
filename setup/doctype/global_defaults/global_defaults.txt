@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-08-06 11:22:22", 
+  "modified": "2013-10-23 18:06:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -155,6 +155,13 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "country", 
+  "fieldtype": "Select", 
+  "label": "Country", 
+  "options": "link:Country"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "sms_sender_name", 
   "fieldtype": "Data", 
   "label": "SMS Sender Name", 
@@ -177,10 +184,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "hr", 
-  "fieldtype": "Section Break", 
-  "label": "HR", 
-  "read_only": 0
+  "fieldname": "time_zone", 
+  "fieldtype": "Select", 
+  "label": "Time Zone"
  }, 
  {
   "doctype": "DocPerm"

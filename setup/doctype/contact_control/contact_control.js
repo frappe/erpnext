@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // common partner functions
@@ -123,7 +123,7 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 	});
 	
 	// css
-	$wrapper.css({ 'padding': '5px 0px' });
+	$wrapper.css({ 'margin': '0px' });
 	$wrapper.find('div.description').css({
 		'padding': '5px 2px',
 		'line-height': '150%',

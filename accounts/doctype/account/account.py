@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,7 +7,6 @@ import webnotes
 from webnotes.utils import flt, fmt_money, cstr, cint
 from webnotes import msgprint, _
 
-sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 
 class DocType:
@@ -32,16 +31,6 @@ class DocType:
 		self.validate_root_details()
 		self.validate_mandatory()
 		self.validate_warehouse_account()
-	
-		if not self.doc.parent_account:
-			self.doc.parent_account = ''
-		
-	def validate(self): 
-		self.validate_master_name()
-		self.validate_parent()
-		self.validate_duplicate_account()
-		self.validate_root_details()
-		self.validate_mandatory()
 		self.validate_frozen_accounts_modifier()
 	
 		if not self.doc.parent_account:
@@ -49,14 +38,17 @@ class DocType:
 		
 	def validate_master_name(self):
 		"""Remind to add master name"""
-		if (self.doc.master_type == 'Customer' or self.doc.master_type == 'Supplier') \
-				and not self.doc.master_name:
-			msgprint("Message: Please enter Master Name once the account is created.")
+		if self.doc.master_type in ('Customer', 'Supplier') or self.doc.account_type == "Warehouse":
+			if not self.doc.master_name:
+				msgprint(_("Please enter Master Name once the account is created."))
+			elif not webnotes.conn.exists(self.doc.master_type or self.doc.account_type, 
+					self.doc.master_name):
+				webnotes.throw(_("Invalid Master Name"))
 			
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
+			par = webnotes.conn.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				msgprint("Parent account does not exists", raise_exception=1)
@@ -84,7 +76,7 @@ class DocType:
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
 			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
-			if sql("""select name from tabAccount where name=%s""", 
+			if webnotes.conn.sql("""select name from tabAccount where name=%s""", 
 				(self.doc.account_name + " - " + company_abbr)):
 					msgprint("Account Name: %s already exists, please rename" 
 						% self.doc.account_name, raise_exception=1)
@@ -133,7 +125,7 @@ class DocType:
 		return webnotes.conn.get_value("GL Entry", {"account": self.doc.name})
 
 	def check_if_child_exists(self):
-		return sql("""select name from `tabAccount` where parent_account = %s 
+		return webnotes.conn.sql("""select name from `tabAccount` where parent_account = %s 
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
@@ -177,24 +169,24 @@ class DocType:
 				in webnotes.user.get_roles():
 			return 1
 			
-	def check_credit_limit(self, account, company, tot_outstanding):
+	def check_credit_limit(self, total_outstanding):
 		# Get credit limit
 		credit_limit_from = 'Customer'
 
-		cr_limit = sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
-			where t2.name=%s and t1.name = t2.master_name""", account)
+		cr_limit = webnotes.conn.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
+			where t2.name=%s and t1.name = t2.master_name""", self.doc.name)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
-			credit_limit = webnotes.conn.get_value('Company', company, 'credit_limit')
-			credit_limit_from = 'global settings in the Company'
+			credit_limit = webnotes.conn.get_value('Company', self.doc.company, 'credit_limit')
+			credit_limit_from = 'Company'
 		
 		# If outstanding greater than credit limit and not authorized person raise exception
-		if credit_limit > 0 and flt(tot_outstanding) > credit_limit \
+		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
 				and not self.get_authorized_user():
 			msgprint("""Total Outstanding amount (%s) for <b>%s</b> can not be \
 				greater than credit limit (%s). To change your credit limit settings, \
-				please update the <b>%s</b>""" % (fmt_money(tot_outstanding), 
-				account, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
+				please update in the <b>%s</b> master""" % (fmt_money(total_outstanding), 
+				self.doc.name, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
 			
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""
@@ -203,40 +195,39 @@ class DocType:
 			
 		if self.check_gle_exists():
 			msgprint("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
-				Journal Voucher) can not be trashed""", raise_exception=1)
+				Journal Voucher) can not be deleted""", raise_exception=1)
 		if self.check_if_child_exists():
-			msgprint("Child account exists for this account. You can not trash this account.",
+			msgprint("Child account exists for this account. You can not delete this account.",
 			 	raise_exception=1)
 
 	def on_trash(self): 
 		self.validate_trash()
 		self.update_nsm_model()
-
-	def on_rename(self, new, old, merge=False):
-		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
-		parts = new.split(" - ")	
-
-		if parts[-1].lower() != company_abbr.lower():
-			parts.append(company_abbr)
 		
-		# rename account name
-		new_account_name = " - ".join(parts[:-1])
-		sql("update `tabAccount` set account_name = %s where name = %s", (new_account_name, old))
+	def before_rename(self, old, new, merge=False):
+		# Add company abbr if not provided
+		from setup.doctype.company.company import get_name_with_abbr
+		new_account = get_name_with_abbr(new, self.doc.company)
 		
+		# Validate properties before merging
 		if merge:
-			new_name = " - ".join(parts)
-			val = list(webnotes.conn.get_value("Account", new_name, 
+			val = list(webnotes.conn.get_value("Account", new_account, 
 				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
 			
 			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account]:
-				msgprint(_("""Merging is only possible if following \
+				webnotes.throw(_("""Merging is only possible if following \
 					properties are same in both records.
-					Group or Ledger, Debit or Credit, Is PL Account"""), raise_exception=1)
+					Group or Ledger, Debit or Credit, Is PL Account"""))
+					
+		return new_account
 
+	def after_rename(self, old, new, merge=False):
+		if not merge:
+			webnotes.conn.set_value("Account", new, "account_name", 
+				" - ".join(new.split(" - ")[:-1]))
+		else:
 			from webnotes.utils.nestedset import rebuild_tree
 			rebuild_tree("Account", "parent_account")
-
-		return " - ".join(parts)
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
 	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""

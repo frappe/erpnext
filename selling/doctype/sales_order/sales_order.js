@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // Module CRM
@@ -9,7 +9,7 @@ cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
@@ -27,7 +27,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
 					doc.per_billed);
 
-				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms);
+				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
 					cur_frm.add_custom_button(wn._('Make Delivery'), this.make_delivery_note);
@@ -50,11 +50,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order']);
+					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
 			} else {	
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
-				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order']);
+				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
 			}
 		}
 
@@ -66,7 +66,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						source_doctype: "Quotation",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Order Lost"],
+							status: ["!=", "Lost"],
 							order_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // Module Material Management
@@ -9,7 +9,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/doctype/sales_common/sales_common.js');
+wn.require('app/selling/sales_common.js');
 wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 wn.provide("erpnext.stock");
@@ -22,24 +22,24 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			var from_sales_invoice = false;
 			from_sales_invoice = cur_frm.get_doclist({parentfield: "delivery_note_details"})
 				.some(function(item) { 
-					return item.prevdoc_doctype==="Sales Invoice" ? true : false; 
+					return item.against_sales_invoice ? true : false; 
 				});
 			
 			if(!from_sales_invoice)
-				cur_frm.add_custom_button('Make Invoice', this.make_sales_invoice);
+				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
 		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
-			cur_frm.add_custom_button('Make Installation Note', this.make_installation_note);
+			cur_frm.add_custom_button(wn._('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(wn._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 	
 		set_print_hide(doc, dt, dn);
@@ -113,13 +113,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.serial_no) {
-		 return get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
-	}
-}
-
 cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 	return{
 		filters: { 'supplier_type': "transporter" }
@@ -136,7 +129,9 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 var set_print_hide= function(doc, cdt, cdn){
 	var dn_fields = wn.meta.docfield_map['Delivery Note'];
 	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];
-	
+	var dn_fields_copy = dn_fields;
+	var dn_item_fields_copy = dn_item_fields;
+
 	if (doc.print_without_amount) {
 		dn_fields['currency'].print_hide = 1;
 		dn_item_fields['export_rate'].print_hide = 1;
@@ -144,9 +139,12 @@ var set_print_hide= function(doc, cdt, cdn){
 		dn_item_fields['ref_rate'].print_hide = 1;
 		dn_item_fields['export_amount'].print_hide = 1;
 	} else {
-		dn_fields['currency'].print_hide = 0;
-		dn_item_fields['export_rate'].print_hide = 0;
-		dn_item_fields['export_amount'].print_hide = 0;
+		if (dn_fields_copy['currency'].print_hide != 1)
+			dn_fields['currency'].print_hide = 0;
+		if (dn_item_fields_copy['export_rate'].print_hide != 1)
+			dn_item_fields['export_rate'].print_hide = 0;
+		if (dn_item_fields_copy['export_amount'].print_hide != 1)
+			dn_item_fields['export_amount'].print_hide = 0;
 	}
 }
 
@@ -181,12 +179,12 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 	if(cl.length){
 		prevdoc_list = new Array();
 		for(var i=0;i<cl.length;i++){
-			if(cl[i].prevdoc_doctype == 'Sales Order' && cl[i].prevdoc_docname && prevdoc_list.indexOf(cl[i].prevdoc_docname) == -1) {
-				prevdoc_list.push(cl[i].prevdoc_docname);
+			if(cl[i].against_sales_order && prevdoc_list.indexOf(cl[i].against_sales_order) == -1) {
+				prevdoc_list.push(cl[i].against_sales_order);
 				if(prevdoc_list.length ==1)
-					out += make_row(cl[i].prevdoc_doctype, cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row("Sales Order", cl[i].against_sales_order, null, 0);
 				else
-					out += make_row('', cl[i].prevdoc_docname, cl[i].prevdoc_date,0);
+					out += make_row('', cl[i].against_sales_order, null,0);
 			}
 		}
 	}

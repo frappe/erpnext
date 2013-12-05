@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,8 +12,7 @@ data_map = {
 		"conditions": ["docstatus < 2"]
 	},
 	"Fiscal Year": {
-		"columns": ["name", "year_start_date", 
-			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"],
+		"columns": ["name", "year_start_date", "year_end_date"],
 		"conditions": ["docstatus < 2"],
 	},
 
@@ -87,6 +86,11 @@ data_map = {
 			"project": ["Project", "name"]
 		},
 		"force_index": "posting_sort_index"
+	},
+	"Serial No": {
+		"columns": ["name", "purchase_rate as incoming_rate"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name"
 	},
 	"Stock Entry": {
 		"columns": ["name", "purpose"],

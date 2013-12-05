@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -37,7 +37,7 @@ def execute():
 				except Exception, e:
 					# if duplicate entry, then dont update
 					if e[0]!=1062:
-						raise e
+						raise
 		
 		
 		changed_keys = change_map.keys()
@@ -62,5 +62,5 @@ def execute():
 				
 			except Exception, e:
 				if e[0]!=1146:
-					raise e
+					raise
 	

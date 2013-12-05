@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 wn.provide("erpnext.support");
@@ -6,7 +6,7 @@ wn.provide("erpnext.support");
 erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	refresh: function() {
 		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
-			cur_frm.add_custom_button('Make Maintenance Visit', this.make_maintenance_visit)
+			cur_frm.add_custom_button(wn._('Make Maintenance Visit'), this.make_maintenance_visit)
 		}
 	}, 
 	

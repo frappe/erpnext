@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes, markdown2
@@ -33,7 +33,7 @@ def execute():
 				pass
 			except Exception, e:
 				if e.args[0] != 1062:
-					raise e
+					raise
 
 	webnotes.delete_doc("DocType", "Question")
 	webnotes.delete_doc("DocType", "Answer")

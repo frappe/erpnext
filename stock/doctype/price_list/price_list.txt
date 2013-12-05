@@ -1,0 +1,116 @@
+[
+ {
+  "creation": "2013-01-25 11:35:09", 
+  "docstatus": 0, 
+  "modified": "2013-10-31 19:24:33", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 0, 
+  "allow_copy": 0, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "autoname": "field:price_list_name", 
+  "description": "Price List Master", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-tags", 
+  "max_attachments": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Price List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Price List", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Data", 
+  "label": "Price List Name", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Currency", 
+  "options": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "default": "Selling", 
+  "doctype": "DocField", 
+  "fieldname": "buying_or_selling", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Valid for Buying or Selling?", 
+  "options": "Buying\nSelling", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Specify a list of Territories, for which, this Price List is valid", 
+  "doctype": "DocField", 
+  "fieldname": "valid_for_territories", 
+  "fieldtype": "Table", 
+  "label": "Valid for Territories", 
+  "options": "Applicable Territory", 
+  "reqd": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager", 
+  "write": 1
+ }
+]

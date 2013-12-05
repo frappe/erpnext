@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -24,3 +24,6 @@ def get_website_settings(context):
 		"shopping_cart_enabled": cart_enabled,
 		"post_login": post_login + context.get("post_login", [])
 	})
+	
+	if not context.get("favicon"):
+		context["favicon"] = "app/images/favicon.ico"

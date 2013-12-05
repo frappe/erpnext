@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-22 12:43:10", 
   "docstatus": 0, 
-  "modified": "2013-08-07 14:44:18", 
+  "modified": "2013-11-02 19:41:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -261,21 +261,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "prevdoc_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "in_list_view": 0, 
-  "label": "Material Request Date", 
-  "no_copy": 1, 
-  "oldfieldname": "prevdoc_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "prevdoc_detail_docname", 
   "fieldtype": "Data", 
   "hidden": 1, 
@@ -303,6 +288,7 @@
   "read_only": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 

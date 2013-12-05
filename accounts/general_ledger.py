@@ -1,11 +1,10 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import flt, cstr, now
-from webnotes.model.doc import Document
-from webnotes import msgprint, _
+from webnotes.utils import flt, cstr
+from webnotes import _
 from accounts.utils import validate_expense_against_budget
 
 
@@ -30,8 +29,12 @@ def process_gl_map(gl_map, merge_entries=True):
 		entry.credit = flt(entry.credit, 2)
 	
 		# toggle debit, credit if negative entry
-		if flt(entry.debit) < 0 or flt(entry.credit) < 0:
-			entry.debit, entry.credit = abs(flt(entry.credit)), abs(flt(entry.debit))
+		if flt(entry.debit) < 0:
+			entry.credit = flt(entry.credit) - flt(entry.debit)
+			entry.debit = 0.0
+		if flt(entry.credit) < 0:
+			entry.debit = flt(entry.debit) - flt(entry.credit)
+			entry.credit = 0.0
 
 	return gl_map
 		

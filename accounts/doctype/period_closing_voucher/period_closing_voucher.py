@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -34,7 +34,7 @@ class DocType(AccountsController):
 
 	def validate_posting_date(self):
 		from accounts.utils import get_fiscal_year
-		self.year_start_date = get_fiscal_year(self.doc.posting_date)[1]
+		self.year_start_date = get_fiscal_year(self.doc.posting_date, self.doc.fiscal_year)[1]
 
 		pce = webnotes.conn.sql("""select name from `tabPeriod Closing Voucher`
 			where posting_date > %s and fiscal_year = %s and docstatus = 1""", 
@@ -69,7 +69,6 @@ class DocType(AccountsController):
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
-		
 		return webnotes.conn.sql("""
 			select t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
 			from `tabGL Entry` t1, `tabAccount` t2 

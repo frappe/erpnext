@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -15,7 +15,7 @@ def get_companies():
 
 @webnotes.whitelist()
 def get_children():
-	args = webnotes.form_dict
+	args = webnotes.local.form_dict
 	ctype, company = args['ctype'], args['comp']
 	
 	# root

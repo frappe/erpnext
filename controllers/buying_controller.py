@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -11,8 +11,6 @@ from setup.utils import get_company_currency
 
 from controllers.stock_controller import StockController
 
-class WrongWarehouseCompany(Exception): pass
-
 class BuyingController(StockController):
 	def onload_post_render(self):
 		# contact, address, item details
@@ -23,6 +21,7 @@ class BuyingController(StockController):
 		if self.doc.supplier and not self.doc.supplier_name:
 			self.doc.supplier_name = webnotes.conn.get_value("Supplier", 
 				self.doc.supplier, "supplier_name")
+		self.is_item_table_empty()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
 		
@@ -280,3 +279,8 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
+
+
+	def is_item_table_empty(self):
+		if not len(self.doclist.get({"parentfield": self.fname})):
+			webnotes.throw(_("Item table can not be blank"))

@@ -41,9 +41,8 @@ span, div, td, input, textarea, button, select {
 }
 
 .pos-bill {
-	padding: 20px 5px;
+	margin-left: -30px;
+	margin-top: -10px;
+	padding: 20px 10px;
 	font-family: Monospace;
-	border: 1px solid #eee;
-    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
 }

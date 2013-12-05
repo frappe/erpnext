@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt"
 
 
@@ -32,9 +32,9 @@ def boot_session(bootinfo):
 		
 		
 		# load subscription info
-		import conf
+		from webnotes import conf
 		for key in ['max_users', 'expires_on', 'max_space', 'status', 'commercial_support']:
-			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
+			if key in conf: bootinfo[key] = conf.get(key)
 
 		bootinfo['docs'] += webnotes.conn.sql("""select name, default_currency, cost_center
             from `tabCompany`""", as_dict=1, update={"doctype":":Company"})

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 wn.pages['Setup'].onload = function(wrapper) { 
@@ -10,9 +10,9 @@ wn.pages['Setup'].onload = function(wrapper) {
 	});
 
 	wrapper.appframe.add_module_icon("Setup");
-	wrapper.appframe.add_button("Refresh", function() {
+	wrapper.appframe.set_title_right(wn._("Refresh"), function() {
 		wn.pages.Setup.make(wrapper);
-	}, "icon-refresh");
+	});
 	
 	wn.pages.Setup.make(wrapper);
 	
@@ -55,7 +55,7 @@ wn.pages.Setup.make = function(wrapper) {
 						<a class="data-link">%(title)s</a></b>\
 					</div>', {
 						count: item.count,
-						title: wn._(item.title || item.doctype),
+						title: item.title || wn._(item.doctype),
 						icon: wn.boot.doctype_icons[item.doctype]
 					}))
 				.appendTo(row);
@@ -110,7 +110,7 @@ wn.pages.Setup.make = function(wrapper) {
 			})
 					
 		} else if(item.single) {
-			$('<a class="view-link"><i class="icon-edit"></i> ' + wn._("Edit") + '</a>')
+			$('<a class="view-link"><i class="icon-edit"></i>'+wn._('Edit')+'</a>')
 				.appendTo($links)
 
 			$links.find(".view-link")
@@ -119,11 +119,11 @@ wn.pages.Setup.make = function(wrapper) {
 					wn.set_route("Form", $(this).attr("data-doctype"));
 				})
 		} else if(item.type !== "Link"){
-			$('<a class="new-link"><i class="icon-plus"></i> ' + wn._("New") + '</a> \
+			$('<a class="new-link"><i class="icon-plus"></i>'+wn._('New')+'</a> \
 				<span class="text-muted">|</span> \
-				<a class="view-link"><i class="icon-list"></i> ' + wn._("View") + '</a> \
+				<a class="view-link"><i class="icon-list"></i>'+wn._('View')+'</a> \
 				<span class="text-muted">|</span> \
-				<a class="import-link"><i class="icon-upload"></i> ' + wn._("Import") + '</a>')
+				<a class="import-link"><i class="icon-upload"></i>'+wn._('Import')+'</a>')
 				.appendTo($links)
 
 			$links.find(".view-link")
@@ -180,11 +180,11 @@ wn.pages.Setup.make = function(wrapper) {
 			if(r.message) {
 				body.empty();
 				if(wn.boot.expires_on) {
-					$(body).prepend("<div class='text-muted' style='text-align:right'>Account expires on "
+					$(body).prepend("<div class='text-muted' style='text-align:right'>"+wn._("Account expires on") 
 							+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
 				}
 
-				$completed = $('<h4>'+ wn._("Setup Completed") + ' <span class="completed-percent"></span><h4>\
+				$completed = $('<h4>'+wn._("Setup Completed")+'<span class="completed-percent"></span><h4>\
 					<div class="progress"><div class="progress-bar"></div></div>')
 					.appendTo(body);
 

@@ -3,6 +3,15 @@
 {% block javascript %}
 <script>
 	{% include "app/stock/doctype/item/templates/includes/product_page.js" %}
+	
+	$(function() {
+		if(window.logged_in && getCookie("system_user")==="yes") {
+			wn.has_permission("Item", "{{ name }}", "write", function(r) {
+				wn.require("lib/js/wn/website/editable.js");
+				wn.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
+			});
+		}
+	});
 </script>
 {% endblock %}
 
@@ -15,7 +24,7 @@
 {% block content %}
 	{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
 	{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
-	<div class="col-md-12 product-page-content" itemscope itemtype="http://schema.org/Product">
+	<div class="container content product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="col-md-6">
 				{% if slideshow %}

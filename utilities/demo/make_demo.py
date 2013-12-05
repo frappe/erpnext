@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes, os, datetime
@@ -18,7 +18,7 @@ company = "Wind Power LLC"
 company_abbr = "WP"
 country = "United States"
 currency = "USD"
-time_zone = "America/New York"
+time_zone = "America/New_York"
 start_date = '2013-01-01'
 bank_name = "Citibank"
 runs_for = None
@@ -30,17 +30,27 @@ prob = {
 }
 
 def make(reset=False, simulate=True):
-	#webnotes.print_messages = True
-	webnotes.mute_emails = True
-	webnotes.rollback_on_exception = True
+	#webnotes.flags.print_messages = True
+	webnotes.flags.mute_emails = True
+	webnotes.flags.rollback_on_exception = True
+	
+	if not webnotes.conf.demo_db_name:
+		raise Exception("conf.py does not have demo_db_name")
 	
 	if reset:
 		setup()
+	else:
+		if webnotes.conn:
+			webnotes.conn.close()
+		
+		webnotes.connect(db_name=webnotes.conf.demo_db_name)
+	
 	if simulate:
 		_simulate()
-	
+		
 def setup():
 	install()
+	webnotes.connect(db_name=webnotes.conf.demo_db_name)
 	complete_setup()
 	make_customers_suppliers_contacts()
 	make_items()
@@ -65,7 +75,7 @@ def _simulate():
 	
 	for i in xrange(runs_for):		
 		print current_date.strftime("%Y-%m-%d")
-		webnotes.utils.current_date = current_date
+		webnotes.local.current_date = current_date
 		
 		if current_date.weekday() in (5, 6):
 			current_date = webnotes.utils.add_days(current_date, 1)
@@ -138,25 +148,28 @@ def run_stock(current_date):
 	# make purchase requests
 	if can_make("Purchase Receipt"):
 		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from stock.stock_ledger import NegativeStockError
 		report = "Purchase Order Items To Be Received"
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
 			pr.doc.posting_date = current_date
-			pr.doc.fiscal_year = "2013"
+			pr.doc.fiscal_year = current_date.year
 			pr.insert()
-			pr.submit()
-			webnotes.conn.commit()
+			try:
+				pr.submit()
+				webnotes.conn.commit()
+			except NegativeStockError: pass
 	
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
 		from selling.doctype.sales_order.sales_order import make_delivery_note
 		from stock.stock_ledger import NegativeStockError
-		from stock.doctype.stock_ledger_entry.stock_ledger_entry import SerialNoRequiredError, SerialNoQtyError
+		from stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
 			dn.doc.posting_date = current_date
-			dn.doc.fiscal_year = "2013"
+			dn.doc.fiscal_year = current_date.year
 			dn.insert()
 			try:
 				dn.submit()
@@ -179,7 +192,7 @@ def run_purchase(current_date):
 			mr = webnotes.new_bean("Material Request")
 			mr.doc.material_request_type = "Purchase"
 			mr.doc.transaction_date = current_date
-			mr.doc.fiscal_year = "2013"
+			mr.doc.fiscal_year = current_date.year
 			mr.doclist.append({
 				"doctype": "Material Request Item",
 				"parentfield": "indent_details",
@@ -198,7 +211,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				sq = webnotes.bean(make_supplier_quotation(row[0]))
 				sq.doc.transaction_date = current_date
-				sq.doc.fiscal_year = "2013"
+				sq.doc.fiscal_year = current_date.year
 				sq.insert()
 				sq.submit()
 				webnotes.conn.commit()
@@ -211,7 +224,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				po = webnotes.bean(make_purchase_order(row[0]))
 				po.doc.transaction_date = current_date
-				po.doc.fiscal_year = "2013"
+				po.doc.fiscal_year = current_date.year
 				po.insert()
 				po.submit()
 				webnotes.conn.commit()
@@ -270,7 +283,7 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	try:
 		st = webnotes.bean(make_stock_entry(pro_id, purpose))
 		st.doc.posting_date = current_date
-		st.doc.fiscal_year = "2013"
+		st.doc.fiscal_year = current_date.year
 		for d in st.doclist.get({"parentfield": "mtn_details"}):
 			d.expense_account = "Stock Adjustment - " + company_abbr
 			d.cost_center = "Main - " + company_abbr
@@ -290,7 +303,7 @@ def make_quotation(current_date):
 		"customer": get_random("Customer"),
 		"order_type": "Sales",
 		"transaction_date": current_date,
-		"fiscal_year": "2013"
+		"fiscal_year": current_date.year
 	}])
 	
 	add_random_children(b, {
@@ -357,16 +370,18 @@ def how_many(doctype):
 def install():
 	print "Creating Fresh Database..."
 	from webnotes.install_lib.install import Installer
-	import conf
+	from webnotes import conf
 	inst = Installer('root')
-	inst.import_from_db(conf.demo_db_name, verbose = 1)
+	inst.install(conf.demo_db_name, verbose=1, force=1)
 
 def complete_setup():
 	print "Complete Setup..."
-	webnotes.get_obj("Setup Control").setup_account({
+	from setup.page.setup_wizard.setup_wizard import setup_account
+	setup_account({
 		"first_name": "Test",
 		"last_name": "User",
-		"fy_start": "1st Jan",
+		"fy_start_date": "2013-01-01",
+		"fy_end_date": "2013-12-31",
 		"industry": "Manufacturing",
 		"company_name": company,
 		"company_abbr": company_abbr,
@@ -382,7 +397,7 @@ def make_items():
 	import_data("BOM", submit=True)
 
 def make_price_lists():
-	import_data("Price_List", overwrite=True)
+	import_data("Item_Price", overwrite=True)
 	
 def make_customers_suppliers_contacts():
 	import_data(["Customer", "Supplier", "Contact", "Address", "Lead"])
@@ -412,7 +427,7 @@ def import_data(dt, submit=False, overwrite=False):
 	
 	for doctype in dt:
 		print "Importing", doctype.replace("_", " "), "..."
-		webnotes.form_dict = webnotes._dict()
+		webnotes.local.form_dict = webnotes._dict()
 		if submit:
 			webnotes.form_dict["params"] = json.dumps({"_submit": 1})
 		webnotes.uploaded_file = os.path.join(os.path.dirname(__file__), "demo_docs", doctype+".csv")

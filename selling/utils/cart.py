@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,8 +12,8 @@ class WebsitePriceListMissingError(webnotes.ValidationError): pass
 def set_cart_count(quotation=None):
 	if not quotation:
 		quotation = _get_cart_quotation()
-	webnotes.add_cookies["cart_count"] = cstr(len(quotation.doclist.get(
-		{"parentfield": "quotation_details"})) or "")
+	cart_count = cstr(len(quotation.doclist.get({"parentfield": "quotation_details"})))
+	webnotes._response.set_cookie("cart_count", cart_count)
 
 @webnotes.whitelist()
 def get_cart_quotation(doclist=None):
@@ -47,7 +47,7 @@ def place_order():
 	sales_order.ignore_permissions = True
 	sales_order.insert()
 	sales_order.submit()
-	webnotes.add_cookies["cart_count"] = ""
+	webnotes._response.set_cookie("cart_count", "")
 	
 	return sales_order.doc.name
 
@@ -310,7 +310,7 @@ def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	quotation.run_method("set_price_list_and_item_details")
 	
 	# set it in cookies for using in product page
-	webnotes.cookies[b"selling_price_list"] = quotation.doc.selling_price_list
+	webnotes.local._response.set_cookie("selling_price_list", quotation.doc.selling_price_list)
 	
 def set_taxes(quotation, cart_settings, billing_territory):
 	"""set taxes based on billing territory"""

@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2013-08-05 17:21:14", 
+  "modified": "2013-11-02 19:41:37", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,6 +67,7 @@
   "fieldtype": "Column Break"
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "parent_item_group", 
   "fieldtype": "Link", 
@@ -160,6 +161,7 @@
   "search_index": 1
  }, 
  {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 

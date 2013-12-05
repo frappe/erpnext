@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # For license information, please see license.txt
@@ -72,7 +72,7 @@ class DocType(DocListController):
 			# make a map of territory: [list of names]
 			# if list against each territory has more than one element, raise exception
 			territory_name = webnotes.conn.sql("""select `territory`, `parent` 
-				from `tabFor Territory`
+				from `tabApplicable Territory`
 				where `parenttype`=%s and `parent` in (%s)""" %
 				("%s", ", ".join(["%s"]*len(names))), tuple([parenttype] + names))
 		

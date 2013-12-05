@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # ERPNext - web based ERP (http://erpnext.com)
@@ -315,10 +315,10 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertRaises(webnotes.MappingMismatchError, se.insert)
 		
 	def test_warehouse_company_validation(self):
-		from controllers.buying_controller import WrongWarehouseCompany
+		from stock.utils import InvalidWarehouseCompany
 		mr = webnotes.bean(copy=test_records[0])
 		mr.doc.company = "_Test Company 1"
-		self.assertRaises(WrongWarehouseCompany, mr.insert)
+		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
 test_dependencies = ["Currency Exchange"]
 test_records = [

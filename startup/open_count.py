@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -55,6 +55,12 @@ def get_unread_messages():
 		AND comment_docname = %s
 		AND ifnull(docstatus,0)=0
 		""", webnotes.user.name)[0][0]
+
+for_module_doctypes = {
+	"ToDo": "To Do",
+	"Event": "Calendar",
+	"Comment": "Messages"
+}
 
 for_module = {
 	"To Do": get_things_todo,

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:18:17", 
+  "modified": "2013-10-10 15:06:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,22 +37,6 @@
  {
   "doctype": "DocType", 
   "name": "UOM"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "oldfieldtype": "Small Text", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "uom_details", 
-  "fieldtype": "Section Break", 
-  "label": "UOM Details", 
-  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 

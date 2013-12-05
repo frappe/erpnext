@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
@@ -12,7 +12,7 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
   if((!doc.__islocal) && (doc.is_active == 'Yes')){
-    cur_frm.add_custom_button('Make Salary Slip', cur_frm.cscript['Make Salary Slip']);  
+    cur_frm.add_custom_button(wn._('Make Salary Slip'), cur_frm.cscript['Make Salary Slip']);  
   }
 
   cur_frm.toggle_enable('employee', doc.__islocal);

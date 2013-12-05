@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-28 17:57:33", 
   "docstatus": 0, 
-  "modified": "2013-08-08 14:22:12", 
+  "modified": "2013-11-02 14:05:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -48,7 +48,7 @@
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "options": "TLB-", 
   "reqd": 1
  }, 

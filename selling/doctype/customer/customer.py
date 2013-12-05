@@ -1,15 +1,13 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
 
-sql = webnotes.conn.sql
 
 from utilities.transaction_base import TransactionBase
 
@@ -31,7 +29,7 @@ class DocType(TransactionBase):
 		return webnotes.conn.get_value('Company', self.doc.company, 'abbr')
 
 	def get_receivables_group(self):
-		g = sql("select receivables_group from tabCompany where name=%s", self.doc.company)
+		g = webnotes.conn.sql("select receivables_group from tabCompany where name=%s", self.doc.company)
 		g = g and g[0][0] or '' 
 		if not g:
 			msgprint("Update Company master, assign a default group for Receivables")
@@ -47,7 +45,7 @@ class DocType(TransactionBase):
 
 	def update_lead_status(self):
 		if self.doc.lead_name:
-			sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
+			webnotes.conn.sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
 
 	def create_account_head(self):
 		if self.doc.company :
@@ -132,7 +130,7 @@ class DocType(TransactionBase):
 	
 	def delete_customer_account(self):
 		"""delete customer's ledger if exist and check balance before deletion"""
-		acc = sql("select name from `tabAccount` where master_type = 'Customer' \
+		acc = webnotes.conn.sql("select name from `tabAccount` where master_type = 'Customer' \
 			and master_name = %s and docstatus < 2", self.doc.name)
 		if acc:
 			from webnotes.model import delete_doc
@@ -143,22 +141,15 @@ class DocType(TransactionBase):
 		self.delete_customer_contact()
 		self.delete_customer_account()
 		if self.doc.lead_name:
-			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
+			webnotes.conn.sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
-	def on_rename(self, new, old, merge=False):
-		#update customer_name if not naming series
+	def before_rename(self, olddn, newdn, merge=False):
+		from accounts.utils import rename_account_for
+		rename_account_for("Customer", olddn, newdn, merge)
+			
+	def after_rename(self, olddn, newdn, merge=False):
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			webnotes.conn.sql("""update `tabCustomer` set customer_name = %s where name = %s""", 
-				(new, old))
-		
-		for account in webnotes.conn.sql("""select name, account_name from 
-			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
-			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new, merge=merge)
-
-		#update master_name in doctype account
-		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
-			master_type = 'Customer' where master_name = %s""", (new,old))
+			webnotes.conn.set(self.doc, "customer_name", newdn)
 
 @webnotes.whitelist()
 def get_dashboard_info(customer):

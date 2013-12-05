@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -117,21 +117,30 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			filters.get("company"), "%%%s%%" % txt, start, page_len]))
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
+	from webnotes.utils import nowdate
+	
 	conditions = []
 
 	return webnotes.conn.sql("""select tabItem.name, 
 		if(length(tabItem.item_name) > 40, 
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name, 
 		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as decription 
+			concat(substr(tabItem.description, 1, 40), "..."), description) as decription
 		from tabItem 
-		where tabItem.docstatus<2 
-			and (tabItem.%(key)s LIKE "%(txt)s" 
-				or tabItem.item_name LIKE "%(txt)s")  
-			%(fcond)s %(mcond)s 
-		limit %(start)s,%(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
-		'fcond': get_filters_cond(doctype, filters, conditions), 
-		'mcond': get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		where tabItem.docstatus < 2
+			and (ifnull(tabItem.end_of_life, '') = '' or tabItem.end_of_life > %(today)s)
+			and (tabItem.`{key}` LIKE %(txt)s
+				or tabItem.item_name LIKE %(txt)s)  
+			{fcond} {mcond}
+		limit %(start)s, %(page_len)s """.format(key=searchfield,
+			fcond=get_filters_cond(doctype, filters, conditions),
+			mcond=get_match_cond(doctype, searchfield)), 
+			{
+				"today": nowdate(),
+				"txt": "%%%s%%" % txt,
+				"start": start,
+				"page_len": page_len
+			})
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []	
@@ -175,3 +184,35 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 				"mcond": get_match_cond(doctype),
 				"start": "%(start)s", "page_len": "%(page_len)s", "txt": "%(txt)s"
 			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })
+
+def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
+	from controllers.queries import get_match_cond
+
+	if filters.has_key('warehouse'):
+		return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 
+				where item_code = '%(item_code)s' 
+					and warehouse = '%(warehouse)s' 
+					and batch_no like '%(txt)s' 
+					and exists(select * from `tabBatch` 
+							where name = sle.batch_no 
+								and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s') 
+								and docstatus != 2) 
+					%(mcond)s
+				group by batch_no having sum(actual_qty) > 0 
+				order by batch_no desc 
+				limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'], 
+					'warehouse': filters['warehouse'], 'posting_date': filters['posting_date'], 
+					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+					'start': start, 'page_len': page_len})
+	else:
+		return webnotes.conn.sql("""select name from tabBatch 
+				where docstatus != 2 
+					and item = '%(item_code)s' 
+					and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s')
+					and name like '%(txt)s' 
+					%(mcond)s 
+				order by name desc 
+				limit %(start)s, %(page_len)s""" % {'item_code': filters['item_code'], 
+				'posting_date': filters['posting_date'], 'txt': "%%%s%%" % txt, 
+				'mcond':get_match_cond(doctype, searchfield),'start': start, 
+				'page_len': page_len})

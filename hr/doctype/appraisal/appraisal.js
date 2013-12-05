@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
@@ -45,7 +45,7 @@ cur_frm.cscript.score = function(doc,cdt,cdn){
 	var d = locals[cdt][cdn];
 	if (d.score){
 		if (flt(d.score) > 5) {
-			msgprint("Score must be less than or equal to 5");
+			msgprint(wn._("Score must be less than or equal to 5"));
 			d.score = 0;
 			refresh_field('score', d.name, 'appraisal_details');
 		}

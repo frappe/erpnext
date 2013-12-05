@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,12 +8,16 @@ from webnotes.utils import cstr, flt, cint
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
+from webnotes.webutils import WebsiteGenerator
 
 from webnotes.model.controller import DocListController
 
 class WarehouseNotSet(Exception): pass
 
-class DocType(DocListController):
+class DocType(DocListController, WebsiteGenerator):
+	def onload(self):
+		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
+	
 	def autoname(self):
 		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
 			from webnotes.model.doc import make_autoname
@@ -203,40 +207,28 @@ class DocType(DocListController):
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
+		# causes problem with tree build
 		if webnotes.conn.exists("Item Group", self.doc.name):
 			webnotes.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
 				self.doc.name, raise_exception=1)
 
 	def update_website(self):
-		def _invalidate_cache():
-			from selling.utils.product import invalidate_cache_for
-			
-			invalidate_cache_for(self.doc.item_group)
+		from selling.utils.product import invalidate_cache_for
+		invalidate_cache_for(self.doc.item_group)
+		[invalidate_cache_for(d.item_group) for d in \
+			self.doclist.get({"doctype":"Website Item Group"})]
 
-			[invalidate_cache_for(d.item_group) for d in \
-				self.doclist.get({"doctype":"Website Item Group"})]
+		WebsiteGenerator.on_update(self)
+
+	def get_page_title(self):
+		if self.doc.name==self.doc.item_name:
+			page_name_from = self.doc.name
+		else:
+			page_name_from = self.doc.name + " " + self.doc.item_name
 		
-		if self.doc.show_in_website:
-			from webnotes.webutils import update_page_name
-			if self.doc.name==self.doc.item_name:
-				page_name_from = self.doc.name
-			else:
-				page_name_from = self.doc.name + " " + self.doc.item_name
-
-			update_page_name(self.doc, page_name_from)
-			
-			_invalidate_cache()
+		return page_name_from
 		
-		elif self.doc.page_name:
-			# if unchecked show in website
-			from webnotes.webutils import delete_page_cache
-			delete_page_cache(self.doc.page_name)
-			
-			_invalidate_cache()
-			
-			webnotes.conn.set(self.doc, "page_name", None)
-
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
 
@@ -260,19 +252,46 @@ class DocType(DocListController):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		WebsiteGenerator.on_trash(self)
 
-		if self.doc.page_name:
-			from webnotes.webutils import clear_cache
-			clear_cache(self.doc.page_name)
+	def before_rename(self, olddn, newdn, merge=False):
+		if merge:
+			# Validate properties before merging
+			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+			new_properties = [cstr(d) for d in webnotes.conn.get_value("Item", newdn, field_list)]
+			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
+				webnotes.throw(_("To merge, following properties must be same for both items")
+					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-	def on_rename(self, newdn, olddn, merge=False):
-		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
+			webnotes.conn.sql("delete from `tabBin` where item_code=%s", olddn)
+
+	def after_rename(self, olddn, newdn, merge):
+		webnotes.conn.set_value("Item", newdn, "item_code", newdn)
+		self.update_website_page_name()
+			
+		if merge:
+			self.set_last_purchase_rate(newdn)
+			self.recalculate_bin_qty(newdn)
+			
+	def update_website_page_name(self):
 		if self.doc.page_name:
+			self.update_website()
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 			
-		if merge:
-			from stock.stock_ledger import update_entries_after
-			for wh in webnotes.conn.sql("""select warehouse from `tabBin` 
-				where item_code=%s""", newdn):
-					update_entries_after({"item_code": newdn, "warehouse": wh[0]})
+	def set_last_purchase_rate(self, newdn):
+		from buying.utils import get_last_purchase_details
+		last_purchase_rate = get_last_purchase_details(newdn).get("purchase_rate", 0)
+		webnotes.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+			
+	def recalculate_bin_qty(self, newdn):
+		from utilities.repost_stock import repost_stock
+		webnotes.conn.auto_commit_on_many_writes = 1
+		webnotes.conn.set_default("allow_negative_stock", 1)
+		
+		for warehouse in webnotes.conn.sql("select name from `tabWarehouse`"):
+			repost_stock(newdn, warehouse[0])
+		
+		webnotes.conn.set_default("allow_negative_stock", 
+			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
+		webnotes.conn.auto_commit_on_many_writes = 0

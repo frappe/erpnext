@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -281,7 +281,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 			"from_date": d.from_date,
 			"to_date": d.to_date,
 			"status": d.status,
-			"title": _("Leave by") + " " +  cstr(d.employee_name) + \
+			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 			"docstatus": d.docstatus
 		}

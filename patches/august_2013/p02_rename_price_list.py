@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,7 +6,7 @@ import webnotes
 
 def execute():
 	webnotes.reload_doc("selling", "doctype", "shopping_cart_price_list")
-	webnotes.reload_doc("setup", "doctype", "item_price")
+	webnotes.reload_doc("stock", "doctype", "item_price")
 	
 	for t in [
 			("Supplier Quotation", "price_list_name", "buying_price_list"),

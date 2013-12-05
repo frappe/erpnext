@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 test_records = [
@@ -6,7 +6,6 @@ test_records = [
 		"doctype": "POS Setting",
 		"name": "_Test POS Setting",
 		"currency": "INR",
-		"conversion_rate": 1.0,
 		"selling_price_list": "_Test Price List",
 		"company": "_Test Company",
 		"warehouse": "_Test Warehouse - _TC",

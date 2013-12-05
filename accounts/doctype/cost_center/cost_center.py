@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,7 +16,7 @@ class DocType(DocTypeNestedSet):
 	def autoname(self):
 		company_abbr = webnotes.conn.sql("select abbr from tabCompany where name=%s", 
 			self.doc.company)[0][0]
-		self.doc.name = self.doc.cost_center_name.strip() + ' - ' + company_abbr		
+		self.doc.name = self.doc.cost_center_name.strip() + ' - ' + company_abbr
 		
 	def validate_mandatory(self):
 		if not self.doc.group_or_ledger:
@@ -73,18 +73,20 @@ class DocType(DocTypeNestedSet):
 		self.validate_mandatory()
 		self.validate_budget_details()
 		
-	def on_rename(self, new, old, merge=False):
-		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
-		parts = new.split(" - ")	
-
-		if parts[-1].lower() != company_abbr.lower():
-			parts.append(company_abbr)
-
-		# rename account name
-		cost_center_name = " - ".join(parts[:-1])
-		webnotes.conn.sql("update `tabCost Center` set cost_center_name = %s where name = %s", \
-			(cost_center_name, old))
+	def before_rename(self, olddn, newdn, merge=False):
+		# Add company abbr if not provided
+		from setup.doctype.company.company import get_name_with_abbr
+		new_cost_center = get_name_with_abbr(newdn, self.doc.company)
+		
+		# Validate properties before merging
+		super(DocType, self).before_rename(olddn, new_cost_center, merge, "group_or_ledger")
+		
+		return new_cost_center
+		
+	def after_rename(self, olddn, newdn, merge=False):
+		if not merge:
+			webnotes.conn.set_value("Cost Center", newdn, "cost_center_name", 
+				" - ".join(newdn.split(" - ")[:-1]))
+		else:
+			super(DocType, self).after_rename(olddn, newdn, merge)
 			
-		super(DocType, self).on_rename(new, old, merge, "group_or_ledger")
-
-		return " - ".join(parts)	

@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 16:37:54", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:56:41", 
+  "modified": "2013-11-02 19:41:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,7 +46,7 @@
   "options": "Item Code\nNaming Series"
  }, 
  {
-  "description": "<a href=\"#Sales Browser/Item Group\">Manage Item Groups</a>", 
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 

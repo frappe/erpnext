@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-08-09 14:47:05", 
+  "modified": "2013-11-22 17:15:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -56,11 +56,10 @@
   "width": "50%"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -136,7 +135,6 @@
   "width": "50%"
  }, 
  {
-  "description": "The date at which current entry will get or has actually executed.", 
   "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
@@ -203,7 +201,6 @@
   "options": "icon-tag"
  }, 
  {
-  "description": "Supplier's currency", 
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
@@ -215,7 +212,6 @@
   "reqd": 1
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which supplier's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
@@ -235,7 +231,6 @@
   "width": "50%"
  }, 
  {
-  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "fieldname": "buying_price_list", 
   "fieldtype": "Link", 
@@ -296,7 +291,7 @@
   "oldfieldname": "net_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1
  }, 
  {
@@ -403,7 +398,7 @@
   "oldfieldname": "grand_total_import", 
   "oldfieldtype": "Currency", 
   "options": "currency", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1
  }, 
  {
@@ -413,7 +408,7 @@
   "label": "In Words", 
   "oldfieldname": "in_words_import", 
   "oldfieldtype": "Data", 
-  "print_hide": 1, 
+  "print_hide": 0, 
   "read_only": 1
  }, 
  {
@@ -490,7 +485,6 @@
   "read_only": 1
  }, 
  {
-  "description": "Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.", 
   "doctype": "DocField", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
@@ -502,7 +496,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -546,7 +540,6 @@
   "print_hide": 1
  }, 
  {
-  "description": "Filing in Additional Information about the Purchase Receipt will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -633,7 +626,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 

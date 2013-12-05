@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 test_records = [
@@ -13,5 +13,11 @@ test_records = [
 		"from_currency": "USD",
 		"to_currency": "EUR",
 		"exchange_rate": 0.773
-	}]
+	}],
+	[{
+		"doctype": "Currency Exchange",
+		"from_currency": "INR",
+		"to_currency": "USD",
+		"exchange_rate": 0.0167
+	}],
 ]

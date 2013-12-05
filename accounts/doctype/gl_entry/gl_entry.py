@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,7 +16,6 @@ class DocType:
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
 		self.validate_posting_date()
-		self.check_credit_limit()
 		self.check_pl_account()
 		self.validate_cost_center()
 
@@ -54,21 +53,6 @@ class DocType:
 	def validate_posting_date(self):
 		from accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
-
-	def check_credit_limit(self):
-		master_type, master_name = webnotes.conn.get_value("Account", 
-			self.doc.account, ["master_type", "master_name"])
-			
-		tot_outstanding = 0	#needed when there is no GL Entry in the system for that acc head
-		if (self.doc.voucher_type=='Journal Voucher' or self.doc.voucher_type=='Sales Invoice') \
-				and (master_type =='Customer' and master_name):
-			dbcr = webnotes.conn.sql("""select sum(debit), sum(credit) from `tabGL Entry` 
-				where account = %s""", self.doc.account)
-			if dbcr:
-				tot_outstanding = flt(dbcr[0][0]) - flt(dbcr[0][1]) + \
-					flt(self.doc.debit) - flt(self.doc.credit)
-			get_obj('Account',self.doc.account).check_credit_limit(self.doc.account, 
-				self.doc.company, tot_outstanding)
 
 	def check_pl_account(self):
 		if self.doc.is_opening=='Yes' and \
@@ -135,17 +119,18 @@ def check_freezing_date(posting_date, adv_adj=False):
 
 def update_outstanding_amt(account, against_voucher_type, against_voucher, on_cancel=False):
 	# get final outstanding amt
-	bal = flt(webnotes.conn.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
+	bal = flt(webnotes.conn.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+		from `tabGL Entry` 
 		where against_voucher_type=%s and against_voucher=%s and account = %s""", 
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Voucher":
-		against_voucher_amount = flt(webnotes.conn.sql("""select sum(debit) - sum(credit)
+		against_voucher_amount = flt(webnotes.conn.sql("""
+			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
 			and account = %s""", (against_voucher, account))[0][0])
-		
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal
@@ -161,16 +146,6 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		webnotes.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
 		 	(against_voucher_type, bal, against_voucher))
 			
-def validate_freezed_account(account, adv_adj=False):
-	"""Account has been freezed for other users except account manager"""
-	
-	freezed_account = webnotes.conn.get_value("Account", account, "freeze_account")
-	
-	if freezed_account == 'Yes' and not adv_adj \
-		and 'Accounts Manager' not in webnotes.user.get_roles():
-			webnotes.throw(_("Account") + ": " + account + _(" has been freezed. \
-			Only Accounts Manager can do transaction against this account"))
-
 def validate_frozen_account(account, adv_adj):
 	frozen_account = webnotes.conn.get_value("Account", account, "freeze_account")
 	if frozen_account == 'Yes' and not adv_adj:

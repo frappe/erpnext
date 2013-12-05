@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # ERPNext - web based ERP (http://erpnext.com)
@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt
-from webnotes.model.bean import getlist
+from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
@@ -19,10 +19,6 @@ class DocType(BuyingController):
 		self.doclist = doclist
 		self.tname = 'Material Request Item'
 		self.fname = 'indent_details'
-
-	# get available qty at warehouse
-	def get_bin_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
@@ -100,9 +96,6 @@ class DocType(BuyingController):
 				update_bin(args)		
 		
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
-		purchase_controller.is_item_table_empty(self)
-		
 		webnotes.conn.set(self.doc,'status','Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	

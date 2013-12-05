@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,6 +16,8 @@ class TestCustomer(unittest.TestCase):
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1 Renamed"), 
 			(("_Test Customer 1 Renamed",),))
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1"), ())
+		
+		webnotes.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		
 	def test_merge(self):
 		from webnotes.test_runner import make_test_records
@@ -57,6 +59,9 @@ class TestCustomer(unittest.TestCase):
 		# check that old name doesn't exist
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer"), ())
 		self.assertEqual(webnotes.conn.exists("Account", "_Test Customer - _TC"), ())
+		
+		# create back _Test Customer
+		webnotes.bean(copy=test_records[0]).insert()
 
 test_ignore = ["Price List"]
 			

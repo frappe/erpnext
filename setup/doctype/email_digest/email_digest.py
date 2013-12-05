@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -457,8 +457,8 @@ def send():
 	from webnotes.utils import getdate
 	now_date = now_datetime().date()
 	
-	import conf
-	if hasattr(conf, "expires_on") and now_date > getdate(conf.expires_on):
+	from webnotes import conf
+	if "expires_on" in conf and now_date > getdate(conf.expires_on):
 		# do not send email digests to expired accounts
 		return
 	

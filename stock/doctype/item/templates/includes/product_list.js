@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 window.get_product_list = function() {
@@ -12,7 +12,7 @@ window.get_product_list = function() {
 	
 	$.ajax({
 		method: "GET",
-		url: "server.py",
+		url: "/",
 		dataType: "json",
 		data: {
 			cmd: "selling.utils.product.get_product_list",

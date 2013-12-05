@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Purchase Receipt Item";
@@ -17,15 +17,15 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		
 		if(this.frm.doc.docstatus == 1) {
 			if(!this.frm.doc.__billing_complete) {
-				cur_frm.add_custom_button('Make Purchase Invoice', 
+				cur_frm.add_custom_button(wn._('Make Purchase Invoice'), 
 					this.make_purchase_invoice);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 			
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		} else {
-			cur_frm.add_custom_button(wn._('From Purchase Order'), 
+			cur_frm.add_custom_button(wn._(wn._('From Purchase Order')), 
 				function() {
 					wn.model.map_current_doc({
 						method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -140,7 +140,7 @@ cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_q
 		}
 	}
 	else{
-		alert("Please enter Item Code.");
+		alert(wn._("Please enter Item Code."));
 	}
 }
 

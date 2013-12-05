@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -7,6 +7,9 @@ import unittest
 from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
 class TestLeaveBlockList(unittest.TestCase):
+	def tearDown(self):
+		webnotes.session.user = "Administrator"
+		
 	def test_get_applicable_block_dates(self):
 		webnotes.session.user = "test@example.com"
 		webnotes.conn.set_value("Department", "_Test Department", "leave_block_list", 

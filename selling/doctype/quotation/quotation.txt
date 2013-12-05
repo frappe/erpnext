@@ -2,13 +2,14 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-09-10 10:46:33", 
+  "modified": "2013-11-27 17:57:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
   "allow_email": 0, 
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "document_type": "Transaction", 
@@ -58,11 +59,10 @@
   "width": "50%"
  }, 
  {
-  "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "label": "Document Numbering Series", 
+  "label": "Series", 
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
@@ -72,6 +72,7 @@
   "reqd": 1
  }, 
  {
+  "default": "Customer", 
   "doctype": "DocField", 
   "fieldname": "quotation_to", 
   "fieldtype": "Select", 
@@ -203,7 +204,6 @@
  }, 
  {
   "default": "Today", 
-  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
@@ -241,7 +241,6 @@
   "read_only": 0
  }, 
  {
-  "description": "Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.", 
   "doctype": "DocField", 
   "fieldname": "currency", 
   "fieldtype": "Link", 
@@ -257,12 +256,11 @@
   "width": "100px"
  }, 
  {
-  "default": "1.00", 
   "description": "Rate at which customer's currency is converted to company's base currency", 
   "doctype": "DocField", 
   "fieldname": "conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Conversion Rate", 
+  "label": "Exchange Rate", 
   "oldfieldname": "conversion_rate", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
@@ -278,7 +276,6 @@
   "width": "50%"
  }, 
  {
-  "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
   "doctype": "DocField", 
   "fieldname": "selling_price_list", 
   "fieldtype": "Link", 
@@ -294,7 +291,6 @@
   "width": "100px"
  }, 
  {
-  "description": "Select the currency in which price list is maintained", 
   "doctype": "DocField", 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
@@ -309,7 +305,7 @@
   "doctype": "DocField", 
   "fieldname": "plc_conversion_rate", 
   "fieldtype": "Float", 
-  "label": "Price List Currency Conversion Rate", 
+  "label": "Price List Exchange Rate", 
   "print_hide": 1, 
   "read_only": 0, 
   "reqd": 1
@@ -385,7 +381,7 @@
   "fieldname": "charge", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Apply Taxes and Charges Master", 
+  "label": "Tax Master", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 
@@ -402,7 +398,7 @@
   "fieldname": "shipping_rule", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Apply Shipping Rule", 
+  "label": "Shipping Rule", 
   "oldfieldtype": "Button", 
   "options": "Shipping Rule", 
   "print_hide": 1, 
@@ -563,7 +559,6 @@
   "width": "200px"
  }, 
  {
-  "description": "Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template", 
   "doctype": "DocField", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
@@ -577,7 +572,7 @@
   "doctype": "DocField", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "label": "Select Terms and Conditions", 
+  "label": "Terms", 
   "oldfieldname": "tc_name", 
   "oldfieldtype": "Link", 
   "options": "Terms and Conditions", 
@@ -603,7 +598,7 @@
   "read_only": 0
  }, 
  {
-  "description": "Will be fetched from Customer", 
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
@@ -618,6 +613,7 @@
  }, 
  {
   "depends_on": "customer", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
@@ -636,7 +632,7 @@
   "fieldname": "shipping_address_name", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Shipping Address Name", 
+  "label": "Shipping Address", 
   "options": "Address", 
   "print_hide": 1
  }, 
@@ -683,7 +679,6 @@
   "reqd": 0
  }, 
  {
-  "description": "Filling in additional information about the Quotation will help you analyze your data better.", 
   "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
@@ -733,7 +728,7 @@
   "no_copy": 1, 
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
-  "options": "\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled", 
+  "options": "Draft\nSubmitted\nOrdered\nLost\nCancelled", 
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1, 
@@ -777,7 +772,7 @@
   "doctype": "DocField", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "label": "Select Print Heading", 
+  "label": "Print Heading", 
   "no_copy": 1, 
   "oldfieldname": "select_print_heading", 
   "oldfieldtype": "Link", 
@@ -825,6 +820,7 @@
  }, 
  {
   "allow_on_submit": 1, 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "communication_html", 
   "fieldtype": "HTML", 

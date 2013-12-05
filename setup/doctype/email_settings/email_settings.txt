@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-07-09 10:41:38", 
+  "modified": "2013-11-28 11:54:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -57,10 +57,11 @@
   "label": "Outgoing Mail Server"
  }, 
  {
+  "description": "<a href=\"https://en.wikipedia.org/wiki/Transport_Layer_Security\" target=\"_blank\">[?]</a>", 
   "doctype": "DocField", 
   "fieldname": "use_ssl", 
   "fieldtype": "Check", 
-  "label": "Use SSL"
+  "label": "Use TLS"
  }, 
  {
   "description": "If non standard port (e.g. 587)", 
@@ -86,7 +87,7 @@
   "doctype": "DocField", 
   "fieldname": "always_use_login_id_as_sender", 
   "fieldtype": "Check", 
-  "label": "Always use Login Id as sender"
+  "label": "Always use above Login Id as sender"
  }, 
  {
   "doctype": "DocField", 

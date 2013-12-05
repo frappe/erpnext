@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
@@ -209,7 +209,7 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	return wlist
 
 def validate_warehouse_user(warehouse):
-	if webnotes.session.user=="Administrator":
+	if webnotes.session.user=="Administrator" or not warehouse:
 		return
 	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
 		where parent=%s""", warehouse)]
@@ -252,10 +252,10 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
-	if not hasattr(webnotes, "auto_indent"):
-		webnotes.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
+	if getattr(webnotes.local, "auto_indent", None) is None:
+		webnotes.local.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
 	
-	if webnotes.auto_indent:
+	if webnotes.local.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
 			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
@@ -291,7 +291,7 @@ def reorder_item():
 						"reorder_qty": reorder_qty
 					})
 				)
-				
+		
 		create_material_request(material_requests)
 
 def create_material_request(material_requests):
@@ -299,6 +299,8 @@ def create_material_request(material_requests):
 	mr_list = []
 	defaults = webnotes.defaults.get_defaults()
 	exceptions_list = []
+	from accounts.utils import get_fiscal_year
+	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -309,12 +311,9 @@ def create_material_request(material_requests):
 				mr = [{
 					"doctype": "Material Request",
 					"company": company,
-					"fiscal_year": defaults.fiscal_year,
+					"fiscal_year": current_fiscal_year,
 					"transaction_date": nowdate(),
-					"material_request_type": request_type,
-					"remark": _("This is an auto generated Material Request.") + \
-						_("""It was raised because the (actual + ordered + indented - reserved) 
-						quantity reaches re-order level when the following record was created""")
+					"material_request_type": request_type
 				}]
 			
 				for d in items:
@@ -340,18 +339,18 @@ def create_material_request(material_requests):
 				mr_list.append(mr_bean)
 
 			except:
-				if webnotes.message_log:
-					exceptions_list.append([] + webnotes.message_log)
-					webnotes.message_log = []
+				if webnotes.local.message_log:
+					exceptions_list.append([] + webnotes.local.message_log)
+					webnotes.local.message_log = []
 				else:
 					exceptions_list.append(webnotes.getTraceback())
 
 	if mr_list:
-		if not hasattr(webnotes, "reorder_email_notify"):
-			webnotes.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+		if getattr(webnotes.local, "reorder_email_notify", None) is None:
+			webnotes.local.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
 				'reorder_email_notify'))
 			
-		if(webnotes.reorder_email_notify):
+		if(webnotes.local.reorder_email_notify):
 			send_email_notification(mr_list)
 
 	if exceptions_list:
@@ -394,12 +393,3 @@ def notify_errors(exceptions_list):
 
 	from webnotes.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)
-
-
-def repost():
-	"""
-	Repost everything!
-	"""
-	from webnotes.model.code import get_obj
-	for wh in webnotes.conn.sql("select name from tabWarehouse"):
-		get_obj('Warehouse', wh[0]).repost_stock()

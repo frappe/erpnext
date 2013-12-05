@@ -6,8 +6,8 @@ Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on P
 
 ERPNext is built on [wnframework](https://github.com/webnotes/wnframework)
 
-- [User Guide](https://erpnext.org/docs.user.html)
-- [Getting Help](https://erpnext.org/docs.user.help.html)
+- [User Guide](http://erpnext.org/user-guide.html)
+- [Getting Help](http://erpnext.org/getting-help.html)
 - [Developer Forum](http://groups.google.com/group/erpnext-developer-forum)
 - [User Forum](http://groups.google.com/group/erpnext-user-forum)
 
@@ -42,15 +42,7 @@ You will have to set your origin in git remote
 
 GNU/General Public License (see LICENSE.txt)
 
-The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Web Notes Technologies Pvt Ltd (Web Notes). 
-
-### Copyright for Contributors
-
-Unless otherwise asserted in the code files, Web Notes will own the copyright of all contributions too. That means Web Notes holds the rights to change the license in the future or offer Commercial Licenses.
-
-Web Notes will only accept copyright assertions in case of a significant contribution like a whole new functionality or a major rewrite. We believe if your contribution is significant then you should have a say in what license Web Notes selects in the future and/or have a right to any revenue Web Notes gets from a Commercial License. Either ways Web Notes will have the right to decide what is a "significant" contribution.
-
-Note: At the moment, Web Notes does not give Commercial License for ERPNext nor has specific plans do so in the future.
+The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Web Notes Technologies Pvt Ltd (Web Notes) and Contributors. 
 
 ---
 

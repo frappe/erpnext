@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 test_records = [
@@ -23,5 +23,10 @@ test_records = [
 		"doctype": "Warehouse User",
 		"parentfield": "warehouse_users",
 		"user": "test2@example.com"
-	}]	
+	}],
+	[{
+		"doctype": "Warehouse",
+		"warehouse_name": "_Test Warehouse No Account",
+		"company": "_Test Company",
+	}],
 ]

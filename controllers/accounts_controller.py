@@ -1,10 +1,11 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
+from webnotes.model.code import get_obj
 from setup.utils import get_company_currency
 from accounts.utils import get_fiscal_year, validate_fiscal_year
 from utilities.transaction_base import TransactionBase, validate_conversion_rate
@@ -60,9 +61,8 @@ class AccountsController(TransactionBase):
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				if not self.doc.price_list_currency:
-					self.doc.price_list_currency = webnotes.conn.get_value("Price List",
-						self.doc.fields.get(fieldname), "currency")
+				self.doc.price_list_currency = webnotes.conn.get_value("Price List",
+					self.doc.fields.get(fieldname), "currency")
 				
 				if self.doc.price_list_currency == company_currency:
 					self.doc.plc_conversion_rate = 1.0
@@ -423,3 +423,17 @@ class AccountsController(TransactionBase):
 			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
+
+	def check_credit_limit(self, account):
+		total_outstanding = webnotes.conn.sql("""
+			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+			from `tabGL Entry` where account = %s""", account)
+		
+		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
+		if total_outstanding:
+			get_obj('Account', account).check_credit_limit(total_outstanding)
+
+
+@webnotes.whitelist()
+def get_tax_rate(account_head):
+	return webnotes.conn.get_value("Account", account_head, "tax_rate")

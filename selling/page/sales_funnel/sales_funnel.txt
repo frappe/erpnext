@@ -1,0 +1,33 @@
+[
+ {
+  "creation": "2013-10-04 13:17:18", 
+  "docstatus": 0, 
+  "modified": "2013-10-04 13:17:18", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-filter", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "page_name": "sales-funnel", 
+  "standard": "Yes", 
+  "title": "Sales Funnel"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "sales-funnel", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "Sales Manager"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "sales-funnel"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

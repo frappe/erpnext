@@ -1,19 +1,11 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd.
+# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import cint, flt
-from webnotes.model import db_exists
-from webnotes.model.doc import Document
-from webnotes.model.bean import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-
-sql = webnotes.conn.sql
-	
-
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -30,7 +22,7 @@ class DocType:
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 		
-		emp_list = sql("""
+		emp_list = webnotes.conn.sql("""
 			select t1.name
 			from `tabEmployee` t1, `tabSalary Structure` t2 
 			where t1.docstatus!=2 and t2.docstatus != 2 
@@ -60,7 +52,6 @@ class DocType:
 		return cond
 		
 		
-		
 	def check_mandatory(self):
 		for f in ['company', 'month', 'fiscal_year']:
 			if not self.doc.fields[f]:
@@ -68,7 +59,7 @@ class DocType:
 		
 	
 	def get_month_details(self, year, month):
-		ysd = sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
+		ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
 		if ysd:
 			from dateutil.relativedelta import relativedelta
 			import calendar, datetime
@@ -85,8 +76,6 @@ class DocType:
 				'month_days': month_days
 			}
 
-		
-		
 	def create_sal_slip(self):
 		"""
 			Creates salary slip for selected employees if already not created
@@ -96,7 +85,7 @@ class DocType:
 		emp_list = self.get_emp_list()
 		ss_list = []
 		for emp in emp_list:
-			if not sql("""select name from `tabSalary Slip` 
+			if not webnotes.conn.sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
 					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
 				ss = webnotes.bean({
@@ -127,7 +116,7 @@ class DocType:
 			which are not submitted
 		"""
 		cond = self.get_filter_condition()
-		ss_list = sql("""
+		ss_list = webnotes.conn.sql("""
 			select t1.name from `tabSalary Slip` t1 
 			where t1.docstatus = 0 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -189,7 +178,7 @@ class DocType:
 			Get total salary amount from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		tot = sql("""
+		tot = webnotes.conn.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
 			where t1.docstatus = 1 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -202,14 +191,12 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		com = sql("select default_bank_account from `tabCompany` where name = '%s'" % self.doc.company)
-		
-		if not com[0][0] or not com[0][1]:
+		default_bank_account = webnotes.conn.get_value("Company", self.doc.company, 
+			"default_bank_account")
+		if not default_bank_account:
 			msgprint("You can set Default Bank Account in Company master.")
 
-		ret = {
-			'def_bank_acc' : com and com[0][0] or '',
-			'def_sal_acc' : com and com[0][1] or '',
+		return {
+			'default_bank_account' : default_bank_account,
 			'amount' : amt
 		}
-		return ret
