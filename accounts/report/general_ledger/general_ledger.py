@@ -16,7 +16,8 @@ def execute(filters=None):
 	
 def get_columns():
 	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Currency:100", 
-		"Credit:Currency:100", "Voucher Type::120", "Voucher No::160", "Remarks::200"]
+		"Credit:Currency:100", "Voucher Type::120", "Voucher No::160", 
+		"Cost Center:Link/Cost Center:100", "Remarks::200"]
 		
 def get_gl_entries(filters):
 	return webnotes.conn.sql("""select 
