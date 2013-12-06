@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-25 17:53:21", 
   "docstatus": 0, 
-  "modified": "2013-11-28 11:54:42", 
+  "modified": "2013-12-06 13:12:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -103,6 +103,7 @@
   "label": "Auto Email Id"
  }, 
  {
+  "default": "1", 
   "description": "If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.", 
   "doctype": "DocField", 
   "fieldname": "send_print_in_body_and_attachment", 
