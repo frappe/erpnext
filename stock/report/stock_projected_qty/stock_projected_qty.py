@@ -3,19 +3,17 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _
 
 def execute(filters=None):
 	columns = get_columns()
-	if not filters.get("company"):
-		webnotes.throw(_("Company is mandatory"))
 		
 	data = webnotes.conn.sql("""select 
 			item.name, item.item_name, description, brand, warehouse, item.stock_uom, 
 			actual_qty, planned_qty, indented_qty, ordered_qty, reserved_qty, 
 			projected_qty, item.re_order_level, item.re_order_qty
 		from `tabBin` bin, 
-			(select name, company from tabWarehouse {warehouse_conditions}) wh,
+			(select name, company from tabWarehouse 
+				where company=%(company)s {warehouse_conditions}) wh,
 			(select name, item_name, description, stock_uom, brand, re_order_level, re_order_qty
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and warehouse = wh.name
@@ -42,13 +40,4 @@ def get_item_conditions(filters):
 	return "where {}".format(" and ".join(conditions)) if conditions else ""
 	
 def get_warehouse_conditions(filters):
-	conditions = []
-	if not filters.get("company"):
-		webnotes.throw(_("Company is mandatory"))
-	else:
-		conditions.append("company=%(company)s")
-		
-	if filters.get("warehouse"):
-		conditions.append("name=%(warehouse)s")
-	
-	return "where {}".format(" and ".join(conditions)) if conditions else ""
+	return " and name=%(warehouse)s" if filters.get("warehouse") else ""

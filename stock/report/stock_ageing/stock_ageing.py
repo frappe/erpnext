@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import date_diff
-from webnotes import _
 
 def execute(filters=None):
 	
@@ -64,11 +63,6 @@ def get_fifo_queue(filters):
 	return item_details
 	
 def get_stock_ledger_entries(filters):
-	if not filters.get("company"):
-		webnotes.throw(_("Company is mandatory"))
-	if not filters.get("to_date"):
-		webnotes.throw(_("To Date is mandatory"))
-	
 	return webnotes.conn.sql("""select 
 			item.name, item.item_name, brand, description, item.stock_uom, actual_qty, posting_date
 		from `tabStock Ledger Entry` sle,
