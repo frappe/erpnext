@@ -24,7 +24,7 @@
  is present in one or many Active BOMs,está presente en una o varias listas de materiales activos
  not active or does not exists in the system,no activa o no se existe en el sistema
  not submitted,no presentado
- or the BOM is cancelled or inactive,la lista de materiales se cancelo o esta inactiva
+ or the BOM is cancelled or inactive, o la lista de materiales se cancelo o esta inactiva
  should be 'Yes'. As Item: ,debería ser &quot;sí&quot;. Como artículo:
  should be same as that in ,debe ser el mismo que el de
  was on leave on ,estaba en situación de excedencia
@@ -39,12 +39,12 @@
 % Completed,% Completado
 % Installed,Instalado%
 % Received,Recibido%
-% of materials billed against this Purchase Order.,% De los materiales facturados en contra de esta Orden de Compra.
-% of materials billed against this Sales Order,% De los materiales facturados en contra de esta orden de venta
-% of materials delivered against this Delivery Note,% De los materiales entregados en contra de esta nota de entrega
-% of materials delivered against this Sales Order,% De los materiales entregados en contra de esta orden de venta
-% of materials ordered against this Material Request,% De materiales ordenó en contra de esta solicitud de material
-% of materials received against this Purchase Order,% Del material recibido en contra de esta Orden de Compra
+% of materials billed against this Purchase Order.,% De los materiales facturados contra esta Orden de Compra.
+% of materials billed against this Sales Order,% De los materiales facturados en contra esta orden de venta
+% of materials delivered against this Delivery Note,% De los materiales entregados contra esta nota de entrega
+% of materials delivered against this Sales Order,% De los materiales entregados contra esta orden de venta
+% of materials ordered against this Material Request,% De materiales ordenó en base a esta solicitud de material
+% of materials received against this Purchase Order,% Del material recibido contra esta Orden de Compra
 "' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;No puede gestionarse a través de la reconciliación de Valores. \ Puede añadir / eliminar Serial No directamente, \ para modificar existencias de este artículo."
 ' in Company: ,&quot;En la empresa:
 'To Case No.' cannot be less than 'From Case No.',&#39;Para el caso núm&#39; no puede ser inferior a &#39;De Caso No.&#39;
