@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:20:19", 
+  "modified": "2013-12-09 16:24:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -229,7 +229,7 @@
   "doctype": "DocField", 
   "fieldname": "po_date", 
   "fieldtype": "Date", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Customer's Purchase Order Date", 
   "no_copy": 0, 
   "oldfieldname": "po_date", 
