@@ -150,7 +150,7 @@ class DocType(StockController):
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No' 
 			order by posting_date desc, posting_time desc, name desc""", 
 			("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1):
-				if self.doc.name in get_serial_nos(sle.serial_no):
+				if self.doc.name.lower() in (sno.lower() for sno in get_serial_nos(sle.serial_no)):
 					if sle.actual_qty > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
 					else:
