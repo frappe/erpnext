@@ -106,7 +106,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						for(d in getchildren('Stock Entry Detail',doc.name,'mtn_details')) {
+						for(d in getchildren('Stock Entry Detail', me.frm.doc.name, 'mtn_details')) {
 							if(!d.expense_account) d.expense_account = r.message;
 						}
 					}
