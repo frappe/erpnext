@@ -6,6 +6,9 @@ from webnotes.utils import flt
 import unittest
 
 class TestSalesOrder(unittest.TestCase):
+	def tearDown(self):
+		webnotes.set_user("Administrator")
+		
 	def test_make_material_request(self):
 		from selling.doctype.sales_order.sales_order import make_material_request
 		
@@ -276,28 +279,29 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 20.0)
 
 	def test_warehouse_user(self):
+		webnotes.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 			
 		webnotes.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		
-		webnotes.session.user = "test@example.com"
+		webnotes.set_user("test@example.com")
 
-		from stock.utils import UserNotAllowedForWarehouse
+		from webnotes.model.bean import BeanPermissionError
 		so = webnotes.bean(copy = test_records[0])
 		so.doc.company = "_Test Company 1"
 		so.doc.conversion_rate = 0.02
 		so.doc.plc_conversion_rate = 0.02
 		so.doclist[1].reserved_warehouse = "_Test Warehouse 2 - _TC1"
-		self.assertRaises(UserNotAllowedForWarehouse, so.insert)
+		self.assertRaises(BeanPermissionError, so.insert)
 
-		webnotes.session.user = "test2@example.com"
+		webnotes.set_user("test2@example.com")
 		so.insert()
+		
+		webnotes.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
 
-		webnotes.session.user = "Administrator"
-
-test_dependencies = ["Sales BOM"]
+test_dependencies = ["Sales BOM", "Currency Exchange"]
 	
 test_records = [
 	[

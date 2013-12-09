@@ -127,13 +127,12 @@ class DocType(SellingController):
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'		
 		
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from stock.utils import validate_warehouse_company
 		
 		warehouses = list(set([d.reserved_warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
 				
 		for w in warehouses:
-			validate_warehouse_user(w)
 			validate_warehouse_company(w, self.doc.company)
 		
 	def validate_with_previous_doc(self):

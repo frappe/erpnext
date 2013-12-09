@@ -8,7 +8,6 @@ from webnotes.utils import flt, cstr, nowdate, add_days, cint
 from webnotes.defaults import get_global_default
 from webnotes.utils.email_lib import sendmail
 
-class UserNotAllowedForWarehouse(webnotes.ValidationError): pass
 class InvalidWarehouseCompany(webnotes.ValidationError): pass
 	
 def get_stock_balance_on(warehouse, posting_date=None):
@@ -191,33 +190,7 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 			raise_exception=1)
 		
 	return valid_serial_nos
-	
-def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
-	"""used in search queries"""
-	wlist = []
-	for w in webnotes.conn.sql_list("""select name from tabWarehouse 
-		where name like '%%%s%%'""" % txt):
-		if webnotes.session.user=="Administrator":
-			wlist.append([w])
-		else:
-			warehouse_users = webnotes.conn.sql_list("""select user from `tabWarehouse User` 
-				where parent=%s""", w)
-			if not warehouse_users:
-				wlist.append([w])
-			elif webnotes.session.user in warehouse_users:
-				wlist.append([w])
-	return wlist
 
-def validate_warehouse_user(warehouse):
-	if webnotes.session.user=="Administrator" or not warehouse:
-		return
-	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
-		where parent=%s""", warehouse)]
-				
-	if warehouse_users and not (webnotes.session.user in warehouse_users):
-		webnotes.throw(_("Not allowed entry in Warehouse") \
-			+ ": " + warehouse, UserNotAllowedForWarehouse)
-			
 def validate_warehouse_company(warehouse, company):
 	warehouse_company = webnotes.conn.get_value("Warehouse", warehouse, "company")
 	if warehouse_company and warehouse_company != company:

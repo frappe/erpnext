@@ -151,7 +151,7 @@ class DocType(DocListController):
 		employee = webnotes.bean("Employee", self.doc.employee)
 		leave_approvers = [l.leave_approver for l in 
 			employee.doclist.get({"parentfield": "employee_leave_approvers"})]
-
+			
 		if len(leave_approvers) and self.doc.leave_approver not in leave_approvers:
 			msgprint(("[" + _("For Employee") + ' "' + self.doc.employee + '"] ' 
 				+ _("Leave Approver can be one of") + ": "

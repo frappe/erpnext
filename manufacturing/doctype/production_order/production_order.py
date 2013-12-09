@@ -54,10 +54,9 @@ class DocType:
 			self.validate_production_order_against_so()
 			
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from stock.utils import validate_warehouse_company
 		
 		for w in [self.doc.fg_warehouse, self.doc.wip_warehouse]:
-			validate_warehouse_user(w)
 			validate_warehouse_company(w, self.doc.company)
 	
 	def validate_production_order_against_so(self):

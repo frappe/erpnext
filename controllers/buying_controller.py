@@ -50,13 +50,12 @@ class BuyingController(StockController):
 					break
 					
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from stock.utils import validate_warehouse_company
 		
 		warehouses = list(set([d.warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
 				
 		for w in warehouses:
-			validate_warehouse_user(w)
 			validate_warehouse_company(w, self.doc.company)
 
 	def get_purchase_tax_details(self):

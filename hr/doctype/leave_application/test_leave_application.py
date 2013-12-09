@@ -10,6 +10,9 @@ class TestLeaveApplication(unittest.TestCase):
 	def tearDown(self):
 		webnotes.set_user("Administrator")
 		
+		# so that this test doesn't affect other tests
+		webnotes.conn.sql("""delete from `tabEmployee Leave Approver`""")
+		
 	def _clear_roles(self):
 		webnotes.conn.sql("""delete from `tabUserRole` where parent in 
 			("test@example.com", "test1@example.com", "test2@example.com")""")
@@ -162,10 +165,10 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		from webnotes.model.bean import BeanPermissionError
 		self.assertRaises(BeanPermissionError, application.submit)
-		
+
 		webnotes.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
 			"_T-Employee-0001")
-		
+			
 	def _test_leave_approval_valid_leave_approver_insert(self):
 		self._clear_applications()
 		self._add_employee_leave_approver("_T-Employee-0001", "test2@example.com")
