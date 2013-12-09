@@ -106,7 +106,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						for(d in getchildren('Stock Entry Detail',doc.name,'mtn_details')) {
+						for(d in getchildren('Stock Entry Detail', me.frm.doc.name, 'mtn_details')) {
 							if(!d.expense_account) d.expense_account = r.message;
 						}
 					}
@@ -244,7 +244,7 @@ cur_frm.script_manager.make(erpnext.stock.StockEntry);
 
 cur_frm.cscript.toggle_related_fields = function(doc) {
 	disable_from_warehouse = inList(["Material Receipt", "Sales Return"], doc.purpose);
-	disable_to_warehouse = inList(["Material Issue", "Purchase Return"], doc.purpose)
+	disable_to_warehouse = inList(["Material Issue", "Purchase Return"], doc.purpose);
 	
 	cur_frm.toggle_enable("from_warehouse", !disable_from_warehouse);
 	cur_frm.toggle_enable("to_warehouse", !disable_to_warehouse);
@@ -302,7 +302,7 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 }
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
-	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
+	cur_frm.cscript.toggle_related_fields(doc);
 }
 
 // Overloaded query for link batch_no
