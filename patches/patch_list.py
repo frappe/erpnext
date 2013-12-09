@@ -258,5 +258,4 @@ patch_list = [
 	"execute:webnotes.delete_doc('Report', 'Stock Ledger') #2013-11-29",
 	"execute:webnotes.delete_doc('Report', 'Payment Collection With Ageing')",
 	"execute:webnotes.delete_doc('Report', 'Payment Made With Ageing')",
-	"patches.december_2013.p01_email_settings_set_send_print_in_body_and_attachment",
 ]
