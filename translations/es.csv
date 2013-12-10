@@ -6,25 +6,25 @@
  as it is stock Item or packing item,ya que es la acción del artículo o elemento de embalaje
  at warehouse: ,en el almacén:
  by Role ,por función
- can not be made.,no puede ser hecho.
+ can not be made.,no puede realizarse.
  can not be marked as a ledger as it has existing child,"no puede ser marcado como un libro de contabilidad, ya que tiene menor existente"
  cannot be 0,no puede ser 0
  cannot be deleted.,no se puede eliminar.
  does not belong to the company,no pertenece a la empresa
- has already been submitted.,ya se ha presentado.
- has been freezed. ,ha sido freezed.
+ has already been submitted.,ya ha sido enviado.
+ has been freezed. ,ha sido congelado.
  has been freezed. \				Only Accounts Manager can do transaction against this account,ha sido congelado. \ Sólo Administrador de cuentas puede hacer en contra de esta transacción cuenta
-" is less than equals to zero in the system, \						valuation rate is mandatory for this item","es menor que es igual a cero en el sistema, \ tasa de valoración es obligatoria para este artículo"
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item","es menor que es igual a cero en el sistema, \ la tasa de valoración es obligatoria para este artículo"
  is mandatory,es obligatorio
  is mandatory for GL Entry,Es obligatorio para la entrada GL
  is not a ledger,no es un libro de contabilidad
  is not active,no está activa
  is not set,no se ha establecido
- is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,"Ahora es el Año Fiscal defecto. \ Por favor, actualiza tu navegador para que los cambios surtan efecto."
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,"Ahora es el Año Fiscal por defecto. \ Por favor, actualiza tu navegador para que los cambios surtan efecto."
  is present in one or many Active BOMs,está presente en una o varias listas de materiales activos
  not active or does not exists in the system,no activa o no se existe en el sistema
  not submitted,no presentado
- or the BOM is cancelled or inactive,o la lista de materiales se cancela o inactivo
+ or the BOM is cancelled or inactive, o la lista de materiales se cancelo o esta inactiva
  should be 'Yes'. As Item: ,debería ser &quot;sí&quot;. Como artículo:
  should be same as that in ,debe ser el mismo que el de
  was on leave on ,estaba en situación de excedencia
@@ -39,12 +39,12 @@
 % Completed,% Completado
 % Installed,Instalado%
 % Received,Recibido%
-% of materials billed against this Purchase Order.,% De los materiales facturados en contra de esta Orden de Compra.
-% of materials billed against this Sales Order,% De los materiales facturados en contra de esta orden de venta
-% of materials delivered against this Delivery Note,% De los materiales entregados en contra de esta nota de entrega
-% of materials delivered against this Sales Order,% De los materiales entregados en contra de esta orden de venta
-% of materials ordered against this Material Request,% De materiales ordenó en contra de esta solicitud de material
-% of materials received against this Purchase Order,% Del material recibido en contra de esta Orden de Compra
+% of materials billed against this Purchase Order.,% De los materiales facturados contra esta Orden de Compra.
+% of materials billed against this Sales Order,% De los materiales facturados en contra esta orden de venta
+% of materials delivered against this Delivery Note,% De los materiales entregados contra esta nota de entrega
+% of materials delivered against this Sales Order,% De los materiales entregados contra esta orden de venta
+% of materials ordered against this Material Request,% De materiales ordenó en base a esta solicitud de material
+% of materials received against this Purchase Order,% Del material recibido contra esta Orden de Compra
 "' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;No puede gestionarse a través de la reconciliación de Valores. \ Puede añadir / eliminar Serial No directamente, \ para modificar existencias de este artículo."
 ' in Company: ,&quot;En la empresa:
 'To Case No.' cannot be less than 'From Case No.',&#39;Para el caso núm&#39; no puede ser inferior a &#39;De Caso No.&#39;
