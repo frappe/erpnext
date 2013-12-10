@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-12-09 16:56:41", 
+  "modified": "2013-12-09 16:25:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -102,7 +102,6 @@
   "doctype": "DocField", 
   "fieldname": "with_operations", 
   "fieldtype": "Check", 
-  "hidden": 0, 
   "label": "With Operations"
  }, 
  {
@@ -126,7 +125,6 @@
   "doctype": "DocField", 
   "fieldname": "operations", 
   "fieldtype": "Section Break", 
-  "hidden": 0, 
   "label": "Operations", 
   "oldfieldtype": "Section Break"
  }, 
