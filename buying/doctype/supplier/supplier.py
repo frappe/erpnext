@@ -151,6 +151,16 @@ class DocType(TransactionBase):
 	def before_rename(self, olddn, newdn, merge=False):
 		from accounts.utils import rename_account_for
 		rename_account_for("Supplier", olddn, newdn, merge)
+		self.rename_address(olddn, newdn)
+		self.rename_contact(olddn, newdn)
+
+	def rename_address(self, olddn, newdn):
+		webnotes.conn.sql("""update `tabAddress` set supplier_name=%s, 
+			address_title=%s where supplier=%s""", (newdn, newdn, olddn))
+
+	def rename_contact(self,olddn, newdn):
+		webnotes.conn.sql("""update `tabContact` set supplier_name=%s 
+			where supplier=%s""", (newdn, olddn))
 		
 	def after_rename(self, olddn, newdn, merge=False):
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Supplier Name':
