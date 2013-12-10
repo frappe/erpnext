@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-12-06 18:48:23", 
+  "modified": "2013-12-09 16:25:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -120,6 +120,10 @@
   "options": "Price List"
  }, 
  {
+<<<<<<< HEAD
+=======
+  "depends_on": "with_operations", 
+>>>>>>> 4e677a3f5235c96e86c5fe5acd8d2f59dff895dc
   "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
   "doctype": "DocField", 
   "fieldname": "operations", 

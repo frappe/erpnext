@@ -121,6 +121,6 @@ def get_costcenter_account_month_map(filters):
 			
 			for ad in actual_details.get(ccd.name, {}).get(ccd.account, []):
 				if ad.month_name == month:
-						tav_dict.actual += ad.debit - ad.credit
+						tav_dict.actual += flt(ad.debit) - flt(ad.credit)
 						
 	return cam_map
