@@ -27,6 +27,14 @@ class DocType(TransactionBase):
 		else:
 			self.doc.name = make_autoname(self.doc.naming_series + '.#####')
 
+	def update_address(self):
+		webnotes.conn.sql("""update `tabAddress` set supplier_name=%s 
+			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
+
+	def update_contact(self):
+		webnotes.conn.sql("""update `tabContact` set supplier_name=%s 
+			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
+
 	def update_credit_days_limit(self):
 		webnotes.conn.sql("""update tabAccount set credit_days = %s where name = %s""", 
 			(cint(self.doc.credit_days), self.doc.name + " - " + self.get_company_abbr()))
@@ -34,6 +42,9 @@ class DocType(TransactionBase):
 	def on_update(self):
 		if not self.doc.naming_series:
 			self.doc.naming_series = ''
+
+		self.update_address()
+		self.update_contact()
 
 		# create account head
 		self.create_account_head()
@@ -151,20 +162,19 @@ class DocType(TransactionBase):
 	def before_rename(self, olddn, newdn, merge=False):
 		from accounts.utils import rename_account_for
 		rename_account_for("Supplier", olddn, newdn, merge)
-		self.rename_address(olddn, newdn)
-		self.rename_contact(olddn, newdn)
 
-	def rename_address(self, olddn, newdn):
-		webnotes.conn.sql("""update `tabAddress` set supplier_name=%s, 
-			address_title=%s where supplier=%s""", (newdn, newdn, olddn))
-
-	def rename_contact(self,olddn, newdn):
-		webnotes.conn.sql("""update `tabContact` set supplier_name=%s 
-			where supplier=%s""", (newdn, olddn))
-		
 	def after_rename(self, olddn, newdn, merge=False):
+		condition = value = ''
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Supplier Name':
 			webnotes.conn.set(self.doc, "supplier_name", newdn)
+			self.update_contact()
+			condition = ", supplier_name=%s"
+			value = newdn
+		self.update_supplier_address(newdn, condition, value)
+
+	def update_supplier_address(self, newdn, condition, value):
+		webnotes.conn.sql("""update `tabAddress` set address_title=%s %s
+			where supplier=%s""" % ('%s', condition, '%s'), (newdn, value, newdn))
 
 @webnotes.whitelist()
 def get_dashboard_info(supplier):
