@@ -95,7 +95,7 @@ AB-,AB-
 AMC Expiry Date,AMC Fecha de Caducidad
 ATT,ATT
 Abbr,Abbr
-About,Sobre
+About,Acerca de
 About Us Settings,La Empresa Ajustes
 About Us Team Member,Acerca de Nosotros Miembro del Equipo
 Above Value,Por encima del valor
@@ -208,15 +208,15 @@ Aging Date,Fecha de antigüedad
 All Addresses.,Todas las direcciones.
 All Contact,Todo contacto
 All Contacts.,Todos los contactos.
-All Customer Contact,Todo servicio al cliente
+All Customer Contact,Todo contacto con clientes
 All Day,Todo el día
 All Employee (Active),Todos los empleados (Activo)
-All Lead (Open),Todos Plomo (Abierto)
+All Lead (Open),Todas las Iniciativas (Abierto)
 All Products or Services.,Todos los Productos o Servicios.
-All Sales Partner Contact,Todo contacto Sales Partner
-All Sales Person,Todas Ventas Persona
+All Sales Partner Contact,Todo contacto de ventas
+All Sales Person,Todo personal de ventas
 All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Todas las transacciones de ventas pueden ser marcados en contra de varias personas de ventas ** ** por lo que puede establecer y supervisar los objetivos.
-All Supplier Contact,Todo contacto Proveedor
+All Supplier Contact,Todo contacto de proveedor
 "All account columns should be after \							standard columns and on the right.							If you entered it properly, next probable reason \							could be wrong account name.							Please rectify it in the file and try again.","Todas las columnas de cuentas deben ser posterior al \ columnas estándar y el de la derecha. Si ha introducido correctamente, junto razón \ probable podría ser el nombre de cuenta equivocado. Por favor, rectificarla en el archivo y vuelva a intentarlo."
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Todos los campos relacionados, como la exportación de moneda, tasa de conversión, el total de las exportaciones, exportación, etc total general están disponibles en <br> Nota de entrega, puntos de venta, cotización, factura de compra, órdenes de venta, etc"
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Todos los campos relacionados, como la importación de moneda, tasa de conversión, el total de las importaciones, importación, etc total general están disponibles en <br> Recibo de compra, cotización del proveedor, factura de compra, orden de compra, etc"
@@ -230,25 +230,25 @@ Allocated Budget,Presupuesto asignado
 Allocated amount,Cantidad asignada
 Allow Attach,Permitir Adjuntar
 Allow Bill of Materials,Permitir Lista de materiales
-Allow Dropbox Access,Permitir Dropbox acceso
-Allow Editing of Frozen Accounts For,Permitir edición de cuentas congeladas con
+Allow Dropbox Access,Permitir acceso Dropbox
+Allow Editing of Frozen Accounts For,Permitir edición de cuentas congeladas para
 Allow Google Drive Access,Permitir acceso Google Drive
 Allow Import,Permitir la importación
 Allow Import via Data Import Tool,Permitir la importación a través de herramientas de importación de datos
 Allow Negative Balance,Permitir balance negativo
 Allow Negative Stock,Permitir Stock Negativo
 Allow Production Order,Permitir orden de producción
-Allow Rename,Permitir Renombre
-Allow Samples,Deje que las muestras
+Allow Rename,Permitir Renombrar
+Allow Samples,Permitir muestras
 Allow User,Permitir al usuario
 Allow Users,Permitir que los usuarios
-Allow on Submit,Deje en Enviar
+Allow on Submit,Permitir Enviar
 Allow the following users to approve Leave Applications for block days.,Permitir que los usuarios siguientes para aprobar solicitudes Dejar de días de bloque.
 Allow user to edit Price List Rate in transactions,Permitir al usuario editar Lista de precios Tarifa en transacciones
 Allow user to login only after this hour (0-24),Permitir al usuario iniciar sesión sólo después de esta hora (0-24)
 Allow user to login only before this hour (0-24),Permitir al usuario iniciar sesión sólo antes de esta hora (0-24)
 Allowance Percent,Asignación porcentual
-Allowed,Animales
+Allowed,Permitidos
 Already Registered,Ya está registrado
 Always use Login Id as sender,Utilice siempre Id Entrar como remitente
 Amend,Enmendar
