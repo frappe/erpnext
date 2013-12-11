@@ -1,0 +1,11 @@
+accounts
+buying
+home
+hr
+manufacturing
+projects
+selling
+setup
+stock
+support
+utilities

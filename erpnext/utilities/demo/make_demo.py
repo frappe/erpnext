@@ -9,7 +9,7 @@ import random
 import json
 
 webnotes.session = webnotes._dict({"user":"Administrator"})
-from core.page.data_import_tool.data_import_tool import upload
+from webnotes.core.page.data_import_tool.data_import_tool import upload
 
 # fix price list
 # fix fiscal year

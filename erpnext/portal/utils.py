@@ -59,7 +59,7 @@ def get_transaction_context(doctype, name):
 
 @webnotes.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):
-	from website.doctype.contact_us_settings.templates.pages.contact \
+	from webnotes.website.doctype.contact_us_settings.templates.pages.contact \
 		import send_message as website_send_message
 	
 	if not website_send_message(subject, message, sender):

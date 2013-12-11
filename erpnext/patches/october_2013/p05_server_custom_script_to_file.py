@@ -17,7 +17,7 @@ def execute():
 	"""
 	import os
 	from webnotes.utils import get_site_base_path
-	from core.doctype.custom_script.custom_script import make_custom_server_script_file
+	from webnotes.core.doctype.custom_script.custom_script import make_custom_server_script_file
 	for name, dt, script in webnotes.conn.sql("""select name, dt, script from `tabCustom Script`
 		where script_type='Server'"""):
 			if script and script.strip():

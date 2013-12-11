@@ -83,7 +83,7 @@ class DocType:
 		webnotes.clear_cache(doctype=doctype)
 			
 	def check_duplicate(self):
-		from core.doctype.doctype.doctype import DocType
+		from webnotes.core.doctype.doctype.doctype import DocType
 		dt = DocType()
 	
 		parent = list(set(
@@ -136,7 +136,7 @@ class DocType:
 			msgprint("Please select prefix first")
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
-	from core.doctype.property_setter.property_setter import make_property_setter
+	from webnotes.core.doctype.property_setter.property_setter import make_property_setter
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")

@@ -45,6 +45,6 @@ class DocType(DocTypeNestedSet, WebsiteGenerator):
 		self.doc.title = self.doc.name
 
 		if self.doc.slideshow:
-			from website.doctype.website_slideshow.website_slideshow import get_slideshow
+			from webnotes.website.doctype.website_slideshow.website_slideshow import get_slideshow
 			get_slideshow(self)
 		

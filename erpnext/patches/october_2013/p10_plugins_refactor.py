@@ -6,6 +6,8 @@ import webnotes, os, shutil
 
 def execute():
 	# changed cache key for plugin code files
+	return
+	
 	for doctype in webnotes.conn.sql_list("""select name from `tabDocType`"""):
 		webnotes.cache().delete_value("_server_script:"+doctype)
 	

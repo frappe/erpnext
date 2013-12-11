@@ -31,7 +31,7 @@ def add_reply(ticket, message):
 	if bean.doc.raised_by != webnotes.session.user:
 		raise webnotes.throw(_("You are not allowed to reply to this ticket."), webnotes.PermissionError)
 	
-	from core.doctype.communication.communication import make
+	from webnotes.core.doctype.communication.communication import make
 	make(content=message, sender=bean.doc.raised_by, subject = bean.doc.subject,
 		doctype="Support Ticket", name=bean.doc.name,
 		date=today())

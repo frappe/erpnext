@@ -41,7 +41,7 @@ def get_things_todo():
 
 def get_todays_events():
 	"""Returns a count of todays events in calendar"""
-	from core.doctype.event.event import get_events
+	from webnotes.core.doctype.event.event import get_events
 	from webnotes.utils import nowdate
 	today = nowdate()
 	return len(get_events(today, today))

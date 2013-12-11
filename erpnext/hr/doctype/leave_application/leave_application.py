@@ -205,7 +205,7 @@ class DocType(DocListController):
 		
 	def notify(self, args):
 		args = webnotes._dict(args)
-		from core.page.messages.messages import post
+		from webnotes.core.page.messages.messages import post
 		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.doc.follow_via_email)})
 

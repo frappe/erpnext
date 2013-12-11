@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from home import update_feed
-from core.doctype.notification_count.notification_count import clear_doctype_notifications
+from webnotes.core.doctype.notification_count.notification_count import clear_doctype_notifications
 from stock.doctype.material_request.material_request import update_completed_qty
 
 def on_method(bean, method):

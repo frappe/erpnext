@@ -6,7 +6,7 @@ import webnotes
 from webnotes.utils import cstr, cint, decode_dict, today
 from webnotes.utils.email_lib import sendmail		
 from webnotes.utils.email_lib.receive import POP3Mailbox
-from core.doctype.communication.communication import make
+from webnotes.core.doctype.communication.communication import make
 
 class SupportMailbox(POP3Mailbox):	
 	def setup(self, args=None):

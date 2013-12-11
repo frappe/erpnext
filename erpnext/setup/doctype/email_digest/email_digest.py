@@ -280,7 +280,7 @@ class DocType(DocListController):
 		return self.get_new_count("Project", self.meta.get_label("new_projects"), False)
 		
 	def get_calendar_events(self, user_id):
-		from core.doctype.event.event import get_events
+		from webnotes.core.doctype.event.event import get_events
 		events = get_events(self.future_from_date.strftime("%Y-%m-%d"), self.future_to_date.strftime("%Y-%m-%d"))
 		
 		html = ""
@@ -301,7 +301,7 @@ class DocType(DocListController):
 			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
-		from core.page.todo.todo import get
+		from webnotes.core.page.todo.todo import get
 		todo_list = get()
 		
 		html = ""
