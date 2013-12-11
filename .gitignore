@@ -5,3 +5,5 @@ conf.py
 locale
 latest_updates.json
 .wnf-lang-status
+*.egg-info
+dist/
