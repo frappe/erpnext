@@ -74,6 +74,9 @@ class DocType:
 		
 @webnotes.whitelist()
 def make_salary_slip(source_name, target_doclist=None):
+	return [d.fields for d in get_mapped_doclist(source_name, target_doclist)]
+	
+def get_mapped_doclist(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
 	
 	def postprocess(source, target):
@@ -109,4 +112,4 @@ def make_salary_slip(source_name, target_doclist=None):
 		}
 	}, target_doclist, postprocess)
 
-	return [d.fields for d in doclist]
+	return doclist
