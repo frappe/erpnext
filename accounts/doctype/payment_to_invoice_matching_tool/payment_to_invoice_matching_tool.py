@@ -145,6 +145,8 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 	        	and voucher_no != gle.voucher_no) 
 					!= abs(ifnull(gle.debit, 0) - ifnull(gle.credit, 0)
 			) 
+			and if(gle.voucher_type='Sales Invoice', (select is_pos from `tabSales Invoice` 
+				where name=gle.voucher_no), 0)=0
 			%(mcond)s
 	    ORDER BY gle.posting_date desc, gle.voucher_no desc 
 	    limit %(start)s, %(page_len)s""" % {

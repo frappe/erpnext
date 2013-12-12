@@ -29,18 +29,17 @@ class DocType(TransactionBase):
 			if struct:
 				self.pull_sal_struct(struct)
 
-
 	def check_sal_struct(self):
-		struct = webnotes.conn.sql("select name from `tabSalary Structure` where employee ='%s' and is_active = 'Yes' "%self.doc.employee)
+		struct = webnotes.conn.sql("""select name from `tabSalary Structure` 
+			where employee=%s and is_active = 'Yes'""", self.doc.employee)
 		if not struct:
-			msgprint("Please create Salary Structure for employee '%s'"%self.doc.employee)
-			self.doc.employee = ''
+			msgprint("Please create Salary Structure for employee '%s'" % self.doc.employee)
+			self.doc.employee = None
 		return struct and struct[0][0] or ''
 
-
 	def pull_sal_struct(self, struct):
-		from hr.doctype.salary_structure.salary_structure import make_salary_slip
-		self.doclist = make_salary_slip(struct, self.doclist)
+		from hr.doctype.salary_structure.salary_structure import get_mapped_doclist
+		self.doclist = get_mapped_doclist(struct, self.doclist)
 		
 	def pull_emp_details(self):
 		emp = webnotes.conn.get_value("Employee", self.doc.employee, 
