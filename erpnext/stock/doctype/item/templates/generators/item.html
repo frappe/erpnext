@@ -2,12 +2,12 @@
 
 {% block javascript %}
 <script>
-	{% include "app/stock/doctype/item/templates/includes/product_page.js" %}
+	{% include "stock/doctype/item/templates/includes/product_page.js" %}
 	
 	$(function() {
 		if(window.logged_in && getCookie("system_user")==="yes") {
 			wn.has_permission("Item", "{{ name }}", "write", function(r) {
-				wn.require("lib/js/wn/website/editable.js");
+				wn.require("js/wn/website/editable.js");
 				wn.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
 			});
 		}
@@ -17,25 +17,25 @@
 
 {% block css %}
 <style>
-	{% include "app/stock/doctype/item/templates/includes/product_page.css" %}
+	{% include "stock/doctype/item/templates/includes/product_page.css" %}
 </style>
 {% endblock %}
 
 {% block content %}
-	{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
-	{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
+	{% include 'stock/doctype/item/templates/includes/product_search_box.html' %}
+	{% include 'stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
 	<div class="container content product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="col-md-6">
 				{% if slideshow %}
-					{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
+					{% include "website/doctype/website_slideshow/templates/includes/slideshow.html" %}
 				{% else %}
 					{% if website_image %}
 					<image itemprop="image" class="item-main-image"
 						src="{{ website_image }}" />
 					{% else %}
 					<div class="img-area">
-		{% include 'app/stock/doctype/item/templates/includes/product_missing_image.html' %}
+		{% include 'stock/doctype/item/templates/includes/product_missing_image.html' %}
 					</div>
 					{% endif %}
 				{% endif %}
