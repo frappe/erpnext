@@ -7,9 +7,9 @@ import webnotes
 from webnotes.utils import cstr, getdate
 from webnotes.model.bean import getlist
 from webnotes import msgprint
-from stock.utils import get_valid_serial_nos	
+from erpnext.stock.utils import get_valid_serial_nos	
 
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -36,11 +36,11 @@ class DocType(TransactionBase):
 		self.validate_installation_date()
 		self.check_item_table()
 		
-		from controllers.selling_controller import check_active_sales_items
+		from erpnext.controllers.selling_controller import check_active_sales_items
 		check_active_sales_items(self)
 
 	def validate_fiscal_year(self):
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.inst_date, self.doc.fiscal_year, "Installation Date")
 	
 	def is_serial_no_added(self, item_code, serial_no):

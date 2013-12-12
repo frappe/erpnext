@@ -7,7 +7,7 @@ import unittest
 import webnotes
 import webnotes.defaults
 from webnotes.utils import cint
-from stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, set_perpetual_inventory, test_records as pr_test_records
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, set_perpetual_inventory, test_records as pr_test_records
 
 def _insert_purchase_receipt(item_code=None):
 	if not item_code:
@@ -23,7 +23,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.clear_stock_account_balance()
 		_insert_purchase_receipt()
 		
-		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		_insert_purchase_receipt()
 		dn = webnotes.bean(copy=test_records[0]).insert()
 		
@@ -80,7 +80,7 @@ class TestDeliveryNote(unittest.TestCase):
 		stock_in_hand_account = webnotes.conn.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
-		from accounts.utils import get_balance_on
+		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
 
 		dn.insert()
@@ -135,7 +135,7 @@ class TestDeliveryNote(unittest.TestCase):
 		stock_in_hand_account = webnotes.conn.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
-		from accounts.utils import get_balance_on
+		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
 	
 		dn.insert()
@@ -161,8 +161,8 @@ class TestDeliveryNote(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 	def test_serialized(self):
-		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-		from stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
@@ -182,7 +182,7 @@ class TestDeliveryNote(unittest.TestCase):
 		return dn
 			
 	def test_serialized_cancel(self):
-		from stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		dn = self.test_serialized()
 		dn.cancel()
 
@@ -194,8 +194,8 @@ class TestDeliveryNote(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
-		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)

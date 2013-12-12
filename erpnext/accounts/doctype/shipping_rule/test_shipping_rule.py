@@ -3,7 +3,7 @@
 
 import webnotes
 import unittest
-from accounts.doctype.shipping_rule.shipping_rule import FromGreaterThanToError, ManyBlankToValuesError, OverlappingConditionError
+from erpnext.accounts.doctype.shipping_rule.shipping_rule import FromGreaterThanToError, ManyBlankToValuesError, OverlappingConditionError
 
 class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):

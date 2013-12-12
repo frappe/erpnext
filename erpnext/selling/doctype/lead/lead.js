@@ -77,14 +77,14 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	
 	create_customer: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.lead.lead.make_customer",
+			method: "erpnext.selling.doctype.lead.lead.make_customer",
 			source_name: cur_frm.doc.name
 		})
 	}, 
 	
 	create_opportunity: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.lead.lead.make_opportunity",
+			method: "erpnext.selling.doctype.lead.lead.make_opportunity",
 			source_name: cur_frm.doc.name
 		})
 	}

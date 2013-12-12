@@ -18,5 +18,5 @@ wn.views.calendar["Task"] = {
 			"label": wn._("Project")
 		}
 	],
-	get_events_method: "projects.doctype.task.task.get_events"
+	get_events_method: "erpnext.projects.doctype.task.task.get_events"
 }

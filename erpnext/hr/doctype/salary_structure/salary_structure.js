@@ -20,7 +20,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn){
 
 cur_frm.cscript['Make Salary Slip'] = function() {
 	wn.model.open_mapped_doc({
-		method: "hr.doctype.salary_structure.salary_structure.make_salary_slip",
+		method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
 		source_name: cur_frm.doc.name
 	});
 }

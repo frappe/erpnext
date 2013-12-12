@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import nowdate, nowtime, cstr
-from accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year
 
 def execute():
 	item_map = {}

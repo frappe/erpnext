@@ -121,14 +121,14 @@ class DocType:
 				lst.append(args)
 		
 		if lst:
-			from accounts.utils import reconcile_against_document
+			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 			msgprint("Successfully allocated.")
 		else:
 			msgprint("No amount allocated.", raise_exception=1)
 
 def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 	
 	return webnotes.conn.sql("""select gle.voucher_no, gle.posting_date, 
 		gle.%(account_type)s from `tabGL Entry` gle

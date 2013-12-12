@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import webnotes
 import unittest
-from selling.doctype.shopping_cart_settings.shopping_cart_settings import ShoppingCartSetupError
+from erpnext.selling.doctype.shopping_cart_settings.shopping_cart_settings import ShoppingCartSetupError
 
 class TestShoppingCartSettings(unittest.TestCase):
 	def setUp(self):
@@ -74,7 +74,7 @@ class TestShoppingCartSettings(unittest.TestCase):
 		controller = cart_settings.make_controller()
 		self.assertRaises(ShoppingCartSetupError, controller.validate_exchange_rates_exist)
 		
-		from setup.doctype.currency_exchange.test_currency_exchange import test_records as \
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
 			currency_exchange_records
 		webnotes.bean(currency_exchange_records[0]).insert()
 		controller.validate_exchange_rates_exist()

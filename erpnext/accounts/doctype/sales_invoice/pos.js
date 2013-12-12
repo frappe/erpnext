@@ -199,7 +199,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		me.item_timeout = null;
 		wn.call({
-			method: 'accounts.doctype.sales_invoice.pos.get_items',
+			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_items',
 			args: {
 				sales_or_purchase: this.sales_or_purchase,
 				price_list: this.price_list,
@@ -450,7 +450,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		me.barcode_timeout = null;
 		wn.call({
-			method: 'accounts.doctype.sales_invoice.pos.get_item_code',
+			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_item_code',
 			args: {barcode_serial_no: this.barcode.$input.val()},
 			callback: function(r) {
 				if (r.message) {
@@ -503,7 +503,7 @@ erpnext.POS = Class.extend({
 			msgprint(wn._("Payment cannot be made for empty cart"));
 		else {
 			wn.call({
-				method: 'accounts.doctype.sales_invoice.pos.get_mode_of_payment',
+				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',
 				callback: function(r) {
 					for (x=0; x<=r.message.length - 1; x++) {
 						mode_of_payment.push(r.message[x].name);

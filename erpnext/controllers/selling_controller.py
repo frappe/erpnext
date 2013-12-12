@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, flt, comma_or, _round, cstr
-from setup.utils import get_company_currency
-from selling.utils import get_item_details
+from erpnext.setup.utils import get_company_currency
+from erpnext.selling.utils import get_item_details
 from webnotes import msgprint, _
 
-from controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
 	def onload_post_render(self):

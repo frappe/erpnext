@@ -10,7 +10,7 @@ no_cache = True
 no_sitemap = True
 
 def get_context():
-	from selling.utils.cart import get_lead_or_customer
+	from erpnext.selling.utils.cart import get_lead_or_customer
 	party = get_lead_or_customer()
 	if party.doctype == "Lead":
 		mobile_no = party.mobile_no
@@ -27,7 +27,7 @@ def get_context():
 	
 @webnotes.whitelist()
 def update_profile(fullname, password=None, company_name=None, mobile_no=None, phone=None):
-	from selling.utils.cart import update_party
+	from erpnext.selling.utils.cart import update_party
 	update_party(fullname, company_name, mobile_no, phone)
 	
 	if not fullname:

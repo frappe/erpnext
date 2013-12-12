@@ -7,9 +7,9 @@ import webnotes.defaults
 import json
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, cint
-from stock.stock_ledger import update_entries_after
-from controllers.stock_controller import StockController
-from stock.utils import update_bin
+from erpnext.stock.stock_ledger import update_entries_after
+from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.utils import update_bin
 
 class DocType(StockController):
 	def setup(self):
@@ -90,7 +90,7 @@ class DocType(StockController):
 			raise webnotes.ValidationError
 						
 	def validate_item(self, item_code, row_num):
-		from stock.utils import validate_end_of_life, validate_is_stock_item, \
+		from erpnext.stock.utils import validate_end_of_life, validate_is_stock_item, \
 			validate_cancelled_item
 		
 		# using try except to catch all validation msgs and display together
@@ -118,8 +118,8 @@ class DocType(StockController):
 	def insert_stock_ledger_entries(self):
 		"""	find difference between current and expected entries
 			and create stock ledger entries based on the difference"""
-		from stock.utils import get_valuation_method
-		from stock.stock_ledger import get_previous_sle
+		from erpnext.stock.utils import get_valuation_method
+		from erpnext.stock.stock_ledger import get_previous_sle
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		

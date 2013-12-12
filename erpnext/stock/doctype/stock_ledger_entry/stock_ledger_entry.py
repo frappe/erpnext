@@ -13,21 +13,21 @@ class DocType(DocListController):
 		self.doclist = doclist
 
 	def validate(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_user, validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()
 		validate_warehouse_user(self.doc.warehouse)
 		validate_warehouse_company(self.doc.warehouse, self.doc.company)
 		self.scrub_posting_time()
 		
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, self.meta.get_label("posting_date"))
 		
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
 		
-		from stock.doctype.serial_no.serial_no import process_serial_no
+		from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 		process_serial_no(self.doc)
 		
 	#check for item quantity available in stock

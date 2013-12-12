@@ -32,7 +32,7 @@ def make_new_ticket(subject, message):
 	if not (subject and message):
 		raise webnotes.throw(_("Please write something in subject and message!"))
 		
-	from support.doctype.support_ticket.get_support_mails import add_support_communication
+	from erpnext.support.doctype.support_ticket.get_support_mails import add_support_communication
 	ticket = add_support_communication(subject, message, webnotes.session.user)
 	
 	return ticket.doc.name

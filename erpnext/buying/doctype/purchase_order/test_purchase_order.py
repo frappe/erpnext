@@ -10,7 +10,7 @@ from webnotes.utils import flt
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):		
-		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
 		po = webnotes.bean(copy=test_records[0]).insert()
 
@@ -33,7 +33,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_ordered_qty(self):
 		webnotes.conn.sql("delete from tabBin")
 		
-		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
 		po = webnotes.bean(copy=test_records[0]).insert()
 
@@ -75,7 +75,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
 		
 	def test_make_purchase_invocie(self):
-		from buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
 		po = webnotes.bean(copy=test_records[0]).insert()
 
@@ -98,14 +98,14 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
 
 	def test_warehouse_company_validation(self):
-		from stock.utils import InvalidWarehouseCompany
+		from erpnext.stock.utils import InvalidWarehouseCompany
 		po = webnotes.bean(copy=test_records[0])
 		po.doc.company = "_Test Company 1"
 		po.doc.conversion_rate = 0.0167
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):
-		from utilities.transaction_base import UOMMustBeIntegerError
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 		po = webnotes.bean(copy=test_records[0])
 		po.doclist[1].qty = 3.4
 		self.assertRaises(UOMMustBeIntegerError, po.insert)

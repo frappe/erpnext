@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 from webnotes import msgprint, _
 import webnotes.defaults
 from webnotes.utils import flt, get_fullname, fmt_money, cstr
@@ -42,7 +42,7 @@ def place_order():
 	quotation.ignore_permissions = True
 	quotation.submit()
 	
-	from selling.doctype.quotation.quotation import _make_sales_order
+	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = webnotes.bean(_make_sales_order(quotation.doc.name, ignore_permissions=True))
 	sales_order.ignore_permissions = True
 	sales_order.insert()
@@ -92,7 +92,7 @@ def update_cart(item_code, qty, with_doclist=0):
 		
 @webnotes.whitelist()
 def update_cart_address(address_fieldname, address_name):
-	from utilities.transaction_base import get_address_display
+	from erpnext.utilities.transaction_base import get_address_display
 	
 	quotation = _get_cart_quotation()
 	address_display = get_address_display(webnotes.doc("Address", address_name).fields)
@@ -123,7 +123,7 @@ def get_addresses():
 @webnotes.whitelist()
 def save_address(fields, address_fieldname=None):
 	party = get_lead_or_customer()
-	fields = webnotes.load_json(fields)
+	fields = json.loads(fields)
 	
 	if fields.get("name"):
 		bean = webnotes.bean("Address", fields.get("name"))
@@ -147,7 +147,7 @@ def save_address(fields, address_fieldname=None):
 	
 def get_address_docs(party=None):
 	from webnotes.model.doclist import objectify
-	from utilities.transaction_base import get_address_display
+	from erpnext.utilities.transaction_base import get_address_display
 	
 	if not party:
 		party = get_lead_or_customer()

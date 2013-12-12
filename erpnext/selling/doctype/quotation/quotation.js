@@ -39,7 +39,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			cur_frm.add_custom_button(wn._('From Opportunity'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "selling.doctype.opportunity.opportunity.make_quotation",
+						method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
 							docstatus: 1,
@@ -112,7 +112,7 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 // =====================================================================================
 cur_frm.cscript['Make Sales Order'] = function() {
 	wn.model.open_mapped_doc({
-		method: "selling.doctype.quotation.quotation.make_sales_order",
+		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 		source_name: cur_frm.doc.name
 	})
 }

@@ -214,7 +214,7 @@ class DocType(DocListController, WebsiteGenerator):
 				self.doc.name, raise_exception=1)
 
 	def update_website(self):
-		from selling.utils.product import invalidate_cache_for
+		from erpnext.selling.utils.product import invalidate_cache_for
 		invalidate_cache_for(self.doc.item_group)
 		[invalidate_cache_for(d.item_group) for d in \
 			self.doclist.get({"doctype":"Website Item Group"})]
@@ -233,7 +233,7 @@ class DocType(DocListController, WebsiteGenerator):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
 
 	def get_context(self):
-		from selling.utils.product import get_parent_item_groups
+		from erpnext.selling.utils.product import get_parent_item_groups
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
 		self.doc.title = self.doc.item_name
 
@@ -280,12 +280,12 @@ class DocType(DocListController, WebsiteGenerator):
 			clear_cache(self.doc.page_name)
 			
 	def set_last_purchase_rate(self, newdn):
-		from buying.utils import get_last_purchase_details
+		from erpnext.buying.utils import get_last_purchase_details
 		last_purchase_rate = get_last_purchase_details(newdn).get("purchase_rate", 0)
 		webnotes.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
 			
 	def recalculate_bin_qty(self, newdn):
-		from utilities.repost_stock import repost_stock
+		from erpnext.utilities.repost_stock import repost_stock
 		webnotes.conn.auto_commit_on_many_writes = 1
 		webnotes.conn.set_default("allow_negative_stock", 1)
 		

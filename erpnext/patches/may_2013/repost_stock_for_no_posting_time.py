@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 def execute():
 	import webnotes
-	from stock.stock_ledger import update_entries_after
+	from erpnext.stock.stock_ledger import update_entries_after
 	
 	res = webnotes.conn.sql("""select distinct item_code, warehouse from `tabStock Ledger Entry` 
 		where posting_time = '00:00'""")

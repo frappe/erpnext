@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint, _
-from accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
 
 def execute(filters=None):
 	if not filters: filters = {}

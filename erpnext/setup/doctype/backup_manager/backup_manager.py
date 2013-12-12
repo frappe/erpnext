@@ -30,7 +30,7 @@ def take_backups_if(freq):
 def take_backups_dropbox():
 	did_not_upload, error_log = [], []
 	try:
-		from setup.doctype.backup_manager.backup_dropbox import backup_to_dropbox
+		from erpnext.setup.doctype.backup_manager.backup_dropbox import backup_to_dropbox
 		did_not_upload, error_log = backup_to_dropbox()
 		if did_not_upload: raise Exception
 		
@@ -50,7 +50,7 @@ def take_backups_dropbox():
 def take_backups_gdrive():
 	did_not_upload, error_log = [], []
 	try:
-		from setup.doctype.backup_manager.backup_googledrive import backup_to_gdrive
+		from erpnext.setup.doctype.backup_manager.backup_googledrive import backup_to_gdrive
 		did_not_upload, error_log = backup_to_gdrive()
 		if did_not_upload: raise Exception
 		

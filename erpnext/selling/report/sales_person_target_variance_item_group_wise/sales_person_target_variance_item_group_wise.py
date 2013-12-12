@@ -6,8 +6,8 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt
 import time
-from accounts.utils import get_fiscal_year
-from controllers.trends import get_period_date_ranges, get_period_month_ranges
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 from webnotes.model.meta import get_field_precision
 
 def execute(filters=None):

@@ -105,7 +105,7 @@ def _get_item_code(barcode=None, serial_no=None):
 	return item_code[0]
 	
 def _validate_item_details(args, item):
-	from utilities.transaction_base import validate_item_fetch
+	from erpnext.utilities.transaction_base import validate_item_fetch
 	validate_item_fetch(args, item)
 	
 	# validate if sales item or service item
@@ -154,7 +154,7 @@ def _get_price_list_rate(args, item_bean, meta):
 		return {}
 	
 	# found price list rate - now we can validate
-	from utilities.transaction_base import validate_currency
+	from erpnext.utilities.transaction_base import validate_currency
 	validate_currency(args, item_bean.doc, meta)
 	
 	return {"ref_rate": flt(ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}

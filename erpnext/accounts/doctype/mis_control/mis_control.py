@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, get_first_day, get_last_day, has_common
 import webnotes.defaults
-from accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_balance_on
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -29,7 +29,7 @@ class DocType:
 
 		ret['period'] = ['Annual','Half Yearly','Quarterly','Monthly']
 		
-		from accounts.page.accounts_browser.accounts_browser import get_companies
+		from erpnext.accounts.page.accounts_browser.accounts_browser import get_companies
 		ret['company'] = get_companies()
 
 		#--- to get fiscal year and start_date of that fiscal year -----

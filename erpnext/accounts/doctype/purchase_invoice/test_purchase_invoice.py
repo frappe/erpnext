@@ -9,7 +9,7 @@ import webnotes.model
 import json	
 from webnotes.utils import cint
 import webnotes.defaults
-from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
@@ -171,7 +171,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 			
 	def test_purchase_invoice_with_advance(self):
-		from accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
 		jv = webnotes.bean(copy=jv_test_records[1])

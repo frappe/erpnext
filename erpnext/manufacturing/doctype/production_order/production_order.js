@@ -70,7 +70,7 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 
 cur_frm.cscript.make_se = function(purpose) {
 	wn.call({
-		method:"manufacturing.doctype.production_order.production_order.make_stock_entry",
+		method: "erpnext.manufacturing.doctype.production_order.production_order.make_stock_entry",
 		args: {
 			"production_order_id": cur_frm.doc.name,
 			"purpose": purpose

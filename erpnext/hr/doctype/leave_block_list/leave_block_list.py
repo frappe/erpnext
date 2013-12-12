@@ -5,7 +5,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from accounts.utils import validate_fiscal_year
+from erpnext.accounts.utils import validate_fiscal_year
 from webnotes import _
 
 class DocType:

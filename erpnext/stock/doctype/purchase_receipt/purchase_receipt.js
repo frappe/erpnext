@@ -28,7 +28,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			cur_frm.add_custom_button(wn._(wn._('From Purchase Order')), 
 				function() {
 					wn.model.map_current_doc({
-						method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 						source_doctype: "Purchase Order",
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
@@ -91,7 +91,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	
 	make_purchase_invoice: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 			source_name: cur_frm.doc.name
 		})
 	}, 

@@ -3,7 +3,7 @@
 
 import webnotes
 from webnotes.utils import cstr
-from stock.stock_ledger import update_entries_after
+from erpnext.stock.stock_ledger import update_entries_after
 
 def execute():
 	webnotes.conn.auto_commit_on_many_writes = 1

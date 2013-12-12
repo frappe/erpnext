@@ -16,7 +16,7 @@ class DocType:
 			"allow_negative_stock"]:
 			webnotes.conn.set_default(key, self.doc.fields.get(key, ""))
 			
-		from setup.doctype.naming_series.naming_series import set_by_naming_series
+		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code", 
 			self.doc.get("item_naming_by")=="Naming Series", hide_name_field=True)
 			

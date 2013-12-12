@@ -173,7 +173,7 @@ class DocType:
 		"""It will raise production order (Draft) for all distinct FG items"""
 		self.validate_data()
 
-		from utilities.transaction_base import validate_uom_is_integer
+		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self.doclist, "stock_uom", "planned_qty")
 
 		items = self.get_distinct_items_and_boms()[1]
@@ -208,7 +208,7 @@ class DocType:
 		
 	def create_production_order(self, items):
 		"""Create production order. Called from Production Planning Tool"""
-		from manufacturing.doctype.production_order.production_order import OverProductionError
+		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError
 
 		pro_list = []
 		for key in items:
@@ -302,7 +302,7 @@ class DocType:
 		
 		item_projected_qty = self.get_projected_qty()
 		
-		from accounts.utils import get_fiscal_year
+		from erpnext.accounts.utils import get_fiscal_year
 		fiscal_year = get_fiscal_year(nowdate())[0]
 		
 		items_to_be_requested = webnotes._dict()

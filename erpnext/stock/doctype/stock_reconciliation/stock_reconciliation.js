@@ -14,7 +14,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		
 		if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
 			return this.frm.call({
-				method: "accounts.utils.get_company_default",
+				method: "erpnext.accounts.utils.get_company_default",
 				args: {
 					"fieldname": "stock_adjustment_account", 
 					"company": this.frm.doc.company
@@ -94,7 +94,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		wn.upload.make({
 			parent: $wrapper,
 			args: {
-				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload'
+				method: 'erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(fid, filename, r) {

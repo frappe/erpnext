@@ -9,9 +9,9 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
-from stock.utils import update_bin
+from erpnext.stock.utils import update_bin
 
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -46,8 +46,8 @@ class DocType(BuyingController):
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
 
 		self.validate_with_previous_doc()
 		self.validate_rejected_warehouse()
@@ -240,7 +240,7 @@ class DocType(BuyingController):
 		
 		self.update_stock()
 
-		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "purchase_receipt_details")
 
 		purchase_controller.update_last_purchase_rate(self, 1)

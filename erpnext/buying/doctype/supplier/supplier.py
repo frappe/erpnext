@@ -10,7 +10,7 @@ from webnotes import msgprint, _
 from webnotes.model.doc import make_autoname
 
 
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -149,7 +149,7 @@ class DocType(TransactionBase):
 		self.delete_supplier_account()
 		
 	def before_rename(self, olddn, newdn, merge=False):
-		from accounts.utils import rename_account_for
+		from erpnext.accounts.utils import rename_account_for
 		rename_account_for("Supplier", olddn, newdn, merge)
 		
 	def after_rename(self, olddn, newdn, merge=False):

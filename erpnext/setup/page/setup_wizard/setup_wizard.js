@@ -13,7 +13,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			var values = wiz.get_values();
 			wiz.show_working();
 			wn.call({
-				method: "setup.page.setup_wizard.setup_wizard.setup_account",
+				method: "erpnext.setup.page.setup_wizard.setup_wizard.setup_account",
 				args: values,
 				callback: function(r) {
 					if(r.exc) {

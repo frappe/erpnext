@@ -99,7 +99,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				account_for = "stock_received_but_not_billed";
 			
 			return this.frm.call({
-				method: "accounts.utils.get_company_default",
+				method: "erpnext.accounts.utils.get_company_default",
 				args: {
 					"fieldname": account_for, 
 					"company": this.frm.doc.company

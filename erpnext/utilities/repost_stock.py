@@ -39,7 +39,7 @@ def repost_stock(item_code, warehouse):
 		})
 
 def repost_actual_qty(item_code, warehouse):
-	from stock.stock_ledger import update_entries_after
+	from erpnext.stock.stock_ledger import update_entries_after
 	try:
 		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
 	except:
@@ -116,7 +116,7 @@ def get_planned_qty(item_code, warehouse):
 	
 	
 def update_bin(item_code, warehouse, qty_dict=None):
-	from stock.utils import get_bin
+	from erpnext.stock.utils import get_bin
 	bin = get_bin(item_code, warehouse)
 	mismatch = False
 	for fld, val in qty_dict.items():

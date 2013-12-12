@@ -8,9 +8,9 @@ from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
-from setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency
 
-from controllers.accounts_controller import AccountsController
+from erpnext.controllers.accounts_controller import AccountsController
 
 class DocType(AccountsController):
 	def __init__(self,d,dl):
@@ -47,7 +47,7 @@ class DocType(AccountsController):
 		self.check_credit_limit()
 
 	def on_cancel(self):
-		from accounts.utils import remove_against_link_from_jv
+		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
 		
 		self.make_gl_entries(1)
@@ -240,7 +240,7 @@ class DocType(AccountsController):
 					Purchase Invoice"))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
-		from accounts.general_ledger import make_gl_entries
+		from erpnext.accounts.general_ledger import make_gl_entries
 		gl_map = []
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.debit or d.credit:
@@ -334,7 +334,7 @@ class DocType(AccountsController):
 
 @webnotes.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	account = webnotes.conn.get_value("Company", company,
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 	if account:
@@ -345,7 +345,7 @@ def get_default_bank_cash_account(company, voucher_type):
 		
 @webnotes.whitelist()
 def get_payment_entry_from_sales_invoice(sales_invoice):
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	si = webnotes.bean("Sales Invoice", sales_invoice)
 	jv = get_payment_entry(si.doc)
 	jv.doc.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.doc.fields
@@ -363,7 +363,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 
 @webnotes.whitelist()
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	pi = webnotes.bean("Purchase Invoice", purchase_invoice)
 	jv = get_payment_entry(pi.doc)
 	jv.doc.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.doc.fields
@@ -407,7 +407,7 @@ def get_payment_entry(doc):
 @webnotes.whitelist()
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	accounts = webnotes.conn.sql_list("""select name from tabAccount 
 		where group_or_ledger='Ledger' and is_pl_account='No' and company=%s""", company)
 	

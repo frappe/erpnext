@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 
-from webnotes.utils import load_json, nowdate, cstr
+from webnotes.utils import nowdate, cstr
 from webnotes.model.code import get_obj
 from webnotes.model.doc import Document
 from webnotes import msgprint
@@ -47,14 +47,14 @@ class DocType:
 	
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"
-		args = load_json(arg)
+		args = json.loads(arg)
 		number = webnotes.conn.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
 			('%s', args['key'], '%s'), (args['contact_name'], args['value']))
 		return number and (number[0][0] or number[0][1]) or ''
 	
 	def send_form_sms(self, arg):
 		"called from client side"
-		args = load_json(arg)
+		args = json.loads(arg)
 		self.send_sms([str(args['number'])], str(args['message']))
 
 	def send_sms(self, receiver_list, msg, sender_name = ''):

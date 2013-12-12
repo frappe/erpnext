@@ -83,7 +83,7 @@ def _get_basic_details(args, item_bean):
 	return out
 	
 def _get_price_list_rate(args, item_bean, meta):
-	from utilities.transaction_base import validate_currency
+	from erpnext.utilities.transaction_base import validate_currency
 	item = item_bean.doc
 	out = webnotes._dict()
 	
@@ -117,7 +117,7 @@ def _get_supplier_part_no(args, item_bean):
 	return item_supplier and item_supplier[0].supplier_part_no or None
 
 def _validate_item_details(args, item):
-	from utilities.transaction_base import validate_item_fetch
+	from erpnext.utilities.transaction_base import validate_item_fetch
 	validate_item_fetch(args, item)
 	
 	# validate if purchase item or subcontracted item

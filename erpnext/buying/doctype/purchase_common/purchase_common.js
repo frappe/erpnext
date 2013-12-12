@@ -112,7 +112,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
-					method: "buying.utils.get_item_details",
+					method: "erpnext.buying.utils.get_item_details",
 					child: item,
 					args: {
 						args: {
@@ -178,7 +178,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
 			return this.frm.call({
-				method: "buying.utils.get_conversion_factor",
+				method: "erpnext.buying.utils.get_conversion_factor",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -211,7 +211,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "buying.utils.get_projected_qty",
+				method: "erpnext.buying.utils.get_projected_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,

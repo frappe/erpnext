@@ -11,7 +11,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 from webnotes.model.mapper import get_mapped_doclist
 
-from controllers.selling_controller import SellingController
+from erpnext.controllers.selling_controller import SellingController
 
 class DocType(SellingController):
 	def __init__(self, doc, doclist=None):
@@ -111,7 +111,7 @@ class DocType(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 
-		from stock.doctype.packed_item.packed_item import make_packing_list
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		self.doclist = make_packing_list(self,'sales_order_details')
 
 		self.validate_with_previous_doc()
@@ -119,8 +119,8 @@ class DocType(SellingController):
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
@@ -128,7 +128,7 @@ class DocType(SellingController):
 		
 		
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_user, validate_warehouse_company
 		
 		warehouses = list(set([d.reserved_warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
@@ -231,7 +231,7 @@ class DocType(SellingController):
 
 
 	def update_stock_ledger(self, update_stock):
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 		for d in self.get_item_list():
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {

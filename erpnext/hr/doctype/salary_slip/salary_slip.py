@@ -9,10 +9,10 @@ from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
-from setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency
 
 	
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self,doc,doclist=[]):
@@ -39,7 +39,7 @@ class DocType(TransactionBase):
 
 
 	def pull_sal_struct(self, struct):
-		from hr.doctype.salary_structure.salary_structure import make_salary_slip
+		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 		self.doclist = make_salary_slip(struct, self.doclist)
 		
 	def pull_emp_details(self):

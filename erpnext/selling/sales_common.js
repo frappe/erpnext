@@ -158,7 +158,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
-					method: "selling.utils.get_item_details",
+					method: "erpnext.selling.utils.get_item_details",
 					child: item,
 					args: {
 						args: {
@@ -268,7 +268,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "selling.utils.get_available_qty",
+				method: "erpnext.selling.utils.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,

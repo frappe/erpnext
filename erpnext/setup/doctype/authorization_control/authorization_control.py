@@ -7,10 +7,10 @@ import webnotes
 from webnotes.utils import cstr, flt, has_common, make_esc
 from webnotes.model.bean import getlist
 from webnotes import session, msgprint
-from setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency
 
 	
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self, d, dl):

@@ -10,7 +10,7 @@ test_dependencies = ["Warehouse"]
 
 class TestItem(unittest.TestCase):
 	def test_default_warehouse(self):
-		from stock.doctype.item.item import WarehouseNotSet
+		from erpnext.stock.doctype.item.item import WarehouseNotSet
 		item = webnotes.bean(copy=test_records[0])
 		item.doc.is_stock_item = "Yes"
 		item.doc.default_warehouse = None

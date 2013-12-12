@@ -9,7 +9,7 @@ import webnotes.defaults
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_order(self):
-		from buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
+		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
 		sq = webnotes.bean(copy=test_records[0]).insert()
 

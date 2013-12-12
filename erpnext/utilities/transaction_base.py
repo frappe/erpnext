@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 from webnotes import msgprint, _
-from webnotes.utils import load_json, cstr, flt, now_datetime, cint
+from webnotes.utils import cstr, flt, now_datetime, cint
 from webnotes.model.doc import addchild
 
-from controllers.status_updater import StatusUpdater
+from erpnext.controllers.status_updater import StatusUpdater
 
 class TransactionBase(StatusUpdater):
 	def get_default_address_and_contact(self, party_field, party_name=None):
@@ -145,7 +145,7 @@ class TransactionBase(StatusUpdater):
 		self.doc.fields.update(self.get_lead_defaults())
 	
 	def get_customer_address(self, args):
-		args = load_json(args)
+		args = json.loads(args)
 		ret = {
 			'customer_address' : args["address"],
 			'address_display' : get_address_display(args["address"]),
@@ -170,7 +170,7 @@ class TransactionBase(StatusUpdater):
 	# -----------------------
 	def get_default_supplier_address(self, args):
 		if isinstance(args, basestring):
-			args = load_json(args)
+			args = json.loads(args)
 			
 		address_name = get_default_address("supplier", args["supplier"])
 		ret = {
@@ -184,7 +184,7 @@ class TransactionBase(StatusUpdater):
 	# Get Supplier Address
 	# -----------------------
 	def get_supplier_address(self, args):
-		args = load_json(args)
+		args = json.loads(args)
 		ret = {
 			'supplier_address' : args['address'],
 			'address_display' : get_address_display(args["address"]),
@@ -439,7 +439,7 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 		}, raise_exception=True)
 			
 def validate_item_fetch(args, item):
-	from stock.utils import validate_end_of_life
+	from erpnext.stock.utils import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life)
 	
 	# validate company

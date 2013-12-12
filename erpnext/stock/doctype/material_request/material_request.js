@@ -49,7 +49,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "selling.doctype.sales_order.sales_order.make_material_request",
+						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
 						get_query_filters: {
 							docstatus: 1,
@@ -95,7 +95,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			if(!values) return;
 			
 			wn.call({
-				method:"manufacturing.doctype.bom.bom.get_bom_items",
+				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
 				args: values,
 				callback: function(r) {
 					$.each(r.message, function(i, item) {
@@ -128,21 +128,21 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		
 	make_purchase_order: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.material_request.material_request.make_purchase_order",
+			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 			source_name: cur_frm.doc.name
 		})
 	},
 
 	make_supplier_quotation: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.material_request.material_request.make_supplier_quotation",
+			method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 			source_name: cur_frm.doc.name
 		})
 	},
 
 	make_stock_entry: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.material_request.material_request.make_stock_entry",
+			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			source_name: cur_frm.doc.name
 		})
 	}

@@ -75,7 +75,7 @@ $.extend(cur_frm.cscript, {
 
 	set_status: function(status) {
 		return wn.call({
-			method:"support.doctype.support_ticket.support_ticket.set_status",
+			method: "erpnext.support.doctype.support_ticket.support_ticket.set_status",
 			args: {
 				name: cur_frm.doc.name,
 				status: status

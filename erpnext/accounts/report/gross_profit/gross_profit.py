@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
-from stock.utils import get_buying_amount, get_sales_bom_buying_amount
+from erpnext.stock.utils import get_buying_amount, get_sales_bom_buying_amount
 
 def execute(filters=None):
 	if not filters: filters = {}

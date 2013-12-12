@@ -47,7 +47,7 @@ class DocType(DocListController):
 		
 		# validate that a Shopping Cart Price List exists for the root territory
 		# as a catch all!
-		from setup.utils import get_root_of
+		from erpnext.setup.utils import get_root_of
 		root_territory = get_root_of("Territory")
 		
 		if root_territory not in territory_name_map.keys():
@@ -143,7 +143,7 @@ class DocType(DocListController):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
 		
 	def get_territory_ancestry(self, territory):
-		from setup.utils import get_ancestors_of
+		from erpnext.setup.utils import get_ancestors_of
 		
 		if not hasattr(self, "_territory_ancestry"):
 			self._territory_ancestry = {}

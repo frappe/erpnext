@@ -8,7 +8,7 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, fmt_money
 from webnotes.model.controller import DocListController
-from setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency
 
 class OverlappingConditionError(webnotes.ValidationError): pass
 class FromGreaterThanToError(webnotes.ValidationError): pass

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 def execute():
-	from stock.stock_ledger import update_entries_after
+	from erpnext.stock.stock_ledger import update_entries_after
 	item_warehouse = []
 	# update valuation_rate in transaction
 	doctypes = {"Purchase Receipt": "purchase_receipt_details", "Purchase Invoice": "entries"}

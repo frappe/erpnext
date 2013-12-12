@@ -25,7 +25,7 @@ erpnext.support.CustomerIssue = wn.ui.form.Controller.extend({
 	
 	make_maintenance_visit: function() {
 		wn.model.open_mapped_doc({
-			method: "support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+			method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
 			source_name: cur_frm.doc.name
 		})
 	}

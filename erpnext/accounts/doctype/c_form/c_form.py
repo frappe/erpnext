@@ -76,7 +76,7 @@ class DocType:
 		}
 
 def get_invoice_nos(doctype, txt, searchfield, start, page_len, filters):
-	from utilities import build_filter_conditions
+	from erpnext.utilities import build_filter_conditions
 	conditions, filter_values = build_filter_conditions(filters)
 	
 	return webnotes.conn.sql("""select name from `tabSales Invoice` where docstatus = 1 

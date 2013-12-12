@@ -206,7 +206,7 @@ class DocType:
 		
 	def before_rename(self, old, new, merge=False):
 		# Add company abbr if not provided
-		from setup.doctype.company.company import get_name_with_abbr
+		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.doc.company)
 		
 		# Validate properties before merging

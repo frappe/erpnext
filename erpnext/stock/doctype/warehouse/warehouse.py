@@ -80,7 +80,7 @@ class DocType:
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
-		from setup.doctype.company.company import get_name_with_abbr
+		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
 
 		if merge:
@@ -89,7 +89,7 @@ class DocType:
 				
 			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
-		from accounts.utils import rename_account_for
+		from erpnext.accounts.utils import rename_account_for
 		rename_account_for("Warehouse", olddn, new_warehouse, merge)
 
 		return new_warehouse
@@ -99,7 +99,7 @@ class DocType:
 			self.recalculate_bin_qty(newdn)
 			
 	def recalculate_bin_qty(self, newdn):
-		from utilities.repost_stock import repost_stock
+		from erpnext.utilities.repost_stock import repost_stock
 		webnotes.conn.auto_commit_on_many_writes = 1
 		webnotes.conn.set_default("allow_negative_stock", 1)
 		

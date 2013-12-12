@@ -6,9 +6,9 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
-from setup.utils import get_company_currency
-from accounts.utils import get_fiscal_year, validate_fiscal_year
-from utilities.transaction_base import TransactionBase, validate_conversion_rate
+from erpnext.setup.utils import get_company_currency
+from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.utilities.transaction_base import TransactionBase, validate_conversion_rate
 import json
 
 class AccountsController(TransactionBase):
@@ -403,7 +403,7 @@ class AccountsController(TransactionBase):
 						raise_exception=1)
 		
 	def get_company_default(self, fieldname):
-		from accounts.utils import get_company_default
+		from erpnext.accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)
 		
 	def get_stock_items(self):

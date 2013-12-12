@@ -8,7 +8,7 @@ from webnotes.utils import cint, getdate, cstr, flt, add_days
 import datetime
 from webnotes import _, ValidationError
 
-from controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController
 
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass

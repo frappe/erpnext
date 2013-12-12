@@ -8,7 +8,7 @@ from webnotes.utils import cstr, validate_email_add, cint, extract_email_id
 from webnotes import session, msgprint
 
 	
-from controllers.selling_controller import SellingController
+from erpnext.controllers.selling_controller import SellingController
 
 class DocType(SellingController):
 	def __init__(self, doc, doclist):

@@ -30,7 +30,7 @@ class DocType:
 		self.clear_operations()
 		self.validate_main_item()
 
-		from utilities.transaction_base import validate_uom_is_integer
+		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self.doclist, "stock_uom", "qty")
 
 		self.validate_operations()
@@ -152,7 +152,7 @@ class DocType:
 			as per valuation method (MAR/FIFO) 
 			as on costing date	
 		"""
-		from stock.utils import get_incoming_rate
+		from erpnext.stock.utils import get_incoming_rate
 		dt = self.doc.costing_date or nowdate()
 		time = self.doc.costing_date == nowdate() and now().split()[1] or '23:59'
 		warehouse = webnotes.conn.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])

@@ -5,40 +5,22 @@ from __future__ import unicode_literals
 
 import webnotes
 
-def post_import():
-	webnotes.conn.begin()
+def get_hooks():
+	return {
+		"app_include_js": ["assets/js/erpnext.min.js"],
+		"app_include_css": ["assets/css/erpnext.css"],
+		"desktop_icons": get_desktop_icons(),
+		"boot_session": ["erpnext.startup.boot.boot_session"]
+	}
 
-	# feature setup
+def after_install():
 	import_defaults()
 	import_country_and_currency()
-	
-	# home page
 	webnotes.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
-
-	# features
 	feature_setup()
-	
-	# all roles to Administrator
-	from setup.page.setup_wizard.setup_wizard import add_all_roles_to
+	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
-	
 	webnotes.conn.commit()
-
-def feature_setup():
-	"""save global defaults and features setup"""
-	bean = webnotes.bean("Features Setup", "Features Setup")
-	bean.ignore_permissions = True
-
-	# store value as 1 for all these fields
-	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
-		'fs_item_advanced', 'fs_packing_details', 'fs_item_group_in_details',
-		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
-		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
-		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
-		'fs_page_break', 'fs_more_info', 'fs_pos_view'
-	]
-	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
-	bean.save()
 
 def import_country_and_currency():
 	from webnotes.country_info import get_all
@@ -139,3 +121,93 @@ def import_defaults():
 			bean.ignore_mandatory = True
 		
 		bean.insert()
+		
+def feature_setup():
+	"""save global defaults and features setup"""
+	bean = webnotes.bean("Features Setup", "Features Setup")
+	bean.ignore_permissions = True
+
+	# store value as 1 for all these fields
+	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
+		'fs_item_advanced', 'fs_packing_details', 'fs_item_group_in_details',
+		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
+		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
+		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
+		'fs_page_break', 'fs_more_info', 'fs_pos_view'
+	]
+	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
+	bean.save()
+		
+def get_desktop_icons():
+	return	{
+		"Accounts": {
+			"color": "#3498db", 
+			"icon": "icon-money", 
+			"link": "accounts-home", 
+			"type": "module"
+		}, 
+		"Activity": {
+			"color": "#e67e22", 
+			"icon": "icon-play", 
+			"label": "Activity", 
+			"link": "activity", 
+			"type": "page"
+		}, 
+		"Buying": {
+			"color": "#c0392b", 
+			"icon": "icon-shopping-cart", 
+			"link": "buying-home", 
+			"type": "module"
+		}, 
+		"HR": {
+			"color": "#2ecc71", 
+			"icon": "icon-group", 
+			"label": "Human Resources", 
+			"link": "hr-home", 
+			"type": "module"
+		}, 
+		"Manufacturing": {
+			"color": "#7f8c8d", 
+			"icon": "icon-cogs", 
+			"link": "manufacturing-home", 
+			"type": "module"
+		}, 
+		"Notes": {
+			"color": "#95a5a6", 
+			"doctype": "Note", 
+			"icon": "icon-file-alt", 
+			"label": "Notes", 
+			"link": "List/Note", 
+			"type": "list"
+		}, 
+		"Projects": {
+			"color": "#8e44ad", 
+			"icon": "icon-puzzle-piece", 
+			"link": "projects-home", 
+			"type": "module"
+		}, 
+		"Selling": {
+			"color": "#1abc9c", 
+			"icon": "icon-tag", 
+			"link": "selling-home", 
+			"type": "module"
+		}, 
+		"Setup": {
+			"color": "#bdc3c7", 
+			"icon": "icon-wrench", 
+			"link": "Setup", 
+			"type": "setup"
+		}, 
+		"Stock": {
+			"color": "#f39c12", 
+			"icon": "icon-truck", 
+			"link": "stock-home", 
+			"type": "module"
+		}, 
+		"Support": {
+			"color": "#2c3e50", 
+			"icon": "icon-phone", 
+			"link": "support-home", 
+			"type": "module"
+		}
+	}

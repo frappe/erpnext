@@ -47,7 +47,7 @@ $.extend(cur_frm.cscript, {
 	allow_dropbox_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
 			return wn.call({
-				method: "setup.doctype.backup_manager.backup_dropbox.get_dropbox_authorize_url",
+				method: "erpnext.setup.doctype.backup_manager.backup_dropbox.get_dropbox_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
 						cur_frm.set_value("dropbox_access_secret", r.message.secret);
@@ -64,7 +64,7 @@ $.extend(cur_frm.cscript, {
 	allow_gdrive_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
 			return wn.call({
-				method: "setup.doctype.backup_manager.backup_googledrive.get_gdrive_authorize_url",
+				method: "erpnext.setup.doctype.backup_manager.backup_googledrive.get_gdrive_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
 						window.open(r.message.authorize_url);
@@ -76,7 +76,7 @@ $.extend(cur_frm.cscript, {
 	
 	validate_gdrive: function() {
 		return wn.call({
-			method: "setup.doctype.backup_manager.backup_googledrive.gdrive_callback",
+			method: "erpnext.setup.doctype.backup_manager.backup_googledrive.gdrive_callback",
 			args: {
 				verification_code: cur_frm.doc.verification_code
 			},

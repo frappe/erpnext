@@ -7,7 +7,7 @@ $(document).ready(function() {
 	erpnext.cart.bind_events();
 	return wn.call({
 		type: "POST",
-		method: "selling.utils.cart.get_cart_quotation",
+		method: "erpnext.selling.utils.cart.get_cart_quotation",
 		callback: function(r) {
 			$("#cart-container").removeClass("hide");
 			$(".progress").remove();
@@ -193,7 +193,7 @@ $.extend(erpnext.cart, {
 		return wn.call({
 			btn: btn,
 			type: "POST",
-			method: "selling.utils.cart.apply_shipping_rule",
+			method: "erpnext.selling.utils.cart.apply_shipping_rule",
 			args: { shipping_rule: rule },
 			callback: function(r) {
 				if(!r.exc) {
@@ -241,7 +241,7 @@ $.extend(erpnext.cart, {
 				
 				return wn.call({
 					type: "POST",
-					method: "selling.utils.cart.update_cart_address",
+					method: "erpnext.selling.utils.cart.update_cart_address",
 					args: {
 						address_fieldname: $address_wrapper.attr("data-fieldname"),
 						address_name: $(this).attr("data-address-name")
@@ -272,7 +272,7 @@ $.extend(erpnext.cart, {
 	place_order: function(btn) {
 		return wn.call({
 			type: "POST",
-			method: "selling.utils.cart.place_order",
+			method: "erpnext.selling.utils.cart.place_order",
 			btn: btn,
 			callback: function(r) {
 				if(r.exc) {

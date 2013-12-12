@@ -22,7 +22,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 		}
 		window.location.href = repl(wn.request.url + 
 			'?cmd=%(cmd)s&from_date=%(from_date)s&to_date=%(to_date)s', {
-				cmd: "hr.doctype.upload_attendance.upload_attendance.get_template",
+				cmd: "erpnext.hr.doctype.upload_attendance.upload_attendance.get_template",
 				from_date: this.frm.doc.att_fr_date,
 				to_date: this.frm.doc.att_to_date,
 			});
@@ -36,7 +36,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 		wn.upload.make({
 			parent: $wrapper,
 			args: {
-				method: 'hr.doctype.upload_attendance.upload_attendance.upload'
+				method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(fid, filename, r) {

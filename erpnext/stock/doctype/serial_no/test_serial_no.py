@@ -10,7 +10,7 @@ import webnotes, unittest
 test_dependencies = ["Item"]
 test_records = []
 
-from stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.serial_no.serial_no import *
 
 class TestSerialNo(unittest.TestCase):
 	def test_cannot_create_direct(self):

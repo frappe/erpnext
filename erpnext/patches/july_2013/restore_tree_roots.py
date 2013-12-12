@@ -2,5 +2,5 @@
 # License: GNU General Public License v3. See license.txt
 
 def execute():
-	from startup.install import import_defaults
+	from erpnext.startup.install import import_defaults
 	import_defaults()

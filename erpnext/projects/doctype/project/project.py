@@ -6,7 +6,7 @@ import webnotes
 
 from webnotes.utils import flt, getdate
 from webnotes import msgprint
-from utilities.transaction_base import delete_events
+from erpnext.utilities.transaction_base import delete_events
 
 class DocType:
 	def __init__(self, doc, doclist=None):

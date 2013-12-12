@@ -4,7 +4,7 @@
 import webnotes
 import unittest
 
-from projects.doctype.time_log.time_log import OverlapError
+from erpnext.projects.doctype.time_log.time_log import OverlapError
 
 class TestTimeLog(unittest.TestCase):
 	def test_duplication(self):		

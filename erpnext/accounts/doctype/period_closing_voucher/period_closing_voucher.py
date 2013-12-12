@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, flt, getdate
 from webnotes import msgprint, _
-from controllers.accounts_controller import AccountsController
+from erpnext.controllers.accounts_controller import AccountsController
 
 class DocType(AccountsController):
 	def __init__(self,d,dl):
@@ -33,7 +33,7 @@ class DocType(AccountsController):
 				_("must be a Liability account"))
 
 	def validate_posting_date(self):
-		from accounts.utils import get_fiscal_year
+		from erpnext.accounts.utils import get_fiscal_year
 		self.year_start_date = get_fiscal_year(self.doc.posting_date, self.doc.fiscal_year)[1]
 
 		pce = webnotes.conn.sql("""select name from `tabPeriod Closing Voucher`
@@ -99,5 +99,5 @@ class DocType(AccountsController):
 				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0
 			}))
 			
-		from accounts.general_ledger import make_gl_entries
+		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries(gl_entries)

@@ -53,7 +53,7 @@ class DocType(DocListController):
 		self.notify_employee("cancelled")
 
 	def show_block_day_warning(self):
-		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates		
+		from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates		
 
 		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
 			self.doc.employee, self.doc.company, all_lists=True)
@@ -64,7 +64,7 @@ class DocType(DocListController):
 				webnotes.msgprint(formatdate(d.block_date) + ": " + d.reason)
 
 	def validate_block_days(self):
-		from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+		from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
 		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
 			self.doc.employee, self.doc.company)
@@ -290,7 +290,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 
 def add_block_dates(events, start, end, employee, company):
 	# block days
-	from hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+	from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
 	cnt = 0
 	block_dates = get_applicable_block_dates(start, end, employee, company, all_lists=True)

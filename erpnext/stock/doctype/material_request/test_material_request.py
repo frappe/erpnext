@@ -13,7 +13,7 @@ class TestMaterialRequest(unittest.TestCase):
 		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 	def test_make_purchase_order(self):
-		from stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
 		mr = webnotes.bean(copy=test_records[0]).insert()
 
@@ -28,7 +28,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEquals(len(po), len(mr.doclist))
 		
 	def test_make_supplier_quotation(self):
-		from stock.doctype.material_request.material_request import make_supplier_quotation
+		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
 		mr = webnotes.bean(copy=test_records[0]).insert()
 
@@ -44,7 +44,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 			
 	def test_make_stock_entry(self):
-		from stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 		mr = webnotes.bean(copy=test_records[0]).insert()
 
@@ -122,7 +122,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 		# map a purchase order
-		from stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		po_doclist = make_purchase_order(mr.doc.name)
 		po_doclist[0].supplier = "_Test Supplier"
 		po_doclist[1].qty = 27.0
@@ -169,7 +169,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 		self._test_requested_qty(54.0, 3.0)
 
-		from stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 				
 		# map a stock entry
 		se_doclist = make_stock_entry(mr.doc.name)
@@ -233,7 +233,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 		# map a stock entry
-		from stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 		se_doclist = make_stock_entry(mr.doc.name)
 		se_doclist[0].update({
@@ -288,7 +288,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# map a stock entry
-		from stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		
 		se_doclist = make_stock_entry(mr.doc.name)
 		se_doclist[0].update({
@@ -315,7 +315,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertRaises(webnotes.MappingMismatchError, se.insert)
 		
 	def test_warehouse_company_validation(self):
-		from stock.utils import InvalidWarehouseCompany
+		from erpnext.stock.utils import InvalidWarehouseCompany
 		mr = webnotes.bean(copy=test_records[0])
 		mr.doc.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)

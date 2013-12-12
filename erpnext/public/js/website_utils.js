@@ -8,7 +8,7 @@ if(!window.erpnext) erpnext = {};
 wn.send_message = function(opts, btn) {
 	return wn.call({
 		type: "POST",
-		method: "portal.utils.send_message",
+		method: "erpnext.portal.utils.send_message",
 		btn: btn,
 		args: opts,
 		callback: opts.callback
@@ -46,7 +46,7 @@ $.extend(erpnext.cart, {
 		} else {
 			return wn.call({
 				type: "POST",
-				method: "selling.utils.cart.update_cart",
+				method: "erpnext.selling.utils.cart.update_cart",
 				args: {
 					item_code: opts.item_code,
 					qty: opts.qty,

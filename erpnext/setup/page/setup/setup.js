@@ -175,7 +175,7 @@ wn.pages.Setup.make = function(wrapper) {
 	}
 
 	return wn.call({
-		method: "setup.page.setup.setup.get",
+		method: "erpnext.setup.page.setup.setup.get",
 		callback: function(r) {
 			if(r.message) {
 				body.empty();

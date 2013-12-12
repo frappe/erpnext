@@ -44,7 +44,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			cur_frm.add_custom_button(wn._('From Purchase Order'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 						source_doctype: "Purchase Order",
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
@@ -59,7 +59,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			cur_frm.add_custom_button(wn._('From Purchase Receipt'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
@@ -107,7 +107,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 cur_frm.cscript.make_bank_voucher = function() {
 	return wn.call({
-		method: "accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_purchase_invoice",
+		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_purchase_invoice",
 		args: {
 			"purchase_invoice": cur_frm.doc.name,
 		},

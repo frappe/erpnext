@@ -33,7 +33,7 @@ class DocType:
 		self.update_qty(args)
 		
 		if args.get("actual_qty"):
-			from stock.stock_ledger import update_entries_after
+			from erpnext.stock.stock_ledger import update_entries_after
 			
 			if not args.get("posting_date"):
 				args["posting_date"] = nowdate()

@@ -14,7 +14,7 @@ class DocType:
 	def validate(self):
 		self.validate_main_item()
 
-		from utilities.transaction_base import validate_uom_is_integer
+		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self.doclist, "uom", "qty")
 
 	def validate_main_item(self):
@@ -33,7 +33,7 @@ class DocType:
 		}
 
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 	
 	return webnotes.conn.sql("""select name, item_name, description from tabItem 
 		where is_stock_item="No" and is_sales_item="Yes"

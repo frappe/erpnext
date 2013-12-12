@@ -100,7 +100,7 @@ def run_sales(current_date):
 
 def run_accounts(current_date):
 	if can_make("Sales Invoice"):
-		from selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 		report = "Ordered Items to be Billed"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Sales Invoice")]:
 			si = webnotes.bean(make_sales_invoice(so))
@@ -110,7 +110,7 @@ def run_accounts(current_date):
 			webnotes.conn.commit()
 
 	if can_make("Purchase Invoice"):
-		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 		report = "Received Items to be Billed"
 		for pr in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Invoice")]:
 			pi = webnotes.bean(make_purchase_invoice(pr))
@@ -121,7 +121,7 @@ def run_accounts(current_date):
 			webnotes.conn.commit()
 			
 	if can_make("Payment Received"):
-		from accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_sales_invoice
+		from erpnext.accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_sales_invoice
 		report = "Accounts Receivable"
 		for si in list(set([r[4] for r in query_report.run(report, {"report_date": current_date })["result"] if r[3]=="Sales Invoice"]))[:how_many("Payment Received")]:
 			jv = webnotes.bean(get_payment_entry_from_sales_invoice(si))
@@ -133,7 +133,7 @@ def run_accounts(current_date):
 			webnotes.conn.commit()
 			
 	if can_make("Payment Made"):
-		from accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_purchase_invoice
+		from erpnext.accounts.doctype.journal_voucher.journal_voucher import get_payment_entry_from_purchase_invoice
 		report = "Accounts Payable"
 		for pi in list(set([r[4] for r in query_report.run(report, {"report_date": current_date })["result"] if r[3]=="Purchase Invoice"]))[:how_many("Payment Made")]:
 			jv = webnotes.bean(get_payment_entry_from_purchase_invoice(pi))
@@ -147,8 +147,8 @@ def run_accounts(current_date):
 def run_stock(current_date):
 	# make purchase requests
 	if can_make("Purchase Receipt"):
-		from buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		from stock.stock_ledger import NegativeStockError
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.stock.stock_ledger import NegativeStockError
 		report = "Purchase Order Items To Be Received"
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
@@ -162,9 +162,9 @@ def run_stock(current_date):
 	
 	# make delivery notes (if possible)
 	if can_make("Delivery Note"):
-		from selling.doctype.sales_order.sales_order import make_delivery_note
-		from stock.stock_ledger import NegativeStockError
-		from stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.stock.stock_ledger import NegativeStockError
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
 		report = "Ordered Items To Be Delivered"
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
@@ -205,7 +205,7 @@ def run_purchase(current_date):
 	
 	# make supplier quotations
 	if can_make("Supplier Quotation"):
-		from stock.doctype.material_request.material_request import make_supplier_quotation
+		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 		report = "Material Requests for which Supplier Quotations are not created"
 		for row in query_report.run(report)["result"][:how_many("Supplier Quotation")]:
 			if row[0] != "Total":
@@ -218,7 +218,7 @@ def run_purchase(current_date):
 		
 	# make purchase orders
 	if can_make("Purchase Order"):
-		from stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		report = "Requested Items To Be Ordered"
 		for row in query_report.run(report)["result"][:how_many("Purchase Order")]:
 			if row[0] != "Total":
@@ -230,8 +230,8 @@ def run_purchase(current_date):
 				webnotes.conn.commit()
 			
 def run_manufacturing(current_date):
-	from stock.stock_ledger import NegativeStockError
-	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
+	from erpnext.stock.stock_ledger import NegativeStockError
+	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
 	ppt.doc.company = company
@@ -276,9 +276,9 @@ def run_manufacturing(current_date):
 		except DuplicateEntryForProductionOrderError: pass
 
 def make_stock_entry_from_pro(pro_id, purpose, current_date):
-	from manufacturing.doctype.production_order.production_order import make_stock_entry
-	from stock.stock_ledger import NegativeStockError
-	from stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
+	from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
+	from erpnext.stock.stock_ledger import NegativeStockError
+	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, DuplicateEntryForProductionOrderError
 
 	try:
 		st = webnotes.bean(make_stock_entry(pro_id, purpose))
@@ -322,7 +322,7 @@ def make_quotation(current_date):
 def make_sales_order(current_date):
 	q = get_random("Quotation", {"status": "Submitted"})
 	if q:
-		from selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		so = webnotes.bean(make_sales_order(q))
 		so.doc.transaction_date = current_date
 		so.doc.delivery_date = webnotes.utils.add_days(current_date, 10)
@@ -376,7 +376,7 @@ def install():
 
 def complete_setup():
 	print "Complete Setup..."
-	from setup.page.setup_wizard.setup_wizard import setup_account
+	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
 	setup_account({
 		"first_name": "Test",
 		"last_name": "User",

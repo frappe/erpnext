@@ -29,7 +29,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	setup_leave_approver_select: function() {
 		var me = this;
 		return this.frm.call({
-			method:"hr.utils.get_leave_approver_list",
+			method: "erpnext.hr.utils.get_leave_approver_list",
 			callback: function(r) {
 				var df = wn.meta.get_docfield("Employee Leave Approver", "leave_approver",
 					me.frm.doc.name);

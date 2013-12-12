@@ -51,7 +51,7 @@ class DocType:
 			self.doc.cost_center = None
 		
 	def validate_posting_date(self):
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
 
 	def check_pl_account(self):

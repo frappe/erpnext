@@ -6,10 +6,10 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 
-from buying.utils import get_item_details
-from setup.utils import get_company_currency
+from erpnext.buying.utils import get_item_details
+from erpnext.setup.utils import get_company_currency
 
-from controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
 	def onload_post_render(self):
@@ -50,7 +50,7 @@ class BuyingController(StockController):
 					break
 					
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_user, validate_warehouse_company
 		
 		warehouses = list(set([d.warehouse for d in 
 			self.doclist.get({"doctype": self.tname}) if d.warehouse]))

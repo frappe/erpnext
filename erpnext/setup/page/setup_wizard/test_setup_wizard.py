@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import webnotes
 
-from setup.page.setup_wizard.test_setup_data import args
-from setup.page.setup_wizard.setup_wizard import setup_account
+from erpnext.setup.page.setup_wizard.test_setup_data import args
+from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
 
 if __name__=="__main__":
 	webnotes.connect()

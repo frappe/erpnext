@@ -52,7 +52,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 						source_doctype: "Sales Order",
 						get_query_filters: {
 							docstatus: 1,
@@ -70,14 +70,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	
 	make_sales_invoice: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_name: cur_frm.doc.name
 		})
 	}, 
 	
 	make_installation_note: function() {
 		wn.model.open_mapped_doc({
-			method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 			source_name: cur_frm.doc.name
 		});
 	},

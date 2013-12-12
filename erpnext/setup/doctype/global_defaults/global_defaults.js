@@ -7,7 +7,7 @@ $.extend(cur_frm.cscript, {
 		this.timezone = doc.time_zone;
 		
 		wn.call({
-			method:"webnotes.country_info.get_country_timezone_info",
+			method: "webnotes.country_info.get_country_timezone_info",
 			callback: function(data) {
 				erpnext.country_info = data.message.country_info;
 				erpnext.all_timezones = data.message.all_timezones;

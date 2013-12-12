@@ -9,7 +9,7 @@ $(document).bind('toolbar_setup', function() {
 	
 	var brand = ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext');
 	$('.navbar-brand').html('<div style="display: inline-block;">\
-			<object type="image/svg+xml" data="app/images/splash.svg" class="toolbar-splash"></object>\
+			<object type="image/svg+xml" data="assets/erpnext/images/splash.svg" class="toolbar-splash"></object>\
 		</div>' + brand)
 	.attr("title", brand)
 	.addClass("navbar-icon-home")

@@ -22,7 +22,7 @@ class DocType:
 				'Rejected' before submitting""", raise_exception=1)
 	
 	def validate_fiscal_year(self):
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
 			
 	def validate_exp_details(self):

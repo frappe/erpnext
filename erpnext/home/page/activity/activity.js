@@ -12,7 +12,7 @@ wn.pages['activity'].onload = function(wrapper) {
 	var list = new wn.ui.Listing({
 		hide_refresh: true,
 		appframe: wrapper.appframe,
-		method: 'home.page.activity.activity.get_feed',
+		method: 'erpnext.home.page.activity.activity.get_feed',
 		parent: $(wrapper).find(".layout-main"),
 		render_row: function(row, data) {
 			new erpnext.ActivityFeed(row, data);

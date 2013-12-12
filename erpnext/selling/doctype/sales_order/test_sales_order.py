@@ -7,7 +7,7 @@ import unittest
 
 class TestSalesOrder(unittest.TestCase):
 	def test_make_material_request(self):
-		from selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
 		
 		so = webnotes.bean(copy=test_records[0]).insert()
 		
@@ -22,7 +22,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(mr), len(sales_order.doclist))
 
 	def test_make_delivery_note(self):
-		from selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
 		so = webnotes.bean(copy=test_records[0]).insert()
 
@@ -37,7 +37,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(dn), len(sales_order.doclist))
 
 	def test_make_sales_invoice(self):
-		from selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		so = webnotes.bean(copy=test_records[0]).insert()
 
@@ -71,8 +71,8 @@ class TestSalesOrder(unittest.TestCase):
 		return w
 		
 	def create_dn_against_so(self, so, delivered_qty=0):
-		from stock.doctype.delivery_note.test_delivery_note import test_records as dn_test_records
-		from stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records as dn_test_records
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
 
 		_insert_purchase_receipt(so.doclist[1].item_code)
 		
@@ -164,7 +164,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 10.0)
 		
 	def test_reserved_qty_for_so_with_packing_list(self):
-		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		test_record = test_records[0][:]
@@ -191,7 +191,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 0.0)
 			
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
-		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		
@@ -241,7 +241,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].reserved_warehouse, 20.0)
 			
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
-		from selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
+		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
 		test_record = webnotes.copy_doclist(test_records[0])
@@ -284,7 +284,7 @@ class TestSalesOrder(unittest.TestCase):
 		
 		webnotes.session.user = "test@example.com"
 
-		from stock.utils import UserNotAllowedForWarehouse
+		from erpnext.stock.utils import UserNotAllowedForWarehouse
 		so = webnotes.bean(copy = test_records[0])
 		so.doc.company = "_Test Company 1"
 		so.doc.conversion_rate = 0.02

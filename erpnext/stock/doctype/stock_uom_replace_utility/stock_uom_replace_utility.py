@@ -58,7 +58,7 @@ class DocType:
 			
 	def update_stock_ledger_entry(self):
 		# update stock ledger entry
-		from stock.stock_ledger import update_entries_after
+		from erpnext.stock.stock_ledger import update_entries_after
 		
 		if flt(self.doc.conversion_factor) != flt(1):
 			webnotes.conn.sql("update `tabStock Ledger Entry` set stock_uom = '%s', actual_qty = ifnull(actual_qty,0) * '%s' where item_code = '%s' " % (self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.item_code))

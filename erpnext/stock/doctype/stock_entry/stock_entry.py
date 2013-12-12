@@ -10,9 +10,9 @@ from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
-from stock.utils import get_incoming_rate
-from stock.stock_ledger import get_previous_sle
-from controllers.queries import get_match_cond
+from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.controllers.queries import get_match_cond
 import json
 
 
@@ -22,7 +22,7 @@ class IncorrectValuationRateError(webnotes.ValidationError): pass
 class DuplicateEntryForProductionOrderError(webnotes.ValidationError): pass
 class StockOverProductionError(webnotes.ValidationError): pass
 	
-from controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController
 
 class DocType(StockController):
 	def __init__(self, doc, doclist=None):
@@ -53,7 +53,7 @@ class DocType(StockController):
 	def on_submit(self):
 		self.update_stock_ledger()
 
-		from stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "mtn_details")
 		self.update_production_order()
 		self.make_gl_entries()
@@ -64,8 +64,8 @@ class DocType(StockController):
 		self.make_cancel_gl_entries()
 		
 	def validate_fiscal_year(self):
-		import accounts.utils
-		accounts.utils.validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year,
+		from erpnext.accounts.utils import validate_fiscal_year
+		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year,
 			self.meta.get_label("posting_date"))
 		
 	def validate_purpose(self):
@@ -356,7 +356,7 @@ class DocType(StockController):
 				where name=%s""", (status, produced_qty, self.doc.production_order))
 			
 	def update_planned_qty(self, pro_bean):
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 		update_bin({
 			"item_code": pro_bean.doc.production_item,
 			"warehouse": pro_bean.doc.fg_warehouse,
@@ -495,7 +495,7 @@ class DocType(StockController):
 		self.get_stock_and_rate()
 	
 	def get_bom_raw_materials(self, qty):
-		from manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.doc.bom_no, qty=qty, fetch_exploded = self.doc.use_multi_level_bom)
@@ -601,7 +601,7 @@ class DocType(StockController):
 		return result and result[0] or {}
 		
 	def get_cust_addr(self):
-		from utilities.transaction_base import get_default_address, get_address_display
+		from erpnext.utilities.transaction_base import get_default_address, get_address_display
 		res = webnotes.conn.sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
 		address_display = None
 		customer_address = get_default_address("customer", self.doc.customer)
@@ -622,7 +622,7 @@ class DocType(StockController):
 		return result and result[0] or {}
 		
 	def get_supp_addr(self):
-		from utilities.transaction_base import get_default_address, get_address_display
+		from erpnext.utilities.transaction_base import get_default_address, get_address_display
 		res = webnotes.conn.sql("""select supplier_name from `tabSupplier`
 			where name=%s""", self.doc.supplier)
 		address_display = None
@@ -811,7 +811,7 @@ def make_return_jv(stock_entry):
 		"company": se.doc.company
 	}]
 	
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	for r in result:
 		jv_list.append({
 			"__islocal": 1,

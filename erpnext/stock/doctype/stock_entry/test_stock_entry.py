@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import webnotes, unittest
 from webnotes.utils import flt
-from stock.doctype.serial_no.serial_no import *
-from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 
 class TestStockEntry(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestStockEntry(unittest.TestCase):
 		st2.insert()
 		st2.submit()
 		
-		from stock.utils import reorder_item
+		from erpnext.stock.utils import reorder_item
 		reorder_item()
 		
 		mr_name = webnotes.conn.sql("""select parent from `tabMaterial Request Item`
@@ -46,7 +46,7 @@ class TestStockEntry(unittest.TestCase):
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		webnotes.session.user = "test2@example.com"
 
-		from stock.utils import InvalidWarehouseCompany
+		from erpnext.stock.utils import InvalidWarehouseCompany
 		st1 = webnotes.bean(copy=test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
@@ -56,7 +56,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_warehouse_user(self):
 		set_perpetual_inventory(0)
-		from stock.utils import UserNotAllowedForWarehouse
+		from erpnext.stock.utils import UserNotAllowedForWarehouse
 
 		webnotes.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
@@ -272,9 +272,9 @@ class TestStockEntry(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"}, "actual_qty"))
 			
 	def _test_sales_invoice_return(self, item_code, delivered_qty, returned_qty):
-		from stock.doctype.stock_entry.stock_entry import NotUpdateStockError
+		from erpnext.stock.doctype.stock_entry.stock_entry import NotUpdateStockError
 		
-		from accounts.doctype.sales_invoice.test_sales_invoice \
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice \
 			import test_records as sales_invoice_test_records
 		
 		# invalid sales invoice as update stock not checked
@@ -352,10 +352,10 @@ class TestStockEntry(unittest.TestCase):
 	def _test_delivery_note_return(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
 		
-		from stock.doctype.delivery_note.test_delivery_note \
+		from erpnext.stock.doctype.delivery_note.test_delivery_note \
 			import test_records as delivery_note_test_records
 
-		from stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		
 		actual_qty_0 = self._get_actual_qty()
 		# make a delivery note based on this invoice
@@ -404,7 +404,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
 		
 	def _test_sales_return_jv(self, se):
-		from stock.doctype.stock_entry.stock_entry import make_return_jv
+		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv_list = make_return_jv(se.doc.name)
 		
 		self.assertEqual(len(jv_list), 3)
@@ -443,8 +443,8 @@ class TestStockEntry(unittest.TestCase):
 	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):
 		self._insert_material_receipt()
 
-		from selling.doctype.sales_order.test_sales_order import test_records as sales_order_test_records
-		from selling.doctype.sales_order.sales_order import make_sales_invoice, make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import test_records as sales_order_test_records
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice, make_delivery_note
 
 		actual_qty_0 = self._get_actual_qty()
 		
@@ -498,10 +498,10 @@ class TestStockEntry(unittest.TestCase):
 		
 		actual_qty_0 = self._get_actual_qty()
 		
-		from stock.doctype.purchase_receipt.test_purchase_receipt \
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 			import test_records as purchase_receipt_test_records
 
-		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 		
 		# submit purchase receipt
 		pr = webnotes.bean(copy=purchase_receipt_test_records[0])
@@ -549,7 +549,7 @@ class TestStockEntry(unittest.TestCase):
 		return se, pr.doc.name
 		
 	def test_over_stock_return(self):
-		from stock.doctype.stock_entry.stock_entry import StockOverReturnError
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverReturnError
 		self._clear_stock_account_balance()
 		
 		# out of 10, 5 gets returned
@@ -567,7 +567,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(StockOverReturnError, se.insert)
 		
 	def _test_purchase_return_jv(self, se):
-		from stock.doctype.stock_entry.stock_entry import make_return_jv
+		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv_list = make_return_jv(se.doc.name)
 		
 		self.assertEqual(len(jv_list), 3)
@@ -590,10 +590,10 @@ class TestStockEntry(unittest.TestCase):
 		
 		actual_qty_0 = self._get_actual_qty()
 		
-		from buying.doctype.purchase_order.test_purchase_order \
+		from erpnext.buying.doctype.purchase_order.test_purchase_order \
 			import test_records as purchase_order_test_records
 		
-		from buying.doctype.purchase_order.purchase_order import \
+		from erpnext.buying.doctype.purchase_order.purchase_order import \
 			make_purchase_receipt, make_purchase_invoice
 		
 		# submit purchase receipt

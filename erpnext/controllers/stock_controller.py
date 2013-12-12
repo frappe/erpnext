@@ -7,8 +7,8 @@ from webnotes.utils import cint, flt, cstr
 from webnotes import msgprint, _
 import webnotes.defaults
 
-from controllers.accounts_controller import AccountsController
-from accounts.general_ledger import make_gl_entries, delete_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
 	def make_gl_entries(self, update_gl_entries_after=True):
@@ -27,7 +27,7 @@ class StockController(AccountsController):
 	
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
-		from accounts.general_ledger import process_gl_map
+		from erpnext.accounts.general_ledger import process_gl_map
 		if not warehouse_account:
 			warehouse_account = self.get_warehouse_account()
 		
@@ -160,7 +160,7 @@ class StockController(AccountsController):
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 					
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
-		from accounts.utils import get_stock_and_account_difference
+		from erpnext.accounts.utils import get_stock_and_account_difference
 		account_list = [d.account for d in expected_gle]
 		acc_diff = get_stock_and_account_difference(account_list, expected_gle[0].posting_date)
 		
@@ -190,7 +190,7 @@ class StockController(AccountsController):
 				])
 				
 		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
+			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries)
 			
 	def check_expense_account(self, item):
@@ -226,7 +226,7 @@ class StockController(AccountsController):
 		return sl_dict
 		
 	def make_sl_entries(self, sl_entries, is_amended=None):
-		from stock.stock_ledger import make_sl_entries
+		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended)
 		
 	def get_stock_ledger_entries(self, item_list=None, warehouse_list=None):

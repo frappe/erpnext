@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	wn.call({
 		type: "POST",
-		method: "selling.utils.product.get_product_info",
+		method: "erpnext.selling.utils.product.get_product_info",
 		args: {
 			item_code: "{{ name }}"
 		},

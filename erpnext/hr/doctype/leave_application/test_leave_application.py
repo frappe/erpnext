@@ -4,7 +4,7 @@
 import webnotes
 import unittest
 
-from hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
+from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 
 class TestLeaveApplication(unittest.TestCase):
 	def tearDown(self):
@@ -129,7 +129,7 @@ class TestLeaveApplication(unittest.TestCase):
 			"docstatus"), 1)
 		
 	def _test_leave_approval_invalid_leave_approver_insert(self):
-		from hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
+		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 		
 		self._clear_applications()
 		

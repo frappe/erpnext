@@ -27,7 +27,7 @@ cur_frm.cscript.replace_abbr = function() {
 		args = dialog.get_values();
 		if(!args) return;
 		return wn.call({
-			method: "setup.doctype.company.company.replace_abbr",
+			method: "erpnext.setup.doctype.company.company.replace_abbr",
 			args: {
 				"company": cur_frm.doc.name,
 				"old": cur_frm.doc.abbr,

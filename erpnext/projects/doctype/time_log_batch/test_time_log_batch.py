@@ -5,7 +5,7 @@ import webnotes, unittest
 
 class TimeLogBatchTest(unittest.TestCase):
 	def test_time_log_status(self):
-		from projects.doctype.time_log.test_time_log import test_records as time_log_records
+		from erpnext.projects.doctype.time_log.test_time_log import test_records as time_log_records
 		time_log = webnotes.bean(copy=time_log_records[0])
 		time_log.doc.fields.update({
 			"from_time": "2013-01-02 10:00:00",

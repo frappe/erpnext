@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import webnotes
-from accounts.utils import get_fiscal_year, FiscalYearError
+from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 def execute():
 	webnotes.reload_doc("stock", "doctype", "stock_entry")

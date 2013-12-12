@@ -15,7 +15,7 @@ window.get_product_list = function() {
 		url: "/",
 		dataType: "json",
 		data: {
-			cmd: "selling.utils.product.get_product_list",
+			cmd: "erpnext.selling.utils.product.get_product_list",
 			start: window.start,
 			search: window.search,
 			product_group: window.product_group

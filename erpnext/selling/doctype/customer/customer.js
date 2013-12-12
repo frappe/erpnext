@@ -52,7 +52,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	
 	return wn.call({
 		type: "GET",
-		method:"selling.doctype.customer.customer.get_dashboard_info",
+		method: "erpnext.selling.doctype.customer.customer.get_dashboard_info",
 		args: {
 			customer: cur_frm.doc.name
 		},

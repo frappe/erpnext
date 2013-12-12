@@ -165,7 +165,7 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
 		return wn.call({
-			method: "accounts.utils.get_balance_on",
+			method: "erpnext.accounts.utils.get_balance_on",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
 				d.balance = r.message;
@@ -208,7 +208,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
 		return wn.call({
 			type: "GET",
-			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
 				"voucher_type": doc.voucher_type,
 				"company": doc.company
@@ -222,7 +222,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	} else if(doc.voucher_type=="Opening Entry") {
 		return wn.call({
 			type:"GET",
-			method: "accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
+			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
 			args: {
 				"company": doc.company
 			},

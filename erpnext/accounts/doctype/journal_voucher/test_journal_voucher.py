@@ -34,14 +34,14 @@ class TestJournalVoucher(unittest.TestCase):
 			where against_jv=%s""", jv_invoice.doc.name))
 	
 	def test_jv_against_stock_account(self):
-		from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 		set_perpetual_inventory()
 		
 		jv = webnotes.bean(copy=test_records[0])
 		jv.doclist[1].account = "_Test Warehouse - _TC"
 		jv.insert()
 		
-		from accounts.general_ledger import StockAccountInvalidTransaction
+		from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
 		self.assertRaises(StockAccountInvalidTransaction, jv.submit)
 
 		set_perpetual_inventory(0)
@@ -61,7 +61,7 @@ class TestJournalVoucher(unittest.TestCase):
 			{"voucher_type": "Journal Voucher", "voucher_no": jv.doc.name}))
 			
 	def test_monthly_budget_crossed_stop(self):
-		from accounts.utils import BudgetError
+		from erpnext.accounts.utils import BudgetError
 		webnotes.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		
@@ -77,7 +77,7 @@ class TestJournalVoucher(unittest.TestCase):
 		webnotes.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		
 	def test_yearly_budget_crossed_stop(self):
-		from accounts.utils import BudgetError
+		from erpnext.accounts.utils import BudgetError
 		self.clear_account_balance()
 		self.test_monthly_budget_crossed_ignore()
 		
@@ -96,7 +96,7 @@ class TestJournalVoucher(unittest.TestCase):
 		webnotes.conn.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
 		
 	def test_monthly_budget_on_cancellation(self):
-		from accounts.utils import BudgetError
+		from erpnext.accounts.utils import BudgetError
 		webnotes.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		

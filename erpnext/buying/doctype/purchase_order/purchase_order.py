@@ -10,7 +10,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 	
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -35,8 +35,8 @@ class DocType(BuyingController):
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
 		pc_obj = get_obj(dt='Purchase Common')
@@ -83,7 +83,7 @@ class DocType(BuyingController):
 
 		
 	def update_bin(self, is_submit, is_stopped = 0):
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'

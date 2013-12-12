@@ -3,7 +3,7 @@
 
 from home import update_feed
 from webnotes.core.doctype.notification_count.notification_count import clear_doctype_notifications
-from stock.doctype.material_request.material_request import update_completed_qty
+from erpnext.stock.doctype.material_request.material_request import update_completed_qty
 
 def on_method(bean, method):
 	if method in ("on_update", "on_submit"):

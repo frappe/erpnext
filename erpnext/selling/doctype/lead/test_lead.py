@@ -19,7 +19,7 @@ import unittest
 
 class TestLead(unittest.TestCase):
 	def test_make_customer(self):
-		from selling.doctype.lead.lead import make_customer
+		from erpnext.selling.doctype.lead.lead import make_customer
 
 		customer = make_customer("_T-Lead-00001")
 		self.assertEquals(customer[0]["doctype"], "Customer")

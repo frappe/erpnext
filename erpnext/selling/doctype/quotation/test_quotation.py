@@ -9,7 +9,7 @@ test_dependencies = ["Sales BOM"]
 
 class TestQuotation(unittest.TestCase):
 	def test_make_sales_order(self):
-		from selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		
 		quotation = webnotes.bean(copy=test_records[0])
 		quotation.insert()

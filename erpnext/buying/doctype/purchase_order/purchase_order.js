@@ -42,14 +42,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		
 	make_purchase_receipt: function() {
 		wn.model.open_mapped_doc({
-			method: "buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 			source_name: cur_frm.doc.name
 		})
 	},
 	
 	make_purchase_invoice: function() {
 		wn.model.open_mapped_doc({
-			method: "buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 			source_name: cur_frm.doc.name
 		})
 	},
@@ -58,7 +58,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.add_custom_button(wn._('From Material Request'), 
 			function() {
 				wn.model.map_current_doc({
-					method: "stock.doctype.material_request.material_request.make_purchase_order",
+					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					get_query_filters: {
 						material_request_type: "Purchase",
@@ -74,7 +74,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.add_custom_button(wn._('From Supplier Quotation'), 
 			function() {
 				wn.model.map_current_doc({
-					method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 					source_doctype: "Supplier Quotation",
 					get_query_filters: {
 						docstatus: 1,
@@ -88,7 +88,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.add_custom_button(wn._('For Supplier'), 
 			function() {
 				wn.model.map_current_doc({
-					method: "stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
+					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
 					source_doctype: "Supplier",
 					get_query_filters: {
 						docstatus: ["!=", 2],

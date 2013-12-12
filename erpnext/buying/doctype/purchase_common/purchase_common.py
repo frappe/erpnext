@@ -8,10 +8,10 @@ from webnotes.utils import cstr, flt
 from webnotes.model.utils import getlist
 from webnotes import msgprint, _
 
-from buying.utils import get_last_purchase_details
+from erpnext.buying.utils import get_last_purchase_details
 
 	
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
@@ -94,7 +94,7 @@ class DocType(BuyingController):
 			if not item:
 				msgprint("Item %s does not exist in Item Master." % cstr(d.item_code), raise_exception=True)
 			
-			from stock.utils import validate_end_of_life
+			from erpnext.stock.utils import validate_end_of_life
 			validate_end_of_life(d.item_code, item[0][3])
 			
 			# validate stock item

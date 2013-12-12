@@ -4,7 +4,7 @@
 import webnotes
 
 def execute():
-	from utilities.transaction_base import delete_events
+	from erpnext.utilities.transaction_base import delete_events
 	
 	# delete orphaned Event User
 	webnotes.conn.sql("""delete from `tabEvent User`

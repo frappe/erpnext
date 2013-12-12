@@ -90,7 +90,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.$sales_order_btn = cur_frm.appframe.add_primary_action(wn._('From Sales Order'), 
 			function() {
 				wn.model.map_current_doc({
-					method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 					source_doctype: "Sales Order",
 					get_query_filters: {
 						docstatus: 1,
@@ -107,7 +107,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(wn._('From Delivery Note'), 
 			function() {
 				wn.model.map_current_doc({
-					method: "stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
 					get_query: function() {
 						var filters = {
@@ -258,14 +258,14 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 cur_frm.cscript['Make Delivery Note'] = function() {
 	wn.model.open_mapped_doc({
-		method: "accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
 		source_name: cur_frm.doc.name
 	})
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
 	return wn.call({
-		method: "accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
+		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
 		args: {
 			"sales_invoice": cur_frm.doc.name
 		},

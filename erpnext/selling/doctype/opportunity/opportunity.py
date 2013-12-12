@@ -9,7 +9,7 @@ from webnotes.model.bean import getlist
 from webnotes import msgprint, _
 
 	
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self,doc,doclist):
@@ -104,7 +104,7 @@ class DocType(TransactionBase):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
 		
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
 
 	def on_submit(self):

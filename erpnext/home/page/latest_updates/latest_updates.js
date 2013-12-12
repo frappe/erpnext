@@ -13,7 +13,7 @@ wn.pages['latest-updates'].onload = function(wrapper) {
 		<div class="progress-bar" style="width: 100%;"></div></div>')
 	
 	return wn.call({
-		method:"home.page.latest_updates.latest_updates.get",
+		method: "erpnext.home.page.latest_updates.latest_updates.get",
 		callback: function(r) {
 			parent.empty();
 			$("<p class='help'>"+wn._("Report issues at")+

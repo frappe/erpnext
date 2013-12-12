@@ -11,7 +11,7 @@ from webnotes import _, msgprint
 
 	
 
-from controllers.selling_controller import SellingController
+from erpnext.controllers.selling_controller import SellingController
 
 class DocType(SellingController):
 	def __init__(self, doc, doclist=[]):
@@ -150,7 +150,7 @@ def _make_customer(source_name, ignore_permissions=False):
 		lead_name = quotation[0]
 		customer_name = webnotes.conn.get_value("Customer", {"lead_name": lead_name})
 		if not customer_name:
-			from selling.doctype.lead.lead import _make_customer
+			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 			customer = webnotes.bean(customer_doclist)
 			customer.ignore_permissions = ignore_permissions

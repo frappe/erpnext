@@ -51,7 +51,7 @@ def add_header(w):
 	return w
 	
 def add_data(w, args):
-	from accounts.utils import get_fiscal_year
+	from erpnext.accounts.utils import get_fiscal_year
 	
 	dates = get_dates(args)
 	employees = get_active_employees()

@@ -8,7 +8,7 @@ class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		webnotes.conn.sql("""delete from `tabLeave Application`""")
 		webnotes.conn.sql("""delete from `tabSalary Slip`""")
-		from hr.doctype.leave_application.test_leave_application import test_records as leave_applications
+		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
 		la = webnotes.bean(copy=leave_applications[4])
 		la.insert()
 		la.doc.status = "Approved"

@@ -9,7 +9,7 @@ from webnotes.model.doc import Document
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, msgprint
-from stock.utils import get_valid_serial_nos
+from erpnext.stock.utils import get_valid_serial_nos
 
 
 class DocType:

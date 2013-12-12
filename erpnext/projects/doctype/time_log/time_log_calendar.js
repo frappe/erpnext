@@ -9,5 +9,5 @@ wn.views.calendar["Time Log"] = {
 		"title": "title",
 		"allDay": "allDay"
 	},
-	get_events_method: "projects.doctype.time_log.time_log.get_events"
+	get_events_method: "erpnext.projects.doctype.time_log.time_log.get_events"
 }

@@ -33,7 +33,7 @@ class DocType:
 					raise_exception=1)
 	
 	def validate_fiscal_year(self):
-		from accounts.utils import validate_fiscal_year
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.doc.att_date, self.doc.fiscal_year)
 	
 	def validate_att_date(self):
@@ -48,8 +48,8 @@ class DocType:
 				_(" not active or does not exists in the system"), raise_exception=1)
 			
 	def validate(self):
-		import utilities
-		utilities.validate_status(self.doc.status, ["Present", "Absent", "Half Day"])
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Present", "Absent", "Half Day"])
 		self.validate_fiscal_year()
 		self.validate_att_date()
 		self.validate_duplicate_record()

@@ -214,7 +214,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
 		if(this.frm.doc[fieldname]) {
 			return this.frm.call({
-				method: "setup.utils.get_price_list_currency",
+				method: "erpnext.setup.utils.get_price_list_currency",
 				args: { 
 					price_list: this.frm.doc[fieldname],
 				},

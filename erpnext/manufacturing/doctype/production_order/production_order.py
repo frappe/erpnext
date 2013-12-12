@@ -20,15 +20,15 @@ class DocType:
 		if self.doc.docstatus == 0:
 			self.doc.status = "Draft"
 			
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"In Process", "Completed", "Cancelled"])
 
 		self.validate_bom_no()
 		self.validate_sales_order()
 		self.validate_warehouse()
 		
-		from utilities.transaction_base import validate_uom_is_integer
+		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
 		
 	def validate_bom_no(self):
@@ -50,7 +50,7 @@ class DocType:
 			self.validate_production_order_against_so()
 			
 	def validate_warehouse(self):
-		from stock.utils import validate_warehouse_user, validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_user, validate_warehouse_company
 		
 		for w in [self.doc.fg_warehouse, self.doc.wip_warehouse]:
 			validate_warehouse_user(w)
@@ -128,7 +128,7 @@ class DocType:
 			"posting_date": nowdate(),
 			"planned_qty": flt(qty)
 		}
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 		update_bin(args)
 
 @webnotes.whitelist()	

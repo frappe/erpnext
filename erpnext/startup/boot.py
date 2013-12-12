@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-import home
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""

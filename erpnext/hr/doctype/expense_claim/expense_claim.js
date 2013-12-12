@@ -7,7 +7,7 @@ erpnext.hr.ExpenseClaimController = wn.ui.form.Controller.extend({
 	make_bank_voucher: function() {
 		var me = this;
 		return wn.call({
-			method: "accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
 				"company": cur_frm.doc.company,
 				"voucher_type": "Bank Voucher"
@@ -60,7 +60,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	}
 	var exp_approver = doc.exp_approver;
 	return cur_frm.call({
-		method:"hr.utils.get_expense_approver_list",
+		method: "erpnext.hr.utils.get_expense_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("exp_approver", "options", r.message);
 			if(exp_approver) cur_frm.set_value("exp_approver", exp_approver);

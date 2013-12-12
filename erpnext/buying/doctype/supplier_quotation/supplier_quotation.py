@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.model.code import get_obj
 
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc, self.doclist = doc, doclist or []
@@ -17,8 +17,8 @@ class DocType(BuyingController):
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 		
 		self.validate_common()

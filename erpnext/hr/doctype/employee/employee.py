@@ -27,8 +27,8 @@ class DocType:
 		self.doc.employee = self.doc.name
 
 	def validate(self):
-		import utilities
-		utilities.validate_status(self.doc.status, ["Active", "Left"])
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Active", "Left"])
 
 		self.doc.employee = self.doc.name
 		self.validate_date()
@@ -143,7 +143,7 @@ class DocType:
 			
 	def validate_employee_leave_approver(self):
 		from webnotes.profile import Profile
-		from hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
+		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 		
 		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
 			if "Leave Approver" not in Profile(l.leave_approver).get_roles():

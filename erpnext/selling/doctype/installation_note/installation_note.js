@@ -47,7 +47,7 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 			cur_frm.add_custom_button(wn._('From Delivery Note'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "stock.doctype.delivery_note.delivery_note.make_installation_note",
+						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
 						get_query_filters: {
 							docstatus: 1,

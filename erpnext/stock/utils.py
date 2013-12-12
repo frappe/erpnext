@@ -110,7 +110,7 @@ def _msgprint(msg, verbose):
 
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
-	from stock.stock_ledger import get_previous_sle
+	from erpnext.stock.stock_ledger import get_previous_sle
 		
 	in_rate = 0
 	if args.get("serial_no"):
@@ -299,7 +299,7 @@ def create_material_request(material_requests):
 	mr_list = []
 	defaults = webnotes.defaults.get_defaults()
 	exceptions_list = []
-	from accounts.utils import get_fiscal_year
+	from erpnext.accounts.utils import get_fiscal_year
 	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
 	for request_type in material_requests:
 		for company in material_requests[request_type]:

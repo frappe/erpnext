@@ -5,8 +5,8 @@
 from __future__ import unicode_literals
 import unittest
 import webnotes
-from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from manufacturing.doctype.production_order.production_order import make_stock_entry
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
 
 
 class TestProductionOrder(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestProductionOrder(unittest.TestCase):
 		pro_bean.insert()
 		pro_bean.submit()
 		
-		from stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
 		mr1 = webnotes.bean(copy = se_test_records[0])
 		mr1.insert()
 		mr1.submit()
@@ -45,7 +45,7 @@ class TestProductionOrder(unittest.TestCase):
 		return pro_bean.doc.name
 			
 	def test_over_production(self):
-		from stock.doctype.stock_entry.stock_entry import StockOverProductionError
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverProductionError
 		pro_order = self.test_planned_qty()
 		
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")

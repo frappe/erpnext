@@ -186,7 +186,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 
 	if filters.has_key('warehouse'):
 		return webnotes.conn.sql("""select batch_no from `tabStock Ledger Entry` sle 

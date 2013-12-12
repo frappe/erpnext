@@ -10,8 +10,8 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 import webnotes.defaults
 from webnotes.model.mapper import get_mapped_doclist
-from stock.utils import update_bin
-from controllers.selling_controller import SellingController
+from erpnext.stock.utils import update_bin
+from erpnext.controllers.selling_controller import SellingController
 
 class DocType(SellingController):
 	def __init__(self, doc, doclist=[]):
@@ -61,8 +61,8 @@ class DocType(SellingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
 
 		self.so_required()
 		self.validate_proj_cust()
@@ -144,7 +144,7 @@ class DocType(SellingController):
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 			
 	def on_update(self):
-		from stock.doctype.packed_item.packed_item import make_packing_list
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		self.doclist = make_packing_list(self, 'delivery_note_details')
 
 	def on_submit(self):

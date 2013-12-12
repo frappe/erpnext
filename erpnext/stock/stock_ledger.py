@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint
 from webnotes.utils import cint, flt, cstr, now
-from stock.utils import get_valuation_method
+from erpnext.stock.utils import get_valuation_method
 import json
 
 # future reposting
@@ -16,7 +16,7 @@ _exceptions = webnotes.local('stockledger_exceptions')
 
 def make_sl_entries(sl_entries, is_amended=None):
 	if sl_entries:
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 	
 		cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
 		if cancel:

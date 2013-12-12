@@ -9,7 +9,7 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 			cur_frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 						source_doctype: "Sales Order",
 						get_query_filters: {
 							docstatus: 1,
@@ -22,7 +22,7 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 		} else if (this.frm.doc.docstatus===1) {
 			cur_frm.add_custom_button(wn._("Make Maintenance Visit"), function() {
 				wn.model.open_mapped_doc({
-					method: "support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
+					method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 					source_name: cur_frm.doc.name
 				})
 			})

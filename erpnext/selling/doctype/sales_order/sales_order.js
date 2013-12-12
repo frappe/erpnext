@@ -62,7 +62,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(wn._('From Quotation'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "selling.doctype.quotation.quotation.make_sales_order",
+						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
 						get_query_filters: {
 							docstatus: 1,
@@ -90,7 +90,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.reserved_warehouse) {
 			return this.frm.call({
-				method: "selling.utils.get_available_qty",
+				method: "erpnext.selling.utils.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -102,35 +102,35 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_material_request: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.sales_order.sales_order.make_material_request",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 			source_name: cur_frm.doc.name
 		})
 	},
 
 	make_delivery_note: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.sales_order.sales_order.make_delivery_note",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			source_name: cur_frm.doc.name
 		})
 	},
 
 	make_sales_invoice: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.sales_order.sales_order.make_sales_invoice",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 			source_name: cur_frm.doc.name
 		})
 	},
 	
 	make_maintenance_schedule: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 			source_name: cur_frm.doc.name
 		})
 	}, 
 	
 	make_maintenance_visit: function() {
 		wn.model.open_mapped_doc({
-			method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 			source_name: cur_frm.doc.name
 		})
 	},

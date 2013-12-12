@@ -12,7 +12,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		from stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		pr = webnotes.bean(copy=test_records[0]).insert()
 		

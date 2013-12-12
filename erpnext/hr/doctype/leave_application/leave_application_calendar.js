@@ -16,5 +16,5 @@ wn.views.calendar["Leave Application"] = {
 			right: 'month'
 		}
 	},
-	get_events_method: "hr.doctype.leave_application.leave_application.get_events"
+	get_events_method: "erpnext.hr.doctype.leave_application.leave_application.get_events"
 }

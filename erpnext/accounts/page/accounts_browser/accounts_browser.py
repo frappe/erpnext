@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.defaults
 from webnotes.utils import flt
-from accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_balance_on
 
 @webnotes.whitelist()
 def get_companies():

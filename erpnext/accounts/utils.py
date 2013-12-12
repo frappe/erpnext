@@ -8,7 +8,7 @@ from webnotes.utils import nowdate, nowtime, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
-from utilities import build_filter_conditions
+from erpnext.utilities import build_filter_conditions
 
 
 class FiscalYearError(webnotes.ValidationError): pass
@@ -260,7 +260,7 @@ def fix_total_debit_credit():
 				(d.diff, d.voucher_type, d.voucher_no))
 	
 def get_stock_and_account_difference(account_list=None, posting_date=None):
-	from stock.utils import get_stock_balance_on
+	from erpnext.stock.utils import get_stock_balance_on
 	
 	if not posting_date: posting_date = nowdate()
 	

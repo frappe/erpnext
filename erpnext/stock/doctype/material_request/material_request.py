@@ -12,7 +12,7 @@ from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -63,8 +63,8 @@ class DocType(BuyingController):
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
+		from erpnext.utilities import validate_status
+		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 		
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
@@ -76,7 +76,7 @@ class DocType(BuyingController):
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
 		
-		from stock.utils import update_bin
+		from erpnext.stock.utils import update_bin
 		for d in getlist(self.doclist, 'indent_details'):
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
@@ -188,7 +188,7 @@ def update_completed_qty(controller, caller_method):
 			
 def _update_requested_qty(controller, mr_obj, mr_items):
 	"""update requested qty (before ordered_qty is updated)"""
-	from stock.utils import update_bin
+	from erpnext.stock.utils import update_bin
 	for mr_item_name in mr_items:
 		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
 		se_detail = controller.doclist.getone({"parentfield": "mtn_details",

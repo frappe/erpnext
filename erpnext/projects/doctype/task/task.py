@@ -80,7 +80,7 @@ def get_events(start, end, filters=None):
 	return data
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 	return webnotes.conn.sql(""" select name from `tabProject`
 			where %(key)s like "%(txt)s"
 				%(mcond)s

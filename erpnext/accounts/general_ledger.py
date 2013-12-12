@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, cstr
 from webnotes import _
-from accounts.utils import validate_expense_against_budget
+from erpnext.accounts.utils import validate_expense_against_budget
 
 
 class StockAccountInvalidTransaction(webnotes.ValidationError): pass
@@ -107,7 +107,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, 
 		adv_adj=False, update_outstanding="Yes"):
 	
-	from accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
+	from erpnext.accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 		
 	if not gl_entries:

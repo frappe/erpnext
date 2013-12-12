@@ -12,7 +12,7 @@ def execute(filters=None):
 	columns = get_columns()	
 	data = get_entries(filters)
 	
-	from accounts.utils import get_balance_on
+	from erpnext.accounts.utils import get_balance_on
 	balance_as_per_company = get_balance_on(filters["account"], filters["report_date"])
 
 	total_debit, total_credit = 0,0

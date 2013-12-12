@@ -38,7 +38,7 @@ cur_frm.cscript.make_dashboard = function(doc) {
 
 	return wn.call({
 		type: "GET",
-		method:"buying.doctype.supplier.supplier.get_dashboard_info",
+		method: "erpnext.buying.doctype.supplier.supplier.get_dashboard_info",
 		args: {
 			supplier: cur_frm.doc.name
 		},

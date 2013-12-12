@@ -13,7 +13,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	
 	var leave_approver = doc.leave_approver;
 	return cur_frm.call({
-		method:"hr.utils.get_leave_approver_list",
+		method: "erpnext.hr.utils.get_leave_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("leave_approver", "options", $.map(r.message, 
 				function(profile) { 

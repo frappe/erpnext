@@ -63,7 +63,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		
 	// load up companies
 	return wn.call({
-		method:'accounts.page.accounts_browser.accounts_browser.get_companies',
+		method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_companies',
 		callback: function(r) {
 			wrapper.$company_select.empty();
 			$.each(r.message, function(i, v) {
@@ -108,7 +108,7 @@ erpnext.AccountsChart = Class.extend({
 			parent: $(wrapper), 
 			label: ctype==="Account" ? "Accounts" : "Cost Centers",
 			args: {ctype: ctype, comp: company},
-			method: 'accounts.page.accounts_browser.accounts_browser.get_children',
+			method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {
 				if(me.cur_toolbar) 
 					$(me.cur_toolbar).toggle(false);
@@ -261,7 +261,7 @@ erpnext.AccountsChart = Class.extend({
 			
 			return wn.call({
 				args: v,
-				method:'accounts.utils.add_ac',
+				method: 'erpnext.accounts.utils.add_ac',
 				callback: function(r) {
 					$(btn).done_working();
 					d.hide();
@@ -308,7 +308,7 @@ erpnext.AccountsChart = Class.extend({
 			
 			return wn.call({
 				args: v,
-				method:'accounts.utils.add_cc',
+				method: 'erpnext.accounts.utils.add_cc',
 				callback: function(r) {
 					$(btn).done_working();
 					d.hide();

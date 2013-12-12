@@ -22,7 +22,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 			cur_frm.add_custom_button(wn._('From Material Request'), 
 				function() {
 					wn.model.map_current_doc({
-						method: "stock.doctype.material_request.material_request.make_supplier_quotation",
+						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 						source_doctype: "Material Request",
 						get_query_filters: {
 							material_request_type: "Purchase",
@@ -38,7 +38,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		
 	make_purchase_order: function() {
 		wn.model.open_mapped_doc({
-			method: "buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			source_name: cur_frm.doc.name
 		})
 	}

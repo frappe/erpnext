@@ -5,8 +5,8 @@ import webnotes
 import unittest, json
 from webnotes.utils import flt
 from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
-from accounts.utils import get_stock_and_account_difference
-from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.accounts.utils import get_stock_and_account_difference
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -262,7 +262,7 @@ class TestSalesInvoice(unittest.TestCase):
 		webnotes.conn.sql("""delete from `tabGL Entry`""")
 		w = self.make()
 		
-		from accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
 		jv = webnotes.bean(webnotes.copy_doclist(jv_test_records[0]))
@@ -399,7 +399,7 @@ class TestSalesInvoice(unittest.TestCase):
 		webnotes.delete_doc("Account", "_Test Warehouse No Account - _TC")
 		
 		# insert purchase receipt
-		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
@@ -505,7 +505,7 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 	def _insert_purchase_receipt(self):
-		from stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
@@ -514,7 +514,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pr.submit()
 		
 	def _insert_delivery_note(self):
-		from stock.doctype.delivery_note.test_delivery_note import test_records \
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records \
 			as dn_test_records
 		dn = webnotes.bean(copy=dn_test_records[0])
 		dn.doc.naming_series = "_T-Delivery Note-"
@@ -523,7 +523,7 @@ class TestSalesInvoice(unittest.TestCase):
 		return dn
 		
 	def _insert_pos_settings(self):
-		from accounts.doctype.pos_setting.test_pos_setting \
+		from erpnext.accounts.doctype.pos_setting.test_pos_setting \
 			import test_records as pos_setting_test_records
 		webnotes.conn.sql("""delete from `tabPOS Setting`""")
 		
@@ -531,7 +531,7 @@ class TestSalesInvoice(unittest.TestCase):
 		ps.insert()
 		
 	def test_sales_invoice_with_advance(self):
-		from accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
 		jv = webnotes.bean(copy=jv_test_records[0])
@@ -654,7 +654,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
 		from webnotes.utils import add_months, get_last_day
-		from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
 		
 		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
 		
@@ -706,8 +706,8 @@ class TestSalesInvoice(unittest.TestCase):
 		webnotes.conn.sql("delete from `tabGL Entry`")
 
 	def test_serialized(self):
-		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-		from stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
@@ -728,7 +728,7 @@ class TestSalesInvoice(unittest.TestCase):
 		return si
 			
 	def test_serialized_cancel(self):
-		from stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		si = self.test_serialized()
 		si.cancel()
 
@@ -740,8 +740,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
-		from stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)

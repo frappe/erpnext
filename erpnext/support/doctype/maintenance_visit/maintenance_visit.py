@@ -10,7 +10,7 @@ from webnotes import msgprint
 
 	
 
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, extract_email_id
 
-from utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):

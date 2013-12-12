@@ -17,7 +17,7 @@ from webnotes import _, msgprint
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
-from controllers.selling_controller import SellingController
+from erpnext.controllers.selling_controller import SellingController
 
 class DocType(SellingController):
 	def __init__(self,d,dl):
@@ -109,7 +109,7 @@ class DocType(SellingController):
 		
 		self.check_stop_sales_order("sales_order")
 		
-		from accounts.utils import remove_against_link_from_jv
+		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_invoice")
 
 		self.update_status_updater_args()
@@ -184,7 +184,7 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) != 1:
 			return
 		
-		from selling.utils import get_pos_settings, apply_pos_settings	
+		from erpnext.selling.utils import get_pos_settings, apply_pos_settings	
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
@@ -285,7 +285,7 @@ class DocType(SellingController):
 				lst.append(args)
 		
 		if lst:
-			from accounts.utils import reconcile_against_document
+			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 			
 	def validate_customer_account(self):
@@ -464,7 +464,7 @@ class DocType(SellingController):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
-			from stock.doctype.packed_item.packed_item import make_packing_list
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 			make_packing_list(self, 'entries')
 		else:
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
@@ -511,7 +511,7 @@ class DocType(SellingController):
 		gl_entries = self.get_gl_entries()
 		
 		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
+			from erpnext.accounts.general_ledger import make_gl_entries
 			
 			update_outstanding = cint(self.doc.is_pos) and self.doc.write_off_account \
 				and 'No' or 'Yes'
@@ -523,7 +523,7 @@ class DocType(SellingController):
 					self.update_gl_entries_after()
 				
 	def get_gl_entries(self, warehouse_account=None):
-		from accounts.general_ledger import merge_similar_entries
+		from erpnext.accounts.general_ledger import merge_similar_entries
 		
 		gl_entries = []
 		
@@ -749,7 +749,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 
 def make_new_invoice(ref_wrapper, posting_date):
 	from webnotes.model.bean import clone
-	from accounts.utils import get_fiscal_year
+	from erpnext.accounts.utils import get_fiscal_year
 	new_invoice = clone(ref_wrapper)
 	
 	mcount = month_map[ref_wrapper.doc.recurring_type]
@@ -903,7 +903,7 @@ def get_bank_cash_account(mode_of_payment):
 
 @webnotes.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 
 	# income account can be any Credit account, 
 	# but can also be a Asset account with account_type='Income Account' in special circumstances. 

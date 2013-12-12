@@ -22,7 +22,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	wrapper.make_tree = function() {
 		var ctype = wn.get_route()[1] || 'Territory';
 		return wn.call({
-			method: 'selling.page.sales_browser.sales_browser.get_children',
+			method: 'erpnext.selling.page.sales_browser.sales_browser.get_children',
 			args: {ctype: ctype},
 			callback: function(r) {
 				var root = r.message[0]["value"];
@@ -60,7 +60,7 @@ erpnext.SalesChart = Class.extend({
 			parent: $(parent), 
 			label: root,
 			args: {ctype: ctype},
-			method: 'selling.page.sales_browser.sales_browser.get_children',
+			method: 'erpnext.selling.page.sales_browser.sales_browser.get_children',
 			click: function(link) {
 				if(me.cur_toolbar) 
 					$(me.cur_toolbar).toggle(false);
@@ -144,7 +144,7 @@ erpnext.SalesChart = Class.extend({
 			v.ctype = me.ctype;
 			
 			return wn.call({
-				method: 'selling.page.sales_browser.sales_browser.add_node',
+				method: 'erpnext.selling.page.sales_browser.sales_browser.add_node',
 				args: v,
 				callback: function() {
 					$(btn).done_working();

@@ -8,12 +8,12 @@ from webnotes.utils import add_days, cint, cstr, flt, formatdate
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
-from setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency
 
 import webnotes.defaults
 
 	
-from controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl 
@@ -289,7 +289,7 @@ class DocType(BuyingController):
 				lst.append(args)
 		
 		if lst:
-			from accounts.utils import reconcile_against_document
+			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
 	def on_submit(self):
@@ -425,11 +425,11 @@ class DocType(BuyingController):
 			)
 		
 		if gl_entries:
-			from accounts.general_ledger import make_gl_entries
+			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
 
 	def on_cancel(self):
-		from accounts.utils import remove_against_link_from_jv
+		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
 		
 		self.update_prevdoc_status()
@@ -455,7 +455,7 @@ class DocType(BuyingController):
 				
 @webnotes.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
-	from controllers.queries import get_match_cond
+	from erpnext.controllers.queries import get_match_cond
 	
 	# expense account can be any Debit account, 
 	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
