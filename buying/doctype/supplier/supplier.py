@@ -28,11 +28,11 @@ class DocType(TransactionBase):
 			self.doc.name = make_autoname(self.doc.naming_series + '.#####')
 
 	def update_address(self):
-		webnotes.conn.sql("""update `tabAddress` set supplier_name=%s 
+		webnotes.conn.sql("""update `tabAddress` set supplier_name=%s, modified=NOW() 
 			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
 
 	def update_contact(self):
-		webnotes.conn.sql("""update `tabContact` set supplier_name=%s 
+		webnotes.conn.sql("""update `tabContact` set supplier_name=%s, modified=NOW() 
 			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
 
 	def update_credit_days_limit(self):
@@ -164,17 +164,17 @@ class DocType(TransactionBase):
 		rename_account_for("Supplier", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
-		condition = value = ''
+		set_field = ''
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Supplier Name':
 			webnotes.conn.set(self.doc, "supplier_name", newdn)
 			self.update_contact()
-			condition = ", supplier_name=%s"
-			value = newdn
-		self.update_supplier_address(newdn, condition, value)
+			set_field = ", supplier_name=%(newdn)s"
+		self.update_supplier_address(newdn, set_field)
 
-	def update_supplier_address(self, newdn, condition, value):
-		webnotes.conn.sql("""update `tabAddress` set address_title=%s %s
-			where supplier=%s""" % ('%s', condition, '%s'), (newdn, value, newdn))
+	def update_supplier_address(self, newdn, set_field):
+		webnotes.conn.sql("""update `tabAddress` set address_title=%(newdn)s 
+			{set_field} where supplier=%(newdn)s"""\
+			.format(set_field=set_field), ({"newdn": newdn}))
 
 @webnotes.whitelist()
 def get_dashboard_info(supplier):

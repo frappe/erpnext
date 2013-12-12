@@ -48,12 +48,12 @@ class DocType(TransactionBase):
 			webnotes.conn.sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
 
 	def update_address(self):
-		webnotes.conn.sql("""update `tabAddress` set customer_name=%s where customer=%s""", 
-			(self.doc.customer_name, self.doc.name))
+		webnotes.conn.sql("""update `tabAddress` set customer_name=%s, modified=NOW() 
+			where customer=%s""", (self.doc.customer_name, self.doc.name))
 
 	def update_contact(self):
-		webnotes.conn.sql("""update `tabContact` set customer_name=%s where customer=%s""", 
-			(self.doc.customer_name, self.doc.name))
+		webnotes.conn.sql("""update `tabContact` set customer_name=%s, modified=NOW() 
+			where customer=%s""", (self.doc.customer_name, self.doc.name))
 
 	def create_account_head(self):
 		if self.doc.company :
@@ -159,17 +159,17 @@ class DocType(TransactionBase):
 		rename_account_for("Customer", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
-		condition = value = ''
+		set_field = ''
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
 			webnotes.conn.set(self.doc, "customer_name", newdn)
 			self.update_contact()
-			condition = ", customer_name=%s"
-			value = newdn
-		self.update_customer_address(newdn, condition, value)
+			set_field = ", customer_name=%(newdn)s"
+		self.update_customer_address(newdn, set_field)
 
-	def update_customer_address(self, newdn, condition, value):
-		webnotes.conn.sql("""update `tabAddress` set address_title=%s %s
-			where customer=%s""" % ('%s', condition, '%s'), (newdn, value, newdn))
+	def update_customer_address(self, newdn, set_field):
+		webnotes.conn.sql("""update `tabAddress` set address_title=%(newdn)s 
+			{set_field} where customer=%(newdn)s"""\
+			.format(set_field=set_field), ({"newdn": newdn}))
 
 @webnotes.whitelist()
 def get_dashboard_info(customer):
