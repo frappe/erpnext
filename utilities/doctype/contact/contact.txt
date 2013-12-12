@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-10-08 16:48:50", 
+  "modified": "2013-12-12 12:18:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_rename": 1, 
   "doctype": "DocType", 
   "document_type": "Master", 
   "icon": "icon-user", 

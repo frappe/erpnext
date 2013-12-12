@@ -72,9 +72,9 @@ class DocType:
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 						or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)
-					or exists (select name from `tabPacked Item` dnpi
-						where dnpi.parent = so.name and dnpi.parent_item = so_item.item_code
-							and exists (select name from `tabItem` item where item.name=dnpi.item_code
+					or exists (select name from `tabPacked Item` pi
+						where pi.parent = so.name and pi.parent_item = so_item.item_code
+							and exists (select name from `tabItem` item where item.name=pi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
 			""" % ('%s', so_filter, item_filter, item_filter), self.doc.company, as_dict=1)
@@ -83,6 +83,8 @@ class DocType:
 
 	def add_so_in_table(self, open_so):
 		""" Add sales orders in the table"""
+		self.clear_so_table()
+
 		so_list = [d.sales_order for d in getlist(self.doclist, 'pp_so_details')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
@@ -116,19 +118,19 @@ class DocType:
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 		
-		dnpi_items = webnotes.conn.sql("""select distinct dnpi.parent, dnpi.item_code, dnpi.warehouse as reserved_warhouse,
-			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * dnpi.qty) / so_item.qty) 
+		packed_items = webnotes.conn.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
+			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty) 
 				as pending_qty
-			from `tabSales Order Item` so_item, `tabPacked Item` dnpi
-			where so_item.parent = dnpi.parent and so_item.docstatus = 1 
-			and dnpi.parent_item = so_item.item_code
+			from `tabSales Order Item` so_item, `tabPacked Item` pi
+			where so_item.parent = pi.parent and so_item.docstatus = 1 
+			and pi.parent_item = so_item.item_code
 			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)
-			and exists (select * from `tabItem` item where item.name=dnpi.item_code
+			and exists (select * from `tabItem` item where item.name=pi.item_code
 				and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 
-		return items + dnpi_items
+		return items + packed_items
 		
 
 	def add_items(self, items):
