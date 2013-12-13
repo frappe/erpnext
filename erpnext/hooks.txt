@@ -1,0 +1,10 @@
+app_name			ERPNext
+
+app_include_js 		assets/js/erpnext.min.js
+app_include_css 	assets/css/erpnext.css
+get_desktop_icons 	erpnext.manage.get_desktop_icons
+boot_session		erpnext.startup.boot.boot_session
+
+standard_queries	Warehouse	erpnext.stock.utils.get_warehouse_list
+standard_queries	Customer	erpnext.selling.utils.get_customer_list
+

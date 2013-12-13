@@ -7,7 +7,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		this.frm.fields_dict.user_id.get_query = function(doc,cdt,cdn) {
 				return { query:"core.doctype.profile.profile.profile_query"} }
 		this.frm.fields_dict.reports_to.get_query = function(doc,cdt,cdn) {	
-			return{	query:"controllers.queries.employee_query"}	}
+			return{	query: "erpnext.controllers.queries.employee_query"}	}
 	},
 	
 	onload: function() {

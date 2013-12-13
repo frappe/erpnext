@@ -71,5 +71,5 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-	return{	query:"controllers.queries.employee_query" }	
+	return{	query: "erpnext.controllers.queries.employee_query" }	
 }

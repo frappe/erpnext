@@ -3,7 +3,7 @@
 
 //--------- ONLOAD -------------
 
-wn.require("app/js/controllers/accounts.js");
+{% include "public/js/controllers/accounts.js" %}
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.doctype === "Sales Taxes and Charges Master")
@@ -129,7 +129,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
 	return{
-		query: "controllers.queries.tax_account_query",
+		query: "erpnext.controllers.queries.tax_account_query",
     	filters: {
 			"account_type": ["Tax", "Chargeable", "Income Account"],
 			"debit_or_credit": "Credit",

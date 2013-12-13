@@ -9,10 +9,10 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 // print heading
 cur_frm.pformat.print_heading = 'Invoice';
 
-wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/sales_common.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+{% include 'selling/sales_common.js' %};
+{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
+{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 wn.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -115,7 +115,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						};
 						if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
 						return {
-							query: "controllers.queries.get_delivery_notes_to_be_billed",
+							query: "erpnext.controllers.queries.get_delivery_notes_to_be_billed",
 							filters: filters
 						};
 					}
@@ -324,7 +324,7 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 //--------------------------
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	return{
-		query: "controllers.queries.get_project_name",
+		query: "erpnext.controllers.queries.get_project_name",
 		filters: {'customer': doc.customer}
 	}	
 }

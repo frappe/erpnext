@@ -100,7 +100,7 @@ cur_frm.fields_dict['master_name'].get_query = function(doc){
   else if(doc.based_on == 'Itemwise Discount')
     return {
 	  doctype: "Item",
-      query: "controllers.queries.item_query"
+      query: "erpnext.controllers.queries.item_query"
     }
   else
     return {
@@ -111,4 +111,4 @@ cur_frm.fields_dict['master_name'].get_query = function(doc){
 }
 
 cur_frm.fields_dict.to_emp.get_query = function(doc,cdt,cdn) {
-  return{ query:"controllers.queries.employee_query" } }
+  return{ query: "erpnext.controllers.queries.employee_query" } }

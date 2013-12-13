@@ -151,11 +151,11 @@ cur_frm.cscript.validate = function(doc,cdt,cdn){
 
 cur_frm.fields_dict.item_customer_details.grid.get_field("customer_name").get_query = 
 function(doc,cdt,cdn) {
-		return{	query:"controllers.queries.customer_query" } }
+		return{	query: "erpnext.controllers.queries.customer_query" } }
 	
 cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query = 
 	function(doc,cdt,cdn) {
-		return{ query:"controllers.queries.supplier_query" } }
+		return{ query: "erpnext.controllers.queries.supplier_query" } }
 
 cur_frm.cscript.copy_from_item_group = function(doc) {
 	wn.model.with_doc("Item Group", doc.item_group, function() {

@@ -5,10 +5,10 @@ cur_frm.cscript.tname = "Purchase Receipt Item";
 cur_frm.cscript.fname = "purchase_receipt_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
-wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
+{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 wn.provide("erpnext.stock");
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({

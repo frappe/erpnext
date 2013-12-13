@@ -9,27 +9,27 @@ $.extend(erpnext.queries, {
 	},
 	
 	lead: function() {
-		return { query: "controllers.queries.lead_query" };
+		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 	
 	customer: function() {
-		return { query: "controllers.queries.customer_query" };
+		return { query: "erpnext.controllers.queries.customer_query" };
 	},
 	
 	supplier: function() {
-		return { query: "controllers.queries.supplier_query" };
+		return { query: "erpnext.controllers.queries.supplier_query" };
 	},
 	
 	account: function() {
-		return { query: "controllers.queries.account_query" };
+		return { query: "erpnext.controllers.queries.account_query" };
 	},
 	
 	item: function() {
-		return { query: "controllers.queries.item_query" };
+		return { query: "erpnext.controllers.queries.item_query" };
 	},
 	
 	bom: function() {
-		return { query: "controllers.queries.bom" };
+		return { query: "erpnext.controllers.queries.bom" };
 	},
 	
 	task: function() {

@@ -5,14 +5,6 @@ from __future__ import unicode_literals
 
 import webnotes
 
-def get_hooks():
-	return {
-		"app_include_js": ["assets/js/erpnext.min.js"],
-		"app_include_css": ["assets/css/erpnext.css"],
-		"desktop_icons": get_desktop_icons(),
-		"boot_session": ["erpnext.startup.boot.boot_session"]
-	}
-
 def after_install():
 	import_defaults()
 	import_country_and_currency()

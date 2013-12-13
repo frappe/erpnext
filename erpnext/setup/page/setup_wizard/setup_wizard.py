@@ -165,8 +165,8 @@ def set_defaults(args):
 			
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
-	import home
-	home.make_feed('Comment', 'ToDo', '', webnotes.session['user'],
+	from erpnext.home import make_feed
+	make_feed('Comment', 'ToDo', '', webnotes.session['user'],
 		'ERNext Setup Complete!', '#6B24B3')
 
 def create_email_digest():

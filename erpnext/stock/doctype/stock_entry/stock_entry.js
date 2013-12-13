@@ -4,7 +4,7 @@
 cur_frm.cscript.tname = "Stock Entry Detail";
 cur_frm.cscript.fname = "mtn_details";
 
-wn.require("public/app/js/controllers/stock_controller.js");
+wn.require("assets/erpnext/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({		
@@ -386,9 +386,9 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
-	return{ query:"controllers.queries.customer_query" }
+	return{ query: "erpnext.controllers.queries.customer_query" }
 }
 
 cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
-	return{	query:"controllers.queries.supplier_query" }
+	return{	query: "erpnext.controllers.queries.supplier_query" }
 }

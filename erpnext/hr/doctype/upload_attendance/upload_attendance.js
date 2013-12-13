@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-wn.require("public/app/js/utils.js");
+wn.require("assets/erpnext/js/utils.js");
 wn.provide("erpnext.hr");
 
 erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({

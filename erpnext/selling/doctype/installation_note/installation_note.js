@@ -37,7 +37,7 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 		
 		this.frm.set_query("customer", function() {
 			return {
-				query: "controllers.queries.customer_query"
+				query: "erpnext.controllers.queries.customer_query"
 			}
 		});
 	},

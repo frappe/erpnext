@@ -4,7 +4,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-import home
+
+from erpnext.home import make_feed
 
 def on_login_post_session(login_manager):
 	"""
@@ -25,7 +26,7 @@ def on_login_post_session(login_manager):
 		from webnotes.utils import nowtime
 		from webnotes.profile import get_user_fullname
 		webnotes.conn.begin()
-		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
+		make_feed('Login', 'Profile', login_manager.user, login_manager.user,
 			'%s logged in at %s' % (get_user_fullname(login_manager.user), nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
 		webnotes.conn.commit()
@@ -66,6 +67,6 @@ def check_if_expired():
 
 def comment_added(doc):
 	"""add comment to feed"""
-	home.make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
+	make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
 		'<i>"' + doc.comment + '"</i>', '#6B24B3')
 	

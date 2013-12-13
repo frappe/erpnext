@@ -8,7 +8,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.set_query("current_bom", function(doc) {
 	return{
-		query:"controllers.queries.bom",
+		query: "erpnext.controllers.queries.bom",
 		filters: {name: "!" + doc.new_bom}
 	}
 });
@@ -16,7 +16,7 @@ cur_frm.set_query("current_bom", function(doc) {
 
 cur_frm.set_query("new_bom", function(doc) {
 	return{
-		query:"controllers.queries.bom",
+		query: "erpnext.controllers.queries.bom",
 		filters: {name: "!" + doc.current_bom}
 	}
 });

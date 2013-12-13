@@ -5,12 +5,12 @@
 // ------
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
-// cur_frm.cscript.other_fname - wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js'); fieldname
+// cur_frm.cscript.other_fname - fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 wn.provide("erpnext.selling");
-wn.require("app/js/transaction.js");
-wn.require("app/js/controllers/accounts.js");
+wn.require("assets/erpnext/js/transaction.js");
+{% include "public/js/controllers/accounts.js" %}
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
@@ -59,7 +59,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict[this.fname].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", this.fname, function() {
 				return {
-					query: "controllers.queries.item_query",
+					query: "erpnext.controllers.queries.item_query",
 					filters: (me.frm.doc.order_type === "Maintenance" ?
 						{'is_service_item': 'Yes'}:
 						{'is_sales_item': 'Yes'	})

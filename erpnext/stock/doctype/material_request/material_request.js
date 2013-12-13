@@ -4,8 +4,8 @@
 cur_frm.cscript.tname = "Material Request Item";
 cur_frm.cscript.fname = "indent_details";
 
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
+{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc) {

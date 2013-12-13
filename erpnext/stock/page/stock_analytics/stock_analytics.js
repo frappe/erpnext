@@ -16,4 +16,4 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	
 }
 
-wn.require("app/js/stock_analytics.js");
+wn.require("assets/erpnext/js/stock_analytics.js");

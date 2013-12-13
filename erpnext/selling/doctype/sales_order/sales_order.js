@@ -8,11 +8,10 @@ cur_frm.cscript.fname = "sales_order_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
-
-wn.require('app/selling/sales_common.js');
-wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+{% include 'selling/sales_common.js' %}
+{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
+{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
@@ -148,7 +147,7 @@ cur_frm.cscript.new_contact = function(){
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	return {
-		query: "controllers.queries.get_project_name",
+		query: "erpnext.controllers.queries.get_project_name",
 		filters: {
 			'customer': doc.customer
 		}

@@ -102,7 +102,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 cur_frm.set_query("bom_no", function(doc) {
 	if (doc.production_item) {
 		return{
-			query:"controllers.queries.bom",
+			query: "erpnext.controllers.queries.bom",
 			filters: {item: cstr(doc.production_item)}
 		}
 	} else msgprint(wn._("Please enter Production Item first"));

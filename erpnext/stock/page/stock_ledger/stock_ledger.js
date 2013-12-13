@@ -12,7 +12,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 	wrapper.appframe.add_module_icon("Stock")
 }
 
-wn.require("app/js/stock_grid_report.js");
+wn.require("assets/erpnext/js/stock_grid_report.js");
 
 erpnext.StockLedger = erpnext.StockGridReport.extend({
 	init: function(wrapper) {

@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require('app/controllers/js/contact_address_common.js');
+{% include 'controllers/js/contact_address_common.js' %};
 
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.communication_view = new wn.views.CommunicationList({

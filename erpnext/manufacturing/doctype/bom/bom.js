@@ -167,7 +167,7 @@ var calculate_total = function(doc) {
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
  	return{
-		query:"controllers.queries.item_query",
+		query: "erpnext.controllers.queries.item_query",
 		filters:{
 			'is_manufactured_item': 'Yes'
 		}
@@ -184,7 +184,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
 	return{
-		query:"controllers.queries.item_query"
+		query: "erpnext.controllers.queries.item_query"
 	}
 }
 

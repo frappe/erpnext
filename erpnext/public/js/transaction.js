@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 wn.provide("erpnext");
-wn.require("app/js/controllers/stock_controller.js");
+wn.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {

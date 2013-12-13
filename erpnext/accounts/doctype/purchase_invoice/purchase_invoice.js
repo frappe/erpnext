@@ -6,9 +6,9 @@ cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
 wn.provide("erpnext.accounts");
-wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('app/buying/doctype/purchase_common/purchase_common.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+{% include 'buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
+{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {
@@ -133,7 +133,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	return {
-		query:"controllers.queries.item_query",
+		query: "erpnext.controllers.queries.item_query",
 		filters:{
 			'is_purchase_item': 'Yes'	
 		}

@@ -7,8 +7,8 @@
 // cur_frm.cscript.fname - Details fieldname
 
 wn.provide("erpnext.buying");
-wn.require("app/js/transaction.js");
-wn.require("app/js/controllers/accounts.js");
+wn.require("assets/erpnext/js/transaction.js");
+{% include "public/js/controllers/accounts.js" %}
 
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	onload: function() {
@@ -37,18 +37,18 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
-				return{	query:"controllers.queries.supplier_query" }});
+				return{	query: "erpnext.controllers.queries.supplier_query" }});
 		}
 		
 		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
 			if(me.frm.doc.is_subcontracted == "Yes") {
 				 return{
-					query:"controllers.queries.item_query",
+					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'is_sub_contracted_item': 'Yes' }
 				}
 			} else {
 				return{
-					query: "controllers.queries.item_query",
+					query: "erpnext.controllers.queries.item_query",
 					filters: { 'is_purchase_item': 'Yes' }
 				}				
 			}

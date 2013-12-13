@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require('app/setup/doctype/contact_control/contact_control.js');
+{% include 'setup/doctype/contact_control/contact_control.js' %};
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	cur_frm.cscript.make_dashboard(doc);

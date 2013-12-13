@@ -8,10 +8,10 @@ cur_frm.cscript.fname = "quotation_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
-wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/selling/sales_common.js');
-wn.require('app/accounts/doctype/sales_invoice/pos.js');
+{% include 'selling/sales_common.js' %}
+{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
+{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -90,7 +90,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
 
 cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
-	return{	query:"controllers.queries.lead_query" } }
+	return{	query: "erpnext.controllers.queries.lead_query" } }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {

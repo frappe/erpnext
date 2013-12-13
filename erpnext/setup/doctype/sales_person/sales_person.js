@@ -37,4 +37,4 @@ cur_frm.fields_dict['target_details'].grid.get_field("item_group").get_query = f
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-	return{	query:"controllers.queries.employee_query" } }
+	return{	query: "erpnext.controllers.queries.employee_query" } }

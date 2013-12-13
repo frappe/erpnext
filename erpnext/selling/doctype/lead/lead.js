@@ -1,14 +1,14 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/contact_control/contact_control.js');
+{% include 'setup/doctype/contact_control/contact_control.js' %};
+{% include 'utilities/doctype/sms_control/sms_control.js' %}
 
 wn.provide("erpnext");
 erpnext.LeadController = wn.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-				return { query:"controllers.queries.customer_query" } }
+				return { query: "erpnext.controllers.queries.customer_query" } }
 	},
 	
 	onload: function() {

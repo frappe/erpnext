@@ -3,7 +3,7 @@
 
 
 wn.provide("erpnext.stock");
-wn.require("public/app/js/controllers/stock_controller.js");
+wn.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.stock.LandedCostWizard = erpnext.stock.StockController.extend({		
 	setup: function() {

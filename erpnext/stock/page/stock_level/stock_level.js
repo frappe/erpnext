@@ -15,7 +15,7 @@ wn.pages['stock-level'].onload = function(wrapper) {
 	;
 }
 
-wn.require("app/js/stock_grid_report.js");
+wn.require("assets/erpnext/js/stock_grid_report.js");
 
 erpnext.StockLevel = erpnext.StockGridReport.extend({
 	init: function(wrapper) {

@@ -4,7 +4,7 @@
 // 
 
 //--------- ONLOAD -------------
-wn.require("app/js/controllers/accounts.js");
+{% include "public/js/controllers/accounts.js" %}
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
    
@@ -139,7 +139,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 
 cur_frm.set_query("account_head", "purchase_tax_details", function(doc) {
 	return {
-		query: "controllers.queries.tax_account_query",
+		query: "erpnext.controllers.queries.tax_account_query",
     	filters: {
 			"account_type": ["Tax", "Chargeable", "Expense Account"],
 			"debit_or_credit": "Debit",

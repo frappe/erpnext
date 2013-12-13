@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require('app/setup/doctype/contact_control/contact_control.js');
+{% include 'setup/doctype/contact_control/contact_control.js' %};
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 	cur_frm.cscript.load_defaults(doc, dt, dn);
@@ -116,7 +116,7 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 
 cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
 	return{
-		query:"controllers.queries.lead_query"
+		query: "erpnext.controllers.queries.lead_query"
 	}
 }
 

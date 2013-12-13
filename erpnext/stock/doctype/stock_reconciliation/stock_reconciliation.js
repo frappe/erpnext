@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("public/app/js/controllers/stock_controller.js");
+wn.require("assets/erpnext/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({

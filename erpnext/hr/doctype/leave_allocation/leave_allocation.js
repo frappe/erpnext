@@ -68,6 +68,6 @@ calculate_total_leaves_allocated = function(doc, dt, dn) {
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
   return{
-    query:"controllers.queries.employee_query"
+    query: "erpnext.controllers.queries.employee_query"
   } 
 }

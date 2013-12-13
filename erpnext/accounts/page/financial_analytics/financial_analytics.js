@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("app/js/account_tree_grid.js");
+wn.require("assets/erpnext/js/account_tree_grid.js");
 
 wn.pages['financial-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({

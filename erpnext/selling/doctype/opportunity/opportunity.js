@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require('app/utilities/doctype/sms_control/sms_control.js');
+{% include 'utilities/doctype/sms_control/sms_control.js' %};
 
 wn.provide("erpnext.selling");
 // TODO commonify this code
@@ -60,7 +60,7 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		
 		this.frm.set_query("item_code", "enquiry_details", function() {
 			return {
-				query: "controllers.queries.item_query",
+				query: "erpnext.controllers.queries.item_query",
 				filters: me.frm.doc.enquiry_type === "Maintenance" ? 
 					{"is_service_item": "Yes"} : {"is_sales_item": "Yes"}
 			};
