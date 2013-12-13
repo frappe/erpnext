@@ -12,6 +12,7 @@ from webnotes import msgprint
 class LeaveDayBlockedError(webnotes.ValidationError): pass
 class OverlapError(webnotes.ValidationError): pass
 class InvalidLeaveApproverError(webnotes.ValidationError): pass
+class LeaveApproverIdentityError(webnotes.ValidationError): pass
 	
 from webnotes.model.controller import DocListController
 class DocType(DocListController):
@@ -161,6 +162,10 @@ class DocType(DocListController):
 			where parent=%s and role='Leave Approver'""", self.doc.leave_approver):
 				msgprint(get_fullname(self.doc.leave_approver) + ": " \
 					+ _("does not have role 'Leave Approver'"), raise_exception=InvalidLeaveApproverError)
+					
+		elif self.doc.docstatus==1 and len(leave_approvers) and self.doc.leave_approver != webnotes.session.user:
+			msgprint(_("Only the selected Leave Approver can submit this Leave Application"),
+				raise_exception=LeaveApproverIdentityError)
 			
 	def notify_employee(self, status):
 		employee = webnotes.doc("Employee", self.doc.employee)

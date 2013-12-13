@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-11-02 16:59:22", 
+  "modified": "2013-12-11 11:14:32", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -13,7 +13,7 @@
   "is_submittable": 0, 
   "module": "Support", 
   "name": "__common__", 
-  "search_fields": "status,customer,customer_name,allocated_to,allocated_on, territory"
+  "search_fields": "status,customer,customer_name,territory"
  }, 
  {
   "doctype": "DocField", 

@@ -8,7 +8,6 @@
 // see ledger
 
 pscript['onload_Accounts Browser'] = function(wrapper){
-	console.log($(wrapper).html());
 	wn.ui.make_app_page({
 		parent: wrapper,
 		single_column: true
@@ -122,14 +121,14 @@ erpnext.AccountsChart = Class.extend({
 				}
 				
 				// bold
-				$('.balance-bold').removeClass('balance-bold'); // deselect
-				$(link).parent().find('.balance-area:first').addClass('balance-bold'); // select
+				$('.bold').removeClass('bold'); // deselect
+				$(link).parent().find('.balance-area:first').addClass('bold'); // select
 
 			},
 			onrender: function(treenode) {
 				if (ctype == 'Account' && treenode.data) {
 					if(treenode.data.balance) {
-						treenode.parent.append('<span class="balance-area">' 
+						treenode.parent.append('<span class="balance-area pull-right">' 
 							+ format_currency(treenode.data.balance, treenode.data.currency) 
 							+ '</span>');
 					}
@@ -142,7 +141,7 @@ erpnext.AccountsChart = Class.extend({
 		var data = $(link).data('node-data');
 		if(!data) return;
 
-		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
+		link.toolbar = $('<span class="tree-node-toolbar highlight"></span>').insertAfter(link);
 		
 		var node_links = [];
 		// edit

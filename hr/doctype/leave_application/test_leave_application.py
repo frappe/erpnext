@@ -163,8 +163,8 @@ class TestLeaveApplication(unittest.TestCase):
 		webnotes.set_user("test1@example.com")
 		application.doc.status = "Approved"
 		
-		from webnotes.model.bean import BeanPermissionError
-		self.assertRaises(BeanPermissionError, application.submit)
+		from hr.doctype.leave_application.leave_application import LeaveApproverIdentityError
+		self.assertRaises(LeaveApproverIdentityError, application.submit)
 
 		webnotes.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
 			"_T-Employee-0001")
