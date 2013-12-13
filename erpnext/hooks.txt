@@ -1,10 +1,14 @@
-app_name			ERPNext
+app_name				ERPNext
 
-app_include_js 		assets/js/erpnext.min.js
-app_include_css 	assets/css/erpnext.css
-get_desktop_icons 	erpnext.manage.get_desktop_icons
-boot_session		erpnext.startup.boot.boot_session
+app_include_js 			assets/js/erpnext.min.js
+app_include_css 		assets/css/erpnext.css
+get_desktop_icons 		erpnext.manage.get_desktop_icons
+boot_session			erpnext.startup.boot.boot_session
+notification_config		erpnext.startup.notifications.get_notification_config
 
-standard_queries	Warehouse	erpnext.stock.utils.get_warehouse_list
-standard_queries	Customer	erpnext.selling.utils.get_customer_list
+dump_report_map			erpnext.startup.report_data_map.data_map
 
+standard_queries		Warehouse:erpnext.stock.utils.get_warehouse_list
+standard_queries		Customer:erpnext.selling.utils.get_customer_list
+
+mail_footer				erpnext.startup.mail_footer

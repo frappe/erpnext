@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from home import update_feed
+from erpnext.home import update_feed
 from webnotes.core.doctype.notification_count.notification_count import clear_doctype_notifications
 from erpnext.stock.doctype.material_request.material_request import update_completed_qty
 
