@@ -85,7 +85,7 @@ class AccountsReceivableReport(object):
 	def get_account_map(self):
 		if not hasattr(self, "account_map"):
 			self.account_map = dict(((r.name, r) for r in webnotes.conn.sql("""select 
-				account.name, customer.customer_name, customer.territory
+				account.name, customer.name as customer_name, customer.territory
 				from `tabAccount` account, `tabCustomer` customer 
 				where account.master_type="Customer" 
 				and customer.name=account.master_name""", as_dict=True)))

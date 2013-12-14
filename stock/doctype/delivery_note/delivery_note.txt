@@ -229,7 +229,7 @@
   "doctype": "DocField", 
   "fieldname": "po_date", 
   "fieldtype": "Date", 
-  "hidden": 1, 
+  "hidden": 0, 
   "label": "Customer's Purchase Order Date", 
   "no_copy": 0, 
   "oldfieldname": "po_date", 

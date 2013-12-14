@@ -1,78 +1,78 @@
 {
-	"app_name": "ERPNext",
-	"app_version": "3.0.0",
-	"requires_framework_version": "==3.0.0",
-	"base_template": "app/portal/templates/base.html",
-	"modules": {
-		"Selling": {
-			"link": "selling-home",
-			"color": "#1abc9c",
-			"icon": "icon-tag",
-			"type": "module"
-		},
-		"Accounts": {
-			"link": "accounts-home",
-			"color": "#3498db",
-			"icon": "icon-money",
-			"type": "module"
-		},
-		"Stock": {
-			"type": "module",
-			"link": "stock-home",
-			"color": "#f39c12",
-			"icon": "icon-truck"
-		},
-		"Buying": {
-			"type": "module",
-			"link": "buying-home",
-			"color": "#c0392b",
-			"icon": "icon-shopping-cart"
-		},
-		"Support": {
-			"type": "module",
-			"link": "support-home",
-			"color": "#2c3e50",
-			"icon": "icon-phone"
-		},
-		"Projects": {
-			"type": "module",
-			"link": "projects-home",
-			"color": "#8e44ad",
-			"icon": "icon-puzzle-piece"
-		},
-		"Manufacturing": {
-			"type": "module",
-			"link": "manufacturing-home",
-			"color": "#7f8c8d",
-			"icon": "icon-cogs"
-		},
-		"HR": {
-			"type": "module",
-			"link": "hr-home",
-			"color": "#2ecc71",
-			"label": "Human Resources",
-			"icon": "icon-group"
-		},
-		"Setup": {
-			"type": "setup",
-			"link": "Setup",
-			"color": "#bdc3c7",
-			"icon": "icon-wrench"
-		},
-		"Activity": {
-			"type": "page",
-			"link": "activity",
-			"color": "#e67e22",
-			"icon": "icon-play",
-			"label": "Activity"
-		},
-		"Notes": {
-			"type": "list",
-			"doctype": "Note",
-			"link": "List/Note",
-			"color": "#95a5a6",
-			"label": "Notes",
-			"icon": "icon-file-alt"
-		}
-	}
+ "app_name": "ERPNext", 
+ "app_version": "3.2.2", 
+ "base_template": "app/portal/templates/base.html", 
+ "modules": {
+  "Accounts": {
+   "color": "#3498db", 
+   "icon": "icon-money", 
+   "link": "accounts-home", 
+   "type": "module"
+  }, 
+  "Activity": {
+   "color": "#e67e22", 
+   "icon": "icon-play", 
+   "label": "Activity", 
+   "link": "activity", 
+   "type": "page"
+  }, 
+  "Buying": {
+   "color": "#c0392b", 
+   "icon": "icon-shopping-cart", 
+   "link": "buying-home", 
+   "type": "module"
+  }, 
+  "HR": {
+   "color": "#2ecc71", 
+   "icon": "icon-group", 
+   "label": "Human Resources", 
+   "link": "hr-home", 
+   "type": "module"
+  }, 
+  "Manufacturing": {
+   "color": "#7f8c8d", 
+   "icon": "icon-cogs", 
+   "link": "manufacturing-home", 
+   "type": "module"
+  }, 
+  "Notes": {
+   "color": "#95a5a6", 
+   "doctype": "Note", 
+   "icon": "icon-file-alt", 
+   "label": "Notes", 
+   "link": "List/Note", 
+   "type": "list"
+  }, 
+  "Projects": {
+   "color": "#8e44ad", 
+   "icon": "icon-puzzle-piece", 
+   "link": "projects-home", 
+   "type": "module"
+  }, 
+  "Selling": {
+   "color": "#1abc9c", 
+   "icon": "icon-tag", 
+   "link": "selling-home", 
+   "type": "module"
+  }, 
+  "Setup": {
+   "color": "#bdc3c7", 
+   "icon": "icon-wrench", 
+   "link": "Setup", 
+   "type": "setup"
+  }, 
+  "Stock": {
+   "color": "#f39c12", 
+   "icon": "icon-truck", 
+   "link": "stock-home", 
+   "type": "module"
+  }, 
+  "Support": {
+   "color": "#2c3e50", 
+   "icon": "icon-phone", 
+   "link": "support-home", 
+   "type": "module"
+  }
+ }, 
+ "requires_framework_version": "==3.2.0"
 }
