@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-12-09 16:24:08", 
+  "modified": "2013-12-14 17:26:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -1058,7 +1058,7 @@
  }, 
  {
   "doctype": "DocPerm", 
-  "match": "customer_name", 
+  "match": "customer", 
   "role": "Customer"
  }
 ]
