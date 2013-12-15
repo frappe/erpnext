@@ -241,7 +241,7 @@ class DocType(DocListController):
 		return self.get_new_count("Lead", self.meta.get_label("new_leads"))
 		
 	def get_new_enquiries(self):
-		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"))
+		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1)
 	
 	def get_new_quotations(self):
 		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total")
@@ -253,7 +253,8 @@ class DocType(DocListController):
 		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total")
 		
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Material Request", self.meta.get_label("new_purchase_requests"))
+		return self.get_new_count("Material Request",
+			 self.meta.get_label("new_purchase_requests"), docstatus=1)
 		
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
@@ -271,13 +272,16 @@ class DocType(DocListController):
 		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount")
 		
 	def get_new_support_tickets(self):
-		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"), False)
+		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"), 
+			filter_by_company=False)
 		
 	def get_new_communications(self):
-		return self.get_new_count("Communication", self.meta.get_label("new_communications"), False)
+		return self.get_new_count("Communication", self.meta.get_label("new_communications"), 
+			filter_by_company=False)
 		
 	def get_new_projects(self):
-		return self.get_new_count("Project", self.meta.get_label("new_projects"), False)
+		return self.get_new_count("Project", self.meta.get_label("new_projects"), 
+			filter_by_company=False)
 		
 	def get_calendar_events(self, user_id):
 		from core.doctype.event.event import get_events
@@ -321,22 +325,22 @@ class DocType(DocListController):
 		else:
 			return 0, "<p>To Do</p>"
 	
-	def get_new_count(self, doctype, label, filter_by_company=True):
+	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
 		if filter_by_company:
 			company = """and company="%s" """ % self.doc.company
 		else:
 			company = ""
 		count = webnotes.conn.sql("""select count(*) from `tab%s`
-			where docstatus < 2 %s and
-			date(creation)>=%s and date(creation)<=%s""" % (doctype, company, "%s", "%s"),
-			(self.from_date, self.to_date))
+			where docstatus=%s %s and
+			date(creation)>=%s and date(creation)<=%s""" % 
+			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
 		count = count and count[0][0] or 0
 		
 		return count, self.get_html(label, None, count)
 		
 	def get_new_sum(self, doctype, label, sum_field):
 		count_sum = webnotes.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
-			from `tab%s` where docstatus < 2 and company = %s and
+			from `tab%s` where docstatus=1 and company = %s and
 			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
 			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
 		count, total = count_sum and count_sum[0] or (0, 0)
