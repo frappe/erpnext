@@ -264,4 +264,5 @@ patch_list = [
 	"patches.1311.p08_email_digest_recipients",
 	"execute:webnotes.delete_doc('DocType', 'Warehouse Type')",
 	"patches.1311.p07_move_warehouse_user_to_restrictions",
+	"patches.1311.p08_restriction_management",
 ]
