@@ -22,7 +22,7 @@ class DocType:
 					where fieldname='naming_series'""")
 				)))),
 			"prefixes": "\n".join([''] + [i[0] for i in 
-				webnotes.conn.sql("""select name from tabSeries""")])
+				webnotes.conn.sql("""select name from tabSeries order by name""")])
 		}
 	
 	def scrub_options_list(self, ol):
@@ -38,7 +38,7 @@ class DocType:
 		self.set_series_for(self.doc.select_doc_for_series, series_list)
 		
 		# create series
-		map(self.insert_series, series_list)
+		map(self.insert_series, [d.split('.')[0] for d in series_list])
 		
 		msgprint('Series Updated')
 		
@@ -103,7 +103,8 @@ class DocType:
 			dt.validate_series(series, self.doc.select_doc_for_series)
 			for i in sr:
 				if i[0]:
-					if series in i[0].split("\n"):
+					existing_series = [d.split('.')[0] for d in i[0].split("\n")]
+					if series.split(".")[0] in existing_series:
 						msgprint("Oops! Series name %s is already in use in %s. \
 							Please select a new one" % (series, i[1]), raise_exception=1)
 			
@@ -120,17 +121,21 @@ class DocType:
 
 	def get_current(self, arg=None):
 		"""get series current"""
-		self.doc.current_value = webnotes.conn.get_value("Series", self.doc.prefix, "current")
+		self.doc.current_value = webnotes.conn.get_value("Series", 
+			self.doc.prefix.split('.')[0], "current")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
 		if not webnotes.conn.exists('Series', series):
-			webnotes.conn.sql("insert into tabSeries (name, current) values (%s,0)", (series))			
+			webnotes.conn.sql("insert into tabSeries (name, current) values (%s, 0)", 
+				(series))			
 
 	def update_series_start(self):
 		if self.doc.prefix:
-			self.insert_series(self.doc.prefix)
-			webnotes.conn.sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.current_value,self.doc.prefix))
+			prefix = self.doc.prefix.split('.')[0]
+			self.insert_series(prefix)
+			webnotes.conn.sql("update `tabSeries` set current = %s where name = %s", 
+				(self.doc.current_value, prefix))
 			msgprint("Series Updated Successfully")
 		else:
 			msgprint("Please select prefix first")

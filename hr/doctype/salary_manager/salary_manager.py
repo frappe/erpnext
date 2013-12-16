@@ -12,7 +12,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 		
-		
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria 
