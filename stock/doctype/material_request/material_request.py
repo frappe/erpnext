@@ -37,20 +37,25 @@ class DocType(BuyingController):
 		
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
-				already_indented = webnotes.conn.sql("select sum(qty) from `tabMaterial Request Item` where item_code = '%s' and sales_order_no = '%s' and docstatus = 1 and parent != '%s'" % (item, so_no, self.doc.name))
+				already_indented = webnotes.conn.sql("""select sum(qty) from `tabMaterial Request Item` 
+					where item_code = '%s' and sales_order_no = '%s' and 
+					docstatus = 1 and parent != '%s'""" % (item, so_no, self.doc.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 				
-				actual_so_qty = webnotes.conn.sql("select sum(qty) from `tabSales Order Item` where parent = '%s' and item_code = '%s' and docstatus = 1 group by parent" % (so_no, item))
+				actual_so_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
+					where parent = '%s' and item_code = '%s' and docstatus = 1 
+					group by parent""" % (so_no, item))
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 
-				if flt(so_items[so_no][item]) + already_indented > actual_so_qty:
-					msgprint("You can raise indent of maximum qty: %s for item: %s against sales order: %s\n Anyway, you can add more qty in new row for the same item." % (actual_so_qty - already_indented, item, so_no), raise_exception=1)
+				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
+					webnotes.throw(_("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
+						\n Anyway, you can add more qty in new row for the same item.")
+						% (actual_so_qty - already_indented, item, so_no))
 				
 	def validate_schedule_date(self):
 		for d in getlist(self.doclist, 'indent_details'):
 			if d.schedule_date < self.doc.transaction_date:
-				msgprint("Expected Date cannot be before Material Request Date")
-				raise Exception
+				webnotes.throw(_("Expected Date cannot be before Material Request Date"))
 				
 	# Validate
 	# ---------------------
@@ -80,8 +85,8 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist, 'indent_details'):
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
-					msgprint("Please Enter Warehouse for Item %s as it is stock item" 
-						% cstr(d.item_code), raise_exception=1)
+					webnotes.throw("Please Enter Warehouse for Item %s as it is stock item" 
+						% cstr(d.item_code))
 					
 				qty =flt(d.qty)
 				if is_stopped:
@@ -96,16 +101,15 @@ class DocType(BuyingController):
 				update_bin(args)		
 		
 	def on_submit(self):
-		webnotes.conn.set(self.doc,'status','Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	
 	def check_modified_date(self):
 		mod_db = webnotes.conn.sql("select modified from `tabMaterial Request` where name = '%s'" % self.doc.name)
-		date_diff = webnotes.conn.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
+		date_diff = webnotes.conn.sql("select TIMEDIFF('%s', '%s')" % (mod_db[0][0], cstr(self.doc.modified)))
 		
 		if date_diff and date_diff[0][0]:
-			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
-			raise Exception
+			webnotes.throw(cstr(self.doc.doctype) + " => " + cstr(self.doc.name) + " has been modified. Please Refresh.")
 
 	def update_status(self, status):
 		self.check_modified_date()
@@ -113,10 +117,10 @@ class DocType(BuyingController):
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 
 		# Step 2:=> Set status 
-		webnotes.conn.set(self.doc,'status',cstr(status))
+		webnotes.conn.set(self.doc, 'status', cstr(status))
 		
 		# Step 3:=> Acknowledge User
-		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)) )
+		msgprint(self.doc.doctype + ": " + self.doc.name + _(" has been %s.") % ((status == 'Submitted') and 'Unstopped' or cstr(status)) )
  
 
 	def on_cancel(self):
@@ -177,9 +181,9 @@ def update_completed_qty(controller, caller_method):
 			mr_doctype = webnotes.get_doctype("Material Request")
 			
 			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
-				msgprint(_("Material Request") + ": %s, " % mr_obj.doc.name 
+				webnotes.throw(_("Material Request") + ": %s, " % mr_obj.doc.name 
 					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
-					+ _("Cannot continue."), raise_exception=webnotes.InvalidStatusError)
+					+ _("Cannot continue."), exc=webnotes.InvalidStatusError)
 				
 			_update_requested_qty(controller, mr_obj, mr_items)
 			

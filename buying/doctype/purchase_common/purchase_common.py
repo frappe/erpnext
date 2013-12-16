@@ -7,11 +7,9 @@ import webnotes
 from webnotes.utils import cstr, flt
 from webnotes.model.utils import getlist
 from webnotes import msgprint, _
-
 from buying.utils import get_last_purchase_details
-
-	
 from controllers.buying_controller import BuyingController
+
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
@@ -107,7 +105,10 @@ class DocType(BuyingController):
 				msgprint("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code), raise_exception=True)
 			
 			# list criteria that should not repeat if item is stock item
-			e = [d.schedule_date, d.item_code, d.description, d.warehouse, d.uom, d.fields.has_key('prevdoc_docname') and d.prevdoc_docname or '', d.fields.has_key('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', d.fields.has_key('batch_no') and d.batch_no or '']
+			e = [d.schedule_date, d.item_code, d.description, d.warehouse, d.uom, 
+				d.fields.has_key('prevdoc_docname') and d.prevdoc_docname or d.fields.has_key('sales_order_no') and d.sales_order_no or '', 
+				d.fields.has_key('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', 
+				d.fields.has_key('batch_no') and d.batch_no or '']
 			
 			# if is not stock item
 			f = [d.schedule_date, d.item_code, d.description]
