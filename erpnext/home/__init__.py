@@ -29,7 +29,6 @@ feed_dict = {
 	'Sales Order':	  ['[%(status)s] To %(customer_name)s worth %(currency)s %(grand_total_export)s', '#4169E1'],
 
 	# Purchase
-	'Material Request':	['%(supplier_name)s, %(supplier_type)s', '#6495ED'],
 	'Supplier':		    ['%(supplier_name)s, %(supplier_type)s', '#6495ED'],
 	'Purchase Order':   ['[%(status)s] %(name)s To %(supplier_name)s for %(currency)s  %(grand_total_import)s', '#4169E1'],
 
