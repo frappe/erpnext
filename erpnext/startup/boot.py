@@ -47,7 +47,6 @@ def load_country_and_currency(bootinfo):
 		where ifnull(enabled,0)=1""", as_dict=1, update={"doctype":":Currency"})
 
 def get_letter_heads():
-	"""load letter heads with startup"""
 	import webnotes
 	ret = webnotes.conn.sql("""select name, content from `tabLetter Head` 
 		where ifnull(disabled,0)=0""")

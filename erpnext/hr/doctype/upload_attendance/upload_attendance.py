@@ -138,7 +138,7 @@ def upload():
 			error = True
 			ret.append('Error for row (#%d) %s : %s' % (row_idx, 
 				len(row)>1 and row[1] or "", cstr(e)))
-			webnotes.errprint(webnotes.getTraceback())
+			webnotes.errprint(webnotes.get_traceback())
 
 	if error:
 		webnotes.conn.rollback()		

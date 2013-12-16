@@ -35,7 +35,7 @@ def update_file_list(doctype, singles):
 			webnotes.conn.commit()
 			webnotes.conn.sql("""alter table `tab%s` drop column `file_list`""" % doctype)
 		except Exception, e:
-			print webnotes.getTraceback()
+			print webnotes.get_traceback()
 			if (e.args and e.args[0]!=1054) or not e.args:
 				raise
 

@@ -29,8 +29,9 @@ feed_dict = {
 	'Sales Order':	  ['[%(status)s] To %(customer_name)s worth %(currency)s %(grand_total_export)s', '#4169E1'],
 
 	# Purchase
-	'Supplier':		     ['%(supplier_name)s, %(supplier_type)s', '#6495ED'],
-	'Purchase Order':       ['[%(status)s] %(name)s To %(supplier_name)s for %(currency)s  %(grand_total_import)s', '#4169E1'],
+	'Material Request':	['%(supplier_name)s, %(supplier_type)s', '#6495ED'],
+	'Supplier':		    ['%(supplier_name)s, %(supplier_type)s', '#6495ED'],
+	'Purchase Order':   ['[%(status)s] %(name)s To %(supplier_name)s for %(currency)s  %(grand_total_import)s', '#4169E1'],
 
 	# Stock
 	'Delivery Note':	['[%(status)s] To %(customer_name)s', '#4169E1'],
@@ -89,3 +90,9 @@ def update_feed(controller, method=None):
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:
 			make_feed('', doc.doctype, doc.name, doc.owner, subject % doc.fields, color)
+
+def make_comment_feed(bean, method):
+	"""add comment to feed"""
+	doc = bean.doc
+	make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
+		'<i>"' + doc.comment + '"</i>', '#6B24B3')

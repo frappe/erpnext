@@ -114,7 +114,7 @@ def backup_to_dropbox():
 				upload_file_to_dropbox(filepath, "/files", dropbox_client)
 			except Exception:
 				did_not_upload.append(filename)
-				error_log.append(webnotes.getTraceback())
+				error_log.append(webnotes.get_traceback())
 	
 	webnotes.connect()
 	return did_not_upload, list(set(error_log))

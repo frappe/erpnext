@@ -127,7 +127,7 @@ $.extend(erpnext.cart, {
 	render_item_row: function($cart_items, doc) {
 		doc.image_html = doc.website_image ?
 			'<div style="height: 120px; overflow: hidden;"><img src="' + doc.website_image + '" /></div>' :
-			'{% include "app/stock/doctype/item/templates/includes/product_missing_image.html" %}';
+			'{% include "stock/doctype/item/templates/includes/product_missing_image.html" %}';
 			
 		if(doc.description === doc.item_name) doc.description = "";
 		

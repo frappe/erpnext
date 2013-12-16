@@ -343,7 +343,7 @@ def create_material_request(material_requests):
 					exceptions_list.append([] + webnotes.local.message_log)
 					webnotes.local.message_log = []
 				else:
-					exceptions_list.append(webnotes.getTraceback())
+					exceptions_list.append(webnotes.get_traceback())
 
 	if mr_list:
 		if getattr(webnotes.local, "reorder_email_notify", None) is None:

@@ -5,9 +5,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from erpnext.home import make_feed
-
-def on_login_post_session(login_manager):
+def on_session_creation(login_manager):
 	"""
 		called after login
 		update login_from and delete parallel sessions
@@ -63,10 +61,4 @@ def check_if_expired():
 	webnotes.msgprint(msg)
 	
 	webnotes.response['message'] = 'Account Expired'
-	raise webnotes.AuthenticationError
-
-def comment_added(doc):
-	"""add comment to feed"""
-	make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
-		'<i>"' + doc.comment + '"</i>', '#6B24B3')
-	
+	raise webnotes.AuthenticationError	

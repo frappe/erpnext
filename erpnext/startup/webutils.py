@@ -4,7 +4,7 @@
 import webnotes
 from webnotes.utils import cint
 
-def get_website_settings(context):
+def update_website_context(context):
 	post_login = []
 	cart_enabled = cint(webnotes.conn.get_default("shopping_cart_enabled"))
 	if cart_enabled:

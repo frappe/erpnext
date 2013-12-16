@@ -738,7 +738,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 					notify_errors(ref_invoice, ref_wrapper.doc.owner)
 					webnotes.conn.commit()
 
-				exception_list.append(webnotes.getTraceback())
+				exception_list.append(webnotes.get_traceback())
 			finally:
 				if commit:
 					webnotes.conn.begin()
