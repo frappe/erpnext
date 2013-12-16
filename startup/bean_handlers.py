@@ -14,3 +14,4 @@ def on_method(bean, method):
 
 	if bean.doc.doctype=="Stock Entry" and method in ("on_submit", "on_cancel"):
 		update_completed_qty(bean.controller, method)
+	
