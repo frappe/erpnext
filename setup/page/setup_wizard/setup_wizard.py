@@ -171,7 +171,7 @@ def create_feed_and_todo():
 
 def create_email_digest():
 	from webnotes.profile import get_system_managers
-	system_managers = get_system_managers()
+	system_managers = get_system_managers(only_name=True)
 	if not system_managers: 
 		return
 	
@@ -186,10 +186,23 @@ def create_email_digest():
 			})
 
 			for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
-				edigest.doc.fields[fieldname] = 1
+				if fieldname != "scheduler_errors":
+					edigest.doc.fields[fieldname] = 1
 		
 			edigest.insert()
-		
+	
+	# scheduler errors digest
+	edigest = webnotes.new_bean("Email Digest")
+	edigest.doc.fields.update({
+		"name": "Scheduler Errors",
+		"company": webnotes.conn.get_default("company"),
+		"frequency": "Daily",
+		"recipient_list": "\n".join(system_managers),
+		"scheduler_errors": 1,
+		"enabled": 1
+	})
+	edigest.insert()
+	
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
 	if start_year == getdate(fy_end_date).year:

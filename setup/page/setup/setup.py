@@ -233,8 +233,9 @@ items = [
 		"route": "Report/Scheduler Log", "type": "Link", "icon": "icon-exclamation-sign" },
 ]
 
-@webnotes.whitelist(allow_roles=["System Manager"])
+@webnotes.whitelist()
 def get():
+	webnotes.only_for("System Manager")
 	for item in items:
 		if item.get("type")=="Section":
 			continue
