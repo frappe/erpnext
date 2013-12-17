@@ -515,7 +515,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		};
-		
 		setup_field_label_map(["net_total", "other_charges_total", "grand_total", 
 			"rounded_total", "in_words",
 			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
