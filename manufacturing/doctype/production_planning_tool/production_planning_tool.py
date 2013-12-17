@@ -154,20 +154,20 @@ class DocType:
 		for d in getlist(self.doclist, 'pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
-				webnotes.throw(_("Please Enter Planned Qty for item: %s at row no: %s") % 
+				webnotes.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
 					(d.item_code, d.idx))
 				
 	def validate_bom_no(self, d):
 		if not d.bom_no:
-			webnotes.throw(_("Please enter bom no for item: %s at row no: %s") % 
+			webnotes.throw("Please enter bom no for item: %s at row no: %s" % 
 				(d.item_code, d.idx))
 		else:
 			bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
-				webnotes.throw(_("""Incorrect BOM No: %s entered for item: %s at row no: %s
-					May be BOM is inactive or for other item or does not exists in the system""") % 
+				webnotes.throw("""Incorrect BOM No: %s entered for item: %s at row no: %s
+					May be BOM is inactive or for other item or does not exists in the system""" % 
 					(d.bom_no, d.item_doce, d.idx))
 
 	def raise_production_order(self):
@@ -290,11 +290,12 @@ class DocType:
 			for item_details in self.item_dict[item]:
 				item_list.append([item, item_details[1], item_details[2], item_details[0]])
 				item_qty = webnotes.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
-					from `tabBin` where item_code = %s""", item)
+					from `tabBin` where item_code = %s""", item, as_dict=1)
 				i_qty, o_qty, a_qty = 0, 0, 0
 				for w in item_qty:
-					i_qty, o_qty, a_qty = i_qty + flt(w[1]), o_qty + flt(w[2]), a_qty + flt(w[3])
-					item_list.append(['', '', '', '', w[0], flt(w[1]), flt(w[2]), flt(w[3])])
+					i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
+					item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty), 
+						flt(w.ordered_qty), flt(w.actual_qty)])
 				if item_qty:
 					item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
@@ -405,7 +406,7 @@ class DocType:
 			if purchase_request_list:
 				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
 					(p, p) for p in purchase_request_list]
-				msgprint(_("Material Request(s) created: \n%s") % 
+				msgprint("Material Request(s) created: \n%s" % 
 					"\n".join(pur_req))
 		else:
 			msgprint(_("Nothing to request"))
