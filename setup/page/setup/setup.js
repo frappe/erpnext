@@ -30,7 +30,7 @@ wn.pages.Setup.make = function(wrapper) {
 		if(item.type==="Section") {
 			$("<h3>")
 				.css({"margin": "20px 0px 15px 0px"})
-				.html('<i class="'+item.icon+'"></i> ' + item.title).appendTo(body);
+				.html('<i class="'+item.icon+'"></i> ' + wn._(item.title)).appendTo(body);
 			return;
 		}
 		var row = $('<div class="row">')
@@ -46,7 +46,7 @@ wn.pages.Setup.make = function(wrapper) {
 		if(item.type==="Link") {
 			var col = $('<div class="col-md-5"><b><a href="#'
 				+item.route+'"><i class="'+item.icon+'"></i> '
-				+item.title+'</a></b></div>').appendTo(row);
+				+wn._(item.title)+'</a></b></div>').appendTo(row);
 		
 		} else {
 			var col = $(repl('<div class="col-md-5">\
@@ -97,9 +97,9 @@ wn.pages.Setup.make = function(wrapper) {
 		$links = $('<div class="col-md-5">').appendTo(row);
 	
 		if(item.tree) {
-			$('<a class="view-link"><i class="icon-sitemap"></i> Browse</a>\
+			$('<a class="view-link"><i class="icon-sitemap"></i> ' + wn._("Browse") + '</a>\
 				<span class="text-muted">|</span> \
-				<a class="import-link"><i class="icon-upload"></i> Import</a>')
+				<a class="import-link"><i class="icon-upload"></i> ' + wn._("Import") + '</a>')
 				.appendTo($links)
 
 			var mylink = $links.find(".view-link")
