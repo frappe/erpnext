@@ -9,7 +9,6 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -47,7 +46,7 @@ class DocType:
 		
 	def validate_company(self):
 		if not self.doc.company:
-			msgprint("Please enter Company", raise_exception=1)
+			webnotes.throw(_("Please enter Company"))
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
@@ -106,7 +105,7 @@ class DocType:
 	def get_items(self):
 		so_list = filter(None, [d.sales_order for d in getlist(self.doclist, 'pp_so_details')])
 		if not so_list:
-			msgprint("Please enter sales order in the above table")
+			msgprint(_("Please enter sales order in the above table"))
 			return []
 			
 		items = webnotes.conn.sql("""select distinct parent, item_code, reserved_warehouse,
@@ -155,21 +154,21 @@ class DocType:
 		for d in getlist(self.doclist, 'pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
-				msgprint("Please Enter Planned Qty for item: %s at row no: %s" %
-					(d.item_code, d.idx), raise_exception=1)
+				webnotes.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
+					(d.item_code, d.idx))
 				
 	def validate_bom_no(self, d):
 		if not d.bom_no:
-			msgprint("Please enter bom no for item: %s at row no: %s" % 
-				(d.item_code, d.idx), raise_exception=1)
+			webnotes.throw("Please enter bom no for item: %s at row no: %s" % 
+				(d.item_code, d.idx))
 		else:
 			bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
-				msgprint("""Incorrect BOM No: %s entered for item: %s at row no: %s
+				webnotes.throw("""Incorrect BOM No: %s entered for item: %s at row no: %s
 					May be BOM is inactive or for other item or does not exists in the system""" % 
-					(d.bom_no, d.item_doce, d.idx), raise_exception=1)
+					(d.bom_no, d.item_doce, d.idx))
 
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""
@@ -183,16 +182,20 @@ class DocType:
 		if pro:
 			pro = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in pro]
-			msgprint("Production Order(s) created:\n\n" + '\n'.join(pro))
+			msgprint(_("Production Order(s) created:\n\n") + '\n'.join(pro))
 		else :
-			msgprint("No Production Order created.")
+			msgprint(_("No Production Order created."))
 
 
 	def get_distinct_items_and_boms(self):
-		""" Club similar BOM and item for processing"""
+		""" Club similar BOM and item for processing
+			bom_dict {
+				bom_no: ['sales_order', 'qty']
+			}
+		"""
 		item_dict, bom_dict = {}, {}
 		for d in self.doclist.get({"parentfield": "pp_details"}):			
-			bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
+			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
 			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
 				"production_item"	: d.item_code,
 				"sales_order"		: d.sales_order,
@@ -241,48 +244,60 @@ class DocType:
 				"item_code": [qty_required, description, stock_uom, min_order_qty]
 			}
 		"""
-		for bom in bom_dict:
+		bom_wise_item_details = {}
+		item_list = []
+
+		for bom, so_wise_qty in bom_dict.items():
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
-				fl_bom_items = webnotes.conn.sql("""select fb.item_code, 
-					ifnull(sum(fb.qty_consumed_per_unit), 0)*%s as qty, 
+				for d in webnotes.conn.sql("""select fb.item_code, 
+					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty, 
 					fb.description, fb.stock_uom, it.min_order_qty 
 					from `tabBOM Explosion Item` fb,`tabItem` it 
-					where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+					where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No' 
 					and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
-					and fb.docstatus<2 and fb.parent=%s
-					group by item_code, stock_uom""", (flt(bom_dict[bom]), bom))
+					and fb.docstatus<2 and fb.parent=%s 
+					group by item_code, stock_uom""", bom, as_dict=1):
+						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
-				fl_bom_items = webnotes.conn.sql("""select bom_item.item_code, 
-						ifnull(sum(bom_item.qty_consumed_per_unit), 0) * %s, 
-						bom_item.description, bom_item.stock_uom, item.min_order_qty
-					from `tabBOM Item` bom_item, tabItem item
+				for d in webnotes.conn.sql("""select bom_item.item_code, 
+					ifnull(sum(bom_item.qty_consumed_per_unit), 0) as qty, 
+					bom_item.description, bom_item.stock_uom, item.min_order_qty 
+					from `tabBOM Item` bom_item, tabItem item 
 					where bom_item.parent = %s and bom_item.docstatus < 2 
 					and bom_item.item_code = item.name 
-					group by item_code""", (flt(bom_dict[bom]), bom))
-			self.make_items_dict(fl_bom_items)
+					group by item_code""", bom, as_dict=1):
+						bom_wise_item_details.setdefault(d.item_code, d)
+
+			for item, item_details in bom_wise_item_details.items():
+				for so_qty in so_wise_qty:
+					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description, 
+						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
+
+			self.make_items_dict(item_list)
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
-			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), 
-				i[2], i[3], i[4]]
-
+			self.item_dict.setdefault(i[0], []).append([flt(i[1]), i[2], i[3], i[4], i[5]])
 
 	def get_csv(self):
 		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
 		 	'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
-		for d in self.item_dict:
-			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0]])
-			item_qty= webnotes.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
-				from `tabBin` where item_code = %s""", d)
-			i_qty, o_qty, a_qty = 0, 0, 0
-			for w in item_qty:
-				i_qty, o_qty, a_qty = i_qty + flt(w[1]), o_qty + flt(w[2]), a_qty + flt(w[3])
-				item_list.append(['', '', '', '', w[0], flt(w[1]), flt(w[2]), flt(w[3])])
-			if item_qty:
-				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
+		for item in self.item_dict:
+			total_qty = sum([flt(d[0]) for d in self.item_dict[item]])
+			for item_details in self.item_dict[item]:
+				item_list.append([item, item_details[1], item_details[2], item_details[0]])
+				item_qty = webnotes.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
+					from `tabBin` where item_code = %s""", item, as_dict=1)
+				i_qty, o_qty, a_qty = 0, 0, 0
+				for w in item_qty:
+					i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
+					item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty), 
+						flt(w.ordered_qty), flt(w.actual_qty)])
+				if item_qty:
+					item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
 		return item_list
 		
@@ -293,31 +308,49 @@ class DocType:
 		"""
 		self.validate_data()
 		if not self.doc.purchase_request_for_warehouse:
-			webnotes.msgprint("Please enter Warehouse for which Material Request will be raised",
-			 	raise_exception=1)
+			webnotes.throw(_("Please enter Warehouse for which Material Request will be raised"))
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]		
 		self.get_raw_materials(bom_dict)
 		
-		if not self.item_dict:
-			return
-		
+		if self.item_dict:
+			self.insert_purchase_request()
+
+	def get_requested_items(self):
 		item_projected_qty = self.get_projected_qty()
-		
-		from accounts.utils import get_fiscal_year
-		fiscal_year = get_fiscal_year(nowdate())[0]
-		
 		items_to_be_requested = webnotes._dict()
-		for item in self.item_dict:
-			if flt(self.item_dict[item][0]) > item_projected_qty.get(item, 0):
+
+		for item, so_item_qty in self.item_dict.items():
+			requested_qty = 0
+			total_qty = sum([flt(d[0]) for d in so_item_qty])
+			if total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = flt(self.item_dict[item][0]) - item_projected_qty.get(item, 0)
-				# comsider minimum order qty
-				requested_qty = requested_qty > flt(self.item_dict[item][3]) and \
-					requested_qty or flt(self.item_dict[item][3])
-				items_to_be_requested[item] = requested_qty
-		
-		self.insert_purchase_request(items_to_be_requested, fiscal_year)
+				requested_qty = total_qty - item_projected_qty.get(item, 0)
+				# consider minimum order qty
+				requested_qty = requested_qty > flt(so_item_qty[0][3]) and \
+					requested_qty or flt(so_item_qty[0][3])
+
+			# distribute requested qty SO wise
+			for item_details in so_item_qty:
+				if requested_qty:
+					sales_order = item_details[4] or "No Sales Order"
+					if requested_qty <= item_details[0]:
+						adjusted_qty = requested_qty
+					else:
+						adjusted_qty = item_details[0]
+
+					items_to_be_requested.setdefault(item, {}).setdefault(sales_order, 0)
+					items_to_be_requested[item][sales_order] += adjusted_qty
+					requested_qty -= adjusted_qty
+				else:
+					break
+
+			# requested qty >= total so qty, due to minimum order qty
+			if requested_qty:
+				items_to_be_requested.setdefault(item, {}).setdefault("No Sales Order", 0)
+				items_to_be_requested[item]["No Sales Order"] += requested_qty
+
+		return items_to_be_requested
 			
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
@@ -327,24 +360,29 @@ class DocType:
 
 		return dict(item_projected_qty)
 		
-	def insert_purchase_request(self, items_to_be_requested, fiscal_year):
+	def insert_purchase_request(self):
+		items_to_be_requested = self.get_requested_items()
+
+		from accounts.utils import get_fiscal_year
+		fiscal_year = get_fiscal_year(nowdate())[0]
+
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
 				item_wrapper = webnotes.bean("Item", item)
-				pr_doclist = [
-					{
-						"doctype": "Material Request",
-						"__islocal": 1,
-						"naming_series": "IDT",
-						"transaction_date": nowdate(),
-						"status": "Draft",
-						"company": self.doc.company,
-						"fiscal_year": fiscal_year,
-						"requested_by": webnotes.session.user,
-						"material_request_type": "Purchase"
-					},
-					{
+				pr_doclist = [{
+					"doctype": "Material Request",
+					"__islocal": 1,
+					"naming_series": "IDT",
+					"transaction_date": nowdate(),
+					"status": "Draft",
+					"company": self.doc.company,
+					"fiscal_year": fiscal_year,
+					"requested_by": webnotes.session.user,
+					"material_request_type": "Purchase"
+				}]
+				for sales_order, requested_qty in items_to_be_requested[item].items():
+					pr_doclist.append({
 						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"parentfield": "indent_details",
@@ -354,11 +392,12 @@ class DocType:
 						"uom": item_wrapper.doc.stock_uom,
 						"item_group": item_wrapper.doc.item_group,
 						"brand": item_wrapper.doc.brand,
-						"qty": items_to_be_requested[item],
+						"qty": requested_qty,
 						"schedule_date": add_days(nowdate(), cint(item_wrapper.doc.lead_time_days)),
-						"warehouse": self.doc.purchase_request_for_warehouse
-					}
-				]
+						"warehouse": self.doc.purchase_request_for_warehouse,
+						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
+					})
+
 				pr_wrapper = webnotes.bean(pr_doclist)
 				pr_wrapper.ignore_permissions = 1
 				pr_wrapper.submit()
@@ -367,7 +406,7 @@ class DocType:
 			if purchase_request_list:
 				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \
 					(p, p) for p in purchase_request_list]
-				webnotes.msgprint("Material Request(s) created: \n%s" % 
+				msgprint("Material Request(s) created: \n%s" % 
 					"\n".join(pur_req))
 		else:
-			webnotes.msgprint("Nothing to request")
+			msgprint(_("Nothing to request"))

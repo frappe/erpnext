@@ -1,1 +1,0 @@
-Average "age" of an Item in a particular Warehouse based on First-in-first-out (FIFO).

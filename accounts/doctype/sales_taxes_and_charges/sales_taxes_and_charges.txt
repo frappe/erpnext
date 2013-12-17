@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-24 11:39:32", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:21", 
+  "modified": "2013-12-17 12:38:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -39,9 +39,18 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "row_id", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Enter Row", 
+  "oldfieldname": "row_id", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "account_head", 
   "fieldtype": "Link", 
-  "in_list_view": 1, 
+  "in_list_view": 0, 
   "label": "Account Head", 
   "oldfieldname": "account_head", 
   "oldfieldtype": "Link", 
@@ -54,7 +63,7 @@
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
-  "in_list_view": 1, 
+  "in_list_view": 0, 
   "label": "Cost Center", 
   "oldfieldname": "cost_center_other_charges", 
   "oldfieldtype": "Link", 
@@ -73,6 +82,24 @@
   "width": "300px"
  }, 
  {
+  "allow_on_submit": 0, 
+  "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount", 
+  "doctype": "DocField", 
+  "fieldname": "included_in_print_rate", 
+  "fieldtype": "Check", 
+  "label": "Is this Tax included in Basic Rate?", 
+  "no_copy": 0, 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "report_hide": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_6", 
+  "fieldtype": "Section Break"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
@@ -80,7 +107,7 @@
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "reqd": 0
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -106,15 +133,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "row_id", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Enter Row", 
-  "oldfieldname": "row_id", 
-  "oldfieldtype": "Data"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "item_wise_tax_detail", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
@@ -134,18 +152,5 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "search_index": 1
- }, 
- {
-  "allow_on_submit": 0, 
-  "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount", 
-  "doctype": "DocField", 
-  "fieldname": "included_in_print_rate", 
-  "fieldtype": "Check", 
-  "label": "Is this Tax included in Basic Rate?", 
-  "no_copy": 0, 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "report_hide": 1, 
-  "width": "150px"
  }
 ]
