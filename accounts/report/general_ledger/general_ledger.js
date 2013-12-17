@@ -23,6 +23,12 @@ wn.query_reports["General Ledger"] = {
 			"fieldtype": "Data",
 		},
 		{
+			"fieldname":"group_by",
+			"label": wn._("Group by"),
+			"fieldtype": "Select",
+			"options": "\nGroup by Account\nGroup by Voucher"
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
@@ -40,12 +46,6 @@ wn.query_reports["General Ledger"] = {
 			"default": wn.datetime.get_today(),
 			"reqd": 1,
 			"width": "60px"
-		}, 
-		{
-			"fieldname":"group_by",
-			"label": wn._("Group by"),
-			"fieldtype": "Select",
-			"options": "\nAccount\nVoucher"
 		}
 	]
 }

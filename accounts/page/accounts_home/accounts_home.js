@@ -157,7 +157,8 @@ wn.module_page["Accounts"] = [
 		items: [
 			{
 				"label":wn._("General Ledger"),
-				page: "general-ledger"
+				doctype: "GL Entry",
+				route: "query-report/General Ledger"
 			},
 			{
 				"label":wn._("Trial Balance"),

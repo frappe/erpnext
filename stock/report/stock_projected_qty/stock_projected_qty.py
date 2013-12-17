@@ -8,13 +8,14 @@ def execute(filters=None):
 	columns = get_columns()
 		
 	data = webnotes.conn.sql("""select 
-			item.name, item.item_name, description, brand, warehouse, item.stock_uom, 
+			item.name, item.item_name, description, item_group, brand, warehouse, item.stock_uom, 
 			actual_qty, planned_qty, indented_qty, ordered_qty, reserved_qty, 
 			projected_qty, item.re_order_level, item.re_order_qty
 		from `tabBin` bin, 
 			(select name, company from tabWarehouse 
 				where company=%(company)s {warehouse_conditions}) wh,
-			(select name, item_name, description, stock_uom, brand, re_order_level, re_order_qty
+			(select name, item_name, description, stock_uom, item_group, 
+				brand, re_order_level, re_order_qty 
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and warehouse = wh.name
 		order by item.name, wh.name"""\

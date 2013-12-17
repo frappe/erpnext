@@ -20,8 +20,8 @@ def execute(filters=None):
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
 		
-		data.append([item, details.item_name, details.description, details.brand, 
-			average_age, earliest_age, latest_age, details.stock_uom])
+		data.append([item, details.item_name, details.description, details.item_group, 
+			details.brand, average_age, earliest_age, latest_age, details.stock_uom])
 		
 	return columns, data
 	
@@ -36,8 +36,8 @@ def get_average_age(fifo_queue, to_date):
 	
 def get_columns():
 	return ["Item Code:Link/Item:100", "Item Name::100", "Description::200", 
-		"Brand:Link/Brand:100", "Average Age:Float:100", "Earliest:Int:80", 
-		"Latest:Int:80", "UOM:Link/UOM:100"]
+		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100", "Average Age:Float:100", 
+		"Earliest:Int:80", "Latest:Int:80", "UOM:Link/UOM:100"]
 		
 def get_fifo_queue(filters):
 	item_details = {}
@@ -64,7 +64,8 @@ def get_fifo_queue(filters):
 	
 def get_stock_ledger_entries(filters):
 	return webnotes.conn.sql("""select 
-			item.name, item.item_name, brand, description, item.stock_uom, actual_qty, posting_date
+			item.name, item.item_name, item_group, brand, description, item.stock_uom, 
+			actual_qty, posting_date
 		from `tabStock Ledger Entry` sle,
 			(select name, item_name, description, stock_uom, brand
 				from `tabItem` {item_conditions}) item
