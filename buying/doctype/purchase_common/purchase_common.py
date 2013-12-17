@@ -139,20 +139,21 @@ class DocType(BuyingController):
 		
 		get_qty = (transaction == 'Material Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
 		qty = webnotes.conn.sql("""select sum(%s) from `tab%s` where %s = %s and 
-			docstatus = 1 and parent != %s""", (get_qty, curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			docstatus = 1 and parent != %s""" % (get_qty, curr_doctype, ref_tab_fname, '%s', '%s'), 
+			(ref_tab_dn, curr_parent_name))
 		qty = qty and flt(qty[0][0]) or 0 
 		
 		# get total qty of ref doctype
 		#--------------------
 		max_qty = webnotes.conn.sql("""select qty from `tab%s` where name = %s 
-			and docstatus = 1""", (ref_doc_tname, ref_tab_dn))
+			and docstatus = 1""" % (ref_doc_tname, '%s'), ref_tab_dn)
 		max_qty = max_qty and flt(max_qty[0][0]) or 0
 		
 		return cstr(qty)+'~~~'+cstr(max_qty)
 
 	def check_for_stopped_status(self, doctype, docname):
-		stopped = webnotes.conn.sql("""select name from `tab%s` where name = '%s' and 
-			status = 'Stopped'""", (doctype, docname))
+		stopped = webnotes.conn.sql("""select name from `tab%s` where name = %s and 
+			status = 'Stopped'""" % (doctype, '%s'), docname)
 		if stopped:
 			webnotes.throw("One cannot do any transaction against %s : %s, it's status is 'Stopped'" % 
 				(doctype, docname))
