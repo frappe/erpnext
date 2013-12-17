@@ -1,1 +1,0 @@
-General Ledger report (for all transactions and accounts).
