@@ -256,6 +256,7 @@ patch_list = [
 	"patches.1311.p06_fix_report_columns",
 	"execute:webnotes.delete_doc('DocType', 'Documentation Tool')",
 	"execute:webnotes.delete_doc('Report', 'Stock Ledger') #2013-11-29",
+	"patches.1312.p01_delete_old_stock_reports",
 	"execute:webnotes.delete_doc('Report', 'Payment Collection With Ageing')",
 	"execute:webnotes.delete_doc('Report', 'Payment Made With Ageing')",
 	"patches.1311.p07_scheduler_errors_digest",

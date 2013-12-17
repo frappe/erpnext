@@ -138,7 +138,7 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				doctype: "Delivery Note",
+				doctype: "Item",
 				route: "query-report/Stock Ledger"
 			},
 			{
@@ -146,12 +146,14 @@ wn.module_page["Stock"] = [
 				page: "stock-balance"
 			},
 			{
-				"page":"stock-level",
-				"label": wn._("Stock Level")
+				"label":wn._("Stock Projected Qty"),
+				doctype: "Item",
+				route: "query-report/Stock Projected Qty"
 			},
 			{
-				"page":"stock-ageing",
-				"label": wn._("Stock Ageing")
+				"label":wn._("Stock Ageing"),
+				doctype: "Item",
+				route: "query-report/Stock Ageing"
 			},
 		]
 	},
