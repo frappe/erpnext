@@ -399,9 +399,10 @@ class DocType(SellingController):
 		if not self.doc.cash_bank_account and flt(self.doc.paid_amount):
 			msgprint("Cash/Bank Account is mandatory for POS, for making payment entry")
 			raise Exception
-		if (flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) - round(flt(self.doc.grand_total), 2))>0.001:
-			msgprint("(Paid amount + Write Off Amount) can not be greater than Grand Total")
-			raise Exception
+		if flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) \
+				- flt(self.doc.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
+			webnotes.throw(_("""(Paid amount + Write Off Amount) can not be \
+				greater than Grand Total"""))
 
 
 	def validate_item_code(self):

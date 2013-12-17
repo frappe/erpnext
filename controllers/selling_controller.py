@@ -205,8 +205,8 @@ class SellingController(StockController):
 			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"])
 			total_amount_to_pay = self.doc.grand_total - self.doc.write_off_amount
-			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
-				self.precision("outstanding_amount"))
+			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance \
+				- self.doc.paid_amount,	self.precision("outstanding_amount"))
 		
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
