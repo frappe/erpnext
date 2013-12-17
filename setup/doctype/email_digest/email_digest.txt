@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-21 14:15:31", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:36:13", 
+  "modified": "2013-12-16 12:37:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -100,11 +100,10 @@
   "label": "Add/Remove Recipients"
  }, 
  {
-  "description": "Check all the items below that you want to send in this digest.", 
   "doctype": "DocField", 
-  "fieldname": "select_digest_content", 
+  "fieldname": "accounts", 
   "fieldtype": "Section Break", 
-  "label": "Select Digest Content"
+  "label": "Accounts"
  }, 
  {
   "doctype": "DocField", 
@@ -178,7 +177,7 @@
   "doctype": "DocField", 
   "fieldname": "section_break_20", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "label": "Buying & Selling"
  }, 
  {
   "doctype": "DocField", 
@@ -236,6 +235,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "section_break_34", 
+  "fieldtype": "Section Break", 
+  "label": "Inventory & Support"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "stock_module", 
   "fieldtype": "Column Break", 
   "label": "Stock"
@@ -257,12 +262,6 @@
   "fieldname": "new_stock_entries", 
   "fieldtype": "Check", 
   "label": "New Stock Entries"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "section_break_34", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
  }, 
  {
   "doctype": "DocField", 
@@ -290,6 +289,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "section_break_40", 
+  "fieldtype": "Section Break", 
+  "label": "Projects & System"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "projects_module", 
   "fieldtype": "Column Break", 
   "label": "Projects"
@@ -302,7 +307,25 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "utilities_module", 
+  "fieldname": "core_module", 
+  "fieldtype": "Column Break", 
+  "label": "System"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "scheduler_errors", 
+  "fieldtype": "Check", 
+  "label": "Scheduler Failed Events"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user_specific", 
+  "fieldtype": "Section Break", 
+  "label": "User Specific"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "general", 
   "fieldtype": "Column Break", 
   "label": "General"
  }, 
@@ -317,6 +340,12 @@
   "fieldname": "todo_list", 
   "fieldtype": "Check", 
   "label": "To Do List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stub", 
+  "fieldtype": "Column Break", 
+  "label": "Stub"
  }, 
  {
   "cancel": 1, 

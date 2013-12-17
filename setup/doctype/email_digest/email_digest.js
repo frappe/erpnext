@@ -70,8 +70,10 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 					check.checked = 1;
 					add_or_update = 'Update';
 				}
+				var fullname = wn.user.full_name(v.name);
+				if(fullname !== v.name) v.name = fullname + " &lt;" + v.name + "&gt;";
 				if(v.enabled==0) {
-					v.name = "<span style='color: red'>" + v.name + " (disabled user)</span>"
+					v.name = repl("<span style='color: red'> %(name)s (disabled user)</span>", {name: v.name});
 				}
 				var profile = $a($td(tab, i+1, 1), 'span', '', '', v.name);
 				//profile.onclick = function() { check.checked = !check.checked; }
