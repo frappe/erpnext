@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
+	webnotes.reload_doc("setup", "doctype", "email_digest")
+	
 	from webnotes.profile import get_system_managers
 	system_managers = get_system_managers(only_name=True)
 	if not system_managers: 
