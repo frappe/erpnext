@@ -12,11 +12,20 @@ def execute():
 	if not system_managers: 
 		return
 	
+	# no default company
+	company = webnotes.conn.get_default("company")
+	if not company:
+		company = webnotes.conn.sql_list("select name from `tabCompany`")
+		if company:
+			company = company[0]
+	if not company:
+		return
+	
 	# scheduler errors digest
 	edigest = webnotes.new_bean("Email Digest")
 	edigest.doc.fields.update({
 		"name": "Scheduler Errors",
-		"company": webnotes.conn.get_default("company"),
+		"company": company,
 		"frequency": "Daily",
 		"enabled": 1,
 		"recipient_list": "\n".join(system_managers),
