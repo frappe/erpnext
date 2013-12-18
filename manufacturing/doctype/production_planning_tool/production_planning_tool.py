@@ -186,7 +186,6 @@ class DocType:
 		else :
 			msgprint(_("No Production Order created."))
 
-
 	def get_distinct_items_and_boms(self):
 		""" Club similar BOM and item for processing
 			bom_dict {
