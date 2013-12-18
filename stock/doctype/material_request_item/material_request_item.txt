@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-11-03 20:36:45", 
+  "modified": "2013-12-18 14:52:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -219,7 +219,7 @@
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
   "label": "Sales Order No", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "options": "Sales Order", 
   "print_hide": 1, 
   "read_only": 1
