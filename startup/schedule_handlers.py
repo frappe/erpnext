@@ -34,10 +34,6 @@ def execute_daily():
 	from core.doctype.notification_count.notification_count import delete_notification_count_for
 	delete_notification_count_for("Event")
 	
-	# email digest
-	from setup.doctype.email_digest.email_digest import send
-	run_fn(send)
-
 	# run recurring invoices
 	from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
 	run_fn(manage_recurring_invoices)
@@ -53,10 +49,11 @@ def execute_daily():
 	# check reorder level
 	from stock.utils import reorder_item
 	run_fn(reorder_item)
+	
+	# email digest
+	from setup.doctype.email_digest.email_digest import send
+	run_fn(send)
 		
-	# scheduler error
-	scheduler.report_errors()
-
 def execute_weekly():
 	from setup.doctype.backup_manager.backup_manager import take_backups_weekly
 	run_fn(take_backups_weekly)
