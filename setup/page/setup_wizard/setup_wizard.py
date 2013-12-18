@@ -175,7 +175,8 @@ def create_email_digest():
 	if not system_managers: 
 		return
 	
-	for company in webnotes.conn.sql_list("select name FROM `tabCompany`"):
+	companies = webnotes.conn.sql_list("select name FROM `tabCompany`")
+	for company in companies:
 		if not webnotes.conn.exists("Email Digest", "Default Weekly Digest - " + company):
 			edigest = webnotes.bean({
 				"doctype": "Email Digest",
@@ -192,16 +193,17 @@ def create_email_digest():
 			edigest.insert()
 	
 	# scheduler errors digest
-	edigest = webnotes.new_bean("Email Digest")
-	edigest.doc.fields.update({
-		"name": "Scheduler Errors",
-		"company": webnotes.conn.get_default("company"),
-		"frequency": "Daily",
-		"recipient_list": "\n".join(system_managers),
-		"scheduler_errors": 1,
-		"enabled": 1
-	})
-	edigest.insert()
+	if companies:
+		edigest = webnotes.new_bean("Email Digest")
+		edigest.doc.fields.update({
+			"name": "Scheduler Errors",
+			"company": companies[0],
+			"frequency": "Daily",
+			"recipient_list": "\n".join(system_managers),
+			"scheduler_errors": 1,
+			"enabled": 1
+		})
+		edigest.insert()
 	
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
