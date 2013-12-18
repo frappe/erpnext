@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:45", 
   "docstatus": 0, 
-  "modified": "2013-11-22 17:16:16", 
+  "modified": "2013-12-14 17:27:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -632,6 +632,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "supplier", 
   "role": "Supplier", 
   "submit": 0, 
   "write": 0

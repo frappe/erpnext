@@ -73,6 +73,9 @@ class DocType(SellingController):
 		self.update_current_stock()		
 		self.validate_with_previous_doc()
 		
+		from stock.doctype.packed_item.packed_item import make_packing_list
+		self.doclist = make_packing_list(self, 'delivery_note_details')
+		
 		self.doc.status = 'Draft'
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
@@ -142,10 +145,6 @@ class DocType(SellingController):
 			bin = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
-			
-	def on_update(self):
-		from stock.doctype.packed_item.packed_item import make_packing_list
-		self.doclist = make_packing_list(self, 'delivery_note_details')
 
 	def on_submit(self):
 		self.validate_packed_qty()

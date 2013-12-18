@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 15:11:38", 
   "docstatus": 0, 
-  "modified": "2013-12-04 11:51:36", 
+  "modified": "2013-12-09 16:25:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -121,12 +121,12 @@
  }, 
  {
   "depends_on": "with_operations", 
+  "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
   "doctype": "DocField", 
   "fieldname": "operations", 
   "fieldtype": "Section Break", 
   "label": "Operations", 
-  "oldfieldtype": "Section Break", 
-  "options": "Specify the operations, operating cost and give a unique Operation no to your operations."
+  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 

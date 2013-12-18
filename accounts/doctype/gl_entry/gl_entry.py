@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money, getdate
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from webnotes import _
 	
 class DocType:
 	def __init__(self,d,dl):
@@ -130,11 +129,12 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		against_voucher_amount = flt(webnotes.conn.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
-			and account = %s""", (against_voucher, account))[0][0])
+			and account = %s and ifnull(against_voucher, '') = ''""", 
+			(against_voucher, account))[0][0])
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal
-		
+	
 	# Validation : Outstanding can not be negative
 	if bal < 0 and not on_cancel:
 		webnotes.throw(_("Outstanding for Voucher ") + against_voucher + _(" will become ") + 

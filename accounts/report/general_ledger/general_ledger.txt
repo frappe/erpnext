@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-12-06 13:22:23", 
+  "docstatus": 0, 
+  "modified": "2013-12-06 13:22:23", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "GL Entry", 
+  "report_name": "General Ledger", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "General Ledger"
+ }
+]

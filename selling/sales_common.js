@@ -95,7 +95,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	refresh: function() {
 		this._super();
 		this.frm.toggle_display("customer_name", 
-			(this.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
+			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packing_details) {
 			var packing_list_exists = this.frm.get_doclist({parentfield: "packing_details"}).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
@@ -515,7 +515,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		};
-		
 		setup_field_label_map(["net_total", "other_charges_total", "grand_total", 
 			"rounded_total", "in_words",
 			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
