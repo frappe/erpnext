@@ -7,8 +7,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _
 
-ignore_list = []
-
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
@@ -39,10 +37,6 @@ def take_backups_dropbox():
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
 		error_message = ("\n".join(file_and_error) + "\n" + webnotes.getTraceback())
 		webnotes.errprint(error_message)
-		
-		if not webnotes.conn:
-			webnotes.connect()
-			
 		send_email(False, "Dropbox", error_message)
 
 #backup to gdrive 
@@ -62,6 +56,7 @@ def take_backups_gdrive():
 		send_email(False, "Google Drive", error_message)
 
 def send_email(success, service_name, error_status=None):
+	from webnotes.utils.email_lib import sendmail
 	if success:
 		subject = "Backup Upload Successful"
 		message ="""<h3>Backup Uploaded Successfully</h3><p>Hi there, this is just to inform you 
@@ -76,7 +71,8 @@ def send_email(success, service_name, error_status=None):
 		<p>Please contact your system manager for more information.</p>
 		""" % (service_name, error_status)
 	
-	# email system managers
-	from webnotes.utils.email_lib import sendmail
-	sendmail(webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(","),
-		subject=subject, msg=message)
+	if not webnotes.conn:
+		webnotes.connect()
+	
+	recipients = webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(",")
+	sendmail(recipients, subject=subject, msg=message)
