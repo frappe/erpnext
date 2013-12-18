@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-11-02 19:41:45", 
+  "modified": "2013-12-18 10:38:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -326,7 +326,7 @@
   "fieldname": "schedule_date", 
   "fieldtype": "Date", 
   "label": "Required By", 
-  "no_copy": 1, 
+  "no_copy": 0, 
   "oldfieldname": "schedule_date", 
   "oldfieldtype": "Date", 
   "print_hide": 1, 
