@@ -123,14 +123,14 @@ class DocType(DocListController, WebsiteGenerator):
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 			
 	def check_for_active_boms(self):
-		if self.doc.is_active != "Yes" or self.doc.is_purchase_item != "Yes":
+		if self.doc.is_purchase_item != "Yes":
 			bom_mat = webnotes.conn.sql("""select distinct t1.parent 
 				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
 				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
 				
 			if bom_mat and bom_mat[0][0]:
-				webnotes.throw(_("Item must be active and purchase item, \
+				webnotes.throw(_("Item must be a purchase item, \
 					as it is present in one or many Active BOMs"))
 					
 		if self.doc.is_manufactured_item != "Yes":
