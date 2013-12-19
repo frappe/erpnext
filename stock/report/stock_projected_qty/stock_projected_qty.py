@@ -26,10 +26,10 @@ def execute(filters=None):
 	
 def get_columns():
 	return ["Item Code:Link/Item:140", "Item Name::100", "Description::200", 
-		"Brand:Link/Brand:100", "Warehouse:Link/Warehouse:120", "UOM:Link/UOM:100", 
-		"Actual Qty:Float:100", "Planned Qty:Float:100", "Requested Qty:Float:110", 
-		"Ordered Qty:Float:100", "Reserved Qty:Float:100", "Projected Qty:Float:100", 
-		"Reorder Level:Float:100", "Reorder Qty:Float:100"]
+		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100", "Warehouse:Link/Warehouse:120", 
+		"UOM:Link/UOM:100", "Actual Qty:Float:100", "Planned Qty:Float:100", 
+		"Requested Qty:Float:110", "Ordered Qty:Float:100", "Reserved Qty:Float:100", 
+		"Projected Qty:Float:100", "Reorder Level:Float:100", "Reorder Qty:Float:100"]
 	
 def get_item_conditions(filters):
 	conditions = []

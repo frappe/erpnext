@@ -158,6 +158,10 @@ def set_defaults(args):
 	hr_settings.doc.emp_created_by = "Naming Series"
 	hr_settings.save()
 
+	email_settings = webnotes.bean("Email Settings")
+	email_settings.doc.send_print_in_body_and_attachment = 1
+	email_settings.save()
+
 	# control panel
 	cp = webnotes.doc("Control Panel", "Control Panel")
 	cp.company_name = args["company_name"]
