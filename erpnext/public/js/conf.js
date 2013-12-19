@@ -27,9 +27,7 @@ wn.ui.misc.about = function() {
 		var d = new wn.ui.Dialog({title: wn._('About ERPNext')})
 	
 		$(d.body).html(repl("<div>\
-		<p>"+wn._("ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd.\
-		to provide an integrated tool to manage most processes in a small organization.\
-		For more information about Web Notes, or to buy hosting servies, go to ")+
+		<p>"+wn._("ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd. to provide an integrated tool to manage most processes in a small organization. For more information about Web Notes, or to buy hosting servies, go to ")+
 		"<a href='https://erpnext.com'>https://erpnext.com</a>.</p>\
 		<p>"+wn._("To report an issue, go to ")+"<a href='https://github.com/webnotes/erpnext/issues'>GitHub Issues</a></p>\
 		<hr>\

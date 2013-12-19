@@ -104,11 +104,9 @@ cur_frm.cscript.set_help = function(doc) {
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {
 			if(user==doc.exp_approver) {
-				cur_frm.set_intro(wn._("You are the Expense Approver for this record. \
-					Please Update the 'Status' and Save"));
+				cur_frm.set_intro(wn._("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
 			} else {
-				cur_frm.set_intro(wn._("Expense Claim is pending approval. \
-					Only the Expense Approver can update status."));
+				cur_frm.set_intro(wn._("Expense Claim is pending approval. Only the Expense Approver can update status."));
 			}
 		} else {
 			if(doc.approval_status=="Approved") {

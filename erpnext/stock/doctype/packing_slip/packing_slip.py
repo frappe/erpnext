@@ -33,8 +33,7 @@ class DocType:
 			Validates if delivery note has status as draft
 		"""
 		if cint(webnotes.conn.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
-			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in 
-				draft state. Please rectify and try again."""), raise_exception=1)
+			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
 	
 	def validate_items_mandatory(self):
 		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]

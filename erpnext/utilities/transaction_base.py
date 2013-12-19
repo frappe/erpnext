@@ -431,8 +431,7 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
 
 	if not conversion_rate:
-		msgprint(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \
-			record is not created for %(from_currency)s to %(to_currency)s') % {
+		msgprint(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s') % {
 				"conversion_rate_label": conversion_rate_label,
 				"from_currency": currency,
 				"to_currency": company_currency

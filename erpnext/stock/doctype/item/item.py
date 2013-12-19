@@ -89,9 +89,7 @@ class DocType(DocListController, WebsiteGenerator):
 						(self.doc.stock_uom, self.doc.name))
 				
 			if not matched:
-				webnotes.throw(_("Default Unit of Measure can not be changed directly \
-					because you have already made some transaction(s) with another UOM.\n \
-					To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
+				webnotes.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
 	
 	def validate_conversion_factor(self):
 		check_list = []
@@ -103,12 +101,10 @@ class DocType(DocListController, WebsiteGenerator):
 				check_list.append(cstr(d.uom))
 
 			if d.uom and cstr(d.uom) == cstr(self.doc.stock_uom) and flt(d.conversion_factor) != 1:
-					msgprint(_("""Conversion Factor of UOM: %s should be equal to 1. 
-						As UOM: %s is Stock UOM of Item: %s.""" % 
+					msgprint(_("""Conversion Factor of UOM: %s should be equal to 1. As UOM: %s is Stock UOM of Item: %s.""" % 
 						(d.uom, d.uom, self.doc.name)), raise_exception=1)
 			elif d.uom and cstr(d.uom)!= self.doc.stock_uom and flt(d.conversion_factor) == 1:
-				msgprint(_("""Conversion Factor of UOM: %s should not be equal to 1. 
-					As UOM: %s is not Stock UOM of Item: %s""" % 
+				msgprint(_("""Conversion Factor of UOM: %s should not be equal to 1. As UOM: %s is not Stock UOM of Item: %s""" % 
 					(d.uom, d.uom, self.doc.name)), raise_exception=1)
 					
 	def validate_item_type(self):
@@ -190,9 +186,7 @@ class DocType(DocListController, WebsiteGenerator):
 				vals.has_serial_no != self.doc.has_serial_no or 
 				cstr(vals.valuation_method) != cstr(self.doc.valuation_method)):
 					if self.check_if_sle_exists() == "exists":
-						webnotes.msgprint(_("As there are existing stock transactions for this \
-							item, you can not change the values of 'Has Serial No', \
-							'Is Stock Item' and 'Valuation Method'"), raise_exception=1)
+						webnotes.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'"))
 							
 	def validate_item_type_for_reorder(self):
 		if self.doc.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 

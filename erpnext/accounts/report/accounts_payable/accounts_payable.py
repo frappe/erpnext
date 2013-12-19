@@ -93,8 +93,7 @@ def get_conditions(filters, before_report_date=True):
 	if supplier_accounts:
 		conditions += " and account in (%s)" % (", ".join(['%s']*len(supplier_accounts)))
 	else:
-		msgprint(_("No Supplier Accounts found. Supplier Accounts are identified based on \
-			'Master Type' value in account record."), raise_exception=1)
+		msgprint(_("No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record."), raise_exception=1)
 		
 	if filters.get("report_date"):
 		if before_report_date:

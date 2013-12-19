@@ -26,8 +26,7 @@ class DocType:
 
 		if year_start_end_dates:
 			if getdate(self.doc.year_start_date) != year_start_end_dates[0][0] or getdate(self.doc.year_end_date) != year_start_end_dates[0][1]:
-				webnotes.throw(_("Cannot change Year Start Date and Year End Date \
-					once the Fiscal Year is saved."))
+				webnotes.throw(_("Cannot change Year Start Date and Year End Date once the Fiscal Year is saved."))
 
 	def on_update(self):
 		# validate year start date and year end date
@@ -43,5 +42,4 @@ class DocType:
 		for fiscal_year, ysd, yed in year_start_end_dates:
 			if (getdate(self.doc.year_start_date) == ysd and getdate(self.doc.year_end_date) == yed) \
 				and (not webnotes.flags.in_test):
-					webnotes.throw(_("Year Start Date and Year End Date are already \
-						set in Fiscal Year: ") + fiscal_year)
+					webnotes.throw(_("Year Start Date and Year End Date are already set in Fiscal Year: ") + fiscal_year)

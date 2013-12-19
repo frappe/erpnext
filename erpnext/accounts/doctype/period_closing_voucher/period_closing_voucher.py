@@ -64,8 +64,7 @@ class DocType(AccountsController):
 		expense_bal = expense_bal and expense_bal[0][0] or 0
 		
 		if not income_bal and not expense_bal:
-			webnotes.throw(_("Both Income and Expense balances are zero. \
-				No Need to make Period Closing Entry."))
+			webnotes.throw(_("Both Income and Expense balances are zero. No Need to make Period Closing Entry."))
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""

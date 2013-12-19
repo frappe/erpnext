@@ -50,8 +50,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			if(this.frm.doc.reconciliation_json) {
 				this.frm.set_intro(wn._("You can submit this Stock Reconciliation."));
 			} else {
-				this.frm.set_intro(wn._("Download the Template, fill appropriate data and \
-					attach the modified file."));
+				this.frm.set_intro(wn._("Download the Template, fill appropriate data and attach the modified file."));
 			}
 		} else if(this.frm.doc.docstatus == 1) {
 			this.frm.set_intro(wn._("Cancelling this Stock Reconciliation will nullify its effect."));

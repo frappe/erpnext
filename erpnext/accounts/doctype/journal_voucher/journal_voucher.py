@@ -236,8 +236,7 @@ class DocType(AccountsController):
 			
 			if d.against_voucher and webnotes.conn.get_value("Purchase Invoice", 
 						d.against_voucher, "credit_to") != d.account:
-				webnotes.throw(_("Debited account (Supplier) is not matching with \
-					Purchase Invoice"))
+				webnotes.throw(_("Debited account (Supplier) is not matching with Purchase Invoice"))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries

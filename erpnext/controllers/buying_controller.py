@@ -69,8 +69,7 @@ class BuyingController(StockController):
 				self.doclist.get({"parentfield": "purchase_tax_details"}) 
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
-				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' 
-					as all items are non-stock items"""), raise_exception=1)
+				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"""), raise_exception=1)
 			
 	def set_total_in_words(self):
 		from webnotes.utils import money_in_words

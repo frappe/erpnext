@@ -152,10 +152,7 @@ def validate_frozen_account(account, adv_adj):
 		frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
 			'frozen_accounts_modifier')
 		if not frozen_accounts_modifier:
-			webnotes.throw(account + _(" is a frozen account. \
-				Either make the account active or assign role in Accounts Settings \
-				who can create / modify entries against this account"))
+			webnotes.throw(account + _(" is a frozen account. Either make the account active or assign role in Accounts Settings who can create / modify entries against this account"))
 		elif frozen_accounts_modifier not in webnotes.user.get_roles():
-			webnotes.throw(account + _(" is a frozen account. ") + 
-				_("To create / edit transactions against this account, you need role") + ": " +  
-				frozen_accounts_modifier)
+			webnotes.throw(account + _(" is a frozen account. To create / edit transactions against this account, you need role") \
+				+ ": " +  frozen_accounts_modifier)

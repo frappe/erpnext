@@ -243,9 +243,7 @@ class DocType(StockController):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.doc.fg_completed_qty):
 				msgprint(_("Row #") + " %s: " % d.idx 
-					+ _("Quantity should be equal to Manufacturing Quantity. ")
-					+ _("To fetch items again, click on 'Get Items' button \
-						or update the Quantity manually."), raise_exception=1)
+					+ _("Quantity should be equal to Manufacturing Quantity. To fetch items again, click on 'Get Items' button or update the Quantity manually."), raise_exception=1)
 						
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""

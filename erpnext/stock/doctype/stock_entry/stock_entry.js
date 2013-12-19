@@ -167,8 +167,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.purpose === "Sales Return") {
 			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
 				// both specified
-				msgprint(wn._("You can not enter both Delivery Note No and Sales Invoice No. \
-					Please enter any one."));
+				msgprint(wn._("You can not enter both Delivery Note No and Sales Invoice No. Please enter any one."));
 				
 			} else if(!(this.frm.doc.delivery_note_no || this.frm.doc.sales_invoice_no)) {
 				// none specified

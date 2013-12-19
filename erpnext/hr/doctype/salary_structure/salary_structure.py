@@ -60,8 +60,7 @@ class DocType:
 		ret = webnotes.conn.sql("""select name from `tabSalary Structure` where is_active = 'Yes' 
 			and employee = %s and name!=%s""", (self.doc.employee,self.doc.name))
 		if ret and self.doc.is_active=='Yes':
-			msgprint(_("""Another Salary Structure '%s' is active for employee '%s'. 
-				Please make its status 'Inactive' to proceed.""") % 
+			msgprint(_("""Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.""") % 
 				(cstr(ret), self.doc.employee), raise_exception=1)
 
 	def validate_amount(self):

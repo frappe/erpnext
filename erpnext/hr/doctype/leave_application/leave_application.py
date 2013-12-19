@@ -107,8 +107,7 @@ class DocType(DocListController):
 			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
 			
 			if self.doc.total_leave_days == 0:
-				msgprint(_("Hurray! The day(s) on which you are applying for leave \
-					coincide with holiday(s). You need not apply for leave."),
+				msgprint(_("The day(s) on which you are applying for leave coincide with holiday(s). You need not apply for leave."),
 					raise_exception=1)
 			
 			if not is_lwp(self.doc.leave_type):
