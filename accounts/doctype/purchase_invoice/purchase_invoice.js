@@ -36,7 +36,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
 				};
-				wn.set_route("general-ledger");
+				wn.set_route("query-report/General Ledger");
 			}, "icon-table");
 		}
 

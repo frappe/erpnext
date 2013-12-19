@@ -9,6 +9,7 @@ from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 from webnotes.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from webnotes.utils.email_lib import sendmail
 
 content_sequence = [
 	["Income / Expenses", ["income_year_to_date", "bank_balance",
@@ -80,15 +81,15 @@ class DocType(DocListController):
 			for user_id in recipients:
 				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
 					common_msg)
-				from webnotes.utils.email_lib import sendmail
-				sendmail(recipients=user_id, 
-					subject="[ERPNext] [{frequency} Digest] {name}".format(
-						frequency=self.doc.frequency, name=self.doc.name), 
-					msg=msg_for_this_receipient)
+				if msg_for_this_receipient:
+					sendmail(recipients=user_id, 
+						subject="[ERPNext] [{frequency} Digest] {name}".format(
+							frequency=self.doc.frequency, name=self.doc.name), 
+						msg=msg_for_this_receipient)
 			
 	def get_digest_msg(self):
 		return self.get_msg_html(self.get_user_specific_content(webnotes.session.user) + \
-			self.get_common_content())
+			self.get_common_content(), send_only_if_updates=False)
 	
 	def get_common_content(self):
 		out = []
@@ -119,14 +120,19 @@ class DocType(DocListController):
 		
 		return out
 				
-	def get_msg_html(self, out):
+	def get_msg_html(self, out, send_only_if_updates=True):
 		with_value = [o[1] for o in out if o[0]]
 		
 		if with_value:
+			has_updates = True
 			with_value = "\n".join(with_value)
 		else:
+			has_updates = False
 			with_value = "<p>There were no updates in the items selected for this digest.</p><hr>"
 		
+		if not has_updates and send_only_if_updates:
+			return
+			
 		# seperate out no value items
 		no_value = [o[1] for o in out if not o[0]]
 		if no_value:

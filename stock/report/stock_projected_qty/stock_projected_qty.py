@@ -20,7 +20,7 @@ def execute(filters=None):
 		where item_code = item.name and warehouse = wh.name
 		order by item.name, wh.name"""\
 		.format(item_conditions=get_item_conditions(filters),
-			warehouse_conditions=get_warehouse_conditions(filters)), filters, debug=1)
+			warehouse_conditions=get_warehouse_conditions(filters)), filters)
 	
 	return columns, data
 	
