@@ -18,7 +18,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root item group
 	if(!doc.parent_item_group) {
-		cur_frm.perm = [[1,0,0], [1,0,0]];
+		cur_frm.set_read_only();
 		cur_frm.set_intro(wn._("This is a root item group and cannot be edited."));
 	} else {
 		cur_frm.set_intro(null);
