@@ -55,7 +55,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
 				};
-				wn.set_route("general-ledger");
+				wn.set_route("query-report/General Ledger");
 			}, "icon-table");
 			
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
