@@ -2,11 +2,12 @@
  {
   "creation": "2012-03-27 14:35:55", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:37:47", 
+  "modified": "2013-12-20 19:24:07", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:expense_type", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -25,11 +26,13 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Expense Claim Type", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "role": "HR Manager", 

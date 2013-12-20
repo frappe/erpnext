@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2013-11-19 11:31:28", 
+  "modified": "2013-12-20 19:24:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "allow_rename": 1, 
   "autoname": "naming_series:", 
   "description": "Supplier of Goods or Services.", 
@@ -28,11 +29,13 @@
  {
   "amend": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Supplier", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "submit": 0

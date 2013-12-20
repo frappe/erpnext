@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-22 16:50:25", 
   "docstatus": 0, 
-  "modified": "2013-11-25 11:40:02", 
+  "modified": "2013-12-20 19:24:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:year", 
   "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
   "doctype": "DocType", 
@@ -25,11 +26,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Fiscal Year", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1
  }, 
  {

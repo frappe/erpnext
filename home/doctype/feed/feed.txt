@@ -2,7 +2,7 @@
  {
   "creation": "2012-07-03 13:29:42", 
   "docstatus": 0, 
-  "modified": "2013-11-15 10:16:00", 
+  "modified": "2013-12-20 19:24:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -23,11 +23,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Feed", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "role": "System Manager"

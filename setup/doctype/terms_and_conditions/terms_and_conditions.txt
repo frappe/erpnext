@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:58:02", 
+  "modified": "2013-12-20 19:24:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "allow_rename": 1, 
   "autoname": "field:title", 
   "description": "Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.", 
@@ -26,11 +27,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Terms and Conditions", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "submit": 0

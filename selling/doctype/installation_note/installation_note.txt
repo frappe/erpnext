@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-30 13:13:06", 
   "docstatus": 0, 
-  "modified": "2013-11-02 16:58:44", 
+  "modified": "2013-12-20 19:24:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -219,6 +219,7 @@
   "doctype": "DocField", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
+  "ignore_restrictions": 1, 
   "label": "Amended From", 
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
@@ -257,7 +258,9 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "permlevel": 0, 
+  "print": 1, 
   "submit": 1, 
   "write": 1
  }, 

@@ -2,11 +2,12 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:24:11", 
+  "modified": "2013-12-20 19:23:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "allow_rename": 1, 
   "autoname": "field:company_name", 
   "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
@@ -26,11 +27,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Company", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1
  }, 
  {

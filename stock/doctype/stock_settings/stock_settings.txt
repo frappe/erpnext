@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 16:37:54", 
   "docstatus": 0, 
-  "modified": "2013-11-02 19:41:56", 
+  "modified": "2013-12-20 19:21:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,11 +25,13 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Stock Settings", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "role": "Material Manager", 
   "write": 1

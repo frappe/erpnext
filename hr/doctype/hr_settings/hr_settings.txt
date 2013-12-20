@@ -2,7 +2,7 @@
  {
   "creation": "2013-08-02 13:45:23", 
   "docstatus": 0, 
-  "modified": "2013-10-02 15:44:38", 
+  "modified": "2013-12-20 19:23:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,11 +25,13 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "HR Settings", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "role": "System Manager", 
   "write": 1

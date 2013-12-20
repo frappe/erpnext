@@ -2,12 +2,13 @@
  {
   "creation": "2013-03-05 14:50:38", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:26:48", 
+  "modified": "2013-12-20 19:23:55", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
   "allow_attach": 1, 
+  "allow_import": 1, 
   "autoname": "field:batch_id", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -28,11 +29,13 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Batch", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "role": "Material Master Manager", 

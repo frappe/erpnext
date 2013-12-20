@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-11-26 17:35:12", 
+  "modified": "2013-12-20 19:23:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -138,7 +138,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_account", 
   "fieldtype": "Link", 
-  "ignore_restriction": 1, 
+  "ignore_restrictions": 1, 
   "label": "Parent Account", 
   "oldfieldname": "parent_account", 
   "oldfieldtype": "Link", 
@@ -257,7 +257,9 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "permlevel": 0, 
+  "print": 1, 
   "role": "Accounts User", 
   "write": 1
  }, 
@@ -265,7 +267,9 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "permlevel": 0, 
+  "print": 1, 
   "role": "Auditor", 
   "write": 0
  }, 
@@ -273,7 +277,9 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "permlevel": 0, 
+  "print": 1, 
   "role": "Sales User", 
   "write": 0
  }, 
@@ -281,7 +287,9 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "permlevel": 0, 
+  "print": 1, 
   "role": "Purchase User", 
   "write": 0
  }, 
@@ -297,7 +305,12 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
+  "export": 0, 
+  "import": 0, 
   "permlevel": 0, 
+  "print": 1, 
+  "restrict": 1, 
   "role": "Accounts Manager", 
   "write": 1
  }, 
