@@ -33,10 +33,9 @@ def update_user_match():
 		doctype_matches.setdefault(doctype, []).append(match)
 	
 	for doctype, user_matches in doctype_matches.items():
-		
 		# get permissions of this doctype
 		perms = webnotes.conn.sql("""select role, `match` from `tabDocPerm` 
-			where parent=%s and permlevel=0 and read=1""", doctype, as_dict=True)
+			where parent=%s and permlevel=0 and `read`=1""", doctype, as_dict=True)
 		
 		# for each user with roles of this doctype, check if match condition applies
 		for profile in webnotes.conn.sql_list("""select name from `tabProfile`
