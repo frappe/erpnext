@@ -13,7 +13,7 @@ def execute(filters=None):
 			projected_qty, item.re_order_level, item.re_order_qty
 		from `tabBin` bin, 
 			(select name, company from tabWarehouse 
-				where company=%(company)s {warehouse_conditions}) wh,
+				{warehouse_conditions}) wh,
 			(select name, item_name, description, stock_uom, item_group, 
 				brand, re_order_level, re_order_qty 
 				from `tabItem` {item_conditions}) item
@@ -41,4 +41,10 @@ def get_item_conditions(filters):
 	return "where {}".format(" and ".join(conditions)) if conditions else ""
 	
 def get_warehouse_conditions(filters):
-	return " and name=%(warehouse)s" if filters.get("warehouse") else ""
+	conditions = []
+	if filters.get("company"):
+		conditions.append("company=%(company)s")
+	if filters.get("warehouse"):
+		conditions.append("name=%(warehouse)s")
+		
+	return "where {}".format(" and ".join(conditions)) if conditions else ""
