@@ -246,6 +246,9 @@ class DocType(DocListController, WebsiteGenerator):
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
 			# Validate properties before merging
+			if not webnotes.conn.exists("Item", newdn):
+				webnotes.throw(_("Item ") + newdn +_(" does not exists"))
+			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in webnotes.conn.get_value("Item", newdn, field_list)]
 			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
