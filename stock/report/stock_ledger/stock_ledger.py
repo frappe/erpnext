@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _
 
 def execute(filters=None):
 	columns = get_columns()
@@ -33,13 +32,6 @@ def get_columns():
 		"Batch:Link/Batch:100", "Serial #:Link/Serial No:100", "Company:Link/Company:100"]
 	
 def get_stock_ledger_entries(filters):
-	if not filters.get("company"):
-		webnotes.throw(_("Company is mandatory"))
-	if not filters.get("from_date"):
-		webnotes.throw(_("From Date is mandatory"))
-	if not filters.get("to_date"):
-		webnotes.throw(_("To Date is mandatory"))
-		
 	return webnotes.conn.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, 
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
