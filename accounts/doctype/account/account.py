@@ -211,6 +211,9 @@ class DocType:
 		
 		# Validate properties before merging
 		if merge:
+			if not webnotes.conn.exists("Account", new):
+				webnotes.throw(_("Account ") + new +_(" does not exists"))
+				
 			val = list(webnotes.conn.get_value("Account", new_account, 
 				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
 			

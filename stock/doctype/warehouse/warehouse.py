@@ -84,6 +84,9 @@ class DocType:
 		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
 
 		if merge:
+			if not webnotes.conn.exists("Warehouse", newdn):
+				webnotes.throw(_("Warehouse ") + newdn +_(" does not exists"))
+				
 			if self.doc.company != webnotes.conn.get_value("Warehouse", new_warehouse, "company"):
 				webnotes.throw(_("Both Warehouse must belong to same Company"))
 				
