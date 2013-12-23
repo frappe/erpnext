@@ -120,8 +120,9 @@ cur_frm.cscript.refresh = function(doc) {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,
 				"to_date": doc.posting_date,
+				"company": doc.company
 			};
-			wn.set_route("general-ledger");
+			wn.set_route("query-report", "General Ledger");
 		}, "icon-table");
 	}
 }

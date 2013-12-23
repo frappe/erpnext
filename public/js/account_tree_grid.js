@@ -26,9 +26,10 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 				show: true, 
 				parent_field: "parent_account", 
 				formatter: function(item) {
-					return repl('<a href="#general-ledger/account=%(enc_value)s">%(value)s</a>', {
+					return repl("<a \
+						onclick='wn.cur_grid_report.show_general_ledger(\"%(value)s\")'>\
+						%(value)s</a>", {
 							value: item.name,
-							enc_value: encodeURIComponent(item.name)
 						});
 				}
 			},
@@ -211,4 +212,14 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 			return;
 		}
 	},
+	
+	show_general_ledger: function(account) {
+		wn.route_options = {
+			account: account,
+			company: this.company,
+			from_date: this.from_date,
+			to_date: this.to_date
+		};
+		wn.set_route("query-report", "General Ledger");
+	}
 });
