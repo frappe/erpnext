@@ -49,6 +49,7 @@ class DocType(DocListController, WebsiteGenerator):
 	def on_update(self):
 		self.validate_name_with_item_group()
 		self.update_website()
+		self.update_item_price()
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
@@ -209,6 +210,11 @@ class DocType(DocListController, WebsiteGenerator):
 			self.doclist.get({"doctype":"Website Item Group"})]
 
 		WebsiteGenerator.on_update(self)
+
+	def update_item_price(self):
+		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
+			item_description=%s, modified=NOW() where item_code=%s""",
+			(self.doc.item_name, self.doc.description, self.doc.name))
 
 	def get_page_title(self):
 		if self.doc.name==self.doc.item_name:
