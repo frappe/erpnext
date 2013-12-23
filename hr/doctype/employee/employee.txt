@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:06", 
+  "modified": "2013-12-23 19:35:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -760,6 +760,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "restrict": 0, 
   "role": "HR User", 
   "write": 1
  }, 
@@ -767,6 +768,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "restrict": 1, 
   "role": "HR Manager", 
   "write": 1
  }

@@ -7,13 +7,11 @@ import webnotes
 from webnotes.utils import getdate, validate_email_add, cstr, cint
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint, _
+import webnotes.permissions
+from webnotes.defaults import get_restrictions
+from webnotes.model.controller import DocListController
 
-
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		
+class DocType(DocListController):
 	def autoname(self):
 		naming_method = webnotes.conn.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
@@ -39,33 +37,36 @@ class DocType:
 		
 	def on_update(self):
 		if self.doc.user_id:
+			self.restrict_user()
 			self.update_user_default()
 			self.update_profile()
+		
+		self.restrict_leave_approver()
 				
-	def update_user_default(self):
-		from webnotes.defaults import get_restrictions
-		if not "HR User" in webnotes.local.user.get_roles():
-			if not self.doc.user_id in get_restrictions().get("Employee", []):
-				webnotes.conn.set_default("Employee", self.doc.name, self.doc.user_id, "Restriction")
+	def restrict_user(self):
+		"""restrict to this employee for user"""
+		self.add_restriction_if_required("Employee", self.doc.user_id)
 
-		webnotes.conn.set_default("employee", self.doc.name, self.doc.user_id)
+	def update_user_default(self):
 		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
 		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
-		self.set_default_leave_approver()
 	
-	def set_default_leave_approver(self):
-		employee_leave_approvers = self.doclist.get({"parentfield": "employee_leave_approvers"})
-
-		if len(employee_leave_approvers):
-			webnotes.conn.set_default("leave_approver", employee_leave_approvers[0].leave_approver,
-				self.doc.user_id)
-		
-		elif self.doc.reports_to:
-			from webnotes.profile import Profile
-			reports_to_user = webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id")
-			if "Leave Approver" in Profile(reports_to_user).get_roles():
-				webnotes.conn.set_default("leave_approver", reports_to_user, self.doc.user_id)
-
+	def restrict_leave_approver(self):
+		"""restrict to this employee for leave approver"""
+		employee_leave_approvers = [d.leave_approver for d in self.doclist.get({"parentfield": "employee_leave_approvers"})]
+		if self.doc.reports_to and self.doc.reports_to not in employee_leave_approvers:
+			employee_leave_approvers.append(webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id"))
+			
+		for user in employee_leave_approvers:
+			self.add_restriction_if_required("Employee", user)
+			self.add_restriction_if_required("Leave Application", user)
+				
+	def add_restriction_if_required(self, doctype, user):
+		if webnotes.permissions.has_only_non_restrict_role(webnotes.get_doctype(doctype), user) \
+			and self.doc.name not in get_restrictions(user).get("Employee", []):
+			
+			webnotes.defaults.add_default("Employee", self.doc.name, user, "Restriction")
+	
 	def update_profile(self):
 		# add employee role if missing
 		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
