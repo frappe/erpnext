@@ -11,9 +11,10 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 				wn.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
-					to_date: me.frm.doc.posting_date
+					to_date: me.frm.doc.posting_date,
+					company: me.frm.doc.company
 				};
-				wn.set_route('stock-ledger');
+				wn.set_route("query-report", "Stock Ledger");
 			}, "icon-bar-chart");
 		}
 		
@@ -24,11 +25,12 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 		if(this.frm.doc.docstatus===1 && cint(wn.defaults.get_default("auto_accounting_for_stock"))) { 
 			cur_frm.appframe.add_button(wn._('Accounting Ledger'), function() {
 				wn.route_options = {
-					"voucher_no": me.frm.doc.name,
-					"from_date": me.frm.doc.posting_date,
-					"to_date": me.frm.doc.posting_date,
+					voucher_no: me.frm.doc.name,
+					from_date: me.frm.doc.posting_date,
+					to_date: me.frm.doc.posting_date,
+					company: me.frm.doc.company
 				};
-				wn.set_route("general-ledger");
+				wn.set_route("query-report", "General Ledger");
 			}, "icon-table");
 		}
 	},
