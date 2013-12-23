@@ -62,6 +62,9 @@ def get_item_conditions(filters):
 	
 def get_sle_conditions(filters):
 	conditions = []
+	if filters.get("item_code"):
+		conditions.append("""item_code in (select name from tabItem 
+			{item_conditions})""".format(item_conditions=get_item_conditions(filters)))
 	if filters.get("warehouse"):
 		conditions.append("warehouse=%(warehouse)s")
 	if filters.get("voucher_no"):
