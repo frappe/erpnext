@@ -16,7 +16,10 @@ class AccountsController(TransactionBase):
 		self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
+			self.flat_discount_applied = False
 			self.calculate_taxes_and_totals()
+			if hasattr(self, "apply_flat_discount"):
+				self.apply_flat_discount()
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 			
@@ -141,7 +144,7 @@ class AccountsController(TransactionBase):
 		else:
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
 				self.meta.get_label("conversion_rate"), self.doc.company)
-		
+
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 		self.item_doclist = self.doclist.get({"parentfield": self.fname})
 		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
@@ -163,11 +166,16 @@ class AccountsController(TransactionBase):
 	def initialize_taxes(self):
 		for tax in self.tax_doclist:
 			tax.item_wise_tax_detail = {}
-			for fieldname in ["tax_amount", "total", 
-				"tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]:
-					tax.fields[fieldname] = 0.0
-			
+			tax_fields = ["total", "tax_amount_after_flat_discount", 
+				"tax_amount_for_current_item", "grand_total_for_current_item", 
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
+
+			if not self.flat_discount_applied:
+				tax_fields.append("tax_amount")
+
+			for fieldname in tax_fields:
+				tax.fields[fieldname] = 0.0
+
 			self.validate_on_previous_row(tax)
 			self.validate_inclusive_tax(tax)
 			self.round_floats_in(tax)
@@ -247,7 +255,10 @@ class AccountsController(TransactionBase):
 				tax.tax_amount_for_current_item = current_tax_amount
 
 				# accumulate tax amount into tax.tax_amount
-				tax.tax_amount += current_tax_amount
+				if not self.flat_discount_applied:
+					tax.tax_amount += current_tax_amount
+
+				tax.tax_amount_after_flat_discount += current_tax_amount
 				
 				if tax.category:
 					# if just for valuation, do not add the tax amount in total
@@ -270,7 +281,7 @@ class AccountsController(TransactionBase):
 				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
-				
+
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0

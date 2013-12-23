@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
-
 from buying.utils import get_item_details
 from setup.utils import get_company_currency
 
@@ -162,6 +161,10 @@ class BuyingController(StockController):
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
 				del item.fields["item_tax_amount"]
+
+		if not self.meta.get_field("tax_amount_after_flat_discount", parentfield=self.other_fname):
+			for tax in self.tax_doclist:
+				del tax.fields["tax_amount_after_flat_discount"]
 				
 	def set_item_tax_amount(self, item, tax, current_tax_amount):
 		"""

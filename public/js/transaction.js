@@ -146,7 +146,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	validate: function() {
+		this.flat_discount_applied = false;
 		this.calculate_taxes_and_totals();
+		this.apply_flat_discount && this.apply_flat_discount();
 	},
 	
 	set_default_values: function() {
@@ -528,12 +530,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	initialize_taxes: function() {
 		var me = this;
+
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			tax.item_wise_tax_detail = {};
-			$.each(["tax_amount", "total",
-				"tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"],
-				function(i, fieldname) { tax[fieldname] = 0.0 });
+			tax_fields = ["total", "tax_amount_for_current_item", "grand_total_for_current_item",
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
+
+			if (me.flat_discount_applied)
+				tax_fields.push("tax_amount_after_flat_discount");
+			else
+				tax_fields.push("tax_amount");
+
+			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
 			
 			me.validate_on_previous_row(tax);
 			me.validate_inclusive_tax(tax);
@@ -567,7 +575,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				tax.tax_amount_for_current_item = current_tax_amount;
 				
 				// accumulate tax amount into tax.tax_amount
-				tax.tax_amount += current_tax_amount;
+				if (me.flat_discount_applied)
+					tax.tax_amount_after_flat_discount += current_tax_amount;
+				else
+					tax.tax_amount += current_tax_amount;
 				
 				// for buying
 				if(tax.category) {
@@ -617,9 +628,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item;
-			
 		}
-		
+
 		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
 		
 		// store tax breakup for each item

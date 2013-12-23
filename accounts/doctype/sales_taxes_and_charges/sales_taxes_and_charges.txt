@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-24 11:39:32", 
   "docstatus": 0, 
-  "modified": "2013-12-17 12:38:08", 
+  "modified": "2013-12-20 12:31:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -133,10 +133,19 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "tax_amount_after_flat_discount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Tax Amount After Flat Discount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "item_wise_tax_detail", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "label": "Item Wise Tax Detail ", 
+  "label": "Item Wise Tax Detail", 
   "oldfieldname": "item_wise_tax_detail", 
   "oldfieldtype": "Small Text", 
   "read_only": 1
