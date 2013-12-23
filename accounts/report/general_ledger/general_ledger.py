@@ -8,7 +8,9 @@ from webnotes import _
 from accounts.utils import get_balance_on
 
 def execute(filters=None):
-	validate_filters(filters)
+	account_details = webnotes.conn.get_value("Account", filters["account"], 
+		["debit_or_credit", "group_or_ledger"], as_dict=True)
+	validate_filters(filters, account_details.group_or_ledger)
 	columns = get_columns()
 	data = []
 	if filters.get("group_by"):
@@ -19,12 +21,13 @@ def execute(filters=None):
 			data.append(get_total_row(data))
 
 	if filters.get("account"):
-		data = [get_opening_balance_row(filters)] + data + [get_closing_balance_row(filters)]
+		data = [get_opening_balance_row(filters, account_details.debit_or_credit)] + data + \
+			[get_closing_balance_row(filters, account_details.debit_or_credit)]
 
 	return columns, data
 	
-def validate_filters(filters):
-	if filters.get("account") and filters.get("group_by") == "Group by Account":
+def validate_filters(filters, group_or_ledger):
+	if group_or_ledger == "Ledger" and filters.get("group_by") == "Group by Account":
 		webnotes.throw(_("Can not filter based on Account, if grouped by Account"))
 		
 	if filters.get("voucher_no") and filters.get("group_by") == "Group by Voucher":
@@ -35,13 +38,19 @@ def get_columns():
 		"Credit:Float:100", "Voucher Type::120", "Voucher No::160", "Link::20", 
 		"Cost Center:Link/Cost Center:100", "Remarks::200"]
 		
-def get_opening_balance_row(filters):
+def get_opening_balance_row(filters, debit_or_credit):
 	opening_balance = get_balance_on(filters["account"], add_days(filters["from_date"], -1))
-	return ["", "Opening Balance", opening_balance, 0.0, "", "", ""]
+	return get_balance_row(opening_balance, debit_or_credit, "Opening Balance")
 	
-def get_closing_balance_row(filters):
+def get_closing_balance_row(filters, debit_or_credit):
 	closing_balance = get_balance_on(filters["account"], filters["to_date"])
-	return ["", "Closing Balance", closing_balance, 0.0, "", "", ""]
+	return get_balance_row(closing_balance, debit_or_credit, "Closing Balance")
+	
+def get_balance_row(balance, debit_or_credit, balance_label):
+	if debit_or_credit == "Debit":
+		return ["", balance_label, balance, 0.0, "", "", ""]
+	else:
+		return ["", balance_label, 0.0, balance, "", "", ""]
 		
 def get_gl_entries(filters):
 	gl_entries = webnotes.conn.sql("""select 
@@ -63,7 +72,9 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
-		conditions.append("account=%(account)s")
+		lft, rgt = webnotes.conn.get_value("Account", filters["account"], ["lft", "rgt"])
+		conditions.append("""account in (select name from tabAccount 
+			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 	
