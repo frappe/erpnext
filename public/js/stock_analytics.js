@@ -17,10 +17,10 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				parent_field: "parent_item_group", 
 				formatter: function(item) {
 					if(!item.is_group) {
-						return repl('<a href="#stock-ledger/item_code=%(enc_value)s">%(value)s</a>',
-							{
+						return repl("<a \
+							onclick='wn.cur_grid_report.show_stock_ledger(\"%(value)s\")'>\
+							%(value)s</a>", {
 								value: item.name,
-								enc_value: encodeURIComponent(item.name)
 							});
 					} else {
 						return item.name;
@@ -183,5 +183,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	get_plot_points: function(item, col, idx) {
 		return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
+	},
+	show_stock_ledger: function(item_code) {
+		wn.route_options = {
+			item_code: item_code,
+			from_date: this.from_date,
+			to_date: this.to_date
+		};
+		wn.set_route("query-report", "Stock Ledger");
 	}
 });
