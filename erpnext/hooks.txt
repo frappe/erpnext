@@ -1,10 +1,16 @@
 app_name				ERPNext
+app_publisher			Web Notes Technologies
+app_description			Open Source Enterprise Resource Planning for Small and Midsized Organizations
+app_icon				icon-th
+app_color				#e74c3c
+app_version				4.0.0-wip
 
 app_include_js 			assets/js/erpnext.min.js
 app_include_css 		assets/css/erpnext.css
 web_include_js			assets/js/erpnext-web.min.js
 
-get_desktop_icons 		erpnext.manage.get_desktop_icons
+after_install			erpnext.setup.install.after_install
+
 boot_session			erpnext.startup.boot.boot_session
 notification_config		erpnext.startup.notifications.get_notification_config
 
