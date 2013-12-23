@@ -67,7 +67,7 @@ def get_stock_ledger_entries(filters):
 			item.name, item.item_name, item_group, brand, description, item.stock_uom, 
 			actual_qty, posting_date
 		from `tabStock Ledger Entry` sle,
-			(select name, item_name, description, stock_uom, brand
+			(select name, item_name, description, stock_uom, brand, item_group
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and
 			company = %(company)s and
