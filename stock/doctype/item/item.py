@@ -213,7 +213,7 @@ class DocType(DocListController, WebsiteGenerator):
 
 	def update_item_price(self):
 		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
-			item_description=%s where item_code=%s""",
+			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.doc.item_name, self.doc.description, self.doc.name))
 
 	def get_page_title(self):
