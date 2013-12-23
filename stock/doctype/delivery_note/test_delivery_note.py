@@ -58,11 +58,6 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(stock_value, 0)
 		self.assertEqual(stock_value_difference, -375)
 			
-		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Delivery Note' and voucher_no=%s
-			order by account desc""", dn.doc.name, as_dict=1)
-			
 		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
 		
 	def test_delivery_note_gl_entry(self):
@@ -111,8 +106,8 @@ class TestDeliveryNote(unittest.TestCase):
 		gl_entries = get_gl_entries("Delivery Note", dn.doc.name)
 		self.assertTrue(gl_entries)
 		expected_values = {
-			stock_in_hand_account: [0.0, 666.65],
-			"Cost of Goods Sold - _TC": [666.65, 0.0]
+			stock_in_hand_account: [0.0, 666.67],
+			"Cost of Goods Sold - _TC": [666.67, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
