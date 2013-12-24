@@ -185,7 +185,6 @@ class SellingController(StockController):
 		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
 				
 	def calculate_totals(self):
-		self.total_tax_excluding_actual = 0.0
 		self.doc.grand_total = flt(self.tax_doclist and \
 			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
 		self.doc.grand_total_export = flt(self.doc.grand_total / self.doc.conversion_rate, 
@@ -199,26 +198,33 @@ class SellingController(StockController):
 		self.doc.rounded_total = _round(self.doc.grand_total)
 		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
 
-		if self.doc.flat_discount:
-			# calculate total tax for flat discount excluding actual
-			for tax in self.tax_doclist:
-				if tax.charge_type != "Actual":
-					self.total_tax_excluding_actual += tax.tax_amount
-
-			self.total_amount_for_flat_discount = flt(self.doc.net_total + 
-				self.total_tax_excluding_actual, self.precision("grand_total"))
-
 	def apply_flat_discount(self):
-		distributed_amount = 0.0
+		if self.doc.flat_discount:
+			total_amount_for_flat_discount = self.get_flat_discountable_amount()
 
-		if self.doc.flat_discount and self.total_amount_for_flat_discount:
-			# calculate item amount after flat discount
-			for item in self.item_doclist:
-				distributed_amount = self.doc.flat_discount * item.amount / self.total_amount_for_flat_discount
-				item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
+			if total_amount_for_flat_discount:
+				# calculate item amount after flat discount
+				for item in self.item_doclist:
+					distributed_amount = self.doc.flat_discount * item.amount / total_amount_for_flat_discount
+					item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
 
-			self.flat_discount_applied = True
-			self.calculate_taxes_and_totals()
+				self.flat_discount_applied = True
+				self.calculate_taxes_and_totals()
+
+	def get_flat_discountable_amount(self):
+		actual_taxes_dict = {}
+
+		for tax in self.tax_doclist:
+			if tax.charge_type == "Actual":
+				actual_taxes_dict.setdefault(tax.idx, tax.tax_amount)
+			elif tax.row_id in actual_taxes_dict:
+				actual_tax_amount = flt(actual_taxes_dict.get(tax.row_id, 0)) * \
+					flt(tax.rate) / 100
+				actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
+
+		total_amount_for_flat_discount = flt(self.doc.grand_total - sum(actual_taxes_dict.values()), 
+			self.precision("grand_total"))
+		return total_amount_for_flat_discount
 
 	def calculate_outstanding_amount(self):
 		# NOTE: 

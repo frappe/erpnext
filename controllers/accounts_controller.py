@@ -148,6 +148,10 @@ class AccountsController(TransactionBase):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 		self.item_doclist = self.doclist.get({"parentfield": self.fname})
 		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
+
+		# for buying
+		if not hasattr(self, "flat_discount_applied"):
+			self.flat_discount_applied = False
 		
 		self.calculate_item_values()
 		self.initialize_taxes()
@@ -232,23 +236,25 @@ class AccountsController(TransactionBase):
 				_on_previous_row_error("1 - %d" % (tax.row_id,))
 				
 	def calculate_taxes(self):
-		for item in self.item_doclist:
+		# maintain actual tax rate based on idx
+		actual_tax_dict = dict([[tax.idx, tax.rate] for tax in self.tax_doclist 
+			if tax.charge_type == "Actual"])
+
+		for n, item in enumerate(self.item_doclist):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 
 			for i, tax in enumerate(self.tax_doclist):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+
+				# Adjust divisional loss to the last item
+				if tax.charge_type == "Actual":
+					actual_tax_dict[tax.idx] -= current_tax_amount;
+					if n == len(self.item_doclist) - 1:
+						current_tax_amount += actual_tax_dict[tax.idx]
 				
 				if hasattr(self, "set_item_tax_amount"):
 					self.set_item_tax_amount(item, tax, current_tax_amount)
-
-				# case when net total is 0 but there is an actual type charge
-				# in this case add the actual amount to tax.tax_amount
-				# and tax.grand_total_for_current_item for the first such iteration
-				if tax.charge_type=="Actual" and \
-						not (current_tax_amount or self.doc.net_total or tax.tax_amount):
-					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
-					current_tax_amount += zero_net_total_adjustment
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
@@ -271,16 +277,30 @@ class AccountsController(TransactionBase):
 				# note: grand_total_for_current_item contains the contribution of 
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.amount +
-						current_tax_amount, self.precision("total", tax))
-						
+					tax.grand_total_for_current_item = flt(item.amount + current_tax_amount,
+						self.precision("total", tax))
 				else:
 					tax.grand_total_for_current_item = \
-						flt(self.tax_doclist[i-1].grand_total_for_current_item +
+						flt(self.tax_doclist[i-1].grand_total_for_current_item + 
 							current_tax_amount, self.precision("total", tax))
+
 				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
+
+				# set precision in the last item iteration
+				if n == len(self.item_doclist) - 1:
+					tax.total = flt(tax.total, self.precision("total", tax))
+					tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
+					tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount, 
+						self.precision("tax_amount", tax))
+
+					# adjust discount loss in last tax iteration
+					if i == (len(self.tax_doclist) - 1) and self.flat_discount_applied:
+						flat_discount_loss = self.doc.grand_total - self.doc.flat_discount - tax.total
+						tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount + 
+							flat_discount_loss, self.precision("tax_amount", tax))
+						tax.total = flt(tax.total + flat_discount_loss, self.precision("total", tax))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -300,9 +320,9 @@ class AccountsController(TransactionBase):
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
-		
+
 		current_tax_amount = flt(current_tax_amount, self.precision("tax_amount", tax))
-		
+
 		# store tax breakup for each item
 		key = item.item_code or item.item_name
 		if tax.item_wise_tax_detail.get(key):
