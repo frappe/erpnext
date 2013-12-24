@@ -6,7 +6,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 	$(".navbar:first").toggle(false);
 	$("body").css({"padding-top":"30px"});
 	
-	erpnext.wiz = new wn.wiz.Wizard({
+	var wizard_settings = {
 		page_name: "setup-wizard",
 		parent: wrapper,
 		on_complete: function(wiz) {
@@ -59,11 +59,16 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				title: wn._("The First User: You"),
 				icon: "icon-user",
 				fields: [
-					{"fieldname": "first_name", "label": wn._("First Name"), "fieldtype": "Data", reqd:1},
-					{"fieldname": "last_name", "label": wn._("Last Name"), "fieldtype": "Data", reqd:1},
-					{"fieldname": "email", "label": wn._("Email Id"), "fieldtype": "Data", reqd:1, "description":"Your Login Id"},
-					{"fieldname": "password", "label": wn._("Password"), "fieldtype": "Password", reqd:1},
-					{fieldtype:"Attach Image", fieldname:"attach_profile", label:"Attach Your Profile..."},
+					{"fieldname": "first_name", "label": wn._("First Name"), "fieldtype": "Data", 
+						reqd:1},
+					{"fieldname": "last_name", "label": wn._("Last Name"), "fieldtype": "Data", 
+						reqd:1},
+					{"fieldname": "email", "label": wn._("Email Id"), "fieldtype": "Data", 
+						reqd:1, "description":"Your Login Id", "options":"Email"},
+					{"fieldname": "password", "label": wn._("Password"), "fieldtype": "Password", 
+						reqd:1},
+					{fieldtype:"Attach Image", fieldname:"attach_profile", 
+						label:"Attach Your Profile..."},
 				],
 				help: wn._('The first user will become the System Manager (you can change that later).'),
 				onload: function(slide) {
@@ -72,13 +77,13 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						slide.form.fields_dict.email.$wrapper.toggle(false);
 						slide.form.fields_dict.first_name.set_input(wn.boot.profile.first_name);
 						slide.form.fields_dict.last_name.set_input(wn.boot.profile.last_name);
-						
+					
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;
 					}
 				}
 			},
-			
+		
 			// Organization
 			{
 				title: wn._("The Organization"),
@@ -110,7 +115,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					});
 				}
 			},
-			
+		
 			// Country
 			{
 				title: wn._("Country, Timezone and Currency"),
@@ -139,7 +144,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 								.add_options([""].concat(erpnext.all_timezones));
 						}
 					})
-				
+			
 					slide.get_input("country").on("change", function() {
 						var country = slide.get_input("country").val();
 						var $timezone = slide.get_input("timezone");
@@ -152,11 +157,10 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						}
 						// add all timezones at the end, so that user has the option to change it to any timezone
 						$timezone.add_options([""].concat(erpnext.all_timezones));
-			
 					});
 				}
 			},
-			
+		
 			// Logo
 			{
 				icon: "icon-bookmark",
@@ -167,25 +171,13 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldtype:"Attach Image", fieldname:"attach_logo", label:"Attach Logo..."},
 				],
 			},
-			
+		
 			// Taxes
 			{
 				icon: "icon-money",
 				"title": wn._("Add Taxes"),
 				"help": wn._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"tax_1", label:"Tax 1", placeholder:"e.g. VAT"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"tax_rate_1", label:"Rate (%)", placeholder:"e.g. 5"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"tax_2", label:"Tax 2", placeholder:"e.g. Customs Duty"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"tax_rate_2", label:"Rate (%)", placeholder:"e.g. 5"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"tax_3", label:"Tax 3", placeholder:"e.g. Excise"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"tax_rate_3", label:"Rate (%)", placeholder:"e.g. 5"},
-				],
+				"fields": [],
 			},
 
 			// Customers
@@ -193,80 +185,15 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				icon: "icon-group",
 				"title": wn._("Your Customers"),
 				"help": wn._("List a few of your customers. They could be organizations or individuals."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"customer_1", label:"Customer 1", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_1", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_2", label:"Customer 2", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_2", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_3", label:"Customer 3", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_3", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_4", label:"Customer 4", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_4", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"customer_5", label:"Customer 5", placeholder:"Customer Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"customer_contact_5", label:"", placeholder:"Contact Name"},
-				],
+				"fields": [],
 			},
-			
+		
 			// Items to Sell
 			{
 				icon: "icon-barcode",
 				"title": wn._("Your Products or Services"),
 				"help": wn._("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"item_1", label:"Item 1", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Attach", fieldname:"item_img_1", label:"Attach Image..."},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_group_1", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_uom_1", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_2", label:"Item 2", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Attach", fieldname:"item_img_2", label:"Attach Image..."},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_group_2", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_uom_2", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_3", label:"Item 3", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Attach", fieldname:"item_img_3", label:"Attach Image..."},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_group_3", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_uom_3", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_4", label:"Item 4", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Attach", fieldname:"item_img_4", label:"Attach Image..."},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_group_4", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_uom_4", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_5", label:"Item 5", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Attach", fieldname:"item_img_5", label:"Attach Image..."},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_group_5", options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_uom_5", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-				],
+				"fields": [],
 			},
 
 			// Suppliers
@@ -274,27 +201,7 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				icon: "icon-group",
 				"title": wn._("Your Suppliers"),
 				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"supplier_1", label:"Supplier 1", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_1", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_2", label:"Supplier 2", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_2", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_3", label:"Supplier 3", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_3", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_4", label:"Supplier 4", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_4", label:"", placeholder:"Contact Name"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"supplier_5", label:"Supplier 5", placeholder:"Supplier Name"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Data", fieldname:"supplier_contact_5", label:"", placeholder:"Contact Name"},
-				],
+				"fields": [],
 			},
 
 			// Items to Buy
@@ -302,52 +209,79 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				icon: "icon-barcode",
 				"title": wn._("Products or Services You Buy"),
 				"help": wn._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
-				"fields": [
-					{fieldtype:"Data", fieldname:"item_buy_1", label:"Item 1", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_group_1", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_uom_1", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_buy_2", label:"Item 2", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_group_2", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_uom_2", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_buy_3", label:"Item 3", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_group_3", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_uom_3", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_buy_4", label:"Item 4", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_group_4", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_uom_4", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Data", fieldname:"item_buy_5", label:"Item 5", placeholder:"A Product or Service"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Section Break"},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_group_5", options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
-					{fieldtype:"Column Break"},
-					{fieldtype:"Select", fieldname:"item_buy_uom_5", options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
-				],
+				"fields": [],
 			},
 
 		]
-		
-	})
+	}
+	
+	// taxes
+	for(var i=1; i<4; i++) {
+		wizard_settings.slides[4].fields = wizard_settings.slides[4].fields.concat([
+			{fieldtype:"Data", fieldname:"tax_"+ i, label:"Tax " + 1, placeholder:"e.g. VAT"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Data", fieldname:"tax_rate_i", label:"Rate (%)", placeholder:"e.g. 5"},
+			{fieldtype:"Section Break"},
+		])
+	}
+	
+	// customers
+	for(var i=1; i<6; i++) {
+		wizard_settings.slides[5].fields = wizard_settings.slides[5].fields.concat([
+			{fieldtype:"Data", fieldname:"customer_" + i, label:"Customer " + i, 
+				placeholder:"Customer Name"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Data", fieldname:"customer_contact_" + i, 
+				label:"Contact", placeholder:"Contact Name"},
+			{fieldtype:"Section Break"}
+		])
+	}
+	
+	for(var i=1; i<6; i++) {
+		wizard_settings.slides[6].fields = wizard_settings.slides[6].fields.concat([
+			{fieldtype:"Data", fieldname:"item_" + i, label:"Item " + 1, 
+				placeholder:"A Product or Service"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Attach", fieldname:"item_img_" + i, label:"Attach Image..."},
+			{fieldtype:"Section Break"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i, 
+				options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
+				options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
+			{fieldtype:"Section Break"}
+		])
+	}
+
+	for(var i=1; i<6; i++) {
+		wizard_settings.slides[7].fields = wizard_settings.slides[7].fields.concat([
+			{fieldtype:"Data", fieldname:"supplier_" + i, label:"Supplier " + i, 
+				placeholder:"Supplier Name"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Data", fieldname:"supplier_contact_" + i, 
+				label:"Contact", placeholder:"Contact Name"},
+			{fieldtype:"Section Break"}
+		])
+	}
+
+	for(var i=1; i<6; i++) {
+		wizard_settings.slides[8].fields = wizard_settings.slides[8].fields.concat([
+			{fieldtype:"Data", fieldname:"item_buy_" + i, label:"Item " + i, 
+				placeholder:"A Product or Service"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Section Break"},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Select", fieldname:"item_buy_group_" + i, label: "Group",
+				options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Select", fieldname:"item_buy_uom_" + i, label: "UOM", 
+				options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
+			{fieldtype:"Section Break"},
+		])
+	}
+	
+	erpnext.wiz = new wn.wiz.Wizard(wizard_settings)
 }
 
 wn.pages['setup-wizard'].onshow = function(wrapper) {
@@ -434,7 +368,16 @@ wn.wiz.WizardSlide = Class.extend({
 	make: function() {
 		var me = this;
 		this.$wrapper = $(repl('<div class="panel panel-default">\
-			<div class="panel-heading"><div class="panel-title">%(main_title)s: Step %(step)s</div></div>\
+			<div class="panel-heading">\
+				<div class="panel-title row">\
+					<div class="col-sm-8">\
+						<i class="%(icon)s text-muted"></i> %(title)s</div>\
+					<div class="col-sm-4 text-right"><a class="prev-btn hide">Previous</a> \
+						<a class="next-btn hide">Next</a> \
+						<a class="complete-btn hide"><b>Complete Setup</b></a>\
+					</div>\
+				</div>\
+			</div>\
 			<div class="panel-body">\
 				<div class="progress">\
 					<div class="progress-bar" style="width: %(width)s%"></div>\
@@ -443,7 +386,6 @@ wn.wiz.WizardSlide = Class.extend({
 				<div class="row">\
 					<div class="col-sm-8 form"></div>\
 					<div class="col-sm-4 help">\
-						<h3 style="margin-top: 0px"><i class="%(icon)s text-muted"></i> %(title)s</h3><br>\
 						<p class="text-muted">%(help)s</p>\
 					</div>\
 				</div>\
@@ -468,30 +410,28 @@ wn.wiz.WizardSlide = Class.extend({
 		}
 		
 		if(this.id > 0) {
-			this.$prev = $("<button class='btn btn-default'>Previous</button>")
+			this.$prev = this.$wrapper.find('.prev-btn').removeClass("hide")
 				.click(function() { 
 					wn.set_route(me.wiz.page_name, me.id-1 + ""); 
 				})
-				.appendTo(this.$wrapper.find(".footer"))
-				.css({"margin-right": "5px"});
+				.css({"margin-right": "10px"});
 			}
 		if(this.id+1 < this.wiz.slides.length) {
-			this.$next = $("<button class='btn btn-primary'>Next</button>")
+			this.$next = this.$wrapper.find('.next-btn').removeClass("hide")
 				.click(function() { 
 					me.values = me.form.get_values();
 					if(me.values===null) 
 						return;
 					wn.set_route(me.wiz.page_name, me.id+1 + ""); 
 				})
-				.appendTo(this.$wrapper.find(".footer"));
 		} else {
-			this.$complete = $("<button class='btn btn-primary'>Complete Setup</button>")
+			this.$complete = this.$wrapper.find('.complete-btn').removeClass("hide")
 				.click(function() { 
 					me.values = me.form.get_values();
 					if(me.values===null) 
 						return;
 					me.wiz.on_complete(me.wiz); 
-				}).appendTo(this.$wrapper.find(".footer"));
+				})
 		}
 		
 		if(this.onload) {
