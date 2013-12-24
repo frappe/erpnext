@@ -20,6 +20,19 @@ class DocType:
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
 				
+		self.update_parent_account()
+				
+	def update_parent_account(self):
+		if not self.doc.__islocal and (self.doc.create_account_under != 
+			webnotes.conn.get_value("Warehouse", self.doc.name, "create_account_under")):
+				warehouse_account = webnotes.conn.get_value("Account", 
+					{"account_type": "Warehouse", "company": self.doc.company, 
+					"master_name": self.doc.name}, ["name", "parent_account"])
+				if warehouse_account and warehouse_account[1] != self.doc.create_account_under:
+					acc_bean = webnotes.bean("Account", warehouse_account[0])
+					acc_bean.doc.parent_account = self.doc.create_account_under
+					acc_bean.save()
+				
 	def on_update(self):
 		self.create_account_head()
 						
