@@ -5,8 +5,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, cstr
-from webnotes import msgprint, _
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
@@ -16,6 +15,11 @@ class DocType:
 		webnotes.conn.set_default("auto_accounting_for_stock", self.doc.auto_accounting_for_stock)
 		
 		if self.doc.auto_accounting_for_stock:
-			for wh in webnotes.conn.sql("select name from `tabWarehouse`"):
-				wh_bean = webnotes.bean("Warehouse", wh[0])
+			warehouse_list = webnotes.conn.sql("select name, company from tabWarehouse", as_dict=1)
+			warehouse_with_no_company = [d.name for d in warehouse_list if not d.company]
+			if warehouse_with_no_company:
+				webnotes.throw(_("Company is missing in following warehouses") + ": \n" + 
+					"\n".join(warehouse_with_no_company))
+			for wh in warehouse_list:
+				wh_bean = webnotes.bean("Warehouse", wh.name)
 				wh_bean.save()

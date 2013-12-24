@@ -287,9 +287,15 @@ class DocType(StockController):
 				# validate quantity <= ref item's qty - qty already returned
 				ref_item = ref.doclist.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
-				self.validate_value("transfer_qty", "<=", returnable_qty, item,
-					raise_exception=StockOverReturnError)
-				
+				if not returnable_qty:
+					webnotes.throw("{item}: {item_code} {returned}".format(
+						item=_("Item"), item_code=item.item_code, 
+						returned=_("already returned though some other documents")))
+				elif item.transfer_qty > returnable_qty:
+					webnotes.throw("{item}: {item_code}, {returned}: {qty}".format(
+						item=_("Item"), item_code=item.item_code,
+						returned=_("Max Returnable Qty"), qty=returnable_qty))
+						
 	def get_already_returned_item_qty(self, ref_fieldname):
 		return dict(webnotes.conn.sql("""select item_code, sum(transfer_qty) as qty
 			from `tabStock Entry Detail` where parent in (
