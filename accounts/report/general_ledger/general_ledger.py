@@ -9,8 +9,9 @@ from accounts.utils import get_balance_on
 
 def execute(filters=None):
 	account_details = webnotes.conn.get_value("Account", filters["account"], 
-		["debit_or_credit", "group_or_ledger"], as_dict=True)
-	validate_filters(filters, account_details.group_or_ledger)
+		["debit_or_credit", "group_or_ledger"], as_dict=True) if filters.get("account") else None
+	validate_filters(filters, account_details)
+	
 	columns = get_columns()
 	data = []
 	if filters.get("group_by"):
@@ -20,14 +21,15 @@ def execute(filters=None):
 		if data:
 			data.append(get_total_row(data))
 
-	if filters.get("account"):
+	if account_details:
 		data = [get_opening_balance_row(filters, account_details.debit_or_credit)] + data + \
 			[get_closing_balance_row(filters, account_details.debit_or_credit)]
 
 	return columns, data
 	
-def validate_filters(filters, group_or_ledger):
-	if group_or_ledger == "Ledger" and filters.get("group_by") == "Group by Account":
+def validate_filters(filters, account_details):
+	if account_details and account_details.group_or_ledger == "Ledger" \
+			and filters.get("group_by") == "Group by Account":
 		webnotes.throw(_("Can not filter based on Account, if grouped by Account"))
 		
 	if filters.get("voucher_no") and filters.get("group_by") == "Group by Voucher":
