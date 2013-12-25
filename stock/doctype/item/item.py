@@ -154,8 +154,8 @@ class DocType(DocListController, WebsiteGenerator):
 			if d.tax_type:
 				account_type = webnotes.conn.get_value("Account", d.tax_type, "account_type")
 				
-				if account_type not in ['Tax', 'Chargeable']:
-					msgprint("'%s' is not Tax / Chargeable Account" % d.tax_type, raise_exception=1)
+				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
+					msgprint("'%s' is not Tax / Chargeable / Income / Expense Account" % d.tax_type, raise_exception=1)
 				else:
 					if d.tax_type in check_list:
 						msgprint("Rate is entered twice for: '%s'" % d.tax_type, raise_exception=1)

@@ -227,11 +227,11 @@ class AccountsController(TransactionBase):
 						"charge_type": tax.charge_type,
 					}, raise_exception=True)
 			elif tax.charge_type == "On Previous Row Amount" and \
-					not cint(self.tax_doclist[tax.row_id - 1].included_in_print_rate):
+					not cint(self.tax_doclist[cint(tax.row_id) - 1].included_in_print_rate):
 				# referred row should also be inclusive
 				_on_previous_row_error(tax.row_id)
 			elif tax.charge_type == "On Previous Row Total" and \
-					not all([cint(t.included_in_print_rate) for t in self.tax_doclist[:tax.row_id - 1]]):
+					not all([cint(t.included_in_print_rate) for t in self.tax_doclist[:cint(tax.row_id) - 1]]):
 				# all rows about the reffered tax should be inclusive
 				_on_previous_row_error("1 - %d" % (tax.row_id,))
 				
@@ -249,7 +249,7 @@ class AccountsController(TransactionBase):
 
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
-					actual_tax_dict[tax.idx] -= current_tax_amount;
+					actual_tax_dict[tax.idx] -= current_tax_amount
 					if n == len(self.item_doclist) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
 				
@@ -283,24 +283,29 @@ class AccountsController(TransactionBase):
 					tax.grand_total_for_current_item = \
 						flt(self.tax_doclist[i-1].grand_total_for_current_item + 
 							current_tax_amount, self.precision("total", tax))
-
 				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
 
 				# set precision in the last item iteration
 				if n == len(self.item_doclist) - 1:
-					tax.total = flt(tax.total, self.precision("total", tax))
-					tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
-					tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount, 
-						self.precision("tax_amount", tax))
+					self.round_off_totals(tax)
 
-					# adjust discount loss in last tax iteration
+					# adjust flat discount loss in last tax iteration
 					if i == (len(self.tax_doclist) - 1) and self.flat_discount_applied:
-						flat_discount_loss = self.doc.grand_total - self.doc.flat_discount - tax.total
-						tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount + 
-							flat_discount_loss, self.precision("tax_amount", tax))
-						tax.total = flt(tax.total + flat_discount_loss, self.precision("total", tax))
+						self.adjust_flat_discount_loss(tax)
+
+	def round_off_totals(self, tax):
+		tax.total = flt(tax.total, self.precision("total", tax))
+		tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
+		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount, 
+			self.precision("tax_amount", tax))
+
+	def adjust_flat_discount_loss(self, tax):
+		flat_discount_loss = self.doc.grand_total - self.doc.flat_discount - tax.total
+		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount + 
+			flat_discount_loss, self.precision("tax_amount", tax))
+		tax.total = flt(tax.total + flat_discount_loss, self.precision("total", tax))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)

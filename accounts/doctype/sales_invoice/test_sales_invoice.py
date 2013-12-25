@@ -192,7 +192,57 @@ class TestSalesInvoice(unittest.TestCase):
 				
 		self.assertEquals(si.doc.grand_total, 1500)
 		self.assertEquals(si.doc.grand_total_export, 1500)
-				
+
+	def test_flat_discount_gl_entry(self):
+		si = webnotes.bean(copy=test_records[3])
+		si.doc.flat_discount = 104.95
+		si.doclist.append({
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 10,
+			"row_id": 8,
+			"idx": 9
+		})
+		si.insert()
+		si.submit()
+
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.doc.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = sorted([
+			[si.doc.debit_to, 1500, 0.0],
+			[test_records[3][1]["income_account"], 0.0, 1163.45],
+			[test_records[3][3]["account_head"], 0.0, 130.31],
+			[test_records[3][4]["account_head"], 0.0, 2.61],
+			[test_records[3][5]["account_head"], 0.0, 1.31],
+			[test_records[3][6]["account_head"], 0.0, 25.96],
+			[test_records[3][7]["account_head"], 0.0, 145.43],
+			[test_records[3][8]["account_head"], 0.0, 116.35],
+			[test_records[3][9]["account_head"], 0.0, 100],
+			[test_records[3][10]["account_head"], 168.54, 0.0],
+			["_Test Account Service Tax - _TC", 16.88, 0.0],
+		])
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+
+		# cancel
+		si.cancel()
+
+		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+
+		self.assertFalse(gle)
+
 	def test_inclusive_rate_validations(self):
 		si = webnotes.bean(copy=test_records[2])
 		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
@@ -418,7 +468,6 @@ class TestSalesInvoice(unittest.TestCase):
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
-		# print gl_entries
 		
 		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				

@@ -97,7 +97,8 @@ cur_frm.fields_dict['default_sales_cost_center'].get_query = function(doc) {
 cur_frm.fields_dict['item_tax'].grid.get_field("tax_type").get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
-			['Account', 'account_type', 'in', 'Tax, Chargeable'],
+			['Account', 'account_type', 'in',
+				'Tax, Chargeable, Income Account, Expense Account'],
 			['Account', 'docstatus', '!=', 2]
 		]
 	}
