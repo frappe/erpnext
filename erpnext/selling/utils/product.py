@@ -107,11 +107,7 @@ def get_group_item_count(item_group):
 				where item_group in (%s))) """ % (child_groups, child_groups))[0][0]
 
 def get_item_for_list_in_html(context):
-	from jinja2 import Environment, FileSystemLoader
-	scrub_item_for_list(context)
-	jenv = Environment(loader = FileSystemLoader(get_base_path()))
-	template = jenv.get_template("app/stock/doctype/item/templates/includes/product_in_grid.html")
-	return template.render(context)
+	return webnotes.get_template("templates/includes/product_in_grid.html").render(context)
 
 def scrub_item_for_list(r):
 	if not r.website_description:

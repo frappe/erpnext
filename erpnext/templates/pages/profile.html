@@ -34,7 +34,7 @@ $(document).ready(function() {
 	$("#fullname").val(getCookie("full_name") || "");
 	$("#update_profile").click(function() {
 		wn.call({
-			method: "portal.templates.pages.profile.update_profile",
+			method: "erpnext.templates.pages.profile.update_profile",
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),

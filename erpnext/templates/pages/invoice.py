@@ -9,7 +9,7 @@ from webnotes.utils import flt, fmt_money
 no_cache = True
 
 def get_context():
-	from erpnext.portal.utils import get_transaction_context
+	from erpnext.templates.utils import get_transaction_context
 	context = get_transaction_context("Sales Invoice", webnotes.form_dict.name)
 	modify_status(context.get("doc"))
 	context.update({

@@ -7,11 +7,11 @@ import webnotes
 no_cache = True
 
 def get_context():
-	from erpnext.portal.utils import get_currency_context
+	from erpnext.templates.utils import get_currency_context
 	context = get_currency_context()
 	context.update({
 		"title": "Shipments",
-		"method": "portal.templates.pages.shipments.get_shipments",
+		"method": "erpnext.templates.pages.shipments.get_shipments",
 		"icon": "icon-truck",
 		"empty_list_message": "No Shipments Found",
 		"page": "shipment"
@@ -20,5 +20,5 @@ def get_context():
 	
 @webnotes.whitelist()
 def get_shipments(start=0):
-	from erpnext.portal.utils import get_transaction_list
+	from erpnext.templates.utils import get_transaction_list
 	return get_transaction_list("Delivery Note", start)

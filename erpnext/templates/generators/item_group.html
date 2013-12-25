@@ -1,11 +1,11 @@
 {% extends base_template %}
 
 {% block content %}
-{% include 'stock/doctype/item/templates/includes/product_search_box.html' %}
-{% include 'stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
+{% include 'templates/includes/product_search_box.html' %}
+{% include 'templates/includes/product_breadcrumbs.html' %}
 <div class="container content">
 	{% if slideshow %}<!-- slideshow -->
-	{% include "website/doctype/website_slideshow/templates/includes/slideshow.html" %}
+	{% include "templates/includes/slideshow.html" %}
 	{% endif %}
 	{% if description %}<!-- description -->
 	<div itemprop="description">{{ description or ""}}</div>
@@ -42,7 +42,7 @@
 $(function() {
 	if(window.logged_in && getCookie("system_user")==="yes") {
 		wn.has_permission("Item Group", "{{ name }}", "write", function(r) {
-			wn.require("js/wn/website/editable.js");
+			wn.require("assets/webnotes/js/wn/website/editable.js");
 			wn.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
 		});
 	}
