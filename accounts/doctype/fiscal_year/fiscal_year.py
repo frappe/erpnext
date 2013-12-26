@@ -17,8 +17,8 @@ class DocType:
 		# clear cache
 		webnotes.clear_cache()
 		
-		msgprint(self.doc.name + _(""" is now the default Fiscal Year. \
-			Please refresh your browser for the change to take effect."""))
+		msgprint(_("""%(current_fiscal_year)s is now the default Fiscal Year. \
+			Please refresh your browser for the change to take effect.""")%dict(current_fiscal_year=self.doc.name))
 
 	def validate(self):
 		year_start_end_dates = webnotes.conn.sql("""select year_start_date, year_end_date 

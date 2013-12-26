@@ -60,7 +60,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}, "icon-table");
 			
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
-			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
+			cur_frm.dashboard.add_progress(percent_paid + wn._("% Paid"), percent_paid);
 
 			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 

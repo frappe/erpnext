@@ -60,7 +60,7 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return [
+	columns = [
 		"Posting Date:Date:80", "Account:Link/Account:150", "Supplier::150", "Voucher Type::110", 
 		"Voucher No::120", "Remarks::150", "Supplier Type:Link/Supplier Type:120", 
 		"Due Date:Date:80", "Bill No::80", "Bill Date:Date:80", 
@@ -68,6 +68,8 @@ def get_columns():
 		"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100", 
 		"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100"
 	]
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 	
 def get_gl_entries(filters, before_report_date=True):
 	conditions, supplier_accounts = get_conditions(filters, before_report_date)

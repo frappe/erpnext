@@ -51,14 +51,14 @@ class DocType:
 			par = webnotes.conn.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
-				msgprint("Parent account does not exists", raise_exception=1)
+				msgprint(_("Parent account does not exists"), raise_exception=1)
 			elif par[0][0] == self.doc.name:
-				msgprint("You can not assign itself as parent account", raise_exception=1)
+				msgprint(_("You can not assign itself as parent account"), raise_exception=1)
 			elif par[0][1] != 'Group':
-				msgprint("Parent account can not be a ledger", raise_exception=1)
+				msgprint(_("Parent account can not be a ledger"), raise_exception=1)
 			elif self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
-				msgprint("You can not move a %s account under %s account" % 
-					(self.doc.debit_or_credit, par[0][3]), raise_exception=1)
+				msgprint(_("You can not move a %(debit_or_creadit)s account under %(account_name)s account") % 
+					dict(debit_or_credit=self.doc.debit_or_credit, account_name=par[0][3]), raise_exception=1)
 			
 			if not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
@@ -70,7 +70,7 @@ class DocType:
 		if webnotes.conn.sql("""select count(*) from tabAccount where
 			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
 			self.doc.company)[0][0] > 4:
-			webnotes.msgprint("One company cannot have more than 4 root Accounts",
+			webnotes.msgprint(_("One company cannot have more than 4 root Accounts"),
 				raise_exception=1)
 	
 	def validate_duplicate_account(self):
@@ -78,14 +78,14 @@ class DocType:
 			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			if webnotes.conn.sql("""select name from tabAccount where name=%s""", 
 				(self.doc.account_name + " - " + company_abbr)):
-					msgprint("Account Name: %s already exists, please rename" 
-						% self.doc.account_name, raise_exception=1)
+					msgprint(_("Account Name: %(account_name)s already exists, please rename")
+						% dict(account_name=self.doc.account_name), raise_exception=1)
 				
 	def validate_root_details(self):
 		#does not exists parent
 		if webnotes.conn.exists("Account", self.doc.name):
 			if not webnotes.conn.get_value("Account", self.doc.name, "parent_account"):
-				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
+				webnotes.msgprint(_("Root cannot be edited."), raise_exception=1)
 				
 	def validate_frozen_accounts_modifier(self):
 		old_value = webnotes.conn.get_value("Account", self.doc.name, "freeze_account")
@@ -98,10 +98,10 @@ class DocType:
 			
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
-			msgprint("Account: %s has existing child. You can not convert this account to ledger" % 
-				(self.doc.name), raise_exception=1)
+			msgprint(_("Account: %(account_name)s has existing child. You can not convert this account to ledger") % 
+				dict(account_name=self.doc.name), raise_exception=1)
 		elif self.check_gle_exists():
-			msgprint("Account with existing transaction can not be converted to ledger.", 
+			msgprint(_("Account with existing transaction can not be converted to ledger."), 
 				raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Ledger'
@@ -110,10 +110,10 @@ class DocType:
 
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
-			msgprint("Account with existing transaction can not be converted to group.", 
+			msgprint(_("Account with existing transaction can not be converted to group."), 
 				raise_exception=1)
 		elif self.doc.master_type or self.doc.account_type:
-			msgprint("Cannot covert to Group because Master Type or Account Type is selected.", 
+			msgprint(_("Cannot covert to Group because Master Type or Account Type is selected."), 
 				raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Group'
@@ -130,9 +130,9 @@ class DocType:
 	
 	def validate_mandatory(self):
 		if not self.doc.debit_or_credit:
-			msgprint("Debit or Credit field is mandatory", raise_exception=1)
+			msgprint(_("Debit or Credit field is mandatory"), raise_exception=1)
 		if not self.doc.is_pl_account:
-			msgprint("Is PL Account field is mandatory", raise_exception=1)
+			msgprint(_("Is PL Account field is mandatory"), raise_exception=1)
 			
 	def validate_warehouse_account(self):
 		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
@@ -191,13 +191,13 @@ class DocType:
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""
 		if not self.doc.parent_account:
-			msgprint("Root account can not be deleted", raise_exception=1)
+			msgprint(_("Root account can not be deleted"), raise_exception=1)
 			
 		if self.check_gle_exists():
-			msgprint("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
-				Journal Voucher) can not be deleted""", raise_exception=1)
+			msgprint(_("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
+				Journal Voucher) can not be deleted"""), raise_exception=1)
 		if self.check_if_child_exists():
-			msgprint("Child account exists for this account. You can not delete this account.",
+			msgprint(_("Child account exists for this account. You can not delete this account."),
 			 	raise_exception=1)
 
 	def on_trash(self): 

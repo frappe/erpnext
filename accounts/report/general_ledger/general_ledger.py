@@ -36,9 +36,11 @@ def validate_filters(filters, account_details):
 		webnotes.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 	
 def get_columns():
-	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100", 
+	columns = ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100", 
 		"Credit:Float:100", "Voucher Type::120", "Voucher No::160", "Link::20", 
 		"Cost Center:Link/Cost Center:100", "Remarks::200"]
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 		
 def get_opening_balance_row(filters, debit_or_credit):
 	opening_balance = get_balance_on(filters["account"], add_days(filters["from_date"], -1))
@@ -108,4 +110,4 @@ def get_total_row(gle):
 		total_debit += flt(d[2])
 		total_credit += flt(d[3])
 		
-	return ["", "Total Debit/Credit", total_debit, total_credit, "", "", ""]
+	return ["", _("Total Debit/Credit"), total_debit, total_credit, "", "", ""]

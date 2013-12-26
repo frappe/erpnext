@@ -55,21 +55,21 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype: "Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", fieldname: "company", label: wn._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype: "Select", fieldname: "fiscal_year", label: wn._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: wn._("From Date")},
-		{fieldtype: "Label", label: wn._("To")},
-		{fieldtype: "Date", label: wn._("To Date")},
-		{fieldtype: "Button", label: wn._("Refresh"), icon:"icon-refresh icon-white",
+		{fieldtype: "Date", fieldname: "from_date", label: wn._("From Date")},
+		{fieldtype: "Label", fieldname: "to", label: wn._("To")},
+		{fieldtype: "Date", fieldname: "to_date", label: wn._("To Date")},
+		{fieldtype: "Button", fieldname: "refresh", label: wn._("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: wn._("Reset Filters")},
+		{fieldtype: "Button", fieldname: "reset_filters", label: wn._("Reset Filters")},
 	],
 	setup_filters: function() {
 		this._super();

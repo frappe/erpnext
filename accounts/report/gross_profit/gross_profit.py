@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import msgprint, _
 from webnotes.utils import flt
 from stock.utils import get_buying_amount, get_sales_bom_buying_amount
 
@@ -18,6 +19,8 @@ def execute(filters=None):
 		"Qty:Float", "Selling Rate:Currency", "Avg. Buying Rate:Currency", 
 		"Selling Amount:Currency", "Buying Amount:Currency",
 		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
+	# translate only the label part of column
+	columns = map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 	data = []
 	for row in source:
 		selling_amount = flt(row.amount)

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 def execute(filters=None):
 	account_map = get_account_map()
@@ -33,4 +34,5 @@ def get_columns(account_map):
 	columns = ["Customer:Link/Customer:120"] + \
 		[(company + ":Link/Account:120") for company in sorted(account_map)]
 
-	return columns
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
