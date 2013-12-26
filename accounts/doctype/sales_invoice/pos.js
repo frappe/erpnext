@@ -30,12 +30,14 @@ erpnext.POS = Class.extend({
 						</div>\
 						<br>\
 						<div class="totals-area" style="margin-left: 40%;">\
-							<table class="table table-condensed">\
-								<tr>\
-									<td><b>Net Total</b></td>\
-									<td style="text-align: right;" class="net-total"></td>\
-								</tr>\
-							</table>\
+							<div class="net-total-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td><b>Net Total</b></td>\
+										<td style="text-align: right;" class="net-total"></td>\
+									</tr>\
+								</table>\
+							</div>\
 							<div class="tax-table" style="display: none;">\
 								<table class="table table-condensed">\
 									<thead>\
@@ -46,6 +48,17 @@ erpnext.POS = Class.extend({
 									</thead>\
 									<tbody>\
 									</tbody>\
+								</table>\
+							</div>\
+							<div class="flat-discount-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td style="vertical-align: middle;"><b>Flat Discount</b></td>\
+										<td style="text-align: right;">\
+											<input type="text" class="form-control flat-discount" \
+												style="text-align: right;">\
+										</td>\
+									</tr>\
 								</table>\
 							</div>\
 							<div class="grand-total-area">\
@@ -82,6 +95,10 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
+		this.wrapper.find('input.flat-discount').on("change", function() {
+			wn.model.set_value(me.frm.doctype, me.frm.docname, "flat_discount", this.value);
+		});
+
 		this.call_function("delete-items", function() {me.remove_selected_item();});
 		this.call_function("make-payment", function() {me.make_payment();});
 	},
@@ -112,9 +129,9 @@ erpnext.POS = Class.extend({
 	},
 	make: function() {
 		this.make_party();
-		this.make_item_group();
-		this.make_search();
 		this.make_barcode();
+		this.make_search();
+		this.make_item_group();
 		this.make_item_list();
 	},
 	make_party: function() {
@@ -137,23 +154,23 @@ erpnext.POS = Class.extend({
 					me.party.toLowerCase(), this.value);
 		});
 	},
-	make_item_group: function() {
+	make_barcode: function() {
 		var me = this;
-		this.item_group = wn.ui.form.make_control({
+		this.barcode = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Link",
-				"options": "Item Group",
-				"label": "Item Group",
-				"fieldname": "pos_item_group",
-				"placeholder": "Item Group"
+				"fieldtype": "Data",
+				"label": "Barcode",
+				"fieldname": "pos_barcode",
+				"placeholder": "Barcode / Serial No"
 			},
-			parent: this.wrapper.find(".item-group-area"),
+			parent: this.wrapper.find(".barcode-area"),
 			only_input: true,
 		});
-		this.item_group.make_input();
-		this.item_group.$input.on("change", function() {
-			if(!me.item_group.autocomplete_open)
-				me.make_item_list();
+		this.barcode.make_input();
+		this.barcode.$input.on("keypress", function() {
+			if(me.barcode_timeout)
+				clearTimeout(me.barcode_timeout);
+			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
 		});
 	},
 	make_search: function() {
@@ -176,23 +193,23 @@ erpnext.POS = Class.extend({
 				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
-	make_barcode: function() {
+	make_item_group: function() {
 		var me = this;
-		this.barcode = wn.ui.form.make_control({
+		this.item_group = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Data",
-				"label": "Barcode",
-				"fieldname": "pos_barcode",
-				"placeholder": "Barcode / Serial No"
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"label": "Item Group",
+				"fieldname": "pos_item_group",
+				"placeholder": "Item Group"
 			},
-			parent: this.wrapper.find(".barcode-area"),
+			parent: this.wrapper.find(".item-group-area"),
 			only_input: true,
 		});
-		this.barcode.make_input();
-		this.barcode.$input.on("keypress", function() {
-			if(me.barcode_timeout)
-				clearTimeout(me.barcode_timeout);
-			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
+		this.item_group.make_input();
+		this.item_group.$input.on("change", function() {
+			if(!me.item_group.autocomplete_open)
+				me.make_item_list();
 		});
 	},
 	make_item_list: function() {
@@ -321,6 +338,7 @@ erpnext.POS = Class.extend({
 	refresh: function() {
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
+		this.wrapper.find('input.flat-discount').val(this.frm.doc.flat_discount);
 		this.barcode.set_input("");
 
 		this.show_items_in_item_cart();
