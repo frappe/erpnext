@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-12-19 11:10:11", 
+  "modified": "2013-12-26 17:50:21", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -364,13 +364,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "flat_discount", 
-  "fieldtype": "Currency", 
-  "label": "Flat Discount", 
-  "options": "Company:company:default_currency"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
   "label": "Taxes and Charges", 
@@ -458,6 +451,14 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "flat_discount", 
+  "fieldtype": "Currency", 
+  "label": "Flat Discount", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 0
  }, 
  {
   "doctype": "DocField", 

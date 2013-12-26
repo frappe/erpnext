@@ -25,7 +25,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos)) {
+		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || this.frm.doc.is_pos)) {
 			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
 				this.frm.set_value("is_pos", 1);
 				this.is_pos(function() {
@@ -144,8 +144,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 							me.set_default_values();
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();
-
-							if(callback_fn) callback_fn()
+							
+							if(callback_fn) callback_fn();
 						}
 					}
 				});

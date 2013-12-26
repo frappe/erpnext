@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-12-14 17:25:46", 
+  "modified": "2013-12-26 17:54:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -460,6 +460,13 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "flat_discount", 
+  "fieldtype": "Currency", 
+  "label": "Flat Discount", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
@@ -863,7 +870,6 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "match": "customer", 
   "role": "Customer", 
   "submit": 0, 
   "write": 0
