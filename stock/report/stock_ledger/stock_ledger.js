@@ -15,14 +15,14 @@ wn.query_reports["Stock Ledger"] = {
 			"fieldname":"from_date",
 			"label": wn._("From Date"),
 			"fieldtype": "Date",
-			"default": wn.defaults.get_user_default("year_start_date"),
+			"default": wn.datetime.add_months(wn.datetime.get_today(), -1),
 			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": wn._("To Date"),
 			"fieldtype": "Date",
-			"default": wn.defaults.get_user_default("year_end_date"),
+			"default": wn.datetime.get_today(),
 			"reqd": 1
 		},
 		{

@@ -95,9 +95,10 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 			wn.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
-				"to_date": sys_defaults.year_end_date
+				"to_date": sys_defaults.year_end_date,
+				"company": doc.company
 			};
-			wn.set_route("general-ledger");
+			wn.set_route("query-report", "General Ledger");
 		}, "icon-table");
 	}
 }

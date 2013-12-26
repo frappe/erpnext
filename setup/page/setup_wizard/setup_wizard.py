@@ -158,6 +158,10 @@ def set_defaults(args):
 	hr_settings.doc.emp_created_by = "Naming Series"
 	hr_settings.save()
 
+	email_settings = webnotes.bean("Email Settings")
+	email_settings.doc.send_print_in_body_and_attachment = 1
+	email_settings.save()
+
 	# control panel
 	cp = webnotes.doc("Control Panel", "Control Panel")
 	cp.company_name = args["company_name"]
@@ -171,11 +175,12 @@ def create_feed_and_todo():
 
 def create_email_digest():
 	from webnotes.profile import get_system_managers
-	system_managers = get_system_managers()
+	system_managers = get_system_managers(only_name=True)
 	if not system_managers: 
 		return
 	
-	for company in webnotes.conn.sql_list("select name FROM `tabCompany`"):
+	companies = webnotes.conn.sql_list("select name FROM `tabCompany`")
+	for company in companies:
 		if not webnotes.conn.exists("Email Digest", "Default Weekly Digest - " + company):
 			edigest = webnotes.bean({
 				"doctype": "Email Digest",
@@ -186,10 +191,24 @@ def create_email_digest():
 			})
 
 			for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
-				edigest.doc.fields[fieldname] = 1
+				if fieldname != "scheduler_errors":
+					edigest.doc.fields[fieldname] = 1
 		
 			edigest.insert()
-		
+	
+	# scheduler errors digest
+	if companies:
+		edigest = webnotes.new_bean("Email Digest")
+		edigest.doc.fields.update({
+			"name": "Scheduler Errors",
+			"company": companies[0],
+			"frequency": "Daily",
+			"recipient_list": "\n".join(system_managers),
+			"scheduler_errors": 1,
+			"enabled": 1
+		})
+		edigest.insert()
+	
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
 	if start_year == getdate(fy_end_date).year:
