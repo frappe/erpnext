@@ -16,7 +16,7 @@ class BudgetError(webnotes.ValidationError): pass
 
 
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
-	return get_fiscal_years(date, fiscal_year, label, verbose=1)[0]
+	return get_fiscal_years(date, fiscal_year, label, verbose)[0]
 	
 def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)

@@ -113,7 +113,14 @@ def update_entries_after(args, verbose=1):
 				(qty_after_transaction * valuation_rate) or 0
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
-			
+		
+		# rounding as per precision
+		from webnotes.model.meta import get_field_precision
+		meta = webnotes.get_doctype("Stock Ledger Entry")
+		
+		stock_value = flt(stock_value, get_field_precision(meta.get_field("stock_value"), 
+			webnotes._dict({"fields": sle})))
+		
 		stock_value_difference = stock_value - prev_stock_value
 		prev_stock_value = stock_value
 			

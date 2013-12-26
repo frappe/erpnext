@@ -150,7 +150,7 @@ class DocType(StockController):
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No' 
 			order by posting_date desc, posting_time desc, name desc""", 
 			("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1):
-				if self.doc.name in get_serial_nos(sle.serial_no):
+				if self.doc.name.upper() in get_serial_nos(sle.serial_no):
 					if sle.actual_qty > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
 					else:
@@ -268,7 +268,8 @@ def get_item_details(item_code):
 		from tabItem where name=%s""", item_code, as_dict=True)[0]
 		
 def get_serial_nos(serial_no):
-	return [s.strip() for s in cstr(serial_no).strip().replace(',', '\n').split('\n') if s.strip()]
+	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n') 
+		if s.strip()]
 
 def make_serial_no(serial_no, sle):
 	sr = webnotes.new_bean("Serial No")

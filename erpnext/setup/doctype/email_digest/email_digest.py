@@ -9,6 +9,7 @@ from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 from webnotes.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from webnotes.utils.email_lib import sendmail
 
 content_sequence = [
 	["Income / Expenses", ["income_year_to_date", "bank_balance",
@@ -19,16 +20,16 @@ content_sequence = [
 	["Selling", ["new_leads", "new_enquiries", "new_quotations", "new_sales_orders"]], 
 	["Stock", ["new_delivery_notes",  "new_purchase_receipts", "new_stock_entries"]], 
 	["Support", ["new_communications", "new_support_tickets", "open_tickets"]], 
-	["Projects", ["new_projects"]]
+	["Projects", ["new_projects"]],
+	["System", ["scheduler_errors"]],
 ]
 
 user_specific_content = ["calendar_events", "todo_list"]
 
-digest_template = 	"""\
-<style>p.ed-indent { margin-right: 17px; }</style>
-<h2>%(digest)s</h2>
-<p style='color: grey'>%(date)s</p>
+digest_template = """<style>p.ed-indent { margin-right: 17px; }</style>
+<h2>%(name)s</h2>
 <h4>%(company)s</h4>
+<p style='color: grey'>%(date)s</p>
 <hr>
 %(with_value)s
 %(no_value)s
@@ -53,10 +54,10 @@ class DocType(DocListController):
 
 	def get_profiles(self):
 		"""get list of profiles"""
-		import webnotes
 		profile_list = webnotes.conn.sql("""
 			select name, enabled from tabProfile
 			where docstatus=0 and name not in ('Administrator', 'Guest')
+			and user_type = "System User"
 			order by enabled desc, name asc""", as_dict=1)
 
 		if self.doc.recipient_list:
@@ -80,13 +81,15 @@ class DocType(DocListController):
 			for user_id in recipients:
 				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
 					common_msg)
-				from webnotes.utils.email_lib import sendmail
-				sendmail(recipients=user_id, subject="[ERPNext] " + (self.doc.frequency + " Digest"),
-					msg=msg_for_this_receipient)
+				if msg_for_this_receipient:
+					sendmail(recipients=user_id, 
+						subject="[ERPNext] [{frequency} Digest] {name}".format(
+							frequency=self.doc.frequency, name=self.doc.name), 
+						msg=msg_for_this_receipient)
 			
 	def get_digest_msg(self):
 		return self.get_msg_html(self.get_user_specific_content(webnotes.session.user) + \
-			self.get_common_content())
+			self.get_common_content(), send_only_if_updates=False)
 	
 	def get_common_content(self):
 		out = []
@@ -117,14 +120,19 @@ class DocType(DocListController):
 		
 		return out
 				
-	def get_msg_html(self, out):
+	def get_msg_html(self, out, send_only_if_updates=True):
 		with_value = [o[1] for o in out if o[0]]
 		
 		if with_value:
+			has_updates = True
 			with_value = "\n".join(with_value)
 		else:
-			with_value = "<p>There were no updates in the items selected for this digest.</p>"
+			has_updates = False
+			with_value = "<p>There were no updates in the items selected for this digest.</p><hr>"
 		
+		if not has_updates and send_only_if_updates:
+			return
+			
 		# seperate out no value items
 		no_value = [o[1] for o in out if not o[0]]
 		if no_value:
@@ -138,7 +146,8 @@ class DocType(DocListController):
 				"date": date,
 				"company": self.doc.company,
 				"with_value": with_value,
-				"no_value": no_value or ""
+				"no_value": no_value or "",
+				"name": self.doc.name
 			}
 		
 		return msg
@@ -241,7 +250,7 @@ class DocType(DocListController):
 		return self.get_new_count("Lead", self.meta.get_label("new_leads"))
 		
 	def get_new_enquiries(self):
-		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"))
+		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1)
 	
 	def get_new_quotations(self):
 		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total")
@@ -253,7 +262,8 @@ class DocType(DocListController):
 		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total")
 		
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Material Request", self.meta.get_label("new_purchase_requests"))
+		return self.get_new_count("Material Request",
+			 self.meta.get_label("new_purchase_requests"), docstatus=1)
 		
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
@@ -271,13 +281,16 @@ class DocType(DocListController):
 		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount")
 		
 	def get_new_support_tickets(self):
-		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"), False)
+		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"), 
+			filter_by_company=False)
 		
 	def get_new_communications(self):
-		return self.get_new_count("Communication", self.meta.get_label("new_communications"), False)
+		return self.get_new_count("Communication", self.meta.get_label("new_communications"), 
+			filter_by_company=False)
 		
 	def get_new_projects(self):
-		return self.get_new_count("Project", self.meta.get_label("new_projects"), False)
+		return self.get_new_count("Project", self.meta.get_label("new_projects"), 
+			filter_by_company=False)
 		
 	def get_calendar_events(self, user_id):
 		from webnotes.core.doctype.event.event import get_events
@@ -321,22 +334,22 @@ class DocType(DocListController):
 		else:
 			return 0, "<p>To Do</p>"
 	
-	def get_new_count(self, doctype, label, filter_by_company=True):
+	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
 		if filter_by_company:
 			company = """and company="%s" """ % self.doc.company
 		else:
 			company = ""
 		count = webnotes.conn.sql("""select count(*) from `tab%s`
-			where docstatus < 2 %s and
-			date(creation)>=%s and date(creation)<=%s""" % (doctype, company, "%s", "%s"),
-			(self.from_date, self.to_date))
+			where docstatus=%s %s and
+			date(creation)>=%s and date(creation)<=%s""" % 
+			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
 		count = count and count[0][0] or 0
 		
 		return count, self.get_html(label, None, count)
 		
 	def get_new_sum(self, doctype, label, sum_field):
 		count_sum = webnotes.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
-			from `tab%s` where docstatus < 2 and company = %s and
+			from `tab%s` where docstatus=1 and company = %s and
 			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
 			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
 		count, total = count_sum and count_sum[0] or (0, 0)
@@ -448,6 +461,10 @@ class DocType(DocListController):
 				t for t in open_tickets])
 		else:
 			return 0, "No Open Tickets!"
+			
+	def get_scheduler_errors(self):
+		import webnotes.utils.scheduler
+		return webnotes.utils.scheduler.get_error_report(self.from_date, self.to_date)
 	
 	def onload(self):
 		self.get_next_sending()

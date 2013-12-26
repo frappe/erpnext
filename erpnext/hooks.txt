@@ -52,13 +52,12 @@ scheduler_event			all:webnotes.utils.email_lib.bulk.flush
 #### Daily
 
 scheduler_event			daily:webnotes.core.doctype.event.event.send_event_digest
-scheduler_event			daily:erpnext.setup.doctype.email_digest.email_digest.send
 scheduler_event			daily:webnotes.core.doctype.notification_count.notification_count.delete_event_notification_count
 scheduler_event			daily:webnotes.utils.email_lib.bulk.clear_outbox
 scheduler_event			daily:erpnext.accounts.doctype.sales_invoice.sales_invoice.manage_recurring_invoices
 scheduler_event			daily:erpnext.setup.doctype.backup_manager.backup_manager.take_backups_daily
 scheduler_event			daily:erpnext.stock.utils.reorder_item
-scheduler_event			daily:webnotes.scheduler.report_errors
+scheduler_event			daily:erpnext.setup.doctype.email_digest.email_digest.send
 
 #### Weekly
 

@@ -24,10 +24,6 @@ def process_gl_map(gl_map, merge_entries=True):
 		gl_map = merge_similar_entries(gl_map)
 	
 	for entry in gl_map:
-		# round off upto 2 decimal
-		entry.debit = flt(entry.debit, 2)
-		entry.credit = flt(entry.credit, 2)
-	
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
@@ -49,7 +45,7 @@ def merge_similar_entries(gl_map):
 			same_head.credit = flt(same_head.credit) + flt(entry.credit)
 		else:
 			merged_gl_map.append(entry)
-			
+			 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x.debit)!=0 or flt(x.credit)!=0, merged_gl_map)
 	return merged_gl_map

@@ -112,10 +112,11 @@ class DocType(SellingController):
 		self.validate_warehouse()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		self.doclist = make_packing_list(self,'sales_order_details')
 
+		self.doclist = make_packing_list(self,'sales_order_details')
+		
 		self.validate_with_previous_doc()
-				
+		
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
@@ -124,8 +125,7 @@ class DocType(SellingController):
 			"Cancelled"])
 
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
-		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
-		
+		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'		
 		
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_user, validate_warehouse_company

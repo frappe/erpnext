@@ -8,7 +8,6 @@ from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
-
 class OverProductionError(webnotes.ValidationError): pass
 
 class DocType:
@@ -37,15 +36,20 @@ class DocType:
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
-				msgprint("""Incorrect BOM: %s entered. 
+				webnotes.throw("""Incorrect BOM: %s entered. 
 					May be BOM not exists or inactive or not submitted 
-					or for some other item.""" % cstr(self.doc.bom_no), raise_exception=1)
+					or for some other item.""" % cstr(self.doc.bom_no))
 					
 	def validate_sales_order(self):
 		if self.doc.sales_order:
-			if not webnotes.conn.sql("""select name from `tabSales Order` 
-					where name=%s and docstatus = 1""", self.doc.sales_order):
-				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
+			so = webnotes.conn.sql("""select name, delivery_date from `tabSales Order` 
+				where name=%s and docstatus = 1""", self.doc.sales_order, as_dict=1)[0]
+
+			if not so.name:
+				webnotes.throw("Sales Order: %s is not valid" % self.doc.sales_order)
+
+			if not self.doc.expected_delivery_date:
+				self.doc.expected_delivery_date = so.delivery_date
 			
 			self.validate_production_order_against_so()
 			
@@ -76,11 +80,11 @@ class DocType:
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 				
 		if total_qty > so_qty:
-			webnotes.msgprint(_("Total production order qty for item") + ": " + 
+			webnotes.throw(_("Total production order qty for item") + ": " + 
 				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
 				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
 				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
-				_("Please reduce qty."), raise_exception=OverProductionError)
+				_("Please reduce qty."), exc=OverProductionError)
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
@@ -114,8 +118,8 @@ class DocType:
 		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
-			msgprint("""Submitted Stock Entry %s exists against this production order. 
-				Hence can not be cancelled.""" % stock_entry[0][0], raise_exception=1)
+			webnotes.throw("""Submitted Stock Entry %s exists against this production order. 
+				Hence can not be cancelled.""" % stock_entry[0][0])
 
 		webnotes.conn.set(self.doc,'status', 'Cancelled')
 		self.update_planned_qty(-self.doc.qty)

@@ -16,8 +16,6 @@ import webnotes
 from webnotes.utils import get_request_site_address, cstr
 from webnotes import _
 
-from backup_manager import ignore_list
-
 @webnotes.whitelist()
 def get_dropbox_authorize_url():
 	sess = get_dropbox_session()
@@ -100,9 +98,7 @@ def backup_to_dropbox():
 	path = get_files_path()
 	for filename in os.listdir(path):
 		filename = cstr(filename)
-		if filename in ignore_list:
-			continue
-		
+
 		found = False
 		filepath = os.path.join(path, filename)
 		for file_metadata in response["contents"]:
