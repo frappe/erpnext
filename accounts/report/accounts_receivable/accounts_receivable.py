@@ -18,7 +18,7 @@ class AccountsReceivableReport(object):
 		return self.get_columns(), self.get_data()
 		
 	def get_columns(self):
-		return [
+		columns = [
 			"Posting Date:Date:80", "Account:Link/Account:150",
 			"Voucher Type::110", "Voucher No::120", "::30",
 			"Due Date:Date:80",  
@@ -27,6 +27,8 @@ class AccountsReceivableReport(object):
 			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100",
 			"Customer:Link/Customer:200", "Territory:Link/Territory:80", "Remarks::200"
 		]
+		# translate only the label part of column
+		return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 		
 	def get_data(self):
 		data = []

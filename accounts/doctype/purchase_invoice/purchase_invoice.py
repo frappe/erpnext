@@ -75,9 +75,9 @@ class DocType(BuyingController):
 					ret['due_date'] = add_days(cstr(self.doc.posting_date), 
 						acc_head and cint(acc_head[0][1]) or 0)
 			elif not acc_head:
-				msgprint("%s does not have an Account Head in %s. \
-					You must first create it from the Supplier Master" % \
-					(self.doc.supplier, self.doc.company))
+				msgprint(_("%(supplier_name)s does not have an Account Head in %(company_name)s. \
+					You must first create it from the Supplier Master") % \
+					dict(supplier_name=self.doc.supplier, company_name=self.doc.company))
 		return ret
 		
 	def set_supplier_defaults(self):
@@ -93,19 +93,19 @@ class DocType(BuyingController):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
 				valid_item = webnotes.conn.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
 				if valid_item[0][0] == 2:
-					msgprint("Item : '%s' is Inactive, you can restore it from Trash" %(d.item_code))
+					msgprint(_("Item : '%(item_code)s' is Inactive, you can restore it from Trash") %dict(item_code=d.item_code))
 					raise Exception
 				if not valid_item[0][1] == 'Yes':
-					msgprint("Item : '%s' is not Purchase Item"%(d.item_code))
+					msgprint(_("Item : '%(item_code)s' is not Purchase Item")%dict(item_code=d.item_code))
 					raise Exception
 						
 	def check_conversion_rate(self):
 		default_currency = get_company_currency(self.doc.company)		
 		if not default_currency:
-			msgprint('Message: Please enter default currency in Company Master')
+			msgprint(_('Message: Please enter default currency in Company Master'))
 			raise Exception
 		if (self.doc.currency == default_currency and flt(self.doc.conversion_rate) != 1.00) or not self.doc.conversion_rate or (self.doc.currency != default_currency and flt(self.doc.conversion_rate) == 1.00):
-			msgprint("Message: Please Enter Appropriate Conversion Rate.")
+			msgprint(_("Message: Please Enter Appropriate Conversion Rate."))
 			raise Exception				
 			
 	def validate_bill_no(self):
@@ -115,28 +115,28 @@ class DocType(BuyingController):
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
 				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
-				msgprint("Please check you have already booked expense against Bill No. %s \
-					in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])), 
+				msgprint(_("Please check you have already booked expense against Bill No. %(bill_no)s \
+					in Purchase Invoice %(invoice_no)s") % dict(bill_no=cstr(b_no[0][0]), invoice_no=cstr(b_no[0][1])), 
 					raise_exception=1)
 					
 			if not self.doc.remarks and self.doc.bill_date:
-				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" 
-					% (self.doc.bill_no, formatdate(self.doc.bill_date)))
+				self.doc.remarks = (self.doc.remarks or '') + "\n" + (_("Against Bill %(bill_no)s dated %(bill_date)s") 
+					% dict(bill_no=self.doc.bill_no, bill_date=formatdate(self.doc.bill_date)))
 
 		if not self.doc.remarks:
-			self.doc.remarks = "No Remarks"
+			self.doc.remarks = _("No Remarks")
 
 	def validate_credit_acc(self):
 		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
 			self.doc.credit_to)
 		if not acc:
-			msgprint("Account: "+ self.doc.credit_to + "does not exist")
+			msgprint(_("Account: %(account_name)s does not exist.") % dict(account_name=self.doc.credit_to))
 			raise Exception
 		elif acc[0][0] and acc[0][0] != 'Credit':
-			msgprint("Account: "+ self.doc.credit_to + "is not a credit account")
+			msgprint(_("Account: %(Account_name)s is not a credit account.") % dict(account_name=self.doc.credit_to))
 			raise Exception
 		elif acc[0][1] and acc[0][1] != 'No':
-			msgprint("Account: "+ self.doc.credit_to + "is a pl account")
+			msgprint(_("Account: %(account_name)s is a pl account.") % dict(account_name))
 			raise Exception
 	
 	# Validate Acc Head of Supplier and Credit To Account entered
@@ -146,7 +146,8 @@ class DocType(BuyingController):
 			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
-				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
+				msgprint(_("Credit To: %(credit_to)s do not match with Supplier: %(supplier_name)s for Company: %(company_name)s.\n If both correctly entered, please select Master Type and Master Name in account master.") %
+						dict(credit_to=self.doc.credit_to,supplier_name=self.doc.supplier,company_name=self.doc.company), raise_exception=1)
 				
 	# Check for Stopped PO
 	# ---------------------
@@ -157,7 +158,7 @@ class DocType(BuyingController):
 				check_list.append(d.purhcase_order)
 				stopped = webnotes.conn.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
 				if stopped:
-					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
+					msgprint(_("One cannot do any transaction against 'Purchase Order' : %(purchase_order)s, it's status is 'Stopped'") % dict(purchase_order=d.purchase_order))
 					raise Exception
 		
 	def validate_with_previous_doc(self):
@@ -203,7 +204,7 @@ class DocType(BuyingController):
 		if self.doc.is_opening != 'Yes':
 			self.doc.aging_date = self.doc.posting_date
 		elif not self.doc.aging_date:
-			msgprint("Aging Date is mandatory for opening entry")
+			msgprint(_("Aging Date is mandatory for opening entry"))
 			raise Exception
 			
 	def set_against_expense_account(self):
@@ -225,8 +226,8 @@ class DocType(BuyingController):
 					against_accounts.append(stock_not_billed_account)
 			
 			elif not item.expense_head:
-				msgprint(_("Expense account is mandatory for item") + ": " + 
-					(item.item_code or item.item_name), raise_exception=1)
+				msgprint(_("Expense account is mandatory for item : %(item_code)s") %
+					dict(item_code=item.item_code or item.item_name), raise_exception=1)
 			
 			elif item.expense_head not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
@@ -238,14 +239,14 @@ class DocType(BuyingController):
 		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_order:
-					 msgprint("Purchse Order No. required against item %s"%d.item_code)
+					 msgprint(_("Purchse Order No. required against item %(item_code)s")%dict(item_code=d.item_code))
 					 raise Exception
 
 	def pr_required(self):
 		if webnotes.conn.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_receipt:
-					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
+					 msgprint(_("Purchase Receipt No. required against item %(item_code)s")%dict(item_code=d.item_code))
 					 raise Exception
 
 	def validate_write_off_account(self):
@@ -257,11 +258,11 @@ class DocType(BuyingController):
 			if d.purchase_order:
 				submitted = webnotes.conn.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
 				if not submitted:
-					webnotes.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
+					webnotes.throw(_("Purchase Order : %(purchase_order)s is not submitted.") % dict(purchase_order=cstr(d.purchase_order)))
 			if d.purchase_receipt:
 				submitted = webnotes.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
 				if not submitted:
-					webnotes.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
+					webnotes.throw(_("Purchase Receipt : %(purchase_receipt)d is not submitted.") % dict(purchase_receipt = cstr(d.purchase_receipt)))
 					
 					
 	def update_against_document_in_jv(self):
@@ -341,8 +342,8 @@ class DocType(BuyingController):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
 					webnotes.throw(_("Row %(row)s: Cost Center is mandatory \
-						if tax/charges category is Valuation or Valuation and Total" % 
-						{"row": tax.idx}))
+						if tax/charges category is Valuation or Valuation and Total") % 
+						{"row": tax.idx})
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)

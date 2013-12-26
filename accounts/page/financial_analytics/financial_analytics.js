@@ -16,7 +16,7 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
-		{fieldtype:"Select", label: wn._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
+		{fieldtype:"Select", fieldname: 'pl_or_bs', label: wn._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
 				
@@ -26,19 +26,19 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", fieldname: 'company', label: wn._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
 			}},
-		{fieldtype:"Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", fieldname: 'fiscal_year', label: wn._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Select", label: wn._("Range"), 
+		{fieldtype:"Date", fieldname: 'from_date', label: wn._("From Date")},
+		{fieldtype:"Label", fieldname: 'to', label: wn._("To")},
+		{fieldtype:"Date", fieldname: 'to_date', label: wn._("To Date")},
+		{fieldtype:"Select", fieldname: 'range', label: wn._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Button", fieldname: 'refresh', label: wn._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", fieldname: 'reset_fielters', label: wn._("Reset Filters")}
 	],
 	setup_columns: function() {
 		var std_columns = [

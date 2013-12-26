@@ -77,7 +77,7 @@ class DocType(DocListController):
 		
 		if overlaps:
 			company_currency = get_company_currency(self.doc.company)
-			msgprint(_("Error") + ": " + _("Overlapping Conditions found between") + ":")
+			msgprint(_("Error: Overlapping Conditions found between :"))
 			messages = []
 			for d1, d2 in overlaps:
 				messages.append("%s-%s = %s " % (d1.from_value, d1.to_value, fmt_money(d1.shipping_amount, currency=company_currency)) + 

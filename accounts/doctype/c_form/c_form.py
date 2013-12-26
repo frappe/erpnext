@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, getdate
 from webnotes.model.bean import getlist
+from webnotes import msgprint, _
 
 class DocType:
 	def __init__(self,d,dl):
@@ -20,18 +21,18 @@ class DocType:
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
 				
 				if not inv:
-					webnotes.msgprint("""Invoice: %s is not exists in the system or 
-						is not submitted, please check.""" % d.invoice_no, raise_exception=1)
+					msgprint(_("""Invoice: %(invoice_name)s is not exists in the system or 
+						is not submitted, please check.""") % dict(invoice_name=d.invoice_no), raise_exception=1)
 					
 				elif inv[0][0] != 'Yes':
-					webnotes.msgprint("C-form is not applicable for Invoice: %s" % 
-						d.invoice_no, raise_exception=1)
+					msgprint(_("C-form is not applicable for Invoice: %(invoice_name)s") % 
+						dict(invoice_name=d.invoice_no), raise_exception=1)
 					
 				elif inv[0][1] and inv[0][1] != self.doc.name:
-					webnotes.msgprint("""Invoice %s is tagged in another C-form: %s.
+					msgprint(_("""Invoice %(invoice_name)s is tagged in another C-form: %(cform_name)s.
 						If you want to change C-form no for this invoice,
-						please remove invoice no from the previous c-form and then try again""" % 
-						(d.invoice_no, inv[0][1]), raise_exception=1)
+						please remove invoice no from the previous c-form and then try again""") % 
+						dict(invoice_name=d.invoice_no, cform_name=inv[0][1]), raise_exception=1)
 
 	def on_update(self):
 		"""	Update C-Form No on invoices"""
@@ -57,7 +58,7 @@ class DocType:
 				('%s', ', '.join(['%s']*len(inv)), '%s'),
 				tuple([self.doc.modified] + inv + [self.doc.name]))
 		else:
-			webnotes.msgprint("Please enter atleast 1 invoice in the table", raise_exception=1)
+			msgprint(_("Please enter atleast 1 invoice in the table"), raise_exception=1)
 
 	def set_total_invoiced_amount(self):
 		total = sum([flt(d.grand_total) for d in getlist(self.doclist, 'invoice_details')])

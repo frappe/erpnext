@@ -20,18 +20,18 @@ class DocType(DocTypeNestedSet):
 		
 	def validate_mandatory(self):
 		if not self.doc.group_or_ledger:
-			msgprint("Please select Group or Ledger value", raise_exception=1)
+			msgprint(_("Please select Group or Ledger value"), raise_exception=1)
 			
 		if self.doc.cost_center_name != self.doc.company and not self.doc.parent_cost_center:
-			msgprint("Please enter parent cost center", raise_exception=1)
+			msgprint(_("Please enter parent cost center"), raise_exception=1)
 		elif self.doc.cost_center_name == self.doc.company and self.doc.parent_cost_center:
 			msgprint(_("Root cannot have a parent cost center"), raise_exception=1)
 		
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
-			msgprint("Cost Center: %s has existing child. You can not convert this cost center to ledger" % (self.doc.name), raise_exception=1)
+			msgprint(_("Cost Center: %(cost_center_name)s has existing child. You can not convert this cost center to ledger") % dict(cost_center_name=self.doc.name), raise_exception=1)
 		elif self.check_gle_exists():
-			msgprint("Cost Center with existing transaction can not be converted to ledger.", raise_exception=1)
+			msgprint(_("Cost Center with existing transaction can not be converted to ledger."), raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Ledger'
 			self.doc.save()
@@ -39,7 +39,7 @@ class DocType(DocTypeNestedSet):
 			
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
-			msgprint("Cost Center with existing transaction can not be converted to group.", raise_exception=1)
+			msgprint(_("Cost Center with existing transaction can not be converted to group."), raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Group'
 			self.doc.save()
@@ -56,10 +56,10 @@ class DocType(DocTypeNestedSet):
 		check_acc_list = []
 		for d in getlist(self.doclist, 'budget_details'):
 			if self.doc.group_or_ledger=="Group":
-				msgprint("Budget cannot be set for Group Cost Centers", raise_exception=1)
+				msgprint(_("Budget cannot be set for Group Cost Centers"), raise_exception=1)
 				
 			if [d.account, d.fiscal_year] in check_acc_list:
-				msgprint("Account " + d.account + "has been entered more than once for fiscal year " + d.fiscal_year, raise_exception=1)
+				msgprint(_("Account %(account_name)s has been entered more than once for fiscal year %(fiscal_year)s") % dict(account_name=d.account, fiscal_year = d.fiscal_year), raise_exception=1)
 			else: 
 				check_acc_list.append([d.account, d.fiscal_year])
 

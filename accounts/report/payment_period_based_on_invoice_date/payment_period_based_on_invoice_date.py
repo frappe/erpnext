@@ -37,12 +37,14 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return ["Journal Voucher:Link/Journal Voucher:140", "Account:Link/Account:140", 
+	columns = ["Journal Voucher:Link/Journal Voucher:140", "Account:Link/Account:140", 
 		"Posting Date:Date:100", "Against Invoice:Link/Purchase Invoice:130", 
 		"Against Invoice Posting Date:Date:130", "Debit:Currency:120", "Credit:Currency:120", 
 		"Reference No::100", "Reference Date:Date:100", "Remarks::150", "Age:Int:40", 
 		"0-30:Currency:100", "30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100"
 	]
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 
 def get_conditions(filters):
 	conditions = ""

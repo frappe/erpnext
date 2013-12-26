@@ -176,7 +176,7 @@ class DocType(SellingController):
 			if d.time_log_batch:
 				status = webnotes.conn.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
-					webnotes.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
+					webnotes.msgprint(_("Time Log Batch status must be 'Submitted': %(time_log_batch)s")%dict(time_log_batch=d.time_log_batch),
 						raise_exception=True)
 
 	def set_pos_fields(self, for_validate=False):
@@ -218,7 +218,7 @@ class DocType(SellingController):
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
 		if not self.doc.company:
-			msgprint("Please select company first and re-select the customer after doing so",
+			msgprint(_("Please select company first and re-select the customer after doing so"),
 			 	raise_exception=1)
 		if self.doc.customer:
 			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
@@ -230,9 +230,9 @@ class DocType(SellingController):
 			if acc_head and acc_head[0][0]:
 				return acc_head[0][0]
 			else:
-				msgprint("%s does not have an Account Head in %s. \
-					You must first create it from the Customer Master" % 
-					(self.doc.customer, self.doc.company))
+				msgprint(_("%(customer_name)s does not have an Account Head in %(company_name)s. \
+					You must first create it from the Customer Master") % 
+					dict(customer_name=self.doc.customer, company_name=self.doc.company))
 
 	def get_due_date(self):
 		"""Set Due Date = Posting Date + Credit Days"""
@@ -295,20 +295,20 @@ class DocType(SellingController):
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
-				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
-					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
+				msgprint(_("Debit To: %(account_name)s do not match with Customer: %(customer_name)s for Company: %(company_name)s.\n If both correctly entered, please select Master Type \
+					and Master Name in account master.") %dict(account_name=self.doc.debit_to, customer_name=self.doc.customer, company_name=self.doc.company), raise_exception=1)
 
 
 	def validate_debit_acc(self):
 		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
 		if not acc:
-			msgprint("Account: "+ self.doc.debit_to + " does not exist")
+			msgprint(_("Account: %(account_name)s does not exist.") % dict(account_name=self.doc.debit_to))
 			raise Exception
 		elif acc[0][0] and acc[0][0] != 'Debit':
-			msgprint("Account: "+ self.doc.debit_to + " is not a debit account")
+			msgprint(_("Account: %(account_name)s is not a debit account.") % dict(account_name=self.doc.debit_to))
 			raise Exception
 		elif acc[0][1] and acc[0][1] != 'No':
-			msgprint("Account: "+ self.doc.debit_to + " is a pl account")
+			msgprint(_("Account: %(account_name)s is a pl account.") % dict(account_name=self.doc.debit_to))
 			raise Exception
 
 
@@ -318,10 +318,10 @@ class DocType(SellingController):
 			item = webnotes.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
 			acc =	webnotes.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
 			if not acc:
-				msgprint("Account: "+d.income_account+" does not exist in the system")
+				msgprint(_("Account: %(account_name)s does not exist in the system") % dict(account_name=d.income_account))
 				raise Exception
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
-				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code)
+				msgprint(_("Please select income head with account type 'Fixed Asset Account' as Item %(item_code)s is an asset item") % dict(item_code=d.item_code))
 				raise Exception
 				
 		
@@ -359,7 +359,7 @@ class DocType(SellingController):
 		if self.doc.is_opening != 'Yes':
 			self.doc.aging_date = self.doc.posting_date
 		elif not self.doc.aging_date:
-			msgprint("Aging Date is mandatory for opening entry")
+			msgprint(_("Aging Date is mandatory for opening entry"))
 			raise Exception
 			
 
@@ -384,7 +384,8 @@ class DocType(SellingController):
 				for d in getlist(self.doclist,'entries'):
 					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
-						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
+						msgprint(_("%(fieldname)s is mandatory for stock item which is not mentioed against item: %(item_code)s") %
+							dict(fieldname=i,item_code=d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -392,12 +393,13 @@ class DocType(SellingController):
 		if self.doc.project_name and self.doc.customer:
 			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
-				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.doc.customer,self.doc.project_name))
+				msgprint(_("Customer - %(customer_name)s does not belong to project - %(project_name)s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project.")%
+					dict(customer_name=self.doc.customer,project_name=self.doc.project_name))
 				raise Exception
 
 	def validate_pos(self):
 		if not self.doc.cash_bank_account and flt(self.doc.paid_amount):
-			msgprint("Cash/Bank Account is mandatory for POS, for making payment entry")
+			msgprint(_("Cash/Bank Account is mandatory for POS, for making payment entry"))
 			raise Exception
 		if flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) \
 				- flt(self.doc.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
@@ -408,18 +410,18 @@ class DocType(SellingController):
 	def validate_item_code(self):
 		for d in getlist(self.doclist, 'entries'):
 			if not d.item_code:
-				msgprint("Please enter Item Code at line no : %s to update stock or remove check from Update Stock in Basic Info Tab." % (d.idx),
+				msgprint(_("Please enter Item Code at line no : %(line_no)s to update stock or remove check from Update Stock in Basic Info Tab.") % dict(line_no=d.idx),
 				raise_exception=True)
 				
 	def validate_delivery_note(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.delivery_note:
-				msgprint("""Stock update can not be made against Delivery Note""", raise_exception=1)
+				msgprint(_("""Stock update can not be made against Delivery Note"""), raise_exception=1)
 
 
 	def validate_write_off_account(self):
 		if flt(self.doc.write_off_amount) and not self.doc.write_off_account:
-			msgprint("Please enter Write Off Account", raise_exception=1)
+			msgprint(_("Please enter Write Off Account"), raise_exception=1)
 
 
 	def validate_c_form(self):
@@ -448,9 +450,9 @@ class DocType(SellingController):
 		if not w:
 			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
-				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
+				msgprint(_("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system."), raise_exception=True)
 			elif not ps[0][1]:
-				msgprint("Please enter warehouse in POS Setting")
+				msgprint(_("Please enter warehouse in POS Setting"))
 			else:
 				w = ps[0][1]
 		return w
@@ -478,7 +480,7 @@ class DocType(SellingController):
 				else:
 					# show message that the amount is not paid
 					webnotes.conn.set(self.doc,'paid_amount',0)
-					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+					webnotes.msgprint(_("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified."))
 		else:
 			webnotes.conn.set(self.doc,'paid_amount',0)
 		
@@ -487,13 +489,13 @@ class DocType(SellingController):
 			if d.sales_order:
 				submitted = webnotes.conn.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
 				if not submitted:
-					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
+					msgprint(_("Sales Order : %(sales_order)s is not submitted")%dict(sales_order=cstr(d.sales_order)))
 					raise Exception , "Validation Error."
 
 			if d.delivery_note:
 				submitted = webnotes.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
-					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
+					msgprint(_("Delivery Note : %(delivery_note)s is not submitted") % dict(delivery_note=cstr(d.delivery_note)))
 					raise Exception , "Validation Error."
 
 	def update_stock_ledger(self):
@@ -684,7 +686,7 @@ class DocType(SellingController):
 						raise_exception=1)
 					
 		else:
-			msgprint("Notification Email Addresses not specified for recurring invoice",
+			msgprint(_("Notification Email Addresses not specified for recurring invoice"),
 				raise_exception=1)
 				
 	def set_next_date(self):
@@ -785,32 +787,41 @@ def make_new_invoice(ref_wrapper, posting_date):
 	
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
-	subject = "Invoice : " + new_rv.doc.name
+	subject = _("Invoice : %(invoice_name)s") % dict(invoice_name=new_rv.doc.name)
 
 	com = new_rv.doc.company
 
-	hd = '''<div><h2>%s</h2></div>
-			<div><h3>Invoice: %s</h3></div>
+	hd = '''<div><h2>%(company_name)s</h2></div>
+			<div><h3>Invoice: %(invoice_name)s</h3></div>
 			<table cellspacing= "5" cellpadding="5"  width = "100%%">
 				<tr>
-					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
-					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
+					<td width = "50%%"><b>%(customer_label)s</b><br>%(customer_name)s<br>%(address_display)s</td>
+					<td width = "50%%">%(invoice_date_label)s	   : %(invoice_date)s<br>%(invoice_period_label)s : %(invoice_period_from_date)s to %(invoice_period_to_date)s <br>%(due_date_label)s	   : %(due_date)s</td>
 				</tr>
 			</table>
-		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
-		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
-		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
+		''' % dict(company_name=com, invoice_name=new_rv.doc.name, customer_label=_('Customer'), 
+			customer_name=new_rv.doc.customer_name, address_display=new_rv.doc.address_display, 
+			invoice_date_label=_("Invoice Date"), invoice_date=getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), 
+			invoice_period_label=_("Invoice Period"), invoice_period_from_date=getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), 
+			invoice_period_to_date=getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),
+			due_date_label=_("Due Date"), due_date=getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
 	
 	
 	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
 				<tr>
-					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
-					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="left"><b>%(item_label)s</b></td>
+					<td width = "40%%" bgcolor="#CCC" align="left"><b>%(description_label)s</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>%(qty_label)s</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>%(rate_label)s</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>%(amount_label)s</b></td>
 				</tr>
-		'''
+		'''%dict(
+			item_label=_('Item'),
+			description_label=_('Description'),
+			qty_label=_('Qty'),
+			rate_label=_('Rate'),
+			amount_label=_('Amount')
+		)
 	for d in getlist(new_rv.doclist, 'entries'):
 		tbl += '<tr><td>' + cstr(d.item_code) +'</td><td>' + cstr(d.description) + \
 			'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) + \
@@ -823,23 +834,25 @@ def send_notification(new_rv):
 						<td width = "50%%">
 							<table width = "100%%">
 								<tr>
-									<td width = "50%%">Net Total: </td><td>%s </td>
+									<td width = "50%%">%(net_total_label): </td><td>%(net_total)s </td>
 								</tr><tr>
-									<td width = "50%%">Total Tax: </td><td>%s </td>
+									<td width = "50%%">%(total_tax_label): </td><td>%(total_tax)s </td>
 								</tr><tr>
-									<td width = "50%%">Grand Total: </td><td>%s</td>
+									<td width = "50%%">%(grand_total_label): </td><td>%(grand_total)s</td>
 								</tr><tr>
-									<td width = "50%%">In Words: </td><td>%s</td>
+									<td width = "50%%">%(in_words_label): </td><td>%(in_words)s</td>
 								</tr>
 							</table>
 						</td>
 					</tr>
-					<tr><td>Terms and Conditions:</td></tr>
-					<tr><td>%s</td></tr>
+					<tr><td>%(terms_label)s:</td></tr>
+					<tr><td>%(terms)s</td></tr>
 				</table>
-			''' % (new_rv.doc.net_total,
-			new_rv.doc.other_charges_total,new_rv.doc.grand_total,
-			new_rv.doc.in_words,new_rv.doc.terms)
+			''' % dict(net_total_label=_("Net Total"), net_total=new_rv.doc.net_total,
+					total_tax_label=_("Total Tax"), total_tax=new_rv.doc.other_charges_total,
+					grand_total_label=_("Grand Total"), grand_total=new_rv.doc.grand_total,
+					in_words_label=_('In Words'), in_words=new_rv.doc.in_words,
+					terms_label=_('Terms and Conditions'), terms=new_rv.doc.terms)
 
 
 	msg = hd + tbl + totals
@@ -849,15 +862,15 @@ def send_notification(new_rv):
 def notify_errors(inv, owner):
 	import webnotes
 		
-	exception_msg = """
+	exception_msg = _("""
 		Dear User,
 
-		An error occured while creating recurring invoice from %s (at %s).
+		An error occured while creating recurring invoice from %(invoice_name)s (at %(url)s).
 
 		May be there are some invalid email ids mentioned in the invoice.
 
 		To stop sending repetitive error notifications from the system, we have unchecked
-		"Convert into Recurring" field in the invoice %s.
+		"Convert into Recurring" field in the invoice %(invoice_name)s.
 
 
 		Please correct the invoice and make the invoice recurring again. 
@@ -869,8 +882,8 @@ def notify_errors(inv, owner):
 		Regards,
 		Administrator
 		
-	""" % (inv, get_url(), inv)
-	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
+	""") % dict(invoice_name=inv, url=get_url())
+	subj = _("[Urgent] Error while creating recurring invoice from %(invoice_name)s") % dict(invoice_name=inv)
 
 	from webnotes.profile import get_system_managers
 	recipients = get_system_managers()
@@ -897,7 +910,8 @@ def assign_task_to_owner(inv, msg, users):
 def get_bank_cash_account(mode_of_payment):
 	val = webnotes.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
 	if not val:
-		webnotes.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
+		webnotes.msgprint(_("Default Bank / Cash Account not set in Mode of Payment: %(mode_of_payment)s. \
+			Please add a Default Account in Mode of Payment master.") % dict(mode_of_payment=mode_of_payment))
 	return {
 		"cash_bank_account": val
 	}

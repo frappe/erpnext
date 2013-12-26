@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
+from webnotes import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -30,7 +31,7 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return [
+	columns = [
 		"Item Code:Link/Item:120", "Item Name::120", "Item Group:Link/Item Group:100", 
 		"Invoice:Link/Sales Invoice:120", "Posting Date:Date:80", "Customer:Link/Customer:120", 
 		"Customer Account:Link/Account:120", "Territory:Link/Territory:80",
@@ -38,6 +39,8 @@ def get_columns():
 		"Delivery Note:Link/Delivery Note:100", "Income Account:Link/Account:140", 
 		"Qty:Float:120", "Rate:Currency:120", "Amount:Currency:120"
 	]
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 	
 	
 def get_conditions(filters):

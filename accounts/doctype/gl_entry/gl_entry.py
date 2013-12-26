@@ -34,18 +34,18 @@ class DocType:
 		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
 		for k in mandatory:
 			if not self.doc.fields.get(k):
-				webnotes.throw(k + _(" is mandatory for GL Entry"))
+				webnotes.throw(_("%(fieldname)s is mandatory for GL Entry")%dict(fieldname=k))
 
 		# Zero value transaction is not allowed
 		if not (flt(self.doc.debit) or flt(self.doc.credit)):
-			webnotes.throw(_("GL Entry: Debit or Credit amount is mandatory for ") + 
-				self.doc.account)
+			webnotes.throw(_("GL Entry: Debit or Credit amount is mandatory for %(account_name)s") % 
+				dict(account_name=self.doc.account))
 			
 	def pl_must_have_cost_center(self):
 		if webnotes.conn.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
 			if not self.doc.cost_center and self.doc.voucher_type != 'Period Closing Voucher':
-				webnotes.throw(_("Cost Center must be specified for PL Account: ") + 
-					self.doc.account)
+				webnotes.throw(_("Cost Center must be specified for PL Account: %(cost_center_name)s") % 
+					dict(cost_center_name=self.doc.account))
 		elif self.doc.cost_center:
 			self.doc.cost_center = None
 		
@@ -65,14 +65,14 @@ class DocType:
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)[0]
 		
 		if ret.group_or_ledger=='Group':
-			webnotes.throw(_("Account") + ": " + self.doc.account + _(" is not a ledger"))
+			webnotes.throw(_("Account: %(account_name)s is not a ledger.") % dict(account_name=self.doc.account))
 
 		if ret.docstatus==2:
-			webnotes.throw(_("Account") + ": " + self.doc.account + _(" is not active"))
+			webnotes.throw(_("Account: %(account_name)s is not acctive." ) % dict(account_name=self.doc.account))
 			
 		if ret.company != self.doc.company:
-			webnotes.throw(_("Account") + ": " + self.doc.account + 
-				_(" does not belong to the company") + ": " + self.doc.company)
+			webnotes.throw(_("Account: %(account_name)s does not belong to the company: %(company_name)s.") % \
+					dict(account_name=self.doc.account, company_name=self.doc.company))
 				
 	def validate_cost_center(self):
 		if not hasattr(self, "cost_center_company"):
@@ -86,8 +86,8 @@ class DocType:
 			return self.cost_center_company[self.doc.cost_center]
 			
 		if self.doc.cost_center and _get_cost_center_company() != self.doc.company:
-				webnotes.throw(_("Cost Center") + ": " + self.doc.cost_center + 
-					_(" does not belong to the company") + ": " + self.doc.company)
+				webnotes.throw(_("Cost Center: %(cost_center_name)s does not belong to the company: %(company_name)s.") % \
+					dict(cost_center_name=self.doc.cost_center, company_name=self.doc.company_name))
 						
 def check_negative_balance(account, adv_adj=False):
 	if not adv_adj and account:
@@ -100,7 +100,7 @@ def check_negative_balance(account, adv_adj=False):
 				flt(balance[0][0]) or -1*flt(balance[0][0])
 		
 			if flt(balance) < 0:
-				webnotes.throw(_("Negative balance is not allowed for account ") + account)
+				webnotes.throw(_("Negative balance is not allowed for account %(account_name)s.") %dict(account_name= account))
 
 def check_freezing_date(posting_date, adv_adj=False):
 	"""
@@ -113,8 +113,8 @@ def check_freezing_date(posting_date, adv_adj=False):
 			bde_auth_role = webnotes.conn.get_value( 'Accounts Settings', None,'bde_auth_role')
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
 					and not bde_auth_role in webnotes.user.get_roles():
-				webnotes.throw(_("You are not authorized to do/modify back dated entries before ")
-					+ getdate(acc_frozen_upto).strftime('%d-%m-%Y'))
+				webnotes.throw(_("You are not authorized to do/modify back dated entries before %(before_date)s") % \
+					dict(before_date=getdate(acc_frozen_upto).strftime('%d-%m-%Y')))
 
 def update_outstanding_amt(account, against_voucher_type, against_voucher, on_cancel=False):
 	# get final outstanding amt
@@ -137,9 +137,11 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 	
 	# Validation : Outstanding can not be negative
 	if bal < 0 and not on_cancel:
-		webnotes.throw(_("Outstanding for Voucher ") + against_voucher + _(" will become ") + 
-			fmt_money(bal) + _(". Outstanding cannot be less than zero. \
-			 	Please match exact outstanding."))
+		webnotes.throw(_("""Outstanding for Voucher %(against_voucher_name)s will become %(voucher_value)s. \n
+				Outstanding cannot be less than zero. 
+			 	Please match exact outstanding.""") %dict(
+			 		against_voucher_name=against_voucher,
+			 		voucher_value=fmt_money(bal)))
 		
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
@@ -152,10 +154,10 @@ def validate_frozen_account(account, adv_adj):
 		frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
 			'frozen_accounts_modifier')
 		if not frozen_accounts_modifier:
-			webnotes.throw(account + _(" is a frozen account. \
+			webnotes.throw(_("%(account_name)s is a frozen account. \
 				Either make the account active or assign role in Accounts Settings \
-				who can create / modify entries against this account"))
+				who can create / modify entries against this account")%dict(account_name=account))
 		elif frozen_accounts_modifier not in webnotes.user.get_roles():
-			webnotes.throw(account + _(" is a frozen account. ") + 
-				_("To create / edit transactions against this account, you need role") + ": " +  
-				frozen_accounts_modifier)
+			webnotes.throw(_("""%(account_name)s is a frozen account. \n
+				To create / edit transactions against this account, you need role: %(frozen_accounts_modifier)s""") % \
+				dict(account_name=account, frozen_accounts_modifier=frozen_accounts_modifier))

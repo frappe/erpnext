@@ -85,8 +85,8 @@ def make_entry(args, adv_adj, update_outstanding):
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
-		 	cstr(total_debit - total_credit))
+		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is %(difference_value)s ") %
+		 	dict(difference_value=cstr(total_debit - total_credit)))
 			
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Voucher":
@@ -95,9 +95,8 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 		
 		for entry in gl_map:
 			if entry.account in aii_accounts:
-				webnotes.throw(_("Account") + ": " + entry.account + 
-					_(" can only be debited/credited through Stock transactions"), 
-					StockAccountInvalidTransaction)
+				webnotes.throw(_("Account: %(account_name)s can onlu be debited/credited through Stock transactions")%
+					dict(account_name=entry.account) ,StockAccountInvalidTransaction)
 	
 		
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, 

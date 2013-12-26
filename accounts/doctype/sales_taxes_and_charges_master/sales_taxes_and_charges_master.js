@@ -61,7 +61,7 @@ cur_frm.pformat.other_charges= function(doc){
 
 		out +='<table class="noborder" style="width:100%">';
 		if(!print_hide('net_total_export')) {
-			out += make_row('Net Total', doc.net_total_export, 1);
+			out += make_row(wn._('Net Total'), doc.net_total_export, 1);
 		}
 
 		// add rows
@@ -74,17 +74,17 @@ cur_frm.pformat.other_charges= function(doc){
 
 		// grand total
 		if(!print_hide('grand_total_export')) {
-			out += make_row('Grand Total',doc.grand_total_export,1);
+			out += make_row(wn._('Grand Total'),doc.grand_total_export,1);
 		}
 		
 		if(!print_hide('rounded_total_export')) {
-			out += make_row('Rounded Total',doc.rounded_total_export,1);
+			out += make_row(wn._('Rounded Total'),doc.rounded_total_export,1);
 		}
 
 		if(doc.in_words_export && !print_hide('in_words_export')){
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
-			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'
+			out += '<table><tr><td style="width:25%;"><b>' + wn._('In Words') + '</b></td>'
 			out+= '<td style="width:50%;">'+doc.in_words_export+'</td></tr>'
 		}
 		out +='</table></td></tr></table></div>';	 

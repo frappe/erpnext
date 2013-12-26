@@ -19,9 +19,9 @@ erpnext.POS = Class.extend({
 							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
-										<th style="width: 50%">Item</th>\
-										<th style="width: 25%; text-align: right;">Qty</th>\
-										<th style="width: 25%; text-align: right;">Rate</th>\
+										<th style="width: 50%">' + wn._('Item') + '</th>\
+										<th style="width: 25%; text-align: right;">' + wn._('Qty') + '</th>\
+										<th style="width: 25%; text-align: right;">' + wn._('Rate') + '</th>\
 									</tr>\
 								</thead>\
 								<tbody>\
@@ -32,7 +32,7 @@ erpnext.POS = Class.extend({
 						<div class="totals-area" style="margin-left: 40%;">\
 							<table class="table table-condensed">\
 								<tr>\
-									<td><b>Net Total</b></td>\
+									<td><b>' + wn._('Net Total') + '</b></td>\
 									<td style="text-align: right;" class="net-total"></td>\
 								</tr>\
 							</table>\
@@ -40,7 +40,7 @@ erpnext.POS = Class.extend({
 								<table class="table table-condensed">\
 									<thead>\
 										<tr>\
-											<th style="width: 60%">Taxes</th>\
+											<th style="width: 60%">' + wn._('Taxes') + '</th>\
 											<th style="width: 40%; text-align: right;"></th>\
 										</tr>\
 									</thead>\
@@ -51,7 +51,7 @@ erpnext.POS = Class.extend({
 							<div class="grand-total-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td style="vertical-align: middle;"><b>Grand Total</b></td>\
+										<td style="vertical-align: middle;"><b>' + wn._('Grand Total') + '</b></td>\
 										<td style="text-align: right; font-size: 200%; \
 											font-size: bold;" class="grand-total"></td>\
 									</tr>\
@@ -61,9 +61,9 @@ erpnext.POS = Class.extend({
 					</div>\
 					<br><br>\
 					<button class="btn btn-success btn-lg make-payment">\
-					<i class="icon-money"></i> Make Payment</button>\
+					<i class="icon-money"></i> ' + wn._('Make Payment') + '</button>\
 					<button class="btn btn-default btn-lg delete-items pull-right" style="display: none;">\
-					<i class="icon-trash"></i> Del</button>\
+					<i class="icon-trash"></i> ' + wn._('Del') + '</button>\
 					<br><br>\
 				</div>\
 				<div class="col-sm-6">\
@@ -238,7 +238,7 @@ erpnext.POS = Class.extend({
 						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
 								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
-							msgprint("Please select " + me.party + " first.");
+							msgprint(repl(wn._("Please select %(party)s first."), {party:me.party}));
 							return;
 						}
 						else

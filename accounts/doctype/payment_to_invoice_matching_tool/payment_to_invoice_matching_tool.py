@@ -90,7 +90,7 @@ class DocType:
 			
 	def validate_mandatory(self):
 		if not self.doc.account:
-			msgprint("Please select Account first", raise_exception=1)
+			msgprint(_("Please select Account first"), raise_exception=1)
 	
 	def reconcile(self):
 		"""
@@ -101,7 +101,7 @@ class DocType:
 		"""
 		if not self.doc.voucher_no or not webnotes.conn.sql("""select name from `tab%s` 
 				where name = %s""" % (self.doc.voucher_type, '%s'), self.doc.voucher_no):
-			msgprint("Please select valid Voucher No to proceed", raise_exception=1)
+			msgprint(_("Please select valid Voucher No to proceed"), raise_exception=1)
 		
 		lst = []
 		for d in getlist(self.doclist, 'ir_payment_details'):
@@ -123,9 +123,9 @@ class DocType:
 		if lst:
 			from accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
-			msgprint("Successfully allocated.")
+			msgprint(_("Successfully allocated."))
 		else:
-			msgprint("No amount allocated.", raise_exception=1)
+			msgprint(_("No amount allocated."), raise_exception=1)
 
 def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 	from controllers.queries import get_match_cond

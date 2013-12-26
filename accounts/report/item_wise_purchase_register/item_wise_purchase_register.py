@@ -32,12 +32,14 @@ def execute(filters=None):
 	
 	
 def get_columns():
-	return ["Item Code:Link/Item:120", "Item Name::120", "Item Group:Link/Item Group:100", 
+	columns = ["Item Code:Link/Item:120", "Item Name::120", "Item Group:Link/Item Group:100", 
 		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier:Link/Customer:120", 
 		"Supplier Account:Link/Account:120", "Project:Link/Project:80", "Company:Link/Company:100", 
 		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100", 
 		"Expense Account:Link/Account:140", "Qty:Float:120", "Rate:Currency:120", 
 		"Amount:Currency:120"]
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 	
 def get_conditions(filters):
 	conditions = ""

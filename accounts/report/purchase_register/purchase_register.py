@@ -94,6 +94,9 @@ def get_columns(invoice_list):
 		["Total Tax:Currency:120"] + ["Grand Total:Currency:120"] + \
 		["Rounded Total:Currency:120"] + ["Outstanding Amount:Currency:120"]
 
+	# translate only the label part of columns
+	columns = map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
+
 	return columns, expense_accounts, tax_accounts
 
 def get_conditions(filters):

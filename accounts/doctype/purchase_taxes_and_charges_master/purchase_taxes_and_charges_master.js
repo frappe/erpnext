@@ -57,23 +57,23 @@ cur_frm.pformat.purchase_tax_details= function(doc){
   // main table
   out +='<table class="noborder" style="width:100%">';
   if(!print_hide('net_total_import')) {
-	out += make_row('Net Total', doc.net_total_import, 1);
+	out += make_row(wn._('Net Total'), doc.net_total_import, 1);
   }
   
   // add rows
   if(cl.length){
     for(var i=0;i<cl.length;i++){
-      out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
+      out += make_row(wn._(cl[i].description),convert_rate(cl[i].tax_amount),0);
     }
   }
 	// grand total
 	if(!print_hide('grand_total_import')) {
-		out += make_row('Grand Total', doc.grand_total_import, 1);
+		out += make_row(wn._('Grand Total'), doc.grand_total_import, 1);
 	}
   if(doc.in_words_import && !print_hide('in_words_import')){
     out +='</table></td></tr>';
     out += '<tr><td colspan = "2">';
-    out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
+    out += '<table><tr><td style="width:25%;"><b>' + wn._('In Words') + '</b></td>';
     out+= '<td style="width:50%;">'+doc.in_words_import+'</td></tr>';
   }
   out +='</table></td></tr></table></div>';   

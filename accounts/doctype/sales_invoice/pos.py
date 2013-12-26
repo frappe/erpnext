@@ -45,7 +45,7 @@ def get_item_code(barcode_serial_no):
 	if item_code:
 		return item_code, input_via
 	else:
-		webnotes.throw("Invalid Barcode / Serial No")
+		webnotes.throw(_("Invalid Barcode / Serial No"))
 
 @webnotes.whitelist()
 def get_mode_of_payment():

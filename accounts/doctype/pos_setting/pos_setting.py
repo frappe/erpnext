@@ -28,11 +28,11 @@ class DocType:
 			(self.doc.user, self.doc.name, self.doc.company))
 		if res:
 			if res[0][1]:
-				msgprint("POS Setting '%s' already created for user: '%s' and company: '%s'" % 
-					(res[0][0], res[0][1], self.doc.company), raise_exception=1)
+				msgprint(_("POS Setting '%(pos_setting_name)s' already created for user: '%(user_name)s' and company: '%(company_name)s'") % 
+					dict(pos_setting_name=res[0][0], user_name=res[0][1], company_name=self.doc.company), raise_exception=1)
 			else:
-				msgprint("Global POS Setting already created - %s for this company: '%s'" % 
-					(res[0][0], self.doc.company), raise_exception=1)
+				msgprint(_("Global POS Setting already created - %(pos_setting_name)s for this company: '%(company_name)s'") % 
+					dict(pos_setting_name=res[0][0], company_name=self.doc.company), raise_exception=1)
 
 	def validate_expense_account(self):
 		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \

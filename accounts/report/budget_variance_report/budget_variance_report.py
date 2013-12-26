@@ -57,8 +57,11 @@ def get_columns(filters):
 				
 			columns.append(label+":Float:120")
 
-	return columns + ["Total Target:Float:120", "Total Actual:Float:120", 
+	columns + ["Total Target:Float:120", "Total Actual:Float:120", 
 		"Total Variance:Float:120"]
+
+	# translate only the label part of column
+	return map(lambda c: ":".join([_(c[0]), c[1]]), map(lambda s: s.split(':', 1) if s.count(':')>=1 else [s, ''], columns))
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):

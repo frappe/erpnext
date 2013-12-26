@@ -60,17 +60,17 @@ class DocType(AccountsController):
 	def validate_debit_credit(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.debit and d.credit:
-				msgprint("You cannot credit and debit same account at the same time.", 
+				msgprint(_("You cannot credit and debit same account at the same time."), 
 				 	raise_exception=1)
 
 	def validate_cheque_info(self):
 		if self.doc.voucher_type in ['Bank Voucher']:
 			if not self.doc.cheque_no or not self.doc.cheque_date:
-				msgprint("Reference No & Reference Date is required for %s" %
-				self.doc.voucher_type, raise_exception=1)
+				msgprint(_("Reference No & Reference Date is required for %(voucher_type)s") %
+				dict(voucher_type=self.doc.voucher_type), raise_exception=1)
 				
 		if self.doc.cheque_date and not self.doc.cheque_no:
-			msgprint("Reference No is mandatory if you entered Reference Date", raise_exception=1)
+			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
 
 	def validate_entries_for_advance(self):
 		for d in getlist(self.doclist,'entries'):
@@ -79,8 +79,8 @@ class DocType(AccountsController):
 				master_type = webnotes.conn.get_value("Account", d.account, "master_type")
 				if (master_type == 'Customer' and flt(d.credit) > 0) or \
 						(master_type == 'Supplier' and flt(d.debit) > 0):
-					msgprint("Message: Please check Is Advance as 'Yes' against \
-						Account %s if this is an advance entry." % d.account)
+					msgprint(_("Message: Please check Is Advance as 'Yes' against \
+						Account %(account_name)s if this is an advance entry.") % dict(account_name=d.account))
 
 	def validate_against_jv(self):
 		for d in getlist(self.doclist, 'entries'):
@@ -91,7 +91,7 @@ class DocType(AccountsController):
 				elif not webnotes.conn.sql("""select name from `tabJournal Voucher Detail` 
 						where account = '%s' and docstatus = 1 and parent = '%s'""" % 
 						(d.account, d.against_jv)):
-					msgprint("Against JV: %s is not valid." % d.against_jv, raise_exception=1)
+					msgprint(_("Against JV: %(journal_voucher_name)s is not valid.") % dict(journal_voucher_name=d.against_jv), raise_exception=1)
 		
 	def set_against_account(self):
 		# Debit = Credit
@@ -107,8 +107,8 @@ class DocType(AccountsController):
 		self.doc.total_credit = credit
 
 		if abs(self.doc.total_debit-self.doc.total_credit) > 0.001:
-			msgprint("Debit must be equal to Credit. The difference is %s" % 
-			 	(self.doc.total_debit-self.doc.total_credit), raise_exception=1)
+			msgprint(_("Debit must be equal to Credit. The difference is %(difference_value)s") % 
+			 	dict(difference_value=self.doc.total_debit-self.doc.total_credit), raise_exception=1)
 		
 		# update against account
 		for d in getlist(self.doclist, 'entries'):
@@ -119,33 +119,33 @@ class DocType(AccountsController):
 		r = []
 		if self.doc.cheque_no :
 			if self.doc.cheque_date:
-				r.append('Via Reference #%s dated %s' % 
-					(self.doc.cheque_no, formatdate(self.doc.cheque_date)))
+				r.append(_('Via Reference #%(cheque_no)s dated %(cheque_date)s') % 
+					dict(cheque_no=self.doc.cheque_no, cheque_date=formatdate(self.doc.cheque_date)))
 			else :
-				msgprint("Please enter Reference date", raise_exception=1)
+				msgprint(_("Please enter Reference date"), raise_exception=1)
 		
 		for d in getlist(self.doclist, 'entries'):
 			if d.against_invoice and d.credit:
 				currency = webnotes.conn.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append('%s %s against Invoice: %s' % 
-					(cstr(currency), fmt_money(flt(d.credit)), d.against_invoice))
+				r.append(_('%(currency_name)s %(credit_value)s against Invoice: %(invoice_name)s') % 
+					dict(currency_name=cstr(currency), credit_value=fmt_money(flt(d.credit)), invoice_name=d.against_invoice))
 					
 			if d.against_voucher and d.debit:
 				bill_no = webnotes.conn.sql("""select bill_no, bill_date, currency 
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					r.append('%s %s against Bill %s dated %s' % 
-						(cstr(bill_no[0][2]), fmt_money(flt(d.debit)), bill_no[0][0], 
-						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or ''))
+					r.append(_('%(currency_name)s %(debit_value)s against Bill %(bill_no)s dated %(bill_date)s') % \
+						dict(currency_name=cstr(bill_no[0][2]), debit_value=fmt_money(flt(d.debit)), 
+							bill_no=bill_no[0][0], bill_date=(bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or '')))
 	
 		if self.doc.user_remark:
-			r.append("User Remark : %s"%self.doc.user_remark)
+			r.append(_("User Remark : %(user_remark)s")%dict(user_remark=self.doc.user_remark))
 
 		if r:
 			self.doc.remark = ("\n").join(r)
 		else:
-			webnotes.msgprint("User Remarks is mandatory", raise_exception=1)
+			webnotes.msgprint(_("User Remarks is mandatory"), raise_exception=1)
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
@@ -161,7 +161,7 @@ class DocType(AccountsController):
 
 			# If customer/supplier account, aging date is mandatory
 			if exists and not self.doc.aging_date: 
-				msgprint("Aging Date is mandatory for opening entry", raise_exception=1)
+				msgprint(_("Aging Date is mandatory for opening entry"), raise_exception=1)
 			else:
 				self.doc.aging_date = self.doc.posting_date
 
@@ -198,8 +198,8 @@ class DocType(AccountsController):
 			credit_days = self.get_credit_days_for(d.account)
 			# Check credit days
 			if credit_days > 0 and not self.get_authorized_user() and cint(date_diff) > credit_days:
-				msgprint("Credit Not Allowed: Cannot allow a check that is dated \
-					more than %s days after the posting date" % credit_days, raise_exception=1)
+				msgprint(_("Credit Not Allowed: Cannot allow a check that is dated \
+					more than %(credit_days)s days after the posting date") % dict(credit_days=credit_days), raise_exception=1)
 					
 	def get_credit_days_for(self, ac):
 		if not self.credit_days_for.has_key(ac):
@@ -270,7 +270,7 @@ class DocType(AccountsController):
 
 	def get_balance(self):
 		if not getlist(self.doclist,'entries'):
-			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
+			msgprint(_("Please enter atleast 1 entry in 'GL Entries' table"))
 		else:
 			flag, self.doc.total_debit, self.doc.total_credit = 0, 0, 0
 			diff = flt(self.doc.difference, 2)
@@ -348,7 +348,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	from accounts.utils import get_balance_on
 	si = webnotes.bean("Sales Invoice", sales_invoice)
 	jv = get_payment_entry(si.doc)
-	jv.doc.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.doc.fields
+	jv.doc.remark = _('Payment received against Sales Invoice %(name)s. %(remarks)s') % si.doc.fields
 
 	# credit customer
 	jv.doclist[1].account = si.doc.debit_to
@@ -366,7 +366,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	from accounts.utils import get_balance_on
 	pi = webnotes.bean("Purchase Invoice", purchase_invoice)
 	jv = get_payment_entry(pi.doc)
-	jv.doc.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.doc.fields
+	jv.doc.remark = _('Payment against Purchase Invoice %(name)s. %(remarks)s') % pi.doc.fields
 	
 	# credit supplier
 	jv.doclist[1].account = pi.doc.credit_to
