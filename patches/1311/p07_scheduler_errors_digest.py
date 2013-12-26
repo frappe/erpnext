@@ -13,11 +13,9 @@ def execute():
 		return
 	
 	# no default company
-	company = webnotes.conn.get_default("company")
-	if not company:
-		company = webnotes.conn.sql_list("select name from `tabCompany`")
-		if company:
-			company = company[0]
+	company = webnotes.conn.sql_list("select name from `tabCompany`")
+	if company:
+		company = company[0]
 	if not company:
 		return
 	

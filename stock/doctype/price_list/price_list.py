@@ -44,5 +44,5 @@ class DocType(DocListController):
 
 	def update_item_price(self):
 		webnotes.conn.sql("""update `tabItem Price` set currency=%s, 
-			buying_or_selling=%s where price_list=%s""", 
+			buying_or_selling=%s, modified=NOW() where price_list=%s""", 
 			(self.doc.currency, self.doc.buying_or_selling, self.doc.name))

@@ -49,6 +49,7 @@ class DocType(DocListController, WebsiteGenerator):
 	def on_update(self):
 		self.validate_name_with_item_group()
 		self.update_website()
+		self.update_item_price()
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
@@ -123,14 +124,14 @@ class DocType(DocListController, WebsiteGenerator):
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 			
 	def check_for_active_boms(self):
-		if self.doc.is_active != "Yes" or self.doc.is_purchase_item != "Yes":
+		if self.doc.is_purchase_item != "Yes":
 			bom_mat = webnotes.conn.sql("""select distinct t1.parent 
 				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
 				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
 				
 			if bom_mat and bom_mat[0][0]:
-				webnotes.throw(_("Item must be active and purchase item, \
+				webnotes.throw(_("Item must be a purchase item, \
 					as it is present in one or many Active BOMs"))
 					
 		if self.doc.is_manufactured_item != "Yes":
@@ -210,6 +211,11 @@ class DocType(DocListController, WebsiteGenerator):
 
 		WebsiteGenerator.on_update(self)
 
+	def update_item_price(self):
+		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
+			item_description=%s, modified=NOW() where item_code=%s""",
+			(self.doc.item_name, self.doc.description, self.doc.name))
+
 	def get_page_title(self):
 		if self.doc.name==self.doc.item_name:
 			page_name_from = self.doc.name
@@ -246,6 +252,9 @@ class DocType(DocListController, WebsiteGenerator):
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
 			# Validate properties before merging
+			if not webnotes.conn.exists("Item", newdn):
+				webnotes.throw(_("Item ") + newdn +_(" does not exists"))
+			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in webnotes.conn.get_value("Item", newdn, field_list)]
 			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:

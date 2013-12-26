@@ -7,9 +7,7 @@ wn.query_reports["Stock Projected Qty"] = {
 			"fieldname":"company",
 			"label": wn._("Company"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": wn.defaults.get_user_default("company"),
-			"reqd": 1
+			"options": "Company"
 		},
 		{
 			"fieldname":"warehouse",

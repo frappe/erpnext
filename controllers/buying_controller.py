@@ -107,10 +107,11 @@ class BuyingController(StockController):
 			item.import_amount = flt(item.import_rate * item.qty,
 				self.precision("import_amount", item))
 			item.item_tax_amount = 0.0;
-				
+
+			self._set_in_company_currency(item, "import_amount", "amount")
 			self._set_in_company_currency(item, "import_ref_rate", "purchase_ref_rate")
 			self._set_in_company_currency(item, "import_rate", "rate")
-			self._set_in_company_currency(item, "import_amount", "amount")
+			
 			
 	def calculate_net_total(self):
 		self.doc.net_total = self.doc.net_total_import = 0.0
@@ -186,14 +187,12 @@ class BuyingController(StockController):
 			
 			if item.item_code and item.qty:
 				self.round_floats_in(item)
-				
-				purchase_rate = item.rate if self.doc.doctype == "Purchase Invoice" else item.purchase_rate
-				
+								
 				# if no item code, which is sometimes the case in purchase invoice, 
 				# then it is not possible to track valuation against it
-				item.valuation_rate = flt((purchase_rate + 
-					(item.item_tax_amount + item.rm_supp_cost) / item.qty) / item.conversion_factor, 
-					self.precision("valuation_rate", item))
+				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
+				item.valuation_rate = ((item.amount + item.item_tax_amount + item.rm_supp_cost)
+					/ qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
 				
